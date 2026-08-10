@@ -64,3 +64,18 @@ zero-sum. The leverage is in **adding a member nobody else has**:
 - `lookup` takes the largest stacker coefficient (0.2415) purely because it is the least
   correlated member (max corr 0.9869 vs 0.987–0.999 for the rest). Decorrelation, not solo
   strength, is what buys blend weight.
+
+## Submission log
+
+| date | entry | CV (cross-fitted) | public LB | offset | rank |
+|---|---|---|---|---|---|
+| 2026-08-10 | `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 | ~155 |
+| 2026-08-10 | `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 | ~155 |
+
+**Working offset: +0.00115.** Two independent points now agree, and both sit a little
+below the +0.0013 quoted in the public record.
+
+**A +0.000019 CV improvement moved the public LB by 0.00000.** The public slice does not
+resolve differences at that scale. This is the empirical justification for selecting on
+CV: sub-0.0001 changes are simply not measurable on the LB, so any apparent LB movement at
+that scale is noise being read as signal.

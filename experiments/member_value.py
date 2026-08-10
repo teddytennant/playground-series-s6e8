@@ -32,6 +32,7 @@ GROUPS = {
     # discloses as mildly optimistic. Kept separable so their effect can be isolated.
     "golem_clean": ["golem_b", "golem_c", "golem_d", "golem_e", "golem_g"],
     "golem_es": ["golem_a", "golem_f"],
+    "mine": ["lgbm_tuned_lat", "lgbm_tuned_lat_frac"],
 }
 
 
@@ -60,12 +61,13 @@ def main():
               + " ".join(f"{m}={roc_auc_score(y, O[:, idx[m]]):.5f}" for m in got))
 
     Z = to_logit(O)
+    pub = base + GROUPS["fm"] + GROUPS["golem_clean"]
     variants = {"base": base}
-    variants["base+fm"] = base + GROUPS["fm"]
-    variants["base+golem_clean"] = base + GROUPS["golem_clean"]
-    variants["base+golem_all"] = base + GROUPS["golem_clean"] + GROUPS["golem_es"]
-    variants["base+fm+golem_clean"] = base + GROUPS["fm"] + GROUPS["golem_clean"]
-    variants["all"] = list(names)
+    variants["base+pub_ext"] = pub
+    variants["base+mine"] = base + GROUPS["mine"]
+    variants["pub_ext+mine_notuneonly"] = pub + ["lgbm_tuned_lat"]
+    variants["pub_ext+mine_fraconly"] = pub + ["lgbm_tuned_lat_frac"]
+    variants["pub_ext+mine"] = pub + GROUPS["mine"]
     variants = {k: [m for m in v if m in idx] for k, v in variants.items()}
 
     rows = []

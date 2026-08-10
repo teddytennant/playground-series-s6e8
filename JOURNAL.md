@@ -124,3 +124,140 @@ are still to come and are where I expect the real gain.
    not on hope.
 4. Do NOT re-try: original-dataset concatenation, pseudo-labeling, naive averaging,
    deep trees, pairwise/multi-resolution TE. All measured negative. See `RESEARCH.md`.
+
+### Results of the angle — LightGBM tuning was a null result, and that is the finding
+
+Two-stage sweep on fold 0, all on the cached lattice matrices (184 features).
+
+**Stage A** — 29 trials, one knob at a time off the library's hand-set control
+(control fold-0 AUC 0.96638 at lr 0.05). Every winner pointed the same direction: less
+capacity, more regularisation, which is what you would expect when 144 of the 184
+features are target-derived and therefore cheap to split on and easy to overfit.
+
+| knob | fold-0 AUC | vs control |
+|---|---|---|
+| `reg_lambda 80` | 0.96671 | +0.00033 |
+| `max_bin 511` | 0.96669 | +0.00031 |
+| `num_leaves 63, max_depth 7` | 0.96668 | +0.00030 |
+| `feature_fraction_bynode 0.8` | 0.96663 | +0.00025 |
+| `min_child_samples 250` | 0.96658 | +0.00020 |
+| `subsample 1.0` (bagging off) | 0.96656 | +0.00018 |
+| control (`num_leaves 96, l2 5`) | 0.96638 | — |
+| `colsample_bytree 1.0` | 0.96616 | −0.00022 |
+| `extra_trees` | 0.96601 | −0.00037 |
+
+**Stage B** — 7 combinations of the winners, since capacity / leaf size / L2 all
+regularise the same thing and are not additive. Best: `B_mcs250_l2_80`
+(`num_leaves 63, max_depth 7, max_bin 511, min_child_samples 250, reg_lambda 80`)
+at **0.96688**, i.e. +0.00050 over the control on fold 0. Pushing `reg_lambda` past the
+stage-A grid edge did not keep paying (200 → 0.96677, 500 → 0.96663).
+
+**Then it did not survive to full OOF.** Finalists on all 5 frozen folds at lr 0.025:
+
+| model | full OOF AUC |
+|---|---|
+| library's best LightGBM (`lattri_lgbm` / `latmax_lgbm`, hand-set) | 0.96768 |
+| `lgbm_tuned_lat` (tuned) | **0.96771** |
+| `lgbm_tuned_lat_frac` (tuned + decimal lattice) | **0.96782** |
+
+**Tuning bought +0.00003 — below the 0.00005 noise floor. Call it zero.** The +0.00050
+fold-0 gain was mostly an artefact of comparing against a control handicapped by lr 0.05;
+stage A itself showed lr 0.035 is worth +0.00027 over lr 0.05, so the honest like-for-like
+tuning gain was never more than ~+0.0002, and on the full OOF it was nothing.
+
+**The decimal lattice, by contrast, paid: +0.00011, and it won on all 5 folds
+individually** (fold deltas +0.00017 / +0.00009 / +0.00012 / +0.00021 / +0.00007). At
+0.96782 `lgbm_tuned_lat_frac` is the strongest single gradient-boosted model in any of the
+libraries, edging `latr1_xgb` (0.96780).
+
+That is the run's real lesson and it matches the ablation record exactly: **a new channel
+beats tuning the existing one.** `frac_`/`d1_` are absent from every `lat_*` model in the
+public library, and target encoding provably cannot see them — "everything ending in .2
+shares something" pools across integer parts, and TE's levels do not.
+
+### New members found: two more public OOF libraries on the same frozen folds
+
+The community standardised on `StratifiedKFold(5, shuffle=True, random_state=42)`, so
+several people publish stackable OOF. Pulled and wired into `data/ext_members/`:
+
+- `raykkretzschmar/s6e8-fm-lattice-blend-members` — 5 factorization machines
+  (0.96455–0.96739). A bilinear function class absent from the 74-member library.
+- `dariushafshar/s6e8-golem-oof-library` — 7 models incl. a spline GAM (0.93438).
+
+Measured with `experiments/member_value.py` (paired 50/50 splits, 6 reps — split noise is
+~0.0002, an order of magnitude larger than these effects, so unpaired comparison would be
+worthless):
+
+| member set | paired delta vs 74-lib |
+|---|---|
+| + FM (5) | +0.000005 [consistent] |
+| + golem_clean (5) | +0.000009 [consistent] |
+| + golem **all** (incl. `golem_a`, `golem_f`) | +0.000007 **[SIGN FLIPS]** |
+| + FM + golem_clean | +0.000014 [consistent] |
+| + FM + golem_clean + my 2 | **+0.000016 [consistent]** |
+| my 2 members alone, on the 74-lib | +0.000003 [consistent] |
+
+`golem_a`/`golem_f` early-stop on the held-out validation fold — their author discloses
+this as mildly optimistic. Including them makes the gain *worse* and flips its sign across
+splits. **Measured out, not assumed out**; they are now in `DEFAULT_DROP` in `stack.py`
+with the numbers in the comment.
+
+### Submitted (2 of 10 today; cap is 10, 8 remaining)
+
+| # | entry | CV (cross-fitted) | public LB | offset |
+|---|---|---|---|---|
+| 1 | `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 |
+| 2 | `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 |
+
+**A +0.000019 CV gain produced exactly zero LB movement.** Two independent calibration
+points now agree the offset is **+0.00115 to +0.00117**, close to the +0.0013 in the
+public record. Rank ~155/1331, top 11.6%; bronze cutoff is 0.97084, three ten-thousandths
+above us.
+
+`lgbm_tuned_lat_frac` earns the **5th-largest stacker coefficient** (0.1104) out of 88
+members, behind only `lookup`, `pub_rmlp`, `latr1_xgb` and `tabm_deeper` — so the stacker
+does value it, even though its marginal contribution to AUC is ~0.000002.
+
+### The thing next run most needs to internalise: THE STACK IS SATURATED
+
+This is the most important number of the day. Adding, on top of the 74-model library:
+
+- a genuinely new **function class** (factorization machines) → +0.000005
+- a genuinely new **channel** (the decimal lattice, inside a strong new GBDT) → +0.000002
+- 12 further members from two independent authors → +0.000016 **total**
+
+...while the gap from our 0.97081 to the #1 public 0.97120 is **+0.00039**, i.e. more
+than twenty times everything the entire day of member-hunting produced.
+
+**So the leaders are not doing what we are doing.** More members from the same public pool
+will not close this. Do not spend another run adding GBDTs to the blend — the marginal
+value is provably ~1e-6 and the FM author independently measured the same saturation
+("once a function class is represented, strengthening it does nothing").
+
+Two candidate explanations, and they call for opposite responses:
+1. The leaders have private models or blend public *test-only* submission files (no OOF,
+   so no honest weighting available to us).
+2. **Part of that 0.0004 is public-LB overfitting.** ~1,331 teams selecting on a public
+   slice, many with 50+ submissions (rank 2 has 51, rank 3 has 58). The private split
+   will reshuffle. This account has been burned exactly this way before on
+   `rogii-wellbore-geology-prediction`.
+
+Given (2), chasing the public gap by tuning against LB feedback is precisely the failure
+mode to avoid. Our CV 0.969660 is honest and our offset is measured twice.
+
+### Next run, in this order
+
+1. **Do not** re-run member-hunting or LightGBM tuning. Both are measured dead ends this
+   week; the numbers are above and in `RESEARCH.md`.
+2. Hunt a **new channel**, which is the only thing that has ever moved this dataset. The
+   generator-forensics direction is the live one: the decimal lattice was found by asking
+   what the generator *did*, not what the features mean. Look for further quantisation
+   fingerprints — joint rounding, value-frequency structure, ordering artefacts in `id`.
+   Check `pub_ryota` ("generator forensics") in the library for prior art.
+3. Consider a **non-linear meta-model** (shallow GBM on the 88 logits, or regime-aware
+   stacking on missingness count). Untested by us. The per-missingness breakdown printed
+   by `run_lgbm.py` shows AUC falling 0.9754 → 0.9111 from 0 to ≥5 missing columns, so the
+   members' relative strengths plausibly vary by regime. The library author measured
+   regime-aware stacking at only +0.00004, so keep expectations low and judge it paired.
+4. When choosing final submissions at the deadline: **select on CV**. Both entries so far
+   sit at 0.97081 public; do not let public-LB ties or micro-differences drive the pick.
