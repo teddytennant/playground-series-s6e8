@@ -718,3 +718,48 @@ parent chain (`ps -o ppid=`) rather than guessing from session start times.
    (`experiments/batch_members.sh`, fixed schedules) but needs an uncontended box.
 4. Do not re-open: stacker C, any meta-model over the members, regime-aware anything,
    pseudo-labeling, original-dataset concat.
+
+### Addendum — the honest retrain, and why the substituted stack did not ship tonight
+
+Retrained both of our members on the fixed schedule (`--stopping 0`, 2000 rounds chosen a
+priori rather than from the previous run's early-stopped 1905–2227, which would have
+smuggled the same held-out information back in).
+
+`lgbm_fixed_lat_frac`: **0.96779** against the early-stopped **0.96782**. Per fold
+−3e-5, −5e-5, −5e-5, −5e-5, +2e-5. **The optimism is real, consistent in 4/5 folds, and
+worth about 3e-5** — under the cross-fit noise floor, and about the size of one member's
+contribution to the stack. Small enough to be reassuring, large enough that it was right
+to remove rather than argue about.
+
+`lgbm_fixed_lat` reached fold 1 (0.96777 vs 0.96781) and is still running.
+
+**The intended second submission — `stack_pub151_fixed_rankraw`, the same 151 members with
+our two swapped from early-stopped to fixed-schedule — did not ship, and the reason is
+the box, not the idea.** Peers restarted heavy work and the load average sat at 31 on 16
+cores; fold 1 of the second retrain took **2184s against fold 0's 177s, a 12× slowdown**.
+Finishing the retrain plus a contended stack build was another 2–3 hours for an expected
+CV difference of ~1e-5, while starving three other sessions. Not a good trade tonight.
+
+Exact command for the next run, once `lgbm_fixed_lat` lands — the drop list substitutes
+rather than adds, so the member count stays at 151 and it is a clean A/B against
+`stack_pub151_rankraw`:
+
+```bash
+cd agent && ../.venv/bin/python stack.py --ext --ext2 --transform rankraw --reps 0 --C 1.0 \
+  --drop golem_a,golem_f,lgbm_tuned_lat,lgbm_tuned_lat_frac \
+  --submit-name stack_pub151_fixed_rankraw
+```
+
+**Read its CV correctly when it lands.** It will probably come in slightly *below*
+`stack_pub151_rankraw`, because the optimistic members were inflating that number too.
+That is the correction working. CV is only comparable between stacks whose members are
+equally honest, so the honest stack **replaces** the optimistic one as the reference — it
+does not compete with it on CV. Getting this backwards would re-introduce the bias by the
+front door, having just removed it by the back.
+
+### Slot 4 in one line
+
+One submission (`stack_pub151_rankraw`, CV 0.970023, 4 slots left today); the angle's own
+feature engineering measured +5e-6; the stacker's C is closed as flat; and two durable
+claims in `RESEARCH.md` were wrong — sd_ratio is not a defect detector, and our own member
+runner carried the very defect we drop other people's members for.

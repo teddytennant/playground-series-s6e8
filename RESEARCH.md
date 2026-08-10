@@ -357,10 +357,27 @@ stacker's coefficients toward itself, and CV is *the* deadline decision rule.
 `fixed900` / `fixed1500` / `fixed4000`. Keep the early-stopping path for *tuning* only,
 where the comparison is what matters and the absolute level does not.
 
-| member | early-stopped OOF | fixed-schedule OOF (2000 rounds) |
-|---|---|---|
-| `lgbm_tuned_lat` | 0.96771 | see `oof/summary_lgbm_fixed_lat.json` |
-| `lgbm_tuned_lat_frac` | 0.96782 | see `oof/summary_lgbm_fixed_lat_frac.json` |
+**Measured size of the correction** (identical params, identical folds, 2000 fixed rounds):
+
+| member | early-stopped OOF | fixed-schedule OOF | optimism |
+|---|---|---|---|
+| `lgbm_tuned_lat_frac` → `lgbm_fixed_lat_frac` | 0.96782 | **0.96779** | **+0.00003** |
+| `lgbm_tuned_lat` → `lgbm_fixed_lat` | 0.96771 | in progress | — |
+
+Per fold on `lat_frac`: −3e-5, −5e-5, −5e-5, −5e-5, +2e-5. So the optimism is real and
+consistent (4/5 folds) but **small — about 3e-5**, which is under the cross-fit noise
+floor and comparable to a single member's contribution to the stack.
+
+Note the fixed count was chosen a priori (a round 2000) rather than from the previous
+run's early-stopped iterations (1905–2227) — picking it from those would smuggle the same
+held-out information back in through the back door.
+
+⚠ **Do not compare an honest stack against an optimistic one on CV.** Substituting the
+fixed members will likely *lower* the stack's CV slightly, because the inflated members
+were inflating the stack's number too. That is the correction working, not a regression.
+CV comparisons are only meaningful between stacks whose members are equally honest — so
+the honest stack **replaces** the optimistic one as the reference, it does not compete
+with it.
 
 Note the fixed count was chosen a priori (a round 2000) rather than from the previous
 run's early-stopped iterations (1905–2227) — picking it from those would smuggle the same
