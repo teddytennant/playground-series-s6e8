@@ -1,0 +1,9 @@
+data/
+cache/
+oof/
+notebooks/
+submissions/*.csv
+submissions/*.npy
+logs_*.txt
+.venv/
+__pycache__/
