@@ -593,3 +593,128 @@ combiner work instead.
 - `kaggle competitions submit` returned `400 CreateSubmission` on the first attempt after
   a full upload, then succeeded on an identical retry. **Always confirm with
   `kaggle competitions submissions -v` — the 400 was real, nothing registered.**
+
+---
+
+## 2026-08-10 — slot 4 of 10 — angle: feature engineering, measured on CV
+
+**Submitted 1 (`stack_pub151_rankraw`). The angle's own deliverable measured +0.000005 and
+I would have skipped the slot for it — that instinct was wrong, and why it was wrong is
+the most useful thing in this entry.**
+
+### Two members built, both from our own pipeline, both judged on decorrelation first
+
+The angle asked for feature engineering measured on CV. In this competition's current
+shape that cashes out as *new members*, because slot 3 established that what moves the
+stack is whose pipeline built a member, not which family it belongs to.
+
+| member | what it is | solo OOF | maxcorr | median corr | sd_ratio |
+|---|---|---|---|---|---|
+| `et_lat_frac` | ExtraTrees, 300 trees, min_leaf 40, max_features 0.15, on our lattice+TE+decimal matrix | 0.96002 | 0.9629 | 0.9551 | 0.8308 |
+| `linlat` | additive log-odds: logistic on `logit(TE)` + `log1p(CT)` + base cols | 0.96133 | 0.9719 | **0.9373** | 1.0108 |
+
+`linlat` has the **lowest median correlation against the pack of anything we hold**. The
+reasoning behind it: a target encoding is already an estimate of P(y | cell), so the
+natural way to combine several is to add their log-odds — which is a linear model in
+`logit(TE)` space, and not one of the 149 members is linear. `experiments/run_linear.py`.
+
+Paired 50/50, 3 splits, fit and scored on identical rows (`experiments/member_eval.py`):
+
+| added to base149 | paired delta | verdict |
+|---|---|---|
+| `et_lat_frac` | +0.000006 ± 0.000003 | consistent |
+| `linlat` | +0.000003 ± 0.000004 | **sign flips** |
+| both | +0.000005 ± 0.000003 | consistent, and **sublinear** |
+
+Two genuinely different function classes, and together they are worth less than the sum of
+their parts. Per-member this is 3–6e-6, at the bottom of slot 3's 5.2–17.3e-6 band.
+
+### The decision rule I got wrong, and the correction
+
+I had concluded: +5e-6 is an order of magnitude under the 5e-5 noise floor, RESEARCH.md
+says sub-1e-4 gains transfer to LB at rate zero, therefore skip the slot — "an unused slot
+beats a wasted one."
+
+That reasoning is **invalid for Playground**, and the workspace owner corrected it
+mid-run. The playbook rule it came from exists for competitions where only the two most
+recent submissions stay active and a weak entry **evicts** a good one. Here nothing evicts
+anything: the leaderboard takes the best of all submissions and final selection is ours to
+make at the deadline. So a submission has **no downside**, an unused daily slot is pure
+waste, and the correct bar is **"is it genuinely different?"** — not "does it clear the
+noise floor?". Scores are deterministic on a fixed public slice, so the only thing worth
+avoiding is re-sending an identical file.
+
+Selection at the deadline still happens on CV. That is the Rogii failure mode and free
+submissions must not be allowed to corrupt it.
+
+### What I actually submitted, and why it is not a near-duplicate
+
+The owner session sent `stack_pub151_hybrid` (CV 0.970024). Sending a second hybrid would
+have been the pointless case. I took **`stack_pub151_rankraw`** instead, on a mechanism
+that this run's own result undermines:
+
+`hybrid` exists to repair "only the members that actually clip", on the theory that
+clipping marks a **defective** member. That theory is wrong. `et_lat_frac` — trained by me,
+on the frozen folds, with no defect whatever — emits `p == 1` on **0.84% of OOF rows against
+0.04% of test rows, a 21× asymmetry**, giving sd_ratio 0.8308, deep inside the range
+RESEARCH.md treated as proof of a broken member.
+
+The cause is structural and applies to everyone: **the OOF array is one model's output per
+row, the test array is the mean of five.** Averaging five saturating models resolves a
+plateau that a single model cannot — all five must agree on exactly 1.0 for the mean to be
+1.0. Any member whose outputs saturate shows this. The 1.0018 "control" only reads clean
+because LightGBM's sigmoid never emits exactly 0 or 1.
+
+So the hybrid/rankraw split was drawing a line between "broken" and "fine" members that
+corresponds to an artefact of how OOF and test arrays are built, not to member quality.
+Treating all 151 uniformly is the better-motivated choice, and rankraw also measured best
+of the four transforms at 86 members (0.969684 vs hybrid 0.969678) — previously dismissed
+as unresolvable noise, now with a mechanism behind it.
+
+### Closed: the stacker's C is flat at 149 members
+
+Top item on slot 3's next-run list. Paired 50/50, 3 splits, `experiments/stack_lab.py`:
+
+| C | 0.03 | 0.1 | 0.3 | 1.0 | 3.0 | 10 | 100 |
+|---|---|---|---|---|---|---|---|
+| vs C=1.0 | +7e-6 | +5e-6 | +5e-6 | — | +1e-6 | +3e-6 | +4e-6 |
+
+Every value within 7e-6 of C=1.0 with std comparable to mean. At n/p ≈ 4600 the L2 penalty
+has nothing to do. **Do not revisit this.**
+
+### A defect in our own runner — same one we drop other people's members for
+
+`agent/run_lgbm.py` calls `lgb.early_stopping` on `(Xb, yb)` — the exact rows that become
+that member's OOF. The iteration count is therefore chosen with sight of the held-out
+labels. **This is precisely why `golem_a`/`golem_f` are dropped from the stack**, and both
+of our own members (`lgbm_tuned_lat`, `lgbm_tuned_lat_frac`) carry it.
+
+It matters beyond that member's own inflated AUC: an optimistic member biases the
+stacker's coefficients toward itself, so the optimism propagates into which blend gets
+selected at the deadline — and CV is *the* deadline decision rule. Added a `--stopping 0`
+fixed-schedule path (what beicicc's "fixed900/fixed1500" datasets do, and now visibly why).
+Retraining both honestly under new names is queued; record old and new OOF AUC side by side
+so the size of the correction is visible rather than silently absorbed.
+
+### Operational: this workspace is not single-tenant
+
+Mid-run I found `stack.py --submit-name stack_pub151_hybrid` running under a different
+Claude session, plus unrelated CPU-heavy work from two more. Run queue hit **33 on 16
+cores** and everything ran ~4× slow — a LightGBM member that takes 17 min alone had not
+finished one fold in 35 min. I killed my own batch to give the cores back.
+
+**Check `ps` for peers before launching heavy jobs, and before submitting.** Two agents
+independently building the same artifact from the same `oof/` directory is the live
+failure mode; `ListAgents` + `SendMessage` resolved it cleanly. Trace ownership with the
+parent chain (`ps -o ppid=`) rather than guessing from session start times.
+
+### Next run
+
+1. Finish the honest retrains of `lgbm_tuned_lat*` and record the delta.
+2. **The bar for a submission is difference, not measured improvement** — but identical
+   files score identically, so vary something real. Deadline selection stays on CV.
+3. Members from our own pipeline are worth 3–6e-6 each, the bottom of the observed band.
+   Getting +0.0001 that way needs ~20 of them; a batch runner exists
+   (`experiments/batch_members.sh`, fixed schedules) but needs an uncontended box.
+4. Do not re-open: stacker C, any meta-model over the members, regime-aware anything,
+   pseudo-labeling, original-dataset concat.

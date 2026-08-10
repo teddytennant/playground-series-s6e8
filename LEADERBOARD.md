@@ -159,3 +159,34 @@ were excluded on mechanism *before* any CV was consulted.
 
 Ranks 2–10 still churn daily and rank 2/3 have 55/51 submissions, so expect private-LB
 reshuffling in that band. Ours is a 4-submission position built on CV.
+
+---
+
+## 2026-08-10, slot 4 — two more entries, no LB movement expected
+
+Board snapshot unchanged from the 17:49 pull: #1 MILANFX 0.97120, rank 10 = 0.97106,
+rank 25 = 0.97096, rank 50 = 0.97092, rank 100 = 0.97086. We sit at 0.97099 (~#18).
+
+Two entries went out at 151 members, differing only in the meta-feature transform:
+
+| entry | members | transform | CV | LB |
+|---|---|---|---|---|
+| `stack_pub151_hybrid` | 151 | hybrid | 0.970024 | pending (sent by the owner session) |
+| `stack_pub151_rankraw` | 151 | rankraw | 0.970023 | pending |
+
+Both are +5e-6 CV over the shipped `stack_pub149_hybrid`, which is an order of magnitude
+under the noise floor — **neither is expected to move the board**, and that is fine: on
+Playground nothing evicts anything, so a slot spent on a genuinely different file is free.
+Spearman of rankraw against the shipped 149 entry is 0.99916.
+
+The reason for sending both: `hybrid` repairs only the members it judges broken, and slot
+4 showed that judgement keys on an artefact of OOF-vs-test construction rather than on
+member quality (see RESEARCH.md). `rankraw` treats all 151 uniformly. They are within 1e-6
+on CV, so this is a mechanism preference, not a measured one.
+
+### Watch at the deadline
+
+Our entries are now 0.97080–0.97099 with CV 0.969641–0.970024, and CV and LB still rank
+identically. If `rankraw` and `hybrid` come back split on the public slice, **that split
+carries no information** — 1e-6 of CV cannot be resolved by a 296k-row slice either.
+Select on CV, and if CV ties, prefer `rankraw` on mechanism.

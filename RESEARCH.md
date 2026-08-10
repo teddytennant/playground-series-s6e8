@@ -143,6 +143,29 @@ Per-fold spread within one 5-fold run massively overstates uncertainty. The real
 floor is the std of repeated 5-fold **means** across partition seeds ≈ **0.00005**.
 Any claimed gain smaller than that is nothing.
 
+The **paired** 50/50 test resolves far below that floor, because fitting and scoring both
+variants on identical rows cancels the split noise. It is the selection instrument; the
+cross-fit is only the headline. A paired delta of +5e-6 that is sign-consistent across
+splits is a real ordering, even though no cross-fit could ever see it.
+
+### Submission economics — the daily slot has no alternative use
+
+**A Playground submission cannot hurt you.** Nothing evicts anything: the public
+leaderboard shows the best of *all* your submissions, and the two final entries are chosen
+by you at the deadline. So the bar for spending a daily slot is **"is this file genuinely
+different?"** — NOT "does the gain clear the noise floor?". An unused slot is pure waste.
+
+This corrects a rule inherited from the standing playbook ("an unused slot beats a wasted
+one"), which is written for competitions where only the two most recent submissions stay
+active and a weak entry **evicts** a good one. That rule does not apply here. Slot 4 nearly
+skipped a submission on it.
+
+Two things it does NOT license:
+- **Re-sending an identical file.** Scoring is deterministic on a fixed public slice, so a
+  duplicate is the one genuinely pointless submission. Vary something real.
+- **Selecting on the public LB.** Final selection stays on CV. That is the Rogii failure
+  mode, and free submissions must not be allowed to corrupt it.
+
 ## The public OOF library — the most valuable asset in this competition
 
 `szymonkapiski/s6e8-oof-library-47-models` (actually **74 models**, updated 2026-08-04).
@@ -297,6 +320,51 @@ lattice features is genuinely unexplored ground.
   catboost, pyarrow.
 - Per-fold design matrices are cached to `cache/` by `experiments/build_cache.py` so
   hyperparameter trials cost only LightGBM time.
+- The transformed member matrix is cached to `cache/meta_<transform>.npz` by
+  `experiments/stack_lab.py:build`, so a combiner sweep costs only the logistic
+  regressions instead of re-reading ~150 `.npy` pairs first.
+
+### ⚠ This box is NOT single-tenant — check before launching anything heavy
+
+Other Claude sessions run concurrently in this same workspace and elsewhere on the
+machine. On 2026-08-10 the run queue hit **33 on 16 cores** and everything ran ~4× slow —
+a LightGBM member that takes 17 minutes alone had not finished a single fold in 35.
+
+```bash
+ps -eo pcpu,pid,comm --sort=-pcpu | head        # who else is burning CPU
+ps -o ppid= -p <pid>                            # trace ownership up to a `claude` process
+```
+
+- **Before a long job:** check the load. Two agents at `n_jobs=-1` are slower than one.
+- **Before submitting:** check whether a peer is building the same artifact. A peer session
+  was independently running `stack.py --submit-name stack_pub151_hybrid` off the very
+  `oof/` files this session had just written. `ListAgents` + `SendMessage` resolved it;
+  trace ownership by parent chain rather than guessing from session start times.
+- Anything written to `oof/` is picked up automatically by every later `stack.py` run,
+  including a peer's. That directory is shared mutable state.
+
+### Our own member runner had the golem_a/golem_f defect
+
+`agent/run_lgbm.py`'s early-stopping path calls `lgb.early_stopping` on `(Xb, yb)` — the
+exact rows that become that member's OOF, so the iteration count is chosen with sight of
+the held-out labels. `lgbm_tuned_lat` and `lgbm_tuned_lat_frac` were both built that way.
+
+It does not stay contained in that member's inflated AUC: an optimistic member biases the
+stacker's coefficients toward itself, and CV is *the* deadline decision rule.
+
+**Use `--stopping 0` for anything that will be stacked** (a fixed round count, no
+`eval_set`). This is why the strongest independent public library names its datasets
+`fixed900` / `fixed1500` / `fixed4000`. Keep the early-stopping path for *tuning* only,
+where the comparison is what matters and the absolute level does not.
+
+| member | early-stopped OOF | fixed-schedule OOF (2000 rounds) |
+|---|---|---|
+| `lgbm_tuned_lat` | 0.96771 | see `oof/summary_lgbm_fixed_lat.json` |
+| `lgbm_tuned_lat_frac` | 0.96782 | see `oof/summary_lgbm_fixed_lat_frac.json` |
+
+Note the fixed count was chosen a priori (a round 2000) rather than from the previous
+run's early-stopped iterations (1905–2227) — picking it from those would smuggle the same
+held-out information back in through the back door.
 
 ## Member arrays are NOT all probabilities — check before stacking
 
@@ -317,21 +385,57 @@ OOF and test**.
 sd_ratio = to_logit(test_j).std() / to_logit(oof_j).std()   # should be 1.000
 ```
 
-Control: our own honest 5-fold `lgbm_tuned_lat_frac` sits at **1.0018**. Ordinary 5-fold
-averaging does not compress a well-behaved member. Anything at 0.68–0.93 is a broken
-transform, not a property of the model. Pre-repair spread across 86 members: 0.679–1.009.
+Pre-repair spread across 86 members: 0.679–1.009.
+
+#### ⚠ sd_ratio is NOT a defect detector — corrected 2026-08-10 (slot 4)
+
+This section used to say "anything at 0.68–0.93 is a broken transform, not a property of
+the model", with our own `lgbm_tuned_lat_frac` at 1.0018 as the control proving it. **That
+inference is wrong.**
+
+Our own `et_lat_frac` — ExtraTrees, trained here, on the frozen folds, with no defect of
+any kind — reads **sd_ratio 0.8308**, squarely inside the "broken" range. It emits `p == 1`
+on **0.84% of OOF rows against 0.04% of test rows, a 21× asymmetry**, which is the same
+shape as naji03's 5.79% → 0.92%.
+
+The cause is structural and applies to every library: **the OOF array is one model's
+output per row, while the test array is the mean of five fold models.** Averaging five
+saturating models resolves a plateau a single model cannot — all five must agree on
+exactly 1.0 for the mean to be 1.0. So *any* member whose outputs saturate produces
+sd_ratio < 1, whether or not anything is wrong with it. The 1.0018 control only reads
+clean because LightGBM's sigmoid never emits exactly 0 or 1; it was never evidence about
+5-fold averaging in general.
+
+Consequences:
+
+- **Do not use sd_ratio to judge whether a published member is trustworthy.** Use the
+  gates that survive: fold-id partition, maxcorr == 1.000 duplication, in-sample blends,
+  level-2 stack outputs, credibility (OOF > 0.9720 is not achievable), and the paired test.
+- **Blast radius checked: nothing was ever dropped on it.** `import_ext2.py` and
+  `import_beicicc.py` only *report* it as a table column, and `stack.py`'s repair gate is a
+  value check (`(O<=0)|(O>=1)`), not a ratio threshold. Every actual exclusion was on one
+  of the gates above. No member was cut wrongly.
+- Putting OOF and test on a common scale is still the right thing to do. The transform is
+  fine; only the *interpretation* of the ratio was wrong.
 
 Transforms available (all monotone per member, same map on OOF and test, so no member's
 solo AUC changes):
 
-| `--transform` | cross-fitted OOF | note |
-|---|---|---|
-| `logit` | 0.969660 | original; clips |
-| `hybrid` | 0.969678 | rank-gauss on the 29 clipping members only |
-| `rankraw` | 0.969684 | rank-gauss on all, ties averaged |
-| `rescale` | 0.969686 | min-max over both splits then logit; only *partially* equalises |
+| `--transform` | cross-fitted OOF @86 | @151 | note |
+|---|---|---|---|
+| `logit` | 0.969660 | — | original; clips |
+| `hybrid` | 0.969678 | 0.970024 | rank-gauss on the clipping members only |
+| `rankraw` | 0.969684 | **0.970023** | rank-gauss on all, ties averaged |
+| `rescale` | 0.969686 | — | min-max over both splits then logit; only *partially* equalises |
 
 Worth ~+0.00002 CV and **0.00000 LB**. Fix it because it is wrong, not because it scores.
+
+`hybrid` and `rankraw` are indistinguishable on CV (1e-6 apart at 151 members, against a
+5e-5 noise floor). **Prefer `rankraw` on mechanism**: `hybrid` only repairs the members it
+judges "broken", and the finding above says that judgement separates members by an
+artefact of OOF-vs-test construction rather than by quality. `rankraw` reports
+sd_test/sd_oof of min 1.0000 / med 1.0000 / max 1.0253 — it equalises the scales fully,
+where `hybrid` and `rescale` only do so partially.
 
 ## More things that do NOT work — measured here, do not re-spend runs
 
@@ -365,6 +469,8 @@ more instructive than the fact.
 | 12 more members, two independent authors | +0.000016 | |
 | repairing a real train/test defect in the meta-features | +0.000018 CV, −0.00001 LB | |
 | **63 members from three further independent pipelines** | **+0.000340 CV, +0.00019 LB** | slot 3 |
+| 2 new members we built ourselves (ExtraTrees + a linear model) | +0.000005 | slot 4 |
+| stacker C, anywhere in 0.03–100 | +0.000007, i.e. flat | slot 4, closed |
 
 Everything above the last row is a **group of 2–12 members from authors whose feature
 engineering already overlapped the 74-model library.** None of them tested a large set

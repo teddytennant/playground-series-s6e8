@@ -99,13 +99,24 @@ def main():
         pb = np.zeros(len(yb))
         pt = np.zeros(len(Xt))
         for sd in seeds:
-            m = lgb.LGBMClassifier(n_estimators=a.n_estimators, random_state=sd,
-                                   verbose=-1, n_jobs=-1, **params)
-            m.fit(Xa, ya, eval_set=[(Xb, yb)], eval_metric="auc",
-                  callbacks=[lgb.early_stopping(a.stopping, verbose=False)])
-            pb += m.predict_proba(Xb)[:, 1] / len(seeds)
-            pt += m.predict_proba(Xt)[:, 1] / len(seeds)
-            iters.append(m.best_iteration_)
+            reg = str(params.get("objective", "")).startswith(("regression", "l2", "mae"))
+            Est = lgb.LGBMRegressor if reg else lgb.LGBMClassifier
+            m = Est(n_estimators=a.n_estimators, random_state=sd,
+                    verbose=-1, n_jobs=-1, **params)
+            if a.stopping:
+                # NOTE: this stops on (Xb, yb), the very rows whose predictions become
+                # this member's OOF. The iteration count is then chosen with sight of the
+                # held-out labels, which is exactly the optimism the journal drops
+                # golem_a/golem_f for -- keep it only for tuning, never for a member that
+                # will be stacked. --stopping 0 is the honest path.
+                m.fit(Xa, ya, eval_set=[(Xb, yb)], eval_metric="auc",
+                      callbacks=[lgb.early_stopping(a.stopping, verbose=False)])
+            else:
+                m.fit(Xa, ya)
+            p = (m.predict(Xb) if reg else m.predict_proba(Xb)[:, 1])
+            pb += p / len(seeds)
+            pt += (m.predict(Xt) if reg else m.predict_proba(Xt)[:, 1]) / len(seeds)
+            iters.append(m.best_iteration_ or a.n_estimators)
         oof[iva] = pb
         tp += pt / N_SPLITS
         print(f"[{a.name}] fold {f}: AUC {roc_auc_score(yb, pb):.5f}  "
