@@ -147,6 +147,41 @@ Best members: `naji03`/`naji05` 0.96881, `tabm_seed3` 0.96867, `lookup` 0.96853,
 strong pack sits 0.987–0.999. Adding it alone was worth +0.000109 to the author's blend.
 Architecture from `tamerlanomralinov/s6e8-lookup-transformer`.
 
+### Other public OOF libraries on the SAME frozen folds
+
+The community converged on one fold scheme, so several people publish stackable OOF.
+Downloaded and symlinked into `data/ext_members/` with collision-proof names.
+
+```bash
+kaggle datasets download -d raykkretzschmar/s6e8-fm-lattice-blend-members -p data/ext/... --unzip
+kaggle datasets download -d dariushafshar/s6e8-golem-oof-library         -p data/ext/... --unzip
+```
+
+- **`raykkretzschmar/s6e8-fm-lattice-blend-members`** — 5 factorization machines
+  (`fmplr` 0.96739, `fmnum` 0.96713, `fmdeep` 0.96666, `fmwide` 0.96493, `fmpure` 0.96455).
+  A bilinear function class absent from the 74-member library: one vector per
+  (field, value), joint cells scoring as inner products, so all pairs are estimated
+  jointly and thin lattice cells borrow strength. Author measures the whole family worth
+  only **+0.000006** to a blend, and warns that `fmplr`/`fmnum` add **0.000000** on top of
+  the other three — once a function class is represented, strengthening it does nothing.
+  Also contains 2 band-local members that are NOT full length (not blend members).
+- **`dariushafshar/s6e8-golem-oof-library`** — 7 models `a`–`g` (0.9344–0.9649), including
+  a **spline GAM** (`c`, 0.934384) which is a genuinely different function class.
+  ⚠ Members `a` and `f` early-stop on the held-out validation fold; the author discloses
+  this as mildly optimistic and uncorrected. Keep them separable from the rest so their
+  effect can be isolated — an optimistic OOF earns undeserved stacker weight.
+- `dariushafshar/s6e8-measured-findings-pack` — folds, drift, noise-floor scenarios.
+- Others not yet pulled: `najiama/predicting-smartphone-addiction-oof-submission-csv`,
+  `beicicc/*` (many "Fixed-Schedule" artifacts), `boltuzamaki/s6e8-oof-prediction-library`,
+  `mohankrishnathalla/s6e8-{xgb,cat-mlp,lgb-dart}-oof`.
+
+**Always check the split before stacking anyone's OOF.** Most published S6E8 OOF arrays
+use a different fold count or average over seeds, so their OOF mixes partitions — they
+look healthy and will quietly inflate a blend built on the 5-fold split. Sanity checks:
+an OOF AUC above ~0.972 is not credible here; and the CV→LB offset must stay near
+**+0.0012** (see `LEADERBOARD.md`). If a stack's LB comes in far below its CV + 0.0012,
+something in the member set is leaking.
+
 ### Best single models by family (the bar to beat)
 
 | family | best OOF | name |

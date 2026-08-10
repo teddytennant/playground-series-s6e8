@@ -98,6 +98,34 @@ def space(stage):
         add("max_bin127", max_bin=127)
         for ss in [0.6, 1.0]:
             add(f"subsample{ss}", subsample=ss)
+
+    if stage == "b":
+        # Stage A moved one knob at a time off the control and every winner pointed the
+        # same way: LESS capacity, MORE regularisation. That is what 144 of 184 features
+        # being target-derived does -- they are easy to overfit and cheap to split on.
+        #
+        # Stage A winners vs control 0.96638:
+        #   reg_lambda 80         +0.00033      max_bin 511          +0.00031
+        #   num_leaves 63/depth 7 +0.00030      feature_frac_bynode  +0.00025
+        #   min_child_samples 250 +0.00020      subsample 1.0        +0.00018
+        # Stage A losers: extra_trees -0.00037, colsample 1.0 -0.00022, max_bin 127.
+        #
+        # These are NOT independent -- capacity, leaf size and L2 all regularise the same
+        # overfitting, so stacking them can overshoot into underfitting. Measure, do not
+        # assume additivity.
+        W = dict(num_leaves=63, max_depth=7, max_bin=511)
+        add("B_l2_80", **W, min_child_samples=100, reg_lambda=80.0)
+        add("B_mcs250_l2_80", **W, min_child_samples=250, reg_lambda=80.0)
+        # reg_lambda was still improving at the edge of the stage-A grid (80 > 20 > 5 >
+        # 0.5), so push past it rather than stopping where the grid happened to end.
+        add("B_l2_200", **W, min_child_samples=100, reg_lambda=200.0)
+        add("B_l2_500", **W, min_child_samples=100, reg_lambda=500.0)
+        add("B_l2_80_ffn", **W, min_child_samples=100, reg_lambda=80.0,
+            feature_fraction_bynode=0.8)
+        add("B_l2_80_ffn_nosub", **W, min_child_samples=100, reg_lambda=80.0,
+            feature_fraction_bynode=0.8, subsample=1.0)
+        add("B_mcs250_l2_200_ffn", **W, min_child_samples=250, reg_lambda=200.0,
+            feature_fraction_bynode=0.8)
     return T
 
 

@@ -39,6 +39,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import DATA, LIB, OOF, SUB, TARGET, get_folds, load_raw  # noqa: E402
 
 
+# golem_a and golem_f early-stop on the held-out validation fold, which their author
+# discloses as mildly optimistic and uncorrected. An optimistic OOF earns undeserved
+# stacker weight. experiments/member_value.py measured them: including them takes the
+# paired gain from +0.000009 (consistent) to +0.000007 with the SIGN FLIPPING across
+# splits. Measured out, not assumed out.
+DEFAULT_DROP = ("golem_a", "golem_f")
+
+
 def to_logit(p, clip=30.0):
     p = np.clip(np.asarray(p, np.float64), 1e-15, 1 - 1e-15)
     return np.clip(np.log(p / (1 - p)), -clip, clip)
@@ -132,13 +140,17 @@ def main():
     ap.add_argument("--reps", type=int, default=5)
     ap.add_argument("--submit-name", default=None)
     ap.add_argument("--C", type=float, default=1.0)
-    ap.add_argument("--drop", default="")
+    ap.add_argument("--drop", default=",".join(DEFAULT_DROP))
+    ap.add_argument("--ext", action="store_true",
+                    help="also load data/ext_members (FM + golem libraries)")
     a = ap.parse_args()
 
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
-    names, O, T = load_members(y, len(te), drop=set(filter(None, a.drop.split(","))))
-    print(f"{len(names)} members loaded\n")
+    extra = (os.path.join(DATA, "ext_members"),) if a.ext else ()
+    names, O, T = load_members(y, len(te), extra_dirs=extra,
+                               drop=set(filter(None, a.drop.split(","))))
+    print(f"{len(names)} members loaded (ext={a.ext}, dropped={a.drop})\n")
 
     if a.verify:
         verify(names, O, y)
