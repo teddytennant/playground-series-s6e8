@@ -513,23 +513,25 @@ were cut by correlation, not family. The new library does contain the most decor
 members ever seen here — `bolt_extratrees_support` at maxcorr **0.811**, and six more at
 0.92–0.96, against `lookup`'s 0.9869 which was previously the best in the pack.
 
-Paired 50/50, fit and scored on identical rows (split 0; the run reproduces exactly
-across invocations):
+Paired 50/50, fit and scored on identical rows, 3 splits. Every group is sign-consistent,
+and the combined figure independently reproduces the cross-fitted +0.000340 — two honest
+estimators agreeing to 1e-5:
 
-| group added to base86 | n | paired delta |
-|---|---|---|
-| `decorr` (maxcorr < 0.97: extratrees, gandalf, dcnv2, ft-transformer, ebm, tabr, deepfm, lookup_v3, neural, mkt_nn) | 10 | +0.000085 |
-| `lookup2` (six seeds of the second Lookup-Transformer) | 6 | +0.000103 |
-| `bei` (fold-id-verified fixed-schedule models) | 12 | +0.000103 |
-| **`rest`** (the 35 GBDT-shaped members the journal predicted were worthless) | 35 | **+0.000201** |
-| **all 63** | 63 | **+0.000322** |
+| group added to base86 | n | paired delta | per member |
+|---|---|---|---|
+| `decorr` (maxcorr < 0.97: extratrees, gandalf, dcnv2, ft-transformer, ebm, tabr, deepfm, lookup_v3, neural, mkt_nn) | 10 | +0.000087 ± 0.000005 | 8.7e-6 |
+| `lookup2` (six seeds of the second Lookup-Transformer) | 6 | +0.000104 ± 0.000001 | **17.3e-6** |
+| `bei` (fold-id-verified fixed-schedule models) | 12 | +0.000101 ± 0.000007 | 8.4e-6 |
+| **`rest`** (the 35 GBDT-shaped members the journal predicted were worthless) | 35 | **+0.000206 ± 0.000011** | 5.9e-6 |
+| **all 63** | 63 | **+0.000330 ± 0.000011** | 5.2e-6 |
 
-The decorrelated members are worth **more per member** (8.5e-6 each vs 5.7e-6), so the
-correlation heuristic is real. But `rest` — 35 ordinary XGB/LGBM/CatBoost members, exactly
-the thing two days of journal entries said to stop adding — contributed the **single
-largest** share. What matters is not only the function class but **whose pipeline built
-it**: an independent author's feature engineering, imputation and encoding decisions are a
-source of decorrelation that the family label does not capture.
+The decorrelated members are worth **more per member** (8.7e-6 vs 5.9e-6) and a second
+*independent implementation* of the Lookup-Transformer is worth triple that (17.3e-6) —
+so the correlation heuristic is real. But `rest` — 35 ordinary XGB/LGBM/CatBoost members,
+exactly the thing two days of journal entries said to stop adding — contributed the
+**single largest** share. What matters is not only the function class but **whose pipeline
+built it**: an independent author's feature engineering, imputation and encoding decisions
+are a source of decorrelation that the family label does not capture.
 
 So the angle's premise was vindicated after all, just not through a model I trained: 20 of
 the 47 boltuzamaki members are XGBoost, and they are a large part of the +0.000322.

@@ -370,15 +370,18 @@ Everything above the last row is a **group of 2–12 members from authors whose 
 engineering already overlapped the 74-model library.** None of them tested a large set
 from a separate pipeline. Sample size was mistaken for saturation.
 
-### Attribution of the +0.000340, paired 50/50 on identical rows
+### Attribution of the gain — paired 50/50 on identical rows, 3 splits
+
+`experiments/member_value2.py`. Every group is sign-consistent across all three splits,
+and the combined figure independently reproduces the cross-fitted +0.000340.
 
 | group added to the 86-member base | n | paired delta | per member |
 |---|---|---|---|
-| `decorr` — maxcorr < 0.97 (extratrees 0.811, gandalf, dcnv2, ft-transformer, ebm, tabr, deepfm, lookup_v3, neural, mkt_nn) | 10 | +0.000085 | 8.5e-6 |
-| `lookup2` — six seeds of a second Lookup-Transformer | 6 | +0.000103 | 17e-6 |
-| `bei` — fold-id-verified fixed-schedule models | 12 | +0.000103 | 8.6e-6 |
-| `rest` — ordinary XGB/LGBM/CatBoost | 35 | +0.000201 | 5.7e-6 |
-| **all 63 together** | 63 | **+0.000322** | 5.1e-6 |
+| `decorr` — maxcorr < 0.97 (extratrees 0.811, gandalf, dcnv2, ft-transformer, ebm, tabr, deepfm, lookup_v3, neural, mkt_nn) | 10 | +0.000087 ± 0.000005 | 8.7e-6 |
+| `lookup2` — six seeds of a second Lookup-Transformer | 6 | +0.000104 ± 0.000001 | **17.3e-6** |
+| `bei` — fold-id-verified fixed-schedule models | 12 | +0.000101 ± 0.000007 | 8.4e-6 |
+| `rest` — ordinary XGB/LGBM/CatBoost | 35 | +0.000206 ± 0.000011 | 5.9e-6 |
+| **all 63 together** | 63 | **+0.000330 ± 0.000011** | 5.2e-6 |
 
 Two things to carry forward, and they pull in different directions:
 
