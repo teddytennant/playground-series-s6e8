@@ -200,13 +200,19 @@ def main():
     ap.add_argument("--drop", default=",".join(DEFAULT_DROP))
     ap.add_argument("--ext", action="store_true",
                     help="also load data/ext_members (FM + golem libraries)")
+    ap.add_argument("--ext2", action="store_true",
+                    help="also load data/ext_members2 (boltuzamaki 47 + mohankrishnathalla 4)")
     ap.add_argument("--transform", default="logit",
                     choices=["logit", "rankraw", "rescale", "hybrid"])
     a = ap.parse_args()
 
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
-    extra = (os.path.join(DATA, "ext_members"),) if a.ext else ()
+    extra = ()
+    if a.ext:
+        extra += (os.path.join(DATA, "ext_members"),)
+    if a.ext2:
+        extra += (os.path.join(DATA, "ext_members2"),)
     names, O, T = load_members(y, len(te), extra_dirs=extra,
                                drop=set(filter(None, a.drop.split(","))))
     print(f"{len(names)} members loaded (ext={a.ext}, dropped={a.drop})\n")
@@ -220,6 +226,8 @@ def main():
           f"max {(Zt.std(0)/Z.std(0)).max():.4f}")
 
     # --- honest comparison of combiners: paired 50/50 splits ---
+    # hill_climb costs k * n_iter AUC evaluations, so it is O(minutes) at 137 members;
+    # --reps 0 skips the whole comparison when only the headline + submission is wanted.
     rows = []
     for rep in range(a.reps):
         iA, iB = next(StratifiedShuffleSplit(1, test_size=0.5, random_state=rep)
@@ -230,16 +238,19 @@ def main():
                  max(roc_auc_score(y[iB], O[iB, j]) for j in range(O.shape[1])))
              for k, v in res.items()}
         rows.append(r)
-    rob = pd.DataFrame(rows)
-    print("\nheld-out AUC per 50/50 split")
-    print(rob.to_string(float_format="%.6f"))
-    print("\nPAIRED DIFFERENCES vs best_solo (same rows, split noise cancels)")
-    for c in rob.columns:
-        if c == "best_solo":
-            continue
-        d = rob[c] - rob["best_solo"]
-        ok = "consistent" if (d > 0).all() or (d < 0).all() else "SIGN FLIPS"
-        print(f"  {c:>18s}  {d.mean():+.6f} +/- {d.std(ddof=1):.6f}  [{ok}]")
+    rob = pd.DataFrame(rows) if rows else None
+    if rob is None:
+        print("\n(skipped combiner comparison: --reps 0)")
+    else:
+        print("\nheld-out AUC per 50/50 split")
+        print(rob.to_string(float_format="%.6f"))
+        print("\nPAIRED DIFFERENCES vs best_solo (same rows, split noise cancels)")
+        for c in rob.columns:
+            if c == "best_solo":
+                continue
+            d = rob[c] - rob["best_solo"]
+            ok = "consistent" if (d > 0).all() or (d < 0).all() else "SIGN FLIPS"
+            print(f"  {c:>18s}  {d.mean():+.6f} +/- {d.std(ddof=1):.6f}  [{ok}]")
 
     # --- headline: cross-fitted on the frozen folds ---
     folds = get_folds(y)

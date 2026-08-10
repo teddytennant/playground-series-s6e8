@@ -426,3 +426,168 @@ So the remaining levers are, in order:
 trained yourself. It is one line of numpy and it found a defect in the strongest members of
 a 74-model public library that everyone on this leaderboard is stacking. Ratios were
 0.679–1.009 where they should all have been 1.000.
+
+---
+
+## 2026-08-10 — slot 3 of 10 — angle: XGBoost as the third leg
+
+**Submitted 1 (4 of 10 used today, 6 remaining). CV 0.969678 → 0.970018 (+0.000340).
+LB 0.97080 → 0.97099. Rank 158 → 18 of 1366.**
+
+This is the first entry in three days whose CV gain actually moved the leaderboard, and
+it did so by overturning yesterday's headline conclusion.
+
+### The angle was redirected, and the reason it was redirected turned out to be wrong
+
+The brief asked for a tuned XGBoost third leg. Yesterday's journal closes that: another
+GBDT member measured **+0.000002**, a new function class **+0.000005**, twelve members
+from two independent authors **+0.000016**. I redirected on those numbers.
+
+But the conclusion drawn from them — *"THE STACK IS SATURATED... more members from the
+same public pool will not close this"* — was **false**, and it was false in a way the
+evidence could not have supported. Every one of those measurements came from adding
+**small** groups (2, 5, 12) from authors whose feature engineering already overlapped the
+74-model library. None of them tested what a *large* set from a genuinely separate
+pipeline does. Sample size was mistaken for saturation.
+
+### What was actually still on the shelf
+
+The Kaggle CLI's list endpoints were returning `400` all run
+(`ListDatasets`, `ListKernels`, `ListCompetitions`, and — intermittently —
+`CreateSubmission`; downloads-by-ref and `submissions -v` kept working throughout). The
+**legacy REST endpoint still works and needs no auth**:
+
+```
+https://www.kaggle.com/api/v1/datasets/list?search=s6e8&pageSize=100&page=1
+```
+
+That enumerated 25 S6E8 datasets, of which **fourteen were public OOF libraries we had
+never pulled**. The community has published far more stackable OOF than `RESEARCH.md`
+recorded.
+
+Imported, vetted, and added: **63 new members**, taking the stack from 86 to 149.
+
+| source | members | what it is |
+|---|---|---|
+| `boltuzamaki/s6e8-oof-prediction-library` | 47 | a complete independent pipeline: TabR (retrieval), EBM (a GAM), GANDALF, DCNv2, FT-Transformer, DeepFM, **six seeds of a second Lookup-Transformer**, plus 20 GBDTs |
+| `beicicc/s6e8-*-artifacts` (10 datasets) | 12 | fixed-schedule LGBM/XGB/CatBoost/RealMLP/Lookup, **each shipping `fold_id.npy`** |
+| `mohankrishnathalla/s6e8-{xgb,cat-mlp,lgb-dart}-oof` | 4 | xgb, cat, nn, lgb-dart |
+
+### The vetting, because a stranger's OOF array is a liability until proven otherwise
+
+`experiments/import_ext2.py` and `experiments/import_beicicc.py`. Five gates:
+
+1. **Row alignment** — id column must equal ours in order. All 47 bolt members reproduce
+   their published OOF AUC to <5e-5.
+2. **Fold partition** — the beicicc libraries ship the fold assignment itself, so this is
+   exact rather than inferred. **Compare the induced partition, not the integers**: their
+   fold *labels* are permuted, so raw agreement reads 0.0000 while the partition is
+   identical. Cross-tabulate and require every one of their folds to map wholly into one
+   of ours. **10/10 pass.** This is a strictly stronger guarantee than reproducing an AUC,
+   which only proves row *order*.
+3. **Credibility** — OOF AUC > 0.9720 is not achievable here. 
+4. **`sd(logit(test))/sd(logit(oof))`** — the diagnostic from yesterday, run on every
+   candidate. 48 of 149 members now need the `hybrid` repair, up from 29.
+5. **Max correlation against the existing pack**, on the logit scale.
+
+### Excluded on mechanism, not on CV
+
+- **`njm_01..05`** — maxcorr **1.000000** against the pack. They are literally `naji01..05`,
+  already in the 74-lib, republished.
+- **`njm_*_blend` (9)** — the author's own blends, OOF AUC 0.9692–0.9697, i.e. at the level
+  of our whole 88-member stack. Their blend weights are fit on the full OOF, so the OOF
+  they publish is in-sample.
+- **`beicicc/sixmember_*` (3)** — level-2 cross-fitted stack outputs. Their author
+  discloses it himself: *"a different meta-training row can come from a base model that
+  used labels from the current meta-validation fold ... may be optimistic."*
+- **2 exact duplicate arrays** shipped across two beicicc datasets each.
+
+All four exclusions are the same principle: **an optimistic OOF earns undeserved stacker
+weight, and CV is precisely the instrument it fools.** None of these can be judged by the
+paired test, so none of them were offered to it.
+
+### The correlation hypothesis was right about the shape and wrong about the size
+
+The journal's standing advice was to judge a candidate on decorrelation first. So groups
+were cut by correlation, not family. The new library does contain the most decorrelated
+members ever seen here — `bolt_extratrees_support` at maxcorr **0.811**, and six more at
+0.92–0.96, against `lookup`'s 0.9869 which was previously the best in the pack.
+
+Paired 50/50, fit and scored on identical rows (split 0; the run reproduces exactly
+across invocations):
+
+| group added to base86 | n | paired delta |
+|---|---|---|
+| `decorr` (maxcorr < 0.97: extratrees, gandalf, dcnv2, ft-transformer, ebm, tabr, deepfm, lookup_v3, neural, mkt_nn) | 10 | +0.000085 |
+| `lookup2` (six seeds of the second Lookup-Transformer) | 6 | +0.000103 |
+| `bei` (fold-id-verified fixed-schedule models) | 12 | +0.000103 |
+| **`rest`** (the 35 GBDT-shaped members the journal predicted were worthless) | 35 | **+0.000201** |
+| **all 63** | 63 | **+0.000322** |
+
+The decorrelated members are worth **more per member** (8.5e-6 each vs 5.7e-6), so the
+correlation heuristic is real. But `rest` — 35 ordinary XGB/LGBM/CatBoost members, exactly
+the thing two days of journal entries said to stop adding — contributed the **single
+largest** share. What matters is not only the function class but **whose pipeline built
+it**: an independent author's feature engineering, imputation and encoding decisions are a
+source of decorrelation that the family label does not capture.
+
+So the angle's premise was vindicated after all, just not through a model I trained: 20 of
+the 47 boltuzamaki members are XGBoost, and they are a large part of the +0.000322.
+
+### Submitted
+
+`stack_pub149_hybrid` — L2 logit stack (C=1.0), `hybrid` transform, 149 members,
+cross-fitted on the frozen folds.
+
+| entry | CV | public LB | offset |
+|---|---|---|---|
+| `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 |
+| `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 |
+| `stack_pub86_hybrid` | 0.969678 | 0.97080 | +0.001122 |
+| **`stack_pub149_hybrid`** | **0.970018** | **0.97099** | **+0.000972** |
+
+Spearman vs the previous entry 0.9982; mean 0.7092 against a train rate of 0.7094.
+
+**Rank 158 → 18 of 1366.** Bronze cutoff 0.97084, silver ~0.97093, rank 10 is 0.97106.
+
+Note the offset fell again, +0.001122 → +0.000972: a CV gain of +0.000340 bought
++0.00019 LB, roughly **56% pass-through**. The offset is not a constant, it shrinks as CV
+rises, so **stop quoting CV + 0.0012 as an LB estimate.** CV differences still rank
+correctly, which is all they are needed for.
+
+### Lesson
+
+Yesterday I wrote that the members correlate 0.987–0.999 and "no function of the existing
+86 columns will move it." That sentence was true and the inference drawn from it was not.
+The binding constraint was never the combiner or the function class — it was that we held
+86 of the ~150 publicly available OOF arrays and had stopped looking. **Two of the three
+"measured dead end" conclusions in `RESEARCH.md` were conclusions about search effort
+wearing the costume of conclusions about the data.**
+
+The concrete failure was procedural: `RESEARCH.md` listed five unpulled libraries by name
+under "Others not yet pulled" and three consecutive runs walked past them to do
+combiner work instead.
+
+### Next run, in this order
+
+1. **The public OOF pool is now essentially exhausted** — we hold 149 of everything
+   published with usable OOF. The enumeration is in `RESEARCH.md`; re-run the REST
+   `datasets/list` query first, since new libraries appeared as recently as 2026-08-10.
+2. **Sweep the stacker's `C` at 149 members.** It was verified flat (0.01–10) at 74
+   members and has never been re-checked; 149 correlated members is a different
+   regularisation problem. One cross-fit is ~25 min. Untested, cheap, and the only
+   parameter left in the shipped pipeline.
+3. Do **not** re-open: any meta-model over the members, anything regime-aware,
+   pseudo-labeling, original-dataset concat, LightGBM tuning. Those remain measured.
+4. Treat the remaining "dead end" entries in `RESEARCH.md` with suspicion in proportion to
+   how small the group was that produced them.
+5. At the deadline, **select on CV.** `stack_pub149_hybrid` leads on both CV and LB, so
+   for the first time there is no conflict.
+
+### Operational notes
+
+- **Daily cap re-confirmed at 10.** The CLI printed "6 submissions remaining today" after
+  this run's submit (4 used).
+- `kaggle competitions submit` returned `400 CreateSubmission` on the first attempt after
+  a full upload, then succeeded on an identical retry. **Always confirm with
+  `kaggle competitions submissions -v` — the 400 was real, nothing registered.**

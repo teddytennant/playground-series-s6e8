@@ -27,9 +27,16 @@ kaggle competitions submissions -c playground-series-s6e8 -v | head -5
 
 Submission format: `id,addicted_label` with a float in `addicted_label`.
 
-**Daily cap: 10** — confirmed 2026-08-10. The CLI printed "9 submissions remaining today"
-after the first submission of the day. This is NOT the usual Playground 5; the brief's
-guess of 5 was wrong. Re-confirm from the CLI line each run.
+**Daily cap: 10** — confirmed twice on 2026-08-10 ("9 submissions remaining today" after
+the 1st, "6 submissions remaining today" after the 4th). This is NOT the usual Playground
+5; the brief's guess of 5 was wrong. Re-confirm from the CLI line each run.
+
+⚠ **`submit` can return `400 CreateSubmission` after a successful 100% upload, and
+nothing registers.** Seen 2026-08-10 alongside the CLI's list endpoints all returning
+400. An identical retry succeeded immediately. **Always confirm with
+`kaggle competitions submissions -v | head -3` rather than trusting the exit status** —
+and check before re-sending, so a retry does not burn a second slot on a submission that
+did land.
 
 ## The data
 
@@ -111,10 +118,22 @@ saved `oof_*.npy` is invalid and the stack becomes dishonest.
 
 ### CV → LB relationship
 
-CV **does not** estimate the LB score; CV **differences** do.
-Measured offset: LB ≈ CV **+0.0013**, because every test prediction averages 5 fold
-models while every OOF prediction comes from one. Two reference points from the public
-record: CV 0.966012 → LB 0.96751, and CV 0.966217 → LB 0.96769.
+CV **does not** estimate the LB score; CV **differences** do — and even those transfer at
+well under 1:1.
+
+The offset is **not a constant, and it shrinks as CV rises.** Four of our own points:
+
+| entry | CV | LB | offset |
+|---|---|---|---|
+| `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 |
+| `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 |
+| `stack_pub86_hybrid` | 0.969678 | 0.97080 | +0.001122 |
+| `stack_pub149_hybrid` | 0.970018 | 0.97099 | **+0.000972** |
+
+The one gain large enough to measure, +0.000340 CV, transferred as +0.00019 LB — about
+**56% pass-through**. Everything smaller than ~0.0001 CV has transferred at a rate of
+**zero**. So: **do not quote "CV + 0.0012" as an LB estimate**, and do not expect a CV
+gain to arrive intact.
 
 Trust CV for **ranking** decisions. Never as a leaderboard estimate.
 
@@ -171,16 +190,67 @@ kaggle datasets download -d dariushafshar/s6e8-golem-oof-library         -p data
   this as mildly optimistic and uncorrected. Keep them separable from the rest so their
   effect can be isolated — an optimistic OOF earns undeserved stacker weight.
 - `dariushafshar/s6e8-measured-findings-pack` — folds, drift, noise-floor scenarios.
-- Others not yet pulled: `najiama/predicting-smartphone-addiction-oof-submission-csv`,
-  `beicicc/*` (many "Fixed-Schedule" artifacts), `boltuzamaki/s6e8-oof-prediction-library`,
-  `mohankrishnathalla/s6e8-{xgb,cat-mlp,lgb-dart}-oof`.
 
-**Always check the split before stacking anyone's OOF.** Most published S6E8 OOF arrays
-use a different fold count or average over seeds, so their OOF mixes partitions — they
-look healthy and will quietly inflate a blend built on the 5-fold split. Sanity checks:
-an OOF AUC above ~0.972 is not credible here; and the CV→LB offset must stay near
-**+0.0012** (see `LEADERBOARD.md`). If a stack's LB comes in far below its CV + 0.0012,
-something in the member set is leaking.
+### The rest of the pool — pulled 2026-08-10, +63 members, worth +0.000340 CV
+
+Three runs walked past the "not yet pulled" list above while doing combiner work. They
+were worth **twenty times** everything the combiner work produced. `agent/stack.py --ext2`
+loads them from `data/ext_members2/`; import + vetting is
+`experiments/import_ext2.py` and `experiments/import_beicicc.py`.
+
+- **`boltuzamaki/s6e8-oof-prediction-library`** — **47 members**, an entire independent
+  pipeline, `oof_predictions.parquet` + `test_predictions.parquet` + `stream_index.csv`.
+  Function classes present nowhere else: **TabR** (retrieval), **EBM** (a GAM), GANDALF,
+  DCNv2, FT-Transformer, DeepFM, and **six seeds of a second Lookup-Transformer**
+  (`lookup_v2_*`, 0.96830–0.96834). Plus ~20 XGB/LGBM/CatBoost. All 47 reproduce their
+  published OOF AUC to <5e-5.
+- **`beicicc/s6e8-*-artifacts`** — **10 separate small datasets**, 12 usable members
+  (fixed-schedule LGBM / XGB / CatBoost / RealMLP / Lookup, 0.9625–0.9683). Uniquely,
+  **every one ships `fold_id.npy`** — the fold assignment itself. Exclude their
+  `sixmember_*` arrays: those are level-2 stack outputs and the author discloses the
+  optimism himself.
+- **`mohankrishnathalla/s6e8-{xgb,cat-mlp,lgb-dart}-oof`** — 4 members (`xgb`, `cat`,
+  `nn`, `lgb`); `nn` is decorrelated at maxcorr 0.940.
+- **`najiama/predicting-smartphone-addiction-oof-submission-csv`** — ⚠ **do not import.**
+  `01..05` are byte-identical to `naji01..05` already in the 74-lib (maxcorr 1.000000);
+  `07..17_blend` are the author's own blends whose weights are fit on the full OOF, so
+  their published OOF is in-sample (AUC 0.9692–0.9697, i.e. at whole-stack level).
+- Submission-only, no OOF, so not honestly weightable:
+  `anhadmahajan06/ps-s6e8predicting-smartphone-addiction-submission`.
+
+### Enumerating the pool — the CLI list endpoints are unreliable
+
+As of 2026-08-10 the Kaggle CLI's RPC endpoints return `400` for **all** list operations
+(`ListDatasets`, `ListKernels`, `ListCompetitions`) while downloads-by-ref,
+`competitions submissions -v` and `competitions leaderboard -d` keep working. The
+**legacy REST endpoint still works and needs no authentication**:
+
+```bash
+curl -s "https://www.kaggle.com/api/v1/datasets/list?search=s6e8&pageSize=100&page=1"
+```
+
+Run it with several search terms and union the `ref` fields — that is how the 14 missed
+libraries were found. New ones appeared as recently as 2026-08-10, so re-run it every run.
+
+### Always verify the split before stacking anyone's OOF
+
+Most published S6E8 OOF arrays use a different fold count or average over seeds. Sanity
+checks, weakest to strongest:
+
+1. **Published-vs-computed OOF AUC.** Cheap, but proves only that the rows are in the
+   right ORDER. It says nothing about which partition was used.
+2. **Credibility.** An OOF AUC above ~0.9720 is not achievable here — the best honest
+   single member across five independent libraries is 0.96881, and our 149-member stack
+   only reaches 0.97002. Anything higher is early stopping on the validation fold, an
+   in-sample blend, or a mixed partition.
+3. **The fold-id gate — exact, when the library ships `fold_id.npy`.** Compare the induced
+   **partition**, not the integers: fold *labels* are permuted between authors, so raw
+   agreement reads 0.0000 while the partition is identical. Cross-tabulate their fold id
+   against ours and require every one of their folds to map wholly into one of ours.
+   All 10 beicicc libraries pass. See `experiments/import_beicicc.py:fold_gate`.
+
+Do not use the CV→LB offset as a leak detector any more — it is not constant (see
+"CV → LB relationship" above), so a low offset no longer implies a leaking member.
 
 ### Best single models by family (the bar to beat)
 
@@ -281,20 +351,47 @@ Worth ~+0.00002 CV and **0.00000 LB**. Fix it because it is wrong, not because i
 Per-fold AUC by missing-column count: 0.9764 / 0.9740 / 0.9651 / 0.9540 / 0.9280 for
 0/1/2/3/4+. Difficulty varies enormously by regime; the optimal *blend* does not.
 
-## Why nothing moves any more
+## What actually moves the stack — corrected 2026-08-10
 
-Members correlate 0.987–0.999. At that correlation the blend's ranking is pinned by the
-consensus and no function of the existing columns will move it. Measured, across two days:
+An earlier version of this section was titled "Why nothing moves any more" and concluded
+the stack was saturated. **That was wrong.** It generalised from three *small* member
+additions to a claim about the data. Kept here in corrected form because the error is
+more instructive than the fact.
 
-| lever | gain |
-|---|---|
-| 12 more members, two independent authors | +0.000016 |
-| a new function class (factorization machines) | +0.000005 |
-| a new channel inside a strong new GBDT | +0.000002 |
-| repairing a real train/test defect in the meta-features | +0.000018 CV, −0.00001 LB |
-| **gap from our 0.97080 to #1's 0.97120** | **+0.00039** |
+| lever | gain | when |
+|---|---|---|
+| a new channel inside a strong new GBDT | +0.000002 | |
+| a new function class (factorization machines), 5 members | +0.000005 | |
+| 12 more members, two independent authors | +0.000016 | |
+| repairing a real train/test defect in the meta-features | +0.000018 CV, −0.00001 LB | |
+| **63 members from three further independent pipelines** | **+0.000340 CV, +0.00019 LB** | slot 3 |
 
-The only member that still earns its keep is a **decorrelated** one. `lookup` has max
-correlation 0.9869 against every other member, ranks 5th solo, and takes the **largest**
-stacker coefficient (0.2127). Judge candidates on correlation to the pack first, solo AUC
-second.
+Everything above the last row is a **group of 2–12 members from authors whose feature
+engineering already overlapped the 74-model library.** None of them tested a large set
+from a separate pipeline. Sample size was mistaken for saturation.
+
+### Attribution of the +0.000340, paired 50/50 on identical rows
+
+| group added to the 86-member base | n | paired delta | per member |
+|---|---|---|---|
+| `decorr` — maxcorr < 0.97 (extratrees 0.811, gandalf, dcnv2, ft-transformer, ebm, tabr, deepfm, lookup_v3, neural, mkt_nn) | 10 | +0.000085 | 8.5e-6 |
+| `lookup2` — six seeds of a second Lookup-Transformer | 6 | +0.000103 | 17e-6 |
+| `bei` — fold-id-verified fixed-schedule models | 12 | +0.000103 | 8.6e-6 |
+| `rest` — ordinary XGB/LGBM/CatBoost | 35 | +0.000201 | 5.7e-6 |
+| **all 63 together** | 63 | **+0.000322** | 5.1e-6 |
+
+Two things to carry forward, and they pull in different directions:
+
+1. **Decorrelation is real.** `bolt_extratrees_support` sits at maxcorr **0.811** against
+   all 148 others, where the previous diversity prize (`lookup`) was 0.9869. Decorrelated
+   members are worth ~1.5× more each than GBDT-shaped ones, and a second *independent
+   implementation* of the same idea (`lookup2`) is worth more per member than anything.
+2. **But the largest single share came from `rest`** — 35 ordinary GBDTs, the exact thing
+   the journal had twice concluded was worthless. **Whose pipeline built a member is a
+   source of decorrelation that the family label does not capture.** An independent
+   author's imputation, encoding and feature decisions differ even when the model class
+   is identical.
+
+Judge candidates on correlation to the pack first and solo AUC second — but do not
+*reject* a group for being GBDT-shaped if it comes from a pipeline you do not already
+hold. Measure it.

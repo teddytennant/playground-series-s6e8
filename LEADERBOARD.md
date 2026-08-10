@@ -112,3 +112,50 @@ i.e. the last three CV gains (+1.9e-5, +1.8e-5) transferred to the LB at a rate 
 Top of the board barely moves day to day (#1 unchanged since 2026-08-06), but ranks 2–10
 churn constantly, which is what a crowd selecting on a public slice looks like. Rank 2 has
 51 submissions, rank 3 has 58. Expect private-LB reshuffling in that band.
+
+---
+
+## 2026-08-10, after slot 3 — rank 158 → 18 of 1366
+
+`stack_pub149_hybrid` scored **0.97099** (CV 0.970018), up from a three-way tie at
+0.97080/0.97081/0.97081. First real LB movement in three days.
+
+| band | score | note |
+|---|---|---|
+| #1 MILANFX | 0.97120 | unchanged since 2026-08-06, 11 submissions |
+| #5 | 0.97110 | |
+| #10 | 0.97106 | ~gold cutoff |
+| #15 | 0.97101 | |
+| **#18 us** | **0.97099** | 4 submissions |
+| #25 | 0.97096 | |
+| #40 | 0.97093 | |
+| ~#68 | ~0.97093 | silver cutoff (top 5%) |
+| #136 | 0.97084 | bronze cutoff (top 10%) |
+
+We are **+0.00007 from rank 10**. The board is extremely dense: 0.97093 → 0.97106 spans
+ranks 40 → 10, so a gain of one ten-thousandth is worth ~30 places up here.
+
+### CV → LB offset, four points — it is NOT constant
+
+| entry | CV | LB | offset |
+|---|---|---|---|
+| `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 |
+| `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 |
+| `stack_pub86_hybrid` | 0.969678 | 0.97080 | +0.001122 |
+| **`stack_pub149_hybrid`** | **0.970018** | **0.97099** | **+0.000972** |
+
+The offset falls monotonically as CV rises. The +0.000340 CV gain arrived as +0.00019 LB
+(**56% pass-through**); the three gains before it, all ≤2e-5, arrived as **zero**. Stop
+treating "CV + 0.0012" as an LB estimate — but note the offset is also no longer usable
+as a leak detector, which is what `RESEARCH.md` previously suggested it for.
+
+### Note on the overfitting warning
+
+Our four entries now rank identically on CV and on public LB, so for the first time there
+is no selection conflict. `stack_pub149_hybrid` leads on both. Nothing in this run was
+tuned against LB feedback: the member set was chosen by paired CV on frozen folds, and
+the four excluded groups (`njm_*` dups, `njm_*_blend`, `sixmember_*`, exact duplicates)
+were excluded on mechanism *before* any CV was consulted.
+
+Ranks 2–10 still churn daily and rank 2/3 have 55/51 submissions, so expect private-LB
+reshuffling in that band. Ours is a 4-submission position built on CV.
