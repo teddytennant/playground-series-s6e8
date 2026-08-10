@@ -52,6 +52,63 @@ def to_logit(p, clip=30.0):
     return np.clip(np.log(p / (1 - p)), -clip, clip)
 
 
+def transform(O, T, kind="logit"):
+    """Map raw member outputs onto the scale the stacker sees.
+
+    `logit` is the original and it has a defect. The clip pins everything at or outside
+    the unit interval onto a single value, and that is not a corner case here: naji03 and
+    naji05, the library's two best members at OOF AUC 0.9688, emit values from -0.013 to
+    1.022, and 5.79% of their OOF rows land on the plateau against only 0.92% of their
+    test rows. Six TabM nets plus rf/et share the asymmetry (rf: 14.96% vs 8.05%). So the
+    stacker fits coefficients against an input whose top tail is a flat constant and then
+    applies them to a test input where that tail is resolved. Our own honest 5-fold model
+    sits at sd_test/sd_oof = 1.0018, which is what an unaffected member looks like; the
+    twelve affected ones run down to 0.679.
+
+    Both repairs are monotone per member -- no member's own ranking moves, so no member's
+    solo AUC changes -- and apply the SAME map to OOF and test, so the two sides land on a
+    common scale by construction.
+    """
+    if kind == "logit":
+        return to_logit(O), to_logit(T)
+    if kind == "rankraw":
+        # No free parameter. Ties are averaged, not broken: rf and et genuinely emit
+        # p == 1.0 for 8-15% of rows, and argsort would order those ties arbitrarily,
+        # injecting noise while appearing to remove it.
+        from scipy.special import ndtri
+        from scipy.stats import rankdata
+        B, Bt = np.empty_like(O), np.empty_like(T)
+        for j in range(O.shape[1]):
+            B[:, j] = ndtri((rankdata(O[:, j]) - 0.5) / len(O))
+            Bt[:, j] = ndtri((rankdata(T[:, j]) - 0.5) / len(T))
+        return B, Bt
+    if kind == "hybrid":
+        # Only the members that actually clip get repaired. The other 74 sit at
+        # sd_test/sd_oof = 1.000 with 0% of rows outside the unit interval, so the logit
+        # scale is already doing the right thing for them and rank-gauss would only cost
+        # them their calibration shape for no gain.
+        B, Bt = to_logit(O), to_logit(T)
+        bad = (((O <= 0) | (O >= 1)).any(0) | ((T <= 0) | (T >= 1)).any(0))
+        Rb, Rbt = transform(O[:, bad], T[:, bad], "rankraw")
+        # put the repaired columns back on a logit-like scale so the meta-feature
+        # magnitudes stay comparable (immaterial to the fit, helps lbfgs condition).
+        # Capture the scale BEFORE overwriting, and use the same one for both sides.
+        s = B[:, bad].std(0)
+        B[:, bad] = Rb * s
+        Bt[:, bad] = Rbt * s
+        print(f"  hybrid: repaired {bad.sum()} of {O.shape[1]} members")
+        return B, Bt
+    if kind == "rescale":
+        # Keeps the logit shape the 0.9697 stack demonstrably likes and removes only the
+        # clipping: rescale each member onto (d, 1-d) over the range it actually occupies
+        # across both splits, then take the logit. Nothing is pinned.
+        d = 1e-4
+        lo, hi = np.minimum(O.min(0), T.min(0)), np.maximum(O.max(0), T.max(0))
+        rng = (hi - lo) / (1 - 2 * d)
+        return to_logit((O - lo) / rng + d), to_logit((T - lo) / rng + d)
+    raise SystemExit(f"unknown transform {kind}")
+
+
 def load_members(y, n_test, extra_dirs=(), drop=()):
     """Load every oof_*/test_* pair from the library plus our own oof dir."""
     names, oofs, tests = [], [], []
@@ -143,6 +200,8 @@ def main():
     ap.add_argument("--drop", default=",".join(DEFAULT_DROP))
     ap.add_argument("--ext", action="store_true",
                     help="also load data/ext_members (FM + golem libraries)")
+    ap.add_argument("--transform", default="logit",
+                    choices=["logit", "rankraw", "rescale", "hybrid"])
     a = ap.parse_args()
 
     tr, te = load_raw()
@@ -155,7 +214,10 @@ def main():
     if a.verify:
         verify(names, O, y)
 
-    Z, Zt = to_logit(O), to_logit(T)
+    Z, Zt = transform(O, T, a.transform)
+    print(f"transform={a.transform}  sd_test/sd_oof: "
+          f"min {(Zt.std(0)/Z.std(0)).min():.4f} med {np.median(Zt.std(0)/Z.std(0)):.4f} "
+          f"max {(Zt.std(0)/Z.std(0)).max():.4f}")
 
     # --- honest comparison of combiners: paired 50/50 splits ---
     rows = []

@@ -227,3 +227,74 @@ lattice features is genuinely unexplored ground.
   catboost, pyarrow.
 - Per-fold design matrices are cached to `cache/` by `experiments/build_cache.py` so
   hyperparameter trials cost only LightGBM time.
+
+## Member arrays are NOT all probabilities — check before stacking
+
+`agent/stack.py --transform` exists because `to_logit`'s clip into `[1e-15, 1-1e-15]`
+silently destroys the tails of several members, and destroys them **asymmetrically between
+OOF and test**.
+
+- `naji03`, `naji05` (the library's two best, OOF 0.96881) emit values from **−0.013 to
+  1.022**. They are not probabilities — most likely blends or regression-objective outputs.
+- `rf` (14.96% of OOF rows), `et` (7.79%), `tabm_imp` (5.03%), `pub_tabm` (8.25%) and four
+  more TabM nets emit exactly `1.0` on 3–15% of rows.
+- Test arrays clip roughly **a third as often** as OOF arrays (naji03: 5.79% → 0.92%),
+  because they are averages.
+
+**The diagnostic**, one line and worth running against any new member library:
+
+```python
+sd_ratio = to_logit(test_j).std() / to_logit(oof_j).std()   # should be 1.000
+```
+
+Control: our own honest 5-fold `lgbm_tuned_lat_frac` sits at **1.0018**. Ordinary 5-fold
+averaging does not compress a well-behaved member. Anything at 0.68–0.93 is a broken
+transform, not a property of the model. Pre-repair spread across 86 members: 0.679–1.009.
+
+Transforms available (all monotone per member, same map on OOF and test, so no member's
+solo AUC changes):
+
+| `--transform` | cross-fitted OOF | note |
+|---|---|---|
+| `logit` | 0.969660 | original; clips |
+| `hybrid` | 0.969678 | rank-gauss on the 29 clipping members only |
+| `rankraw` | 0.969684 | rank-gauss on all, ties averaged |
+| `rescale` | 0.969686 | min-max over both splits then logit; only *partially* equalises |
+
+Worth ~+0.00002 CV and **0.00000 LB**. Fix it because it is wrong, not because it scores.
+
+## More things that do NOT work — measured here, do not re-spend runs
+
+| idea | delta | note |
+|---|---|---|
+| CatBoost meta-model on logits + regime | −0.00020 | plateaus at 0.968866; better behaved than LGBM but still short |
+| LightGBM meta-model on logits + regime | −0.00020 | decays monotonically from the first checkpoint |
+| tree meta on (honest linear stack + regime) | −0.00027 | |
+| rank-averaging any tree meta into the linear stack | ≤ +0.000003 | best blend weight is w ≈ 0 |
+| **per-bucket coefficients by missingness** | −0.000026 | |
+| **per-bucket isotonic on the global stack** | −0.000085, 5/5 folds | monotone, so this is a *pure* cross-regime test |
+| per-member cubic recalibration (`lin_poly`) | −0.000032 | |
+| rank-gauss on the clipped logits (`lin_rank`) | −0.000014 | rank the RAW values instead — ties matter |
+
+**The linear logit stack is the right combiner. Stop looking for a better one.**
+
+Per-fold AUC by missing-column count: 0.9764 / 0.9740 / 0.9651 / 0.9540 / 0.9280 for
+0/1/2/3/4+. Difficulty varies enormously by regime; the optimal *blend* does not.
+
+## Why nothing moves any more
+
+Members correlate 0.987–0.999. At that correlation the blend's ranking is pinned by the
+consensus and no function of the existing columns will move it. Measured, across two days:
+
+| lever | gain |
+|---|---|
+| 12 more members, two independent authors | +0.000016 |
+| a new function class (factorization machines) | +0.000005 |
+| a new channel inside a strong new GBDT | +0.000002 |
+| repairing a real train/test defect in the meta-features | +0.000018 CV, −0.00001 LB |
+| **gap from our 0.97080 to #1's 0.97120** | **+0.00039** |
+
+The only member that still earns its keep is a **decorrelated** one. `lookup` has max
+correlation 0.9869 against every other member, ranks 5th solo, and takes the **largest**
+stacker coefficient (0.2127). Judge candidates on correlation to the pack first, solo AUC
+second.

@@ -79,3 +79,36 @@ below the +0.0013 quoted in the public record.
 resolve differences at that scale. This is the empirical justification for selecting on
 CV: sub-0.0001 changes are simply not measurable on the LB, so any apparent LB movement at
 that scale is noise being read as signal.
+
+## 2026-08-10, end of slot 2
+
+| | |
+|---|---|
+| teams | 1,356 (up from 1,331 this morning) |
+| our best public | **0.97081** (`stack_pub74_logit`, `stack_pub88_mine_logit`) |
+| today's slot-2 entry | 0.97080 (`stack_pub86_hybrid`) — no movement |
+| our rank | ~158/1356, top 11.7% |
+| bronze cutoff (top 10%) | **0.97084** at rank ~136 |
+| gap to bronze | **+0.00004** |
+| #1 (MILANFX) | 0.97120 |
+| gap to #1 | +0.00040 |
+
+Three submissions now sit at 0.97080/0.97081/0.97081 — a **public tie carrying no
+information**. Do not let it drive the final pick; select on CV, where
+`stack_pub86_hybrid` leads at 0.969678.
+
+### CV → LB offset, three points
+
+| entry | CV | LB | offset |
+|---|---|---|---|
+| `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 |
+| `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 |
+| `stack_pub86_hybrid` | 0.969678 | 0.97080 | +0.001122 |
+
+The offset is stable at **+0.00112 to +0.00117** and drifting *down* as CV goes up —
+i.e. the last three CV gains (+1.9e-5, +1.8e-5) transferred to the LB at a rate of
+**zero**. Anything smaller than ~0.0001 CV is not worth a slot.
+
+Top of the board barely moves day to day (#1 unchanged since 2026-08-06), but ranks 2–10
+churn constantly, which is what a crowd selecting on a public slice looks like. Rank 2 has
+51 submissions, rank 3 has 58. Expect private-LB reshuffling in that band.

@@ -7,3 +7,5 @@ submissions/*.npy
 logs_*.txt
 .venv/
 __pycache__/
+meta_preds/
+lb_tmp/

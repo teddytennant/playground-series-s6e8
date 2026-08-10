@@ -261,3 +261,168 @@ mode to avoid. Our CV 0.969660 is honest and our offset is measured twice.
    regime-aware stacking at only +0.00004, so keep expectations low and judge it paired.
 4. When choosing final submissions at the deadline: **select on CV**. Both entries so far
    sit at 0.97081 public; do not let public-LB ties or micro-differences drive the pick.
+
+---
+
+## 2026-08-10 — slot 2 of 10 — angle: CatBoost
+
+**Submitted 1 (3 of 10 used today, 7 remaining). Everything this run measured negative,
+including the submission. That is the finding.**
+
+### Angle: redirected, deliberately
+
+The brief's angle was "CatBoost: tune and compare on identical folds." Yesterday's entry
+already closes that as a *member*: a new function class bought +0.000005 and a new channel
+inside a strong new GBDT bought +0.000002, and the library's best CatBoost (`latwide_cat`
+0.96718) is behind its LightGBM and XGBoost. Training a 87th GBDT was not going to be
+worth a slot.
+
+So I kept CatBoost and moved it up a level: **CatBoost as the meta-model**, which is also
+the journal's own priority #3 ("non-linear meta-model — untested by us"). Same family, same
+frozen folds, a question we had not answered.
+
+### 1. Every non-linear meta-model loses to the linear logit stack
+
+Fold 0, all against the identical 86-member matrix, `lin` = the current stack at 0.969070.
+
+| meta-model | fold-0 AUC | vs lin |
+|---|---|---|
+| **`lin` — L2 logistic on the logits** | **0.969070** | — |
+| `lin_rank` (rank-gauss on logits) | 0.969056 | −0.000014 |
+| `lin_regime` (separate coefficients per missingness bucket) | 0.969044 | −0.000026 |
+| `lin_poly` (per-member cubic recalibration) | 0.969038 | −0.000032 |
+| `cat_zr` — **CatBoost, logits + regime**, best of 8 checkpoints | 0.968866 | −0.000204 |
+| `lgb_zr` — LightGBM, logits + regime, best checkpoint | 0.968866 | −0.000204 |
+| `lgb_resid` (tree on the honest linear stack + regime) | 0.968804 | −0.000266 |
+
+The angle's answer: **CatBoost peaks at 0.968866 and plateaus** — better behaved than
+LightGBM, which decayed monotonically from its very first checkpoint (0.968866 at 300 →
+0.968009 at 3000), exactly as oblivious trees should. It is still 0.0002 short. Rank
+-averaging the tree meta into the linear one recovers nothing: the best blend weight over
+every checkpoint of every tree variant was **w ≈ 0, gain ≤ +0.000003**.
+
+A tree cannot beat an additive-in-logit combiner at combining near-collinear logits, and
+handing it order statistics (`z_mean/std/min/max/med`) and the whole regime block does not
+change that.
+
+### 2. The regime hypothesis is dead — three independent tests, all negative
+
+Per-fold AUC really does collapse across missingness: 0.9764 / 0.9740 / 0.9651 / 0.9540 /
+0.9280 for 0,1,2,3,4+ missing columns. The tempting inference is that the members'
+*relative* strengths move too, and a global weight vector cannot exploit that.
+
+They do not.
+
+| test | what it relaxes | result |
+|---|---|---|
+| `lin_regime` | separate coefficient vector per bucket | −0.000026 (fold 0) |
+| `lgb_resid` | tree correction on (linear stack, regime) | −0.000266 (fold 0) |
+| `iso_regime` | per-bucket isotonic on the global stack | **−0.000085 full OOF, 5/5 folds negative** |
+
+`iso_regime` is the clean one and worth keeping in mind: isotonic is monotone, so
+within-bucket ranking is unchanged *by construction* and within-bucket AUC cannot move at
+all. Every point it moved was pure cross-bucket regrading. It lost on all five folds. The
+global stack's cross-regime calibration is already better than a bucket-wise refit of it.
+
+**Do not re-open regime-aware stacking.** Difficulty varies enormously by regime; the
+optimal blend does not.
+
+### 3. A real defect in the stacker's input transform — found, quantified, repaired, and it did not matter
+
+Chasing why the meta-models all failed, I compared each member's OOF logit distribution
+against its test logit distribution. They should match: train and test come from the same
+generator, and the covariates agree to 4 decimals on every column.
+
+For 76 of 86 members `sd_test/sd_oof` sits at 1.000. For the rest it does not:
+
+| member | OOF AUC | sd_test/sd_oof | % OOF rows clipped | % test rows clipped |
+|---|---|---|---|---|
+| `naji03`, `naji05` | **0.9688 (library's best)** | 0.679 | 5.79 | 0.92 |
+| `et` | 0.9411 | 0.699 | 7.79 | 2.49 |
+| `tabm_imp` | 0.9681 | 0.749 | 5.03 | 0.69 |
+| `rf` | 0.9433 | 0.795 | 14.96 | 8.05 |
+| `pub_tabm` + 5 more TabM | ~0.968 | 0.83–0.93 | 2.7–8.3 | 1.1–4.6 |
+| `lgbm_tuned_lat_frac` (**ours, honest 5-fold**) | 0.9678 | **1.0018** | 0 | 0 |
+| `lookup` | 0.9685 | 0.9941 | 0 | 0 |
+
+Cause: `to_logit` clips `p` into `[1e-15, 1-1e-15]`. **`naji03`/`naji05` are not
+probability arrays** — they run from −0.013 to 1.022 — and `rf`/`et`/the TabM nets emit
+exactly 1.0 on 3–15% of rows. Everything at or past the boundary collapses onto a single
+value of ±30. The stacker therefore fits its coefficients against an input whose top tail
+is a flat plateau, then applies them to a test input where that tail is *resolved*, because
+the test arrays are averages and clip roughly a third as often.
+
+Our own model at ratio 1.0018 is the control that rules out the innocent explanation:
+ordinary 5-fold averaging does **not** compress a well-behaved member.
+
+I checked the worrying alternative — that `naji03`/`naji05`'s OOF is optimistic rather than
+clipped, which would call for *down*-weighting them. Against it: they show no early-stopping
+disclosure (unlike `golem_a`/`golem_f`), and their 0.96881 is barely above their own
+siblings `naji02`/`naji04` at 0.96863/0.96874, which sit at ratio 1.004. A leaking member
+stands above its siblings; these do not.
+
+Repair (`agent/stack.py --transform`): monotone per member, same map applied to OOF and
+test, so no member's own ranking moves and both sides land on a common scale.
+
+| transform | cross-fitted OOF | paired per-fold delta vs `logit` |
+|---|---|---|
+| `logit` (the shipped one) | 0.969660 | — |
+| `hybrid` (rank-gauss, affected members only) | 0.969678 | +0.000018 |
+| `rankraw` (rank-gauss, all members) | 0.969684 | +0.000023, 4/5 folds |
+| `rescale` (min-max then logit, no clip) | 0.969686 | +0.000027, 4/5 folds |
+
+Post-repair the ratio spread went from 0.679–1.009 to 0.955–1.020, median 1.0000.
+
+**Submitted `hybrid`** — it touches only the 29 members that actually clip and leaves the
+other 57 on the logit scale they demonstrably suit. Chosen over `rankraw`/`rescale` on
+mechanism, not CV: all three are within 8e-6 of each other, which CV cannot resolve.
+
+| entry | CV | public LB | offset |
+|---|---|---|---|
+| `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 |
+| `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 |
+| **`stack_pub86_hybrid`** | **0.969678** | **0.97080** | **+0.001122** |
+
+**CV +0.000018, LB −0.00001. No movement.** Spearman vs the previous submission was 0.9986,
+so the repair genuinely did reallocate weight — it just did not change the ranking.
+
+### The lesson, and it is the same one from a third direction
+
+Yesterday: adding members does nothing (+1.6e-5 for 12 members from two authors).
+Today: **reweighting members does nothing either.** A non-linear meta-model, a
+regime-conditional one, a per-member recalibration, and a genuine repair of a real
+train/test defect in the meta-features all land inside ±0.0003 of the plain linear stack,
+and the one I shipped moved the LB by −0.00001.
+
+The members correlate 0.987–0.999. At that correlation the blend's ranking is pinned by
+the consensus, and *no* function of the existing 86 columns will move it. The gap to #1
+(0.97120 vs our 0.97080) is 0.0004 — twenty times everything two full days of combiner
+work has produced.
+
+So the remaining levers are, in order:
+1. **A member that is genuinely decorrelated from the pack**, not a better one. `lookup`
+   (max correlation 0.9869 vs everything else) still takes the largest stacker coefficient
+   at 0.2127 despite ranking only 5th solo. That is the shape of what is missing.
+2. Accepting that 0.97080 with an honestly-selected CV is a good private-LB position, and
+   that much of the 0.0004 above us is 1,356 teams selecting on a public slice.
+
+### Next run
+
+1. **Do not** re-try: any meta-model over the existing members (§1), anything regime-aware
+   (§2), more members from the public pool, LightGBM tuning, original-dataset concat,
+   pseudo-labeling. All measured, all in `RESEARCH.md`.
+2. The only live direction is **a decorrelated function class**, judged on correlation to
+   the pack *before* it is judged on solo AUC. `pub_ryota` ("generator forensics", solo
+   0.9637) already earns a large negative coefficient −0.1042, which is the stacker saying
+   it sees something the others do not. Generator forensics is where the decimal lattice
+   came from and is still the least-worked seam.
+3. At the deadline **select on CV**. Our three entries are 0.97080/0.97081/0.97081 — a
+   3-way public tie that carries no information. `stack_pub86_hybrid` has the best CV
+   (0.969678) and is the only one without a known defect in its inputs.
+
+### Reusable diagnostic worth keeping
+
+`sd(logit(test_j)) / sd(logit(oof_j))` per member, against the control of a model you
+trained yourself. It is one line of numpy and it found a defect in the strongest members of
+a 74-model public library that everyone on this leaderboard is stacking. Ratios were
+0.679–1.009 where they should all have been 1.000.
