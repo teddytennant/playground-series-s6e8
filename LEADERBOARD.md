@@ -364,3 +364,56 @@ has not been passed). Three teams entered the 0.97108–0.97115 band today, so t
 between us and the lead is thickening rather than the lead pulling away. The gap to first
 is 0.00018 — roughly 4x the total CV spread of every candidate this workspace holds, which
 is the honest reason to expect rank movement to come from someone else's slip, not ours.
+
+## 2026-08-11 ~11:00 UTC — 1,410 teams, us rank 13
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97124 |
+| 2 | Don Mani | 0.97115 |
+| 3 | Optimistix | 0.97113 |
+| 4 | Maher el Ouahabi | 0.97113 |
+| 5 | Mahog | 0.97110 |
+| 6 | cstdy | 0.97110 |
+| 7 | Orig_lab | 0.97109 |
+| 8 | midway2333 | 0.97109 |
+| 9 | Utkarsh | 0.97108 |
+| 10 | FunnyBishop | 0.97108 |
+| 11 | AJboos | 0.97108 |
+| 12 | LeTuanM | 0.97107 |
+| **13** | **Teddy Tennant** | **0.97106** |
+| 14 | magp | 0.97106 |
+
+Team count 1,396 → 1,410. MILANFX still unpassed since 2026-08-10 21:01 UTC. Top-10 cutoff
+is 0.97108, two ticks above us.
+
+### ⚠ Correction: "the entire visible leaderboard is inside the noise" is wrong
+
+The slot-6 note above argued that because the *marginal* sd of an AUC estimate is 1.67e-4
+and ranks 1–50 span 3.2e-4, the whole board is a tie displayed as an ordering. **That is the
+unmatched-null mistake, applied to the leaderboard.** Two teams are scored on the *same
+fixed public rows*, so comparing them is a paired comparison and the marginal sd is not the
+relevant scale — the shared slice noise cancels, exactly as it does for our own candidates.
+
+Measured paired sds at a 20% slice (`experiments/cvlb2.py`), using pairs of our own files as
+proxies for how correlated two strong submissions are:
+
+| proxy pair | paired sd @20% |
+|---|---|
+| near-identical (corr ~0.999) | 0.000005–0.000008 |
+| moderately different transforms | **0.000029** |
+
+Taking the looser 2.9e-5 as a cross-team proxy:
+
+- **The 0.00018 gap to MILANFX is ~6 paired sd. That is a real difference, not noise.**
+  Someone is genuinely ahead of us and it is not a display artefact. The slot-6 reading let
+  us off the hook for it.
+- **The 2e-5 gap to the top-10 cutoff is ~0.7 paired sd — that one *is* a coin flip**, and
+  the 0.97106–0.97110 pile-up (ranks 5–14, ten teams inside 4e-5) is genuinely unordered.
+
+So the honest reading inverts the old one: the *local* ordering around us is noise, but the
+*distance to the lead* is not. Closing 1.8e-4 needs something this workspace does not
+currently have — the whole CV spread of all 41 candidates is 4.0e-4, and within the top
+cluster it is 8.6e-5. Blend tweaks cannot get there; a genuinely better member can. The
+seed-averaging result (+138e-6 solo for `xgb_latcat`, journal 2026-08-11 slot 8) is the
+first thing in days pointed the right way.

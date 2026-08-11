@@ -198,6 +198,128 @@ believe is worse.
 Trust CV for **ranking** decisions. Never as a leaderboard estimate, and never let a
 public-LB ordering break a CV tie.
 
+#### ⚠ The top-cluster scatter is NOT noise — it is the transform. Measured 2026-08-11
+
+Both statements above ("the offset scatters with no trend", "the slice cannot resolve
+below ~1e-4") are half right, and the half that is wrong is the half that matters for the
+deadline pick. `experiments/cvlb.py`, `cvlb2.py`, `logit_bias.py`, `predict_lb.py`.
+
+**1. Restrict to the operating cluster and the correlation collapses.** Over all 20 scored
+files pearson(CV, LB) is +0.958 — carried entirely by the three 74/88/86-member entries
+30e-5 below everything else. Over the 16 files with CV ≥ 0.96995 it is **+0.148**. Never
+quote a CV↔LB correlation computed across the 0.9696/0.9700 step.
+
+**2. The residual is structured by transform family**, over the ≥150-member sets only
+(the 74/88/86 entries have a systematically larger offset and contaminate any family mean
+by ~4e-5 — excluding them is not optional):
+
+| family | n | mean LB−CV |
+|---|---|---|
+| **logit** | 2 | **+0.001082** |
+| rescale | 2 | +0.001016 |
+| ens4 | 3 | +0.001011 |
+| rankraw | 4 | +0.000999 |
+| hybrid | 3 | +0.000979 |
+
+Differenced **within member set** (removes everything except the transform): `logit −
+hybrid` = +0.000104 (150fx), +0.000091 (150sx), mean **+0.000097**. Controls: `rankraw −
+hybrid` +0.000018 (n=3), `rescale − hybrid` +0.000031 (n=1), `ens4 − hybrid` +0.000022
+(n=2). Exact permutation over family labels on all 20 residuals: **one-sided p = 0.0085**.
+
+So `blend150fx_logit`'s "worst CV of the top nine, second-best LB" is **not** the Rogii
+failure mode offered for free, which is how the section above reads it. It is a replicated
+transform-specific bias with a mechanism: `to_logit` clips at the unit interval, an OOF
+prediction comes from one fold model while a test prediction is a 5-fold average and is
+less extreme, so more OOF cells land on the plateau — the logit stack is fit and CV-scored
+on the damaged side and predicts on the clean side. Its CV understates its test AUC.
+
+**Mechanism only partially confirmed** — census at 161 members (`logit_bias.py --census`,
+`experiments/clip_census.csv`): 49 members put ≥1 cell on the plateau but only **~9 are
+asymmetric** (naji03 5.79%/0.92% = 6.3×, et 3.1×, bolt_extratrees 2.5×, rf 1.9×, tabm ~1.8×).
+The 16 heaviest (bolt_lookup_v2/v3, fm*, bolt_deepfm_exact) are pinned at 91–94% on **both**
+sides, ratio 1.00. Aggregate OOF 9.884% of cells vs test 9.531% — 0.35pp. `sd_test/sd_oof`
+is ~1.00 for all of them; **the old note's "ratios down to 0.679" does not reproduce at 161
+members.** Those 16 symmetric near-constant columns are a competing explanation for logit's
+low CV (genuine information loss, which would predict a low test AUC too) — but symmetric
+loss cannot produce the displacement, so the asymmetry has real force.
+
+**3. Consequence — the drop-logit / `h3` decision is not established.** `h3` (drop logit
+from the 4-transform ensemble) beats `ens4` by **+5e-6** on cross-fitted OOF, and four
+"independent instruments" agree (paired 50/50, row bootstrap, 8 resampled fold splits,
+exhaustive subset enumeration with 7/7). **All four are computed on OOF and therefore share
+this bias — four instruments on one biased measurement is one measurement.** Propagated
+with the mix-gap estimator (a mix's gap = mean of its components' gaps; validated on 150fx
+where all four components *and* the mix are scored, error −7e-6):
+
+| quantity | value |
+|---|---|
+| estimated `h3` gap | +0.000998 |
+| estimated `ens4` gap | +0.001019 |
+| **ens4 − h3 in the gap** (favours ens4 on test) | **+0.000021** |
+| h3 − ens4 in CV (favours h3 on OOF) | +0.000005 |
+
+The bias is **4.2× the margin it would overturn, in the opposite direction**; the
+estimator's own error is 32% of the effect, so the sign is informative and the magnitude is
+not. The subset enumeration's 7/7 is not extra evidence: a ~2.4e-5 bias at ¼ weight produces
+exactly that pattern regardless of whether logit helps on test, and the effects it measured
+were 3e-6 to 12e-6.
+
+**Standing position: `h3` and `ens4` are not separable. Do not claim either is better, and
+do not resolve it on the public LB.** Resolving it needs a third within-set replication of
+the `logit − hybrid` displacement (a 9.7e-5 effect, which the slice *does* resolve) — not an
+LB reading of the 5e-6 h3/ens4 contrast, which it does not.
+
+#### ⚠ "The public slice cannot resolve differences below ~1e-4" — the wrong null
+
+That estimate came from bootstrapping **one** file's AUC at the slice's size: sd 5.4e-4 at
+20% of 296,302 rows, implying nothing below 1.5e-3 is resolvable. **The public slice is
+fixed**: both candidates are scored on identical rows and correlate ~0.999, so the shared
+slice noise cancels. Bootstrap the **paired difference** instead (`cvlb2.py`):
+
+| pair | CV gap | paired sd @20% | paired sd @50% | P(flip) @20% |
+|---|---|---|---|---|
+| blend158_h3 vs blend156 | +0.000007 | 0.000008 | 0.000005 | 20.0% |
+| blend158_h3 vs blend156_h3 | +0.000002 | 0.000005 | 0.000003 | 31.0% |
+| blend158_h3 vs blend150fx_logit | +0.000098 | 0.000029 | 0.000018 | 0.0% |
+| blend156 vs stack_pub74_logit | +0.000400 | 0.000062 | 0.000037 | 0.0% |
+
+The paired sd is **~60× smaller** than the unpaired estimate. The LB resolves a 1e-4 gap
+perfectly and gives an ~80%-reliable bit on a 7e-6 gap. It is informative at our margins —
+just not authoritative, and the pair-agreement table shows where it fails: pairs separated
+by 5e-5–1e-4 of CV are ordered correctly only **32%** of the time (8 agree / 17 disagree),
+because that band is exactly where the logit files sit; pairs above 1e-4 are **51/51**.
+
+**GENERAL RULE, third time this workspace has been caught by it.** The other two were the
+chi2/df null (unmatched on K and cell density) and the residual-booster's permuted-feature
+null (permuted features cannot reconstruct z, so it measured a different experiment). *Any
+null here must be matched on everything except the thing being tested.* For a two-file
+comparison on a fixed slice, that means pairing on the slice.
+
+#### Kaggle accepts values outside [0,1] — confirmed, the metric is rank-only
+
+24 of the queued files hold raw logits, range down to −17.9 / up to +17.9.
+`blend150fx_logit` has range [−8.49, +17.02] and scored **0.97103**. So no clipping or
+sigmoid step is needed before submitting, and adding one would only risk creating ties. Do
+**not** read the mean of one of these files as a base rate.
+
+#### `experiments/audit.py` — run it before spending slots
+
+Gates the whole `submissions/` directory in one pass: column names, id order against
+`test.csv`, finiteness, ranking-distinctness (sha1 of the rank vector — AUC sees nothing
+else), and CV recomputed from each file's own `oof_*.npy` rather than trusted from the
+journal. Writes `experiments/audit_results.csv` with the CV→LB pairing, which `cvlb*.py` and
+`predict_lb.py` read. As of 2026-08-11: 41 files, 41 distinct rankings, correct ids
+everywhere, and **21 files with a CV never submitted — including the four best on CV.** No
+`h3` file of any member count has ever been scored.
+
+#### Seed-averaging a member is worth ~10× a blend tweak
+
+`xgb_latcat` at seeds 13/17/23: solo OOF 0.967696 / 0.967750 / 0.967766, pairwise
+correlation 0.99813–0.99818, **probability mean 0.967904 = +138e-6 over the best single.**
+Two 6,365s runs bought a bigger member-level gain than any blend decision made all week. If
+the stack moves on it, seed twins for the other strong own-built members beat new
+architectures as the next member-side idea.
+
 ### Noise floor
 
 Per-fold spread within one 5-fold run massively overstates uncertainty. The real noise

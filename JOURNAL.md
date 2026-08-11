@@ -1999,3 +1999,293 @@ bootstrap and the 8 resampled fold splits.
 5. If a run needs an angle: the honest one left is **the private-vs-public discipline** —
    re-read the deadline pick against CV only, and resist any public-LB-shaped edit. The
    Rogii failure is the reason this workspace exists in its current form.
+
+---
+
+## 2026-08-11 — slot 8 of 10, ANGLE: consolidation
+
+**No submission: the counter was already at 10 for the UTC day when this run started.**
+Next reset 00:00 UTC 2026-08-12. LB 0.97106, **rank 13 of 1,410**; rank 12 is 0.97107 and
+the top-10 cutoff is 0.97108. MILANFX still leads at 0.97124.
+
+The angle was "re-verify the best pipeline end-to-end, check the CV-to-LB gap across every
+experiment, and make sure the strongest submission is the one selected". The first and
+third parts came out clean. **The second part did not, and it overturns the deadline pick's
+justification.**
+
+### The queue audit: `experiments/audit.py` (new)
+
+41 candidate files in `submissions/`, audited for column names, id order against
+`test.csv`, finiteness, range, ranking-distinctness (sha1 of the rank vector, because AUC
+sees nothing else) and recomputed cross-fitted CV from each file's own `oof_*.npy`.
+
+- **296,302 ids, correct order, in every one of the 41 files.** No id-set or id-order
+  defects anywhere.
+- **41 distinct rankings out of 41 files.** No accidental duplicate is sitting in the
+  queue waiting to waste a slot.
+- 24 files carry raw logits, range down to −17.9 and up to +17.9. **This is fine and now
+  confirmed empirically**: `blend150fx_logit` has range [−8.49, +17.02] and scored 0.97103.
+  Kaggle's scorer here accepts values outside [0,1], so no clipping step is needed and
+  adding one would only risk creating ties. My own audit flagged these as "range" defects;
+  that flag is a false positive for a rank-only metric and I have left it in as a warning
+  rather than a gate.
+- **21 files with a recomputed CV have never been submitted, and they include the four
+  best on CV.** `blend158_h3` (0.970048), `blend156w` (0.970048), `blend159_h3` (0.970047),
+  `blend156_h3` (0.970046). Best *sent* CV is `blend156` at 0.970042.
+
+**The deadline pick has never been scored.** No `h3` file of any member count has ever
+been submitted. That is the single largest hole in this workspace and it was invisible
+until the audit paired CV against LB for everything at once.
+
+### End-to-end reproduction of the deadline pick — clean
+
+`make_h3.py blend158` re-run from the files on disk: hybrid 0.970028 / rankraw 0.970036 /
+rescale 0.970027 → **cross-fitted CV 0.970048**, and the output CSV is **byte-identical**
+(md5 `7aabaa48…`) to the queued file, with the OOF vector `np.array_equal` to the stored
+one. The pick is deterministic and reproduces.
+
+### The finding: the CV→LB gap is transform-dependent, and it is largest for `logit`
+
+`experiments/cvlb.py` + `cvlb2.py` + `logit_bias.py` + `predict_lb.py` (all new).
+
+Over all 20 scored files the gap LB−CV is +0.001029 ± 0.000058 and pearson(CV, LB) is
++0.958. **That correlation is an artefact**: it is carried entirely by the three
+74/88/86-member entries sitting 30e-5 below everything else. Restricted to the 16 files in
+the operating cluster (CV ≥ 0.96995) pearson collapses to **+0.148**. The gap is also not
+constant — it shrinks as CV rises, from +0.00117 at CV 0.9696 to +0.00100 at CV 0.9700.
+
+Grouping the regression residual by transform family, over the ≥150-member sets only:
+
+| family | n | mean LB−CV | residuals |
+|---|---|---|---|
+| **logit** | 2 | **+0.001082** | +0.001080 +0.001085 |
+| hybrid | 3 | +0.000979 | +0.000966 +0.000976 +0.000994 |
+| rankraw | 4 | +0.000999 | +0.000996 +0.000997 +0.000998 +0.001004 |
+| rescale | 2 | +0.001016 | +0.001007 +0.001025 |
+| ens4 | 3 | +0.001011 | +0.001007 +0.001008 +0.001018 |
+
+Differenced **within member set**, which removes everything except the transform:
+
+| contrast | n | per-set | mean |
+|---|---|---|---|
+| **logit − hybrid** | 2 | 150fx +0.000104, 150sx +0.000091 | **+0.000097** |
+| rankraw − hybrid | 3 | +0.000020, +0.000004, +0.000031 | +0.000018 |
+| rescale − hybrid | 1 | +0.000031 | +0.000031 |
+| ens4 − hybrid | 2 | +0.000032, +0.000013 | +0.000022 |
+
+`logit`'s displacement is 3–5× the controls', 2/2 replications agree in sign and magnitude,
+and an exact permutation over family labels on all 20 residuals gives **one-sided
+p = 41/4845 = 0.0085**.
+
+This is what the earlier "logit scores better than its CV deserves" one-off observations
+were seeing (journal 2026-08-11: "blend150fx_logit returned 0.97103 despite the worst CV of
+the top nine"). It is not a one-off. It is a systematic, replicated, transform-specific
+bias, and it is why the paired-rank agreement table has a hole in it: pairs separated by
+5e-5–1e-4 of CV are ordered *correctly by LB only 32% of the time* (8 agree, 17 disagree),
+while pairs separated by >1e-4 are 51/51 correct. That band is exactly where the logit
+files sit.
+
+### Why this matters: the drop-logit decision is measured on the biased side
+
+`blend158_h3` is the deadline pick because dropping `logit` from the four-transform
+ensemble is worth **+5e-6** on cross-fitted OOF, "confirmed by four independent
+instruments" (paired 50/50, row bootstrap, 8 resampled fold splits, exhaustive subset
+enumeration — the last giving 7/7 comparisons where a logit-containing subset loses to the
+same subset without it).
+
+**All four instruments are computed on out-of-fold predictions. They share this bias. Four
+instruments on one biased measurement is one measurement.**
+
+Propagating it (`predict_lb.py`), using the mix-gap estimator "a mix's gap is the mean of
+its components' gaps" — validated on 150fx, the one set where all four components *and*
+the mix are scored, error **−0.000007**:
+
+| quantity | value |
+|---|---|
+| estimated `h3` gap (mean of hybrid/rankraw/rescale) | +0.000998 |
+| estimated `ens4` gap (mean of all four) | +0.001019 |
+| **ens4 − h3 in the gap** — favours ens4 on test | **+0.000021** |
+| h3 − ens4 in CV — favours h3 on OOF | +0.000005 |
+| net predicted LB, ens4 − h3 | **+0.000016** |
+
+**The bias runs 4.2× larger than the margin it would overturn, and in the opposite
+direction.** The estimator's own error (7e-6) is 32% of the effect, so the *sign* is
+informative and the magnitude is not.
+
+The subset enumeration's 7/7 consistency is not independent evidence either: a bias worth
+~2.4e-5 propagated at ¼ weight would produce "every logit-containing subset loses to its
+logit-free counterpart on OOF" **regardless of whether logit helps or hurts on test**. The
+effects it measured were 3e-6 to 12e-6 — 2–8× smaller than the bias. That pattern was
+expected from the bias alone.
+
+**I am withdrawing the confident preference for `h3` over `ens4`. They are not separable
+on the evidence in this workspace.** I am *not* replacing it with a confident preference
+for `ens4`: that would be selecting on the public LB, which is the Rogii failure.
+
+### The mechanism, and the part of it that does not hold up
+
+`agent/stack.py:58-66` documents the mechanism: `to_logit` clips at the unit interval, and
+an OOF prediction comes from one fold model while a test prediction is averaged over five
+and is therefore less extreme, so more OOF cells land on the plateau. The logit stack is
+fit and CV-scored on the damaged side and predicts on the clean side.
+
+`logit_bias.py --census` measured it at the **current 161 members** rather than quoting the
+86-member note, and the picture is narrower than the note implies:
+
+| member | OOF pinned | test pinned | OOF/test |
+|---|---|---|---|
+| naji03 | 5.790% | 0.919% | **6.30** |
+| et | 7.793% | 2.489% | 3.13 |
+| bolt_extratrees_support | 14.623% | 5.785% | 2.53 |
+| pub_tabm | 8.251% | 4.008% | 2.06 |
+| rf | 14.960% | 8.053% | 1.86 |
+| tabm_deep / tabm_deeper | 8.261% / 6.385% | 4.631% / 3.590% | 1.78 |
+| bolt_lookup_v3_evidence | 94.280% | 94.472% | **1.00** |
+| fmplr / fmnum / fmdeep / fmwide / fmpure | 92.4–93.6% | 92.7–93.7% | **1.00** |
+| bolt_lookup_v2_×6, bolt_deepfm_exact | 91.7–93.2% | 91.9–93.4% | **1.00** |
+
+49 of 161 members put at least one cell on the plateau, but only **~9 are asymmetric**. The
+other 16 heavy ones are pinned at ~93% on *both* sides, ratio 1.00. Aggregate: OOF 9.884%
+of cells pinned vs test 9.531% — a 0.35pp difference, not the large asymmetry the framing
+suggested. `sd_test/sd_oof` is ~1.00 for all of them; the note's "ratios down to 0.679"
+does not reproduce at 161 members.
+
+So there are two competing accounts of `logit`'s low CV and the census supports both:
+
+- **(a) measurement artefact** — the ~9 asymmetric members (naji03 at 6.3×) mean OOF is
+  differentially damaged, so logit's CV understates its test AUC. Predicts the displacement.
+- **(b) genuine symmetric information loss** — the 16 members pinned at 93% on both sides
+  are near-constant columns under `logit`, so the logit stack really is information-starved.
+  Predicts logit's low CV *and* a low test AUC, i.e. no displacement.
+
+(b) alone cannot produce the displacement: if the loss were symmetric, logit's gap would
+equal hybrid's, and it is +9.7e-5 above it twice. So (a) has real force. But the mechanism
+is only **partially** confirmed, and I am recording that rather than the tidier version I
+had written before running the census.
+
+The distinction from Rogii, stated explicitly because it is the thing that matters: Rogii
+fit a hedge parameter *to* public-LB scores with no mechanism. Here a mechanism identified
+in the code and measured in the data predicted the *sign* of a displacement, and the LB
+then confirmed that sign across 2 independent member sets with 3 control transforms landing
+near zero as predicted. That is mechanism-first with LB confirmation, not LB-fitted. It is
+still only n=2.
+
+### The corrected resolvability estimate — another unmatched null caught
+
+`cvlb.py` first estimated "how small a CV gap could the public slice resolve" by
+bootstrapping **one** file's AUC at the slice's size: sd 5.4e-4 at 20%, implying nothing
+below 1.5e-3 is resolvable — i.e. the LB is pure noise for us. **That is the wrong null.**
+The public slice is *fixed*: both candidates are scored on identical rows and correlate
+~0.999, so the shared slice noise cancels. `cvlb2.py` bootstraps the **paired difference**:
+
+| pair | CV gap | 20% paired sd | 50% paired sd | P(order flips) at 20% |
+|---|---|---|---|---|
+| blend158_h3 vs blend156 | +0.000007 | 0.000008 | 0.000005 | 20.0% |
+| blend158_h3 vs blend156_h3 | +0.000002 | 0.000005 | 0.000003 | 31.0% |
+| blend158_h3 vs blend150fx_logit | +0.000098 | 0.000029 | 0.000018 | 0.0% |
+| blend156 vs stack_pub74_logit | +0.000400 | 0.000062 | 0.000037 | 0.0% |
+
+The paired sd is **~60× smaller** than the unpaired estimate. The LB resolves a 1e-4 gap
+perfectly and gives an ~80%-reliable bit on a 7e-6 gap. It is genuinely informative — the
+"LB is noise at our margins" reading was an artefact of an unmatched control, the third
+time this workspace has made that exact mistake (chi2/df null, permuted-feature null, this).
+
+Same rule as before, now stated generally: **any null here must be matched on everything
+except the thing being tested.** For a two-file comparison on a fixed slice, that means
+pairing on the slice.
+
+### Executed the previous entry's next-run item 2: the seed-averaged member
+
+Both `xgb_latcat` seed twins landed:
+
+| member | solo OOF |
+|---|---|
+| xgb_latcat (seed 13) | 0.967696 |
+| xgb_latcat_s17 | 0.967750 |
+| xgb_latcat_s23 | 0.967766 |
+| **avg3 (probability mean)** | **0.967904** |
+
+Pairwise correlation between twins 0.99813–0.99818, and the average gains **+138e-6** solo
+over the best single — a real seed-bagging gain, much larger than anything the blend has
+moved recently. Saved as member `xgb_latcat_avg3`; `blend159av` is building now with the
+three individual seeds dropped and the average in their place (159 members). Result and
+delta go in the next entry either way.
+
+### Operational
+
+- A blend build is ~645s (69s to load and transform 159 members × 691k, then 24 fits).
+- `kaggle competitions leaderboard -c … -s` prints a `Next Page Token` line before the
+  header; it is not part of the CSV.
+- `tail -3 a.txt b.txt` fails under fish with "option used in invalid context"; use
+  `tail -n 3`.
+
+### Next run, in this order
+
+1. **If the counter has rolled, send the queue — and send it to answer the logit question,
+   because that is now the only open question that can change the deadline pick.** The six
+   158-member transform files are all unsent and give the first-ever `h3` LB reading plus a
+   third within-set replication of the displacement. Falsifiable predictions from
+   `predict_lb.py`, to be checked against what comes back:
+
+   | file | CV | predicted LB |
+   |---|---|---|
+   | `blend158` (ens4) | 0.970043 | 0.97106 |
+   | `blend158_h3` | 0.970048 | 0.97105 |
+   | `blend158_logit` | 0.969961 | 0.97104 |
+   | `blend158_rescale` | 0.970027 | 0.97104 |
+   | `blend158_rankraw` | 0.970036 | 0.97103 |
+   | `blend158_hybrid` | 0.970028 | 0.97101 |
+
+   The CV ranking puts `h3` first and `logit` last; this model puts `ens4` first and
+   `logit` level with `rescale`. The two orderings disagree, so the slice decides. Use the
+   remaining four slots on `blend159av` and its transforms.
+2. **Do not resolve the deadline pick on what comes back from those six.** A 20%-flip-rate
+   bit does not settle a 5e-6 contrast. What it settles is whether the *displacement*
+   replicates a third time; that is a claim about a 9.7e-5 effect, which the slice does
+   resolve. If it replicates, the honest deadline position is "h3 and ens4 are tied, pick
+   either and record why"; if the `logit − hybrid` gap comes back near zero at 158, the
+   bias was a two-set coincidence and `h3` is restored on CV.
+3. `blend159av` — read `logs_blend159av.txt`, record the delta, and make `h3`/`ens4` files
+   for it.
+4. Do not re-open: any feature work (two corrected instruments say the raw frame is
+   exhausted conditional on the stack), member hunting on solo AUC or correlation alone,
+   stacker `C`, meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging,
+   transform-subset enumeration, calibration of the final submission (−6.2e-5).
+5. Seed-averaging is the one member-side idea that just produced a >100e-6 solo gain. If
+   `blend159av` moves the stack, the obvious follow-up is seed twins for the *other*
+   strong own-built members, not new architectures.
+
+### `blend159av` landed — the seed-average is worth +2e-6 to the stack
+
+159 members: the three `xgb_latcat` seeds replaced by their probability mean. Cross-fitted
+on the frozen folds, against `blend159` (the same library with seed 13 alone plus the two
+twins absent):
+
+| transform | blend159 | **blend159av** | delta |
+|---|---|---|---|
+| logit | 0.969965 | 0.969965 | +0.000000 |
+| hybrid | 0.970024 | 0.970029 | +0.000005 |
+| rankraw | 0.970033 | 0.970034 | +0.000001 |
+| rescale | 0.970026 | 0.970029 | +0.000003 |
+| ens4 | 0.970043 | 0.970045 | +0.000002 |
+| **h3** | 0.970047 | **0.970049** | +0.000002 |
+
+**A +138e-6 solo member gain became +2e-6 in the stack — 1.4% pass-through.** Four of five
+transforms moved the same way and none moved down, so the sign is probably real, but the
+magnitude is at the noise floor. This is the pack-geometry result yet again: with 159
+members correlating 0.987–0.999 the blend's ranking is pinned, and improving one member's
+own AUC by a lot barely reaches it.
+
+That materially tempers the note above about seed twins being "the first thing in days
+pointed the right way". It is the right *kind* of gain — member-level, not blend-level — but
+at 1.4% pass-through, seed-twinning every member would cost ~6,400s each to buy single-digit
+microAUC. **Recorded as a measured near-null at the stack level, not a direction to pursue.**
+
+`blend159av_h3` = **0.970049**, nominally the best CV this workspace holds (`blend158_h3`
+0.970048). The 1e-6 margin is meaningless; it is a joint-top and a distinct file, which is
+all that matters for the queue. Audited clean: 296,302 correct ids, 6 distinct rankings.
+
+**Queue now 48 validated files.** Priority for the first run after 00:00 UTC is unchanged
+and is the logit question — send the six `blend158_*` transforms to get the first-ever `h3`
+LB reading and the third within-set `logit − hybrid` replication, then `blend159av_h3` and
+`blend159av` with the remaining slots.
