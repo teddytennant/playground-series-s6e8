@@ -1279,3 +1279,58 @@ row bootstrap and the 8 resampled fold splits. **This line is closed; do not re-
 - `mohankrishnathalla/s6e8-tabm-oof-saver` — **ERROR on three separate runs** (2026-08-11
   04:54 the latest). Stop checking it. The RealMLP sibling did land and is a measured null
   (parked in `oof_rejected/`).
+
+## What a public rank is empirically worth — `experiments/lbhist.py`, measured 2026-08-11
+
+Dataset: `georgymamarin/playground-series-s6-leaderboards` (825 KB) — public rank, private
+rank and both scores for every team in the **seven completed S6 episodes**. Download:
+
+```bash
+kaggle datasets download -d georgymamarin/playground-series-s6-leaderboards -p data/lbhist --unzip
+```
+
+AUC episodes E2/E3/E5 are S6E8's reference class. Durable facts:
+
+- **Top-30 retention across the seven episodes: 77 / 3 / 53 / 20 / 57 / 0 / 0 percent.**
+  Three of seven destroyed their public top 30. Public #1 finished 570th (E2), 615th (E4),
+  379th (E6), 440th (E7).
+- **A destroyed top 30 does not imply anyone overfitted.** S6E2's whole-board
+  spearman(public, private) is **0.99** and its score correlation **1.00**; ranks 1 and 570
+  differ by 1e-4 privately. Compression, not collapse. Diagnose the two apart with the
+  matched null below before drawing any lesson from a shakeup.
+- **Matched null:** add i.i.d. Gaussian noise at the episode's own observed shift sd to
+  every public score, re-rank, compare simulated to observed top-30 retention.
+  `obs > sim` ⇒ the shift is mostly a **common offset**, which cannot reorder anyone
+  (E1 +33%, E5 +24%, E3 +13%). `obs < sim` with p90/median of the centred shift ≫ 1.9 ⇒
+  genuine heterogeneous blow-ups (E7 ratio 10.73, E4 9.47). Calibrated to about **±25%**.
+- **Density must be anchored where you stand, not at the leader.** Anchoring the window on
+  the leader's score gave spearman −0.25 with retention over 7 episodes — a failure, and the
+  same unmatched-null error this file already records three times. Anchored at public rank
+  13: S6E2 240 teams within ±5e-5, S6E3 140, S6E5 9, **S6E8 live 14**.
+- **Submission volume does not predict a private drop.** AUC episodes, public top 100,
+  spearman(submissions, private rank drop) = **−0.083**; the 73–310-submission bucket drops
+  a median +87.5 ranks against +143.5 for the 1–14 bucket. The uniform ~+180-rank drop in
+  every bucket is the selection effect of conditioning on a high public rank. This supports
+  the brief's "use all 10 slots"; Rogii's failure was fitting a hedge parameter to public
+  feedback, not submitting often.
+
+### The private-side projection for our own position (rank 13, 0.97106, 1,415 teams)
+
+| assumed shift sd | median private rank | p10 | p90 | P(top 10) | P(top 10%) |
+|---|---|---|---|---|---|
+| 0.000043 | 12 | 7 | 22 | 34.8% | 100.0% |
+| 0.000067 | 15 | 5 | 38 | 32.2% | 100.0% |
+| 0.000124 | 26 | 5 | 90 | 24.2% | 98.8% |
+
+**Bronze (top 10% ≈ rank 141) is not the binding constraint — stop targeting it.** Top 10 is
+a 25–35% draw that public-LB chasing cannot improve.
+
+⚠ Historical `public_score` is a **selected** entry post-close; our live score is
+**best-of-all-submissions**. The projection is optimistically biased, not unbiased.
+
+### Pool status as of 2026-08-11 08:00 UTC
+
+`datasets list -s s6e8` returns **20** datasets, newest `lastUpdated` 2026-08-10, all
+imported or explicitly rejected. Static for three days — **check kernels, not datasets.**
+`georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new` re-ran 08:00 UTC but the
+diff against `notebooks/gaming_nothing_new/` is prose and one moved constant only.

@@ -2289,3 +2289,155 @@ all that matters for the queue. Audited clean: 296,302 correct ids, 6 distinct r
 and is the logit question — send the six `blend158_*` transforms to get the first-ever `h3`
 LB reading and the third within-set `logit − hybrid` replication, then `blend159av_h3` and
 `blend159av` with the remaining slots.
+
+---
+
+## 2026-08-11 — slot 9 (no submission: already at the 10/day cap)
+
+**At the cap before this run started.** `kaggle competitions submissions -v` shows ten
+entries dated 2026-08-11 (00:16 → 04:04 UTC), so the counter has not rolled and no slot
+existed. Research and instrument work only, as the standing playbook requires.
+
+### Pool sweep: nothing new, and the "hot" new notebook is a cosmetic re-run
+
+- `datasets list -s s6e8` works again and returns the same **20** datasets, newest
+  `lastUpdated` 2026-08-10 (`anhadmahajan06`, submission-only, not weightable). Pool static
+  for a third day; every member in it is imported.
+- `kernels list --sort-by dateRun` shows four kernels newer than the last sweep.
+  `georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new` re-ran at 08:00 UTC with
+  26 votes, but diffing the extracted cells against the copy already in
+  `notebooks/gaming_nothing_new/` shows **only prose and a moved constant** — no new
+  analysis. The other three are ordinary single-model notebooks with no OOF output.
+- `mohankrishnathalla/s6e8-realmlp-oof-saver` output re-pulled; same `oof_realmlp.npy`
+  already imported and parked in `oof_rejected/`. Nothing to gain.
+- The LB dict in `audit.py` already carries all four of today's scores
+  (`blend156` 0.97106, `blend156_rescale` 0.97105, `blend156_rankraw` 0.97104,
+  `blend153` 0.97104), so there is **no new CV→LB data** and no new `logit − hybrid`
+  contrast. The logit question is untouched and still needs the six `blend158_*` files.
+
+### The new instrument: what a public rank is empirically worth — `experiments/lbhist.py`
+
+`georgymamarin/playground-series-s6-leaderboards` (825 KB, in the dataset list this
+workspace has been reading for days and never opened) carries **public rank, private rank
+and both scores for every team in the seven completed S6 episodes**. Three are ROC AUC on
+synthetic tabular binary targets — E2, E3, E5 — which is S6E8's reference class.
+
+Every claim this workspace has made about the public LB has been argued from our own files.
+This is the first time any of it has been checked against a revealed private board.
+
+**Churn at the top is enormous and highly episode-dependent.**
+
+| ep | teams | top-30 rho | top-30 kept | public #1 → private |
+|---|---|---|---|---|
+| S6E2 (AUC) | 4370 | −0.51 | **3%** | **570** |
+| S6E3 (AUC) | 4142 | +0.75 | 53% | 1 |
+| S6E5 (AUC) | 3022 | +0.78 | 57% | 5 |
+| S6E1 | 4317 | +0.83 | 77% | 1 |
+| S6E4 | 4315 | +0.42 | 20% | 615 |
+| S6E6 | 2816 | −0.01 | **0%** | 379 |
+| S6E7 | 3355 | +0.31 | **0%** | 440 |
+
+Three of seven episodes destroyed their public top 30 outright. In S6E2 the private winner
+was **public rank 189**.
+
+**But S6E2 is compression, not overfitting — and that distinction is the whole finding.**
+S6E2's whole-board spearman(public, private) is **0.99** and its score correlation is
+**1.00**. Its public #1 scored 0.95419 and finished 570th; the private scores of ranks 1 and
+570 differ by **1e-4**. Six hundred teams were tied to inside the private slice's own
+resolution. Nobody blew up; the board simply had no resolving power at the top.
+
+**The matched null (q5).** Add i.i.d. Gaussian noise with each episode's *own* observed
+shift sd to every public score, re-rank, read off simulated top-30 retention. Scale is
+calibrated from the episode's own data, so simulation and reality differ only in shape:
+
+| ep | sd(shift) | obs kept | sim kept | obs − sim | p90/med of centred shift |
+|---|---|---|---|---|---|
+| S6E1 | 0.001617 | 77% | 43% | **+33%** | 4.21 |
+| S6E2 (AUC) | 0.000043 | 3% | 24% | −21% | 2.86 |
+| S6E3 (AUC) | 0.000067 | 53% | 41% | +13% | 2.65 |
+| S6E4 | 0.000400 | 20% | 25% | −5% | 9.47 |
+| S6E5 (AUC) | 0.000124 | 57% | 33% | **+24%** | 1.64 |
+| S6E6 | 0.000087 | 0% | 44% | −44% | 3.58 |
+| S6E7 | 0.000161 | 0% | 42% | −42% | **10.73** |
+
+`obs > sim` (E1/E3/E5) means the shift is largely a **common offset**, and a common offset
+cannot reorder anyone. `obs < sim` with a heavy tail (E7 at 10.73, E4 at 9.47) is the
+genuine heterogeneous-collapse fingerprint. The instrument is calibrated to about **±25%**.
+
+**Density measured where we stand, not at the leader.** The first operationalisation
+anchored the density window on the leader's score and failed outright (spearman with
+retention −0.25 over 7 episodes) — recorded because it is the same unmatched-null error
+this workspace keeps making, in a new dress. Anchored at public rank 13 instead:
+
+| board | teams | score at rank 13 | within ±5e-5 | within ±1e-4 | top-30 kept |
+|---|---|---|---|---|---|
+| S6E2 | 4370 | 0.95411 | **240** | 270 | 3% |
+| S6E3 | 4142 | 0.91736 | 140 | 194 | 53% |
+| S6E5 | 3022 | 0.95464 | 9 | 295 | 57% |
+| **S6E8 live** | **1415** | **0.97106** | **14** | **28** | — |
+
+Density is necessary but not sufficient — S6E3 packs 140 teams into ±5e-5 and still kept
+53%, because its shift is nearly all common offset. So quote the simulation, not this table.
+But it does place S6E8 next to S6E5, the *most* stable AUC episode, and 17× less crowded at
+our own rank than the episode that detonated.
+
+### What this says about our position — the first honest private-side estimate
+
+Running the same simulation on the live 1,415-team board at our actual score (rank 13,
+0.97106, 0.00018 behind MILANFX at 0.97124):
+
+| assumed shift sd | median private rank | p10 | p90 | P(top 10) | P(top 10% ≈ bronze) |
+|---|---|---|---|---|---|
+| 0.000043 (S6E2-like) | 12 | 7 | 22 | 34.8% | **100.0%** |
+| 0.000067 (S6E3-like) | 15 | 5 | 38 | 32.2% | **100.0%** |
+| 0.000124 (S6E5-like) | 26 | 5 | 90 | 24.2% | **98.8%** |
+
+Three readings, in decreasing confidence:
+
+1. **Bronze is not the binding constraint.** Top 10% is rank ~141 of 1,415; the worst p90
+   across all three noise scales is 90. Even applying the instrument's −25% shock this
+   holds comfortably. The workspace should stop treating the medal cutoff as the target.
+2. **Top 10 is a ~25–35% coin toss and is not improvable by public-LB chasing.** The 1.8e-4
+   gap to MILANFX is real (LEADERBOARD.md already established that at ~6 paired sd), but
+   from rank 13 the private draw does more than any blend tweak at our margins.
+3. **The catastrophic-shakeup scenario is much less likely here than the E2/E6/E7 base rate
+   suggests**, because those boards were 10–17× denser at the relevant rank. That is not
+   licence to select on public LB — it is a statement that the *unavoidable* component of
+   private risk is small, which makes the *avoidable* component (selection) worth more.
+
+### An empirical result that supports the brief's "use all 10 slots"
+
+q4, AUC episodes, public top 100, bucketed by submission count:
+
+| bucket | n | submissions | mean private drop | median |
+|---|---|---|---|---|
+| 0 | 72 | 1–14 | +216.3 | +143.5 |
+| 1 | 76 | 15–37 | +178.4 | +125.0 |
+| 2 | 76 | 38–70 | +183.9 | +127.0 |
+| 3 | 76 | 73–310 | **+171.9** | **+87.5** |
+
+spearman(submissions, private drop) = **−0.083**. Heavy submitters drop *slightly less*,
+not more. The large common drop (+170 to +216 across every bucket) is the selection effect
+of conditioning on a high public rank, and it is flat in submission volume.
+
+So the volume of public-LB engagement is **not** itself the hazard — which is what the brief
+asserted and what the Rogii note could have been misread as contradicting. Rogii's failure
+was fitting a *hedge parameter* to public feedback, not submitting often. Recorded because
+this workspace had no evidence either way and the brief's instruction now has some.
+
+⚠ One asymmetry to hold onto: the historical `public_score` is a **selected** entry's score
+after close, while our live 0.97106 is **best-of-all-submissions**. Our live rank is
+therefore optimistically biased relative to the reference class, and the projections above
+inherit that bias. They are upper-ish bounds, not unbiased estimates.
+
+### Next run, in this order
+
+1. **The counter rolls at 00:00 UTC — send the six `blend158_*` transforms first.** Still
+   the only open question that can change the deadline pick, still unsent, predictions
+   already written in the previous entry. Then `blend159av_h3` and `blend159av`.
+2. Do not re-run the pool sweep for datasets; it has been static three days. Kernels only.
+3. `lbhist.py` is cheap and deterministic — re-run it near the deadline against the final
+   board to re-price the private projection once the field has stopped moving.
+4. Unchanged closed list: feature work, member hunting on solo AUC/correlation, stacker `C`,
+   meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging, transform-subset
+   enumeration, final-submission calibration, seed-twinning members (1.4% pass-through).

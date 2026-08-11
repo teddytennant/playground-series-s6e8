@@ -417,3 +417,31 @@ currently have — the whole CV spread of all 41 candidates is 4.0e-4, and withi
 cluster it is 8.6e-5. Blend tweaks cannot get there; a genuinely better member can. The
 seed-averaging result (+138e-6 solo for `xgb_latcat`, journal 2026-08-11 slot 8) is the
 first thing in days pointed the right way.
+
+## Snapshot 2026-08-11 08:08 UTC (1,415 teams) — and the first private-side estimate
+
+| | score |
+|---|---|
+| #1 MILANFX | 0.97124 |
+| top-10 cutoff | ~0.97108 |
+| **us (thtennant), rank 13** | **0.97106** |
+| bronze ≈ top 10% (rank ~141) | — |
+
+MILANFX moved 0.97120 → 0.97124; our gap to the lead widened to 0.00018.
+
+**`experiments/lbhist.py` prices the private draw for the first time**, using public *and*
+private boards from the seven completed S6 episodes. Simulating a noisy private re-draw on
+the live board at our score:
+
+| assumed shift sd | median private rank | p90 | P(top 10) | P(top 10%) |
+|---|---|---|---|---|
+| 0.000043 (S6E2-like) | 12 | 22 | 34.8% | 100.0% |
+| 0.000067 (S6E3-like) | 15 | 38 | 32.2% | 100.0% |
+| 0.000124 (S6E5-like) | 26 | 90 | 24.2% | 98.8% |
+
+**Bronze is no longer the target — it is nearly locked at rank 13 and top 10% ≈ rank 141.**
+The live question is top 10, which is a 25–35% coin toss from here. Three of seven past
+episodes destroyed their public top 30, but those boards carried 140–240 teams within ±5e-5
+of rank 13 against S6E8's **14**, so the unavoidable component of our private risk is small.
+That makes the avoidable component — selecting the deadline entries on CV — worth more, not
+less. Full derivation and the failed leader-anchored density attempt are in the journal.
