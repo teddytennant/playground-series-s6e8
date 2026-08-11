@@ -137,6 +137,13 @@ All twelve of our own points, complete as of 2026-08-11:
 | `blend150fx_rankraw` | 0.970024 | 0.97102 | +0.000996 |
 | `stack_pub151_fixed_rankraw` | 0.970025 | 0.97103 | +0.001005 |
 | `blend150fx` | 0.970032 | 0.97104 | +0.001008 |
+| `blend150sx_rankraw` | 0.970022 | 0.97102 | +0.000998 |
+| `blend150sx` | 0.970033 | 0.97104 | +0.001007 |
+
+`blend150sx` differs from `blend150fx` by one added member and one removed exact
+duplicate, and scored **identically, 0.97104**. Its `rankraw` variant likewise matched
+`blend150fx_rankraw` exactly at 0.97102. **A one-member change is invisible to the public
+slice** — confirmed twice on the same run.
 
 The one gain large enough to measure, +0.000340 CV, transferred as +0.00019 LB — about
 **56% pass-through**. So: **do not quote "CV + 0.0012" as an LB estimate**, and do not
@@ -316,7 +323,32 @@ Do not use the CV→LB offset as a leak detector any more — it is not constant
 | CatBoost | 0.96718 | `latwide_cat` |
 | TabM | 0.96867 | `tabm_seed3` |
 
-**Open opening:** the library's LightGBM hyperparameters on the lattice feature set were
+#### ⚠ CLOSED 2026-08-11: you cannot tune a LightGBM into a decorrelated member
+
+The "open opening" below was tuned for solo AUC on 2026-08-10 (**+0.00003, a null**) and
+for *decorrelation* on 2026-08-11. The second attempt failed at its own objective:
+
+`lgbm_stump_lat_frac` — depth **3** / **8** leaves against the pack's hand-set depth 7 /
+96 leaves, fixed 4000 rounds. That is about the largest available move in tree shape and
+it genuinely changed the model (solo OOF **0.96735**, i.e. 0.00044 *worse* than
+`lgbm_fixed_lat_frac`). Its correlation with the pack: **maxcorr 0.9961**, median 0.9816 —
+the *dense* part of the pack (pack median maxcorr 0.995; only 15 of 149 sit below 0.97).
+
+Effect on the stack, cross-fitted on the frozen folds, all four transforms:
++5e-6 / +2e-6 / **−2e-6** / +4e-6, ensemble +1e-6. Sign-flipping and entirely inside the
+±4e-6 solver floor. Public LB moved by **exactly zero**.
+
+**Where a member lands is set by its function class and its pipeline, not its
+hyperparameters.** This resolves the slot-3 puzzle: 35 ordinary XGB/LGBM/CatBoost members
+from `boltuzamaki` were the largest single share of that day's +0.000340, while GBDT
+hyperparameter variation inside our own pipeline is worth nothing. The difference is the
+**imputation, encoding and feature decisions upstream of the model**, not the model.
+
+So the only lever with demonstrated size still available is **a genuinely second
+pipeline** built here — a different missing-data treatment or a no-TE representation — not
+more models on `agent/features.py`'s single lineage.
+
+**Open opening (superseded — kept for the record):** the library's LightGBM hyperparameters on the lattice feature set were
 **hand-set, never tuned** (`lr 0.035, num_leaves 96, min_child_samples 40, subsample 0.9,
 colsample 0.6, reg_lambda 5, max_depth 7`). The only LGBM tuning in `hyperparameters.json`
 is `lgbm_tuned`, which was tuned on the far weaker raw+iterative-imputation feature set

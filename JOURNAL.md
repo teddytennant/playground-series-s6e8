@@ -944,3 +944,100 @@ differences below ~1e-4, which is every difference we can still produce.**
   at ~1200 rounds.
 - `kaggle competitions leaderboard -d -p /tmp/lb` will happily read **another
   competition's** leaderboard if that path already holds one. Use a per-competition path.
+
+### Addendum — the angle's own deliverable, and it answers the question cleanly
+
+`lgbm_stump_lat_frac`: LightGBM at **depth 3 / 8 leaves**, fixed 4000 rounds
+(`--stopping 0`), lattice + decimal-lattice features. About the largest available move in
+tree shape away from the pack's hand-set `depth 7 / 96 leaves`, chosen to buy a different
+function shape at the cost of solo AUC.
+
+| | |
+|---|---|
+| full OOF AUC | **0.96735** |
+| our best LightGBM (`lgbm_fixed_lat_frac`) | 0.96779 |
+| library's best LightGBM | 0.96768 |
+| **maxcorr vs the pack (rank space)** | **0.9961** (vs `lgbm_tuned_lat_frac`) |
+| median corr vs the pack | 0.9816 |
+
+**The decorrelation tuning failed at its own objective.** Collapsing depth 7 → 3 and
+leaves 96 → 8 — which costs 0.00044 of solo AUC, so the model genuinely changed — moved
+its correlation with its own sibling only to **0.9961**, landing it in the *dense* part of
+the pack (pack median maxcorr 0.995, and only 15 of 149 members sit below 0.97).
+
+So: **you cannot tune a LightGBM into a decorrelated member.** Where a member lands is set
+by its function class and its pipeline, not by its hyperparameters. That is the direct
+answer to the angle, and it is consistent with everything else measured today.
+
+It also finally explains the slot-3 puzzle. 35 ordinary XGB/LGBM/CatBoost members from
+`boltuzamaki` were the single largest share of that day's +0.000340, while GBDT
+hyperparameter variation inside our own pipeline is worth nothing. The difference is not
+the model — it is **the imputation, encoding and feature decisions upstream of it.**
+
+### The stack it produced
+
+`blend150sx` — 151 members (adds the stump, drops the duplicate `bolt_xgb_d7_alt2`),
+rank-average of the four transform stacks, all cross-fitted on the frozen folds.
+
+| transform | `blend150fx` (150) | `blend150sx` (151) | delta |
+|---|---|---|---|
+| logit | 0.969950 | 0.969955 | +5e-6 |
+| hybrid | 0.970014 | 0.970016 | +2e-6 |
+| rankraw | 0.970024 | 0.970022 | **−2e-6** |
+| rescale | 0.970013 | 0.970017 | +4e-6 |
+| **rank-ensemble** | 0.970032 | **0.970033** | +1e-6 |
+
+**A null, and self-consistently so.** The deltas sign-flip across transforms and every one
+of them is inside the ±4e-6 solver noise floor measured independently this run. Predicted
+in advance by the 0.9961 maxcorr, and consistent with `member_select`'s finding that
+member-level diversity engineering does not work.
+
+`blend150sx` is nonetheless the best CV we hold (0.970033) and is now the CV-preferred
+deadline candidate, by a margin far too small to mean anything.
+
+#### I did not run the paired `member_eval`, and that was a decision, not an omission
+
+The paired 50/50 instrument resolves to ~1e-6 by cancelling *split* noise. But this run
+measured a **±4e-6 floor from the solver itself**, which paired row-splitting does not
+cancel because it is not resampled by changing rows. A member expected to be worth ~5e-6
+is therefore not resolvable by that instrument, and 30 minutes of a contended box would
+have bought a number I would have had to discount anyway. The four cross-fitted transform
+deltas above are the honest measurement and they say the same thing.
+
+### Submitted this run — 4 of 10, 6 remaining
+
+| # | entry | CV | public LB |
+|---|---|---|---|
+| 1 | `blend150fx_rescale` | 0.970013 | 0.97102 |
+| 2 | `blend150fx_logit` | 0.969950 | 0.97103 |
+| 3 | **`blend150sx`** | **0.970033** | **0.97104** |
+| 4 | `blend150sx_rankraw` | 0.970022 | 0.97102 |
+
+Rank 14/1385 holds at 0.97104. Adding a member and removing an exact duplicate moved the
+public score not at all, which is what both the CV and the correlation predicted — and the
+match is exact on both files: `blend150sx` 0.97104 = `blend150fx` 0.97104, and
+`blend150sx_rankraw` 0.97102 = `blend150fx_rankraw` 0.97102. A one-member change is
+invisible to a 296k-row slice, twice over.
+
+I stopped at 4 rather than sending the two remaining `blend150sx_*` transform variants.
+The brief is right that slots are free and an unused one is waste — but the five-way
+transform → LB mapping was *completed* this run, and it showed the public slice cannot
+resolve these differences. Re-sending the same comparison one member later would not be a
+different experiment, only a different file. Nothing left tonight clears "tells us
+something the journal does not already know".
+
+### Next run, in this order
+
+1. **Do not tune GBDT hyperparameters for diversity, and do not hand-pick members by a
+   correlation statistic.** Both are measured dead this run, with mechanisms.
+2. The only lever with demonstrated size left is **a whole new pipeline** — different
+   imputation, encoding and features, not a different model. The public pool is exhausted,
+   so that means building one here. `agent/features.py` is a single lineage: constrained
+   imputation + lattice + fold-safe TE. A genuinely second pipeline (e.g. no TE at all, or
+   a different missing-data treatment) is the honest version of "add 20 members".
+3. Re-run the REST `datasets/list` enumeration **weekly**, not every run — it has been
+   static since 2026-08-10.
+4. Believe no paired delta under ~1e-5 unless it is stable under column permutation.
+5. **Select on CV at the deadline.** `blend150sx` (0.970033) then `blend150fx` (0.970032).
+   Do *not* be tempted by `blend150fx_logit`, which is 8e-5 worse on CV, has a mechanism
+   argument against it, and scored 0.97103 on the public slice.
