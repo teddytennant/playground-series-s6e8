@@ -463,6 +463,17 @@ ps -o ppid= -p <pid>                            # trace ownership up to a `claud
   because the wrapper's own command line contains the pattern. It killed this session's
   shell mid-command (exit 144) on 2026-08-11. Use `pgrep -f ... | head -1` then
   `kill <pid>`.
+- ⚠ **The same self-match silently breaks `pgrep` wait-loops**, and that failure is worse
+  because it is quiet rather than fatal. A "wait until the job finishes" loop like
+  `until ! pgrep -f "run_xgb.py --name probeLC"; do sleep 20; done` **never exits**: the
+  bash process evaluating the loop has the pattern in its own command line, so `pgrep`
+  matches the waiter forever and the job looks permanently unfinished. Break the
+  self-match with a bracket class — the regex still matches the target, but the waiter's
+  own literal command line no longer matches the regex:
+
+  ```bash
+  until ! pgrep -f "run_xgb.py --name pro[b]eLC" >/dev/null; do sleep 20; done
+  ```
 - Members left in `oof/` **outlive their author's session**. On 2026-08-11 the three
   `cat_*` members were owned by a session that had already exited (their processes were
   reparented to `systemd --user`, PPID 5788). Two live peers were messaged and neither

@@ -38,6 +38,18 @@ THE THREE MODES
        encoding channel worth +0.0023 to everyone else is simply absent, so whatever this
        member gets right, it gets right by a route nothing else in the pack uses.
 
+`latcat`
+       the `lat` frame with the 12 unordered lattice categoricals APPENDED as extra
+       columns (prefixed `K_`) rather than substituted for it. This is the one-factor
+       version of the `cat` experiment. `cat` changed two things at once -- it discarded
+       the numeric ordering AND deleted the entire target-encoding channel -- and the
+       member that came back was decorrelated (maxcorr 0.9746) but much worse (0.9611
+       solo), which is why it bought nothing. Here the TE channel is held fixed and the
+       ordering-discarded channel is added on top, so any movement in either statistic is
+       attributable to that channel alone. Run it against `lat` on the same folds, same
+       hyperparameters and same round count -- `lat` is the control and exists for no
+       other reason.
+
 Note `cat` keeps NaN as *missing* (default-direction), where the sibling CatBoost
 `native` mode lifts NaN to its own level. Deliberate: two members, not one member twice.
 
@@ -89,7 +101,7 @@ def frames(tr, te, mode):
         codes, uniq = pd.factorize(s, sort=True)
         return pd.Categorical.from_codes(codes, categories=np.arange(len(uniq), dtype="int32"))
 
-    if mode == "cat":
+    if mode in ("cat", "latcat"):
         for c in cols:
             out[c] = as_cat(both[c])
     else:  # raw
@@ -108,27 +120,60 @@ def describe(F):
     return ", ".join(bits)
 
 
+def gain_share(m):
+    """Fraction of total split gain the model spent on the added `K_` categoricals.
+
+    The direct answer to the obvious objection to `latcat`: with 184 target-encoded
+    columns already present, does the ordering-discarded channel get used at all, or is
+    it simply never selected? A share near 0 means the member is the `lat` control with
+    extra columns attached and cannot possibly be decorrelated by them.
+    """
+    g = m.get_score(importance_type="total_gain")
+    tot = sum(g.values())
+    return sum(v for k, v in g.items() if k.startswith("K_")) / tot if tot else 0.0
+
+
 def build_params(a):
     p = dict(objective="binary:logistic", eval_metric="auc", tree_method="hist",
              max_depth=a.depth, eta=a.eta, subsample=a.subsample,
              colsample_bytree=a.colsample, min_child_weight=a.min_child_weight,
              reg_lambda=a.reg_lambda, max_bin=a.max_bin, nthread=a.threads, seed=a.seed)
-    if a.mode in ("cat", "raw"):
+    if a.mode in ("cat", "raw", "latcat"):
         # max_cat_to_onehot=1 forces the partition-based split for every categorical,
         # including the 2-3 level ones, so the whole frame goes through one mechanism.
         p.update(max_cat_to_onehot=1, max_cat_threshold=a.max_cat_threshold)
     return p
 
 
+def _latframe(dense, names, K):
+    """Dense lattice block + the `K_`-prefixed unordered categoricals, as one frame.
+
+    Assigned column by column rather than concat'd so the 184-column float block keeps
+    referencing `dense` instead of being copied (~400 MB per fold).
+    """
+    F = pd.DataFrame(dense, columns=names, copy=False)
+    for c in K.columns:
+        F[f"K_{c}"] = K[c].to_numpy()
+    return F
+
+
 def fold_matrices(a, f, itr, iva, y, Ftr, Fte, Ltr, Lte):
     """(Xa, ya, Xb, yb, Xt_getter) for one fold, in whichever mode is active."""
-    if a.mode == "lat":
+    if a.mode in ("lat", "latcat"):
         g = lambda k: np.load(os.path.join(CACHE, f"f{f}_{k}.npy"))
         Xa, ya, Xb, yb = g("Xa"), g("ya"), g("Xb"), g("yb")
         if a.frac:
             Xa = np.hstack([Xa, Ltr[itr]])
             Xb = np.hstack([Xb, Ltr[iva]])
-        return Xa, ya, Xb, yb, (lambda: np.hstack([g("Xt"), Lte]) if a.frac else g("Xt"))
+        get_Xt = (lambda: np.hstack([g("Xt"), Lte])) if a.frac else (lambda: g("Xt"))
+        if a.mode == "lat":
+            return Xa, ya, Xb, yb, get_Xt
+        # cache rows are written as Xtr.iloc[itr] / Xtr.iloc[iva] (build_cache.py), so
+        # positional alignment against the same index arrays is exact.
+        names = [f"c{i}" for i in range(Xa.shape[1])]
+        return (_latframe(Xa, names, Ftr.iloc[itr].reset_index(drop=True)), ya,
+                _latframe(Xb, names, Ftr.iloc[iva].reset_index(drop=True)), yb,
+                (lambda: _latframe(get_Xt(), names, Fte)))
     return Ftr.iloc[itr], y[itr], Ftr.iloc[iva], y[iva], (lambda: Fte)
 
 
@@ -139,7 +184,7 @@ def dm(X, y=None, cat=False):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--name", required=True)
-    ap.add_argument("--mode", choices=("lat", "cat", "raw"), default="lat")
+    ap.add_argument("--mode", choices=("lat", "cat", "raw", "latcat"), default="lat")
     ap.add_argument("--rounds", type=int, default=2000)
     ap.add_argument("--eta", type=float, default=0.03)
     ap.add_argument("--depth", type=int, default=7)
@@ -168,13 +213,14 @@ def main():
     want = [int(x) for x in a.folds.split(",")] if a.folds else list(range(N_SPLITS))
 
     Ftr = Fte = Ltr = Lte = None
-    if a.mode in ("cat", "raw"):
+    if a.mode in ("cat", "raw", "latcat"):
         Ftr, Fte = frames(tr, te, a.mode)
-        print(f"  {Ftr.shape[1]} columns: {describe(Ftr)}", flush=True)
-    elif a.frac:
+        print(f"  {Ftr.shape[1]} categorical columns: {describe(Ftr)}", flush=True)
+    if a.frac and a.mode in ("lat", "latcat"):
         Ltr, Lte = lattice(tr), lattice(te)
 
-    use_cat = a.mode in ("cat", "raw")
+    use_cat = a.mode in ("cat", "raw", "latcat")   # frame carries category dtypes
+    fresh = a.mode in ("lat", "latcat")            # fold matrices are per-fold, deletable
 
     # ---- probe: choose rounds/params without ever seeing a validation fold's labels ----
     if a.probe:
@@ -194,6 +240,9 @@ def main():
         best = int(np.argmax(curve))
         print(f"[{a.name}] PROBE best inner AUC {curve[best]:.6f} @ round {best+1} "
               f"of {len(curve)} ({time.time()-t0:.0f}s) -- nothing saved", flush=True)
+        if a.mode == "latcat":
+            print(f"[{a.name}] PROBE {gain_share(m):.4f} of total split gain went to "
+                  f"the 12 K_ categoricals", flush=True)
         return
 
     oof = np.zeros(len(y))
@@ -204,19 +253,22 @@ def main():
             continue
         Xa, ya, Xb, yb, get_Xt = fold_matrices(a, f, itr, iva, y, Ftr, Fte, Ltr, Lte)
         d = dm(Xa, ya, use_cat)
-        if not use_cat:
+        if fresh:
             del Xa
         m = xgb.train(params, d, num_boost_round=a.rounds)
         del d
         oof[iva] = m.predict(dm(Xb, cat=use_cat))
         print(f"[{a.name}] fold {f}: AUC {roc_auc_score(yb, oof[iva]):.6f} "
               f"({time.time()-t0:.0f}s)", flush=True)
-        if not use_cat:
+        if fresh:
             del Xb
+        if a.mode == "latcat":
+            print(f"[{a.name}] fold {f}: {gain_share(m):.4f} of total split gain went to "
+                  f"the 12 K_ categoricals", flush=True)
         Xt = get_Xt()
         tp += m.predict(dm(Xt, cat=use_cat)) / N_SPLITS
         del m
-        if not use_cat:
+        if fresh:
             del Xt
 
     if len(want) < N_SPLITS:

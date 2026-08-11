@@ -268,3 +268,34 @@ exhausted.
 
 Submission counts are worth noting against that. Ranks 2–4 have sent 51–58 entries to our
 16, and rank 1 has sent 14. Volume is not what separates the top of this board.
+
+## 2026-08-11 04:20 UTC — rank 13 of 1396, holding at 0.97106
+
+No submission this run: all 10 daily slots were already spent by 04:04 UTC (the
+`blend150sx`/`blend156` batch). Standing re-read from the downloaded LB snapshot rather
+than moved.
+
+| rank | score | team |
+|---|---|---|
+| 1 | 0.97124 | MILANFX |
+| 2 | 0.97115 | Don Mani |
+| 3 | 0.97113 | Maher el Ouahabi |
+| 4 | 0.97112 | Optimistix |
+| 5 | 0.97110 | Mahog |
+| … | | |
+| **13** | **0.97106** | **Teddy Tennant** |
+
+The board is extremely compressed and it is worth writing down how compressed:
+
+| rank | 1 | 5 | 10 | 15 | 20 | 30 | 50 |
+|---|---|---|---|---|---|---|---|
+| score | 0.97124 | 0.97110 | 0.97108 | 0.97104 | 0.97099 | 0.97095 | 0.97092 |
+
+**Ranks 10 to 50 span 1.6e-4 of AUC**, and ranks 5 to 15 span 6e-5 — which is *inside*
+the ±5e-5 scatter the public slice already shows on files whose CV we know exactly. So
+most of our visible rank is not a measurement of anything. Two entries of ours separated
+by 1e-5 of CV have already landed 2e-5 apart on the LB in the wrong order.
+
+Gap to #1 is 1.8e-4 of LB. At the ~56% CV→LB pass-through, closing it needs ≈ +3.2e-4 CV,
+about the size of the entire slot-3 63-member import and ~35× this week's typical member
+gain. That target has not moved and nothing incremental reaches it.
