@@ -445,3 +445,33 @@ episodes destroyed their public top 30, but those boards carried 140–240 teams
 of rank 13 against S6E8's **14**, so the unavoidable component of our private risk is small.
 That makes the avoidable component — selecting the deadline entries on CV — worth more, not
 less. Full derivation and the failed leader-anchored density attempt are in the journal.
+
+## Snapshot 2026-08-11 09:05 UTC (top of board) — three teams passed us today
+
+| rank | team | score | submitted |
+|---|---|---|---|
+| 1 | MILANFX | 0.97124 | 08-10 21:01 |
+| 2 | Don Mani | 0.97115 | **08-11 05:50** |
+| 3 | Optimistix | 0.97114 | **08-11 08:07** |
+| 4 | Maher el Ouahabi | 0.97113 | 08-10 09:34 |
+| 5 | Mahog | 0.97110 | 08-09 14:23 |
+| 6 | cstdy | 0.97110 | **08-11 07:48** |
+| 7 | Orig_lab | 0.97109 | 08-11 02:51 |
+| 8 | midway2333 | 0.97109 | 08-09 16:41 |
+| 9 | Utkarsh | 0.97108 | 08-09 10:10 |
+| 10 | FunnyBishop | 0.97108 | 08-09 11:05 |
+| 11 | AJboos | 0.97108 | 08-11 06:36 |
+| 12 | LeTuanM | 0.97107 | 08-11 01:56 |
+| **13** | **Teddy Tennant** | **0.97106** | 08-11 04:04 |
+| 14 | magp | 0.97106 | 08-11 02:33 |
+
+MILANFX unchanged; the gap to the lead holds at 0.00018. **Rank 13 held but the ledge above
+us is thickening** — Don Mani, Optimistix and cstdy all improved past us in the last nine
+hours, and the top-10 cutoff has firmed at 0.97108, two ticks above us. The density figure
+that drives the private projection is unchanged in shape: 14 teams within ±5e-5 of us.
+
+⚠ A team is now called **`Orig_lab`** (0.97109). If the name means what it looks like, note
+that this workspace measured both original-dataset routes on 2026-08-11 and found
+concatenation monotonically harmful (−58e-6 at 1×) and the separate-estimator member worth
+0 to −2e-6 in a 160-member stack. Their score is 3e-5 above ours and entirely consistent
+with a good ordinary stack; nothing on the board suggests the original is paying anyone.

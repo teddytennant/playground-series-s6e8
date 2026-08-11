@@ -2441,3 +2441,202 @@ inherit that bias. They are upper-ish bounds, not unbiased estimates.
 4. Unchanged closed list: feature work, member hunting on solo AUC/correlation, stacker `C`,
    meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging, transform-subset
    enumeration, final-submission calibration, seed-twinning members (1.4% pass-through).
+
+---
+
+## 2026-08-11 — slot 10 (no submission: still at the 10/day cap), ANGLE: the original dataset
+
+**At the cap before this run started and still at it.** `kaggle competitions submissions -v`
+counts ten entries dated 2026-08-11 (00:16 → 04:04 UTC); the run prompt says the same. The
+counter has not rolled, so no slot existed. Everything below is CV work and queue-building.
+
+The angle is "find the real source dataset and concatenate it as extra training rows".
+`RESEARCH.md` has said since day one that this is dead here (−0.0001), but **that number was
+never measured in this workspace** — it was copied out of `tomasa2/s6e8-what-moved-the-score`.
+An inherited number standing in for the single most-cited edge in the series is exactly the
+kind of thing this workspace should not be running on faith. So: measured, both ways, and
+the answer is now ours.
+
+### The source dataset, and what it actually is
+
+`jayjoshi37/smartphone-usage-and-addiction-prediction` — 7,500 rows, 16 columns, no missing
+values anywhere in the predictors. Two columns the competition frame does not carry:
+`transaction_id`/`user_id` (row labels) and **`addiction_level`**, an ordinal
+None(819) < Mild(1373) < Moderate(2874) < Severe(2434) of which `addicted_label` is exactly
+the indicator `level >= Moderate`. Zero disagreement, so it is a re-encoding of the target,
+not a side channel.
+
+**No leak.** Joining on all 12 predictors as strings: **0 of 691,369 train rows and 0 of
+296,302 test rows** match an original row verbatim (269,185 train and 113,104 test rows are
+complete cases, so the join had something to bite on). There is no free label lookup here.
+Recorded so no later run re-checks it.
+
+### The generating rule, read off the real data
+
+Marginal AUCs in the original are pure noise everywhere except three columns — `age` 0.5026,
+`gaming_hours` 0.5054, `work_study_hours` 0.5007, `sleep_hours` 0.5225,
+`notifications_per_day` 0.4996, `app_opens_per_day` 0.5070 — against `daily` 0.8657,
+`weekend` 0.8558 (which is 0.964-correlated with `daily`) and `social` 0.7634. So the real
+label is a function of **two** variables, and it is nearly deterministic:
+
+| cell | n | rate |
+|---|---|---|
+| `social > 4.0` | 2,748 | **1.0000** |
+| `social ≤ 4` & `daily > 8.0` | 2,093 | **1.0000** |
+| `social ≤ 4` & `daily ≤ 6.0` | 1,634 | **0.0000** |
+| `social ≤ 4` & `6 < daily ≤ 8` | 1,025 | 0.4556 |
+
+**86.3% of the real dataset is decided outright by two thresholds.** The remaining band is a
+coin flip that nothing in the frame resolves: its rate is flat in `daily` (0.449 / 0.468 /
+0.456 across the three quarter-hour slices) and flat in `social` (0.366 / 0.443 / 0.489 /
+0.469), it splits Mild 558 / Moderate 467 on the ordinal, and a 9-column GBM restricted to
+it reaches in-sample AUC 1.0 on 1,025 rows with importances that are flat noise — i.e. pure
+memorisation, which is what an irreducible cell looks like when you over-fit it. ⚠ That
+in-sample 1.0 is the trap in this analysis and it caught me for one step; the honest number
+is the 5-fold one, **0.9885**.
+
+So the real data is *more* separable (0.9885) than anything achievable on the synthetic
+frame (best held here 0.9700). The generator did not add information — it took the crisp
+two-threshold rule and smeared it.
+
+**And the smear is exactly what we are scored on.** The same four cells on competition train:
+
+| cell | comp n | comp rate | orig rate |
+|---|---|---|---|
+| `social > 4` | 69,978 | 0.9956 | 1.0000 |
+| `social ≤ 4` & `daily > 8` | 175,446 | 0.9680 | 1.0000 |
+| `social ≤ 4` & `daily ≤ 6` | 154,634 | **0.3253** | 0.0000 |
+| band | 102,202 | 0.6498 | 0.4556 |
+| either driver NaN | 189,109 | 0.7099 | — |
+
+The rule survives in order but not in magnitude, and the boundary is a ramp rather than a
+step: profiling `daily` at 0.25h resolution inside `social ≤ 4` gives 0.417 → 0.411 → 0.547
+→ 0.677 across (5.75,6.0] → (6.0,6.25] → (6.25,6.5] → (6.5,6.75]. The kink is real, it is
+displaced off 6.0, and full-resolution target encoding over 691k rows estimates it far
+better than a 7,500-row rule can state it. This is the mechanism behind everything below.
+
+### Route 1 — the separate estimator, which strictly dominates concatenation
+
+Concatenation is the wrong shape for this data: 7,500 real rows against 691,369 synthetic is
+a 1% perturbation, and it forces the real rows through a model that is being asked to fit
+the synthetic boundary at the same time. A model fitted on the originals **alone** never
+sees a competition label, so its prediction is honest on every row of both splits and can go
+into the stack as a member with no fold structure at all — and the stacker gets to choose its
+weight, which concatenation does not allow. Anything concatenation can contribute, this can.
+
+`experiments/orig_transfer.py`, `experiments/orig_member.py`:
+
+| direction | AUC |
+|---|---|
+| orig-trained, 5-fold **on the original** | 0.9885 |
+| orig-trained → **competition train** (transfer) | 0.8503 |
+| orig-trained with matched missingness → competition train | **0.8864** |
+| comp-trained (one fold) → **the original rows** | 0.9630 |
+
+**The +36e-4 from matched missingness is the one modelling idea in this run that mattered.**
+The original has no NaNs; the competition frame is 13.9% missing on `daily` and 19.4% on
+`social`, so ~29% of competition rows are missing a rule driver, and a model fitted on
+complete rows has never been *asked* which way a NaN should go — LightGBM's default direction
+on those splits is a fallback, not a fitted decision. Training on 10 MCAR-masked copies of
+the original at the competition's own per-column rates makes it a fitted decision. Converged:
+5 copies × 6 bags gives 0.8856, 10 × 8 gives 0.8864.
+
+Targets tried: binary 0.8864, the 4-level ordinal 0.8805, the explicit hand-written rule
+0.8207. The ordinal does not beat the binary, so the extra resolution in `addiction_level`
+buys nothing once 7,500 rows are spent estimating it.
+
+**The member is the most decorrelated object this workspace has ever held.**
+
+| member | solo AUC | maxcorr (hybrid) | maxcorr (rankraw) |
+|---|---|---|---|
+| `orig_bin` (no missingness match) | 0.8503 | **0.8257** | 0.8155 |
+| `orig_binm` (matched) | 0.8864 | **0.8792** | 0.8632 |
+| pack's own minimum | — | 0.9309 (`logreg`) | — |
+| pack's own median | — | 0.9946 | — |
+
+All 156 pack members sit below 0.97 against it. The previous record decorrelated member,
+`xgb_cat_lattice`, was 0.9746.
+
+### And it is worth nothing. Two builds, 160 members each, frozen folds
+
+| transform | `blend159av` | `blend160orig` (0.850 / 0.826) | `blend160origm` (0.886 / 0.879) |
+|---|---|---|---|
+| logit | 0.969965 | 0.969962 (−3e-6) | 0.969964 (−1e-6) |
+| hybrid | 0.970029 | 0.970025 (−4e-6) | 0.970027 (−2e-6) |
+| rankraw | 0.970034 | 0.970034 (0) | 0.970033 (−1e-6) |
+| rescale | 0.970029 | 0.970023 (−6e-6) | 0.970027 (−2e-6) |
+| ens4 | 0.970045 | 0.970042 (−3e-6) | 0.970044 (−1e-6) |
+| **h3** | **0.970049** | 0.970046 (−3e-6) | **0.970049 (0)** |
+
+Twelve readings, **none positive**. The better member is uniformly less harmful than the
+worse one, which is the right sign and says the measurement is not noise-driven — but its
+best cell is a tie, not a gain.
+
+### Route 2 — the literal angle, with a dose-response
+
+`experiments/orig_concat.py`: LightGBM on the 12 raw columns with native NaN handling, the
+frozen 5 folds, original rows appended to the **training** half only. `--weight` repeats them
+so the test is not rigged by the 1% dilution:
+
+| training set | OOF AUC | delta |
+|---|---|---|
+| baseline | 0.962639 | — |
+| + 1× the 7,500 originals | 0.962581 | **−58e-6** |
+| + 10× | 0.961653 | −986e-6 |
+| + 50× | 0.959299 | −3,340e-6 |
+
+Monotone in dose, and −58e-6 at 1× reproduces the public record's −0.0001 to within the
+right order. **This is now our own number, and the dose-response is the part the public
+notebook did not have** — it turns "measured a small negative once" into "the real rows pull
+the fit toward the real boundary, and the harm scales with how hard you pull". The single
+most reliable edge in the Playground Series is not merely absent in S6E8, it is inverted, and
+the mechanism is understood: the generator replaced a crisp two-threshold rule with a ramp,
+and the ramp is the thing being scored.
+
+### The result that matters more than the angle
+
+Every "member additions barely move the stack" finding in this journal has carried the same
+unanswered objection: **every member ever tested was ~0.99 correlated with the pack**, so of
+course the blend could not move. `orig_binm` retires that objection. It is a different
+function class, fitted on a different distribution, on a different target encoding of the
+label, at maxcorr 0.879 — an order of magnitude further out than anything else here. It still
+adds nothing.
+
+So the constraint is not correlation. **The pack's span already contains everything the 12
+columns can say about this target**, and a member is decorrelated from that span precisely to
+the extent that it is *worse*, not to the extent that it is orthogonal in a useful direction.
+That reframes the pack-geometry result from a fact about this member library into a statement
+about the problem, and it closes member hunting for good — not "we have not found a
+decorrelated member yet" but "decorrelation is not the missing ingredient".
+
+### Queue and pool
+
+- **12 new validated files**, queue now 60: `blend160orig{,_logit,_hybrid,_rankraw,_rescale,_h3}`
+  and `blend160origm{...}`. Audited: 296,302 correct ids in sample order, all finite, no
+  duplicate-file collisions. **`blend160origm_h3` = 0.970049 ties `blend159av_h3` for the best
+  CV this workspace holds** and is a distinct file, so it is a legitimate queue entry — but it
+  is a tie reached by adding a member that costs 1–2e-6 everywhere else, so it does **not**
+  displace `blend159av_h3`/`blend158_h3` in the deadline pick.
+- Pool sweep: dataset list unchanged at 20 (fourth day static). One new kernel worth chasing,
+  `mohankrishnathalla/s6e8-tabm-oof-saver` — **it crashed**
+  (`rtdl.MLP.__init__() got an unexpected keyword argument 'd_layers'`) and emitted no
+  artefacts. Nothing importable.
+- Board: MILANFX still 0.97124. Three teams passed us today (Don Mani 0.97115, Optimistix
+  0.97114, cstdy 0.97110); we hold **rank 13 at 0.97106** with 12 teams ahead.
+
+### Next run, in this order
+
+1. **The counter rolls at 00:00 UTC. Send the six `blend158_*` transforms first** — unchanged
+   from the last two entries, still unsent, still the only open question that can change the
+   deadline pick, predictions already written. Then `blend159av_h3`, `blend159av`, and
+   `blend160origm_h3` (which is a genuinely different file at joint-top CV).
+2. Do **not** re-open the original dataset. Both routes are now measured here: concatenation
+   is monotonically harmful (−58e-6 at 1×, −3,340e-6 at 50×), and the separate-estimator route
+   — which dominates concatenation and produced the most decorrelated member ever built here —
+   is 12 readings of nothing-or-worse. The angle is closed with our own numbers.
+3. Member hunting is closed on a stronger basis than before: not "no decorrelated member
+   found" but "maxcorr 0.879 was found and it did nothing".
+4. Unchanged closed list: feature work, stacker `C`, meta-models, regime-aware anything,
+   NNLS/hill-climbing, combiner bagging, transform-subset enumeration, final-submission
+   calibration, seed-twinning members (1.4% pass-through).
+5. `lbhist.py` near the deadline against the final board, as previously noted.

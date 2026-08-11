@@ -94,7 +94,7 @@ CAT = gender (Male/Female/Other), stress_level (High/Low/Medium),
 | pairwise TE (2 parameterisations) | −0.0004 / −0.0001 | |
 | multi-resolution TE | −0.0003 | |
 | monotone constraints on screen columns | −0.0003 | |
-| **concatenating the original dataset** | **−0.0001** | see below — the usual Playground edge is DEAD here |
+| **concatenating the original dataset** | **−58e-6 at 1×, −3,340e-6 at 50×** | measured here 2026-08-11, monotone in dose — see the dedicated section below. The usual Playground edge is INVERTED here |
 | k-NN target encoding (0.936 standalone!) | +0.00001 | a new *view*, not a new *channel* |
 | second decimal digit, integer-ness | +0.00001 | |
 | TE smoothing sweep (10/50/200) | ≈0 | smoothing 10–20 is the sweet spot |
@@ -106,11 +106,88 @@ half the predictors from every tree and costs ~0.0006 (inner-holdout 0.96082 pla
 against 0.96140 at `colsample 1.0`, and it starts at AUC 0.849 where the others start at
 0.92+). Re-check it whenever the frame width changes.
 
-**The original dataset does not help.** It is
-`jayjoshi37/smartphone-usage-and-addiction-prediction`. Concatenating it measured
-**−0.00008**. The standard Playground "find the original dataset" edge is worthless here
-because the generator invented the structure that the models actually use. Use the
-original only as a *diagnostic* for what the generator did.
+## The original dataset — CLOSED, both routes measured here (2026-08-11)
+
+`jayjoshi37/smartphone-usage-and-addiction-prediction`, 7,500 rows × 16 cols, downloaded to
+`data/orig/`. No missing values in any predictor. Carries `addiction_level`, an ordinal
+None(819) < Mild(1373) < Moderate(2874) < Severe(2434) of which `addicted_label` is exactly
+`level >= Moderate` — a re-encoding of the target, not a side channel.
+
+**No leak.** Joining on all 12 predictors as strings: **0 of 691,369 train rows and 0 of
+296,302 test rows** match an original row verbatim. Do not re-check this.
+
+### The generating rule (read off the real data, `experiments/orig_transfer.py`)
+
+Only two columns matter in the original — `daily_screen_time_hours` and
+`social_media_hours` (`weekend` is 0.964-correlated with `daily`; everything else has
+marginal AUC 0.50):
+
+| cell | n | orig rate | **competition rate** |
+|---|---|---|---|
+| `social > 4.0` | 2,748 | 1.0000 | 0.9956 |
+| `social ≤ 4` & `daily > 8.0` | 2,093 | 1.0000 | 0.9680 |
+| `social ≤ 4` & `daily ≤ 6.0` | 1,634 | 0.0000 | **0.3253** |
+| `social ≤ 4` & `6 < daily ≤ 8` | 1,025 | 0.4556 | 0.6498 |
+
+86.3% of the real data is decided outright by two thresholds; the band is an irreducible
+coin flip (flat in both drivers, splits Mild 558 / Moderate 467). Honest 5-fold AUC on the
+original is **0.9885** — the real data is *more* separable than the synthetic frame ever
+gets (best held here 0.9700). **The generator did not add information, it smeared a crisp
+two-threshold rule into a ramp, and the ramp is what we are scored on.** Profiling `daily`
+at 0.25h inside `social ≤ 4`: 0.417 → 0.411 → 0.547 → 0.677 over (5.75,6.0] → (6.5,6.75].
+The kink is real and displaced off 6.0; full-resolution TE over 691k rows locates it better
+than a 7,500-row rule can state it.
+
+⚠ A GBM restricted to the 1,025-row band reaches **in-sample AUC 1.0** with flat
+importances. That is memorisation, not a recoverable sub-rule. Only quote 5-fold numbers.
+
+### Route 1 — separate estimator (`experiments/orig_member.py`). Dominates concat, adds nothing
+
+A model fitted on the originals alone never sees a competition label, so its prediction is
+honest on both splits and goes into the stack as a member with a stacker-chosen weight.
+
+| direction | AUC |
+|---|---|
+| orig-trained → competition train (transfer) | 0.8503 |
+| **same, trained on 10 MCAR-masked copies at the competition's own per-column missing rates** | **0.8864** |
+| comp-trained (one fold) → the original rows | 0.9630 |
+
+The **+36e-4 from matched missingness** is the transferable trick: the original has no NaNs,
+the competition frame is 13.9%/19.4% missing on the two rule drivers, so ~29% of competition
+rows are missing a driver and a complete-data model has never been asked which way a NaN
+should go. Binary target 0.8864 beats the 4-level ordinal 0.8805 and the hand-written rule
+0.8207.
+
+Saved as member `orig_binm`: solo 0.8864, **maxcorr 0.8792 hybrid / 0.8632 rankraw** — the
+most decorrelated object this workspace has ever held (pack min 0.9309, median 0.9946, prior
+record 0.9746). In the 160-member stack it is worth **−1e-6 to −2e-6 across logit / hybrid /
+rankraw / rescale / ens4 and exactly 0 under h3**; the weaker unmasked version is −3e-6 to
+−6e-6. Twelve readings, none positive.
+
+### Route 2 — literal concatenation (`experiments/orig_concat.py`). Monotonically harmful
+
+12 raw columns, native NaN, frozen folds, extra rows in the training half only:
+
+| training set | OOF AUC | delta |
+|---|---|---|
+| baseline | 0.962639 | — |
+| + 1× the 7,500 originals | 0.962581 | **−58e-6** |
+| + 10× | 0.961653 | −986e-6 |
+| + 50× | 0.959299 | −3,340e-6 |
+
+Monotone in dose; −58e-6 at 1× reproduces the public record's −0.0001. **The single most
+reliable edge in the Playground Series is not merely absent in S6E8, it is inverted.** Do
+not re-open this. Use the original only as a diagnostic for what the generator did.
+
+### What this proved about the pack, which matters more than the angle
+
+Every "member additions barely move the stack" finding here carried the objection that every
+member tested was ~0.99 correlated with the pack. `orig_binm` at maxcorr 0.879 retires it:
+different function class, different training distribution, and still nothing. **The
+constraint is not correlation — the pack's span already contains everything the 12 columns
+can say about this target, and a member is decorrelated from that span precisely to the
+extent that it is worse.** Member hunting is closed on that basis, not on "we have not found
+a decorrelated member yet".
 
 ## The frozen CV scheme — USE THIS, do not change it
 
