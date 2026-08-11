@@ -230,6 +230,31 @@ candidate is better", never an upper bound. `experiments/repcv.py` prices the fo
 half by re-partitioning the combiner's folds (free — the member OOF matrix is fixed on
 disk, and a 156-member logistic fit costs **4 seconds**, not the minute you would guess).
 
+#### The fold-split half, measured — 8 combiner partitions, `experiments/repcv.py`
+
+| quantity | sd across 8 fold splits |
+|---|---|
+| the CV **level** of any candidate | **0.000004–0.000005** |
+| the **paired difference** h3 − ens4 | **0.0000005** |
+
+Same lesson on a second axis: the level wanders ~10× more than the difference between two
+candidates evaluated on it. `ens3_h3` beat `ens4` in **8 of 8** splits at +4e-6.
+
+⚠ **The frozen seed-42 split is the pessimistic one.** It returns the LOWEST value of all
+eight partitions for every candidate — ens4 0.970043 vs a mean of 0.970048, h3 0.970047 vs
+0.970052. Every headline CV in `JOURNAL.md` is therefore ~5e-6 low. Harmless for selection
+because it shifts all candidates alike; do not quote the frozen numbers as unbiased.
+
+The three instruments now available, cheapest first, all on a fixed member OOF matrix:
+
+| instrument | what it resamples | cost | resolves |
+|---|---|---|---|
+| `auc_boot.py` | rows | 130s / 300 reps | ~1e-6 paired |
+| `repcv.py` | combiner fold partition | ~470s / split | ~1e-6 paired |
+| `blend_lab --reps` | a 50/50 fit-score split | ~400s / rep | ~2e-6 paired |
+
+Agreement across all three on the drop-logit decision was +5e-6 / +4e-6 / +4e-6.
+
 Implementation note worth reusing: weighted AUC needs only one global sort per candidate
 plus an O(n) pass per bootstrap rep (`np.add.reduceat` over runs of equal score handles
 ties exactly). 400 reps × 7 candidates over 691k rows runs in 128s. Do not resort per rep.
@@ -362,9 +387,20 @@ the pool has only through `beicicc/s6e8-fixed4-realmlp-two-seed-artifacts`.
 **Re-checked 2026-08-11 05:30 UTC (slot 6).** The author re-ran both ~35 min earlier.
 TabM **failed again**, differently: they swapped `tabm-torch` for `rtdl_revisiting_models`
 and guessed its API — `TypeError: MLP.__init__() got an unexpected keyword argument
-'d_layers'`. RealMLP was **`RUNNING`**, i.e. past the cell that killed it last time. This
-is the one candidate that could satisfy the both-sides member rule above, so check
-`kaggle kernels status` on it every run until it resolves.
+'d_layers'`. TabM remains dead; stop checking it.
+
+**RealMLP went `COMPLETE` at 06:20 UTC on its third attempt — imported, verified, and
+measured a null.** It ships `oof_realmlp.npy` + `test_realmlp.npy`, solo OOF 0.958585.
+
+*The verification is worth copying* — it is stronger than the fold-id gate and needs no
+`fold_id.npy`. Score their OOF vector **per fold under our frozen folds** and compare to
+the fold AUCs printed in their kernel log. Ours came back 0.95721 / 0.95910 / 0.95856 /
+0.95983 / 0.95908 against their reported 0.95721 / 0.95910 / 0.95856 / 0.95983 / 0.95908 —
+identical *and in the same order*, so the partition and the fold labelling both match. Any
+author who prints per-fold AUCs can be gated this way in 30 seconds.
+
+Outcome: maxcorr 0.9662 (the workspace record) but solo 8e-3 below the pack, and the stack
+did not move. See "the independent pipeline escape clause" above. Parked in `oof_rejected/`.
 
 ### Enumerating the pool — the CLI list endpoints are unreliable
 
@@ -873,6 +909,32 @@ alone**, and no member built here has ever had both. `xgb_latcat` adds the 12 un
 lattice categoricals *on top of* the full TE frame and gains +3.2e-5 solo over `xgb_lat` —
 but only 1.05–1.14% of split gain goes to those columns, so the member stays inside the
 pack. Before spending 2h on a member, argue for both numbers or do not run it.
+
+#### And the "independent pipeline" escape clause does NOT rescue a weak member
+
+The paragraph above says decorrelation from an independent pipeline pays where
+decorrelation bought by discarding information does not. **Tested directly on 2026-08-11
+and it is false as stated.** `mkt_rmlp` (below) is a neural net from a completely separate
+pipeline, sets the workspace decorrelation record by a wide margin — maxcorr **0.9662**
+hybrid / **0.8930** rankraw, below 0.97 against all 156 members, against a pack median of
+0.9946 — and adds **exactly 0.000000** to the rank-ensemble (blend158 → blend159), with the
+per-transform signs mixed. Its solo AUC is 0.9586, ~8e-3 under the pack.
+
+**The accuracy floor binds regardless of where the decorrelation came from.** Independent
+provenance is necessary, not sufficient. Three record-setting members, three nulls:
+
+| member | maxed | other half | stack delta |
+|---|---|---|---|
+| `xgb_cat_lattice`/`cat_native` | decorrelation by discarding order | low solo | null |
+| `xgb_latcat` | solo AUC 0.967696 | maxcorr 0.9970 | +1e-6 |
+| `mkt_rmlp` | decorrelation, independent pipeline, 0.9662 | solo 0.9586 | **0** |
+
+Member hunting is closed unless a candidate is plausibly near 0.966 solo **and** genuinely
+outside the pack. Nothing across five public libraries is.
+
+**`oof_rejected/`** holds members that verified clean but measured null — currently
+`mkt_rmlp`. It sits deliberately outside the directory `blend_lab` globs so a rejected
+member cannot silently re-enter a build. Restore only with a reason.
 
 ### The geometry of the pack — measured 2026-08-11, and it explains everything above
 

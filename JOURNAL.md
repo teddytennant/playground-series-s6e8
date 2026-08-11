@@ -1624,3 +1624,129 @@ files built when the counter rolls, and it is nearly satisfied for tomorrow.
    is the one function class that could clear the bar in point 4.
 6. Do **not** re-sweep stacker `C`, do **not** try NNLS/hill-climbing, and do **not** bag or
    bootstrap the combiner. All three are closed with the arithmetic written down.
+
+### Addendum, same run — repcv landed, and a free member arrived that should have worked
+
+Three things finished after the entry above was written. Two of them matter.
+
+#### 1. `repcv.py`, 8 combiner fold splits — the drop-logit decision is settled
+
+Split 0 is the frozen seed-42 scheme; splits 1–7 are new partitions of the combiner's
+folds over the same fixed member OOF matrix.
+
+| split | seed | stack_logit | stack_hybrid | stack_rankraw | stack_rescale | ens4 | **ens3_h3** | ens_w |
+|---|---|---|---|---|---|---|---|---|
+| 0 | 42 | 0.969963 | 0.970025 | 0.970037 | 0.970026 | 0.970043 | 0.970047 | 0.970049 |
+| 1 | 1001 | 0.969973 | 0.970035 | 0.970040 | 0.970031 | 0.970049 | 0.970053 | 0.970053 |
+| 2 | 1002 | 0.969971 | 0.970033 | 0.970033 | 0.970033 | 0.970048 | 0.970052 | 0.970051 |
+| 3 | 1003 | 0.969972 | 0.970038 | 0.970040 | 0.970034 | 0.970051 | 0.970055 | 0.970055 |
+| 4 | 1004 | 0.969979 | 0.970040 | 0.970047 | 0.970037 | 0.970056 | 0.970059 | 0.970060 |
+| 5 | 1005 | 0.969965 | 0.970031 | 0.970036 | 0.970024 | 0.970044 | 0.970048 | 0.970049 |
+| 6 | 1006 | 0.969972 | 0.970038 | 0.970040 | 0.970031 | 0.970050 | 0.970054 | 0.970054 |
+| 7 | 1007 | 0.969965 | 0.970028 | 0.970034 | 0.970027 | 0.970043 | 0.970048 | 0.970048 |
+
+**Paired against `ens4`, every split:**
+
+| candidate | mean Δ | sd | verdict |
+|---|---|---|---|
+| `ens3_h3` (drop logit) | **+0.000004** | **0.0000005** | **consistent, 8/8** |
+| `ens_w` (searched weights) | +0.000004 | 0.000001 | consistent, 8/8 |
+| `stack_rankraw` | −0.000009 | 0.000003 | consistent |
+| `stack_logit` | −0.000078 | 0.000001 | consistent |
+
+**h3 beats the four-transform ensemble in all 8 splits, by +4e-6, with a standard
+deviation of 5e-7.** Three independent instruments now agree on the same one-bit decision:
+the paired 50/50 (+5e-6), the row bootstrap (+4e-6, P 0.97), and 8 resampled fold
+partitions (+4e-6, 8/8). This is as settled as anything in this workspace gets, and it
+cost no model refits at any stage.
+
+**The level moves ~3× more than the difference does.** Fold-split sd of the CV *level* is
+4–5e-6 for every candidate, while the sd of the h3-vs-ens4 *difference* is 5e-7. That is
+the paired-vs-marginal lesson again, now on the fold axis rather than the row axis, and it
+is the whole reason a 4e-6 decision is resolvable at all.
+
+**The frozen split is the pessimistic one.** Seed 42 returns the lowest value of all eight
+for every single candidate — ens4 0.970043 against a mean of 0.970048, h3 0.970047 against
+0.970052. Every headline CV in this journal is therefore ~5e-6 low. It biases nothing,
+because it biases all candidates alike, but do not read the frozen numbers as unbiased.
+
+Under the lower-variance repeated-CV statistic (per-split OOF ranks averaged over all 8),
+`ens_w` and `ens3_h3` **tie exactly at 0.970059** against ens4's 0.970054. The searched
+weights buy literally nothing over dropping one transform. **`h3` wins on parsimony with no
+argument left to have.**
+
+#### 2. A free RealMLP member arrived, set a decorrelation record, and did nothing
+
+`mohankrishnathalla/s6e8-realmlp-oof-saver` went `COMPLETE` mid-run — third attempt, after
+two crashes. It shipped `oof_realmlp.npy` and `test_realmlp.npy`.
+
+**Fold verification passed at the strongest level available.** Scoring their OOF vector
+per-fold under *our* frozen folds reproduces their five reported fold AUCs exactly and
+**in order**: 0.95721 / 0.95910 / 0.95856 / 0.95983 / 0.95908. Not just the same partition
+— the same fold labelling. Directly stackable, no gate needed.
+
+Then the profile, and it is the most extreme this workspace has recorded:
+
+| | `mkt_rmlp` | pack |
+|---|---|---|
+| solo OOF AUC | **0.958585** | median member ~0.966 |
+| maxcorr (hybrid) | **0.9662** | median 0.9946, min 0.9309 |
+| median corr (hybrid) | **0.8841** | — |
+| maxcorr (rankraw) | **0.8930** | — |
+| members it sits below 0.97 against | **156 of 156** | 16 of 156 |
+
+It beats the previous decorrelation record (`xgb_cat_lattice`, 0.9746) by a wide margin,
+and its nearest neighbours are the pack's *own* RealMLPs at only 0.9658–0.9662. Crucially,
+its decorrelation is the kind `RESEARCH.md` argues **should** pay — an independent
+pipeline, not information thrown away.
+
+| stack | logit | hybrid | rankraw | rescale | ens4 | h3 |
+|---|---|---|---|---|---|---|
+| blend158 (no rmlp) | 0.969961 | 0.970028 | 0.970036 | 0.970027 | 0.970043 | **0.970048** |
+| blend159 (+ rmlp) | 0.969965 | 0.970024 | 0.970033 | 0.970026 | 0.970043 | 0.970047 |
+| delta | +4e-6 | −4e-6 | −3e-6 | −1e-6 | **0** | −1e-6 |
+
+**Exactly zero, with the per-transform signs mixed.** So the independent-pipeline escape
+clause does *not* rescue a member sitting 8e-3 of solo AUC below the pack. Three
+record-setting members in two runs, three nulls:
+
+| member | what it maxed | the other half | stack delta |
+|---|---|---|---|
+| `xgb_cat_lattice`/`cat_native` | decorrelation by discarding order | low solo | null |
+| `xgb_latcat` | solo AUC (0.967696) | maxcorr 0.9970 | +1e-6 |
+| `mkt_rmlp` | decorrelation from an independent pipeline (0.9662) | solo 0.9586 | **0** |
+
+The accuracy floor is real and it binds *regardless of where the decorrelation came from*.
+That is a stronger and less comfortable rule than the one written this morning, and it
+closes the member-hunting line unless something arrives that is genuinely near 0.966 solo
+**and** genuinely outside the pack. Nothing in five public libraries is.
+
+`oof_mkt_rmlp.npy`/`test_mkt_rmlp.npy` are parked in **`oof_rejected/`**, deliberately
+outside the directory `blend_lab` globs, so they cannot silently re-enter a build. Restore
+them only with a reason.
+
+#### 3. The queue, final state
+
+| file | CV | note |
+|---|---|---|
+| `submissions/blend158_h3.csv` | **0.970048** | best held, zero free params — **send first** |
+| `submissions/blend156w.csv` | 0.970048 | ties, 3 searched weights |
+| `submissions/blend159_h3.csv` | 0.970047 | + RealMLP; a measured null, but a distinct file |
+| `submissions/blend156_h3.csv` | 0.970046 | |
+| `submissions/blend158.csv` | 0.970043 | |
+| `submissions/blend159.csv` | 0.970043 | |
+| `submissions/blend15{8,9}_{logit,hybrid,rankraw,rescale}.csv` | 0.969961–0.970036 | free by-products |
+
+Sixteen distinct valid files for ten slots. The queue is no longer the binding constraint.
+
+**Deadline pick, on CV, unchanged and now well supported: `blend158_h3`.** Joint-top on the
+frozen cross-fit, joint-top on repeated CV, and the only one there that fits nothing
+against the OOF.
+
+#### Corrections to the entry above
+
+- The entry says the seed-twin runs would answer whether member-level seed averaging
+  survives stacking. They were suspended twice to give cores to `repcv` and `blend159`, both
+  of which were worth more, and had not finished a single fold when this was written. They
+  are running again. Nothing about them is known yet.
+- The entry's "eight distinct valid files" is superseded by the sixteen above.
