@@ -1368,3 +1368,54 @@ the counter rolls**. Seven of today's ten agent-slots could not submit at all.
    idea left, and its prior is weak.
 6. Re-check the two `mohankrishnathalla` OOF savers — a working RealMLP is a function
    class the pool barely has.
+
+### Addendum, same run — the searched-weight cross-fit landed
+
+`transform_weights.py --crossfit` finished after the entry above was written. Weights are
+chosen on 4 of the frozen 5 folds and applied to the held-out fold, so the number is the
+honest estimate of the *procedure*, and the shipped file uses weights fitted on all rows.
+
+| candidate | cross-fitted CV | free params |
+|---|---|---|
+| `blend156` — equal over 4 transforms (sent, 0.97106 LB) | 0.970042 | 0 |
+| `blend156_h3` — drop `logit`, equal over 3 | **0.970046** | 0 (one bit) |
+| `blend156w` — searched simplex weights | **0.970047** | 3 |
+
+**Both instruments agree to 1e-6.** Paired predicted +5e-6 (`drop_worst`) and +6e-6
+(`searched`); the cross-fit returned +4e-6 and +5e-6. That agreement is the most
+reassuring thing in this entry — two evaluations with different noise structure, on a
+result small enough that either alone would be arguable.
+
+Per-fold searched weights, and they are stable:
+
+| fold | logit | hybrid | rankraw | rescale |
+|---|---|---|---|---|
+| 0 | **0.00** | 0.20 | 0.45 | 0.30 |
+| 1 | 0.10 | 0.20 | 0.50 | 0.15 |
+| 2 | 0.10 | 0.15 | 0.50 | 0.20 |
+| 3 | 0.10 | 0.15 | 0.50 | 0.20 |
+| 4 | 0.05 | 0.20 | 0.50 | 0.20 |
+| mean | 0.07 | 0.18 | **0.49** | 0.21 |
+
+Given the whole simplex, the search puts **half the weight on `rankraw`** in every fold
+and starves `logit` to 0.00–0.10. `rankraw` is also the one transform with a mechanism
+argument for it (it equalises the OOF/test scale fully), so the search is recovering
+something the workspace already had a reason to believe, which is the good case.
+
+**Deadline ranking, on CV: `blend156w` (0.970047), `blend156_h3` (0.970046), `blend156`
+(0.970042).** The first two are separated by 1e-6 and are not distinguishable — by this
+journal's own standing rule, nothing under ~1e-5 is believable. If they must be split, I
+would send both and, at the deadline, prefer **`blend156_h3`**: it ties on CV to within
+noise while fitting *zero* free parameters against the OOF, and the Rogii failure was
+caused by exactly this class of tuning-against-a-holdout. The searched vector is the
+better *number*; the dropped transform is the better *decision*.
+
+Both files validated: 296,302 rows, ids identical to `sample_submission`, no NaN, and
+byte-distinct from each other and from `blend156` (h3 vs blend156 spearman 0.999824), so
+neither is the pointless duplicate submission.
+
+Also checked, since `blend_lab.py` was edited while slot 4's waiter is queued to run it:
+the waiter's exact command still parses, `--lam`/`--standardize` default to the old
+behaviour, and the `max_iter` 3000 → 5000 change is **inert** — lbfgs converges in
+**257 iterations** on a fold-sized fit, nowhere near either cap. `blend158` will stay
+comparable to `blend156`.
