@@ -90,6 +90,7 @@ CAT = gender (Male/Female/Other), stress_level (High/Low/Medium),
 | **pseudo-labeling confident test rows** | **−0.0034** | worst of the lot |
 | naive mean of a 12-model library | −0.0012 | cost scales with the worst member |
 | tree depth 9–13 | to −0.0011 | |
+| `colsample_bytree 0.5` on a 12-column frame | −0.0006 | see below — it is a feature-set setting, not a model setting |
 | pairwise TE (2 parameterisations) | −0.0004 / −0.0001 | |
 | multi-resolution TE | −0.0003 | |
 | monotone constraints on screen columns | −0.0003 | |
@@ -98,6 +99,12 @@ CAT = gender (Male/Female/Other), stress_level (High/Low/Medium),
 | second decimal digit, integer-ness | +0.00001 | |
 | TE smoothing sweep (10/50/200) | ≈0 | smoothing 10–20 is the sweet spot |
 | NA-indicator features | −0.00001 | missingness is MCAR |
+
+**`colsample_bytree` belongs to the feature set, not to the model.** `0.5` was inherited
+unexamined from the library's 184-column lattice matrices. On a 12-column frame it drops
+half the predictors from every tree and costs ~0.0006 (inner-holdout 0.96082 plateau
+against 0.96140 at `colsample 1.0`, and it starts at AUC 0.849 where the others start at
+0.92+). Re-check it whenever the frame width changes.
 
 **The original dataset does not help.** It is
 `jayjoshi37/smartphone-usage-and-addiction-prediction`. Concatenating it measured
@@ -139,11 +146,26 @@ All twelve of our own points, complete as of 2026-08-11:
 | `blend150fx` | 0.970032 | 0.97104 | +0.001008 |
 | `blend150sx_rankraw` | 0.970022 | 0.97102 | +0.000998 |
 | `blend150sx` | 0.970033 | 0.97104 | +0.001007 |
+| `blend150sx_hybrid` | 0.970016 | 0.97101 | +0.000994 |
+| `blend150sx_logit` | 0.969955 | 0.97104 | +0.001085 |
+| `blend153` | 0.970034 | 0.97104 | +0.001006 |
+| `blend156_rescale` | 0.970025 | 0.97105 | +0.001025 |
+| `blend156_rankraw` | 0.970036 | 0.97104 | +0.001004 |
+| **`blend156`** | **0.970042** | **0.97106** | +0.001018 |
 
-`blend150sx` differs from `blend150fx` by one added member and one removed exact
-duplicate, and scored **identically, 0.97104**. Its `rankraw` variant likewise matched
-`blend150fx_rankraw` exactly at 0.97102. **A one-member change is invisible to the public
-slice** — confirmed twice on the same run.
+#### ⚠ "A one-member change is invisible to the public slice" — withdrawn 2026-08-11
+
+That was written after `blend150sx` matched `blend150fx` at 0.97104 and their `rankraw`
+variants matched at 0.97102, i.e. from the two transforms where it happened to hold. The
+other two were sent the next run and **both moved**: `blend150sx_hybrid` 0.97101 against
+`blend150fx_hybrid` 0.97099, and `blend150sx_logit` 0.97104 against `blend150fx_logit`
+0.97103. So a one-member change is worth 0 to 2e-5 of public score, sign unpredictable —
+which is just the ±5e-5 slice scatter again, not a special fact about one member.
+
+The general rule below is the one that survives: within the top cluster the public slice
+cannot resolve CV differences below ~1e-4. Fresh confirmation the same run —
+`blend156_rescale` is **4th of four** on CV (0.970025) and scored 0.97105, above
+`blend156_rankraw`, which beats it by 1.1e-5 on CV.
 
 The one gain large enough to measure, +0.000340 CV, transferred as +0.00019 LB — about
 **56% pass-through**. So: **do not quote "CV + 0.0012" as an LB estimate**, and do not
@@ -348,6 +370,38 @@ So the only lever with demonstrated size still available is **a genuinely second
 pipeline** built here — a different missing-data treatment or a no-TE representation — not
 more models on `agent/features.py`'s single lineage.
 
+#### Ordering, not target encoding, is what decorrelates a member — measured 2026-08-11
+
+Five TE-free / alternative-upstream members were built on the frozen folds and profiled in
+the **hybrid** space (`experiments/member_profile.py`). Two upstreams, two model families,
+and the split is completely clean:
+
+| member | representation | solo OOF | maxcorr | median corr |
+|---|---|---|---|---|
+| `xgb_cat_lattice` | all 12 cols as **unordered** lattice categoricals, no TE | 0.961074 | **0.9746** | 0.9350 |
+| `cat_native` | same, but NaN lifted to its own level | 0.958941 | **0.9762** | 0.9532 |
+| `cat_raw` | 12 raw cols, no TE, **ordering kept** | 0.963075 | 0.9933 | 0.9776 |
+| `xgb_raw_nan` | 12 raw cols, no TE, **ordering kept** | 0.965152 | 0.9947 | 0.9801 |
+| `cat_lat` | our own TE pipeline | 0.966353 | 0.9948 | 0.9677 |
+
+Pack reference: median maxcorr 0.9949, min 0.9309 (`logreg`), 15 of 149 below 0.97.
+
+1. **Dropping target encoding does nothing for decorrelation.** `xgb_raw_nan`'s nearest
+   neighbour is `bei_xgb_identity_digit_raw12` at 0.9947 — beicicc already ships that
+   pipeline. "No TE at all", named by three consecutive runs as the honest second lineage,
+   is a **rediscovery**, not a new one. Same for `cat_raw` (nearest `bolt_cat_cpu5` 0.9933).
+2. **Discarding the numeric ordering is what moves a member.** Replicated across XGBoost
+   and CatBoost with *different* NaN handling, so it is a property of the representation.
+   The two ordering-discarded members correlate only **0.9478** with each other; the two
+   raw ones correlate **0.9902**.
+3. **And it does not pay** — see the correction under "Attribution of the gain". Low
+   correlation obtained this way is the model being worse, not a new direction.
+
+**Untested and the obvious next move:** keep the full TE pipeline and *add* the unordered
+lattice categoricals as extra columns instead of replacing everything with them. That
+would separate the two effects — if the screening rule is right, such a member sits near
+0.967 solo with maxcorr well under 0.99.
+
 **Open opening (superseded — kept for the record):** the library's LightGBM hyperparameters on the lattice feature set were
 **hand-set, never tuned** (`lr 0.035, num_leaves 96, min_child_samples 40, subsample 0.9,
 colsample 0.6, reg_lambda 5, max_depth 7`). The only LGBM tuning in `hyperparameters.json`
@@ -380,8 +434,14 @@ lattice features is genuinely unexplored ground.
 
 - 16 CPU cores, 31 GB RAM, **no GPU**. `device="cuda"` paths in public code must be
   disabled.
-- venv at `.venv` (uv, Python 3.12): pandas, numpy, scikit-learn, lightgbm, xgboost,
-  catboost, pyarrow.
+- venv at `.venv` (uv, Python 3.12): pandas, numpy, scikit-learn, lightgbm, **xgboost
+  3.4.0**, catboost, pyarrow.
+- ⚠ **XGBoost rejects a pandas category INDEX of floating dtype** —
+  `Category index from DataFrame has floating point dtype`. The numeric lattice levels are
+  floats, so `both[c].astype("category")` fails. Factorize to integer level ids and
+  rebuild: `pd.Categorical.from_codes(pd.factorize(s, sort=True)[0], np.arange(k, "int32"))`.
+  Code `-1` (NaN) comes back as a missing value, which is what makes XGBoost route it by
+  the node's learned default direction rather than as a level.
 - Per-fold design matrices are cached to `cache/` by `experiments/build_cache.py` so
   hyperparameter trials cost only LightGBM time.
 - The transformed member matrix is cached to `cache/meta_<transform>.npz` by
@@ -399,6 +459,16 @@ ps -eo pcpu,pid,comm --sort=-pcpu | head        # who else is burning CPU
 ps -o ppid= -p <pid>                            # trace ownership up to a `claude` process
 ```
 
+- ⚠ **`pkill -f "<script> --name foo"` also kills the bash wrapper that launched it**,
+  because the wrapper's own command line contains the pattern. It killed this session's
+  shell mid-command (exit 144) on 2026-08-11. Use `pgrep -f ... | head -1` then
+  `kill <pid>`.
+- Members left in `oof/` **outlive their author's session**. On 2026-08-11 the three
+  `cat_*` members were owned by a session that had already exited (their processes were
+  reparented to `systemd --user`, PPID 5788). Two live peers were messaged and neither
+  owned them. Trace ownership with `ps -o ppid= -p <pid>`; a PPID of 1 or of the systemd
+  user manager means **there is nobody to ask** — the members are yours to use, and no one
+  else is going to submit them.
 - **Before a long job:** check the load. Two agents at `n_jobs=-1` are slower than one.
 - **Before submitting:** check whether a peer is building the same artifact. A peer session
   was independently running `stack.py --submit-name stack_pub151_hybrid` off the very
@@ -420,6 +490,23 @@ stacker's coefficients toward itself, and CV is *the* deadline decision rule.
 `eval_set`). This is why the strongest independent public library names its datasets
 `fixed900` / `fixed1500` / `fixed4000`. Keep the early-stopping path for *tuning* only,
 where the comparison is what matters and the absolute level does not.
+
+#### The honest way to tune here — `run_xgb.py --probe` / `run_catboost.py --inner`
+
+"Tuning only" still leaks if the tuning holdout is a **validation fold**, because that is
+the fold that becomes the OOF, and the round count then carries its labels into the
+member. Both runners now carve the tuning holdout out of the fold's **training rows**:
+
+```bash
+run_xgb.py --name probeC --mode cat --probe 0.08 --rounds 4000 --probe-stopping 200 ...
+# -> "PROBE best inner AUC 0.961600 @ round 401 of 601 -- nothing saved"
+run_xgb.py --name xgb_cat_lattice --mode cat --rounds 450 ...   # frozen, no eval_set
+```
+
+`--probe` saves nothing at all, so a probe can never become a member by accident. Freeze
+the round it reports (rounded up ~10%, since the real fold trains on ~8% more rows) into
+`--rounds` and run with no eval set. Costs nothing over the old fold-0 sweep and removes
+the last place optimism was entering.
 
 **Measured size of the correction** (identical params, identical folds, 2000 fixed rounds):
 
@@ -585,6 +672,36 @@ Two things to carry forward, and they pull in different directions:
 Judge candidates on correlation to the pack first and solo AUC second — but do not
 *reject* a group for being GBDT-shaped if it comes from a pipeline you do not already
 hold. Measure it.
+
+#### ⚠ "Correlation first, solo AUC second" is BACKWARDS below ~0.966 solo — 2026-08-11
+
+Two members were built specifically to be decorrelated and they are, by a wide margin —
+and they were worth **nothing**. See "Ordering, not target encoding" below for how they
+were built. Cross-fitted on the frozen folds, identical drops, four transforms:
+
+| group added | n | maxcorr | solo OOF | logit / hybrid / rankraw / rescale | ensemble |
+|---|---|---|---|---|---|
+| the decorrelated pair | 2 | 0.9746, 0.9762 | 0.9611, 0.9589 | −1e-6 / +1e-6 / +5e-6 / +3e-6 | **+1e-6** |
+| the redundant trio | 3 | 0.9933–0.9948 | 0.9631–0.9664 | +8e-6 / +6e-6 / +9e-6 / +5e-6 | **+8e-6** |
+
+The pair sign-flips and sits inside the ±4e-6 solver floor — a null. The trio, whose
+pipelines the pack **already holds**, is one sign across all four transforms and carries
+effectively the whole 151 → 156 gain.
+
+**Mechanism.** The pack is 95.4% PC1. A member gets to maxcorr 0.9746 here by being
+*worse* — the pair are the two lowest solo AUCs of the five. Their residual is noise, not
+signal in a new direction. The `decorr` group that did pay on slot 3 had solo AUCs near
+the pack's.
+
+**Decorrelation bought by discarding information is not decorrelation from an independent
+pipeline.** The first destroys the signal that would have made the low correlation worth
+having; only the second pays. This reconciles the whole record: 35 ordinary GBDTs from
+boltuzamaki paid, while both deliberate decorrelation attempts built here — the depth-3
+LightGBM stump (maxcorr 0.9961) and the categorical recode (0.9746) — did not.
+
+**The operational rule:** screen on the *pair* (low maxcorr AND solo ≥ ~0.966), never on
+correlation alone. A candidate below ~0.966 solo has to earn its place on a paired
+measurement, whatever its correlation says.
 
 ### The geometry of the pack — measured 2026-08-11, and it explains everything above
 

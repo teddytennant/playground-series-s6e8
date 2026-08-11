@@ -1041,3 +1041,166 @@ something the journal does not already know".
 5. **Select on CV at the deadline.** `blend150sx` (0.970033) then `blend150fx` (0.970032).
    Do *not* be tempted by `blend150fx_logit`, which is 8e-5 worse on CV, has a mechanism
    argument against it, and scored 0.97103 on the public slice.
+
+---
+
+## 2026-08-11 — slot 3 of 10 — angle: XGBoost as the third leg
+
+**Result: `blend156`, cross-fitted CV 0.970042 (best held) → public 0.97106 (best held).**
+Both records, and the first LB move in three runs. But the *reason* it moved is the
+opposite of what this workspace has believed for two days, and that is the real output.
+
+### The angle, taken at the pipeline level rather than the hyperparameter level
+
+The brief asked for a tuned XGBoost third leg. Two runs have now closed tuning: LightGBM
+tuned for solo AUC was +0.00003 (null), and LightGBM tuned for *decorrelation* — depth
+7→3, leaves 96→8 — still landed at maxcorr 0.9961. The recorded conclusion is that where
+a member lands is set by its **upstream**, not its knobs. So the angle was kept (XGBoost,
+frozen folds, honestly tuned) and pointed at the upstream: `experiments/run_xgb.py` grew
+`--mode {lat,cat,raw}`, two of which are pipelines nothing here had built.
+
+- **`cat`** — all 12 columns, including all nine numerics, as **unordered** pandas
+  categoricals at full lattice resolution. No target encoding at all. XGBoost splits
+  categoricals by sorting levels on their gradient/hessian ratio *inside the node and
+  refitting at every split*, so this is an adaptive per-level target statistic in place
+  of our frozen fold-safe smoothed TE. Numeric ordering is discarded on purpose.
+- **`raw`** — the 12 columns as the generator wrote them, NaN preserved so XGBoost learns
+  a default direction. No imputation, no TE, no lattice.
+
+**Tuning was done honestly, and this is a method improvement worth keeping.** `--probe`
+carves its holdout out of **fold 0's training rows** and saves nothing; the round count it
+picks is then frozen into `--rounds` for a 5-fold run with no eval set. Previous tuning
+here compared configurations on fold 0's *validation* rows — the rows that become the OOF.
+Four probes ran; A (`colsample 0.5`) was killed once dominated.
+
+| probe | mode | config | best inner AUC | @ round |
+|---|---|---|---|---|
+| A | cat | d6, mcw 60, mct 64, colsample 0.5 | 0.96082 (plateau, killed) | — |
+| B | cat | d6, mcw 300, mct 256, colsample 1.0 | 0.961407 | 425 |
+| C | cat | d8, mcw 300, mct 256, colsample 0.8 | 0.961600 | 401 |
+| R | raw | d8, mcw 60, colsample 1.0 | 0.965508 | 2579 |
+
+`colsample_bytree 0.5`, inherited unexamined from the library's 184-column feature set,
+is actively harmful on a 12-column frame — it starts at 0.849 where the others start at
+0.92+. That knob was never the model's; it was the feature set's.
+
+### The 2×2 that came out of it, and it is not the one that was expected
+
+Full 5-fold members, plus three CatBoost members a peer session left in the shared `oof/`
+covering the same three upstreams. All five profiled with the new
+`experiments/member_profile.py`, **in the hybrid space the stacker is fitted in** — never
+again on the raw `to_logit` scale that manufactured the bogus "extratrees maxcorr 0.811".
+
+| member | representation | solo OOF | maxcorr | median corr |
+|---|---|---|---|---|
+| `xgb_cat_lattice` | unordered lattice categoricals | 0.961074 | **0.9746** | 0.9350 |
+| `cat_native` | unordered lattice categoricals, NaN a level | 0.958941 | **0.9762** | 0.9532 |
+| `cat_raw` | 12 raw columns, ordering kept | 0.963075 | 0.9933 | 0.9776 |
+| `xgb_raw_nan` | 12 raw columns, ordering kept | 0.965152 | 0.9947 | 0.9801 |
+| `cat_lat` | our own TE pipeline | 0.966353 | 0.9948 | 0.9677 |
+
+Pack reference: median maxcorr **0.9949**, minimum 0.9309 (`logreg`), only 15 of 149
+below 0.97.
+
+**Dropping target encoding is not what buys decorrelation. Discarding the numeric
+ORDERING is.** The two ordering-discarded members are the most decorrelated things ever
+built in this workspace, 146/149 and 135/149 of the pack below 0.97. The two TE-free
+members that keep ordering land in the dense pack, and `xgb_raw_nan`'s nearest neighbour
+is `bei_xgb_identity_digit_raw12` at 0.9947 — beicicc **already holds that pipeline**, so
+"no TE at all", the second lineage the last three runs kept naming as the way forward, is
+a rediscovery rather than a new one.
+
+Replicated across two model families with different missing-value handling (XGB routes
+NaN by default direction, CatBoost lifts it to a level), so it is a property of the
+representation, not of either implementation. The two ordering-discarded members correlate
+only **0.9478** with each other; the two raw ones correlate **0.9902**.
+
+### The ablation — and it inverts the correlation heuristic
+
+Three stacks, identical cross-fit on the frozen folds, same drops.
+
+| transform | 151 `blend150sx` | 153 (+2 decorrelated) | 156 (+3 redundant) |
+|---|---|---|---|
+| logit | 0.969955 | 0.969954 | 0.969962 |
+| hybrid | 0.970016 | 0.970017 | 0.970023 |
+| rankraw | 0.970022 | 0.970027 | 0.970036 |
+| rescale | 0.970017 | 0.970020 | 0.970025 |
+| **rank-ensemble** | 0.970033 | 0.970034 | **0.970042** |
+
+- **151 → 153**, adding the two most decorrelated members ever built here:
+  **−1e-6 / +1e-6 / +5e-6 / +3e-6, ensemble +1e-6.** Sign-flipping, inside the ±4e-6
+  solver floor. **A null.**
+- **153 → 156**, adding the three that duplicate pipelines already held:
+  **+8e-6 / +6e-6 / +9e-6 / +5e-6, ensemble +8e-6.** All one sign, above the solver floor.
+  **Effectively the entire gain.**
+
+`RESEARCH.md` says "judge candidates on correlation to the pack first and solo AUC
+second." **On this evidence that ordering is backwards**, and the mechanism is visible:
+the pack is 95.4% PC1, and a member reaches maxcorr 0.9746 here by being *worse*
+(0.9611 and 0.9589 solo, the two lowest of the five). Its residual is noise, not signal in
+a new direction. The `decorr` group that paid on slot 3 had solo AUCs near the pack's.
+
+**Decorrelation bought by discarding information is not the same thing as decorrelation
+from an independent pipeline.** Discarding the ordering buys the low correlation and
+destroys the signal that would have made it worth having, in one move. That reconciles
+every result here: what pays is an independent *author's* upstream at comparable accuracy,
+which is why 35 ordinary GBDTs from boltuzamaki paid and both of tonight's deliberate
+decorrelation attempts — the depth-3 stump and the categorical recode — did not.
+
+Honest scale note: the whole 151 → 156 gain is +9e-6 for five members, ~1.8e-6 each,
+against +5.2e-6/member for the ext2 import. Five members from two genuinely new
+representations is a *small* result. It is above the solver floor and sign-consistent
+across four transforms, which is why it is reported as real rather than as noise.
+
+### Submitted this run — 6 of 10, all 10 now used for the UTC day
+
+| # | entry | CV | public LB | offset |
+|---|---|---|---|---|
+| 5 | `blend150sx_hybrid` | 0.970016 | 0.97101 | +0.000994 |
+| 6 | `blend150sx_logit` | 0.969955 | 0.97104 | +0.001085 |
+| 7 | **`blend156`** | **0.970042** | **0.97106** | +0.001018 |
+| 8 | `blend156_rankraw` | 0.970036 | 0.97104 | +0.001004 |
+| 9 | `blend153` | 0.970034 | 0.97104 | +0.001006 |
+| 10 | `blend156_rescale` | 0.970025 | 0.97105 | +0.001025 |
+
+**`blend156` is now both the CV leader and the LB leader** — the first time those have
+agreed on a new entry. 0.97104 → 0.97106 moves us from rank 15 to about rank 13 of 1389.
+
+Two corrections fall out of the first two rows. Last run claimed "a one-member change is
+invisible to the public slice", from `rankraw` and the ensemble both matching exactly.
+Tested on the other two transforms tonight: `blend150sx_hybrid` 0.97101 against
+`blend150fx_hybrid` 0.97099, and `blend150sx_logit` 0.97104 against `blend150fx_logit`
+0.97103. **It moved on both.** The claim was generalised from the two transforms where it
+happened to hold. And `blend156_rescale`, 4th of four on CV, scored 0.97105 — above
+`rankraw`, which beats it by 1.1e-5 on CV. The slice still cannot resolve these.
+
+### Operational
+
+- `pkill -f "run_xgb.py --name probeA"` **also kills the bash wrapper running it**, since
+  the wrapper's own command line contains the pattern. Killed my own shell mid-command
+  (exit 144). Use `pgrep` then `kill <pid>`.
+- XGBoost rejects a pandas category **index** of floating dtype
+  (`Category index from DataFrame has floating point dtype`). Numeric lattice levels are
+  floats, so factorize to integer level ids and rebuild with
+  `pd.Categorical.from_codes`; code −1 comes back as missing, which is what routes NaN by
+  default direction.
+- Box peaked at load 52 on 16 cores. Everything here ran `nice -n 15` at 2–4 threads.
+- The `cat_native`/`cat_lat`/`cat_raw` jobs were reparented to `systemd --user`, i.e.
+  **their session had already exited**. Two peers were messaged and neither owned them.
+  Members left in `oof/` outlive their author; they are shared state with no one to ask.
+
+### Next run, in this order
+
+1. **Do not chase maxcorr on its own.** Measured backwards tonight. A candidate needs a
+   low correlation *at solo AUC comparable to the pack* (≥ ~0.966). Below that, the
+   decorrelation is the model being worse. Screen on the pair, never on correlation alone.
+2. The clean test of that rule, and the obvious next member: an ordering-discarded
+   representation that does **not** pay for it in accuracy — keep the full TE pipeline and
+   *add* the unordered lattice categoricals as extra columns rather than replacing
+   everything with them. If the rule is right, that member sits near 0.967 solo with
+   maxcorr well under 0.99 and is worth several times tonight's pair.
+3. `colsample_bytree` is set per feature-set, not per model. 0.5 is right for 184 columns
+   and wrong for 12. Check it whenever the frame width changes.
+4. **Select on CV at the deadline.** `blend156` (0.970042), then `blend153` (0.970034),
+   then `blend150sx` (0.970033). `blend156` happens to also lead the public slice; that is
+   a coincidence and not the reason to pick it.

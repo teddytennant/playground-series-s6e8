@@ -241,3 +241,30 @@ points spanning a large CV range. With twelve points it resolves into two regime
 So the public slice cannot resolve CV differences below ~1e-4, which is every difference
 we are still able to produce. Chase LB rank freely, since it costs nothing; read nothing
 into it.
+
+## 2026-08-11 03:40 UTC — rank ~13 of 1389 at 0.97106 (new best)
+
+`blend156` returned **0.97106**, up from the 0.97104 that had held for two runs. First
+public move in three runs, and the first time a new entry led on CV *and* on the LB.
+
+Top of the board when checked at 02:25 UTC (before this submission):
+
+| rank | score | subs | team |
+|---|---|---|---|
+| 1 | 0.97124 | 14 | MILANFX |
+| 2 | 0.97115 | 55 | Don Mani |
+| 3 | 0.97113 | 51 | Maher el Ouahabi |
+| 4 | 0.97112 | 58 | Optimistix |
+| 5 | 0.97110 | 16 | Mahog |
+| … | | | |
+| 13 | 0.97106 | 34 | magp |
+| 15 | 0.97104 | 16 | **Teddy Tennant** |
+
+Gap to #1 is **0.00019**. At the ~56% CV→LB pass-through measured on the only gain large
+enough to trace, closing it needs roughly **+0.00034 CV** — which is 38× the +9e-6 this
+run bought, and about the size of the entire slot-3 63-member import. Nothing incremental
+gets there; it needs another whole independent pipeline group, and the public OOF pool is
+exhausted.
+
+Submission counts are worth noting against that. Ranks 2–4 have sent 51–58 entries to our
+16, and rank 1 has sent 14. Volume is not what separates the top of this board.
