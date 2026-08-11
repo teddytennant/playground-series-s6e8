@@ -299,3 +299,27 @@ by 1e-5 of CV have already landed 2e-5 apart on the LB in the wrong order.
 Gap to #1 is 1.8e-4 of LB. At the ~56% CV→LB pass-through, closing it needs ≈ +3.2e-4 CV,
 about the size of the entire slot-3 63-member import and ~35× this week's typical member
 gain. That target has not moved and nothing incremental reaches it.
+
+## Snapshot 2026-08-11 04:20 UTC — 1,396 teams, us rank 13
+
+Refetched during slot 5 (research-only run, all 10 daily submissions already spent).
+
+| rank | score | team |
+|---|---|---|
+| 1 | 0.97124 | MILANFX |
+| 5 | 0.97110 | Mahog |
+| 10 | 0.97108 | FunnyBishop |
+| **13** | **0.97106** | **Teddy Tennant** (`blend156`) |
+| 20 | 0.97099 | miki |
+| 50 | 0.97092 | Charismatic Pizza Party |
+
+Percentile cutoffs at 1,396 teams: top 5% = rank 69 (0.97092), top 10% = rank 139
+(0.97084). Both are now comfortably behind us — we cleared them on slot 3 and the field
+has not caught up.
+
+**Fourteen teams sit at or above our 0.97106, and rank 10 is 0.97108.** The whole distance
+from rank 13 to rank 10 is **2e-5 of public AUC**, which at the measured ~56% CV→LB
+pass-through is about **+3.6e-5 of CV** — for once, a target of the same order as the
+combiner work actually produces, rather than the 3.2e-4 needed to reach #1. It is still
+inside the slice's own scatter, so treat it as a reason to keep shipping CV improvements,
+never as a thing to tune towards.

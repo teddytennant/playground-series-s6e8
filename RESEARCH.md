@@ -227,6 +227,19 @@ Two things it does NOT license:
 - **Selecting on the public LB.** Final selection stays on CV. That is the Rogii failure
   mode, and free submissions must not be allowed to corrupt it.
 
+#### The agent's SLOT number is not a submission slot — keep a prepared queue
+
+The daily counter rolls at **00:00 UTC = 20:00 EDT**, and the agent's runs are numbered
+1..10 independently of it. On 2026-08-11 all ten submissions were spent between 00:16 and
+04:04 UTC by agent-slots 1–3, so **agent-slots 4 through 10 that day had zero submissions
+available** — seven consecutive research-only runs.
+
+That is the normal case, not a mishap, and it has a consequence worth acting on: the
+binding constraint is not ideas, it is *having files built when the counter rolls*. Leave
+finished, CV-ranked `.csv` files in `submissions/` with their cross-fitted CV recorded in
+the journal, so the first run after 20:00 EDT can send ten immediately instead of
+spending its hour rebuilding. Check the clock before planning a run around a submission.
+
 ## The public OOF library — the most valuable asset in this competition
 
 `szymonkapiski/s6e8-oof-library-47-models` (actually **74 models**, updated 2026-08-04).
@@ -302,6 +315,25 @@ loads them from `data/ext_members2/`; import + vetting is
 - Submission-only, no OOF, so not honestly weightable:
   `anhadmahajan06/ps-s6e8predicting-smartphone-addiction-submission`.
 
+### Two new OOF savers appeared 2026-08-11 04:37 UTC and BOTH CRASHED — nothing to import
+
+`mohankrishnathalla` published `s6e8-realmlp-oof-saver` and `s6e8-tabm-oof-saver` minutes
+before the slot-5 run. Both use `StratifiedKFold(5, shuffle=True, random_state=42)`, i.e.
+our exact frozen scheme, so they *would* be directly stackable. Neither produced a file:
+
+- **RealMLP** — died at cell 6, `TypeError: RealMLPConstructorMixin.__init__() got an
+  unexpected keyword argument 'verbose'`. `pytabkit`'s `RealMLP_TD_Classifier` does not
+  take `verbose`. Ran 57s, produced nothing.
+- **TabM** — `pip install tabm-torch` fails on Kaggle (`No matching distribution found`;
+  the package does not exist under that name). The notebook falls back to an
+  "alternative", ran 5,601s and emitted no OOF AUC.
+
+Check with `kaggle kernels output <ref> -p <dir>` **before** planning around a published
+saver: a kernel that lists `np.save('oof_*.npy')` in its source has not necessarily
+produced one. When only a `.log` comes back, the run failed. Worth re-checking these two
+in later runs — the author is iterating, and a working RealMLP would be a function class
+the pool has only through `beicicc/s6e8-fixed4-realmlp-two-seed-artifacts`.
+
 ### Enumerating the pool — the CLI list endpoints are unreliable
 
 As of 2026-08-10 the Kaggle CLI's RPC endpoints return `400` for **all** list operations
@@ -314,7 +346,13 @@ curl -s "https://www.kaggle.com/api/v1/datasets/list?search=s6e8&pageSize=100&pa
 ```
 
 Run it with several search terms and union the `ref` fields — that is how the 14 missed
-libraries were found. New ones appeared as recently as 2026-08-10, so re-run it every run.
+libraries were found.
+
+**Re-run this weekly, not every run.** Re-enumerated 2026-08-11 04:45 UTC over three
+search terms: **20 datasets, all already known, newest `lastUpdated` 2026-08-10.** The
+pool has been static for two days and every member in it is already imported. The CLI's
+`kernels list` was also working again on 2026-08-11 (the 400s of 2026-08-10 were
+transient), so prefer it for *kernels* — that is where new material actually appears now.
 
 ### Always verify the split before stacking anyone's OOF
 
@@ -426,9 +464,64 @@ lattice features is genuinely unexplored ground.
 - **Hill climbing can only add; a linear stacker can subtract.** Weak-but-decorrelated
   members carry usable information as *corrections* with negative coefficients. If a hill
   climber zeroes a member out, try a linear stacker before discarding it.
+  **Priced 2026-08-11:** 71 of 156 coefficients (46%) are negative at the shipped C=1. As
+  C shrinks, the negative count falls 71 → 66 → 59 → 37 → 0 and AUC falls with it, down
+  **−0.00104** by the time the last negative coefficient is gone. Non-negativity — NNLS,
+  hill-climbing, any "average the models" blend — is not a safe default here, it is
+  expensive. (Shrinking toward zero is not identical to constraining ≥ 0, so read this as
+  a strong direction rather than a proof.)
+- **Do not weight near-equal models by their OOF AUC.** `(auc − 0.5)^p` over the four
+  transform stacks (0.96996–0.97004) returns weights uniform to rounding error at every
+  p up to 32, and measured **exactly** +0.000000. The classic OOF-performance weighting
+  needs spread between the things being weighted; there is none at this level.
+- **Ensembling the four transforms: drop the worst, do not fit weights.** Paired 50/50,
+  3/3 consistent: dropping the lowest-CV transform is +5e-6, a full 1,540-point simplex
+  search is +6e-6. Three fitted parameters buy 1e-6 over one bit of information.
+  `blend156_h3` (hybrid + rankraw + rescale, equal) cross-fits to **0.970046** vs
+  `blend156`'s 0.970042. `logit` is the one to drop — its clip destroys the tails of ~49
+  saturating members.
 - Fitting a stacker on the OOF matrix and scoring it on the same matrix reads high.
   Score it with a proper cross-fit, and compare alternatives with **paired** differences
   on the same row splits so split noise cancels.
+
+### `C` is not a regularisation strength until you divide by n
+
+sklearn's `LogisticRegression` minimises `0.5*w'w + C * sum_i logloss_i`, so the penalty a
+single row argues against is **`1/(C*n)`**, not `1/C`. At the 345,684-row paired fit half:
+
+| C | 1 | 0.03 | 0.01 | 1e-3 | 1e-4 | 1e-5 | 1e-6 | 1e-7 |
+|---|---|---|---|---|---|---|---|---|
+| penalty per row | 2.9e-6 | 9.7e-5 | 2.9e-4 | 2.9e-3 | 0.029 | 0.29 | 2.9 | 29 |
+
+Against a log-loss of order 0.5, **everything at C ≥ 0.01 is unregularised.** The
+2026-08-10 sweep (`logs_csweep.txt`) covered 0.03–100, i.e. it fitted the same
+unpenalised solution eight times and correctly found no difference — it did not measure
+regularisation, and "C does not matter" is not what it established. To shrink 156
+coefficients at this n, C has to reach ~1e-5 and below. `experiments/ridge_sweep.py`
+extends the grid there and prints the penalty-per-row line so the arithmetic is visible in
+the log. **Whenever n or the member count changes, recompute `1/(C*n)` before believing a
+C sweep.**
+
+**Measured 2026-08-11 over the full range, 156 members, paired 3 reps: still a null.**
+C=0.001 is +7e-6 ± 15e-6 with the sign flipping; C=1e-4 and below are catastrophic
+(−1.3e-4 to −1.0e-3). ‖w‖₂ drops by a third from C=1 to C=1e-3 with **no** change in AUC,
+then the model degrades. The design is collinear (median pairwise 0.98, 95.4% PC1) but
+n/p = **4,400**, and at that ratio the unregularised fit is already precise — the
+collinearity is real and harmless. **Do not sweep stacker C again.** If anything set
+C=0.01: +5e-6 ± 3e-6 consistent here, and +7e-6 at C=0.03 on the separate 149-member
+sweep — six positive measurements, two sweeps, two member sets, all ~5e-6.
+
+Two related defects, both fixed in `ridge_sweep.py` / `blend_lab.py` (2026-08-11):
+
+- **C does not transfer across n.** The pipeline fits at 345,684 (paired), 553,095
+  (cross-fit fold) and 691,369 (full fit, the one that predicts test). One shared C
+  regularises the submission model 2.0× harder than the instrument that validated it.
+  Both now take `--lam`, a penalty **per row**, and derive `C = 1/(lam*n)` per fit.
+  Latent while C=1 leaves everything unpenalised.
+- **L2 on unstandardised columns is not a neutral prior.** Hybrid column sds run
+  **1.81–27.58**, so the widest member is shrunk ~230× less than the narrowest, purely
+  from where the transform happens to put its logits. `--standardize` makes it isotropic.
+  Built, not yet measured; low prior given shrinkage itself is a null.
 
 ## Environment (this machine)
 

@@ -1204,3 +1204,167 @@ happened to hold. And `blend156_rescale`, 4th of four on CV, scored 0.97105 — 
 4. **Select on CV at the deadline.** `blend156` (0.970042), then `blend153` (0.970034),
    then `blend150sx` (0.970033). `blend156` happens to also lead the public slice; that is
    a coincidence and not the reason to pick it.
+
+---
+
+## 2026-08-11 — slot 5 of 10 — angle: blending, search the weights on OOF
+
+**No submission: the daily cap was already spent.** All ten of 2026-08-11's submissions
+landed between 00:16 and 04:04 UTC under agent-slots 1–3. This run started 04:33 UTC, so
+slots 5–10 today are research-only and the counter does not roll until 20:00 EDT. Research
+and code only, as the playbook requires at the cap.
+
+**Result: `blend156_h3`, cross-fitted CV 0.970046 — best held, up from `blend156`'s
+0.970042. It is built and waiting in `submissions/` for the reset.** The change is to
+*drop the `logit` transform from the rank-ensemble*, which is one bit of information, not
+a fitted weight vector.
+
+### The angle, taken at both levels the stack actually blends at
+
+`blend156` blends twice: an L2 logistic stack weights 156 members, then four transform
+stacks are combined by an unweighted rank-average. The angle applies to both, and both
+were unmeasured defaults. Two new benches, `experiments/transform_weights.py` and
+`experiments/ridge_sweep.py`, and both instruments are the paired 50/50 split so the
+±4e-6 solver floor is resolvable.
+
+#### 1. The four transform stacks — searching the weights works, barely, and simply
+
+Inputs are the cross-fitted OOF vectors `blend_lab --build` already wrote, so nothing is
+refitted and an honest nested evaluation is affordable: weights are chosen on half the
+rows and scored on the other half, against equal weights on those same rows.
+
+| variant | paired vs equal | verdict |
+|---|---|---|
+| `drop_worst` — drop the lowest-CV transform, equal on the rest | **+0.000005 ± 0.000002** | **consistent, 3/3** |
+| `searched` — full 1,540-point simplex search on the fit half | **+0.000006 ± 0.000002** | **consistent, 3/3** |
+| `auc_p1` … `auc_p32` — weight ∝ (auc − 0.5)^p | +0.000000 | exactly zero at every p |
+
+**Searching three free weights buys +1e-6 over throwing one transform away.** The searched
+vector on rep 0 was `logit 0.05, hybrid 0.15, rankraw 0.45, rescale 0.30` — it spends its
+freedom almost entirely on zeroing `logit`, and the rest is noise it cannot exploit.
+
+`auc_p*` returning **exactly** 0.000000 at every power is not a bug and is worth
+understanding: the four stacks score 0.96996–0.97004, so `(auc − 0.5)^p` is uniform to
+within a rounding error even at p=32. The classic "weight members by OOF performance" has
+no purchase when the things being weighted are this close. That is the direct answer to
+the half of the angle that says *weight the tuned models by out-of-fold performance*:
+**at this level it is arithmetically incapable of doing anything.**
+
+Cross-fitted on the frozen folds, `blend156_h3` (hybrid + rankraw + rescale, equal)
+scores **0.970046** against `blend156`'s 0.970042. The paired instrument predicted +5e-6
+and the cross-fit returned +4e-6, which is the kind of agreement that makes the paired
+number worth trusting at this scale.
+
+#### 2. The 156-member stack — the L2 penalty had never been switched on, and it is still a null
+
+sklearn minimises `0.5·w'w + C·Σ logloss`, so the penalty one row argues against is
+**1/(C·n)**, not 1/C. At n = 345,684 the 2026-08-10 sweep's range (C 0.03–100) spans
+9.7e-5 down to 2.9e-8 of penalty per row. **Against a log-loss of order 0.5, every one of
+those is unregularised.** That sweep fitted the same unpenalised solution eight times and
+correctly found no difference — but "C does not matter" was never actually tested, because
+nothing in it reached a C where the penalty exists.
+
+Extending the grid to 1e-7 tests it. The answer is still a null, and now it is one:
+
+| C | paired Δ vs C=1 | ‖w‖₂ | #negative coefs |
+|---|---|---|---|
+| 1 | — | 0.5951 | 71 / 156 |
+| 0.01 | **+0.000005 ± 0.000003 consistent** | 0.5932 | 68 |
+| 0.001 | +0.000007 ± 0.000015 **SIGN FLIPS** | 0.4071 | 66 |
+| 1e-4 | −0.000131 | 0.2089 | 59 |
+| 1e-5 | −0.000334 | 0.0727 | 37 |
+| 1e-7 | −0.001041 | 0.0343 | 0 |
+
+**Honest note on how this was read mid-run.** After two reps C=0.001 was +17e-6 and
++14e-6 and I recorded it as a real effect. The third rep came back negative, taking it to
++7e-6 ± 15e-6 with the sign flipping. Two sign-consistent reps at four times the solver
+floor were not enough, and the standing rule — believe nothing under ~1e-5 unless it is
+stable — caught it exactly as intended. It stays in the journal because the failure mode
+is the interesting part: at three reps this instrument can still manufacture a
+2-out-of-2 story.
+
+The mechanism is in the coefficient column. **‖w‖₂ falls by a third from C=1 to C=1e-3
+with no measurable change in AUC**, then the model degrades once shrinkage passes ~65%.
+The 156-member design is pathological on paper — median pairwise correlation 0.98, 95.4%
+of variance in PC1 — but n/p is **4,400**, and at that ratio a badly conditioned design is
+still estimated precisely. Collinearity here is real and harmless, which is the reason no
+combiner-level regularisation has ever paid in this workspace.
+
+**The most useful row is the last one.** As C shrinks, the count of negative coefficients
+falls 71 → 66 → 59 → 37 → 0 and the AUC falls with it, reaching −0.00104 when the last
+negative coefficient is gone. 46% of this stacker's coefficients are negative at the
+shipped setting. That is quantitative support for the note already in `RESEARCH.md` — a
+linear stacker can subtract and a hill climber cannot — and it prices the alternative:
+**a non-negativity constraint (NNLS, hill-climbing, any "average the models" blend) is
+not a safe prior here, it is expensive.** It also explains why the hill climber lost to
+the logit stack by 0.00018 back at 74 members. This is suggestive rather than proven —
+shrinking every coefficient toward zero is not the same operation as constraining them to
+be non-negative — but the direction is unambiguous.
+
+`C=0.01` at +5e-6 ± 3e-6 consistent now agrees with the old sweep's +7e-6 at C=0.03 on a
+*different* 149-member set. Six positive measurements across two sweeps and two member
+sets, all ~5e-6. Small, free, and the one part of the C question worth acting on.
+
+### Two library defects found and fixed while doing this
+
+1. **`C` is not transferable across sample sizes.** The pipeline fits at three different
+   n — 345,684 (paired), 553,095 (cross-fit fold), 691,369 (full fit, the one that
+   predicts test). One shared C regularises the submission model **2.0×** harder than the
+   instrument it was validated on. `blend_lab.build()` has this latent. Both benches now
+   take `--lam`, a penalty **per row**, and derive C = 1/(lam·n) per fit. Harmless while
+   C=1 leaves everything unpenalised; wrong the moment anyone acts on a C sweep.
+2. **The L2 penalty on unstandardised columns is not a neutral prior.** Hybrid column sds
+   run **1.81 to 27.58**, so at any C the widest member is shrunk ~230× less than the
+   narrowest — an artefact of where a transform puts a member's logits, not a statement
+   about which members deserve shrinking. `ridge_sweep --standardize` and
+   `blend_lab --standardize` make it isotropic. Not yet measured; given that shrinkage
+   itself is a null, the expected value is low, which is why it was not run tonight.
+
+### Also this run
+
+- **Two new OOF savers appeared at 04:37 UTC and both crashed.**
+  `mohankrishnathalla/s6e8-realmlp-oof-saver` died on
+  `RealMLP_TD_Classifier(verbose=...)`, which pytabkit does not accept;
+  `s6e8-tabm-oof-saver` could not `pip install tabm-torch` (no such package), fell back to
+  an "alternative" and emitted no OOF AUC in 5,601s. Both use our exact frozen fold
+  scheme, so a working version would be directly stackable — worth re-checking. Durable
+  lesson recorded: a kernel whose source contains `np.save('oof_*.npy')` has not
+  necessarily produced one. Check `kernels output` before planning around it; if only a
+  `.log` comes back, the run failed.
+- **Dataset pool re-enumerated over three search terms: 20 datasets, all known, newest
+  `lastUpdated` 2026-08-10.** Static for two days, confirming last run's "weekly, not
+  every run" call. The CLI's `kernels list` works again — the 400s of 2026-08-10 were
+  transient — and kernels, not datasets, is now where new material appears.
+- **Leaderboard: rank 13 of 1,396 at 0.97106.** Rank 10 is 0.97108. The gap is 2e-5 of
+  public AUC ≈ 3.6e-5 of CV at the measured pass-through — for once the same order as what
+  combiner work produces. Top 5% (0.97092) and top 10% (0.97084) are both well behind us.
+- **Slot 4's latcat experiment is still running and is healthy.** `xgb_lat` fold 0 AUC
+  0.966795 (1,438s), `xgb_latcat` fold 0 0.966880 (1,557s) — the one-factor pair is +8.5e-5
+  apart on fold 0, and only **1.05%** of split gain went to the added `K_` categoricals.
+  ~2h per member at 5 folds, so both land ~06:30 UTC. `experiments/latcat_eval.sh` is
+  alive and will profile them and build `blend158` unattended. Do not restart it.
+
+### Prepared and waiting for the 20:00 EDT reset
+
+| file | CV | note |
+|---|---|---|
+| `submissions/blend156_h3.csv` | **0.970046** | best CV held; drop `logit` from the ensemble |
+| `submissions/blend156w.csv` | (building) | searched simplex weights, cross-fitted honestly |
+| `submissions/blend156.csv` | 0.970042 | already sent, 0.97106 |
+
+The binding constraint on this competition is not ideas, it is **having files built when
+the counter rolls**. Seven of today's ten agent-slots could not submit at all.
+
+### Next run, in this order
+
+1. **Check whether `latcat_eval.sh` finished** and read `logs_latcat_eval.txt`. If
+   `blend158` exists, its CV is the headline and it should be first out of the gate.
+2. **If the counter has rolled, send the queue immediately**, `blend156_h3` first.
+3. Do **not** re-sweep stacker `C`. Closed twice now, across two member sets, with the
+   arithmetic written down. Set C=0.01 if anything.
+4. Do **not** try NNLS, hill-climbing or any non-negative blend at the member level. The
+   negative coefficients are load-bearing and this run priced them.
+5. The `--standardize` path is built but unmeasured. It is the only untested combiner
+   idea left, and its prior is weak.
+6. Re-check the two `mohankrishnathalla` OOF savers — a working RealMLP is a function
+   class the pool barely has.

@@ -161,18 +161,35 @@ def paired(names, y, mats, kinds, reps, C):
     return df
 
 
-def build(names, y, mats, kinds, te, C, submit_name):
-    """Cross-fit each transform on the frozen folds, then rank-average the stacks."""
+def build(names, y, mats, kinds, te, C, submit_name, lam=0.0, std=False):
+    """Cross-fit each transform on the frozen folds, then rank-average the stacks.
+
+    `lam` is the L2 penalty PER ROW; when set it overrides `C`, and each fit derives its
+    own C = 1/(lam*n) from its own n. This matters because the fold fits see 553,095 rows
+    and the full fit that predicts test sees 691,369: one shared C regularises the
+    submission model 1.25x harder than the folds it was validated on. Harmless at C=1,
+    where nothing is penalised either way; wrong once the penalty is real.
+
+    `std` scales every member to unit sd first (scale taken from the OOF side and applied
+    to both), so the ridge stops shrinking members in inverse proportion to whatever scale
+    the transform happened to put them on.
+    """
     folds = get_folds(y)
     oof, tst = {}, {}
     for k in kinds:
         Z, Zt = mats[k]
+        if std:
+            s = Z.std(0)
+            s[s <= 0] = 1.0
+            Z, Zt = (Z / s).astype("float32"), (Zt / s).astype("float32")
         mo = np.zeros(len(y))
         for itr, iva in folds:
-            mo[iva] = (LogisticRegression(max_iter=3000, C=C)
+            Cf = 1.0 / (lam * len(itr)) if lam else C
+            mo[iva] = (LogisticRegression(max_iter=5000, C=Cf)
                        .fit(Z[itr], y[itr]).decision_function(Z[iva]))
         oof[k] = mo
-        full = LogisticRegression(max_iter=3000, C=C).fit(Z, y)
+        Cfull = 1.0 / (lam * len(y)) if lam else C
+        full = LogisticRegression(max_iter=5000, C=Cfull).fit(Z, y)
         tst[k] = full.decision_function(Zt)
         print(f"  cross-fitted stack_{k:8s} {roc_auc_score(y, mo):.6f}", flush=True)
         if submit_name:
@@ -212,6 +229,10 @@ def main():
     ap.add_argument("--C", type=float, default=1.0)
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--submit-name", default=None)
+    ap.add_argument("--lam", type=float, default=0.0,
+                    help="L2 penalty per row; overrides --C and rescales it per fit n")
+    ap.add_argument("--standardize", action="store_true",
+                    help="scale members to unit sd so the L2 penalty is isotropic")
     a = ap.parse_args()
 
     kinds = [k for k in a.kinds.split(",") if k]
@@ -223,7 +244,10 @@ def main():
     if a.reps:
         paired(names, y, mats, kinds, a.reps, a.C)
     if a.build or a.submit_name:
-        build(names, y, mats, kinds, te, a.C, a.submit_name)
+        if a.lam:
+            print(f"lam={a.lam:g} -> C={1/(a.lam*553095):.4g} (fold fits, n=553,095), "
+                  f"C={1/(a.lam*len(y)):.4g} (full fit, n={len(y):,})", flush=True)
+        build(names, y, mats, kinds, te, a.C, a.submit_name, a.lam, a.standardize)
     print(f"\ntotal {time.time()-t0:.0f}s")
 
 
