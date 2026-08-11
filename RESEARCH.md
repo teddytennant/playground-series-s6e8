@@ -1057,3 +1057,103 @@ That is the same magnitude as the paired deltas slot 4 reported for our own two 
 across row splits does not rescue them, because the solver noise is not resampled by
 changing rows. Treat any paired delta under ~1e-5 as unresolved unless it is also stable
 under column permutation.
+
+## Conditional-independence testing against the stack — the instrument, and how it lies
+
+Measured 2026-08-11. The question "is there anything left for a feature to capture" is
+`y _||_ x | z`, where z is the stack's own OOF score. Two ways to test it, both of which
+gave a confident WRONG answer before the control was built.
+
+### 1. Stratify on z-bins and chi-square — `experiments/erroran.py`
+
+**The chi2/df null is NOT 1.0.** It is a function of the number of x-bins K and the cell
+density, because the z-bin rate is estimated from the row margin. At 2048 z-bins over
+691,369 rows the null is:
+
+| K | empirical null chi2/df |
+|---|---|
+| 2 | **~2.15** |
+| 4–6 | ~1.1–1.3 |
+| 13 | ~1.06 |
+
+Judging a K=2 statistic against a K=13 control puts the NaN indicators at the top of the
+scan with an apparent 36 sigma. `experiments/erroran_na.py` builds the matched null
+(permuted indicators at the identical missing rate) and every one of the 12 columns lands
+inside its own control band. **Only K-matched, marginal-matched controls are admissible.**
+
+Second trap: a permuted control destroys the x–z correlation as well as the x–y one.
+Inside a z-bin z still varies, so a real feature correlated with z picks that up and scores
+an excess the control cannot produce. The strongest predictor in the frame is therefore
+guaranteed to look like the strongest finding whether or not anything is left in it. Both
+traps come from replacing z with a bin, so prefer instrument 2.
+
+### 2. Boost on top of the stack — `experiments/resid_boost2.py`
+
+**Never use `logit(rank percentile)` as the LightGBM `init_score`.** It is logistic by
+construction with sd ~1.8, not a log-odds, so the residual is dominated by a smooth
+calibration error in z. The corrector cannot see z, so it reconstructs z from the features
+(only to AUC ~0.967) and injects that proxy's error. Measured cost: **−0.0076 AUC** against
+a permuted control at −0.00003. Diagnostic signature: **monotone decline then recovery** as
+rounds increase. A model chasing noise does not recover.
+
+Two correct forms, both matched-control:
+- `--mode offset` — offset = logit of an out-of-fold **isotonic** map z → P(y=1).
+- `--mode feature` — no offset; the stack score is a *feature* beside the frame, so a
+  calibration defect cannot masquerade as a feature finding. Baseline = a run with the
+  stack score as the only feature (0.969967, i.e. ~8e-5 of tree-discretisation handicap).
+
+**Result, 2026-08-11, blend158_h3 (158 members): `real − ctrl` is NEGATIVE at all 8 round
+counts in BOTH modes** (offset −2.0e-5 → −2.2e-4; feature −7.4e-5 → −5.3e-4). The 40-column
+numeric frame — raw columns, constrained imputation, bounds, decimal lattice, and every
+interaction a 31-leaf tree can find over 1000 rounds — adds nothing to the stack.
+
+⚠ **Out-of-fold isotonic calibration of a submission costs 6.2e-5 AUC** (0.970048 →
+0.969986). Isotonic is monotone *within* a fold; five per-fold maps are not mutually
+monotone, so pooling reorders rows across folds. Never calibrate the final file.
+
+## Where the AUC actually lives — `experiments/errormap.py`
+
+Pooled within-segment AUC vs global 0.970048 (blend158_h3):
+
+| segmentation | pooled within | vs global |
+|---|---|---|
+| `n_missing_all` | 0.974025 | +0.003977 |
+| `n_screen_missing` | 0.974071 | +0.004023 |
+| `other_screen_band` | 0.961145 | −0.008904 |
+| **`daily_band` (2h)** | **0.933423** | **−0.036625** |
+
+Most of the headline score is ranking ACROSS screen-time bands, where the base rate runs
+0.2421 (0–2h) → 0.9997 (12h+). The hard population is **4–8h of daily screen time**:
+274k rows, base 0.36–0.66, within-band AUC 0.916/0.939 — the same region
+`georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new` shows P(addicted) FALLING
+with screen time at fixed social media (which is why monotone constraints cost score).
+A booster free to isolate that band cannot beat a shuffled control there (above).
+
+By missingness: 0 missing → 0.977541, 5+ missing → 0.913295. The +0.0040 pooled-within gap
+is NOT recoverable — it is the arithmetic penalty of pooling populations of different
+difficulty, and `iso_regime.py` measured regrading them at −0.000085 on 5/5 folds.
+
+## Transform subsets — enumerated exhaustively 2026-08-11, `experiments/subset_lab.py`
+
+All 11 subsets of {logit, hybrid, rankraw, rescale} on blend158, paired 300-rep bootstrap:
+**h3 = hybrid+rankraw+rescale is the argmax at 0.970048.** Runners-up rankraw+rescale and
+hybrid+rankraw at 0.970046 (P(>h3) 0.15/0.12); ens4 at 0.970043 (P 0.003).
+
+**`logit` is beaten by the same subset without it in 7 of 7 comparisons**, by 3e-6 to 12e-6.
+The finding is not "drop logit from the four-ensemble" — the transform is actively harmful
+in every combination it appears in. Fourth instrument agreeing, after the paired 50/50, the
+row bootstrap and the 8 resampled fold splits. **This line is closed; do not re-sweep it.**
+
+## Public notebooks worth having read
+
+- `georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new` (26 votes) — the best
+  analysis on the board. Confirms from the other side: `gaming_hours`/`work_study_hours`
+  carry ~0.500 conditional AUC and are worth +0.0032 anyway because they RECONSTRUCT
+  missing drivers through the budget identity; `other_screen = daily − (social+gaming+
+  work_study)` is the one engineered feature that pays (we already hold it as
+  `other_screen_imp`); missingness carries nothing about the target despite an adversarial
+  train/test AUC of 0.57; monotone constraints on screen columns lose score because the
+  conditional curve genuinely dips.
+- `mohankrishnathalla/s6e8-tabm-oof-saver` — **ERROR on three separate runs** (2026-08-11
+  04:54 the latest). Stop checking it. The RealMLP sibling did land and is a measured null
+  (parked in `oof_rejected/`).

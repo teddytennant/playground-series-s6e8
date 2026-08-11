@@ -1750,3 +1750,252 @@ against the OOF.
   of which were worth more, and had not finished a single fold when this was written. They
   are running again. Nothing about them is known yet.
 - The entry's "eight distinct valid files" is superseded by the sixteen above.
+
+---
+
+## 2026-08-11 — slot 7 of 10, ANGLE: error analysis
+
+**No submission: the counter was already at 10 for the UTC day when this run started**
+(04:04, 04:04, 03:35, 03:35, 01:48, 01:47, 01:27, 01:26, 00:16, 00:16 — all 2026-08-11).
+Next reset 00:00 UTC 2026-08-12. Sixteen validated files are queued and unchanged; the
+deadline pick is still `blend158_h3` and this run strengthened it on a fourth instrument.
+LB 0.97106, rank 13 of ~1,400. MILANFX still leads at 0.97124.
+
+The angle was "segment the out-of-fold errors and look for structure a feature could
+capture". The answer is **there is none**, and it is now measured with the controls that
+two earlier versions of the measurement were missing. Both of those near-misses are
+written up below, because each one produced a confident wrong answer first.
+
+### The question, posed so it can be answered
+
+`blend158_h3` scores OOF 0.970048. Every feature idea in this workspace is already folded
+into its 158 members. So the only well-posed question left is conditional independence:
+
+    y  _||_  x  |  z          z = the stack's own score
+
+If that holds for every x, no feature can ever help, because two rows the stack scores
+identically already have the same addiction rate whatever they differ on. `experiments/
+erroran.py` (new) tests it by stratifying on quantile bins of z and asking whether y still
+depends on x inside a bin — 46 candidate columns, plus permuted controls scanned through
+the identical pipeline.
+
+### Near-miss #1: the chi2/df null is not 1.0, and it produced a fake headline finding
+
+At 2048 z-bins the top of the whole scan was, by a wide margin:
+
+| feature | chi2/df | apparent sigma |
+|---|---|---|
+| `d1_age` / `d2_age` | 2.149 | 36.8 |
+| `d1_app_opens_per_day` | 2.129 | 36.1 |
+| `d1_notifications_per_day` | 2.088 | 34.8 |
+| *(K=13 controls)* | *1.055–1.067* | *6.1–7.4* |
+
+Those three columns are integers, so their "decimal digit" degenerates to a **pure NaN
+indicator** — the scan was reporting that missingness carries large residual signal, in
+direct contradiction to `RESEARCH.md`'s "NA-indicator features −0.00001, MCAR".
+
+It does not. The controls in that table have 13 x-bins and those features have 2, and the
+chi2 bias from estimating the z-bin rate is a function of cell density, so the comparison
+was never admissible. `experiments/erroran_na.py` (new) builds the matched null — for each
+of the 12 columns' NaN indicators it draws permuted indicators with the **identical
+marginal missing rate**, so real and control differ in exactly one thing:
+
+| indicator | rate | chi2/df | matched ctrl | dAUC | ctrl dAUC |
+|---|---|---|---|---|---|
+| age | 0.0418 | 2.146 | **2.229** | −0.000064 | −0.000069 |
+| daily_screen_time_hours | 0.1386 | 2.038 | **2.197** | −0.000359 | −0.000229 |
+| social_media_hours | 0.1938 | 2.231 | **2.159** | −0.000394 | −0.000353 |
+| gaming_hours | 0.1834 | 2.097 | **2.230** | −0.000361 | −0.000324 |
+| work_study_hours | 0.0745 | 2.045 | **2.248** | −0.000137 | −0.000121 |
+| sleep_hours | 0.0643 | 2.111 | **2.198** | −0.000097 | −0.000098 |
+| notifications_per_day | 0.0978 | 2.090 | **2.199** | −0.000188 | −0.000169 |
+| app_opens_per_day | 0.1167 | 2.117 | **2.257** | −0.000240 | −0.000192 |
+| weekend_screen_time | 0.1621 | 2.353 | **2.238** | −0.000345 | −0.000291 |
+| gender | 0.0420 | 2.360 | **2.194** | −0.000072 | −0.000058 |
+| stress_level | 0.0798 | 2.302 | **2.013** | −0.000142 | −0.000131 |
+| academic_work_impact | 0.0640 | 2.115 | **2.117** | −0.000111 | −0.000097 |
+| `n_missing_all` (K=6) | | 1.106 | 1.090 | −0.000727 | −0.000712 |
+| `na_cat_count` (K=4) | | 1.256 | 1.286 | −0.000300 | −0.000273 |
+
+**Every real indicator sits inside its own control band and every dAUC is at or below its
+control's.** The 2.1 was the null. Missingness is a complete null conditional on the
+stack — which is a stronger claim than `RESEARCH.md` had, because the old one came from a
+member-level ablation and this one survives 158 members having already absorbed it.
+
+**Rule for any future conditional-independence scan here: the chi2/df null is a function
+of K and cell density. Only K-matched, marginal-matched controls are admissible.**
+
+### Near-miss #2: a residual booster on the wrong scale destroys 76e-4 and looks like a finding
+
+`experiments/resid_boost.py` (new) is the omnibus version — boost with LightGBM on top of
+the stack, offset fixed, and see if the features earn AUC. First run, offset =
+`logit(rank percentile of z)`:
+
+| round | real dAUC | permuted-control dAUC |
+|---|---|---|
+| 25 | −0.000837... | |
+| 100 | −0.006343 | −0.000013 |
+| **200** | **−0.007570** | **−0.000029** |
+| 500 | −0.005885 | −0.000087 |
+| 1000 | −0.004433 | −0.000161 |
+
+The real features lost **76e-4** where the control lost 0.3e-4. Boosting on a fixed offset
+cannot destroy 76e-4 by chasing noise — the control proves that — and the curve says what
+it was: monotone decline to round 200, then **recovery**. A model chasing noise does not
+recover.
+
+The rank logit is not a log-odds. It is logistic by construction with sd ~1.8, so the
+residual `y − sigmoid(offset)` is dominated by a large smooth **calibration** error that is
+a function of z. The corrector cannot see z, so it spends its capacity reconstructing z
+from the features — which it can only do to AUC ~0.967 — and injects that proxy's error
+into the score. The late recovery is the reconstruction slowly getting good enough to stop
+hurting. **The permuted control was never a null for this run; permuted features cannot
+reconstruct z at all, so it was measuring a different experiment.**
+
+### The corrected answer: nothing is left, on two instruments
+
+`experiments/resid_boost2.py` (new) fixes it two ways, both against matched controls.
+
+**A. `--mode offset`** — calibrate the offset with an out-of-fold isotonic map z → P(y=1)
+so the residual has no calibration component. Base 0.969986.
+
+| round | real | ctrl | **real − ctrl** |
+|---|---|---|---|
+| 25 | −0.000013 | +0.000007 | **−0.000020** |
+| 100 | −0.000038 | +0.000011 | **−0.000049** |
+| 200 | −0.000069 | +0.000004 | **−0.000073** |
+| 500 | −0.000161 | −0.000019 | **−0.000142** |
+| 1000 | −0.000292 | −0.000074 | **−0.000219** |
+
+**B. `--mode feature`** — no offset at all; the stack score goes in as a *feature*
+alongside the 40-column frame, so a calibration defect can never masquerade as a feature
+finding. Baseline (stack score as the only feature) 0.969967.
+
+| round | real | ctrl | **real − ctrl** |
+|---|---|---|---|
+| 25 | −0.000837 | −0.000311 | **−0.000526** |
+| 100 | −0.000139 | −0.000065 | **−0.000074** |
+| 200 | −0.000092 | −0.000016 | **−0.000077** |
+| 1000 | −0.000408 | −0.000137 | **−0.000271** |
+
+**`real − ctrl` is negative at every one of the 16 checkpoints across both instruments.**
+The real feature frame never beats a frame of the same columns with their rows shuffled.
+There is nothing in the raw columns, the constrained imputation, the bounds, the decimal
+lattice or their interactions that the 158-member stack has not already extracted.
+
+Scope, stated honestly: the corrector was handed `make_frames(wide_pairs=False,
+triples=False)` — the 40-column numeric frame, no target encoding. It does not rule out
+some encoding nobody has tried. It does rule out every feature family this workspace has
+built, and the members already carry full-resolution TE on all 36 numeric pairs and 5
+triples, so the residual would have to live somewhere none of that reaches.
+
+Side measurement worth keeping: **out-of-fold isotonic calibration of the stack costs
+6.2e-5 AUC** (0.970048 → 0.969986). Isotonic is monotone *within* a fold, but five
+per-fold maps are not mutually monotone, so pooling them reorders rows across folds. Never
+calibrate a submission here.
+
+### Where the stack IS wrong — the descriptive map, `experiments/errormap.py` (new)
+
+Within-segment AUC, and pooled-within-segment AUC against the global 0.970048:
+
+| segmentation | pooled within | vs global | pair share |
+|---|---|---|---|
+| `n_missing_all` | 0.974025 | +0.003977 | 0.263 |
+| `n_screen_missing` | 0.974071 | +0.004023 | 0.441 |
+| `age_band` | 0.970327 | +0.000279 | 0.398 |
+| `stress_level` | 0.970267 | +0.000219 | 0.289 |
+| `other_screen_band` | 0.961145 | −0.008904 | 0.332 |
+| **`daily_band`** | **0.933423** | **−0.036625** | 0.107 |
+
+| `n_missing_all` | n | base | within AUC |
+|---|---|---|---|
+| 0 | 269,185 (38.9%) | 0.7081 | 0.977541 |
+| 1 | 180,459 | 0.7090 | 0.974040 |
+| 2 | 120,697 | 0.7112 | 0.966550 |
+| 3 | 67,328 | 0.7118 | 0.955155 |
+| 4 | 32,557 | 0.7095 | 0.940698 |
+| 5+ | 21,143 (3.1%) | 0.7122 | 0.913295 |
+
+| `daily_band` (2h wide) | n | base | within AUC |
+|---|---|---|---|
+| missing | 95,854 (13.9%) | 0.7113 | 0.940549 |
+| 0–2h | 5,738 | 0.2421 | 0.898671 |
+| 2–4h | 55,006 | 0.2678 | 0.922258 |
+| **4–6h** | **121,650 (17.6%)** | **0.3584** | **0.916339** |
+| 6–8h | 128,538 | 0.6593 | 0.938796 |
+| 8–10h | 145,496 | 0.9547 | 0.967081 |
+| 10–12h | 120,659 | 0.9987 | 0.972378 |
+| 12h+ | 18,428 | 0.9997 | 0.993495 |
+
+Two things this makes concrete for the first time:
+
+1. **`daily_band` pooled-within is 36.6e-4 BELOW global.** Most of the headline 0.970 is
+   ranking *across* screen-time bands, where the base rate runs 0.24 → 0.9997 and the
+   problem is nearly trivial. Inside a band the stack is at 0.90–0.97.
+2. **The hard population is 4–8h of daily screen time** — 274k rows, base rate 0.36–0.66,
+   within-AUC 0.916/0.939. That is precisely where `georgymamarin`'s public notebook finds
+   P(addicted) *falling* with screen time at fixed social media. It is the region a
+   feature would have to attack, and §"the corrected answer" says a booster with 1000
+   rounds and 31 leaves — free to isolate exactly that band — cannot beat a shuffled
+   control there or anywhere.
+
+The `n_missing_all` gap of +0.0040 is **not** a recoverable loss; it is the arithmetic
+penalty of pooling populations of different difficulty, and `iso_regime.py` already showed
+regrading those buckets costs −0.000085 on 5/5 folds.
+
+### A free confirmation: enumerate the transform subsets, `experiments/subset_lab.py` (new)
+
+Drop-logit (`h3`) was found by trying *one* alternative. There are 11 subsets of size ≥2
+and this workspace had scored two. All 11, on blend158, with a paired 300-rep row
+bootstrap against h3:
+
+| subset | CV | vs h3 | P(>h3) |
+|---|---|---|---|
+| **hybrid+rankraw+rescale (h3)** | **0.970048** | — | — |
+| rankraw+rescale | 0.970046 | −0.000002 | 0.150 |
+| hybrid+rankraw | 0.970046 | −0.000002 | 0.123 |
+| logit+hybrid+rankraw+rescale (ens4) | 0.970043 | −0.000005 | 0.003 |
+| logit+hybrid+rankraw | 0.970041 | −0.000007 | 0.003 |
+| hybrid+rescale | 0.970040 | −0.000009 | 0.000 |
+| logit+rankraw+rescale | 0.970039 | −0.000010 | 0.000 |
+| logit+rankraw | 0.970033 | −0.000016 | 0.000 |
+| logit+hybrid+rescale | 0.970032 | −0.000017 | 0.000 |
+| logit+hybrid | 0.970021 | −0.000027 | 0.000 |
+| logit+rescale | 0.970015 | −0.000034 | 0.000 |
+
+**h3 is the argmax of the whole lattice**, so the enumeration adds no new file — but it
+upgrades the claim. Every subset that contains `logit` is beaten by the same subset
+without it, **7 comparisons out of 7**, by 3e-6 to 12e-6. The finding is not "drop logit
+from the four-ensemble"; it is **`logit` is actively harmful in every combination it
+appears in**. Fourth independent instrument agreeing, after the paired 50/50, the row
+bootstrap and the 8 resampled fold splits.
+
+### Operational
+
+- `kill -STOP` / `kill -CONT` on the two seed twins to give `resid_boost2` its cores —
+  used `pgrep` then `kill <pid>` this time, per the last two entries' warning, and it
+  worked without killing the wrapper.
+- `mohankrishnathalla/s6e8-tabm-oof-saver` re-ran 04:54 UTC and is **ERROR** again. Third
+  failure. Stop checking it.
+- `kaggle kernels pull` hung past 2 minutes on a large notebook but had already written
+  the files — check the target directory before retrying.
+- The two `xgb_latcat_s{17,23}` seed twins reached fold 3/5 (AUC 0.96687/0.96791/…/0.96838)
+  and are still running.
+
+### Next run, in this order
+
+1. **If the counter has rolled, send the queue immediately, `blend158_h3` first.** Sixteen
+   distinct validated files; nothing about the ranking changed today.
+2. Read `logs_xgb_latcat_s17.txt` / `_s23.txt`. If both landed, average the three seeds
+   into one member, swap for `xgb_latcat`, rebuild, and record the delta either way.
+3. **Do not build another feature.** Both corrected instruments say the raw frame is
+   exhausted conditional on the stack, at every capacity setting, against matched
+   controls. The only opening left in that direction is an encoding no member carries, and
+   the members carry every encoding in `RESEARCH.md`.
+4. Do not re-open: member hunting on solo AUC or correlation alone (three measured nulls),
+   stacker `C`, meta-models over the members, regime-aware anything, NNLS/hill-climbing,
+   combiner bagging, transform subsets (now enumerated exhaustively), calibration of the
+   final submission (costs 6.2e-5).
+5. If a run needs an angle: the honest one left is **the private-vs-public discipline** —
+   re-read the deadline pick against CV only, and resist any public-LB-shaped edit. The
+   Rogii failure is the reason this workspace exists in its current form.

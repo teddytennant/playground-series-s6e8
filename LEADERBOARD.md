@@ -344,3 +344,23 @@ that they score every candidate on identical rows, which the leaderboard cannot 
 
 Concretely: do not read the 2e-5 gap to rank 10 as a target. It is not a distance, it is a
 tie displayed as an ordering.
+
+## 2026-08-11 07:00 UTC
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97124 |
+| 2 | Don Mani | 0.97115 |
+| 3 | Optimistix | 0.97113 |
+| 4 | Maher el Ouahabi | 0.97113 |
+| 5 | Mahog | 0.97110 |
+| 6 | cstdy | 0.97110 |
+| 7 | Orig_lab | 0.97109 |
+| — | … | |
+| **13** | **Teddy Tennant** | **0.97106** |
+
+Held 13th overnight; the top of the board moved by 0.00000 since 2026-08-10 21:01 (MILANFX
+has not been passed). Three teams entered the 0.97108–0.97115 band today, so the cluster
+between us and the lead is thickening rather than the lead pulling away. The gap to first
+is 0.00018 — roughly 4x the total CV spread of every candidate this workspace holds, which
+is the honest reason to expect rank movement to come from someone else's slip, not ours.
