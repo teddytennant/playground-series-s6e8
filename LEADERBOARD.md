@@ -323,3 +323,24 @@ pass-through is about **+3.6e-5 of CV** — for once, a target of the same order
 combiner work actually produces, rather than the 3.2e-4 needed to reach #1. It is still
 inside the slice's own scatter, so treat it as a reason to keep shipping CV improvements,
 never as a thing to tune towards.
+
+## Snapshot 2026-08-11 06:00 UTC — 1,396 teams, us rank 13, unchanged
+
+Refetched during slot 6 (research-only, the day's 10 submissions were spent by 04:04 UTC).
+The board has barely moved in two hours: #1 MILANFX 0.97124 (unchanged since 21:01 UTC
+yesterday), rank 10 = 0.97108, us 0.97106 with `blend156`.
+
+Three teams did post overnight — `Orig_lab` 0.97109 (02:51 UTC), `AJboos` 0.97108
+(02:20 UTC), `LeTuanM` 0.97107 (01:56 UTC) — all landing in the 0.97107–0.97109 band
+immediately above us. That band is where the field piles up, and it is 1–3e-5 wide.
+
+**What the slot-6 bootstrap adds to reading this board.** The paired row-bootstrap
+(`experiments/auc_boot.py`) puts the *marginal* sd of a single AUC estimate at 1.67e-4 on
+691k OOF rows. The public slice is a fraction of a 296k-row test set, so its own marginal
+scatter is at least that large. **Ranks 1 through 50 span 3.2e-4 — under two marginal
+standard deviations.** Essentially the entire visible leaderboard is inside the noise of
+its own measurement, and the only reason our *paired* CV comparisons resolve at 2e-6 is
+that they score every candidate on identical rows, which the leaderboard cannot do.
+
+Concretely: do not read the 2e-5 gap to rank 10 as a target. It is not a distance, it is a
+tie displayed as an ordering.

@@ -1419,3 +1419,208 @@ the waiter's exact command still parses, `--lam`/`--standardize` default to the 
 behaviour, and the `max_iter` 3000 → 5000 change is **inert** — lbfgs converges in
 **257 iterations** on a fold-sized fit, nowhere near either cap. `blend158` will stay
 comparable to `blend156`.
+
+---
+
+## 2026-08-11 — slot 6 of 10 — angle: seed and fold diversity, averaged
+
+**No submission: the daily cap was already spent.** All ten of the UTC-day 2026-08-11
+submissions landed 00:16–04:04 UTC under agent-slots 1–3; this run started 05:22 UTC. The
+counter rolls at 00:00 UTC = 20:00 EDT. Research and code only, as the playbook requires
+at the cap.
+
+**Headline: `blend158_h3`, cross-fitted CV 0.970048 — new best held, and it fits zero free
+parameters.** It is built, validated and waiting in `submissions/`. Two other results are
+worth more than the file: the paired row-bootstrap says the 2–5e-6 gaps this workspace has
+been arguing over *are* resolvable, and slot 4's latcat member is a measured null that
+refutes last run's own hypothesis.
+
+### The angle, taken at both levels — and the combiner level is a clean null
+
+Member-level seed diversity costs ~80 min a model; the combiner does not, because the 156
+member OOF vectors are fixed on disk and a logistic refit turned out to cost **4 seconds**,
+not the ~60 I had budgeted. So the combiner half ran to completion this run
+(`experiments/bag_lab.py`, paired 50/50, rankraw, 3 reps):
+
+| arm | paired vs single | spearman vs single |
+|---|---|---|
+| `foldbag5` — 5 fits on disjoint 80% slices, decision functions averaged | +0.000001 ± 0.000001 **SIGN FLIPS** | 0.999991–0.999999 |
+| `boot5` — 5 bootstrap fits, averaged | **−0.000013 ± 0.000013 consistent** | 0.999927–0.999941 |
+
+**Bagging the combiner does nothing, and bootstrapping it actively hurts.** Both are what
+theory predicts at n/p = 4,400 — a logistic fit that precise has no variance left for
+averaging to remove, and bootstrap resampling only throws away 37% of the unique rows.
+
+The `foldbag5` arm was not idle curiosity. The shipped pipeline is **internally
+inconsistent** about this and nobody had noticed: the cross-fitted CV that every decision
+in this journal rests on is produced by fold models (n = 553,095 each), while the file
+actually submitted comes from a single full-data fit (n = 691,369). Those are two
+different estimators, so the CV number has been validating a procedure the submission does
+not use. The measurement above prices that gap at spearman 0.999999 and +1e-6 of AUC:
+**the inconsistency is real and immaterial.** Worth having as a fact rather than a worry.
+
+### The bigger result: the 2e-6 gaps are resolvable, and the noise floor note was too blunt
+
+`RESEARCH.md` says "the real noise floor is ≈ 0.00005; any claimed gain smaller than that
+is nothing", and the journal's standing rule is "believe nothing under ~1e-5". Both are
+about the wrong quantity, and `experiments/auc_boot.py` (new) shows by how much.
+
+It Poisson-bootstraps the **rows** of a fixed cross-fitted OOF vector, using the *same*
+resampled rows for every candidate, so what comes out is the noise of the paired
+difference rather than of either AUC alone. Weighted AUC comes from one global sort per
+candidate plus an O(n) pass per rep, with exact tie handling — 400 reps over 7 candidates
+in 128s, no model refitted.
+
+| | |
+|---|---|
+| marginal bootstrap sd of any single AUC | **0.000167** |
+| paired sd of a difference between two near-identical ensembles | **0.000001–0.000003** |
+
+A factor of **~80**. The marginal number is why the 5e-5 floor exists and it is correct
+for its purpose; it is simply not the uncertainty that applies when two candidates are
+scored on the same rows.
+
+Against `blend156` (400 reps): `blend156w` +6e-6 ± 3e-6, **P(better) 0.995**;
+`blend156_h3` +4e-6 ± 2e-6, **P 0.968**; `blend156_rankraw` −6e-6 ± 6e-6, P 0.125;
+`blend156_logit` −80e-6 ± 7e-6, P 0.000. So the drop-logit and searched-weight gains that
+last run called "not believable under the standing rule" survive row resampling
+comfortably. **The rule should be restated: under ~1e-5 is unbelievable for a marginal
+comparison, and perfectly believable for a paired one.**
+
+Stated plainly, because it bounds the claim: this prices **row** noise only. The fold
+assignment, the member models and the stacker fits are all held fixed, so it is a lower
+bound on "which candidate is better", never an upper bound. `experiments/repcv.py` was
+written to price the other half and is still running (below).
+
+### blend158 landed — and the latcat hypothesis is refuted
+
+Slot 4's pair finished at 01:45/01:47 EDT and `latcat_eval.sh` ran itself through unattended
+exactly as designed.
+
+| member | solo OOF AUC | maxcorr (hybrid) | maxcorr (rankraw) |
+|---|---|---|---|
+| `xgb_lat` | 0.967664 | 0.9969 | 0.9873 |
+| `xgb_latcat` | 0.967696 | 0.9970 | 0.9874 |
+| *pack's own median* | | *0.9946* | |
+
+These are the **highest solo AUC members ever built in this workspace**, and adding the
+unordered lattice categoricals on top of the full TE frame is worth +3.2e-5 solo. Only
+1.05–1.14% of split gain went to the 12 `K_` columns, which is why:
+
+| stack | logit | hybrid | rankraw | rescale | rank-ensemble |
+|---|---|---|---|---|---|
+| blend156 | 0.969962 | 0.970023 | 0.970036 | 0.970025 | 0.970042 |
+| blend158 | 0.969961 | 0.970028 | 0.970036 | 0.970027 | **0.970043** |
+| delta | −1e-6 | +5e-6 | 0 | +2e-6 | **+1e-6** |
+
+**A null, and it refutes last run's hypothesis #2 in its own words.** That hypothesis
+predicted this member would "sit near 0.967 solo with maxcorr well under 0.99 and be worth
+several times" the decorrelated pair. It got the solo AUC exactly right and the
+correlation exactly wrong: keeping the TE pipeline keeps the member inside the pack, and
+1% of split gain cannot pull it out.
+
+This is now measured from **both sides**, which is the part worth keeping:
+
+- `blend153` — decorrelated members (maxcorr 0.9746/0.9762) at *low* solo AUC → null.
+- `blend158` — best-in-workspace solo AUC at *pack-typical* maxcorr (0.9970) → null.
+
+**Neither half of the pair buys anything on its own.** A candidate member needs low
+correlation *and* competitive accuracy simultaneously, and no member built here has had
+both. That is a much sharper statement of the screening rule than "screen on the pair", and
+it prices the whole member-hunting line honestly: it has produced nothing since blend156.
+
+### blend158_h3 — the new best, for free
+
+Dropping the `logit` transform from the rank-ensemble replicates on the new member set:
+
+| | 156 members | 158 members |
+|---|---|---|
+| all four transforms | 0.970042 | 0.970043 |
+| drop `logit` (`h3`) | 0.970046 (+4e-6) | **0.970048 (+5e-6)** |
+
+Third independent confirmation of the same one-bit decision, now on two member sets and
+two instruments. `experiments/make_h3.py` (new) assembles it from files
+`blend_lab --build` already writes, so it costs no refitting at all — four files read,
+three rank-averaged, one written.
+
+Paired bootstrap on the full candidate set, 300 reps, reference `blend156_h3`:
+
+| candidate | CV | vs blend156_h3 | P(better) | free params |
+|---|---|---|---|---|
+| **`blend158_h3`** | **0.970048** | +0.000002 ± 0.000001 | 0.933 | **0** |
+| `blend156w` | 0.970048 | +0.000002 ± 0.000001 | 0.913 | 3 |
+| `blend156_h3` | 0.970046 | — | — | 0 |
+| `blend158` | 0.970043 | −0.000003 ± 0.000002 | 0.110 | 0 |
+| `blend156` | 0.970042 | −0.000004 ± 0.000002 | 0.023 | 0 |
+
+**`blend158_h3` is the deadline pick**: joint-top on CV and the only candidate at the top
+that fits nothing against the OOF. `blend156w` ties it on the number while spending three
+searched weights to get there, and the Rogii failure was exactly this class of tuning.
+
+All five files validated: 296,302 rows, ids identical to `sample_submission`, no NaN, and
+mutually byte-distinct (blend158_h3 vs blend156_h3 spearman 0.999988).
+
+### Still running when this entry was written
+
+- **`experiments/repcv.py`, 8 combiner fold splits.** Prices the noise `auc_boot` cannot:
+  the combiner's fold partition is itself a random draw and has never been resampled here.
+  Split 0 is the frozen seed-42 scheme and returns ens4 0.970043 / h3 0.970047 / w 0.970049
+  against the journal's 0.970042 / 0.970046 / 0.970047 — agreement to within the known
+  ±4e-6 solver floor, which is the check that the bench is wired correctly. 754s per split
+  under contention; ~7 splits left.
+- **`xgb_latcat_s17` and `xgb_latcat_s23`** — the member-level half of the angle. Seed
+  twins of the best solo member, one factor changed. Their point is not the two members;
+  it is to answer *does member-level seed averaging survive stacking?*, which this
+  workspace has never measured. Given blend158, the honest prior is that it does not, and a
+  clean null is worth having because it retires a 2h-per-member idea permanently.
+
+### Operational
+
+- **I repeated the exact mistake the last entry warned about.** `pkill -f "repcv.py"` killed
+  the bash wrapper running it (exit 144) because the wrapper's own command line contains
+  the pattern. Use `pgrep` then `kill <pid>`, or a bracket class. Warned, and did it anyway.
+- **`kill -STOP` / `kill -CONT` is the right tool for yielding cores temporarily.** Four
+  jobs took the box to load 29/16 and the two short combiner jobs were being starved by the
+  two 80-minute ones. Suspending the long jobs for 10 minutes cost them nothing and let the
+  short ones finish.
+- **A member landing mid-run silently changed my member count.** `repcv` loaded at 01:46 and
+  picked up `xgb_lat` (saved 01:45) but not `xgb_latcat` (01:47) — a 157-member set matching
+  no shipped candidate. Caught it because the load line prints the count. **Any bench that
+  globs `oof/` must pin its member set with an explicit `--drop`**, and the ones here now do.
+- `mohankrishnathalla/s6e8-tabm-oof-saver` **failed again** — now
+  `TypeError: MLP.__init__() got an unexpected keyword argument 'd_layers'` (the author
+  swapped `tabm-torch` for `rtdl_revisiting_models` and guessed its API). The RealMLP saver
+  was **RUNNING** at 05:30 UTC, past the cell that killed it last time. Worth re-checking.
+- Leaderboard: 0.97106, rank ~13 of 1,396. MILANFX leads at 0.97124.
+
+### Prepared and waiting for the 20:00 EDT reset
+
+| file | CV | note |
+|---|---|---|
+| `submissions/blend158_h3.csv` | **0.970048** | best held, zero free params — send first |
+| `submissions/blend156w.csv` | 0.970048 | ties on CV, 3 searched weights |
+| `submissions/blend156_h3.csv` | 0.970046 | |
+| `submissions/blend158.csv` | 0.970043 | all four transforms, 158 members |
+| `submissions/blend158_{logit,hybrid,rankraw,rescale}.csv` | 0.969961–0.970036 | free by-products, all distinct files |
+
+That is eight distinct valid files for ten slots. The binding constraint remains having
+files built when the counter rolls, and it is nearly satisfied for tomorrow.
+
+### Next run, in this order
+
+1. **Read `logs_repcv.txt`.** If the h3-over-ens4 difference is sign-consistent across all
+   8 fold splits, the drop-logit decision is settled on three independent instruments and
+   `blend158_h3` is the deadline entry with no further argument needed. If it sign-flips,
+   the paired bootstrap was measuring row noise around a fold-noise-dominated quantity and
+   the whole 2e-6 candidate ranking collapses into a tie — which would itself be the most
+   important thing in the journal.
+2. **If the counter has rolled, send the queue immediately, `blend158_h3` first.**
+3. Read `logs_xgb_latcat_s17.txt` / `_s23.txt`; if both landed, average the three seeds into
+   one member, swap it for `xgb_latcat`, and rebuild. Expect a null; record it either way.
+4. **Stop hunting members on solo AUC or on correlation alone.** Both screens are now
+   measured nulls in isolation (blend153, blend158). Only a candidate plausibly strong on
+   *both* is worth 2 hours.
+5. Re-check `s6e8-realmlp-oof-saver` — it was running, and RealMLP on our exact frozen folds
+   is the one function class that could clear the bar in point 4.
+6. Do **not** re-sweep stacker `C`, do **not** try NNLS/hill-climbing, and do **not** bag or
+   bootstrap the combiner. All three are closed with the arithmetic written down.

@@ -209,6 +209,31 @@ variants on identical rows cancels the split noise. It is the selection instrume
 cross-fit is only the headline. A paired delta of +5e-6 that is sign-consistent across
 splits is a real ordering, even though no cross-fit could ever see it.
 
+#### The 5e-5 floor is a MARGINAL number — do not apply it to paired comparisons
+
+Measured 2026-08-11 with `experiments/auc_boot.py`, which Poisson-bootstraps the **rows**
+of a fixed cross-fitted OOF vector using the *same* resampled rows for every candidate.
+
+| quantity | sd |
+|---|---|
+| any single ensemble's AUC (marginal) | **0.000167** |
+| the *difference* between two near-identical ensembles (paired) | **0.000001–0.000003** |
+
+A factor of ~80. The old rule "believe nothing under ~1e-5" is right for a marginal
+comparison and badly wrong for a paired one: at 691,369 rows a +4e-6 paired gap came back
+at P(better) = 0.97 over 400 reps. **Restated: under ~1e-5 is unbelievable marginally and
+perfectly believable paired.**
+
+Caveat that bounds the claim: this prices ROW noise only, holding the folds, the member
+models and the stacker fits fixed. It is a lower bound on the uncertainty of "which
+candidate is better", never an upper bound. `experiments/repcv.py` prices the fold-split
+half by re-partitioning the combiner's folds (free — the member OOF matrix is fixed on
+disk, and a 156-member logistic fit costs **4 seconds**, not the minute you would guess).
+
+Implementation note worth reusing: weighted AUC needs only one global sort per candidate
+plus an O(n) pass per bootstrap rep (`np.add.reduceat` over runs of equal score handles
+ties exactly). 400 reps × 7 candidates over 691k rows runs in 128s. Do not resort per rep.
+
 ### Submission economics — the daily slot has no alternative use
 
 **A Playground submission cannot hurt you.** Nothing evicts anything: the public
@@ -333,6 +358,13 @@ saver: a kernel that lists `np.save('oof_*.npy')` in its source has not necessar
 produced one. When only a `.log` comes back, the run failed. Worth re-checking these two
 in later runs — the author is iterating, and a working RealMLP would be a function class
 the pool has only through `beicicc/s6e8-fixed4-realmlp-two-seed-artifacts`.
+
+**Re-checked 2026-08-11 05:30 UTC (slot 6).** The author re-ran both ~35 min earlier.
+TabM **failed again**, differently: they swapped `tabm-torch` for `rtdl_revisiting_models`
+and guessed its API — `TypeError: MLP.__init__() got an unexpected keyword argument
+'d_layers'`. RealMLP was **`RUNNING`**, i.e. past the cell that killed it last time. This
+is the one candidate that could satisfy the both-sides member rule above, so check
+`kaggle kernels status` on it every run until it resolves.
 
 ### Enumerating the pool — the CLI list endpoints are unreliable
 
@@ -554,8 +586,18 @@ ps -o ppid= -p <pid>                            # trace ownership up to a `claud
 
 - ⚠ **`pkill -f "<script> --name foo"` also kills the bash wrapper that launched it**,
   because the wrapper's own command line contains the pattern. It killed this session's
-  shell mid-command (exit 144) on 2026-08-11. Use `pgrep -f ... | head -1` then
-  `kill <pid>`.
+  shell mid-command (exit 144) on 2026-08-11 — **twice, in two consecutive runs**, the
+  second time after reading this very warning. Never type `pkill -f` in this workspace.
+  Use `pgrep -f "scrip[t].py"` then `kill <pid>`.
+- **Yield cores with `kill -STOP` / `kill -CONT`, do not kill long jobs.** Four concurrent
+  jobs took the box to load 29/16 on 2026-08-11 and two 4-second combiner fits were being
+  starved by two 80-minute XGBoost runs. Suspending the long jobs for 10 minutes cost them
+  nothing and unblocked the short ones. `nice` alone does not achieve this.
+- ⚠ **A member landing mid-run silently changes any bench that globs `oof/`.** On
+  2026-08-11 `repcv.py` loaded 157 members — `xgb_lat` had saved one minute earlier and
+  `xgb_latcat` had not — producing a member set matching no shipped candidate. **Pin the
+  member set with an explicit `--drop` whenever another job may be writing to `oof/`**, and
+  always print and read the loaded member count.
 - ⚠ **The same self-match silently breaks `pgrep` wait-loops**, and that failure is worse
   because it is quiet rather than fatal. A "wait until the job finishes" loop like
   `until ! pgrep -f "run_xgb.py --name probeLC"; do sleep 20; done` **never exits**: the
@@ -721,8 +763,19 @@ where `hybrid` and `rescale` only do so partially.
 | **per-bucket isotonic on the global stack** | −0.000085, 5/5 folds | monotone, so this is a *pure* cross-regime test |
 | per-member cubic recalibration (`lin_poly`) | −0.000032 | |
 | rank-gauss on the clipped logits (`lin_rank`) | −0.000014 | rank the RAW values instead — ties matter |
+| **bagging the combiner over disjoint 80% slices** (`foldbag5`) | +0.000001, sign flips | spearman vs the single fit 0.999991–0.999999 |
+| **bootstrap-bagging the combiner** (`boot5`) | −0.000013, consistent | resampling with replacement discards 37% of unique rows |
 
 **The linear logit stack is the right combiner. Stop looking for a better one.**
+
+Combiner-level resampling is closed (`experiments/bag_lab.py`, 2026-08-11). At n/p = 4,400
+the coefficients are estimated too precisely for averaging to have anything to remove.
+
+Related, and worth knowing rather than worrying about: the shipped pipeline uses two
+different estimators on the two sides — the cross-fitted CV comes from fold models
+(n = 553,095) while the submitted file comes from one full-data fit (n = 691,369). The
+`foldbag5` measurement prices that inconsistency at spearman 0.999999 and +1e-6. Real, and
+immaterial.
 
 Per-fold AUC by missing-column count: 0.9764 / 0.9740 / 0.9651 / 0.9540 / 0.9280 for
 0/1/2/3/4+. Difficulty varies enormously by regime; the optimal *blend* does not.
@@ -806,6 +859,20 @@ LightGBM stump (maxcorr 0.9961) and the categorical recode (0.9746) — did not.
 **The operational rule:** screen on the *pair* (low maxcorr AND solo ≥ ~0.966), never on
 correlation alone. A candidate below ~0.966 solo has to earn its place on a paired
 measurement, whatever its correlation says.
+
+#### The rule is now measured from BOTH sides — 2026-08-11
+
+| test | member(s) | solo AUC | maxcorr | stack delta |
+|---|---|---|---|---|
+| `blend153` | `xgb_cat_lattice`, `cat_native` | low | **0.9746 / 0.9762** (best ever here) | null |
+| `blend158` | `xgb_lat`, `xgb_latcat` | **0.967664 / 0.967696** (best ever here) | 0.9969 / 0.9970 | **+1e-6, null** |
+
+Best-in-workspace decorrelation at low accuracy buys nothing. Best-in-workspace accuracy at
+pack-typical correlation buys nothing either. **Neither half of the pair is worth anything
+alone**, and no member built here has ever had both. `xgb_latcat` adds the 12 unordered
+lattice categoricals *on top of* the full TE frame and gains +3.2e-5 solo over `xgb_lat` —
+but only 1.05–1.14% of split gain goes to those columns, so the member stays inside the
+pack. Before spending 2h on a member, argue for both numbers or do not run it.
 
 ### The geometry of the pack — measured 2026-08-11, and it explains everything above
 
