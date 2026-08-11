@@ -5,6 +5,7 @@ notebooks/
 submissions/*.csv
 submissions/*.npy
 logs_*.txt
+logs/
 .venv/
 __pycache__/
 meta_preds/

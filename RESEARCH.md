@@ -121,21 +121,53 @@ saved `oof_*.npy` is invalid and the stack becomes dishonest.
 CV **does not** estimate the LB score; CV **differences** do — and even those transfer at
 well under 1:1.
 
-The offset is **not a constant, and it shrinks as CV rises.** Four of our own points:
+All twelve of our own points, complete as of 2026-08-11:
 
 | entry | CV | LB | offset |
 |---|---|---|---|
 | `stack_pub74_logit` | 0.969641 | 0.97081 | +0.001169 |
 | `stack_pub88_mine_logit` | 0.969660 | 0.97081 | +0.001150 |
 | `stack_pub86_hybrid` | 0.969678 | 0.97080 | +0.001122 |
-| `stack_pub149_hybrid` | 0.970018 | 0.97099 | **+0.000972** |
+| `blend150fx_logit` | 0.969950 | 0.97103 | +0.001080 |
+| `blend150fx_rescale` | 0.970013 | 0.97102 | +0.001007 |
+| `blend150fx_hybrid` | 0.970014 | 0.97099 | +0.000976 |
+| `stack_pub149_hybrid` | 0.970018 | 0.97099 | +0.000972 |
+| `stack_pub151_rankraw` | 0.970023 | 0.97102 | +0.000997 |
+| `stack_pub151_hybrid` | 0.970024 | 0.97099 | +0.000966 |
+| `blend150fx_rankraw` | 0.970024 | 0.97102 | +0.000996 |
+| `stack_pub151_fixed_rankraw` | 0.970025 | 0.97103 | +0.001005 |
+| `blend150fx` | 0.970032 | 0.97104 | +0.001008 |
 
 The one gain large enough to measure, +0.000340 CV, transferred as +0.00019 LB — about
-**56% pass-through**. Everything smaller than ~0.0001 CV has transferred at a rate of
-**zero**. So: **do not quote "CV + 0.0012" as an LB estimate**, and do not expect a CV
-gain to arrive intact.
+**56% pass-through**. So: **do not quote "CV + 0.0012" as an LB estimate**, and do not
+expect a CV gain to arrive intact.
 
-Trust CV for **ranking** decisions. Never as a leaderboard estimate.
+#### ⚠ "The offset shrinks as CV rises" was an artefact of four points — corrected 2026-08-11
+
+That claim was drawn from four entries spanning a wide CV range. With twelve points it
+resolves into two regimes, and only the first is real:
+
+- **Across** the 0.9696 → 0.9700 step the offset genuinely fell, +0.00115 → +0.00100.
+- **Within** the top cluster (CV 0.96995–0.97003, nine entries) the offset scatters over
+  +0.00097…+0.00108 with **no trend in CV at all**. That scatter is ±5e-5 of LB — the
+  same size as the CV differences being compared.
+
+**The public slice cannot resolve CV differences below ~1e-4**, which is every difference
+we are still capable of producing. The sharpest demonstration, and the reason this matters
+more than a bookkeeping correction:
+
+> `blend150fx_logit` has the **worst CV of the top nine, by 8e-5** — a gap bigger than the
+> noise floor and bigger than any single improvement shipped all week — and it scored
+> **0.97103**, second-best of everything we have sent and above three stacks that beat it
+> on CV.
+
+That is the Rogii failure mode offered for free. `logit` is also the one transform with a
+mechanism argument *against* it (its clip provably destroys the tails of ~29 saturating
+members). If the public slice is allowed a vote, it picks the entry we have a reason to
+believe is worse.
+
+Trust CV for **ranking** decisions. Never as a leaderboard estimate, and never let a
+public-LB ordering break a CV tie.
 
 ### Noise floor
 
@@ -521,3 +553,125 @@ Two things to carry forward, and they pull in different directions:
 Judge candidates on correlation to the pack first and solo AUC second — but do not
 *reject* a group for being GBDT-shaped if it comes from a pipeline you do not already
 hold. Measure it.
+
+### The geometry of the pack — measured 2026-08-11, and it explains everything above
+
+Eigenvalues of the 149×149 correlation matrix, computed on the **hybrid** matrix (the
+space the stacker actually sees), `cache/meta_hybrid.npz`:
+
+| | |
+|---|---|
+| variance in PC1 alone | **95.39%** |
+| first 3 PCs | 97.08% |
+| first 10 PCs | 98.42% |
+| first 40 PCs | 99.49% |
+| eigenvalues > 1e-4 × λmax | **55** |
+| entropy effective rank | **1.41** |
+| smallest eigenvalue | **1.1e-16 → exact collinearity** (see the duplicate below) |
+
+**149 members are one consensus signal plus a very thin tail of corrections.** The entire
+job of the stacker lives in the 4.6% of variance that is not PC1, and the whole
+0.9696 → 0.9700 climb was bought there. This is the quantitative version of what the
+journal kept rediscovering:
+
+- It explains why a member from a **new pipeline** beats a better member from a pipeline
+  already held: the first adds a *direction*, the second adds *magnitude* along PC1, and
+  PC1 is already saturated.
+- It explains why the stacker's `C` is flat and why non-linear meta-models lose. There is
+  no rich structure to regularise or bend — there are ~55 usable directions carrying 4.6%
+  of the variance between them.
+- It bounds the remaining upside honestly. Anything that lands inside the existing span
+  is worth ~0 no matter how good its solo AUC.
+
+#### ⚠ `bolt_xgb_d7_alt1` and `bolt_xgb_d7_alt2` are the SAME ARRAY — drop one
+
+`np.array_equal` is `True` for both the OOF and the test vectors (max|diff| exactly 0.0,
+identical AUC 0.9681005). This is the `maxcorr == 1.000` duplication condition that
+`RESEARCH.md` already lists as a rejection gate and that `najiama`'s members were
+excluded for — it slipped through the boltuzamaki import because that import screened
+each candidate against the **pack**, never against the other candidates in its own batch.
+
+Practical effect is small: with an L2 penalty an exactly duplicated column splits its
+coefficient, which halves the effective penalty on that one direction — and `C` is flat
+here anyway. So this is a correctness fix, not a scoring one. But **the real member count
+is 148, not 149**, and every "n members" figure in this file and the journal is off by one
+from `--ext2` onward. Screen new batches against themselves as well as against the pack.
+
+#### ⚠ The flagship "maxcorr 0.811" for `bolt_extratrees_support` is a transform artefact
+
+This file twice cites `bolt_extratrees_support` at **maxcorr 0.811** as the headline
+evidence that decorrelation is real. That number comes from `import_ext2.py:120`, which
+computes correlation on the raw **`to_logit`** scale — the very scale whose clip destroys
+the tails of saturating members, and ExtraTrees saturates hard.
+
+In the hybrid space the stacker actually uses, `bolt_extratrees_support` reads
+**maxcorr 0.9701** (against `et`), median 0.9340, solo AUC 0.94322. It is not close to
+being the most decorrelated member. The genuine extremes are:
+
+| member | maxcorr (hybrid) |
+|---|---|
+| `logreg` | **0.9307** |
+| `bolt_lookup_v3_evidence` | 0.9333 |
+| `nn2` | 0.9491 |
+| `golem_c` (spline GAM) | 0.9500 |
+| `bolt_fttransformer` | 0.9512 |
+
+Distribution over all 149: min 0.931 / p5 0.956 / median 0.995 / max 1.000. Only **15**
+members sit below 0.97 and only **3** below 0.95.
+
+This is the same shape of error as the `sd_ratio` correction: a quantity measured in a
+space the model does not use, then read as a property of the model. **The group-level
+conclusion still stands** — it was established by paired deltas, not by this number — but
+the `maxcorr < 0.97` grouping in the slot-3 attribution table was cut in logit space, so
+its membership is partly determined by which members saturate. Compute correlation in the
+transform the stack is actually fitted in.
+
+### How many members, and chosen how — measured 2026-08-11, `experiments/member_select.py`
+
+Greedy top-k under three orderings, paired (every cell fitted and scored on identical
+rows), 2 reps, 148 members after dropping the duplicate. `auc` = greedy by solo OOF AUC
+measured on the fit half only; `decorr` = greedy minimum max-|corr| against those already
+chosen, using no labels at all; `random` = the control.
+
+| k | `auc` | `decorr` | `random` |
+|---|---|---|---|
+| 10 | 0.969599 | 0.969517 | 0.969244 |
+| 25 | 0.969821 | 0.969730 | 0.969671 |
+| 50 | 0.969965 | 0.969874 | **0.970042** |
+| 100 | 0.970128 | 0.970141 | 0.970145 |
+| 148 | 0.970177 | 0.970181 | 0.970180 |
+
+**1. There is no saturation in k. Keep every member.** The curve is still climbing at the
+right-hand edge: k=100 → 148 is worth +3.5e-5. Do not prune the stack, and do not read the
+95.4%-in-PC1 geometry as licence to. A "cleaner, better-conditioned 50-member stack" costs
+**−1.4e-4**, which is three times the noise floor.
+
+**2. Decorrelation FAILS as a member-level selection rule.** `decorr` loses to `auc` by
+−8e-5 to −9e-5 at k=10/25/50, sign-consistent across both reps, and only draws level once
+k ≥ 100 (i.e. once both orderings have swept up nearly the same set). Selecting individual
+members for being decorrelated picks up weak outliers — the ordering opens `logreg`,
+`golem_g`, `nn2`, `knn`, `fmpure` — and a stack of oddities is worse than a stack of good
+models.
+
+**3. At k=50 a RANDOM 50 beats both principled orderings** (+7.7e-5 over `auc`, +1.7e-4
+over `decorr`). Greedy-by-AUC concentrates inside one redundant strong family; greedy-by-
+diversity concentrates on junk; random draws a natural mix of strength *and* pipelines.
+
+This does not contradict slot 3's group-level attribution, it **explains** it. Adding
+`boltuzamaki`'s 47 members paid because it was a *representative sample of a whole
+independent pipeline* — not because its members were individually decorrelated. The unit
+that carries value is the pipeline, not the member. So: **acquire whole pipelines, keep
+everything they contain, and never hand-pick members by a correlation statistic.**
+
+#### The solver's own noise floor is ±4e-6 — and it matters
+
+At k=148 all three orderings select the *same 148 columns*, differing only in column
+order. They score 0.970177 / 0.970181 / 0.970180. That spread — **4e-6** — is pure
+`LogisticRegression` convergence noise, measured for free.
+
+That is the same magnitude as the paired deltas slot 4 reported for our own two members
+(`et_lat_frac` +6e-6, `linlat` +3e-6, both together +5e-6) and called "a real ordering".
+**Those numbers are at, not above, the solver's own reproducibility.** Sign-consistency
+across row splits does not rescue them, because the solver noise is not resampled by
+changing rows. Treat any paired delta under ~1e-5 as unresolved unless it is also stable
+under column permutation.

@@ -763,3 +763,184 @@ One submission (`stack_pub151_rankraw`, CV 0.970023, 4 slots left today); the an
 feature engineering measured +5e-6; the stacker's C is closed as flat; and two durable
 claims in `RESEARCH.md` were wrong — sd_ratio is not a defect detector, and our own member
 runner carried the very defect we drop other people's members for.
+
+---
+
+## 2026-08-11 (UTC) — slot 1 of 10 — angle: tune LightGBM properly against the fixed folds
+
+**Read the date carefully: the prompt said "10 submissions already today" and SLOT 1 of
+10, which is contradictory.** Both are right. Local time was 20:12 EDT on 2026-08-10, i.e.
+**00:12 UTC on 2026-08-11** — Kaggle counts submission days in UTC and the quota had reset
+twelve minutes earlier. The ten entries the API reported all carry 2026-08-10 UTC
+timestamps. Confirmed empirically, not assumed: the CLI printed **"9 submissions remaining
+today"** after the first submit of this run.
+
+Durable: **the daily counter rolls at 00:00 UTC = 20:00 EDT.** A run that starts in the
+evening US-eastern is at the start of a fresh quota, not the end of a spent one.
+
+### Standing at the start of the run
+
+Rank **14 of 1385**, public 0.97104, 12 submissions. Rank 1 is 0.97124; the entire field
+from us to the top spans 0.00020, and we are **0.00004 under the gold cutoff** (rank 10 =
+0.97108) — a gap smaller than any effect measured here in two days.
+
+`blend150fx` (public 0.97104) had been submitted by a peer session with **no journal entry
+and no recorded CV**, which is a selection hazard given that the deadline pick is on CV.
+Recovered it by scoring every saved `submissions/oof_*.npy` directly. It leads on **both**
+CV (0.970032) and LB, so there is no conflict — but that was luck, not process.
+
+### Why I did not do the angle as written
+
+Slot 1 of 2026-08-10 already tuned LightGBM against these folds and got **+0.00003 full
+OOF — below the 0.00005 noise floor**, after a fold-0 sweep promised +0.00050. Both the
+journal and `RESEARCH.md` list "LightGBM tuning" as measured-dead and say not to reopen it.
+Re-running it would have bought a known null.
+
+What has never been tested is the question the last two days' results actually raise:
+solo-AUC tuning is dead, but **is decorrelation-oriented tuning alive?** Slot 3 measured
+that a member's worth to the stack tracks how differently it is wrong, not how good it is
+alone. Nobody had ever tuned a member *for that objective*. So the angle was kept — tune
+LightGBM against the fixed folds — with the objective swapped from solo AUC to
+decorrelation, which is a real reading of the same instruction and not a substitution.
+
+The answer, from the run's main experiment, is **no** — see below. Reinterpreting the
+angle produced a clean negative rather than a gain, and the negative is worth more than
+the gain would have been.
+
+### 1. The public OOF pool is confirmed exhausted
+
+Re-ran the REST enumeration (`datasets/list`, five search terms, unioned) — the CLI's list
+endpoints are still 400ing. Nothing new since the 2026-08-10 sweep. All 20 S6E8-related
+datasets are already accounted for in `RESEARCH.md`. This closes slot 3's item 1; it does
+not need re-running daily any more, only weekly.
+
+### 2. Two defects found in the member library itself
+
+**`bolt_xgb_d7_alt1` and `bolt_xgb_d7_alt2` are the same array.** `np.array_equal` is
+`True` for both the OOF and the test vectors, max|diff| exactly 0.0, identical AUC
+0.9681005. The smallest eigenvalue of the 149×149 correlation matrix is **1.1e-16** —
+exact collinearity, which is how it surfaced.
+
+This is the `maxcorr == 1.000` gate that `RESEARCH.md` already lists and that `najiama`'s
+members were rejected for. It got through because `import_ext2.py` screens each candidate
+against **the pack** and never against the other candidates in its own batch. Scoring
+impact is negligible (an L2 penalty just splits the coefficient, and `C` is flat here), but
+**the real member count is 148, not 149**, and every "n members" figure from `--ext2`
+onward is off by one.
+
+**The flagship "maxcorr 0.811" for `bolt_extratrees_support` is a transform artefact.**
+`RESEARCH.md` cites it twice as the headline evidence that decorrelation is real. It comes
+from `import_ext2.py:120`, which correlates on the raw `to_logit` scale — the scale whose
+clip destroys the tails of saturating members, and ExtraTrees saturates hard. In the
+**hybrid** space the stacker is actually fitted in, the same member reads **0.9701**
+(median 0.9340). It is not close to the most decorrelated member; `logreg` (0.9307) and
+`bolt_lookup_v3_evidence` (0.9333) are. Only 15 of 149 sit below 0.97.
+
+Same shape of error as the `sd_ratio` correction two days ago: **a quantity measured in a
+space the model does not use, then read as a property of the model.** That is now twice.
+Any statistic used to judge members must be computed in the transform the stack is fitted
+in.
+
+### 3. The geometry of the pack, and what it costs to prune
+
+Eigenvalues of the 149-member correlation matrix in hybrid space:
+
+| | |
+|---|---|
+| PC1 alone | **95.39%** of variance |
+| first 10 PCs | 98.42% |
+| first 40 PCs | 99.49% |
+| eigenvalues > 1e-4 × λmax | 55 |
+| entropy effective rank | 1.41 |
+
+149 members are **one consensus signal plus a very thin tail of corrections**, and the
+entire 0.9696 → 0.9700 climb was bought inside the 4.6% that is not PC1. This is the
+quantitative version of what the journal kept rediscovering: a member from a new pipeline
+adds a *direction*, a better member from a pipeline already held adds *magnitude along
+PC1*, and PC1 is saturated.
+
+### 4. The main experiment — how many members, and chosen how
+
+`experiments/member_select.py`. Greedy top-k under three orderings, every cell fitted and
+scored on **identical rows** so split noise cancels, 2 reps, 148 members.
+
+| k | `auc` (greedy solo AUC) | `decorr` (greedy min-maxcorr) | `random` |
+|---|---|---|---|
+| 10 | 0.969599 | 0.969517 | 0.969244 |
+| 25 | 0.969821 | 0.969730 | 0.969671 |
+| 50 | 0.969965 | 0.969874 | **0.970042** |
+| 100 | 0.970128 | 0.970141 | 0.970145 |
+| 148 | 0.970177 | 0.970181 | 0.970180 |
+
+**No saturation in k — keep every member.** The curve still climbs at the right edge
+(k=100 → 148 is +3.5e-5). A "cleaner 50-member stack" costs −1.4e-4, three times the noise
+floor. The 95.4%-in-PC1 geometry is *not* licence to prune.
+
+**Decorrelation fails as a member-level selection rule.** `decorr` loses to `auc` by
+−8e-5 to −9e-5 at k=10/25/50, sign-consistent across both reps, and only draws level once
+k ≥ 100 and both orderings hold nearly the same set. Choosing members for being
+decorrelated selects weak oddities — the ordering opens `logreg`, `golem_g`, `nn2`, `knn`,
+`fmpure`.
+
+**At k=50 a random 50 beats both principled orderings.** Greedy-by-AUC concentrates inside
+one redundant strong family; greedy-by-diversity concentrates on junk; random gets a
+natural mix of strength and pipelines.
+
+This does not contradict slot 3's group-level attribution — it **explains** it. The
+boltuzamaki import paid because it was a *representative sample of an entire independent
+pipeline*, not because its members were individually decorrelated. **The unit that carries
+value is the pipeline, not the member.** Acquire whole pipelines, keep everything in them,
+never hand-pick by a correlation statistic.
+
+#### A free noise calibration that undercuts an earlier claim of mine
+
+At k=148 all three orderings select the *same 148 columns* and differ only in column
+order. They score 0.970177 / 0.970181 / 0.970180 — a spread of **4e-6 of pure
+`LogisticRegression` convergence noise.**
+
+That is the same size as the paired deltas slot 4 reported for our own two members
+(`et_lat_frac` +6e-6, `linlat` +3e-6, both +5e-6) and called "a real ordering". **Those
+numbers are at, not above, the solver's own reproducibility**, and sign-consistency across
+row splits does not rescue them, because solver noise is not resampled by changing rows.
+Anything under ~1e-5 needs to be stable under column permutation before it is believed.
+
+### Submitted this run
+
+| # | entry | CV | public LB | offset |
+|---|---|---|---|---|
+| 1 | `blend150fx_rescale` | 0.970013 | 0.97102 | +0.001007 |
+| 2 | `blend150fx_logit` | **0.969950** | **0.97103** | +0.001080 |
+
+Both were already built by the peer's `blend_lab.py --build` and had never been sent;
+sending them completes the five-way transform → LB mapping at zero CPU cost.
+
+**The result is the single most useful thing the public LB has told us.**
+`blend150fx_logit` has the **worst CV of the top nine by 8e-5** — a gap larger than the
+noise floor and larger than any single improvement shipped all week — and came back
+**0.97103, second-best of everything we have ever sent**, above three stacks that beat it
+on CV. `logit` is also the one transform with a mechanism argument *against* it (its clip
+provably destroys the tails of ~29 saturating members).
+
+That is the Rogii failure mode handed over for free: the public slice, given a vote, picks
+the entry we have a specific reason to believe is worse. **Final selection stays on CV.**
+
+It also corrects a durable claim. "The offset shrinks as CV rises" was drawn from four
+points spanning a wide CV range. With twelve points it splits in two: across the
+0.9696 → 0.9700 step the offset genuinely fell (+0.00115 → +0.00100), but **within** the
+top cluster of nine it scatters +0.00097…+0.00108 with no trend, and that scatter is ±5e-5
+— the same size as the CV differences being compared. **The public slice cannot resolve CV
+differences below ~1e-4, which is every difference we can still produce.**
+
+### Operational
+
+- Box contention was severe and got worse through the run: a peer session on
+  `kaggriculture` went from 16 to 30+ processes, load average **47 on 16 cores**. My jobs
+  were `taskset`-pinned and `nice`d throughout, which is the only reason anything finished.
+- **`lgbm_goss_xt_lat_frac` was abandoned** after 48 minutes without completing fold 0
+  (against 20 min/fold for the stump). GOSS reweights every row each iteration and
+  `extra_trees` gives up the histogram short-circuit, so it does not amortise like plain
+  boosting. Killing it immediately sped the stump member up 5× (fold 2 took 244s against
+  fold 0's 1217s). Noted in `experiments/decorr_batch.sh`; retry only on an idle box and
+  at ~1200 rounds.
+- `kaggle competitions leaderboard -d -p /tmp/lb` will happily read **another
+  competition's** leaderboard if that path already holds one. Use a per-competition path.

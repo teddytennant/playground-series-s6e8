@@ -190,3 +190,54 @@ Our entries are now 0.97080–0.97099 with CV 0.969641–0.970024, and CV and LB
 identically. If `rankraw` and `hybrid` come back split on the public slice, **that split
 carries no information** — 1e-6 of CV cannot be resolved by a 296k-row slice either.
 Select on CV, and if CV ties, prefer `rankraw` on mechanism.
+
+---
+
+## 2026-08-11 (UTC) — rank 14 of 1385, and the transform split came back
+
+**Standing: 0.97104 public, rank 14/1385, 12 submissions.** Rank 1 is 0.97124, so the
+whole field from us to the top spans 0.00020. Cutoffs: rank 5 = 0.97110, rank 10 =
+0.97108, rank 20 = 0.97099, rank 50 = 0.97092, rank 100 = 0.97086.
+
+We are **0.00004 below the gold cutoff** — a difference smaller than every CV effect
+measured in the last two days, i.e. not a difference we can steer by.
+
+### The answer to the previous entry's open question
+
+That entry asked what to conclude if `rankraw` and `hybrid` came back split on the public
+slice, and answered in advance: *the split carries no information*. Both remaining
+transforms were sent this run, so the full five-way mapping now exists — and the result is
+sharper than "no information".
+
+| entry | CV (cross-fitted) | public LB | offset |
+|---|---|---|---|
+| `blend150fx` (rank-avg of all 4) | **0.970032** | **0.97104** | +0.001008 |
+| `stack_pub151_fixed_rankraw` | 0.970025 | 0.97103 | +0.001005 |
+| `blend150fx_rankraw` | 0.970024 | 0.97102 | +0.000996 |
+| `blend150fx_rescale` | 0.970013 | 0.97102 | +0.001007 |
+| `blend150fx_hybrid` | 0.970014 | 0.97099 | +0.000976 |
+| **`blend150fx_logit`** | **0.969950** ← worst | **0.97103** ← 2nd best | +0.001080 |
+
+`blend150fx_logit` has the **lowest CV of the five by 8e-5** — a gap larger than the noise
+floor and larger than any single improvement we shipped all week — and it scored **0.97103
+public, one ten-thousandth off our best and above three stacks that beat it on CV.**
+
+This is the Rogii failure mode in miniature, presented as a free gift. Selecting these
+five on public LB would rank `logit` second; selecting on CV ranks it last. **We select on
+CV.** The transform is the one thing here with a mechanism argument attached (`logit`'s
+clip provably destroys the tails of ~29 saturating members), and it is the entry the
+public slice likes.
+
+### What this pins down about CV → LB
+
+The old claim in `RESEARCH.md` — "the offset shrinks as CV rises" — was drawn from four
+points spanning a large CV range. With twelve points it resolves into two regimes:
+
+- **Across** the 0.9696 → 0.9700 step the offset genuinely fell, +0.00115 → +0.00100.
+- **Within** the top cluster (CV 0.96995–0.97003) the offset scatters over
+  +0.00098…+0.00108 with no trend. That scatter is ±5e-5 of LB — the same size as the CV
+  differences being compared.
+
+So the public slice cannot resolve CV differences below ~1e-4, which is every difference
+we are still able to produce. Chase LB rank freely, since it costs nothing; read nothing
+into it.
