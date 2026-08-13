@@ -3291,3 +3291,122 @@ into anything): `blend159av_wh3`, `blend159av_w`, `blend156w2`, `blend159_h3`, `
 ties them on CV but spends two fitted parameters to arrive at the same place, so it does not
 displace a file that fits none — and today's whole result is that those parameters buy
 nothing.
+
+---
+
+## 2026-08-13 — slot 8 (cap already reached), ANGLE: tune LightGBM against the fixed folds
+
+**No submission is possible this run.** The counter reads 10/10 for 2026-08-13 (all ten
+landed 17:15–17:24 UTC) and rolls at 00:00 UTC. Research and compute only. Board at
+19:40 UTC: **rank 19**, 0.97106, leader MILANFX 0.97124.
+
+**The assigned angle was already executed in full on day 1** — stage A (one knob at a time)
+plus stage B (7 combinations) plus 5-fold finalists, and it bought **+0.00003 full-OOF,
+below the 5e-5 noise floor.** I did not re-run it. But stage A left exactly one thing
+genuinely open, and a notebook published today claims it is worth ten times our entire
+stack-level margin, so that is where the run went.
+
+### The `max_bin` ladder: stage A stopped at the grid edge, not at a flat curve
+
+Stage A moved `max_bin` to 511 and recorded **+0.00031 — its second-largest single win** —
+then stopped, because 511 was the top of the grid. It never asked whether the curve kept
+climbing. `kitopl/max-bin` (published today) says it does, and has a mechanism: this
+target does not respond to the *magnitude* of the screen-time columns, it responds to the
+*exact value* (the lookup-key structure this workspace has documented since day 1).
+Binning averages adjacent values together, so any column with more distinct values than
+bins gets its signal smeared. Their claim: set `max_bin` ≥ the max distinct count and the
+gain is **+0.0023**, more than double their 26-trial Optuna search.
+
+Their ceiling reproduces here exactly. Raw distinct counts on `train.csv`:
+
+```
+weekend_screen_time 1437   daily_screen_time_hours 1389   social_media 721
+work_study 600   sleep 451   gaming 401   notifications 231   app_opens 166   age 18
+```
+
+**1437 — their number to the digit.** So at our tuned `max_bin 511`, four raw columns are
+still binned lossily, and the two worst are the two biggest carriers of signal. That is a
+real gap, and the mechanism makes a sharp falsifiable prediction: AUC should climb to
+~1439 and then flatten completely, because past that every raw column is exact and the
+extra bins only subdivide the target-encoded columns, which are smooth.
+
+Added as `--stage c` in `experiments/tune_lgbm.py`, fold 0, lr 0.05, same harness.
+
+| `max_bin` | control vector | vs 255 | stage-B regularised vector |
+|---|---|---|---|
+| 255 | 0.96638 | — | — |
+| **511** | **0.96669** | **+0.00031** | **0.96688** |
+| 1023 | 0.96655 | +0.00017 | — |
+| 1439 | 0.96651 | +0.00013 | 0.96691 (+0.00003) |
+| 2047 | 0.96649 | +0.00011 | 0.96678 (−0.00010) |
+
+**Prediction falsified, and in the informative direction.** Neither vector climbs to 1439
+and flattens; *both peak and then decay*. The control peaks at 511 and falls monotonically
+after it. The regularised stage-B vector drifts up a below-noise +3e-5 to 1439 and then
+gives back −1e-4 by 2047 — the same answer with the overfitting term partly regularised
+away. `max_bin 511` stands, and it is already in the shipped members.
+
+Free replication on the way past: `C_ctrl_mb255` returned 0.96638 / 442 iters and
+`C_ctrl_mb511` 0.96669 / 622 iters, reproducing stage A's `control` and `max_bin511`
+**to the digit and the iteration**. The harness is deterministic across a month of runs.
+
+### Why the public +0.0023 does not transfer — and it is the workspace's oldest lesson
+
+`agent/features.py:175` (`te_block`) target-encodes **every exact lattice key**, with a
+count column alongside. So the exact-value lookup signal arrives at our LightGBM as a
+*continuous, already-monotone TE column that needs zero bin resolution*. kitopl's model has
+no target encoding, so its only access to the lookup structure is through bin edges on the
+raw columns — which is precisely why bins must cover every distinct value there, and why
+their baseline sits at 0.96406 while ours sits at 0.9678.
+
+Once the channel is saturated, extra bins are not extra information, they are extra split
+opportunities on 184 mostly-target-derived columns. That is variance, which is exactly what
+the decay above shows and why regularising it flattens the curve.
+
+**This is the same finding the journal already carries in the other direction:** a new
+channel beats refining an existing one (the decimal lattice paid +0.00011 where tuning paid
++0.00003). The converse now has a measurement too — *a public gain measured on a weaker
+representation does not survive transfer to a saturated one*, however sound its mechanism.
+Worth holding onto, because the headline number was large, the reasoning was correct, and
+it still transferred to zero.
+
+### Operational: OpenMP oversubscription was costing 7×
+
+Trial 1 took **904s**; the identical trial with cores freed took **125s**. Two LightGBM
+jobs each with `n_jobs=-1` put 32 OpenMP threads on 16 cores, and barrier-heavy histogram
+building degrades far worse than the 1.2× oversubscription suggests. Diagnosed via
+`%CPU 831 + 1109` with no swap. Fixed by `kill -STOP` on the oofsim seed (reversible —
+resumed with `kill -CONT` after, so the pre-registered replication was paused, not lost).
+**Never run two `n_jobs=-1` LightGBM jobs concurrently on this box.**
+
+### Also checked
+
+- **No new public OOF library since 08-12.** `kaggle datasets list -s s6e8 --sort-by
+  updated`: newest is najiama's (08-12, already closed in the journal). Member hunting is
+  genuinely dry, not merely declared closed.
+- `wowtimwow/model-capacity-beat-my-feature-engineering-by-18x` — climbing out of
+  `num_leaves=15` at 0.959 AUC. We run 63–96 leaves at 0.9678. Not applicable, nothing taken.
+- `verify_pick.py` re-run: all nine composites still reproduce from their own parts
+  (spearman 1.000000), so the `ens4`-vs-`h3` contrast remains a real contrast.
+- `blend156w2` now audits at the honest cross-fitted **0.970046**, so the repair the last
+  run flagged has landed. `blend159av_h3` and `blend160origm_h3` remain joint-top at 0.970049.
+
+**Deadline pick unchanged: `blend159av_h3` + `blend160origm_h3`.**
+
+### Next run, in this order
+
+1. **Ten free slots at 00:00 UTC.** Nothing below can raise the public score (best unsent CV
+   0.970049 = best sent), but they are free and cannot hurt. Send:
+   `blend159av_wh3`, `blend159av_w`, `blend156w2`, `blend159_h3`, `blend160orig_h3`,
+   `blend156_h3`, `blend160origm`, `blend159`, `blend160orig`, `blend153_rankraw`.
+2. **`oofsim_summary.py 7 11 13`** — seed 13 was paused mid-run for CPU and resumed at end
+   of this run; it was only at dose 0 of 5, so expect it to need ~2h. Confirmatory only:
+   no pooled result can restore `ens4` (confirmation required 3/3, seed 7 gave 0).
+3. **⚠ The final-selection toggle still needs Teddy.** Re-verified again this run: no
+   browser on this box. Unchanged and still the highest-value open item by ~40×.
+4. **Closed, do not re-open:** original dataset (both routes), feature work, stacker `C`,
+   meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging, transform-subset
+   enumeration, final-submission calibration, seed-twinning, member hunting, najiama's
+   blends, the logit CV bias, transform-weight search, **and now the `max_bin` ladder —
+   511 is optimal, the distinct-value ceiling argument does not transfer past target
+   encoding.** The modelling programme is finished; only the toggle changes the outcome.

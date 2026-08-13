@@ -126,6 +126,39 @@ def space(stage):
             feature_fraction_bynode=0.8, subsample=1.0)
         add("B_mcs250_l2_200_ffn", **W, min_child_samples=250, reg_lambda=200.0,
             feature_fraction_bynode=0.8)
+
+    if stage == "c":
+        # THE max_bin LADDER -- stage A stopped one rung too early.
+        #
+        # Stage A moved max_bin to 511 (+0.00031, its second-largest single win) and then
+        # stopped, because 511 was the top of the grid, not because the curve flattened.
+        # There is a mechanism here that says exactly where it SHOULD flatten.
+        #
+        # The target does not respond to the magnitude of these columns, it responds to
+        # the exact value -- the lookup-key structure this workspace has documented since
+        # day 1 (a screen-time value of 6.2 and one of 6.3 have unrelated addiction
+        # rates). Binning averages adjacent values together, so any column with more
+        # distinct values than bins gets its signal smeared. The raw distinct counts:
+        #
+        #   weekend_screen_time 1437   daily_screen_time_hours 1389   social_media 721
+        #   work_study 600   sleep 451   gaming 401   notifications 231
+        #   app_opens 166   age 18
+        #
+        # So at max_bin 511 FOUR columns are still lossy, and the two biggest carriers
+        # of the signal are the two worst. The prediction is sharp and falsifiable: AUC
+        # keeps climbing to ~1439 (= max distinct + 2 for the NaN/overflow bins) and then
+        # flattens completely, because past that every raw column is already exact and
+        # the extra bins only subdivide the target-encoded columns, which are smooth and
+        # have nothing to gain. If it instead keeps climbing past 1439, the mechanism is
+        # wrong and something else is going on.
+        #
+        # Measured on the control vector and on the stage-B winner, since the whole point
+        # is whether this composes with the regularisation stage B settled on.
+        for mb in [255, 511, 1023, 1439, 2047]:
+            add(f"C_ctrl_mb{mb}", max_bin=mb)
+        W = dict(num_leaves=63, max_depth=7, min_child_samples=250, reg_lambda=80.0)
+        for mb in [511, 1439, 2047]:
+            add(f"C_B_mb{mb}", **W, max_bin=mb)
     return T
 
 

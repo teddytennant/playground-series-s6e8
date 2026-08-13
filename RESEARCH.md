@@ -714,6 +714,57 @@ is `lgbm_tuned`, which was tuned on the far weaker raw+iterative-imputation feat
 and landed in a completely different regime (`depth 4, num_leaves 18`). Tuning LGBM on the
 lattice features is genuinely unexplored ground.
 
+## LightGBM tuning — CLOSED, including the `max_bin` ladder (2026-08-13)
+
+Tuning LGBM on the lattice features was done in full: stage A (one knob at a time), stage B
+(7 combinations of the winners), then 5-fold finalists. **Net +0.00003 full-OOF, below the
+5e-5 noise floor.** The shipped vector is stage B's: `num_leaves 63, max_depth 7,
+min_child_samples 250, reg_lambda 80, max_bin 511`.
+
+### The `max_bin` ladder and why the public +0.0023 does not transfer here
+
+`kitopl/max-bin` (2026-08-13) argues `max_bin` must be ≥ the max distinct-value count,
+worth **+0.0023** on their pipeline — more than double their 26-trial Optuna search. The
+mechanism is sound and their ceiling reproduces here exactly: max raw distinct is **1437**
+(`weekend_screen_time`; then `daily` 1389, `social` 721, `work_study` 600, `sleep` 451,
+`gaming` 401, `notifications` 231, `app_opens` 166, `age` 18).
+
+Measured on our matrix (`--stage c`, fold 0, lr 0.05):
+
+| `max_bin` | control | vs 255 | stage-B regularised |
+|---|---|---|---|
+| 255 | 0.96638 | — | — |
+| **511** | **0.96669** | **+0.00031** | **0.96688** |
+| 1023 | 0.96655 | +0.00017 | — |
+| 1439 | 0.96651 | +0.00013 | 0.96691 (+0.00003) |
+| 2047 | 0.96649 | +0.00011 | 0.96678 (−0.00010) |
+
+**Both vectors peak and then decay** — neither climbs to the distinct-value ceiling and
+flattens, which is what the mechanism predicted. The control peaks at 511; the regularised
+stage-B vector drifts up a below-noise +3e-5 to 1439 and then gives back −1e-4 by 2047.
+`max_bin 511` stands; do not raise it.
+
+**Why:** `agent/features.py:175` (`te_block`) target-encodes **every exact lattice key**.
+The exact-value lookup signal therefore reaches our LightGBM as a continuous, already-
+monotone TE column that needs *zero* bin resolution. Their model has no TE, so bin edges on
+the raw columns are its only access to the lookup structure — hence their baseline is
+0.96406 and ours is 0.9678. Once the channel is saturated, extra bins are not extra
+information, only extra split opportunities across 184 mostly-target-derived columns, i.e.
+variance.
+
+**General lesson, worth more than the knob:** a public gain measured on a *weaker
+representation* does not survive transfer to a saturated one, however large the headline
+and however correct the mechanism. The mirror of the journal's older finding that a new
+channel beats refining an existing one (decimal lattice +0.00011 vs tuning +0.00003).
+
+### Operational: never run two `n_jobs=-1` LightGBM jobs at once on this box
+
+Two concurrent LightGBM processes put 32 OpenMP threads on 16 cores; barrier-heavy
+histogram building degrades **~7×** (measured: identical trial 904s contended vs 125s
+alone), far worse than the 1.2× oversubscription implies. Serialise, or `kill -STOP` the
+other job and `kill -CONT` it after — pausing is reversible, killing a pre-registered run
+is not.
+
 ## Leaderboard shape
 
 - Top public LB ≈ **0.97092**. Those entries are **stacks of other competitors'
