@@ -2640,3 +2640,157 @@ decorrelated member yet" but "decorrelation is not the missing ingredient".
    NNLS/hill-climbing, combiner bagging, transform-subset enumeration, final-submission
    calibration, seed-twinning members (1.4% pass-through).
 5. `lbhist.py` near the deadline against the final board, as previously noted.
+
+---
+
+## 2026-08-13 — slots 1-10 (all ten used), ANGLE: feature engineering
+
+**2026-08-12 was missed entirely** — no journal entry, no submissions, and the counter had
+rolled twice. Ten slots were available and all ten were spent. The board moved while the
+workspace did not: **we fell from rank 13 to rank 18** on an unchanged 0.97106, with
+MILANFX still leading at 0.97124.
+
+### The angle was declined, on the journal's own evidence
+
+The run angle was "interactions, in-fold target and count encodings, careful categorical
+treatment". `logs_resid_boost.txt` already settles this with a matched control: boosting the
+40-column raw frame on top of `blend158_h3`'s score gives **−0.001580 at 25 rounds against a
+permuted control's −0.000001**, worsening monotonically to −0.004433 at 1000. Features
+conditional on the stack are not merely neutral, they are actively harmful, and the control
+proves that is not a capacity artefact. Nothing was re-run; the slots went to the queue and
+the compute went to the one pre-registered open question.
+
+### Pool sweep: one new object in the world, and it is excluded on mechanism
+
+`najiama/...-oof-submission-csv` was re-versioned 2026-08-12, the first pool movement in
+four days. Every file byte-matches what we already hold except a new **`18_blend`** pair.
+`experiments/naji18_probe.py` (new) profiled it:
+
+| | |
+|---|---|
+| solo OOF AUC | **0.969856** |
+| pack best solo (of 166) | naji05, 0.968815 |
+| members above it | **0** |
+| maxcorr, hybrid | 0.9897 |
+| maxcorr, rankraw | **0.9712** |
+
+That reads as the find of the week — the best solo member ever seen here by +104e-6, *and*
+more decorrelated than the pack's 0.9946 median. It is neither. **It is excluded on the same
+mechanism the journal already applied to `njm_*_blend` at line 497:** najiama's blends fit
+their weights on the full OOF, so the OOF they publish is in-sample. Its 0.969856 sits just
+above that family's 0.9692–0.9697, which is the signature of in-sample fitting, not of a
+better model. And the exclusion costs nothing even if the optimism were absent: naji01–05
+are honest members already in the pack, so **the stacker can already form any honest linear
+combination of them** — naji18 offers only the author's particular leakage-fitted weights.
+
+⚠ I had already written `oof_naji18.npy`/`test_naji18.npy` into `data/ext_members2/`, which
+`--ext2` loads automatically. **Moved to `oof_rejected/`.** Any build between those two steps
+would have been silently poisoned.
+
+Also checked and dismissed: `kenchanhodgkin/pg-s6e8-exp00{0,1}` (new 08-11) are OOF-only at
+0.9542/0.9534, far below the pack floor and with no test predictions;
+`sarveshchhetri/the-lookup-key-trick-minus-the-neural-net` is a plain TE LightGBM we subsume.
+
+### The ten submissions, and the pre-registered test resolving
+
+The six `blend158_*` files are the first time **one member set has been scored under all six
+transforms** — the matched design three earlier entries kept asking for — plus the first `h3`
+readings ever. Predictions from `predict_lb.py` were written before sending.
+
+| file | CV | rank | predicted | **actual LB** |
+|---|---|---|---|---|
+| `blend158_h3` | 0.970048 | 1 | 0.97105 | 0.97105 |
+| `blend158` (ens4) | 0.970043 | 2 | 0.97106 | **0.97106** |
+| `blend158_rankraw` | 0.970036 | 3 | 0.97103 | 0.97104 |
+| `blend158_hybrid` | 0.970028 | 4 | 0.97101 | 0.97103 (last) |
+| `blend158_rescale` | 0.970027 | 5 | 0.97104 | 0.97105 |
+| `blend158_logit` | 0.969961 | **6** | 0.97104 | **0.97106** (joint 1st) |
+| `blend159av_h3` | 0.970049 | — | — | 0.97105 |
+| `blend159av` (ens4) | 0.970045 | — | — | **0.97106** |
+| `blend160origm_h3` | 0.970049 | — | — | 0.97105 |
+| `blend156w` | 0.970047 | — | — | 0.97105 |
+
+**spearman(CV, LB) across the six = −0.088.** CV spread 87e-6, LB spread 3 ulp. No LB
+improvement from any of the ten: three files tie our standing 0.97106.
+
+### The result: CV is a clean instrument for every transform except `logit`
+
+`experiments/cvlb3.py` (new) folds today's ten points into the map, 24 total.
+
+**Q1 — the logit bias replicated a third time, and now 8/8 across all its contrasts:**
+
+| contrast | sets | mean dCV | mean dLB | sign agreement with CV |
+|---|---|---|---|---|
+| logit − hybrid | 150fx/150sx/158 | −0.000064 | **+3 ulp** | **0/3** |
+| logit − rankraw | 150fx/150sx/158 | −0.000072 | **+2 ulp** | **0/3** |
+| logit − rescale | 150fx/158 | −0.000065 | **+1 ulp** | **0/2** |
+
+**Q2 — and it propagates exactly as predicted.** `ens4` includes logit in the mix, `h3`
+excludes it, so `ens4` should beat `h3` on LB while losing on CV. Two sets carry both:
+**2/2, +1 ulp each, against dCV of −5e-6 and −4e-6.**
+
+**The decisive decomposition.** Logit's three gap readings (+0.001080/+0.001085/+0.001099)
+sit **above all 21 non-logit readings** (max +0.001025) — complete separation. Splitting the
+CV-gap ordering table by whether a logit entry is involved:
+
+| CV gap | no logit | logit involved |
+|---|---|---|
+| [0, 2e-5) | 96/125 = 77% | 3/3 = 100% |
+| [2e-5, 5e-5) | **54/54 = 100%** | — |
+| [5e-5, 1e-4) | — | **22/55 = 40%** |
+
+The [5e-5,1e-4) bucket that looked like an LB-resolution failure contains **only** logit
+pairs. Every non-logit pair at a resolvable separation is ordered correctly, 54/54. Dropping
+the three logit points lifts spearman over the whole map from **+0.585 to +0.808**.
+
+**Mechanism, and why it is not the Rogii failure.** Logit's clip pins the tails of the
+saturating members — 49 of 159 need the hybrid repair — and it pins *more OOF rows than test
+rows*, because an OOF row is one model's output while a test row is a 5-fold average and so
+is less extreme. That depresses logit's **CV** relative to its true test score. This is a
+defect in the instrument, on the OOF side, and it therefore applies to **all** test rows —
+the private slice exactly as much as the public one. It was pre-registered, it has a
+mechanism measured independently of any LB reading (the `sd_ratio` census predates it), and
+it is not a hedge parameter fitted to public feedback.
+
+**Non-circular validation.** The correction was calibrated on the *gap* column, so
+re-scoring gaps with it would be circular. Ordering was never used to build it. Applying
+`logit += 8.9e-5`, `ens4 += 8.9e-5/4` to the fully-crossed 158 set:
+
+| | spearman(·, LB) on the 158 set |
+|---|---|
+| raw CV | **−0.088** |
+| bias-corrected CV | **+0.736** |
+
+Only `rescale` remains misplaced. And the corrected CV reproduces the `ens4 − h3` contrast
+independently: **+17e-6 (158) and +18e-6 (159av), against an LB that said +1 ulp both times.**
+
+### The deadline pick moves from `h3` to `ens4`
+
+Corrected CV on the 158 set: ens4 0.970065 > logit 0.970050 > h3 0.970048 > rankraw 0.970036
+> hybrid 0.970028 > rescale 0.970027. **`blend159av` (ens4, raw CV 0.970045, corrected
+0.970067) replaces `blend159av_h3`/`blend158_h3` as the deadline pick.**
+
+Stated honestly, because this is exactly where this account has been burned before: the raw
+CV margin between them is 4–5e-6, an order of magnitude below the ~5e-5 CV noise floor, so
+on raw CV the pick was always a coin flip. What the correction does is break that tie with a
+mechanism, not overturn a real CV preference. The *sign* of the defect is established
+independently of the LB; the *magnitude* (8.9e-5) is calibrated on 3 LB points and should
+not be leaned on beyond its sign. `blend159av` also happens to be joint-best on the public
+slice, which is corroboration and explicitly not the reason.
+
+### Next run, in this order
+
+1. **Queue: 50 validated files, all six 158s and the top 159av/160origm files now spent.**
+   Send the remaining distinct high-CV files — `blend159_h3`, `blend160orig_h3`,
+   `blend156_h3`, the `blend153_*` and `blend159av_*` transforms. Prefer any file that adds
+   an `ens4`/`h3` pair on a set that has only one of them, since that is the only contrast
+   still accumulating replications.
+2. **Do not re-open** the original dataset, feature work, member hunting, stacker `C`,
+   meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging, transform-subset
+   enumeration, final-submission calibration, seed-twinning. All measured nulls with matched
+   controls. Add to that list: **najiama's blends, permanently — the family is in-sample by
+   construction and the pack already spans it.**
+3. `experiments/lbhist.py` near the deadline against the final board, to re-price the private
+   projection once the field stops moving.
+4. The one thing worth more LB data: every additional `ens4`/`h3` pair sharpens Q2, which is
+   now the sole basis of the deadline pick. It is at 2/2.

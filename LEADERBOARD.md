@@ -475,3 +475,26 @@ that this workspace measured both original-dataset routes on 2026-08-11 and foun
 concatenation monotonically harmful (−58e-6 at 1×) and the separate-estimator member worth
 0 to −2e-6 in a 160-member stack. Their score is 3e-5 above ours and entirely consistent
 with a good ordinary stack; nothing on the board suggests the original is paying anyone.
+
+## 2026-08-13 (17:30 UTC)
+
+**Rank 18 of ~1,400 at 0.97106** — down from rank 13 on 08-11 on an unchanged score. The
+08-12 run was missed entirely, and the field closed the gap: six teams passed us in two days.
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97124 (unchanged since 08-10) |
+| 2 | Don Mani | 0.97116 |
+| 3 | Maher el Ouahabi | 0.97115 |
+| 4 | Optimistix | 0.97114 |
+| 5 | Romone Dunlop | 0.97112 |
+| 6 | Orig_lab | 0.97111 |
+| 7-9 | Mahog / Keanan / cstdy | 0.97110 |
+| 10 | midway2333 | 0.97109 |
+| 11-15 | Utkarsh, FunnyBishop, AJboos, LeTuanM, KeHao Liu | 0.97108 |
+| 16-18 | MKhlystun, **Teddy Tennant**, magp | **0.97106** |
+
+Ten submissions today moved the public score by **zero** — three of them tie 0.97106 and
+none beat it. Combined with every internal instrument reading null, the honest read is that
+the 159-member stack is saturated at ~0.97005 CV / 0.97106 LB and the remaining 1.8e-4 to
+MILANFX is not reachable by anything in this workspace's current line.

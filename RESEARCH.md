@@ -1411,3 +1411,51 @@ a 25–35% draw that public-LB chasing cannot improve.
 imported or explicitly rejected. Static for three days — **check kernels, not datasets.**
 `georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new` re-ran 08:00 UTC but the
 diff against `notebooks/gaming_nothing_new/` is prose and one moved constant only.
+
+## The `logit` CV bias — CV is clean for every transform except one (settled 2026-08-13)
+
+24 (CV, LB) points over >=150-member stacks, `experiments/cvlb3.py`. **Logit's (LB − CV) gap
+sits +8.9e-5 above every other transform's, with complete separation:** its three readings
+(+0.001080/+0.001085/+0.001099) are all above all 21 non-logit readings (max +0.001025).
+
+Within member set, logit's CV is ~65e-6 *worse* and its LB is *better*, **8/8**:
+logit−hybrid +3 ulp on 3 sets, logit−rankraw +2 ulp on 3 sets, logit−rescale +1 ulp on 2.
+
+**The ordering failure is entirely in the logit column.** Non-logit pairs separated by
+2e-5..5e-5 on CV are ordered correctly by the LB **54/54**; the 5e-5..1e-4 bucket that reads
+40% contains *only* logit pairs. Dropping the 3 logit points takes spearman +0.585 → +0.808.
+
+**Mechanism:** logit's clip pins the tails of saturating members (49 of 159 need the hybrid
+repair) and pins **more OOF rows than test rows**, because an OOF row is one model's output
+while a test row is a 5-fold average and so is less extreme. So the damage lands on the CV
+side. This is a defect in the instrument, not a property of the public slice, and it
+therefore applies to the private slice equally.
+
+**Correction:** `logit += 8.9e-5`; a mix carries it at its logit weight (`ens4` 1/4, `h3` 0).
+Non-circular check — the correction was calibrated on gaps, never on ordering — spearman on
+the fully-crossed 158 set goes **−0.088 → +0.736**.
+
+**Consequence for the deadline pick:** `ens4` (includes logit) beats `h3` (excludes it) by
++17e-6 corrected CV, and beat it on LB 2/2 at +1 ulp, despite losing on raw CV by 4-5e-6.
+**Deadline pick is `blend159av` (ens4), not `blend159av_h3`.** Use the sign of this
+correction, not its magnitude — the sign is mechanism-derived, the 8.9e-5 rests on 3 points.
+
+⚠ LB resolution is **1e-5** (five printed decimals). Every contrast above is 1–4 ulp. No
+single comparison means anything; only the replication count does.
+
+## najiama's `*_blend` files — permanently excluded (confirmed 2026-08-13)
+
+The dataset re-versions periodically (new `18_blend` on 2026-08-12). **Do not import any
+`N_blend` file.** najiama fits blend weights on the full OOF, so the published OOF is
+in-sample: `18_blend` reads solo OOF **0.969856**, above all 166 pack members, which is the
+signature of that fitting and not of a better model. Independently, it is redundant —
+naji01–05 are honest members already in the pack, so the stacker already spans every honest
+combination of them. `experiments/naji18_probe.py` reproduces the profile.
+
+Same-mechanism exclusions already on the books: `beicicc/sixmember_*` (level-2 stack
+outputs, author-disclosed as optimistic), `golem_a`/`golem_f` (early-stop on their own
+validation fold; in `DEFAULT_DROP`).
+
+Other pool entries checked and dismissed 2026-08-13: `kenchanhodgkin/pg-s6e8-exp00{0,1}`
+(OOF-only, 0.9542/0.9534, far below the pack floor, no test predictions);
+`sarveshchhetri/the-lookup-key-trick-minus-the-neural-net` (plain TE LightGBM, subsumed).
