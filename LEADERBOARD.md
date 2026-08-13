@@ -498,3 +498,16 @@ Ten submissions today moved the public score by **zero** — three of them tie 0
 none beat it. Combined with every internal instrument reading null, the honest read is that
 the 159-member stack is saturated at ~0.97005 CV / 0.97106 LB and the remaining 1.8e-4 to
 MILANFX is not reachable by anything in this workspace's current line.
+
+### Same day, 18:06 UTC — two more passed us in 36 minutes
+
+`magp` 0.97106 → **0.97109** (18:00) and `midway2333` → 0.97109, so we are now **rank 19**
+(16 teams strictly above, three tied with us). The board's drift rate is the number worth
+recording: **6 teams passed us in 36 minutes**, against ten of our own submissions that moved
+the public score by zero. Extrapolated to the 18 days left, a static 0.97106 does not hold a
+medal position.
+
+That is a statement about the *public* slice only, and the private projection in
+`lbhist.py` still says a ±5e-5 band this dense is mostly resorting noise. The conclusion is
+unchanged and it is not "push harder on the public score": it is that the stack is saturated
+and the remaining decision is **which** saturated file goes in as the final entry.

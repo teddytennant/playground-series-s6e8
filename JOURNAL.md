@@ -2794,3 +2794,283 @@ slice, which is corroboration and explicitly not the reason.
    projection once the field stops moving.
 4. The one thing worth more LB data: every additional `ens4`/`h3` pair sharpens Q2, which is
    now the sole basis of the deadline pick. It is at 2/2.
+
+---
+
+## 2026-08-13 — slot 3 (LATE RUN, cap already reached), ANGLE: seed and fold diversity
+
+**No submission is possible this run.** The counter reads 10/10 for 2026-08-13; all ten
+landed 17:15–17:24 UTC and are recorded in the entry above. The counter rolls at 00:00 UTC.
+This run is research and compute only, which is the correct use of a capped slot.
+
+Board at 17:52 UTC: **rank 16** (15 teams strictly above our 0.97106; we sit on line 19 of
+the ties). MILANFX still 0.97124. Don Mani 0.97116 and Maher el Ouahabi 0.97115 are new
+above us today. Pool sweep: **20 datasets, unchanged — fifth static day.** najiama's
+`ensemble-of-ensembles-0-97099` kernel re-ran at 17:37 but the backing dataset is unmoved
+since 08-12 and that family is permanently excluded on mechanism.
+
+### The angle, redirected — and why
+
+Member-level seed averaging is closed here (`blend159av`: +138e-6 solo → +2e-6 stack, 1.4%
+pass-through) and so is combiner bagging over fold splits (`repcv.py`, 8 splits). Re-running
+either would be filler. But there is a live use for split diversity that is not filler:
+**the deadline pick currently rests on a correction calibrated against the public
+leaderboard**, and re-drawing the split is the only honest error bar available for it.
+
+### Pre-registration — written BEFORE the numbers, so the reading is not fitted
+
+`experiments/oofsim.py` (built at the end of the previous slot, unfinished and uncommitted;
+finished and run here) holds out 20% of `train` as a labelled pseudo-test, runs the real
+5-fold pipeline on the other 80%, and so reproduces the exact OOF/test asymmetry the real
+members carry — a pseudo-OOF cell is one fold model, a pseudo-test cell is the 5-fold mean —
+with **both sides labelled**. It never touches the leaderboard. Three outer split seeds
+(7/11/13) give the sd across splits, which is the honest error bar and is strictly larger
+than any within-split bootstrap.
+
+The quantity is `displacement = gap(logit) − gap(hybrid)`, claimed **+9.7e-5** on real data
+from 3 LB contrasts. The matched control is a **dose**: the four saturating members are
+added one at a time to six clean ones, so the mechanism must switch on with the thing that
+causes it.
+
+**Decision rule, fixed now:**
+
+1. **Confirmed** — displacement ≈ 0 at dose 0 and rising with dose, positive in 3/3 splits
+   at full dose. Then the sign is established off-leaderboard, `ens4` stays the deadline
+   pick, and the Rogii objection to it is answered.
+2. **Falsified** — displacement flat across dose, or sign-inconsistent across the 3 splits.
+   Then the 8.9e-5 correction is a public-slice artefact fitted to 3 points, and **the
+   deadline pick reverts to `blend159av_h3`/`blend158_h3`**, which win on raw CV and fit
+   nothing. This is the Rogii-safe branch and I will take it if the numbers say so.
+3. **Unresolved** — right sign but inside the across-split sd. Then it stays a coin flip on
+   raw CV, and raw CV prefers `h3` by 4–5e-6, so `h3` is the pick by default.
+
+Note the rule is asymmetric on purpose: `ens4` has to *earn* the pick, because it is the one
+supported by leaderboard-fitted evidence and this account has been burned exactly there.
+
+
+---
+
+## 2026-08-13 — slot 5 (LATE RUN, cap already reached), ANGLE: consolidation
+
+**No submission is possible this run.** The counter reads 10/10 for 2026-08-13 (all ten
+landed 17:15–17:24 UTC, recorded two entries above) and rolls at 00:00 UTC. Research and
+compute only.
+
+Board at 18:06 UTC: **rank 19**, 16 teams strictly above our unchanged 0.97106. `magp` and
+`midway2333` both went to 0.97109 in the 36 minutes since the last entry's check. Six teams
+have passed us today against ten of our own submissions that moved the public score by zero.
+
+The angle was consolidation, and it found a hole in the workspace that eleven days of CV
+discipline had not noticed.
+
+### ⚠ Nothing in this workspace can actually make the deadline pick, and the default is Rogii
+
+Every entry since 08-11 argues about which file is the deadline pick. `blend159av` versus
+`blend159av_h3` has consumed three entries, a bias correction, and a pre-registered
+experiment. **None of that reaches Kaggle.** Final selection is a `Use for Final Score`
+toggle on the My Submissions tab, in a browser:
+
+- `kaggle competitions` exposes no verb that selects a final submission, and
+  `submissions -v` does not report selection state either. Checked this run, full subcommand
+  list in `RESEARCH.md`.
+- Brave was **not running** on this box, so there is currently no path to the toggle at all.
+
+And the default is not neutral. Kaggle's standing rule is that an entrant who selects nothing
+gets their best **public** submission(s) chosen automatically — and our best public is a
+**four-way tie at 0.97106**:
+
+| file at 0.97106 | cross-fitted CV | acceptable as a final? |
+|---|---|---|
+| `blend159av` (ens4) | 0.970045 → corrected 0.970067 | **yes, this is the CV pick** |
+| `blend158` (ens4) | 0.970043 → corrected 0.970065 | yes, near-identical |
+| `blend156` (ens4) | 0.970042 | acceptable, older set |
+| `blend158_logit` | **0.969961** | **no — worst CV of every ≥150-member stack held here** |
+
+So doing nothing gives roughly a 1-in-4 chance of shipping *the single worst-CV file in the
+queue* as a final answer, chosen because the logit bias flatters it on the public slice.
+That is not an analogy to the Rogii failure. It is that failure, arriving by default, with
+nobody having made a decision. Written up under **Final selection** in `RESEARCH.md` with the
+two files to select and the reason for each; the action itself needs a browser and is due
+before 2026-08-31 23:59 UTC.
+
+### The audit's LB map was ten points stale, and it was mis-reporting the queue
+
+`audit.py` keeps a hand-maintained `LB` dict so it can run offline. Nobody updated it after
+this afternoon's ten submissions, so the first run this evening listed `blend158_logit`,
+`blend158_hybrid`, `blend158_rescale`, `blend159av_h3`, `blend160origm_h3` and `blend156w`
+as **never submitted**, and reported "best sent CV 0.970042" when the true figure was
+0.970049. In a workspace whose sole rule for spending a slot is *is this file genuinely
+different?*, that error spends one on a duplicate — the one submission the brief calls
+genuinely pointless.
+
+Fixed so it cannot recur: `experiments/lb_refresh.py` (new) turns
+`kaggle competitions submissions -v` into `experiments/lb_scores.json`, which `audit.py` now
+overlays on top of its literals. **Run it at the start of every run, before reading the
+queue.** It also prints the best-public tie set, which is how the final-selection risk above
+surfaced in the first place.
+
+### The corrected audit: every top-CV file has already been sent
+
+| | |
+|---|---|
+| files with a CV and an integrity pass | 59, **all 59 distinct as rankings** |
+| best CV held | `blend159av_h3` / `blend160origm_h3` 0.970049 — **both sent** |
+| best **unsent** CV | `blend159_h3` 0.970047 |
+| gap LB−CV over 30 scored files | mean +0.001025, sd 0.000050, range [+0.000966, +0.001169] |
+| LB spans 0.00026 over a CV span of 0.000408 | quantisation 1e-5 |
+
+The consolidation reading: **the queue's remaining 29 files are all below the best already
+sent.** Tomorrow's ten slots cannot improve the public score by construction; their only
+value is accumulating `ens4`/`h3` contrast readings, which is exactly what the queue order in
+`RESEARCH.md` is already built for. That is worth stating plainly rather than rediscovering.
+
+### `verify_pick.py` (new) — the composites are what their names say
+
+`audit.py` catches a corrupt file but not a **mislabelled** one, and the entire deadline
+argument is a comparison between two file names. There is an exact check available for free:
+`blend_lab.build` writes `ens4` as the mean of `rk(stack_k)` over the four transforms and
+`make_h3` writes the same average over three, and every single-transform stack is itself on
+disk as a CSV. So each composite can be recomputed from its own parts.
+
+**All 9 member sets pass.** Every `ens4` reproduces from its four parts at spearman
+1.000000, every `_h3` from its three, and each matches its own recipe strictly better than
+the other one — so `h3` genuinely excludes logit and `ens4` genuinely includes it. The
+`ens4`-vs-`h3` contrast is a real contrast and not a file compared against itself.
+
+One number worth keeping from it: **ens4 and h3 agree at spearman 0.99982.** The decision
+that has consumed three journal entries is a choice between two rankings that are 99.98%
+the same. That is consistent with everything else — an LB separation of 1 ulp, a raw CV
+separation of 4–5e-6 — and it is the right frame for how much the pick can possibly matter.
+
+### The clip census, re-read: two `RESEARCH.md` sections disagreed with each other
+
+Not a new measurement — `RESEARCH.md` already recorded this correctly at its *Mechanism only
+partially confirmed* block. But the 08-13 summary section written later flattened it back to
+"49 of 159 need the hybrid repair", and that is the phrasing a future run would have quoted.
+The two now agree. Of the 49 real members that pin cells on the logit plateau,
+the **16 heaviest pinners — the `bolt_lookup`/`fm*`/`deepfm` family at 85–94% pinned — have
+an OOF/test ratio of exactly 1.00.** They are pinned symmetrically and cannot displace
+anything. All of the asymmetry lives in the tree family, which pins far less: `rf` 1.86,
+`et` 3.13, `naji03` 6.30, the tabm group 1.8–2.5. Aggregated over all cells the asymmetry is
+**OOF 9.884% vs test 9.531%** — 0.35 percentage points, not the large effect the phrase
+"49 of 159 need the repair" suggests.
+
+This does not weaken `oofsim`; it sharpens why `oofsim` is the right instrument. A
+symmetrically-pinned member damages logit's CV and its test score equally and contributes
+nothing to the gap, so any real displacement must come from the asymmetric tree family —
+which is precisely the family `oofsim` dials in as its dose (`rf` 1.54, `et` 1.93 in the
+pseudo-census). The dose control is aimed at the only members that could produce the effect.
+
+### The pre-registered test resolved: the logit CV bias is FALSIFIED, and the pick reverts
+
+`oofsim.py` was finished and run this evening. It had been left mid-run by the previous
+slot with three seeds started concurrently; two of them never completed a single member in
+25 minutes because LightGBM at `n_jobs=-1` in parallel processes thrashes 16 cores. Re-run
+**sequentially**: seed 7 completed in 1,890s, seeds 11 and 13 are chained behind it and
+detached (`setsid`), so they will finish after this session and write
+`cache/oofsim/results_s1{1,3}.json`. **Next run should start by pooling all three with
+`oofsim_summary.py 7 11 13`.**
+
+The instrument, restated: 20% of `train` held out as a labelled pseudo-test, the real 5-fold
+pipeline on the other 80%, so a pseudo-OOF cell is one fold model and a pseudo-test cell is a
+5-fold average — the exact asymmetry the real members carry, with **both sides labelled and
+the leaderboard never touched**. The four saturating members are dialled in as a dose against
+six clean ones.
+
+**Seed 7, `displacement = gap(logit) − gap(hybrid)`, claimed +9.7e-5:**
+
+| dose | members added | logit − hybrid | ens4 − h3 |
+|---|---|---|---|
+| 0 | none saturating | +0.000000 | −0.000000 |
+| 1 | rf | −0.000006 | +0.000000 |
+| 2 | rf, et | −0.000015 | −0.000006 |
+| 3 | rf, et, lookup | +0.000004 | +0.000000 |
+| 4 | **all four** | **+0.000000** | **−0.000007** |
+
+**Flat, sign-flipping, and zero at full dose against a claim of +97e-6.** That is
+pre-registered outcome 2, written down before the numbers: *displacement flat across dose →
+the 8.9e-5 correction is a public-slice artefact fitted to 3 points.* Note the rule can no
+longer be satisfied whatever seeds 11 and 13 say — confirmation required positive at full
+dose in **3/3** splits, and seed 7 is +0.000000. Outcome 3 (unresolved) also defaults to
+`h3`. Every remaining branch gives the same answer.
+
+Three further readings, all pointing the same way:
+
+- **CV ranks the transforms the way the truth does.** spearman(pseudo-OOF, labelled truth)
+  over the six variants is **+1.000 at dose 0 and +0.943 at every dose 1–4**. At doses 2, 3
+  and 4 the CV puts `logit` **last** — and so does the truth. The OOF is not under-rating
+  logit; it is ranking it correctly, and the thing the LB was said to be revealing is not
+  there.
+- **The OOF weight search never underweights logit. 5/5 doses:** `w_oof` gives logit 0.00
+  and `w_true` gives logit 0.00. The whole story was that the search maximises a criterion
+  damaged for logit; with ground truth available, it does not.
+- **`ens4 − h3` at full dose is −7e-6** — the labelled truth prefers `h3`, agreeing with
+  raw CV (which prefers h3 by 4–5e-6) and disagreeing with the LB's +1 ulp for ens4. The
+  Q2 contrast that was "2/2 on the LB" does not reproduce off-leaderboard.
+
+**The deadline pick reverts to `blend159av_h3` (CV 0.970049), with `blend158_h3` (0.970048)
+as the second.** This is the Rogii-safe branch and I said in advance I would take it. The
++1 ulp that `ens4` beat `h3` by, twice, is a public-slice reading with no mechanism behind it
+now; `h3` wins on raw CV, fits zero free parameters, and is what the only labelled instrument
+in this workspace prefers. `RESEARCH.md` updated in both places.
+
+Honest limits on this, since it is now load-bearing: it is **one split** of a planned three,
+on a 10-member pseudo-pack at AUC 0.962 rather than 159 members at 0.970, and the transform
+stacks there are far less correlated than the real ones. What transfers is the *sign* and the
+*mechanism*, which is what was claimed. And the design is biased **toward** finding the
+effect, not away — its dose members are more asymmetric (`rf` 1.54×, `et` 1.93×) than the
+real pack in aggregate (0.35pp), so a real mechanism should have shown up larger here, not
+smaller. It showed up as zero.
+
+### The one positive: OOF-searched transform weights generalise, and beat equal weights
+
+Same harness, the other question it was built for. Simplex weights over the four transform
+stacks searched on the pseudo-OOF, scored on the labelled hold-out:
+
+| dose | searched − ens4, on the hold-out | search left on the table |
+|---|---|---|
+| 0 | +0.000005 | +0.000000 |
+| 1 | +0.000006 | +0.000002 |
+| 2 | +0.000014 | +0.000000 |
+| 3 | +0.000018 | +0.000000 |
+| 4 | **+0.000071** | +0.000000 |
+
+Positive 5/5, growing with dose, and the OOF-chosen weights land on the truth-optimal ones at
+4/5 doses — **the fitted weights generalise essentially perfectly**. That directly answers the
+objection this journal raised against `blend156w` ("three fitted free parameters, which is why
+h3 rather than this is the deadline pick"): with ground truth available, those parameters do
+not overfit.
+
+Do not over-read it. `blend156w`'s real-data edge over `blend156` is **+6e-6 CV**, not +71e-6,
+because oofsim's ten members give the four transform stacks genuinely different quality while
+the real 159-member stacks sit on top of each other. But the sign agrees, from two independent
+directions, and it is the only positive signal this workspace has produced in three days.
+**`blend156w` is the one file whose CV lead now has off-leaderboard support**, and the obvious
+build is the same simplex search on the 159av member set. It does not displace the pick today
+— one split, and 6e-6 is an order of magnitude under the ~5e-5 noise floor — but it is the
+first thing worth building rather than another queue file.
+
+### Next run, in this order
+
+1. **Pool the splits: `.venv/bin/python experiments/oofsim_summary.py 7 11 13`.** Seeds 11
+   and 13 are running detached and should have landed. If either contradicts seed 7 the
+   entry above must be revisited — but note no combination can restore `ens4`, since
+   confirmation required 3/3.
+2. **Refresh the LB map before touching the queue:**
+   `kaggle competitions submissions -v | .venv/bin/python experiments/lb_refresh.py`, then
+   `audit.py`. The hand-maintained dict is what mis-reported the queue this evening.
+3. **Ten slots are available at 00:00 UTC.** Send the queue in the order in `RESEARCH.md`
+   (`blend159_h3`, `blend159`, `blend160orig_h3`, `blend160orig`, `blend160origm`,
+   `blend156_h3`, then the four `blend159av_*` transforms). Every one of the 29 unsent files
+   is below the best already sent, so these cannot improve the public score — they buy
+   `ens4`/`h3` replications, which is now the contrast the *falsified* claim rested on, so
+   their value has dropped. Consider spending two or three slots on a
+   **`blend159av_w`** (simplex transform weights on the 159av set) instead — that is the one
+   live lead.
+4. **The final-selection toggle.** Needs a browser; nothing in the CLI can do it. Not urgent
+   (18 days) but it is the only step that converts all of this into a result, and the default
+   if it is skipped has a 1-in-4 chance of shipping `blend158_logit` (CV 0.969961).
+5. Closed and not to be re-opened: original dataset (both routes), feature work, stacker `C`,
+   meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging, transform-subset
+   enumeration, final-submission calibration, seed-twinning, member hunting, najiama's blends.
+   **Add: the logit CV bias and the 8.9e-5 correction** — measured off-leaderboard, falsified.

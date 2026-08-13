@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import glob
 import hashlib
+import json
 import os
 import sys
 
@@ -42,6 +43,17 @@ N_TEST = 296_302
 # Public scores keyed by the submission FILE name, read off `kaggle competitions
 # submissions -v`. Kept here rather than re-fetched so the audit runs offline; a file
 # absent from this map is simply reported as unscored.
+#
+# This dict went 10 points stale on 2026-08-13 and the audit then reported six files as
+# "never submitted" that had been submitted that afternoon -- which, in a workspace whose
+# one rule for spending a slot is "is this file genuinely different?", is the exact error
+# that wastes one. Do not hand-edit it again. Refresh with:
+#
+#     kaggle competitions submissions -c playground-series-s6e8 -v \
+#       | python experiments/lb_refresh.py
+#
+# which writes experiments/lb_scores.json; that file, when present, is overlaid on top of
+# the literals below so the map cannot silently fall behind the leaderboard again.
 LB = {
     "stack_pub74_logit.csv": 0.97081,
     "stack_pub88_mine_logit.csv": 0.97081,
@@ -63,7 +75,23 @@ LB = {
     "blend156_rescale.csv": 0.97105,
     "blend156.csv": 0.97106,
     "blend153.csv": 0.97104,
+    # --- 2026-08-13, the ten-submission day: first h3 readings and the fully-crossed 158 ---
+    "blend158_h3.csv": 0.97105,
+    "blend158.csv": 0.97106,
+    "blend158_logit.csv": 0.97106,
+    "blend158_hybrid.csv": 0.97103,
+    "blend158_rankraw.csv": 0.97104,
+    "blend158_rescale.csv": 0.97105,
+    "blend159av_h3.csv": 0.97105,
+    "blend159av.csv": 0.97106,
+    "blend160origm_h3.csv": 0.97105,
+    "blend156w.csv": 0.97105,
 }
+
+_OVERLAY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lb_scores.json")
+if os.path.exists(_OVERLAY):
+    with open(_OVERLAY) as _f:
+        LB.update(json.load(_f))
 
 
 def rk(v):
