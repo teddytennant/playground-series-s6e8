@@ -3074,3 +3074,110 @@ first thing worth building rather than another queue file.
    meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging, transform-subset
    enumeration, final-submission calibration, seed-twinning, member hunting, najiama's blends.
    **Add: the logit CV bias and the 8.9e-5 correction** — measured off-leaderboard, falsified.
+
+
+---
+
+## 2026-08-13 — slot 7 (cap already reached), ANGLE: original dataset
+
+**No submission is possible this run.** The counter reads 10/10 for 2026-08-13 (all ten
+landed 17:15–17:24 UTC) and rolls at 00:00 UTC. Research and compute only. Board at
+18:52 UTC: **rank 19**, unchanged 0.97106, leader MILANFX 0.97124.
+
+**The assigned angle is closed and I am not re-opening it.** `blend160origm_h3` already
+carries a member fitted *only* on the real 7,500-row source dataset, and the 08-12 entry
+closed both routes: concatenation is inverted, the decorrelated member is a null. The angle
+brief calls this "historically the single biggest edge"; here it has been measured twice and
+is worth zero. I spent this run on the one lead the journal left live instead.
+
+### The live lead is dead: the transform-weight search does not beat `h3`, it rediscovers it
+
+Yesterday's `oofsim` produced exactly one positive signal — OOF-searched simplex weights over
+the four transform stacks beat equal weights on labelled hold-out data, 5/5 doses, +71e-6 at
+full dose — and the journal named `blend159av_w` "the one live lead". Built and measured it.
+
+First, a provenance problem found on the way in. `simplex()` drew its stars-and-bars cuts from
+`1..n+k-2`, one position short, so **every weight vector on the grid summed to 0.95, not 1**.
+AUC is scale-invariant so the scores were valid, but **equal weights (0.25 each) and h3
+(0,⅓,⅓,⅓) were not points on the grid** — the search was structurally unable to return either
+baseline it was being compared against. The fix (uncommitted, made 14:39 local by the previous
+slot) takes the grid 1,540 → 1,771 points. `submissions/blend156w.csv` was written at 01:19
+local, **before** the fix, so the `blend156w` submitted at 17:23 today is a buggy-grid artefact
+and the "+6e-6, P(better) 0.995" in its submission message came off that grid.
+
+Re-run honestly — fixed grid, best member set, paired 50/50 on fixed splits so split noise
+cancels, weights chosen on half the rows and scored on the other half:
+
+| candidate | paired vs equal | free parameters |
+|---|---|---|
+| `drop_worst` (≡ h3) | **+0.000005 ± 0.000002**, 3/3 consistent | one bit |
+| `searched` simplex | **+0.000005 ± 0.000002**, 3/3 consistent | three floats |
+| `auc_p1 … auc_p32` | ±0.000000, sign-flips | — |
+
+**Identical to the last digit reported.** The searched weights say why: logit comes back at
+**0.00 / 0.05 / 0.10** across the three reps, so the search spends essentially all of its
+freedom on the single bit `drop_worst` already has. The earlier "search +6e-6 vs drop-worst
++5e-6" was a 1e-6 gap measured on a grid that excluded drop-worst's own answer.
+
+This retires transform-weight search, which was the last live modelling lead in the workspace,
+and it is a **third independent line supporting the `h3` deadline pick** — after raw CV
+(prefers h3 by 4–5e-6) and oofsim's labelled truth (`ens4 − h3` = −7e-6 at full dose). It also
+correctly re-reads yesterday's +71e-6: that was searched-vs-**ens4**, and on real data the
+whole of the gain is the logit drop, which `h3` gets for free.
+
+`blend159av_w`, `blend159av_wh3` (search restricted to the three h3 transforms) and
+`blend156w2` (the 156 rebuild on the fixed grid) are building; they are for tomorrow's free
+slots, not for the pick.
+
+### Final selection: `blend160origm_h3` is a better second than `blend158_h3`, measured
+
+The previous entry proposed finals `blend159av_h3` (0.970049) + `blend158_h3` (0.970048).
+`blend160origm_h3` **ties the top at 0.970049** and is also already sent. Measured the pairwise
+spearman on the actual test vectors to break it:
+
+| pair | spearman |
+|---|---|
+| `blend159av_h3` vs `blend160origm_h3` | **0.999981** ← least correlated |
+| `blend159av_h3` vs `blend158_h3` | 0.999991 |
+| `blend159av_h3` vs `blend156w` | 0.999920 |
+
+`blend160origm_h3` wins on *both* axes — equal-top CV and the least-correlated of the top
+candidates — so it is the better second pick. Honest caveat: at spearman 0.99998 there is no
+real hedge available among these files, so this is a tie-break, not a strategy.
+
+**Revised finals: `blend159av_h3` + `blend160origm_h3`.**
+
+### ⚠ The final-selection toggle still needs Teddy — re-verified, unchanged
+
+Re-checked the six rows the previous slot recorded, cheaply, as it instructed. `brave` absent
+from PATH, no Brave profile, `~/.config/google-chrome` holds only `Crash Reports`, CDP 9222
+closed. **No agent run on this box can set the final selection.** It is a `Use for Final
+Score` toggle on the My Submissions tab, behind a Kaggle login this machine does not hold.
+
+This remains the highest-value open item by a wide margin. `lb_refresh.py` confirms the
+best-public tie is still **4-way at 0.97106** — `blend156`, `blend158`, `blend159av` and
+**`blend158_logit` (CV 0.969961, the worst-CV file in the queue)**. Kaggle's default picks
+best-public, so doing nothing is roughly a 1-in-4 chance of shipping the worst-CV file as a
+final answer. The spread from the CV pick to that file is **−88e-6**; every modelling lever
+left in this workspace is worth ~2e-6, and as of today all of them are closed. One click is
+~40× the entire remaining research programme. Due before 2026-08-31 23:59.
+
+### Next run, in this order
+
+1. **`.venv/bin/python experiments/oofsim_summary.py 7 11 13`** — seed 11 was mid dose-loop
+   at the end of this run and 13 is chained behind it. Note seed 11's **dose-0 displacement
+   is +44e-6 where the mechanism predicts exactly zero** (seed 7 gave +0). That is a noise
+   floor half the size of the +97e-6 claim, and it makes the falsification stronger, not
+   weaker. No pooled result can restore `ens4` — confirmation required 3/3 and seed 7 is 0.
+2. **`lb_refresh.py` before reading the queue**, then `audit.py`.
+3. **Ten slots at 00:00 UTC.** Nothing in the queue or in tonight's three new files can
+   improve the public score — best unsent CV 0.970047 is below best sent 0.970049. Send them
+   anyway (free, cannot hurt): `blend159av_w`, `blend159av_wh3`, `blend156w2`, then
+   `blend159_h3`, `blend159`, `blend160orig_h3`, `blend160orig`, `blend160origm`,
+   `blend156_h3`. Expect no movement and do not read any into the LB.
+4. **Closed and not to be re-opened:** original dataset (both routes), feature work, stacker
+   `C`, meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging,
+   transform-subset enumeration, final-submission calibration, seed-twinning, member hunting,
+   najiama's blends, the logit CV bias / 8.9e-5 correction, **and now transform-weight
+   search**. The modelling programme is finished; the deadline pick is `blend159av_h3` +
+   `blend160origm_h3` and the only work left that changes the outcome is the toggle.

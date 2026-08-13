@@ -747,6 +747,36 @@ lattice features is genuinely unexplored ground.
   `blend156_h3` (hybrid + rankraw + rescale, equal) cross-fits to **0.970046** vs
   `blend156`'s 0.970042. `logit` is the one to drop — its clip destroys the tails of ~49
   saturating members.
+
+  > ⚠ **Provenance, established 2026-08-13 (slot 7): every number in the bullet above, and
+  > the shipped `blend156w.csv`, came off a BROKEN simplex grid.** `simplex()` chose its
+  > stars-and-bars cut positions from `1..n+k-2`, one short, so every row summed to
+  > `(n-1)/n = 0.95` instead of 1. AUC is scale-invariant, so the *scores* that grid
+  > produced are still valid readings of a legitimate simplex at step 1/19 — but **equal
+  > weights (0.25 each) and h3 (0, ⅓, ⅓, ⅓) were not points on it**, so the search was
+  > structurally unable to return either baseline it was being compared against. The "+6e-6
+  > for a search vs +5e-6 for drop-worst" comparison was therefore rigged slightly against
+  > the search. Fixed at 14:39 local on 08-13; the grid goes 1,540 → **1,771** points and
+  > now contains both baselines. `submissions/blend156w.csv` was written at 01:19 local,
+  > i.e. **before** the fix — it is a buggy-grid artefact. `blend156w2` is the rebuild.
+  >
+  > **Re-run on the fixed grid, on the best member set — the search's 1e-6 edge vanishes.**
+  > `transform_weights.py --stack blend159av --paired --reps 3`, 1,771 points, both
+  > baselines now reachable:
+  >
+  > | candidate | paired vs equal | free parameters |
+  > |---|---|---|
+  > | `drop_worst` (≡ h3) | **+0.000005 ± 0.000002**, 3/3 consistent | one bit |
+  > | `searched` simplex | **+0.000005 ± 0.000002**, 3/3 consistent | three floats |
+  > | `auc_p1..p32` | ±0.000000, sign-flips | — |
+  >
+  > They are **equal to the last digit reported**. The fold weights say why: the search
+  > returns logit at **0.00 / 0.05 / 0.10** across the three reps and spends essentially all
+  > its freedom on the one bit `drop_worst` already has. Restated for the deadline: the
+  > simplex search does not beat `h3`, it *rediscovers* `h3`. This retires transform-weight
+  > search as a live lead and is a third independent line supporting the `h3` pick.
+
+
 - Fitting a stacker on the OOF matrix and scoring it on the same matrix reads high.
   Score it with a proper cross-fit, and compare alternatives with **paired** differences
   on the same row splits so split noise cancels.
@@ -1529,6 +1559,32 @@ init, create, topics, topic-messages}` — no verb selects a final submission, a
 "Use for Final Score" toggle on the **My Submissions** tab of the competition page, in a
 browser. On this box that means launching Brave with the debug port (see the root
 `CLAUDE.md`) and driving it over CDP; Brave was **not running** on 2026-08-13.
+
+> ⚠ **Escalated 2026-08-13 (slot 6): this is not merely "Brave was not running" — no agent
+> run on this box can do it, and it needs the human.** Checked directly:
+>
+> | check | result |
+> |---|---|
+> | `brave` / `brave-browser` on PATH | **absent** (only `google-chrome-stable`) |
+> | `~/.config/BraveSoftware/Brave-Browser` | **does not exist** |
+> | `~/.config/google-chrome` | exists but holds only `Crash Reports` — no logged-in profile |
+> | `brave` MCP server tools in the agent session | **not present** in the tool list |
+> | CDP on `127.0.0.1:9222` | not listening |
+> | `websocket-client` / `websockets` in `.venv` | neither installed |
+>
+> So there is **no authenticated browser session on this machine at all**, and the root
+> `CLAUDE.md` instructions for the Brave MCP server cannot be followed here as written.
+> Starting a browser would not help: the toggle is behind a Kaggle login this box does not
+> hold. **The final-selection action must be done by Teddy in his own browser**, or the
+> machine must first be given a logged-in profile. A future agent run should not re-spend
+> tokens rediscovering this — it should re-check the six rows above, and if they are
+> unchanged, say so and move on.
+>
+> This is now the **highest-value open item in the competition**, and it is worth more than
+> any remaining modelling. The spread between the CV pick (`blend159av_h3`, 0.970049) and
+> the worst file in the best-public tie (`blend158_logit`, 0.969961) is **−88e-6**, whereas
+> every live modelling lever left here is worth ~2e-6. One click is ~40x the entire
+> remaining research programme.
 
 **The default is best-public.** Kaggle's standing rule is that an entrant who selects
 nothing has their best *public-leaderboard* submission(s) chosen automatically. Confirm this

@@ -294,14 +294,23 @@ def paired_boot(y_ho, a, b, reps=200, seed=0):
 
 
 def simplex(k, step):
+    """Stars and bars over the k-simplex; rows sum to exactly 1.
+
+    The cut range was previously 1..n+k-2, one position short, so rows summed to
+    (n-1)/n = 0.95. AUC is scale-invariant, so the wsearch SCORES that grid produced are
+    still valid (it is a simplex at step 1/19 up to a constant) -- but equal weights, i.e.
+    `ens4`, the baseline wsearch is compared against, were not on it. Seeds 7 and 11 ran
+    with the offset grid; only the wsearch diagnostic is affected, never the pre-registered
+    displacement, which reads fixed stacks and no weights at all.
+    """
     n = int(round(1.0 / step))
     out = []
-    for cut in itertools.combinations(range(1, n + k - 1), k - 1):
+    for cut in itertools.combinations(range(1, n + k), k - 1):
         prev, w = 0, []
         for c in cut:
             w.append(c - prev - 1)
             prev = c
-        w.append(n + k - 1 - prev - 1)
+        w.append(n + k - 1 - prev)
         out.append(np.array(w, np.float64) / n)
     return np.array(out)
 

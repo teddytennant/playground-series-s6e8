@@ -59,17 +59,33 @@ def rk(v):
 
 
 def simplex(k, step):
-    """All weight vectors on the k-simplex with coordinates on a `step` grid."""
+    """All weight vectors on the k-simplex with coordinates on a `step` grid.
+
+    Stars and bars: k-1 cut positions chosen from 1..n+k-1 partition n units into k
+    non-negative parts. The cut range was previously 1..n+k-2, one position short, so every
+    row summed to (n-1)/n = 0.95 rather than 1. AUC is scale-invariant so the SCORES that
+    grid produced were still valid -- it is a legitimate simplex at step 1/19 up to a
+    constant factor -- but equal weights (0.25 each, summing to 1) were not on it, and
+    neither was h3 = (0, 1/3, 1/3, 1/3). The search could not return either baseline it was
+    being compared against.
+
+    Equal weights are appended when they are still not a grid point. At k=4, step=0.05 they
+    now are (5/20 each); at k=3 they are 1/3 and land between grid points regardless.
+    """
     n = int(round(1.0 / step))
     out = []
-    for cut in itertools.combinations(range(1, n + k - 1), k - 1):
+    for cut in itertools.combinations(range(1, n + k), k - 1):
         prev, w = 0, []
         for c in cut:
             w.append(c - prev - 1)
             prev = c
-        w.append(n + k - 1 - prev - 1)
+        w.append(n + k - 1 - prev)
         out.append(np.array(w, np.float64) / n)
-    return np.array(out)
+    g = np.array(out)
+    eq = np.ones((1, k)) / k
+    if not np.any(np.all(np.isclose(g, eq), axis=1)):
+        g = np.vstack([g, eq])
+    return g
 
 
 def sel_auc(yy, s, npos, nneg):
