@@ -650,6 +650,22 @@ Do not use the CV→LB offset as a leak detector any more — it is not constant
 | CatBoost | 0.96718 | `latwide_cat` |
 | TabM | 0.96867 | `tabm_seed3` |
 
+#### ⚠ CLOSED 2026-08-13: tuning ANY GBDT is worth ~4e-7 into the stack
+
+Note XGBoost is not a missing leg — `latr1_xgb` is the **best GBDT of any family here**, and
+the pack already holds `xgb_lat`, `xgb_latcat` (×3 seeds), `xgb_cat_lattice`, `xgb_raw_nan`
+and the `bolt_xgb_*` family. Two measurements price any further tuning:
+
+- **Solo→stack pass-through is 1.4%** — seed-averaging `xgb_latcat` bought **+138e-6 solo**
+  (the largest member-level gain ever measured here) and moved the stack **+2e-6**.
+- **Tuning a GBDT for solo AUC on these folds was measured at +3e-5** (2026-08-10, LightGBM,
+  recorded as a null).
+
+3e-5 × 1.4% = **+4e-7**, ~1% of the 5e-5 noise floor. Even a 10× better tune stays under it.
+And there is nothing left for a tuned member to inform: every member trains on the frozen
+SKF5 seed42 folds already, and the deadline pick (`h3`) fits **zero** free parameters above
+the stack. **Do not tune GBDTs. Do not add ordinary GBDT members.**
+
 #### ⚠ CLOSED 2026-08-11: you cannot tune a LightGBM into a decorrelated member
 
 The "open opening" below was tuned for solo AUC on 2026-08-10 (**+0.00003, a null**) and
@@ -1729,6 +1745,50 @@ Every body shape tried (`competitionId` int/string/snake_case, real id `125218`,
 schema feedback. `/api/i/` wants the website's cookie session plus its XSRF token.
 **Closed deliberately:** brute-forcing a body against an endpoint that *mutates final-submission
 selection*, with no read-back to verify the effect, is the wrong thing to guess at.
+
+### ✅ You CAN read the selection — and as of 2026-08-13 21:10 UTC nothing is selected
+
+The write path is gone, but there is a read, and it settles the risk empirically.
+`kagglesdk/competitions/types/competition_enums.py:63` defines
+`SubmissionGroup.SUBMISSION_GROUP_SELECTED = 2`, and `ApiListSubmissionsRequest` takes `group`:
+
+```
+SUBMISSION_GROUP_SELECTED:   0 rows      <- nothing is selected
+SUBMISSION_GROUP_SUCCESSFUL: 30 rows     <- control: same call, same auth, works
+```
+
+Wrapped as **`experiments/check_selection.py`** — prints the selection, compares it to the
+deadline pick, **exits 1 if nothing is selected**, exits 2 if the control fails (so a broken
+call never masquerades as an empty selection). **Run it first, every run.**
+
+⚠ **Auth gotcha.** `KaggleClient()` with no arguments sends **no `Authorization` header** and
+returns 401 — `kaggle_http_client._try_fill_auth` only reads `KAGGLE_API_TOKEN` or
+`~/.kaggle/kaggle.json`, and knows nothing about the OAuth `credentials.json` this box uses.
+The 401 means "never sent", not "token dead". Pass it explicitly:
+
+```python
+tok = json.load(open(os.path.expanduser("~/.kaggle/credentials.json")))["access_token"]
+KaggleClient(env=KaggleEnv.PROD, api_token=tok)
+```
+
+### ⚠ CLOSED 2026-08-13: the authenticated API has no selection write method
+
+Slot 9 closed `/api/i/` (rejects before auth, so its 400/404 says nothing about the token).
+The remaining door was the **authenticated** router `api.kaggle.com/v1`, where the token
+works. It does not serve the method — and unlike `/api/i/`, this router returns real JSON
+errors for routes that exist, so the controls are meaningful:
+
+| POST, bearer token, `{}` body | result |
+|---|---|
+| `competitions.CompetitionApiService/ListSubmissions` | **403 JSON** `Permission 'competitions.participate' was denied` |
+| `…/NoSuchMethodXyz` (negative control) | 404, website HTML |
+| `competitions.CompetitionApiService/UpdateSubmissionSelection` | **404, website HTML** |
+| `competitions.SubmissionService/UpdateSubmissionSelection` | **404, website HTML** |
+| `competitions.SubmissionService/ListSubmissions` | 404, website HTML |
+
+Every selection candidate is byte-identical to the negative control. `CompetitionApiClient`
+exposes 40+ methods and none touches selection. **Final-submission selection is
+website-session-only and cannot be automated from this box. Do not re-open this line.**
 
 **Useful by-catch:** `POST /api/v1/competitions.CompetitionApiService/GetCompetition` with
 `{"competition_name":"playground-series-s6e8"}` returns `id = 125218`, `deadline

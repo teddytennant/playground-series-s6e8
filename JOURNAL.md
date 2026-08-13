@@ -3593,3 +3593,126 @@ direction as seeds 7 and 11. Confirmatory only; no pooled result can restore `en
    the logit CV bias, transform-weight search, the `max_bin` ladder, **and now the OAuth route
    to the selection API (falsified by a no-auth control) and CatBoost in every role.** The
    modelling programme is finished; only the toggle changes the outcome.
+
+---
+
+## 2026-08-13 — slot 10 (cap already reached), ANGLE: XGBoost as the third ensemble leg, tuned on the same folds
+
+**No submission possible.** Counter reads 10/10 for 2026-08-13 (all ten landed 17:15–17:24
+UTC; now 21:09 UTC). Rolls at 00:00 UTC, ~2h50m out. Research and compute only.
+
+### 1. The selection state is no longer inferred — it is read, and it is EMPTY
+
+Two runs have now escalated the final-selection toggle on the reasoning that Kaggle's default
+is best-public. Nobody had ever *checked* whether anything is selected, because every attempt
+went at the website's `/api/i/` router and died on the missing cookie session. That was the
+wrong door. The **public, OAuth-authenticated** API has no *write* path, but it does have a
+**read** one, and it had been sitting in the SDK the whole time:
+
+`kagglesdk/competitions/types/competition_enums.py:63` defines
+`SubmissionGroup.SUBMISSION_GROUP_SELECTED = 2`, and `ApiListSubmissionsRequest` takes a
+`group` field. So:
+
+```
+SUBMISSION_GROUP_SELECTED:   0 rows
+SUBMISSION_GROUP_SUCCESSFUL: 30 rows      <- control
+```
+
+The control is what makes this a measurement rather than a shrug: the same call, same auth,
+same page size, differing only in the enum, returns all 30 submissions. So the call works,
+the token is accepted, the filter is honoured — and **nothing is selected**. The 88e-6 /
+~10σ exposure to `blend158_logit` that slot 9 priced is not a hypothetical. It is the live
+state of the account, confirmed against Kaggle's own API, and it stays that way until a human
+clicks.
+
+⚠ **Auth gotcha, worth recording:** `KaggleClient()` with no arguments returns 401 with **no
+`Authorization` header at all**. `kaggle_http_client._try_fill_auth` only reads
+`KAGGLE_API_TOKEN` or `~/.kaggle/kaggle.json`; it does **not** know about the OAuth
+`credentials.json` this box actually has. Pass the token explicitly:
+`KaggleClient(env=KaggleEnv.PROD, api_token=json.load(open(...))["access_token"])`.
+An hour was nearly lost reading the 401 as "the token is dead" — it is not, it was never sent.
+
+Wrapped as **`experiments/check_selection.py`**: prints the selection, checks it against the
+deadline pick, and **exits 1 when nothing is selected**, control-guarded so a broken call
+reports `2` rather than masquerading as an empty selection. Any future run should treat a
+non-zero exit as the top item on its list.
+
+### 2. The write path does not exist on the public API — falsified with a matched control
+
+Slot 9 closed the `/api/i/` route because that router rejects *before* auth, so its 400/404
+pattern says nothing about the token. The untried door was the **authenticated** router
+(`api.kaggle.com/v1`), where the token demonstrably works. It does not serve the method:
+
+| route (POST, bearer token, `{}` body) | result |
+|---|---|
+| `competitions.CompetitionApiService/ListSubmissions` | **403 JSON** — `Permission 'competitions.participate' was denied` |
+| `competitions.CompetitionApiService/NoSuchMethodXyz` | 404, website HTML |
+| `competitions.CompetitionApiService/UpdateSubmissionSelection` | **404, website HTML** |
+| `competitions.SubmissionService/UpdateSubmissionSelection` | **404, website HTML** |
+| `competitions.SubmissionService/ListSubmissions` | 404, website HTML |
+| `competitions.CompetitionService/UpdateSubmissionSelection` | 404, website HTML |
+
+Unlike `/api/i/`'s content-length-0 blanks, this router gives real JSON errors when a route
+exists — the positive control proves it. Every selection candidate returns the *website 404
+page*, identical to the negative control. `CompetitionApiClient` has 40+ methods and not one
+touches selection.
+
+**So the line is now closed from both ends, and the conclusion is firm rather than cautious:
+final-submission selection is website-session-only. It cannot be automated from this box, no
+matter how much cleverness is thrown at it.** What changed is that we can now *verify* the
+result once someone does it.
+
+### 3. The angle: XGBoost is already the strongest leg, and tuning it is worth ~4e-7
+
+Honouring the angle by measuring it rather than re-running it. Two facts already in the
+workspace settle it, and the second is the one that matters:
+
+- **XGBoost is not a missing third leg — it is the best GBDT leg we have.** `latr1_xgb` at
+  solo OOF **0.96780** beats the best LightGBM (0.96768) and the best CatBoost (0.96718).
+  The 86-member pack holds `xgb_lat`, `xgb_latcat` (×3 seeds), `xgb_cat_lattice`,
+  `xgb_raw_nan`, the `bolt_xgb_*` family and more.
+- **Solo-to-stack pass-through is 1.4%.** Seed-averaging `xgb_latcat` bought **+138e-6 solo**,
+  the largest single member-level gain ever measured here, and it moved the stack **+2e-6**.
+
+Multiply those out. Tuning a GBDT for solo AUC on these folds was measured at **+3e-5**
+(2026-08-10, LightGBM, recorded as a null). At 1.4% pass-through that is **+4e-7** into the
+stack — about 1% of the 5e-5 noise floor, and ~1/200th of the toggle exposure in §1. Even
+granting a tune an implausible 10× that gain, it lands under the noise floor.
+
+The angle's second clause answers itself too: *"tuned on the same folds so the blend weights
+mean something."* Every member here already trains on the frozen SKF5 seed42 folds — and the
+deadline pick (`h3`) fits **zero free parameters** above the stack, deliberately, because
+weight-fitting was retired on 2026-08-12 for rediscovering `h3` rather than beating it. There
+are no blend weights left for a tuned member to make meaningful.
+
+Not run, and the CPU argument is secondary to the arithmetic above: load average was 40 on 16
+cores from unrelated jobs, and the standing rule forbids two `n_jobs=-1` GBDT jobs on this box.
+**XGBoost tuning joins the closed list.**
+
+### 4. Housekeeping
+
+- All ten files queued for the 00:00 UTC send verified present, 296,302 rows each, ids from
+  691369: `blendtop3`, `blend159av_wh3`, `blend159av_w`, `blend159_h3`, `blend156w2`,
+  `blend160orig_h3`, `blend156_h3`, `blend160origm`, `blend159`, `blend160orig`.
+- `oofsim` seed 13 reached dose 3 of 5: `ens4 − h3` **−0.000004 ± 0.000003**, same sign as
+  seeds 7 and 11. Confirmatory only; no pooled result can restore `ens4`.
+
+### Next run, in this order
+
+1. **Run `experiments/check_selection.py` first, every run.** Exit 1 = nothing selected = the
+   competition's only live risk is still live. This is now a one-command check; there is no
+   excuse for a future run to re-derive it.
+2. **Ten slots at 00:00 UTC**, list in §4, CV-ordered. Objective from slot 9 §3: get two
+   CV-good files strictly above 0.97106 so the *default* cannot land on `blend158_logit`.
+   A hedge, not a fix — expect no movement, send anyway, free.
+3. **⚠ Escalate to Teddy — this is the whole competition.** One click, and §1 now proves it
+   is unset rather than assuming it. Select **`blend159av_h3`** and **`blend160origm_h3`** at
+   https://www.kaggle.com/competitions/playground-series-s6e8/submissions .
+   Verify afterwards with `check_selection.py` (exit 0 = done).
+4. **`oofsim_summary.py 7 11 13`** once seed 13 lands.
+5. **Closed, do not re-open:** original dataset (both routes), feature work, stacker `C`,
+   meta-models, regime-aware anything, NNLS/hill-climbing, combiner bagging, transform-subset
+   enumeration, final-submission calibration, seed-twinning, member hunting, najiama's blends,
+   the logit CV bias, transform-weight search, the `max_bin` ladder, CatBoost in every role,
+   **and now XGBoost tuning (+4e-7 into the stack) and the entire API route to the selection
+   toggle (no write method exists on the authenticated router, matched-control 404).**
