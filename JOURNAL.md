@@ -3181,3 +3181,113 @@ left in this workspace is worth ~2e-6, and as of today all of them are closed. O
    najiama's blends, the logit CV bias / 8.9e-5 correction, **and now transform-weight
    search**. The modelling programme is finished; the deadline pick is `blend159av_h3` +
    `blend160origm_h3` and the only work left that changes the outcome is the toggle.
+
+### Addendum (same run): the cross-fits landed, and one of them was about to poison the audit
+
+`blend159av_w` cross-fits to **0.970048** — below `blend159av_h3`'s 0.970049, +3e-6 over
+equal. Mean fold weights `logit 0.06 / hybrid 0.28 / rankraw 0.41 / rescale 0.25`; logit is
+at 0.0–0.1 in all five folds. The crossfit and the paired test agree exactly.
+
+`blend159av_wh3` — the search restricted to the three h3 transforms — closes the question
+completely:
+
+```
+equal   cross-fitted OOF 0.970049        <- this is blend159av_h3, reproduced
+searched-weight blend    0.970049        <- two free parameters, +0.000000
+```
+
+So the search's entire +5e-6 **is** the logit drop, and once logit is gone there is nothing
+left for it to find. (Bonus: this re-derives `blend159av_h3`'s 0.970049 down a different code
+path, which is a free verification of the deadline pick's headline number.)
+
+**The landmine.** `audit.py` ranks every candidate by `roc_auc_score(y, oof_<stem>.npy)`, and
+`transform_weights.py` was saving `R @ wfull` — the blend under weights chosen to maximise AUC
+on exactly those rows. An in-sample maximum over 1,771 grid points, written straight into the
+workspace's main decision table:
+
+| file | stored | honest cross-fit |
+|---|---|---|
+| `blend159av_w` | 0.970050 | 0.970048 |
+| `blend159av_wh3` | 0.970050 | 0.970049 |
+| `blend156w` | 0.970048 | 0.970047 |
+
++2e-6 of pure fitting was enough to put `blend159av_w` **at the top of the audit ranking,
+above `blend159av_h3`** — so a future run reading that table would have found a fitted
+artefact sitting exactly where the deadline pick belongs. That is the Rogii failure arriving
+through the instrument instead of through the leaderboard, which is worse, because nothing
+about it looks like leaderboard-chasing.
+
+Fixed at the source (the script now stores the cross-fitted `mo`; the shipped `.csv` still
+uses `wfull`, which is the right procedure for test predictions — only the CV bookkeeping
+must not reuse the fitted weights). All three existing files repaired in place by
+reconstructing `mo` from the fold weights in their build logs; every reconstruction matched
+its logged cross-fitted CV exactly, which is what confirms both the diagnosis and the repair.
+`audit.py` now has `blend159av_h3` and `blend160origm_h3` back on top at 0.970049.
+
+`blend156w2` was still building at end of run and was started before the fix — **repair its
+`oof_blend156w2.npy` the same way before trusting its audit row.** Seed 11 was on dose 4;
+its displacement runs +44e-6 (dose 0) → +50e-6 (dose 1), i.e. flat and non-zero exactly where
+the mechanism predicts zero, which strengthens the falsification.
+
+### Addendum 2: seeds 7 + 11 pooled — the falsification holds and the two stories merge
+
+`oofsim_summary.py 7 11` (seed 13 still running). sd is across splits, the honest error bar.
+
+| dose | `logit − hybrid` | signs | `ens4 − h3` | signs |
+|---|---|---|---|---|
+| 0 | +0.000022 ± 0.000031 | 1/2 | +0.000000 | 1/2 |
+| 1 | +0.000022 ± 0.000039 | 1/2 | +0.000001 | 2/2 |
+| 2 | +0.000012 ± 0.000038 | 1/2 | −0.000005 | 0/2 |
+| 3 | +0.000020 ± 0.000022 | 2/2 | −0.000002 | 1/2 |
+| **4** | **−0.000010 ± 0.000015** | **1/2** | **−0.000009 ± 0.000003** | **0/2** |
+
+Claimed from the leaderboard: `logit − hybrid` **+0.000097** (3/3) and `ens4 − h3` +0.000021.
+
+Measured off-leaderboard on labelled data: **flat across dose, sign-inconsistent at four of
+five doses, and negative at full dose** — against a claim that it must be ~0 at dose 0 and
+rise. Every error bar contains zero and the largest pooled mean (+22e-6) is a quarter of the
+claim. Pre-registered outcome 2, twice. And `ens4 − h3` is **−9e-6 at full dose, 0/2 positive**:
+the labelled truth prefers `h3` in both splits, agreeing with raw CV and with today's weight
+search, and disagreeing with the +1 ulp the public slice gave `ens4`. `h3` is the pick on
+three independent instruments now, and the only thing that ever favoured `ens4` was the slice.
+
+**The one positive result merges with today's.** `searched − ens4` is 2/2 positive at all five
+doses and grows to **+81e-6** at full dose — but look at what the search actually returns:
+`w_oof = [0, 0, 0, 0.95]` at doses 2/3/4 in both seeds. It is not weighting, it is **picking
+the single best transform and discarding the other three.** That is the same mechanism as the
+real-data result, where the whole +5e-6 was the logit drop and searching beyond it paid
++0.000000. oofsim's four transforms differ far more in quality than the real ones do, so
+drop-the-bad-transform is worth 81e-6 there and 5e-6 here. **One finding, two datasets:** drop
+bad transforms, do not fit weights. `h3` is exactly that, with one bit instead of three floats.
+
+Caveat kept honest: oofsim's own simplex still prints weights summing to 0.95, so it carries
+the same grid bug fixed in `transform_weights.py` today. It is not binding here — the searched
+optimum is a corner, and `ens4` is computed as the rank-average rather than off the grid — but
+the grid cannot return exactly-equal weights, and that should be fixed before oofsim is used
+to compare against equal weighting again.
+
+### Addendum 3: `blend156w2` — the search ties drop-worst for a third time
+
+Rebuilt `blend156w` on the fixed 1,771-point grid: **cross-fitted CV 0.970046**, against
+`blend156_h3`'s 0.970046 and equal-weight `blend156`'s 0.970042. Identical to drop-worst
+again. The buggy-grid `blend156w` read 0.970047, so the "+6e-6 and P(better) 0.995 over
+blend156" claimed in today's 17:23 submission message was **+1e-6 of grid artefact on top of
+a real +4e-6 that `blend156_h3` gets for free.** Fold weights put logit at 0.00–0.10 in all
+five folds, as everywhere else.
+
+Three member sets, three ways of asking, one answer: **drop logit, do not fit weights.**
+
+All four weight-fitted OOF vectors (`blend156w`, `blend156w2`, `blend159av_w`,
+`blend159av_wh3`) are now the honest cross-fitted vectors; every reconstruction matched its
+logged CV. Final audit state: `blend159av_h3` and `blend160origm_h3` joint-top at 0.970049,
+and **`blend159av_wh3` also 0.970049 — the best unsent file, and it ties the best sent.**
+
+Revised send order for tomorrow's ten free slots (none of these can raise the public score;
+best unsent CV now equals best sent, so send them as free reads and do not re-read the LB
+into anything): `blend159av_wh3`, `blend159av_w`, `blend156w2`, `blend159_h3`, `blend159`,
+`blend160orig_h3`, `blend160orig`, `blend160origm`, `blend156_h3`, `blend153_rankraw`.
+
+**The deadline pick is unchanged: `blend159av_h3` + `blend160origm_h3`.** `blend159av_wh3`
+ties them on CV but spends two fitted parameters to arrive at the same place, so it does not
+displace a file that fits none — and today's whole result is that those parameters buy
+nothing.

@@ -222,7 +222,15 @@ def main():
             pred = Rt @ wfull
             pd.DataFrame({"id": te["id"].to_numpy(), TARGET: pred}).to_csv(
                 os.path.join(SUB, f"{a.submit_name}.csv"), index=False)
-            np.save(os.path.join(SUB, f"oof_{a.submit_name}.npy"), R @ wfull)
+            # Store the CROSS-FITTED `mo`, never `R @ wfull`. `audit.py` ranks every
+            # candidate by roc_auc_score(y, oof_<stem>.npy), and `wfull` was chosen to
+            # maximise AUC on exactly those rows -- so saving `R @ wfull` puts an in-sample
+            # maximum over 1,771 grid points into the workspace's main decision table and
+            # makes a fitted file outrank an unfitted one for free. Measured on blend159av:
+            # `R @ wfull` reads 0.970050 against the honest 0.970048, which is enough to
+            # jump blend159av_h3 (0.970049) and become the apparent deadline pick.
+            # `mo` is the right vector anyway -- fold weights applied to held-out rows.
+            np.save(os.path.join(SUB, f"oof_{a.submit_name}.npy"), mo)
             print(f"wrote {os.path.join(SUB, a.submit_name)}.csv  "
                   f"rows={len(te):,}  cross-fitted CV {cv:.6f}")
 

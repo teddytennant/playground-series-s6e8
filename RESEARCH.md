@@ -775,6 +775,37 @@ lattice features is genuinely unexplored ground.
   > its freedom on the one bit `drop_worst` already has. Restated for the deadline: the
   > simplex search does not beat `h3`, it *rediscovers* `h3`. This retires transform-weight
   > search as a live lead and is a third independent line supporting the `h3` pick.
+  >
+  > The cross-fit agrees: **`blend159av_w` cross-fits to 0.970048**, below `blend159av_h3`'s
+  > 0.970049 and only +3e-6 over equal. Mean fold weights
+  > `logit 0.06 / hybrid 0.28 / rankraw 0.41 / rescale 0.25`.
+
+### ⚠ A fitted file must never store `R @ wfull` as its OOF vector — `audit.py` ranks on it
+
+Found 2026-08-13 (slot 7) and fixed. `audit.py` ranks every candidate by
+`roc_auc_score(y, oof_<stem>.npy)`. For an ordinary blend that vector is genuinely
+cross-fitted and the number is honest. But `transform_weights.py --submit-name` was saving
+`R @ wfull`, where `wfull` is the weight vector chosen to **maximise AUC on exactly those
+rows** — an in-sample maximum over 1,771 grid points, dropped straight into the workspace's
+main decision table.
+
+| file | stored `R @ wfull` | honest cross-fit |
+|---|---|---|
+| `blend159av_w` | 0.970050 | **0.970048** |
+| `blend156w` | 0.970048 | **0.970047** |
+
++2e-6 of pure fitting was enough to put `blend159av_w` **above `blend159av_h3` (0.970049) at
+the top of the audit ranking**, i.e. a future run reading that table would have found a
+fitted artefact sitting where the deadline pick belongs. That is the Rogii failure mode
+arriving through the instrument rather than through the leaderboard.
+
+Fixed at the source: the script now stores the cross-fitted `mo` (fold weights applied to
+held-out rows), which is the correct vector anyway. The `.csv` still ships `Rt @ wfull` —
+fitting the weights on all OOF rows is the right *procedure* for test predictions; it is only
+the CV bookkeeping that must not reuse them. Both existing files were repaired in place by
+reconstructing `mo` from the fold weights in their build logs; both reconstructions matched
+the logged cross-fitted CV exactly. **Rule: any file whose name ends in `w` is weight-fitted —
+check its `oof_*.npy` is the cross-fitted vector before trusting its row in `audit.py`.**
 
 
 - Fitting a stacker on the OOF matrix and scoring it on the same matrix reads high.
@@ -1455,6 +1486,29 @@ on a labelled pseudo-test set and it is **not there**:
 | `gap(ens4) − gap(h3)` | +0.000021 | **−0.000007** (truth prefers `h3`) |
 | does CV mis-rank the transforms? | yes, logit specifically | **no** — spearman(CV, truth) +0.943 at every dose, CV puts logit last and so does the truth |
 | does the OOF weight search underweight logit? | yes, that was the mechanism | **no** — `w_oof` logit 0.00 = `w_true` logit 0.00, **5/5 doses** |
+
+**Replicated on a second split 2026-08-13 (slot 7).** `oofsim_summary.py 7 11`, sd across
+splits:
+
+| dose | `logit − hybrid` | signs | `ens4 − h3` | signs |
+|---|---|---|---|---|
+| 0 | +0.000022 ± 0.000031 | 1/2 | +0.000000 | 1/2 |
+| 1 | +0.000022 ± 0.000039 | 1/2 | +0.000001 | 2/2 |
+| 2 | +0.000012 ± 0.000038 | 1/2 | −0.000005 | 0/2 |
+| 3 | +0.000020 ± 0.000022 | 2/2 | −0.000002 | 1/2 |
+| **4** | **−0.000010 ± 0.000015** | 1/2 | **−0.000009 ± 0.000003** | **0/2** |
+
+Flat across dose, sign-inconsistent at four of five doses, **negative at full dose**, every
+error bar covering zero, largest pooled mean a quarter of the +97e-6 claim. Pre-registered
+outcome 2, on both splits. `ens4 − h3` is −9e-6 at full dose and **0/2 positive**: the
+labelled truth prefers `h3` on both splits. Seed 13 was still running at end of slot 7 —
+pool it with `oofsim_summary.py 7 11 13`, but no result can restore `ens4` (confirmation
+required 3/3 positive at full dose; seeds 7 and 11 are +0 and negative).
+
+⚠ `oofsim.py` still carries the **0.95-sum simplex grid bug** fixed in
+`transform_weights.py` (its printed `w_oof` sum to 0.95). Not binding for what it has been
+used for — the searched optimum is a corner and `ens4` is the rank-average rather than a grid
+point — but fix it before using oofsim to compare anything *against equal weights* again.
 
 **Consequences, all of them:**
 - **The `logit += 8.9e-5` correction is withdrawn.** Do not apply it to any CV, ever again.
