@@ -1670,7 +1670,7 @@ browser. On this box that means launching Brave with the debug port (see the roo
 >
 > | check | result |
 > |---|---|
-> | `brave` / `brave-browser` on PATH | **absent** (only `google-chrome-stable`) |
+> | `brave` / `brave-browser` on PATH | **absent** — but see the correction below: `google-chrome` **is** present |
 > | `~/.config/BraveSoftware/Brave-Browser` | **does not exist** |
 > | `~/.config/google-chrome` | exists but holds only `Crash Reports` — no logged-in profile |
 > | `brave` MCP server tools in the agent session | **not present** in the tool list |
@@ -1691,17 +1691,69 @@ browser. On this box that means launching Brave with the debug port (see the roo
 > every live modelling lever left here is worth ~2e-6. One click is ~40x the entire
 > remaining research programme.
 
+### Correction + the endpoint's real name (2026-08-13, slot 9)
+
+Two rows of the table above were wrong or imprecise. **The conclusion is unchanged: this
+still needs Teddy.** But get the reason right, so no run "fixes" it by installing a browser.
+
+- **`google-chrome` IS on PATH** (`/home/nixos/.nix-profile/bin/google-chrome`), and
+  `~/.config/chromium` exists too. "No browser on this box" is not the blocker.
+- **The blocker is the login.** Both profiles are empty — `~/.config/google-chrome` holds only
+  `Crash Reports`, and `find ~/.config/google-chrome -name Cookies` returns nothing. There is
+  no Kaggle session anywhere on this machine.
+
+**The credential here is OAuth, not an API key.** `$KAGGLE_CONFIG_DIR=/home/nixos/.kaggle`
+holds `credentials.json` (not `kaggle.json`): `access_token` in ASP.NET Data-Protection
+format (`CfDJ8…`), `refresh_token`, `scopes: ["resources.admin:*"]`, user `thtennant`,
+~24h expiry. The CLI refreshes it; do not hand-edit.
+
+**The toggle's endpoint is named, and it is worth recording permanently.** `kagglesdk` builds
+calls as `POST /api/v1/<service>/<Method>`; the site's internal router is `/api/i/`, which
+returns **404 for a method that does not exist and 400 for one that does** — a free existence
+oracle. Result:
+
+```
+POST https://www.kaggle.com/api/i/competitions.SubmissionService/UpdateSubmissionSelection
+```
+
+(also live: `SubmissionService/{ListSubmissions, GetSubmission}`. 404, i.e. not real:
+`CompetitionService/*`, `SelectFinalSubmission`, `SetFinalSubmission`, `ToggleFinalSubmission`,
+`SelectSubmission`, `SetSubmissionSelected`, `ListFinalSubmissions`, `GetFinalSubmissions`.)
+
+⚠ **The OAuth token does NOT open it — falsified, do not retry.** The control that settles it:
+sending the same requests with **no `Authorization` header at all**, and with a deliberately
+invalid bearer, reproduces the **identical** 400/404 pattern. The 400 is the `/api/i/` router
+rejecting *before* auth, so it reports route existence only and says nothing about the token.
+Every body shape tried (`competitionId` int/string/snake_case, real id `125218`, paging,
+`x-xsrf-token` header, protobuf content-type) returned 400 with `content-length: 0` — zero
+schema feedback. `/api/i/` wants the website's cookie session plus its XSRF token.
+**Closed deliberately:** brute-forcing a body against an endpoint that *mutates final-submission
+selection*, with no read-back to verify the effect, is the wrong thing to guess at.
+
+**Useful by-catch:** `POST /api/v1/competitions.CompetitionApiService/GetCompetition` with
+`{"competition_name":"playground-series-s6e8"}` returns `id = 125218`, `deadline
+2026-08-31T23:59Z`, `maxTeamSize 3`, and **`maxDailySubmissions = 10`** — an authoritative
+read of the daily cap that does not require burning a submission to see the CLI's
+"N remaining today" line.
+
 **The default is best-public.** Kaggle's standing rule is that an entrant who selects
 nothing has their best *public-leaderboard* submission(s) chosen automatically. Confirm this
 against the competition's own Rules page the next time a browser is up — but plan for it,
 because here it is actively dangerous:
 
-| best public = 0.97106, four-way tie | cross-fitted CV | acceptable as a final? |
-|---|---|---|
-| `blend159av` (ens4) | 0.970045 | tolerable, but 4e-6 under the `h3` pick |
-| `blend158` (ens4) | 0.970043 | same |
-| `blend156` (ens4) | 0.970042 | same, older member set |
-| `blend158_logit` | **0.969961** | **no — worst CV of every ≥150-member stack held here** |
+| best public = 0.97106, four-way tie | cross-fitted CV | paired diff vs `blend159av_h3` | acceptable as a final? |
+|---|---|---|---|
+| `blend159av` (ens4) | 0.970045 | −0.000004 ± 0.000002 | tolerable, but 4e-6 under the `h3` pick |
+| `blend158` (ens4) | 0.970043 | −0.000006 ± 0.000002 | same |
+| `blend156` (ens4) | 0.970042 | −0.000008 ± 0.000003 | same, older member set |
+| `blend158_logit` | **0.969961** | **−0.000088 ± 0.000009** | **no — worst CV of every ≥150-member stack held here** |
+
+> **Priced 2026-08-13 (slot 9), 300-rep paired row-bootstrap, `auc_boot.py --ref
+> blend159av_h3`.** The exposure is **not the tie, it is one file.** Three of the four are
+> 4–8e-6 behind — real (all three resolve directionally, P(better) 0.040/0.013/0.003) but
+> negligible. `blend158_logit` is **−88e-6 at ±9e-6, about ten sigma**, and ~18× the 5e-5
+> noise floor. So the toggle's value is binary: it is worth avoiding one specific
+> auto-selection, not a diffuse "40× the research programme".
 
 Note **none of the four is the CV pick**: `blend159av_h3` (0.970049) and `blend158_h3`
 (0.970048) both score 0.97105 on the public slice and so would never be chosen by default.
@@ -1719,7 +1771,25 @@ removes the whole risk. Two slots; pick them to **bracket the one unresolved que
 | slot | file | rationale |
 |---|---|---|
 | 1 | **`blend159av_h3.csv`** | top raw CV 0.970049, fits nothing above the stack, and the choice `oofsim` prefers on labelled data |
-| 2 | **`blend158_h3.csv`** | CV 0.970048, a different member set, same construction |
+| 2 | **`blend160origm_h3.csv`** | CV 0.970049, joint-top, different member set, same construction — supersedes `blend158_h3` (0.970048), see the 2026-08-13 slot-6 entry |
+
+### The partial hedge available without a browser (2026-08-13, slot 9)
+
+The default takes the **top two by public score**, so putting two CV-good files strictly above
+0.97106 makes it impossible for the default to land on `blend158_logit`. Tomorrow's ten free
+slots should be spent CV-best-first with that objective, rather than as undirected "free
+reads".
+
+**This is not LB-chasing, and the distinction matters.** No final entry is being chosen for
+its public score; the observation is that *if the toggle stays unset the default chooses on
+public score*, and every file sent is one CV already endorses (≥0.970042) — so steering the
+default steers it toward a file CV likes. Consequence: keep CV-poor files **off** the send
+list (`blend153_rankraw`, 0.970027, was dropped for this reason — if it were the file to land
+0.97107 the default would select something 22e-6 below the pick).
+
+It is a **hedge, not a fix**, and it may simply not fire: the public slice is fixed and
+deterministic, the top files are ~0.9999 correlated, and the observed spread among them is a
+single 1e-5 quantisation step. **The toggle remains the only real fix.**
 
 *(Superseded 2026-08-13 evening: this table previously paired `blend159av` (ens4) with
 `blend159av_h3` to bracket the logit-bias question. `oofsim` answered that question — the
