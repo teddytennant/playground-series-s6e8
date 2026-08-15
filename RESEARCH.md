@@ -1929,3 +1929,290 @@ validation fold; in `DEFAULT_DROP`).
 Other pool entries checked and dismissed 2026-08-13: `kenchanhodgkin/pg-s6e8-exp00{0,1}`
 (OOF-only, 0.9542/0.9534, far below the pack floor, no test predictions);
 `sarveshchhetri/the-lookup-key-trick-minus-the-neural-net` (plain TE LightGBM, subsumed).
+
+---
+
+# From wave w14 — 2026-08-14
+
+# w14a — durable facts for RESEARCH.md
+
+## The stack is numerically singular: the pipeline's reproducibility floor is ~2e-6 AUC
+
+A shipped file **cannot be regenerated** from `oof/` + the stacker. Measured end-to-end
+(`experiments/w14a_repro.py`, rebuilds `blend159av_h3` from the frozen folds):
+
+| transform | stored CV | rebuilt CV | delta |
+|---|---|---|---|
+| logit | 0.969965 | 0.969965 | +0.000000 |
+| hybrid | 0.970029 | 0.970026 | −0.000003 |
+| rankraw | 0.970034 | 0.970031 | −0.000003 |
+| rescale | 0.970029 | 0.970027 | −0.000001 |
+| **h3** | **0.970049** | **0.970047** | **−0.000002** |
+
+99.91% of test rows change rank; spearman vs the stored pick 0.9999748.
+
+**Cause, diagnosed with controls** (`experiments/w14a_solver_probe.py`):
+
+- Condition number of the 159-member design ≈ **1.47e18** (4.22e18 on a rerun — the smallest
+  singular value is rounding noise). That is past 1/eps for float64 (4.5e15): **singular to
+  working precision.** Members correlate 0.987–0.999 and at `C=1` over 553,095 rows the L2
+  penalty is ~0, so nothing selects a point in the flat valley.
+- **In-process the code is bit-deterministic** — fold 0 fitted twice gives identical
+  coefficients, at both thread counts. Ruled out: nondeterministic code.
+- **Across BLAS thread counts (1 vs 4, separate processes)**: `n_iter` 85 vs 93,
+  max|Δcoef| 6.25e-3, cosine 0.999654, max|Δ decision_function| 5.28e-2 — but
+  **Δ fold-0 AUC only +1.9e-6** and Δ train logloss −2.3e-6. Far apart in coefficient space,
+  the same point in loss and AUC.
+- Ruled out by evidence, not assumption: no member file in the 159 set was written after the
+  original build (mtimes ≤ 2026-08-11 03:49); zero `ConvergenceWarning`, `n_iter` 85–93
+  against `max_iter=5000`.
+
+**Operational consequences:**
+
+1. **Submit the stored CSVs at the deadline. Never rebuild-and-resubmit** — a rebuild is a
+   different file scoring the same to ~2e-6.
+2. **Any CV difference below ~2e-6 is not a difference.** The joint-top cluster
+   (`blend159av_h3` 0.970049 / `blend160origm_h3` 0.970049 / `blend158_h3` 0.970048 /
+   `blend159_h3` 0.970047) spans exactly one reproducibility unit and is genuinely unordered.
+   Results that survive: `blend158_logit` −87e-6 (44 floors), `ens4 − h3` −10e-6 (5 floors).
+3. `blend_lab --lam` would give a unique solution. **Not a lead** — "stacker `C`" stays
+   closed on performance grounds; this is a property of the instrument, recorded so no future
+   run reads the wobble as a modelling result.
+
+## The CV→LB regression is dead as a predictive instrument (R² 0.035)
+
+`experiments/w14a_cvlb.py` — reads pairs from `audit_results.csv` rather than hard-coding
+them the way `predict_lb.py` does, so it stays current. 27 files, ≥150-member family:
+
+```
+slope +0.148   R^2 0.035   pearson +0.187   spearman +0.618
+residual sd 2.12e-05 = 2.12 LB quantisation steps
+gap (LB - CV) mean +0.001011  sd 0.000031
+```
+
+At slope +0.148 you need **+6.7e-5 of CV to buy one 1e-5 LB step**, and the whole top-of-pack
+CV spread is 7.6e-6. Do not use `predict_lb.py`-style predictions at current resolution.
+
+**What predicts LB is the transform family, not CV.** Mean residual against the common fit:
+hybrid −32.0e-6, rankraw −6.8e-6, rescale +5.8e-6, h3 +11.7e-6, ens4 +13.3e-6, logit
++18.9e-6. The transform spread (51e-6) is **7× the CV spread of the entire top pack**.
+
+## The public slice cannot resolve anything inside a transform family — 5/5 at one value
+
+Every `h3` file ever sent has returned **exactly 0.97105**: `blend158_h3`, `blend159av_h3`,
+`blend160origm_h3` (08-13), `blend159_h3` (w14b), `blendtop3` (w14a) — across CV
+0.970046–0.970049 and files that are genuinely distinct (spearman 0.999995 vs the pick).
+Residual sd across the h3 group is 6.4e-8, i.e. zero. The top `ens4` files (CV ≥ 0.970042)
+return 0.97106, 3/3.
+
+`blendtop3`'s 0.97105 was **pre-registered before submission** from this rule and came back
+exactly. The public LB reads transform identity and nothing else.
+
+⚠ **Retire the "get two CV-good files strictly above 0.97106" hedge (planned 2026-08-13).**
+It is measured impossible: h3 files land 0.97105, the best ens4 files land 0.97106 (tie, not
+exceed). Nothing this pack can build goes above 0.97106, and per w14b building *for* the
+public slice is paid back 4:1 on private.
+
+## h3 vs ens4 on the public slice = the logit displacement, not independent evidence
+
+`ens4` is `h3` plus `logit`. At fixed member set the LB prefers `ens4` by exactly one grid
+step (blend158 and blend159av, 2/2) while CV prefers `h3` by 4–5e-6. The mean-of-component-
+gaps estimator (validated on 150fx in `predict_lb.py`) attributes +5.0e-6 of that +1.0e-5 to
+logit re-entering — same sign, half the size, within one grid step. So the LB's preference
+for `ens4` is the logit displacement under another name, and by w14b's 4:1 borrowing result
+it is evidence *against* `ens4`, not for it. `h3` stands as the pick.
+
+## Re-pricing the unset-selection risk: the 4-way public tie bounds the damage at ~10e-6
+
+The "−88e-6 / ~10σ / this is the whole competition" framing carried by three entries priced
+the *file* and never the *draw*. Best-public is a **4-way tie at 0.97106**:
+
+| file | CV | kind |
+|---|---|---|
+| `blend156` | 0.970042 | ens4 |
+| `blend158` | 0.970043 | ens4 |
+| **`blend158_logit`** | **0.969961** | **logit** |
+| `blend159av` | 0.970045 | ens4 |
+
+Kaggle's default selects the best public submissions up to the final-submission limit (2 for
+Playground) and scores the **best** of the selected on private. Any 2-of-4 draw from this tie
+therefore contains at least one CV-good ens4 file, and the private result is the max — so the
+default's worst case is the `ens4 − h3` gap, **~−10e-6** (w14b's labelled-truth pooled
+figure), not `blend158_logit`'s −87e-6 CV / −111e-6 predicted-private gap.
+
+⚠ Assumptions, neither readable from the API (`ApiListCompetitionsRequest` returns
+`max_daily_submissions=10`, `max_team_size=3`, no selection-limit field): (a) limit = 2,
+(b) private = best of selected. Both Kaggle-standard. If the limit were 1 **and** the
+tiebreak latest-first, `blend158_logit` alone is selected and the −111e-6 is live.
+
+**The toggle item is re-sized, not closed.** Still worth ~10e-6 and still the only way to
+make the outcome unconditional on an undocumented tiebreak — but a future run should not
+spend itself on the "10σ, whole competition" framing.
+
+## Board, 2026-08-14
+
+`team_count` **1831** (the brief's ~1,326 is stale), our `user_rank` **20** (was 13). Leader
+MILANFX 0.97124; five teams passed 0.97106 in the preceding day. `user_rank` is available
+directly off `ApiListCompetitionsRequest(search=...)`, no leaderboard pull needed.
+
+# w14b — durable facts for RESEARCH.md
+
+## The public/private partition arithmetic — the thing that settles the logit question
+
+The public and private slices **partition one 296,302-row test set**. So for any two files,
+the paired AUC difference on the private slice is *forced* by the full-test difference and
+the public reading:
+
+```
+private_gap  ~=  (g - f * public_gap) / (1 - f)          f = public slice fraction
+```
+
+`experiments/w14b_slicenoise2.py` §4 validates this empirically on labelled data: regressing
+the private deviation on the public deviation gives **beta −0.245 (corr −0.998)** against the
+exact-partition prediction of −f/(1−f) = −0.250, at f = 0.20. It holds to ~2%.
+
+**Consequence, and it is the important one: a public-LB gain that is not backed by the true
+full-test difference is not free — it is BORROWED from the private slice at 4:1.** A file
+flattered by δ on the public slice is penalised by δ·f/(1−f) on the private one. This is a
+sharper statement of the workspace's standing "select on CV" rule and it has a number in it.
+
+⚠ **Do not build a file designed to top the public LB.** The 2026-08-13 plan's hedge ("get
+two CV-good files above 0.97106 so the default cannot pick `blend158_logit`") is sound only
+while every candidate is *already* CV-good. Deliberately leaning a blend toward whatever the
+public slice likes would buy public rank and pay 4× for it on private.
+
+## `blend158_logit`'s exposure is WORSE than −88e-6, not better
+
+Applying the above to the live risk (nothing is selected; Kaggle auto-selects on best
+public, and `blend158_logit` is tied for best public at 0.97106):
+
+| assumed real transform effect | full-test gap `logit − h3` | ⇒ private gap |
+|---|---|---|
+| 0 | −86.9e-6 | **−111e-6** |
+| +20e-6 (2σ ceiling from `oofsim`) | −66.9e-6 | −86e-6 |
+| +40e-6 | −46.9e-6 | −61e-6 |
+| +97e-6 (whole displacement real) | +10e-6 | +10e-6 |
+
+Only the last row rescues it, and that row is excluded below. The journal's "−88e-6 / ~10σ"
+is the *CV* gap; the **predicted private gap is ~−111e-6**. Robust to the LB's 1e-5
+quantisation (public gap anywhere in 0..+20e-6 moves it only −109 to −114e-6).
+
+## `oofsim` OVER-doses the clip mechanism by 5.7× — its null is stronger than it was read
+
+The mechanism (logit's clip pins more single-fold OOF cells than 5-fold-averaged test cells)
+was tested by `oofsim.py` and came back flat. That was read as "the test found nothing".
+It is better than that — the test was **over-powered**, not merely null:
+
+| pack | mean OOF pinned | mean test pinned | **aggregate asymmetry** |
+|---|---|---|---|
+| real, 161 members (`experiments/clip_census.csv`) | 9.884% | 9.531% | **+0.353pp** |
+| `oofsim` dose-4, 10 members (`cache/oofsim/results_s7.json`) | 6.378% | 4.356% | **+2.022pp** |
+
+**5.72×.** `oofsim` concentrates rf/et-grade asymmetry into 4 of 10 members; the real pack
+dilutes comparable per-member asymmetry (worst real +8.8pp vs oofsim's +9.7pp) across 161.
+So if the mechanism were real and linear in aggregate asymmetry, oofsim would have to show
+**~5.7× the real-pack effect**. It shows −15e-6 ± 14e-6 at full dose (3 seeds pooled) —
+which scales *down* to **−2.6e-6 ± 2.5e-6** for the real pack, against a +97e-6 claim.
+**The clip mechanism is excluded by a factor of ~40, not merely unconfirmed.**
+
+## The public slice behaves like a uniform random subsample — no id structure
+
+`experiments/w14b_idstructure.py`. If Kaggle cut the public slice contiguously in id order,
+or the generator drifted with id, the slice's draw would be wider than a random subsample's
+and the displacement would be cheaper than it looks. It does not:
+
+| pair | sd across 24 contiguous id blocks | sd across matched random subsamples | ratio |
+|---|---|---|---|
+| logit − hybrid | 43.9e-6 | 41.3e-6 | 1.06 |
+| logit − h3 | 36.4e-6 | 39.2e-6 | 0.93 |
+| rankraw − hybrid | 43.3e-6 | 32.1e-6 | 1.35 |
+| h3 − ens4 | 8.3e-6 | 9.6e-6 | 0.86 |
+
+Drift test (correlation of the per-block deviation with block index): **+0.073**. Train is
+confirmed strictly ascending in `id`. So the random-subsample sd is the right null.
+
+## Slice-draw sd on a paired difference, at public-slice size
+
+`experiments/w14b_slicenoise2.py` §1, 250 reps, pseudo-test 296,302 rows drawn from the
+691,369 labelled OOF pool. At **f = 0.20** the paired sd is ~30e-6 for `logit − h3` and
+~30e-6 for `logit − hybrid`; it reproduces the 2026-08-11 `cvlb2.py` paired-bootstrap
+number (29e-6) independently, via a different construction. Non-logit contrasts
+(`rankraw − hybrid`, `h3 − rankraw`) land at |dev| ≈ 2e-6, i.e. **the null is well
+calibrated everywhere logit is not involved** — the anomaly is specific, not a general
+failure of the instrument.
+
+## The three "replications" of the displacement are ONE reading
+
+The 150fx / 150sx / 158 readings (+104e-6 / +91e-6 / +97e-6) are taken off **the same fixed
+public slice** with files correlated ~0.9999. Simulated on a shared slice, their deviations
+correlate **+0.992** pairwise → **effective independent reads 1.01 of 3**. So the evidence
+is a *single* ~3.3σ draw, not three. Any future argument that counts LB replications of a
+fixed-slice effect as independent evidence is wrong for this reason.
+
+## `oofsim` seeds 7 + 11 + 13 pooled — the deadline pick is confirmed, item closed
+
+`oofsim_summary.py 7 11 13`, full dose:
+
+| contrast | pooled | signs |
+|---|---|---|
+| `logit − hybrid` | **−0.000015 ± 0.000014** | 1/3 |
+| `ens4 − h3` | **−0.000010 ± 0.000003** | **0/3** |
+
+Pre-registered confirmation required 3/3 positive at full dose. It is 1/3 and negative.
+`ens4 − h3` is negative on all three splits: **the labelled truth prefers `h3`**, which is
+what raw CV said. Seed 13 changes nothing; **this item is now closed.**
+
+Also from the pooled run: the OOF-searched simplex weight recovers the true optimum exactly
+at doses 3 and 4 on all three seeds (search leaves +0.000000 on the table), which is an
+independent confirmation that transform-weight search is retired for the right reason.
+
+### Correction: the "irreducible coin flip" band is a fact about the ORIGINAL, not about us
+
+`RESEARCH.md`'s generating-rule table says the `(social ≤ 4, 6 < daily ≤ 8)` cell is "an
+irreducible coin flip (flat in both drivers, splits Mild 558 / Moderate 467)". That is true of
+the **1,025 original rows**. Measured on our own OOF (`experiments/w14d_bandmap.py`,
+2026-08-14), the same cell holds **102,202 competition rows** and `blend159av_h3` ranks them at
+**within-cell AUC 0.939442**. It is *more* rankable than cell D (`social ≤ 4, daily ≤ 6`,
+0.923973) and than the both-drivers-missing population (0.912365). The generator's smear did not
+only blur the thresholds, it gave the band an internal ordering the pack has largely found.
+Do not plan a run around "the band is a coin flip".
+
+### Where the OOF AUC deficit actually lives (exact, not estimated)
+
+Every positive/negative pair belongs to exactly one (cell of pos, cell of neg) bucket, so
+`AUC = Σ_ij U(pos_i, neg_j)/(Npos·Nneg)` with `U` the Mann-Whitney statistic (ties 0.5). The
+identity reproduces `roc_auc_score` to 0.00e+00 and splits the deficit `1 − 0.970049 = 0.029951`
+exactly. On the generator's seven cells:
+
+- **within-cell 23.3%, cross-cell 76.7%.**
+- Biggest single bucket is **D×D at 13.5%**; the band's own within bucket is **4.9%**, fifth
+  overall. D also supplies the four largest cross-cell terms. **D — the cell the real rule says
+  is unanimously negative (orig rate 0.0000) and where the generator smeared it to 0.3253 — is
+  where the loss is, not the band.**
+- Exact oracle ceilings: perfect within the band **+0.001461**; perfect within every cell
+  +0.006964; perfect across all cell pairs +0.022987. Use these to price any regional idea
+  before building it.
+
+`experiments/w14d_bandmap.py` prints all of this in ~3 min from saved vectors, no refitting.
+`W14D_BLEND` env var picks the blend.
+
+### CLOSED (2026-08-14): error analysis / targeted correction on the generator's rule cells
+
+Two instruments, both with matched controls, both null:
+
+1. **Cross-fitted per-cell isotonic** (the only thing that can touch the 76.7% cross-cell mass,
+   since monotone maps cannot reorder within a cell): real cells **−118e-6**, size-matched
+   permuted-cell control **−124e-6**, so **real − ctrl = +6e-6** with both arms negative. The
+   loss is the five per-fold isotonic maps not being mutually monotone, not the segmentation.
+   Reproduces `iso_regime.py`'s −85e-6 on a different partition and adds the control it lacked.
+2. **Cell-local LightGBM** (`experiments/w14d_cellboost.py`) — 40-column frame + the stack score
+   as a feature, fitted on one cell's rows only, frozen folds restricted to the cell, against
+   the same frame row-permuted within the cell. **real − ctrl negative at 9 of 9 checkpoints**
+   across BAND / D / G, monotonically worse with capacity. This is `resid_boost2.py --mode
+   feature` with the "it never got to specialise on the region" objection removed.
+
+### Operational gotcha: `pgrep -f <script>.py` matches your own waiter
+
+`until ! pgrep -f w14d_cellboost.py; do sleep 10; done` never exits — the waiter's own command
+line contains the pattern, so `pgrep -f` matches it. Three background waits hung on this after
+the job had already finished. Use `pgrep -f "python.*<script>"`, or check the log's last line.
