@@ -554,3 +554,48 @@ live cell is a 0.1/0.9 average of Rayk's file with an undisclosed `Blend_submiss
 There is no OOF anywhere in it by the author's own statement. **Do not pull, fork, or blend
 it.** It also independently confirms the public slice is ~20% of the test set, which is the
 `f = 0.20` this workspace has assumed since w14b.
+
+---
+
+## 2026-08-16 (w16c/w16f, slot 2) — board unchanged in the hour, our public best is now a 3-way tie
+
+Board re-read at 04:04 UTC: **1,943 teams, leader MILANFX 0.97132, us rank 41 at 0.97107.**
+Identical to slot 1's read 16 minutes earlier — the overnight burst has stopped for now.
+Local density at our score: **2.5 teams per 1e-5** (10 teams within ±2e-5). That is the
+conversion factor for every AUC number below: a 1e-5 gain is worth about 2.5 places here, so
+the ~6e-6 the deadline pick moved this run is worth **~1.5 places**, and the 25e-5 gap to
+first is worth ~62 places.
+
+**Our best-public tie is now three files wide and all three are CV-endorsed.**
+
+| public | files |
+|---|---|
+| **0.97107** | **3** — `w15f_antistudent_avg` (CV 0.9700527), `w16b_cellweight` (0.9700556), `w16f_armavg` (0.9700554) |
+| 0.97106 | 7 — the ens4 shelf, including `blend158_logit` |
+| 0.97105 | 13, the h3/w cluster |
+
+All three members of the top tie are the same corrected object at different arm resolutions,
+and all three are above every zero-parameter file on CV. Kaggle's default best-public auto-pick
+therefore draws its **first** slot from a set in which every member is CV-endorsed, which is
+the third consecutive run that has been true and is now robust rather than lucky. The exposure
+remains the **second** slot, drawn from the 7-way tie at 0.97106 that contains `blend158_logit`.
+
+**The corrected family occupies its own LB shelf.** Public score minus recomputed CV, by
+transform family, over all 33 scored pack files (overall mean +0.001013, sd 2.58e-5):
+
+| family | n | LB − CV | within-family sd |
+|---|---|---|---|
+| logit | 3 | +0.001088 | 9.6e-6 |
+| rescale | 3 | +0.001018 | 9.5e-6 |
+| ens4 | 9 | +0.001013 | 5.0e-6 |
+| w | 3 | +0.001003 | 0.9e-6 |
+| h3 | 8 | +0.001002 | 1.4e-6 |
+| rankraw | 4 | +0.001000 | 4.0e-6 |
+| hybrid | 3 | +0.000990 | 13.3e-6 |
+| **corrected** | **3** | **+0.001015** | **1.5e-6** |
+
+The corrected files sit ~13e-6 of gap above the h3 cluster they are built from, which is why
++6e-6 of CV bought a full 2e-5 of LB (0.97105 → 0.97107) rather than the +1.2e-5 the
+within-family slope alone predicts. That is a **between-family** move and must not be read as
+a slope; within the corrected family itself the three points span 2.9e-6 of CV and all print
+0.97107, exactly as the ladder says they must.

@@ -17,8 +17,17 @@ import subprocess
 import sys
 
 COMP = "playground-series-s6e8"
-# The deadline pick, per JOURNAL.md. Both fit zero free parameters above the stack.
-WANTED = {"blend159av_h3.csv", "blend160origm_h3.csv"}
+# The deadline pick, per JOURNAL.md.
+#
+# CHANGED 2026-08-16 by w16c's audit, the first move since 2026-08-13. First pick is now
+# `w16b_cellweight` (CV 0.9700554, the workspace's best) instead of `blend159av_h3`
+# (CV 0.9700492): on 500 paired private-slice draws it wins by +6.49e-6 +/- 0.20 with
+# P(better) 0.912, worth ~1.5 places at the live board density. The second pick stays a
+# ZERO-parameter file on purpose — it is the hedge against the whole fitted-correction
+# family failing, and it costs only 0.10e-6 of E[max] against the unhedged optimum
+# (w16b_cellweight + w15f_antistudent_avg), an order of magnitude under the 2e-6 stack
+# reproducibility floor. See experiments/w16c_audit.json.
+WANTED = {"w16b_cellweight.csv", "blend159av_h3.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"
@@ -65,9 +74,23 @@ def main() -> int:
 
     if not selected:
         print(f"\n*** NOTHING IS SELECTED for {COMP}. ***")
-        print("Kaggle will then auto-select by best PUBLIC score, which here means")
-        print("blend158_logit (public 0.97106, CV 0.969961) is a live candidate —")
-        print("88e-6 / ~10 sigma below the CV pick. See JOURNAL.md 2026-08-13 slot 9.")
+        print("Kaggle will then auto-select by best PUBLIC score. The two tiers it would")
+        print("draw from, computed live rather than quoted from a stale journal entry:")
+        scored = [(sc, fn) for _, fn, sc in data["successful"] if sc is not None]
+        tiers = sorted({sc for sc, _ in scored}, reverse=True)[:2]
+        for rank, sc in enumerate(tiers, start=1):
+            members = sorted(fn for s, fn in scored if s == sc)
+            print(f"  auto-slot {rank}: public {sc}, {len(members)}-way tie — "
+                  + ", ".join(m.replace(".csv", "") for m in members))
+        # The one file that must never reach a slot. w15j enumerated six tiebreak rules
+        # and it is uniquely selected under none of them, but the exposure is real.
+        risk = [fn for sc, fn in scored if fn == "blend158_logit.csv" and sc in tiers]
+        if risk:
+            tier = 1 + tiers.index(next(sc for sc, fn in scored if fn == risk[0]))
+            print(f"  ** blend158_logit (CV 0.969961, ~88e-6 below the CV pick) is in "
+                  f"auto-slot {tier}'s tie. **")
+        print("Priced by w15i: +9.2e-6 if the final-submission limit is 2, +36.5e-6 if it")
+        print("is 1, +112e-6 in the worst branch. ~2.5 places per 1e-5 at the local density.")
         print(f"Wanted: {', '.join(sorted(WANTED))}")
         return 1
 

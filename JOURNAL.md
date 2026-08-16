@@ -7188,3 +7188,253 @@ the answer and §5(c) prices why; another error analysis aimed at cell D or the 
 interrupted attempt: `experiments/w16a_where.py` + `w16a_where.json`, `logs_w16a_where.txt`.
 Nothing existing was modified except `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md`, all
 append-only apart from the one flagged w15j-item-6 correction in `RESEARCH.md`.
+
+## 2026-08-16 — w16c, slot 2/10, ANGLE: consolidation — re-verify the pipeline, audit the CV-to-LB gap, confirm the deadline picks
+
+**Slots 3–10: §2 changes the deadline pick for the first time since 2026-08-13, and §1 says
+w16b's headline number is 40% optimism. Read both. §5 closes w16a's item 1.**
+
+### 0. Housekeeping — verified, not assumed
+
+- **Submission count checked against the live API before sending: 3 rows dated `2026-08-16`
+  after my send** (`blend160orig` 03:35, `w16b_cellweight` 04:00, mine 04:16). The CLI printed
+  **"7 submissions remaining today"**, which agrees exactly. The prompt's "2 of 10" was right.
+- **The journal merge is done and I did not redo it.** Slot 1 merged the whole w15 inbox; the
+  bookkeeping half of this angle was already closed, so the slot went entirely to the live half.
+- `experiments/check_selection.py` → **exit 1, nothing selected**, control reads 43 successful
+  submissions. Still one human click. Its `WANTED` set and its warning text are both **changed
+  by this run** — see §2 and §6.
+
+### 1. ⚠ w16b's +6.195e-6 is +4.417e-6 once the arm choice is paid for
+
+The audit's job was to check that the file at the top of CV deserves to be there. It mostly
+does, but not for the number the journal records.
+
+w16b enumerated three arms of one object (base + a fitted weight on `c_avg`) and shipped the
+best. Its own docstring rule — highest cross-fitted arm, tie inside 1e-6 → fewer parameters —
+is a selection, and it was scored on the same cross-fitted folds it selected on. w16b flagged
+this and guessed "perhaps 0.5–1e-6 of selection optimism". **Measure it instead:** run the
+identical rule leave-one-fold-out, choosing the arm on four folds and reading it on the fifth.
+
+| fold | 0 | 1 | 2 | 3 | 4 | |
+|---|---|---|---|---|---|---|
+| arm the rule picks | a_only | a_only | **per_cell** | a_only | **per_cell** | |
+| delta on the held fold (e-6) | +11.28 | +7.48 | +4.93 | −5.95 | +4.35 | **mean +4.417, se 2.865** |
+
+**Naive +6.195e-6 → nested +4.417e-6. The optimism is +1.778e-6, about double w16b's own
+estimate.** Honest CV for the shipped file is **0.9700536**, not 0.9700554.
+
+The more useful half is *how* the rule fails: **it picks A-ONLY three times out of five.** The
+three arms are not separated by the data at all. The fold-level uncertainties say the same
+thing and the journal has been quoting these as point estimates:
+
+```
+global    +3.338e-6  se 3.642e-6  t(4df) +0.92        per_cell - global  +2.857e-6  t +1.52
+a_only    +5.031e-6  se 2.906e-6  t(4df) +1.73        per_cell - a_only  +1.164e-6  t +0.98
+per_cell  +6.195e-6  se 2.585e-6  t(4df) +2.40        per_cell - ctrl7   +3.825e-6  t +1.21
+```
+
+The correction family clears the base at t +2.40. **Which arm of it is right is not resolved at
+better than 1.5σ**, and no future run should write "per-cell beats global" as settled.
+
+### 2. THE DEADLINE PICK MOVES — and this run submitted the object that finding produced
+
+**When a selection rule cannot separate its candidates, average them instead of picking one.**
+It deletes the selection step, so there is no optimism left to correct, and it lowers the
+variance of the fitted correction without adding a parameter. The workspace already accepted
+that argument for seeds and folds (w14c, `blend159av`); it had never been applied to the *arm*
+dimension. `experiments/w16f_armavg.py` rank-averages the three cross-fitted arms:
+
+| | CV | note |
+|---|---|---|
+| `blend159av_h3` base | 0.97004917 | 0 params |
+| global arm = `w15f_antistudent_avg` | 0.97005270 | 1 |
+| A-only arm | 0.97005443 | 2, never built as a file until §4 |
+| per-cell arm = `w16b_cellweight` | 0.97005561 | 7, **honest 0.97005359** |
+| **arm average = `w16f_armavg`** | **0.97005536** | **no selection, so this number is honest** |
+
+Same CV as per-cell, minus the optimism. Per fold +12.12 +10.41 +5.95 −5.20 +6.53 e-6, mean
++5.961e-6, se 3.022e-6, t(4df) **+1.97**, 4/5.
+
+**The decision instrument.** 500 reps, 296,302-row pseudo-test drawn from the 691,369 labelled
+rows, f = 0.20 cut away, **the same simulated private slice scored for every file each rep**, so
+every ± below is a *paired* standard error and not two independent draws. Corrected files enter
+as their **cross-fitted** OOF — fold *f*'s rows carry weights fitted without fold *f* — which is
+conservative, because the shipped test files use full-data weights.
+
+| candidate first pick | params | mean private AUC | vs incumbent | P(better) |
+|---|---|---|---|---|
+| `blend159av_h3` (incumbent since 08-13) | 0 | 0.97003740 | — | — |
+| `blend160origm_h3` | 0 | 0.97003690 | −0.51e-6 | 0.402 |
+| `blendtop3` | 0 | 0.97003768 | +0.28e-6 | 0.578 |
+| `w15f_antistudent_avg` | 1 | 0.97004095 | +3.55e-6 | 0.890 |
+| `w16f_armavg` | 3 arms | 0.97004361 | +6.21e-6 | **0.954** |
+| **`w16b_cellweight`** | 7 | **0.97004390** | **+6.49e-6** | 0.912 |
+
+Head to head, paired: `w16b` − `w16f` = **+0.29e-6 ± 0.07**, P(w16b) 0.582 — the two are the
+same file for decision purposes, with `w16f` the tighter of the two and `w16b` the higher mean.
+Both beat every zero-parameter file by ~6e-6 at P ≥ 0.91.
+
+E[max] over the pair, which is the quantity Kaggle actually scores:
+
+| pair | E[max] | vs incumbent pair | places |
+|---|---|---|---|
+| `w16b_cellweight` + `w16f_armavg` | 0.97004438 | +6.40e-6 | +1.6 |
+| `w16b_cellweight` + `w15f_antistudent_avg` | 0.97004415 | +6.17e-6 | +1.5 |
+| **`w16b_cellweight` + `blend159av_h3`** ← **new pick** | 0.97004405 | **+6.07e-6** | **+1.5** |
+| `blend159av_h3` + `blend160origm_h3` ← old pick | 0.97003798 | 0 | 0 |
+
+**`WANTED` in `check_selection.py` is now `{w16b_cellweight.csv, blend159av_h3.csv}`.** First
+change since 2026-08-13.
+
+**Why the second slot stays a zero-parameter file.** The unhedged optimum beats the chosen pair
+by **0.33e-6** — an order of magnitude under the 2e-6 stack reproducibility floor, so it is not
+a real cost. What the hedge buys: `w16b` and `w16f` are perturbations of the same base by the
+same correction, so if that correction reverses on the private rows they lose *together*, and by
+roughly twice the gain (~12e-6). At a 5–10% probability for that branch the hedge is worth
+0.6–1.2e-6 against a 0.33e-6 cost. Take it.
+
+**And this is explicitly not the Rogii failure.** The move is CV-led three ways over: `w16b`
+leads on naive CV (0.9700554), on the optimism-corrected nested CV (0.9700536), and on the
+simulated private slice (+6.49e-6, P 0.912). The public slice only *agrees* — and it agrees on
+~59k real test rows the OOF never saw, which is precisely why the "the correction does not
+transfer" branch is priced at 5–10% rather than 50%. Nothing was selected because it topped the
+public slice; a file that had topped the public slice and lost on CV would not be here.
+
+### 3. The ladder is 19/19 and the CV→LB instrument got sharper, not weaker
+
+`experiments/w16c_audit.py` §1 recomputes every CV from each file's own stored OOF and joins to
+the live API. w16a's three pre-registration rules, re-checked against **every** scored pack file
+rather than the subset that induced them:
+
+| rule | record |
+|---|---|
+| `ens4` CV ≥ 0.9700416 → 0.97106 | **6/6** |
+| `ens4` CV ≤ 0.9700343 → 0.97104 | **2/2** |
+| h3 / `w` cluster → 0.97105 | **11/11** |
+
+Within-family fixed effects on 33 pack files, with both 08-16 readings folded in:
+**slope +1.941 ± 0.138, t +14.06**, within-family residual sd **3.28e-6 = 0.33 LB grid steps**,
+and **30 of 30** resolvable within-family pairs concordant. w15i had +1.771 ± 0.226 and 36/38.
+Constant-gap null LB = CV + 0.001013, RMSE 2.54e-5.
+
+**The corrected files sit on their own shelf, and that must not be read as a slope.** LB − CV by
+family: logit +0.001088, rescale +0.001018, **corrected +0.001015**, ens4 +0.001013, w +0.001003,
+h3 +0.001002, rankraw +0.001000, hybrid +0.000990. The corrected family is ~13e-6 of gap above
+the h3 cluster it is built from, which is why +6e-6 of CV bought a full 2e-5 of LB (0.97105 →
+0.97107). That is a between-family displacement. *Within* the corrected family the three points
+span 2.9e-6 of CV and all three print 0.97107, exactly as the ladder requires.
+
+### 4. Submitted — `w16f_armavg`, and the prediction was pre-registered and right
+
+`submissions/w16f_armavg.csv` — ref **55543132**, 2026-08-16 04:16:12 UTC, CLI reported
+**"7 submissions remaining today"**. Cross-fitted CV **0.9700554**.
+
+**PRE-REGISTERED PREDICTION: 0.97107, alternative 0.97106.** Written into the submission message
+before sending, from the corrected-family ladder: `w15f_antistudent_avg` CV 0.9700527 → 0.97107
+and `w16b_cellweight` CV 0.9700556 → 0.97107 bracket it, and w16a derived that a corrected file
+needs CV ≥ 0.970058 to print 0.97108, which this does not reach. **RESULT: 0.97107.** Fifth
+consecutive out-of-sample confirmation of the within-family fit, and the third point in the
+corrected family.
+
+Validated before sending: 296,302 rows, ids equal `sample_submission` exactly, all finite,
+296,302 distinct values, range [3.37e-6, 1.0]. Checked against **every** `.csv` in
+`submissions/` for rank-identity, not just the obvious neighbours — **no match**. Spearman
+0.9999958 vs `w16b_cellweight` (293,830 rows differ), 0.9999930 vs `w15f_antistudent_avg`,
+0.9999824 vs the base. No new weight is fitted anywhere in the script and nothing in it was
+chosen with reference to the public slice.
+
+**Not a deadline pick** — it inherits the arms' fitted parameters. Our public best is now a
+**3-way tie at 0.97107**, all three members corrected files, all three above every
+zero-parameter file on CV, so the default auto-pick's *first* slot is safe under any tiebreak.
+
+### 5. w16a's item 1 — per-cell member weights — is a NULL, and the reason generalises
+
+`experiments/w16d_membercell.py`. This was the top of slot 1's ranked list and the reason it was
+there is that `xgb_cat_lattice` reads cond AUC **z +6.88** in cell A, *larger* than `c_avg`'s
++5.16 by the same instrument. Built as the matched object rather than by swapping a path:
+`c_mem = pct(member) − pct(base)`, mean-centred to unit sd within fold, so the 0…0.02 grid means
+what it means for `c_avg` (the top of the grid is an effective member blend weight of **0.25**).
+Same folds, same three arms, same size-matched permuted controls.
+
+```
+SET1  base = blend159av_h3 (0.97004917)      SET2  base = w16b_cellweight (0.97005561)
+  GLOBAL   1 weight    +0.000e+00  0/5         GLOBAL   1 weight    +0.000e+00  0/5
+  A-ONLY   2 weights   +0.000e+00  0/5         A-ONLY   2 weights   +4.719e-08  4/5
+  PER-CELL 7 weights   -8.036e-07  3/5         PER-CELL 7 weights   -7.861e-07  2/5
+  CTRL permuted 7      -1.999e-06  1/5         CTRL permuted 7      -1.812e-06  1/5
+  CTRL permuted 2      -6.584e-08  0/5         CTRL permuted 2      -3.383e-07  0/5
+```
+
+**Zero is not a grid artefact.** Coordinate ascent maximises on the *training* folds and still
+returns w = 0 in every fold, globally and in cell A alone — adding this member to the stack at
+any weight up to a 25% blend hurts *in sample*. The per-cell arm is negative outright. SET2 —
+stacking the member correction on top of the per-cell `c_avg` file, which is where a genuinely
+additional cell-A signal would show most clearly — reproduces the same shape: +0.047e-6 at best,
+which is 130× smaller than `c_avg`'s own effect on the same base. **Two independent bases, one
+answer.**
+
+**One honest disclosure about my own pre-registered rule.** It said "ship the highest arm whose
+net over its matched control exceeds +1.0e-6". SET2 per-cell satisfies that (net +1.026e-6)
+while having an **absolute delta of −0.786e-6** — the control is simply even more negative. The
+rule was written without a floor on the absolute delta and would have shipped a CV regression;
+`submissions/w16d_membercell.csv` exists and is **deliberately not sent**. Anyone reusing this
+rule must add `xfit > 0` to it.
+
+⚠ **The lesson is about the instrument and it is worth more than the null.** A high conditional-
+AUC z says a vector carries label information the base does not use *at the same base score*. It
+does **not** say an additive rank shift can extract it. `c_avg` is a residual built to be
+orthogonal to the base (teacher minus student) and its z converts into AUC; `xgb_cat_lattice` is
+**96.17% rank-correlated** with the base and is *already in* the 159-member stack at its fitted
+weight, so its z is information the additive route cannot reach. **Before spending a slot on any
+future cond-AUC z, ask whether the vector is a residual or a pack member.** `cat_native`
+(z +3.41 in cell A) is the same shape and should be assumed null without spending a slot.
+
+### 6. `check_selection.py` — two changes, both load-bearing
+
+1. `WANTED` → `{w16b_cellweight.csv, blend159av_h3.csv}`, with the derivation in a comment.
+2. Its **printed warning was three days stale** and w16a flagged it without fixing it. It still
+   said `blend158_logit` was "a live candidate" for the auto-pick. It is not: best public is
+   0.97107, a 3-way tie of corrected files, so the **first** auto-slot is safe. The exposure is
+   the **second** slot out of the 7-way tie at 0.97106. **The replacement text is computed
+   live** from the API response the script already fetches — it prints both tiers, their tie
+   sizes and members, and flags which tier `blend158_logit` is in — so it cannot go stale again
+   the way the old hardcoded paragraph did. w15i's prices are kept as constants (+9.2e-6 at
+   limit 2, +36.5e-6 at limit 1, +112e-6 worst branch) because those are model outputs, not
+   state. Current reading: auto-slot 1 is a 3-way tie of corrected files, auto-slot 2 is the
+   7-way ens4 tie and `blend158_logit` is in it.
+
+### 7. What slot 3 should look at first
+
+Everything on the 2026-08-13, w14b, w14d, w15j §6 and w16a §6 closed lists stands, **plus
+w16a's item 1, which §5 closes.** Do not re-open any of them.
+
+1. **Sweep the closed list for "picked rather than averaged".** §1/§2 is the wave's second
+   reversal and it has the same shape as w15i's: a number that was load-bearing turned out to be
+   an artefact of a *selection* nobody had priced. Any earlier experiment that enumerated
+   variants and shipped the best one is carrying the same optimism, and the fix — average them —
+   is usually free and usually also a submittable file. `blendtop3`, the transform families, and
+   the seed/fold stacks are the obvious places to start.
+2. **w16a item 2, a genuinely transductive member**, is now the only *class* the workspace has
+   not closed. Unchanged and still the highest-ceiling idea on the board. The concrete hook is
+   still w15c's train/test mask asymmetry used as a **training weight**, which has never been
+   tried.
+3. **w16a item 3**, how much of the +200e-6 OOF/test bagging asymmetry survives 160-member
+   blending — two extra configurations inside `experiments/w15g_cvgap.py`'s existing loop.
+4. **The human click.** `check_selection.py` exits 1. The pick is now
+   `w16b_cellweight.csv` + `blend159av_h3.csv` and §2 prices the move at +6.07e-6 / ~1.5 places
+   *on top of* w15i's +9.2e-6 for making the click at all.
+
+**Do NOT spend a slot on:** per-cell member weights (§5); another cond-AUC-z chase on a pack
+member (§5); re-investigating the gap to first (w15j item 4 is the answer, and w16a §5(c) prices
+why stack refinement cannot close 25e-5); anything constructed to top the public slice.
+
+### Files created
+
+`experiments/w16c_audit.py` + `.json` + `w16c_subs_raw.csv`, `experiments/w16d_membercell.py` +
+`.json`, `experiments/w16e_aonly.py` (the 2-parameter arm, written as a fallback candidate and
+not needed once §2 produced a better one — it has not been run), `experiments/w16f_armavg.py` +
+`.json`, `experiments/w16g_pickcheck.py` + `.json`, `submissions/w16f_armavg.csv` (sent),
+`submissions/w16d_membercell.csv` (**not** sent, see §5), and the four `logs_w16*.txt`.
+`experiments/check_selection.py` is the only existing file modified, in the two ways §6 lists;
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.

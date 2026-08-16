@@ -9,9 +9,13 @@ Failed to authenticate: OAuth session expired and could not be refreshed
 ```
 
 That is the headless `claude -p` login expiring under systemd, not anything wrong
-with Kaggle or the workspace. Consequence: **zero submissions have been made on the
-current Kaggle day**, and the timer has already fired so it will not retry until
-20:10 EDT on 2026-08-16.
+with Kaggle or the workspace. The timer has already fired, so it will not retry
+until 20:10 EDT on 2026-08-16 and the day's whole quota is available to this wave.
+
+**Never trust a submission count quoted in this file or in a slot prompt.** The
+first version of this file said zero submissions had been made on the current day;
+it was already 1, because an interrupted slot-1 attempt had submitted without
+writing a journal entry. Count the live API listing yourself, every time.
 
 ## What that means for you
 

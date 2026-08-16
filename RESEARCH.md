@@ -3939,3 +3939,121 @@ re-spends a slot on them:
   is a regional cancellation. Build: `experiments/w16b_cellweight.py` with `c` swapped to
   `oof/oof_xgb_cat_lattice.npy` (test side `oof/test_xgb_cat_lattice.npy`), same arms, same
   permuted controls, ~10 min.
+
+---
+
+## w16c — the consolidation audit, 2026-08-16 (slot 2). Read §A and §B before selecting anything.
+
+### A. ⚠ ARM-SELECTION OPTIMISM IS +1.78e-6, NOT THE 0.5–1e-6 w16b GUESSED
+
+`experiments/w16c_audit.py` re-ran **w16b's own selection rule leave-one-fold-out**: choose the
+arm on four folds by w16b's docstring rule (highest cross-fitted arm; tie inside 1e-6 → fewer
+parameters), then read that arm's delta on the held-out fifth fold.
+
+```
+arm chosen per fold      a_only  a_only  per_cell  a_only  per_cell
+delta on the held fold   +11.28  +7.48   +4.93     -5.95   +4.35   e-6
+nested mean              +4.417e-6   se 2.865e-6
+naive per_cell mean      +6.195e-6              -> optimism +1.778e-6
+nested CV 0.97005359     vs the 0.97005537 w16b shipped
+```
+
+**The nested rule cannot decide which arm it wants** — it picks A-ONLY three times out of five.
+That is the real finding: the three arms are not separated by the data, and any run that reads
+w16b's `+6.195e-6` as the honest gain over the base is over-reading it by ~40%.
+
+**The generalisable rule this produces.** When a selection rule cannot separate its candidates,
+**average them instead of picking one** — it deletes the selection step, so there is no optimism
+left to correct, and it lowers the fitted correction's variance without adding a parameter.
+Applied here (`experiments/w16f_armavg.py`), the rank-average of the three arms lands at
+cross-fitted CV **0.9700554** against per-cell's 0.9700556: the same number, minus the optimism.
+Its per-fold spread is also tighter — on 500 paired private-slice draws it beats the incumbent
+first pick by +6.21e-6 ± 0.16 at **P(better) 0.954**, against per-cell's +6.49e-6 ± 0.20 at
+P 0.912. **Same mean, tighter.** This is the same argument the workspace already accepted for
+seeds and folds (w14c, `blend159av`); it had never been applied to the *arm* dimension. Sweep
+for other places where a candidate was picked rather than averaged.
+
+### B. THE DEADLINE PICK MOVED — first pick is now `w16b_cellweight`, not `blend159av_h3`
+
+First change since 2026-08-13. `experiments/check_selection.py`'s `WANTED` is updated and its
+stale warning text is rewritten; the file is the single source of truth.
+
+**`WANTED = {w16b_cellweight.csv, blend159av_h3.csv}`**
+
+Derived, not asserted. 500 reps, 296,302-row pseudo-test drawn from the 691,369 labelled rows,
+f = 0.20 cut away, **the same simulated private slice scored for every file each rep** so the
+reported ± is a paired standard error. Corrected files enter as their **cross-fitted** OOF
+(fold *f*'s rows carry weights fitted without fold *f*), which is conservative — the shipped
+test files use full-data weights.
+
+| candidate first pick | params | mean private AUC | vs incumbent | P(better) |
+|---|---|---|---|---|
+| `blend159av_h3` (incumbent) | 0 | 0.97003740 | — | — |
+| `blendtop3` | 0 | 0.97003768 | +0.28e-6 | 0.578 |
+| `w15f_antistudent_avg` | 1 | 0.97004095 | +3.55e-6 | 0.890 |
+| `w16f_armavg` | 3 arms | 0.97004361 | +6.21e-6 | **0.954** |
+| **`w16b_cellweight`** | 7 | **0.97004390** | **+6.49e-6** | 0.912 |
+
+E[max] over the pair, which is what Kaggle actually scores:
+
+| pair | E[max] | vs incumbent pair | places |
+|---|---|---|---|
+| `w16b_cellweight` + `w16f_armavg` | 0.97004438 | +6.40e-6 | +1.6 |
+| `w16b_cellweight` + `w15f_antistudent_avg` | 0.97004415 | +6.17e-6 | +1.5 |
+| **`w16b_cellweight` + `blend159av_h3`** ← chosen | 0.97004405 | **+6.07e-6** | +1.5 |
+| `blend159av_h3` + `blend160origm_h3` (incumbent) | 0.97003798 | 0 | 0 |
+
+**Why the second slot stays a ZERO-parameter file.** The unhedged optimum beats the chosen pair
+by **0.33e-6**, an order of magnitude under the 2e-6 stack reproducibility floor. What it buys:
+if the whole `c_avg` correction family reverses on the private rows, both corrected files lose
+together (they are perturbations of the same base, so a reversal costs ~2× the gain, ~12e-6),
+and a zero-parameter second pick is the only thing that catches it. At a 5–10% subjective
+probability for that branch the hedge is worth 0.6–1.2e-6 against a 0.33e-6 cost. **Take it.**
+
+**This is not the Rogii failure.** The move is CV-led: `w16b_cellweight` leads on naive CV
+(0.9700554) *and* on the optimism-corrected nested CV (0.9700536) *and* on the simulated private
+slice. The public slice merely agrees — and it agrees on 59k real test rows the OOF never saw,
+which is why the "correction family does not transfer" branch is priced at 5–10% rather than 50%.
+
+### C. THE LADDER IS 19/19 AND THE WITHIN-FAMILY SLOPE STRENGTHENED
+
+w16a's three pre-registration rules, re-checked against **every** scored pack file rather than
+the subset they were induced from:
+
+| rule | record |
+|---|---|
+| `ens4` CV ≥ 0.9700416 → 0.97106 | **6/6** |
+| `ens4` CV ≤ 0.9700343 → 0.97104 | **2/2** |
+| h3 / `w` cluster → 0.97105 | **11/11** |
+
+Within-family fixed-effects refit on 33 pack files with the two 08-16 readings folded in:
+**slope +1.941 ± 0.138, t +14.06**, residual sd **3.28e-6 = 0.33 LB grid steps**, and
+**30 of 30** resolvable within-family pairs concordant (was +1.771 ± 0.226 and 36/38 at w15i).
+The instrument got sharper, not weaker. Constant-gap null: LB = CV + 0.001013, RMSE 2.54e-5.
+
+### D. ITEM 1 OF w16a's RANKED LIST IS A NULL — DO NOT RE-OPEN IT
+
+`experiments/w16d_membercell.py`. w16a's headline open question was per-cell **member** weights
+for `xgb_cat_lattice` (cond AUC z **+6.88** in cell A, larger than `c_avg`'s +5.16). Built as the
+matched object — `c_mem = pct(member) − pct(base)`, mean-centred to unit sd within fold, so the
+0…0.02 grid means the same thing it means for `c_avg` (top of grid = an effective member blend
+weight of 0.25) — on the same folds, same arms, same permuted controls:
+
+```
+GLOBAL   1 weight    +0.000e+00   0/5 folds     <- coordinate ascent picks w=0 in every fold
+A-ONLY   2 weights   +0.000e+00   0/5 folds     <- including in cell A alone
+PER-CELL 7 weights   -8.036e-07   3/5 folds
+CTRL permuted 7      -1.999e-06   1/5 folds
+```
+
+**Zero is not a grid artefact** — the ascent maximises on the *training* folds and still picks
+0.0, i.e. adding this member to the stack at any weight up to a 25% blend hurts in-sample.
+
+⚠ **The lesson is about the instrument, and it is bigger than this member.** A high conditional-
+AUC z says a vector carries label information the base does not use **at the same base score**.
+It does **not** say an additive rank shift can extract it. `c_avg` is a residual built to be
+orthogonal to the base (teacher minus student) and its z converts; `xgb_cat_lattice` is 96.17%
+rank-correlated with the base and is *already in* the 159-member stack at its fitted weight, so
+its z is information the additive route cannot reach. **Before spending a slot on any future
+`cond AUC z` reading, ask whether the vector is a residual or a pack member.** The same caveat
+applies to `cat_native` (z +3.41 in cell A), which is the same shape and should be assumed null.
