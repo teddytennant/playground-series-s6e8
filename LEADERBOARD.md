@@ -690,3 +690,23 @@ any tiebreak rule. The exposure remains auto-slot 2, the 7-way tie at 0.97106 th
   cstdy 0.97121. Gap to first **24e-5**, unchanged since w16a.
 - Account submission count 50. Two files now sit at 0.97108 (`w16q_ens4avg`, `w16t_cellens4`),
   five at 0.97107.
+
+## 2026-08-16 10:08 UTC — after slot 10 (`w16e_aonly`, LB 0.97108), WAVE CLOSED
+
+- **Us: rank 53 of 1,977** at 0.97108, read off the downloaded public leaderboard snapshot
+  (`playground-series-s6e8-publicleaderboard-2026-08-16T10:07:59.csv`), not the paginated CLI.
+  Slot 9 read 52 of 1,970 at 09:35 — the field passed us one place in 33 minutes while our score
+  was unchanged, and added 7 teams. Consistent with the ~4 places/hour drift at this density.
+- Top unchanged all wave: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124,
+  Maher el Ouahabi 0.97122, cstdy 0.97121. **Gap to first 24e-5**, unchanged since w16a.
+- Account submission count **50**. Ten sent this Kaggle day, quota confirmed spent by the CLI's
+  "0 submissions remaining today".
+- **Three files now sit at 0.97108** (`w16q_ens4avg`, `w16t_cellens4`, `w16e_aonly`) and five at
+  0.97107. Auto-slot 1 is a **3-way tie**, so the auto-pick at limit 2 is ambiguous again and the
+  click price is a range — see `check_selection.py`, and re-run it rather than quoting this.
+- ⚠ `w16e_aonly` reaching 0.97108 from CV 0.9700544 is what falsified the corrected-h3 CV→LB
+  ladder: `w16i_schemeavg` and `w16n_finegrid` sit **higher** on CV and print 0.97107. Any
+  future entry here that predicts an LB from a CV needs to read RESEARCH §1 of the wave
+  consolidation first.
+- Wave net: **+1e-5 public** (0.97107 → 0.97108) across ten submissions, one place lost to field
+  drift. The score is not what this wave produced; the corrections list is.

@@ -4544,3 +4544,146 @@ Was −0.24 to +2.14e-6 this morning. **Any slot quoting a click price must re-r
 ens4 arm deltas, w16b's h3 per-cell delta, and both entries' single control draws (w16q's needs
 its shared rng replayed through the `a_only` call first; w16b's uses the gather form at seed 4242)
 — **all six at exactly 0.000e-12**. For objects on a fixed stored base the floor is zero.
+
+---
+
+# ══ WAVE CONSOLIDATION — Kaggle day UTC 2026-08-16 (slots 1–10) ══
+
+Written by slot 10. This section supersedes any earlier statement in this file that it
+contradicts. `JOURNAL.md`'s wave summary carries the ranked open list and the closed list; this
+carries the durable facts.
+
+## ⚠ 1. The corrected-file CV→LB ladder is FALSIFIED. Delete it from your priors.
+
+Earlier in this file the table "h3 + `c_avg` correction: LB = CV + 0.0010143, 4/4" and its ens4
+twin are recorded as confirmed rules, and later entries call them 5/5, then "eighth consecutive
+out-of-sample confirmation", then 9/9. **They are not a predictive rule.**
+
+| file | CV (pooled) | LB |
+|---|---|---|
+| `w16i_schemeavg` | 0.9700556663 | 0.97107 |
+| `w16n_finegrid` | 0.9700557 | 0.97107 |
+| **`w16e_aonly`** | **0.9700544305** | **0.97108** |
+
+A file **1.2e-6 lower in CV printed one grid step higher**. Within-family LB is not monotone in
+CV at this resolution. **Dead with it:** "0.97108 needs h3 CV ≥ ~0.9700606", "0.97109 needs ens4
+CV ≥ ~0.9700565", "the ladder cannot reach 0.97109 from anything in this workspace", and every
+LB point prediction derived from a gap constant.
+
+**Why the sequence of confirmations was worthless, which is the part that generalises.** Every
+file in the corrected family sat within a **3e-6 CV span** while the LB reporting grid is
+**10e-6** wide. Almost any gap constant reproduces almost any such sequence. w16t's own
+pre-registration had already noticed this in its single case — it recorded that a miss needed
+the true gap in the bottom 1.5% of the rounding window — and nobody generalised it. **A run of
+successful pre-registrations is not evidence the rule is right if no test in the run could have
+failed.** Before quoting a confirmation, state the CV that would have falsified the rule and
+check that a file near it was actually sent.
+
+What still holds: the LB is a deterministic function of the file; the corrected family sits
+roughly one grid step above the plain h3 shelf; final selection runs on CV, not on any of this.
+
+**Open and cheap (JOURNAL §5.2):** re-cut the CV→LB relation as a *residual-scatter* estimate
+over the 50 scored files rather than a family gap constant. Until that exists no LB prediction
+here is defensible.
+
+## 2. Controls: never one draw, and pair them when you can
+
+- A permutation control is a **draw from a distribution**, not a constant. Measured sd:
+  **1.0–1.7e-6** for a 7-level permutation, **0.36e-6** for a 2-level one. **Control variance
+  grows with the number of levels permuted** — predict that in advance and budget draws for it.
+- Seven-draw margins for the `c_avg` correction over its matched control, both bases:
+
+| arm | base | real | ctrl mean (7 draws) | real − control | t |
+|---|---|---|---|---|---|
+| per-cell, 7 weights | ens4 | +6.399e-6 | +1.929e-6 | +4.470e-6 ±2.537 | +1.76 |
+| per-cell, 7 weights | h3 | +6.195e-6 | +1.545e-6 | +4.650e-6 ±2.614 | +1.78 |
+| **a_only, 2 weights** | ens4 | +4.987e-6 | **+3.044e-6** | **+1.943e-6 ±2.635** | **+0.74** |
+| **a_only, 2 weights** | h3 | +5.031e-6 | **+3.009e-6** | **+2.022e-6 ±2.909** | **+0.70** |
+
+  ⚠ **None of these is individually significant**, and the error is dominated by the *real*
+  arm's fold-to-fold spread (se 2.5–2.9), which more control draws cannot shrink. The
+  2-parameter arm in particular does **not** clear its own control.
+- **PAIRING beats adding draws.** `w16i_schemeavg.permuted()` is the scatter form
+  (`out[rng.permutation(n)] = assign`), so at a fixed seed the permutation array is independent
+  of the assignment: the 2-level control is the exact A/rest **coarsening** of the 7-level
+  control on that same shuffle. Pairing on seeds 601–606 gives, on the same number of draws that
+  produced t ≈ 1.8 unpaired:
+
+| base | paired random 2→7 toll | t | draws losing | real 2→7 gap | real clears toll by |
+|---|---|---|---|---|---|
+| ens4 | **−1.690e-6 ±0.377** | **−4.48** | 6/6 | +1.412e-6 | +3.102e-6 |
+| h3 | **−1.591e-6 ±0.435** | **−3.66** | 6/6 | +1.164e-6 | +2.755e-6 |
+
+  The only |t| > 3 control quantity this workspace has ever measured. **Look for a
+  coarsening/refinement relation between two controls before spending on more seeds.**
+- **Consequence:** shipping the 7-parameter per-cell arm over the 2-parameter one (done three
+  times, never checked) is **justified** — refining at random *costs* 1.6e-6, so the real
+  refinement clears its own toll by ~+2.8/+3.1e-6 on both bases.
+- Corrected: w16b's published tolls (−0.97e-6 for 1→7, −0.26e-6 for 1→2, single draws) are
+  **−1.79e-6** and **−0.33e-6** against seven-draw means.
+
+## 3. The reproducibility floor for objects on a fixed stored base is EXACTLY ZERO
+
+Five independent confirmations across slots 7–10, covering arm deltas, per-cell deltas, control
+draws, pair readings and E[max] figures — **every re-derivation at 0.000e-12**. The "2e-6 stack
+reproducibility floor" quoted in older entries was measured **once**, on a rebuild of the
+159-member *logistic* stack (singular lbfgs, condition number ~1e18), and does not describe this
+layer. **Do not dismiss a sub-2e-6 quantity because it is "under the floor".**
+Corollary: gate every rerun against the stored published numbers first. It costs seconds and it
+is what makes a correction attributable to the finding rather than to drift.
+
+## 4. Two different quantities are both called "cross-fitted CV" here
+
+They differ by ~**0.2e-6** and the ladder table above mixed them:
+
+- `base_auc + mean(per-fold dAUC)` — what `w16b_cellweight` and `w16e_aonly` print and store.
+- pooled AUC of the cross-fitted OOF vector — what `w16i`, `w16q` and `w16t` print.
+
+For `w16e_aonly`: 0.9700542031 vs 0.9700544305. Both are stored in `w16e_aonly.json` as `cv`
+and `cv_pooled`. State which one you mean. It changes no decision taken so far.
+
+## 5. Selection optimism is a *measured* quantity, not an assumption
+
+Nested leave-one-fold-out over the same candidates the naive rule chose from:
+
+| axis | nested pick stability | optimism |
+|---|---|---|
+| arm {glob, a_only, per_cell} | **5/5** | **exactly +0.000e-6** |
+| scheme {glob, a_only, rule, mask, decile} | 4/5 (`decile` wins one fold) | +1.263e-6 |
+| w16b's arm rule, as originally run | 3/5 picks `a_only` | +1.778e-6 |
+| w16i's scheme rule | — | +1.546e-6 |
+
+**Test nested-pick stability rather than assuming selection is harmful.** A 5/5-stable dimension
+costs nothing and does not need averaging away. This is why the deadline pick is
+`w16i_schemeavg` (nothing inside it is chosen) rather than `w16b_cellweight`, whose honest CV is
+0.9700536 once both optimism terms are subtracted, not the 0.9700556 originally published.
+
+## 6. The `c_avg` correction is base- AND arm-independent
+
+The full-data per-cell weight vector is **identical** on `blend159av` and `blend159av_h3`:
+A 0.0075, B 0.0025, BAND 0.0015, D 0.0000, E 0.0010, F 0.0010, G 0.0000 (per fold the two tables
+differ in one of 35 entries). The 2-cell `a_only` fit puts **A at 0.0075 as well** — collapsing
+five cells into "rest" does not move the one cell that carries the correction. The structure
+belongs to `c_avg` and the data, not to the base or the arm.
+
+## 7. The public slice, quantified once and for all
+
+59,260 rows public against 237,042 private. A public-SIZED slice **reverses a true ~5e-6
+advantage 24% of the time** (draw sd rises 2.98e-6 → 7.08e-6). Six near-identical files scored
+against the same fixed slice is **one** observation, not six. **Never move a deadline pick on a
+public-slice reading.** Chase it for information — submissions do not evict each other and the
+board shows best-of-all, so an unused slot is waste — but the pick is on CV.
+
+## 8. Final-submission selection: still unmade, and the API cannot do it
+
+`ApiListSubmissionsRequest` with `group=SUBMISSION_GROUP_SELECTED` **reads** the selection
+(`experiments/check_selection.py`); there is **no write path** (probed and falsified
+2026-08-13). No browser and no display on this machine. **This is a human click.**
+
+Wanted: `w16i_schemeavg.csv` + `blend159av_h3.csv`. Cost of leaving it, on 500 paired draws:
+limit 2 **+0.831e-6 to +3.326e-6**, limit 1 **+1.266e-6 to +4.162e-6**; ~2.5 places per 1e-5.
+All lower bounds — the instrument only draws worlds where the CV ordering is right, so it cannot
+price the zero-parameter hedge at all.
+
+⚠ **That price has gone stale four times in one Kaggle day**, twice caused by the slot quoting
+it. **Re-run `check_selection.py` before quoting it a fifth time.**

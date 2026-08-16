@@ -1,0 +1,15 @@
+{
+ "cv": 0.9700542031378847,
+ "xfit": 5.0310196150427086e-06,
+ "full_weights": {
+  "A": 0.0075,
+  "rest": 0.001
+ },
+ "test_shares": {
+  "A": 0.11724861796410418,
+  "rest": 0.8827513820358958
+ },
+ "dupes": [],
+ "cv_pooled": 0.9700544304624674,
+ "cv_convention": "cv = base_auc + mean(per-fold dAUC); cv_pooled = AUC of the OOF vector"
+}

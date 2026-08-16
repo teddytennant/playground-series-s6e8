@@ -9044,3 +9044,412 @@ w16o §6, w16q §6 and w16s §7 closed lists stands, **plus §6 above**.
 `logs_w16u_autoprice.txt`; `submissions/w16t_cellens4.csv` + `oof_w16t_cellens4.npy` (sent).
 `experiments/check_selection.py` is the only existing file modified — the printed repricing block
 only; **`WANTED` is untouched.** `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+
+## 2026-08-16 — w16e/w16v/w16w, slot 10/10, ANGLE (as handed): "Seed and fold diversity: same models across multiple seeds and fold splits, averaged"
+
+**The angle is on the closed list and I spent nothing on it.** Seed/fold stacks were swept in
+slot 3 (`w16h_pickavg`) and are already averaged; w16h §1 measured the nested-pick stability of
+that dimension at 5/5 and closed it. Noted and moved on, per the run context.
+
+**⚠ READ §3 FIRST. This slot's pre-registered prediction MISSED, in the direction it had
+declared near-impossible, and the miss falsifies the CV→LB ladder that eight consecutive
+"successful" pre-registrations in this wave were scored against.**
+
+### 0. Housekeeping, counted rather than quoted
+
+- Live API before sending: **9 rows dated `2026-08-16`**. Counted twice, at the start of the slot
+  and again immediately before the send. After the send the CLI printed **"0 submissions
+  remaining today"** — exact agreement, **10 of 10 used, the wave's quota is spent.**
+- Board after the send: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124, Maher el Ouahabi
+  0.97122, cstdy 0.97121. Account best **0.97108**, now held by three files.
+- `check_selection.py` **still exits with nothing selected after ten slots.** See §6.
+
+### 1. LIVE TIERS, re-run as instructed — and they moved again during this slot
+
+Before the send:
+
+```
+auto-slot 1: public 0.97108, 2-way tie — w16q_ens4avg, w16t_cellens4
+auto-slot 2: public 0.97107, 5-way tie — w15f_antistudent_avg, w16b_cellweight,
+                                         w16f_armavg, w16i_schemeavg, w16n_finegrid
+```
+
+After it:
+
+```
+auto-slot 1: public 0.97108, 3-way tie — w16e_aonly, w16q_ens4avg, w16t_cellens4
+auto-slot 2: public 0.97107, 5-way tie — unchanged
+```
+
+w16s asked for this because a quoted ladder had gone stale twice in one day; it has now gone
+stale **four** times, and the fourth was caused by the slot that was re-running it. The rule
+that generalises is not "the tiers move" but **`check_selection.py` is the only authority on
+its own output — never quote a click price you did not just re-run.**
+
+### 2. What was sent — `w16e_aonly`, the 2-parameter arm, never before shipped alone
+
+`experiments/w16e_aonly.py` had sat unrun in the workspace since slot 2, written as a fallback
+and abandoned. It builds the **A-only** arm: base `blend159av_h3` (h3, zero fitted parameters)
+plus w15f's `c_avg` correction with the additive weight fitted on **two** cells (A = social>4,
+and "rest") rather than one (w15f, global) or seven (w16b, per-cell). Cross-fitted CV
+**0.9700542031** in w16b's convention, **0.9700544305** pooled (see §5).
+
+- Full-data weights **A 0.0075, rest 0.0010**. The A weight is **identical** to the A weight in
+  w16t's 7-cell full-data vector, so collapsing five cells into "rest" does not move the one
+  cell that carries the correction. Third independent confirmation that the correction's
+  spatial structure is a property of `c_avg`, not of the arm or the base.
+- Test-side A share 0.1172, re-derived from `test.csv` by the same rule function. Nothing
+  transferred by row index. 296,302 rows, ids equal `sample_submission` exactly, all finite,
+  296,302 distinct, **rank-identical to none of the 50 files already sent** (spearman 0.9999943
+  vs `w16b_cellweight`, 0.9999853 vs `w15f_antistudent_avg`, 0.9999743 vs its own base).
+- Chosen h3-side deliberately, per w16s §8.1: the two files then holding auto-slot 1 were both
+  ens4-side twins on the same `c_avg` and would fail together. §6 shows this worked — for a
+  reason the prereg got wrong.
+
+ref **55549737**, 2026-08-16 09:58:56 UTC, `submissions/w16e_aonly.csv`. **LB 0.97108** — ties the account best,
+and is the third file in that bin and the **first h3-side one**.
+
+### 3. ⚠ THE PREDICTION MISSED, AND THAT KILLS THE LADDER — `experiments/w16v_prereg_lb.txt`
+
+The prereg was written in full before the build script was run once. It is explicit:
+
+```
+0.97107  PRIMARY      (h3-corrected gap +0.00101433 applied to expected CV 0.97005420)
+0.97106  ALTERNATIVE  (would put a SLOPE on the gap displacement)
+0.97105  would say a 2-parameter correction buys no displacement at all
+0.97108  is NOT predicted and is close to impossible: it needs a gap of +0.00102580,
+         i.e. +11e-6 above the corrected family's measured gap.
+```
+
+**It returned 0.97108.** The outcome ruled out in writing is the one that happened.
+
+The falsification is cleaner than a missed point prediction, because it is an **ordering**
+violation that needs no gap arithmetic at all:
+
+| file | CV (pooled) | LB |
+|---|---|---|
+| `w16i_schemeavg` | 0.9700556663 | 0.97107 |
+| `w16n_finegrid`  | 0.9700557    | 0.97107 |
+| **`w16e_aonly`** | **0.9700544305** | **0.97108** |
+
+A file **1.2e-6 lower in CV printed one grid step higher.** Under any monotone within-family
+CV→LB law that is impossible. **"h3 + `c_avg` correction: LB = CV + 0.0010143" is dead as a
+predictive rule** and so is everything derived from it, including RESEARCH's "0.97108 needs h3
+CV ≥ ~0.9700606" and "the ladder cannot reach 0.97109 from anything in this workspace". Those
+were the basis of this slot's own claim that the send "provably cannot make the click more
+expensive" (§6), and of slot 9's statement that slot 10 could not fix the auto-pick by
+submitting. Both were wrong, from the same source.
+
+⚠ **The generalisable part, and it is the wave's sharpest instrument lesson.** The corrected
+family's ladder was "5/5", then "eighth consecutive out-of-sample confirmation", then "9/9".
+Those confirmations were **near-zero-information and the workspace had already noticed why in a
+single case without generalising it**: w16t's own prereg admitted its test was near-certain
+because a miss needed the true gap in the bottom 1.5% of a 10e-6 rounding window. That was not
+a quirk of w16t. **Every file in the corrected family sat within a 3e-6 CV span while the LB
+reporting grid is 10e-6 wide**, so almost any gap constant reproduces almost any such sequence.
+The confirmations were counting, not testing. This slot deliberately picked a file whose CV sat
+midway between two shelves — the prereg says so, in advance, as the reason the test was worth
+running — and **the first genuinely powered test in the sequence failed.**
+
+**A run of successful pre-registrations is not evidence the rule is right if every test in the
+run was one the rule could not lose.** Before quoting a ladder confirmation, state what CV would
+have falsified it and check that a file near that value was actually sent. Nine of the wave's
+were not tests.
+
+What survives: the LB is still a deterministic function of the file, the corrected family still
+sits roughly one grid step above the plain h3 shelf, and CV is still what final selection runs
+on. What does not: any point prediction, any exposure figure, and any "unreachable" claim
+derived from the gap constant.
+
+### 4. ⚠ The `a_only` control was the family's last single draw, and its margin does NOT survive — `experiments/w16v_a2ctrl.py`
+
+w16t re-measured the **7**-weight arm's permutation control with seven draws after finding both
+published margins rested on one draw each. It left the **2**-weight arm alone, and slot 10 was
+shipping exactly that arm, so its control became load-bearing. Seven draws per base, same folds,
+same grid, **four published quantities re-derived first at 0.000e-12 drift each** (w16b's ctrl2
+at rng 909 gather form, w16q's a_only ctrl as the first `permuted()` call off rng 20260816, and
+both real arms). Fifth consecutive confirmation of the exact-zero reproducibility floor.
+
+| base | real | ctrl mean | ctrl sd | **real − control** | published single draw |
+|---|---|---|---|---|---|
+| `blend159av` (ens4) | +4.987e-6 (se 2.632) | **+3.044e-6** | 0.355 | **+1.943e-6 ±2.635 (t +0.74)** | +2.300e-6 |
+| `blend159av_h3` (h3) | +5.031e-6 (se 2.906) | **+3.009e-6** | 0.362 | **+2.022e-6 ±2.909 (t +0.70)** | +1.953e-6 |
+
+**The file this slot shipped does not clear its own control at any useful confidence**, and the
+submission message says so rather than quoting w16b's +1.953e-6. w16b's draw happened to land
+4/7 in its own distribution (nearly the median, so its published figure was accidentally fair);
+w16q's landed 6/7 and overstated the ens4 margin.
+
+Note the shape: the 2-level control has sd **0.36**, four to five times tighter than the 7-level
+control's 1.0–1.7. **Control variance grows with the number of levels being permuted** — which
+is exactly why the 7-level margins needed seven draws and is a cheap thing to predict in advance.
+
+### 5. THE SHARP RESULT — the 2-vs-7 decision this account made three times, tested for the first time, on PAIRED draws
+
+`w16i_schemeavg.permuted()` is the **scatter** form (`out[rng.permutation(n)] = assign`), so at a
+fixed seed the permutation array is identical whatever the assignment is: feeding it `a_only`
+yields **exactly the A/rest coarsening of the 7-level control draw**, not an independent shuffle.
+Reusing w16t's seeds 601–606 therefore pairs the two controls on identical shuffles and removes
+the draw noise from the comparison.
+
+| base | paired random 2→7 toll | t | draws losing | real 2→7 gap | real clears toll by |
+|---|---|---|---|---|---|
+| `blend159av` (ens4) | **−1.690e-6 ±0.377** | **−4.48** | **6/6** | +1.412e-6 | **+3.102e-6** |
+| `blend159av_h3` (h3) | **−1.591e-6 ±0.435** | **−3.66** | **6/6** | +1.164e-6 | **+2.755e-6** |
+
+Two things:
+
+1. **This is the first control quantity measured in this workspace with |t| > 3**, and it is
+   decisive *only* because it is paired. Same instrument, same seeds, same number of draws as
+   w16t's unpaired margins at t ≈ 1.8. **Pairing the control to the real object on a shared
+   draw is worth more than adding draws** — it is the natural next step after w16t's "never one
+   draw", and it is cheap. Where a control can be constructed as a coarsening or refinement of
+   another control on the same shuffle, do that.
+2. **The decision it prices survives.** w16b, w16q and w16t all shipped the 7-parameter per-cell
+   arm over this 2-parameter one on a raw gap of +1.16e-6 / +1.41e-6, and **not one of them
+   checked whether splitting a random 2-way into a random 7-way buys that much for free.** It
+   buys −1.6e-6, i.e. refining at random *costs*, so the real refinement clears its own toll by
+   +2.8e-6 / +3.1e-6 on both bases. The three ships were right. They were right by luck, in the
+   sense that the check that would have caught them being wrong was never run.
+
+This also corrects w16b's published tolls (−0.97e-6 for 1→7, −0.26e-6 for 1→2, both single
+draws): against seven-draw control means the h3 figures are **−1.79e-6** and **−0.33e-6**.
+
+### 6. ⚠ THE CLICK, REPRICED A FOURTH TIME — and this slot's own pre-registered reasoning was wrong
+
+`experiments/w16w_reprice.py`, same 500 paired draws, seed 1616, f 0.20, gated at 0.000e-12
+against **both** w16s's pair readings and w16u's limit-2 figure before anything was believed.
+
+```
+limit 2, auto takes two of the three 0.97108 files (tiebreak undocumented):
+  w16e_aonly + w16t_cellens4   [h3+ens4 ]  cost of NOT clicking +0.831e-6 ±0.075  P(auto better) 0.280
+  w16e_aonly + w16q_ens4avg    [h3+ens4 ]  cost of NOT clicking +0.936e-6 ±0.069  P(auto better) 0.256
+  w16q_ens4avg + w16t_cellens4 [ens4+ens4] cost of NOT clicking +3.326e-6 ±0.142  P(auto better) 0.144
+  -> RANGE +0.831e-6 to +3.326e-6   (w16u's determinate +3.326e-6 is now one branch of three)
+limit 1:  +1.266e-6 (w16e_aonly, h3) / +4.072e-6 (w16q_ens4avg) / +4.162e-6 (w16t_cellens4)
+```
+
+**Stated plainly because it is this slot's own error.** `w16v_prereg_lb.txt` argued the send
+"provably cannot make the click more expensive" because an h3 file could not reach 0.97108 —
+an argument resting entirely on the ladder §3 falsified. The send *did* move the tier structure,
+in the direction slot 10 told itself was closed. It happened to move it favourably: two of the
+three branches now mix an h3 file with an ens4 one instead of pairing correlated ens4 twins, and
+the worst branch is unchanged, so the expected cost fell. **Right outcome, wrong reasoning, and
+the reasoning is the part that transfers.** w16u's "DETERMINED" survived two slots.
+
+The E[max] figures remain a **lower bound**: all three auto-slot-1 files carry the same `c_avg`,
+`WANTED`'s second slot is a zero-parameter file insuring against that whole family failing, and
+this instrument only ever draws worlds in which the CV ordering is right.
+
+### 7. A convention split worth one line — two CV numbers, both called "CV"
+
+`w16e_oof.py` had to rebuild the shipped file's OOF vector (w16e never stored one) and found the
+workspace uses **two different quantities under the name "cross-fitted CV"**, differing here by
+**+0.227e-6**: `base_auc + mean(per-fold dAUC)` (w16b, w16e) versus the pooled AUC of the
+cross-fitted OOF vector (w16q, w16t, w16i). The corrected-family ladder table mixes them. It is
+small next to §3's 6e-6 falsification and changes no decision — `w16e_aonly` is below
+`w16i_schemeavg` on either convention, so `WANTED` is untouched — but it is one more quantity
+quoted to a precision it does not have. Both are now stored in `w16e_aonly.json`.
+
+### 8. Deadline picks — UNCHANGED, seventh consecutive slot
+
+`WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}`. Nothing this slot measured is eligible to
+move it: §3 is an LB-side falsification and final selection runs on CV; §4 weakens the shipped
+file rather than strengthening it; §5 supports the arm already in the pick; §6 prices a human
+action. `check_selection.py`'s comment and printed blocks are updated with §3 and §6; **`WANTED`
+itself is untouched.**
+
+### Files created
+
+`experiments/w16v_prereg_lb.txt`; `experiments/w16v_a2ctrl.py` + `.json`, `logs_w16v_a2ctrl.txt`;
+`experiments/w16w_reprice.py` + `.json`, `logs_w16w_reprice.txt`; `experiments/w16e_oof.py`,
+`logs_w16e_oof.txt`; `logs_w16e_aonly.txt`; `submissions/w16e_aonly.csv` (sent) +
+`oof_w16e_aonly.npy`. Existing files modified: `experiments/check_selection.py` (comment and
+printed blocks only, `WANTED` untouched) and `experiments/w16e_aonly.json` (added `cv_pooled`).
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+
+---
+
+# ══ WAVE SUMMARY — Kaggle day UTC 2026-08-16, slots 1–10, written by slot 10 ══
+
+**Read this before reading anything above it.** The journal is ~9,200 lines and this wave added
+ten dense entries (`w16a`–`w16w`). Everything you need to not repeat the day is here. The
+individual entries are the evidence; this is the state.
+
+## ⚠ 0. THE ONE THING A HUMAN MUST DO, and it has now survived TEN slots
+
+**The final-submission selection on the Kaggle website is still unmade.**
+`.venv/bin/python experiments/check_selection.py` exits 1 after **50 submissions**.
+
+- **The two files to select:** `w16i_schemeavg.csv` and `blend159av_h3.csv`.
+- **What it costs to leave it:** with nothing selected, Kaggle auto-selects by best **public**
+  score. Auto-slot 1 is a 3-way tie at 0.97108 (`w16e_aonly`, `w16q_ens4avg`, `w16t_cellens4`),
+  so at limit 2 the cost of not clicking is **+0.831e-6 to +3.326e-6** depending on an
+  undocumented tiebreak, and at limit 1 it is **+1.266e-6 to +4.162e-6**. Roughly 2.5 board
+  places per 1e-5 at the local density. Every one of those figures is a **lower bound**: all
+  three auto-slot-1 files carry the same `c_avg` correction and would fail together, `WANTED`'s
+  second slot is a zero-parameter file bought precisely as insurance against that, and the
+  E[max] instrument only ever draws worlds in which the CV ordering is right.
+- **Why an agent cannot do it:** Kaggle's public API has **no write path** for final-submission
+  selection (probed and falsified 2026-08-13). There is no browser and no display on this
+  machine. It is a human click and nothing else will do.
+- **The perverse part:** auto-slot 1 is held by the best *public* score, which is one of the
+  *weakest* corrected files on CV. Unattended, this competition ends in the Rogii failure
+  executed by Kaggle on our behalf.
+- ⚠ **Re-run `check_selection.py` before quoting any of the above.** That price has now gone
+  stale **four times in one Kaggle day**, twice caused by the slot that was quoting it.
+
+## 1. Where the account stands
+
+- **Best public 0.97108**, held by three files (`w16q_ens4avg` slot 7, `w16t_cellens4` slot 9,
+  `w16e_aonly` slot 10). Rank ~52 of ~1,970. MILANFX 0.97132, Optimistix 0.97125.
+- **Best CV 0.9700557** (`w16i_schemeavg`, pooled). Deadline picks unchanged for seven slots.
+- 10 of 10 submissions used. Quota confirmed spent by the CLI's "0 submissions remaining today".
+
+## 2. CLOSED — do not re-open. Each line names the measurement that closed it.
+
+Everything on the 2026-08-13, w14b, w14d, w15j §6, w16a §6, w16c §7, w16h §6, w16l §4, w16m §5,
+w16o §6, w16q §6, w16s §7 and w16t §6 closed lists stands. Consolidated, the closed set is:
+
+| closed | closed by |
+|---|---|
+| **h3 vs ens4 for the deadline pick** — h3 wins | three matched pairs at p0/p7/p23, P(h3 better on one private draw) 0.906–0.912, agreeing to 0.14e-6 (w16s, w16t §4) |
+| **"the public slice prefers ens4, so investigate train/test"** | a public-SIZED slice reverses a true h3 advantage **24%** of the time; the 6/6 reading is ONE draw against a fixed slice (w16s §3) |
+| **The correction's weight grid**, both axes | ceiling measured at an exact zero; resolution binds on 28/30 fits and is worth +0.046e-6 (w16m, w16n) |
+| **Per-cell member weights** | null (w16c §5) |
+| **The mask as a training weight**, globally and per cell | null, confirmed on real test rows (w16l §2, w16r) |
+| **The transductive component**, globally and per cell | null (w16r §3) |
+| **Feature engineering on the original columns** | closed 08-13, re-skipped twice |
+| **Finding/using the original dataset** | closed four times |
+| **Member hyperparameter tuning** (LGBM / XGB / CatBoost) | closed; the handed angles for slots 3, 5, 6, 7 were all already closed |
+| **Seed and fold diversity, averaged** | nested-pick stability 5/5 on that dimension (w16h §1); slot 10's handed angle, re-skipped |
+| **Generic OOF blend-weight search** | closed 08-13, re-skipped (slot 9's handed angle) |
+| **The +98e-6 residual CV→LB gap** | closed *by exhaustion*, not by mechanism — see §3 |
+| **The bagging asymmetry in any framing** | w16o §3 |
+| **The cross-axis hedge pair** | priced at −0.009e-6, declined, does not need re-pricing (w16q) |
+| **Re-investigating the 25e-5 gap to first** | w15j item 4; w16a §5(c) prices why stack refinement cannot close it |
+| **"real minus control" as a single-draw quantity** | w16t §1, extended to the 2-parameter arm by w16v |
+| **The 2-vs-7 arm choice** — the 7-param arm is justified | paired 2→7 random toll −1.59/−1.69e-6 at t −3.66/−4.48, real refinement clears it by +2.8/+3.1e-6 (w16v, §5 of slot 10) |
+| **The ens4-side option-set asymmetry** | two ens4-side corrected files now exist against five h3-side ones (w16t) |
+
+**Also do not spend a slot on:** anything built to top the public slice; anything sized to move
+a public-slice reading; re-pricing the click without first re-running `check_selection.py`.
+
+## 3. ⚠ CORRECTED OR KILLED THIS WAVE — do not inherit these numbers
+
+Every one of these was quoted confidently somewhere above and is now wrong. They are listed so
+the next agent does not re-import them from an older entry.
+
+1. **The corrected-h3 CV→LB ladder, "LB = CV + 0.0010143", 9/9 — DEAD.** `w16e_aonly`
+   (CV 0.9700544) printed 0.97108 while `w16i_schemeavg`/`w16n_finegrid` (CV 0.9700557) print
+   0.97107: a lower-CV file one grid step higher. Not monotone at this resolution. **Everything
+   derived from it dies with it** — "0.97108 needs h3 CV ≥ 0.9700606", "0.97109 is unreachable
+   from anything in this workspace", and every LB point prediction. (slot 10 §3)
+2. **w15g §5's gap claim** — "the bagging asymmetry is the first mechanism at least as large as
+   the thing it has to explain". True for a **single member**, false for our pack. At blend
+   level `gap_total` is **−50.6e-6 ± 56.8**, not +98e-6 and not even positive. w15j, w16a and
+   w16m all inherited it. (w16o §3)
+3. **The "2e-6 stack reproducibility floor"** — does not apply to anything built on a fixed
+   stored base. Measured there **five times at exactly 0.000e-12**. Do not dismiss a sub-2e-6
+   quantity "because it is under the floor". The floor was measured once, on a singular logistic
+   refit (condition number ~1e18), and generalised to a layer it does not describe. (w16q §2)
+4. **"h3 and ens4 are not separable"** — a one-member-set claim from an estimator validated on
+   one set with error −7e-6. Six direct paired readings say h3 is above ens4 on CV. (w16q §1)
+5. **Both single-draw control margins for the 7-weight arm** — w16q's published draw was the
+   **maximum of seven**. Re-measured: +4.470e-6 ±2.537 (ens4) and +4.650e-6 ±2.614 (h3), and
+   the h3/ens4 difference in that margin, quoted as +2.447e-6, is **+0.180e-6 ±3.643**, i.e.
+   nothing. (w16t §1)
+6. **The single-draw control margin for the 2-weight arm** — +1.953e-6 / +2.300e-6 become
+   **+2.022e-6 ±2.909 (t +0.70)** and **+1.943e-6 ±2.635 (t +0.74)**. The shipped `w16e_aonly`
+   does **not** clear its own control at useful confidence. (slot 10 §4)
+7. **w16b's random-split tolls** (−0.97e-6 for 1→7, −0.26e-6 for 1→2, single draws) — against
+   seven-draw means the h3 figures are **−1.79e-6** and **−0.33e-6**. (slot 10 §4)
+8. **w15i's auto-pick exposure ladder (+9.2 / +36.5 / +112e-6)** — retired, stale tier
+   structure. Then w16s's range, stale in one slot. Then w16u's "DETERMINED +3.326e-6", stale
+   in two. Use §0 and re-run first. (w16s §5, w16u, slot 10 §6)
+9. **w16b's +6.195e-6 arm delta** — +4.417e-6 once the arm choice is paid for (w16c §1), and
+   `w16b_cellweight`'s honest CV is 0.9700536, not 0.9700556, once arm-selection (+1.78e-6) and
+   scheme-selection (+1.55e-6) optimism are both subtracted. That is why the deadline pick moved
+   to `w16i_schemeavg`, which needs no correction because nothing inside it is chosen.
+10. **"cross-fitted CV"** names two different quantities here, differing by ~0.2e-6:
+    `base_auc + mean(per-fold dAUC)` (w16b, w16e) vs pooled AUC of the OOF vector (w16i, w16q,
+    w16t). The ladder table mixed them. (slot 10 §7)
+
+## 4. THE METHOD — the transferable output of this wave
+
+Ten slots produced one score improvement (+1e-5, and the public LB is not what is being played
+for) and roughly a dozen corrections to its own published numbers. **The corrections are the
+product.** Every one came from the same small set of habits, and they are cheap:
+
+1. **Pre-register the ship decision and the prediction, in the script's docstring or a dated
+   file, before computing anything.** Every slot in this wave did it. It is what makes a miss
+   legible instead of retrospectively explainable — slot 10's §3 exists only because the
+   outcome that occurred had been ruled out *in writing* first.
+2. **State what would falsify the claim, and check that the test could actually fail.** This is
+   the lesson the wave learned last and paid for. Nine "successful" ladder confirmations were
+   tests the rule could not lose: every file sat within a 3e-6 CV span against a 10e-6 LB
+   reporting grid. **A run of confirmations is not evidence if none of them was a test.**
+3. **Matched controls, never permuted-in-the-abstract**, and **never a single control draw.** A
+   control is a draw from a distribution with an sd comparable to the effect being tested
+   (1.0–1.7e-6 for a 7-level permutation here, 0.36e-6 for a 2-level one — control variance
+   grows with the number of levels permuted).
+4. **Pair the control to the real object on a shared draw where the structure allows it.** This
+   is strictly better than adding draws: the same seeds that gave t ≈ 1.8 unpaired gave
+   **t −3.66 / −4.48** paired, on the same number of draws. Look for a coarsening/refinement
+   relation between two controls before spending on more seeds.
+5. **Nest every argmax, and test nested-pick *stability* rather than assuming selection is
+   harmful.** Selection optimism here ranged from **exactly +0.000e-6** (arm axis, 5/5 stable)
+   to **+1.78e-6** (w16c) and **+1.55e-6** (w16i). A dimension whose leave-one-fold-out pick is
+   5/5 stable costs nothing and does not need averaging away; one that flips does.
+6. **Never move a deadline pick on a public-slice reading.** The public slice is 59,260 rows
+   against a 237,042-row private slice; it reverses a true ~5e-6 advantage **24%** of the time.
+   Chase it for information, never for the pick. Final selection is on CV. This is the Rogii
+   rule and it is the whole reason `WANTED` has not moved in seven slots.
+7. **Before quoting a single-member or single-observation number as a property of the pack,
+   measure it at two scales and fit A + B/k.** 81% of w15g's headline effect was member-specific
+   and died on contact with averaging — it changed the *sign* of the conclusion.
+8. **Count, do not quote.** Submission counts, tier structures and click prices were all wrong
+   at least once this wave when carried forward from a previous entry. Re-derive from the live
+   API or the live script every time.
+9. **Gate every rerun against the stored published numbers before believing anything
+   downstream.** Done in five separate slots, always at exactly 0.000e-12, and it is what makes
+   a correction attributable to the finding rather than to drift.
+
+## 5. STILL OPEN, ranked. Start at the top.
+
+1. **The human click (§0).** Not a research item and the largest priced quantity on the board.
+   It has survived ten slots. It cannot be done from this machine.
+2. **Re-cut the CV→LB relation now that the ladder is falsified (slot 10 §3).** The account
+   holds 50 scored files. The right object is not a within-family gap constant but a
+   **residual-scatter estimate**: how far can LB sit from CV + gap, given the 10e-6 reporting
+   grid? Until that exists, no LB prediction in this workspace is defensible, and several
+   "unreachable" claims are unsupported. Cheap — it needs only stored OOF vectors and the API
+   history, both present.
+3. **The remaining single-member claims**, in load-bearing order: the cross-team paired-slice
+   sd of **53–84e-6** (measured on three weaker non-leader files, applied to all five leaders,
+   and the likely error is anti-conservative — it closes an entire research direction on six
+   do-not-spend lists); the **1.4% solo→stack pass-through** (one member); **`oofsim`'s 5.72×
+   down-scaling**, a 10→161-member transfer by an *asserted linear* law, which is precisely the
+   shape w16o §3 proved wrong. (w16s §8.3)
+4. **The remaining pooled nulls**, in order: `w14d_cellboost.py` was run on `--cells BAND,D,G`
+   only — **A, B, E and F were never run**, and w16a §2 says regional work should aim at A/B,
+   which is where the correction actually lives; `w15c` §2's in-fold lookups, read out pooled
+   across the two columns that *define* the rule cells; `w15b` §6's power calibration, which
+   injected a **spatially uniform** signal and is used to certify a closed list against
+   alternatives now known to be cell-concentrated. (w16s §8.4)
+5. **A genuinely transductive member** (w16a §6 item 2). Still the only candidate *class* the
+   workspace has not closed; w15f narrowed rather than settled it. Note w16r §3 closed the
+   transductive *component* of the existing correction, which is a different object.
+6. **Nothing else.** The gap to first is 24e-5 and w16a §5(c) prices why stack refinement
+   cannot close it. Slots spent below this line should go to §5.2 or §5.4, not to a new member.
+
+## 6. Practical notes for the next run
+
+- Daily cap **10**, confirmed repeatedly. Day rolls at **00:00 UTC = 20:00 EDT**. Count only
+  rows dated with the current UTC day; the CLI's "N submissions remaining today" is authoritative.
+- Submissions do **not** evict each other and the public LB is best-of-all, so an unused slot is
+  pure waste — but scores are deterministic, so never resubmit an identical file. 50 files sent;
+  check `submissions/` and the rank-identity test before building.
+- The nightly `kaggle-playground.timer` fires 20:10 EDT. It failed on 2026-08-15 with an expired
+  headless OAuth session, which is why this wave was driven by hand; if the next wave is
+  automated, that expiry is the first thing to check.

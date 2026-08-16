@@ -1,0 +1,78 @@
+w16v PRE-REGISTERED LB PREDICTION for submissions/w16e_aonly.csv
+written 2026-08-16 (slot 10, the LAST send of the Kaggle day) BEFORE
+experiments/w16e_aonly.py had been run even once. The script has existed
+since slot 2 and has never been executed; nothing about its output was
+visible when this file was written.
+
+WHAT IS BEING SENT, and why it needs no argmax
+----------------------------------------------
+The A-ONLY arm: base `blend159av_h3` (h3 side, zero fitted parameters)
+plus w15f's `c_avg` correction with the additive weight fitted on TWO
+cells (A = social>4, and "rest") instead of one (global, w15f) or seven
+(per-cell, w16b). It is the middle rung of the arm ladder w16b measured
+and the only rung this account has never shipped as a file.
+
+SHIP RULE, fixed here before the run: send `w16e_aonly.csv`
+UNCONDITIONALLY, whatever its CV prints. There is no argmax anywhere in
+the ship path. It is chosen because the arm has never been sent, because
+it is h3-side (see below), and because it is the cheapest member of the
+correction family by parameter count.
+
+WHY H3-SIDE SPECIFICALLY. w16u priced the un-made human final-selection
+click at +3.326e-6 +/-0.142, and the reason it rose is that BOTH files in
+Kaggle's auto-slot-1 tie (w16q_ens4avg, w16t_cellens4) are ens4-side and
+share the same c_avg, so they fail together. A third ens4-side file at
+0.97108 would deepen that. An h3-side file cannot reach 0.97108 from
+anything in this workspace (needs CV >= ~0.9700607, best h3 CV 0.9700557),
+so this send provably cannot make the click more expensive.
+
+MEASURED INPUTS, all read off logs / prior json / the live API, none constructed:
+
+  blend159av_h3   (h3 base)      CV 0.97004917   LB 0.97105   gap +0.00100083
+  w16i_schemeavg  (h3 corrected) CV 0.97005567   LB 0.97107   gap +0.00101433
+  a_only cross-fitted dAUC (w16b_cellweight.json, arms.a_only.per_fold mean)
+                                 +5.0310e-06
+  => expected CV of this file    0.97004917 + 5.031e-6 = 0.97005420
+
+  The corrected h3 family's CV->LB gap sits +13.50e-6 above the plain h3
+  base's gap (w16q's derivation, re-read above, not recomputed here).
+
+THE PREDICTION, stated as a rule so it is falsifiable:
+
+  0.97107  PRIMARY. If a 2-parameter correction earns the SAME +13.50e-6
+           gap displacement that the 5-arm-average (23 params) and the
+           per-cell (7 params) corrections earned, the predicted LB is
+           0.97005420 + 0.00101433 = 0.97106853 -> 0.97107. This also
+           says the gap displacement is a property of ADDING c_avg at all
+           rather than of how finely the weight is cut, which is the
+           reading w16t's identical-weight-vector result already suggests.
+
+  0.97106  ALTERNATIVE. If the displacement scales with parameter count,
+           a 2-parameter arm earns only part of the +13.50e-6 and the file
+           lands one grid step lower. This is the outcome worth the most:
+           it would put a SLOPE on the gap displacement, which the family
+           currently treats as a constant across 1, 7 and 23 parameters.
+
+  0.97105  would say a 2-parameter correction buys no gap displacement at
+           all, i.e. the file inherits the plain h3 base's own gap
+           (0.97005420 + 0.00100083 = 0.97105503). That would contradict
+           w15f's GLOBAL 1-parameter arm, which is corrected-family-shelf
+           at 0.97107, and would be the strongest result of the three.
+
+  0.97108 is NOT predicted and is close to impossible: it needs a gap of
+  +0.00102580, i.e. +11e-6 above the corrected family's measured gap.
+
+HONEST STATEMENT OF HOW MUCH THIS TEST IS WORTH, written before the result.
+More than w16t's was, and still not much. w16t's prereg admitted its test
+was near-certain (a 0.97107 needed the gap in the bottom 1.5% of its
+window). This one is a genuine three-way, because the expected CV
+0.9700542 sits 6.9e-6 BELOW w16i and 5.0e-6 ABOVE blend159av_h3 -- almost
+exactly midway between the two shelves the two outcomes correspond to, so
+the reporting grid is not doing the work for me. But the corrected-family
+ladder is 5/5 at 0.97107 spanning CV 0.9700527-0.9700557, and this file is
+1.5e-6 below the bottom of that span, so 0.97107 is the favourite and a
+0.97106 would be the informative surprise.
+
+NOT A DEADLINE PICK. Two fitted parameters above the stack. `WANTED`
+stays {w16i_schemeavg.csv, blend159av_h3.csv} and this file is ineligible
+to move it. Nothing here was chosen with reference to the public slice.
