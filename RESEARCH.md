@@ -4139,3 +4139,42 @@ Submission 55543960's description quotes fabricated per-fold deltas (`+12.66 +11
 are `+12.82 +13.02 +6.39 −7.78 +7.30`. Kaggle descriptions are immutable, so the wrong line is
 permanent and a future run reading the history back would inherit it. Everything else in that
 message is measured and correct.
+
+## w16l (2026-08-16) — the mask shift as a training weight: durable facts
+
+**The transductive class is closed on the mask route.** Importance weighting the 159-member
+h3 stack's fit by the exact 4096-pattern train→test mask density ratio (w15c's weights, ESS
+642,050 = 92.87%) costs **−3.432e-6** of plain cross-fitted CV and **−3.726e-6** of
+mask-weighted CV. The mirror arm (weights inverted, ESS 635,095) costs −3.484e-6 / −3.448e-6.
+**`imp − anti` = +0.052e-6 plain, −0.277e-6 weighted** — the direction carries nothing and the
+whole effect is the ESS toll. LB confirms: `w16l_maskw_h3` 0.97105, `blend159av_h3` (the
+identical object at w = 1) 0.97105.
+
+Generalisable, and worth more than the null: **a fit reweighted to the test measure that does
+not score better under that measure is measuring its own misspecification at zero.** The
+covariate-shift argument only pays under misspecification; P(y | values, mask) is identical
+across the splits (w15c §6), so a well-specified fit gains nothing and strictly loses
+variance. Before building any importance-weighted anything, run the mirror arm — it costs one
+fit per fold and it separates "the direction is real" from "reweighting is expensive".
+
+**Reproducing `blend159av_h3` from source requires a 10-name drop list, not the 7 in
+`blend_lab.HONEST_DROP` + the three seeds.** `orig_bin`, `orig_binm` and `w15d_origrep_r`
+entered `oof/` after that build (they are what make the `blend160*` sets 160 members) and the
+naive list now yields **162** members. Correct list:
+
+```
+golem_a, golem_f, lgbm_tuned_lat, lgbm_tuned_lat_frac,
+xgb_latcat, xgb_latcat_s17, xgb_latcat_s23,
+orig_bin, orig_binm, w15d_origrep_r
+```
+
+With it, `unw` reproduces `oof_blend159av_h3.npy` at CV 0.97004917 and rank corr 1.00000000,
+and `stack_hybrid` reproduces `logs_blend159av.txt`'s 0.970029 with the same "repaired 49 of
+159". **Assert the member count in any script that rebuilds a named blend** — the count is the
+only cheap tripwire for this, and it fired once in w16l's first launch.
+
+**Timing.** A 3-arm × 3-transform build is 45 fold fits + 3 full fits ≈ **1,586s**. Weighted
+`LogisticRegression` fits run ~40% slower than unweighted (50–90s vs 40–73s at 553k × 159).
+Normalise weights to mean 1 so `sum(w) = n` and a shared `C` regularises every arm equally.
+
+**Ladder.** The h3 / top-cluster rule (CV in the h3 cluster → LB **0.97105**) is now **12/12**.

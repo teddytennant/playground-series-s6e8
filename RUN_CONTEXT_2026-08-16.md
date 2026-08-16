@@ -59,5 +59,12 @@ and write the discrepancy into `JOURNAL.md`.
 - If a shell command fails because of sandbox or network restrictions, re-run it
   with the sandbox disabled. Kaggle API access and the workspace `.venv` are both
   expected to work.
+- **Every number you write must be a number you measured.** On 2026-08-16 a slot
+  shipped a Kaggle submission message quoting per-fold deltas it had constructed to
+  sum to the correct mean rather than reading them off the run. Kaggle submission
+  descriptions are immutable, so that is permanent and public. If you have not
+  computed a figure, do not write it — in a submission message, in `JOURNAL.md`, in
+  `RESEARCH.md`, or in a report. Write "not measured" instead. A submission message
+  with three real numbers is worth more than one with ten, most of them invented.
 - Git author is Teddy Tennant <teddytennant@icloud.com>. No AI attribution anywhere:
   not in commits, not in code comments, not in anything posted to Kaggle.

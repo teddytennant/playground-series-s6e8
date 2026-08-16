@@ -618,3 +618,18 @@ The corrected family's CV→LB shelf is unchanged with the fourth point added: C
 grid. A corrected file needs CV ≥ 0.970058 to move the printed digit, and no mechanism measured
 in this workspace has ever moved CV by more than ~1e-5 — so the 25e-5 gap to first is not
 closable by more of this.
+
+## 2026-08-16 05:50 UTC — after w16l (slot 4)
+
+Board top unchanged from slot 3's reading: MILANFX **0.97132**, Utkarsh 0.97124,
+Optimistix 0.97123, Maher el Ouahabi 0.97122, cstdy 0.97121. Our best is **0.97107**
+(4-way tie of our own corrected files) and the gap to first stays **25e-5**.
+
+`w16l_maskw_h3` (ref 55544597) returned **0.97105** on a pre-registered 0.97105. It is a
+deliberate CV regression sent to test a mechanism, not a rank attempt — `blend159av_h3`,
+the identical object with unit training weights, also scores 0.97105, and that pair is the
+workspace's first genuinely paired LB reading.
+
+Submission tally for Kaggle day UTC 2026-08-16: **5 of 10** used (blend160orig,
+w16b_cellweight, w16f_armavg, w16i_schemeavg, w16l_maskw_h3); CLI confirmed "5 remaining".
+Nothing is selected on the submissions page — still one human click.

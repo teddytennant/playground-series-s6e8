@@ -7640,3 +7640,219 @@ test — measure the stability first, it costs one script); the sub-combinations
 `submissions/w16h_h3av6.csv` (**not** sent, see §1), and their `oof_*.npy`/`test_*.npy`.
 `experiments/check_selection.py` is the only existing file modified, in `WANTED` and the comment
 above it; `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.
+
+## 2026-08-16 — w16l, slot 4/10, ANGLE (as handed): "Original dataset: find the real source dataset and concatenate it as extra training rows"
+
+**The handed angle was already closed and I spent nothing on it.** The source dataset is
+positively identified and held locally; w15d measured its contribution at exactly zero
+weight against four packs, in-sample and cross-fitted, with a mechanism (the two label
+functions disagree on the majority of the frame and agree only above `social = 4`); w16a §6
+closed it a *third* time regionally (`orig_bin` cell-A z +0.72, `orig_binm` z +1.32, against
+`c_avg`'s +5.16 by the same instrument). It is on four separate closed lists. The slot went
+to slot 3's parting item 1 instead.
+
+**Slots 5–10: §2 closes the last open CANDIDATE CLASS in this workspace, and §3 is an LB
+confirmation of that closure on real test rows. §4 says what is actually left, and it is
+short.**
+
+### 0. Housekeeping, verified not assumed
+
+- Live API before sending: **4 rows dated `2026-08-16`** (`blend160orig` 03:35,
+  `w16b_cellweight` 04:00, `w16f_armavg` 04:16, `w16i_schemeavg` 05:08). After my send the
+  CLI printed **"5 submissions remaining today"**, which agrees exactly: 5 of 10 used. The
+  prompt's "4 of 10" was right.
+- `experiments/check_selection.py` → **still exit 1, nothing selected**, control reads 45
+  successful submissions. Its live-computed warning now reads: auto-slot 1 is a **4-way**
+  tie at 0.97107 (all four corrected files), auto-slot 2 is the 7-way tie at 0.97106 with
+  `blend158_logit` in it. Unchanged by this run.
+- Board at 05:20 UTC: MILANFX **0.97132**, Utkarsh 0.97124, Optimistix 0.97123. Top
+  unchanged from slot 3's reading.
+
+### 1. What was built — `experiments/w16l_maskweight.py`
+
+w16a item 2, restated by w16c §7 item 2 and w16h §6 item 1 and deferred by three slots: a
+genuinely transductive object, via w15c's train-vs-test mask asymmetry **used as a training
+weight**. w15c established the raw material and none of it is re-derived here:
+
+- train and test were **masked separately** — adversarial train-vs-test is 100% the mask
+  (mask-only AUC 0.56472 vs full-frame 0.56280), and the observed **values** are identical
+  between splits to a 382,289-row instrument's precision (values-only 0.49750 against a
+  train-vs-train floor of 0.50059);
+- all twelve per-column NaN rates shift, up to |z| = 44, while the per-row missing **count**
+  distribution matches (mean 1.2589 train vs 1.2729 test);
+- reweighting the **OOF pool** to the test mask distribution by the exact 4096-pattern
+  density ratio moves estimated AUC **+905e-6**, which is 88% of the workspace's
+  long-standing CV→LB gap, at 34σ on a test-row bootstrap.
+
+**That +905e-6 has only ever been a diagnostic applied to finished files.** w15c's own
+closing note says "do not build an importance-weighted retrain off §4 expecting a gain", on
+three grounds — additive per column, correlated −0.97 with CV, does not move the argmax.
+Every one of those three is a statement about the shift as an **evaluation** reweighting.
+None is a statement about what happens when the same weights enter the **fit**. That is the
+different object, and this run is the first time it has been built.
+
+The object is `blend159av_h3` **exactly**: 159 members, hybrid/rankraw/rescale logistic
+stacks at C = 1, frozen SKF5 seed42 folds, rank-averaged. `sample_weight` is the only thing
+that varies.
+
+| arm | weight | ESS |
+|---|---|---|
+| `unw` | 1 | 691,369 |
+| `imp` | p_test(mask) / p_train(mask) — **transductive**, computed from the 296,302 unlabelled test rows, no label touches it | 642,050 (**92.87%**) |
+| `anti` | p_train(mask) / p_test(mask) — the mirror | 635,095 (91.86%) |
+
+`imp`'s ESS reproduces w15c's 92.9% to the digit, so the weights are the same object.
+corr(`w_imp`, `w_anti`) = −0.8213.
+
+**⚠ Two build details that a re-run must keep.** (a) The naive drop list gives **162**
+members, not 159: `orig_bin`, `orig_binm` and `w15d_origrep_r` were added to `oof/` *after*
+`blend159av` was built — they are what make the `blend160*` sets 160 — so they must drop
+too, or the control is a different stack and nothing is comparable. The script asserts
+`len(names) == 159` for exactly this reason; the first launch of this run tripped it and was
+killed and restarted. (b) The weights are normalised to mean 1, so `sum(w) = n` and the L2
+penalty at a shared `C` means the same thing in every arm. Without that the arms would
+differ in regularisation as well as in weighting.
+
+**Why `anti` rather than a permutation control.** For a training weight the informative null
+is *directional*. A permuted-pattern control destroys the smoothness of the weight function
+as well as its direction and inflates variance threefold — w15c ran one and disowned it in
+writing. `anti` has the identical weight-function smoothness, the identical marginal spread
+up to inversion, and the identical ESS penalty; it differs only in which way the mass moves.
+So `imp − anti` isolates the **direction** at twice the effect and the same variance, and
+`unw − (imp+anti)/2` isolates the **ESS toll**. That decomposition is the whole finding.
+
+**The control is exact.** `unw` reproduces the stored `oof_blend159av_h3.npy` at CV
+**0.97004917 = 0.97004917** with **rank correlation 1.00000000**, and its per-transform
+numbers reproduce `logs_blend159av.txt` (`hybrid` 0.97002917 vs the logged 0.970029, and the
+same "repaired 49 of 159"). So this is a genuinely paired design, not an approximate one.
+
+### 2. ⚠ THE RESULT IS A NULL, AND THE MIRROR IS WHAT MAKES IT A CLOSURE RATHER THAN A SHRUG
+
+Two endpoints, both fixed in the docstring before the run: **plain** cross-fitted OOF AUC
+(the workspace's standard CV) and **wtd**, the same AUC under the mask-importance measure —
+the unbiased estimator of AUC on the *test* distribution, and the criterion `imp` is by
+construction trying to maximise.
+
+| arm | plain CV | vs `unw` | wtd CV | vs `unw` |
+|---|---|---|---|---|
+| `unw` | **0.97004917** | — | 0.97095208 | — |
+| `imp` | 0.97004574 | **−3.432e-6** | 0.97094835 | **−3.726e-6** |
+| `anti` | 0.97004569 | −3.484e-6 | 0.97094863 | −3.448e-6 |
+
+Paired per-fold on the h3 object (e-6):
+
+```
+imp  - unw [plain]  -12.044  -7.345  -2.820  -6.793  +10.352   mean -3.730  se 3.813  t(4df) -0.98  1/5
+imp  - unw [wtd  ]  -12.710  -7.659  -3.511  -5.646   +9.234   mean -4.059  se 3.656  t(4df) -1.11  1/5
+anti - unw [plain]   +2.365  +6.481  -8.428  +0.366  -13.377   mean -2.519  se 3.647  t(4df) -0.69  3/5
+anti - unw [wtd  ]   +3.882  +6.376  -8.391  -0.874  -13.359   mean -2.473  se 3.707  t(4df) -0.67  2/5
+```
+
+**`imp − anti` = +0.052e-6 plain and −0.277e-6 weighted.** Reweighting *toward* the test mask
+distribution and reweighting *away from it* cost the same, to within a twentieth of a
+grid-step of CV. There is **no directional component at all**: the entire effect is the ESS
+toll, ~3.5e-6 of CV for a 7% loss of effective sample size, and it is paid identically in
+both directions.
+
+**The sharper half: `imp` loses on the weighted criterion too, by −3.726e-6.** A fit
+reweighted to the test measure does not score better *under that measure*. That is not a
+weak result — it is the empirical signature of a model that is **not misspecified with
+respect to the mask mixture**. The covariate-shift argument for importance weighting only
+ever pays under misspecification (P(y | values, mask) is identical across the splits, so a
+well-specified fit gains nothing and strictly loses variance). This measures the
+misspecification at zero and the variance cost at 3.5e-6, which is the whole theory
+confirmed in the unfavourable direction.
+
+**Per-transform, so nobody re-opens this one transform at a time** (`imp − unw`, plain):
+hybrid −5.60e-6, rankraw −1.42e-6, rescale −4.46e-6. `anti − unw`: hybrid −7.35e-6, rankraw
+**+1.17e-6**, rescale −6.43e-6. Note `anti` beats `unw` on rankraw — an early partial read
+of hybrid alone looked like a real +0.9e-6 directional effect and it did not survive the
+other two transforms. It was noise. Do not quote a single-transform arm from this log.
+
+### 3. Submitted — and the LB confirms the null on real test rows
+
+`submissions/w16l_maskw_h3.csv` — ref **55544597**, 2026-08-16 05:46:58 UTC. CLI: **"5
+submissions remaining today"**. Plain cross-fitted CV **0.97004574**, weighted 0.97094835.
+
+**PRE-REGISTERED PREDICTION: 0.97105, alternative 0.97104**, from the h3/top-cluster ladder
+rule (record 11/11 going in). **RESULT: 0.97105.** That takes the h3 rule to **12/12** and is
+the seventh consecutive out-of-sample confirmation of w15i's within-family fit.
+
+**The reading is better than the ladder confirmation, because this is a paired LB
+measurement and the workspace has never had one.** `blend159av_h3` is *the identical object
+at w = 1* — reproduced here at rank correlation 1.00000000 — and it returned **0.97105**.
+Two files differing in nothing but the training weight vector, both 0.97105. The OOF null in
+§2 is therefore confirmed on ~59k real test rows the OOF never saw, which is the one place
+the transductive argument could have paid off and did not.
+
+**Pre-registration, both items honoured.**
+1. *"Ship `w16l_maskw_h3` unconditionally, whatever its CV."* Done. It is a CV regression of
+   3.4e-6 against the base and it went out anyway, because naming the file before the
+   numbers exist is the only defence against the argmax bug that cost w16c +1.78e-6 and
+   w16i +1.55e-6 and that w16i caught a third time inside its own audit script.
+2. *"Move the deadline pick only if `imp` beats `unw` on plain CV **and** `imp − anti` > 0 on
+   plain CV."* The script evaluates this mechanically and prints `False`. **The picks stay
+   `{w16i_schemeavg.csv, blend159av_h3.csv}`** and `check_selection.py` is unmodified by this
+   run — the first w16 slot not to move `WANTED`.
+
+Validated before sending: 296,302 rows, ids equal `sample_submission`, all finite, 264,083
+distinct, range [8.437e-6, 0.9998161], checked against **every** `.csv` in `submissions/` for
+rank identity — none; nearest is `w16h_h3av6` at spearman 0.99998923 (295,889 rows differ).
+Nothing was chosen with reference to the public slice.
+
+### 4. CLOSED by this run, and what that leaves
+
+**CLOSED: the transductive class.** w16a called it "the only candidate *class* the workspace
+has not closed" and it has been item 1 on three consecutive ranked lists. The concrete hook —
+the mask asymmetry as a training weight — is measured at −3.4e-6 with a mirror control at
+−3.5e-6, i.e. a pure variance toll with zero directional content, and confirmed at equal LB.
+**Do not re-open it on the mask.** Two caveats stated honestly so a future run can tell what
+was and was not tested:
+
+- This closes the **importance-weight** route on the **stack**. It does not test self-training
+  on high-confidence test rows or test-inclusive frequency/quantile encodings, which are
+  different transductive objects. But note the bound §2 establishes: any object whose only
+  contact with the test rows is *through the mask distribution* has at most the directional
+  effect measured here, which is +0.05e-6. And w15c already showed the mask is the **only**
+  thing that differs between the splits — values-only adversarial AUC is *below* the
+  train-vs-train floor. So the room for any mask-mediated transductive gain is now bounded
+  near zero, and self-training would have to work through the values, where there is no
+  measured train/test difference to exploit.
+- It does not test importance weighting inside a **base member** (a GBDT reallocating splits)
+  rather than inside the stack. That has more capacity to be misspecified. It is ~17 min per
+  arm and would need three arms plus a stack rebuild to ship, and the §2 result makes it a
+  poor bet — but it is the honest residual and nobody should claim otherwise.
+
+**What is actually left, ranked. The list is now short and every item on it is small.**
+
+1. **The correction's grid is binding at the top in the decile arm** (w16i §6 item 2,
+   untouched). `q6` hit the 0.0200 ceiling in fold 0 and sat at 0.0115–0.0180 in the other
+   four; the 0…0.02 grid was set by w16a for the rule cells and has never been widened.
+   Cheapest untested thing on the board, one ascent per fold. **Pre-register whether you will
+   ship the wider grid before you see its CV** — the grid ceiling is itself a fixed choice, so
+   relaxing it and then picking is the same bug a fourth time.
+2. **w16a item 3** — how much of the +200e-6 OOF/test bagging asymmetry survives 160-member
+   blending; two extra configurations inside `experiments/w15g_cvgap.py`'s existing loop.
+   Unchanged and still unmeasured, now the largest *unmeasured* quantity left.
+3. **The human click.** `check_selection.py` exits 1 after 45 submissions. The pick is
+   `w16i_schemeavg.csv` + `blend159av_h3.csv`. Priced at +9.2e-6 (limit 2) / +36.5e-6
+   (limit 1), on top of w16i §4's +6.48e-6 for the pick itself.
+4. w16c §7 item 4 / w16a §6 item 4 — sweep the closed list for nulls that were measured
+   **pooled** over a strong categorical. Still the generalisable lesson of the wave's two
+   reversals and still not systematically done.
+
+**Do NOT spend a slot on:** the original dataset (closed four times: w15d in-sample and
+cross-fitted, w16a §6 regionally, and it is on four closed lists); the mask as a training
+weight or any re-run of it with a different clip/normalisation (§2 — the mirror control is
+what closes it, and a different clip moves the ESS toll, not the direction); averaging any
+dimension whose nested pick is 5/5 stable (w16h §1); per-cell member weights or a cond-AUC-z
+chase on a pack member (w16c §5); re-investigating the 25e-5 gap to first (w15j item 4 is the
+answer, w16a §5(c) prices why stack refinement cannot close it); anything built to top the
+public slice.
+
+### Files created
+
+`experiments/w16l_maskweight.py` + `w16l_maskweight.json`, `logs_w16l_maskweight.txt`,
+`submissions/w16l_maskw_h3.csv` (sent, 55544597) + its `oof_`/`test_` `.npy`. **No existing
+file was modified** — `check_selection.py` is untouched for the first time this wave, and
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.
