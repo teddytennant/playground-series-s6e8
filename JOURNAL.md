@@ -6877,3 +6877,314 @@ The 18e-5 is smaller and far less certain than the brief stated (3.4σ for MILAN
 whatever is real is priced at an orthogonal predictor of solo AUC ~0.511, and w15b's power
 calibration excludes that from the inductive class our 168 members live in. **The only door
 left is transductive, and w15f spent today building the key.**
+
+---
+
+## 2026-08-16 — w16a, slot 1/10, ANGLE: error analysis — segment the OOF errors, look for structure
+
+**Slots 2–10: read §0, §5 and §6. Three things about the state of this workspace changed under
+this entry and none of them are in the 6,800 lines above it.**
+
+### 0. Housekeeping the rest of the wave depends on
+
+**(a) The journal was two days stale. It is now current.** `JOURNAL.md`'s last entry was
+**2026-08-14 (w14d)**. The entire w15 wave — nine entries, the day this workspace did most of
+its measurement work, including w15f's transductive rebuild that produced our best-scoring
+file — sat unmerged in `journal_inbox/`. All nine are appended above this entry and moved to
+`journal_inbox/merged-2026-08-15/`; the nine matching `-research.md` files are appended to
+`RESEARCH.md`. **Nothing merges the inbox automatically.** Write to `JOURNAL.md` directly, or
+the next wave does not see you. (`w15h` never wrote an entry at all; its `w15h_*.py` artefacts
+are on disk, unread, from 13:34 UTC on 08-15.) I also applied w15j's own item 6: `RESEARCH.md`'s
+leaderboard-shape paragraph carried the superseded solo-AUC prices 0.524/0.531 and now carries
+the corrected **0.509/0.511**.
+
+**(b) The slot-1 quota was already spent before I started, by a run that wrote nothing.** An
+earlier attempt at this same slot submitted `blend160orig.csv` (ref **55542322**, 2026-08-16
+03:35:38 UTC) and ran `experiments/w16a_where.py` to completion, then died before journalling
+either. Both are recovered here. **The day's count is 2 of 10 after me, not 1** —
+`RUN_CONTEXT_2026-08-16.md` says zero submissions on the current Kaggle day and is wrong by one.
+Verified directly: exactly one row in the API history is dated `2026-08-16` before my send.
+
+**(c) `blend160orig` returned 0.97106, which closes w15j item 3 as a PASS and makes the CV→LB
+ladder usable.** It was pre-registered at 0.97106 on a CV of 0.9700423 — 0.7e-6 above the lowest
+member of the upper `ens4` shelf, inside the 7.3e-6 window between shelves, i.e. the sharpest
+available test of where the step sits. It landed on the predicted shelf. **w15i's within-family
+fit now has three out-of-sample confirmations (`blend160origm`, `blend159`, `blend160orig`).**
+
+Practical consequence for every later slot — **you can predict your own LB score before you
+send, so pre-register it:**
+
+| family | rule | record |
+|---|---|---|
+| `ens4` | CV ≥ 0.9700416 → **0.97106** | 5/5 |
+| `ens4` | CV ≤ 0.9700343 → **0.97104** | 3/3 |
+| h3 / top cluster | → **0.97105** | 11/11 |
+
+The only file off both ladders is `w15f_antistudent_avg` at **0.97107** — base plus a fitted
+correction, which is the family this entry extends.
+
+---
+
+### 1. The angle, assessed before spending anything on it
+
+Error analysis *as a search over the 12 columns for a new feature* is closed, and the closure is
+a bound rather than a shrug. w14d cut the OOF on the generator's own rule cells: per-cell
+isotonic real-minus-permuted-control +6e-6 with **both arms negative**, cell-local booster
+negative at **9/9** checkpoints. w15b then power-calibrated that exact family — inject a
+leader-sized signal into labels it generates itself, re-run the same instruments, recover
+**78–102%**. So the nulls are genuine bounds. w15c closed row identity and in-fold lookups;
+w15b closed the exact quantisation lattice. Re-running "segment and hunt for a feature" is a
+measured waste and I did not do it.
+
+But there is exactly one object here **known to be a miss that something captures**, and nobody
+had asked *where* it is: `c_avg`, w15f's averaged teacher-minus-student correction. It is the
+only thing all week that beats its own matched control on the labelled rows, and w15f also
+showed it is **not** transductive (an inductive twin fitted without the unlabelled rows
+correlates +0.967 with it), so it sits *inside* w15b's power bound and is a real inductive miss.
+That is what this run segmented.
+
+### 2. The one live residual is NOT spatially uniform — `experiments/w16a_where.py`
+
+Instrument: pooled within-bin Mann-Whitney of `c_avg` against the label, bins on the base score,
+**restricted to a segment and re-binned inside it** so the base-score conditioning is matched
+segment by segment. Control: the same values permuted inside (segment × bin), 24 seeds —
+marginals and bin structure survive, only the row correspondence dies. Rank-based, therefore
+scale-free, so segments of different sizes compare directly. Base `blend159av_h3`, OOF 0.9700492.
+
+Global: cond AUC(`c_avg` | base) **0.505819** vs control 0.500203 ± 1.37e-3, **z +4.11**.
+
+| segment | n | pack AUC | cond AUC | ctrl | **z** | z if the effect were uniform |
+|---|---|---|---|---|---|---|
+| **A `social>4`** | 77,654 | 0.984476 | **0.589702** | 0.500498 | **+5.16** | 0.11 |
+| B `soc≤4 daily>8` | 175,446 | 0.977018 | 0.528770 | 0.500393 | **+4.42** | 0.52 |
+| BAND `6<daily≤8` | 102,202 | 0.939442 | 0.510507 | 0.500912 | +3.50 | 0.74 |
+| **D `soc≤4 daily≤6`** | 154,634 | 0.923973 | 0.500297 | 0.499584 | **+0.32** | 1.17 |
+| E `soc≤4 dailyNA` | 47,438 | 0.948157 | 0.509562 | 0.499189 | +2.09 | 0.43 |
+| F `socialNA` | 93,255 | 0.963741 | 0.505312 | 0.500882 | +1.16 | 0.58 |
+| G both NA | 40,740 | 0.912365 | 0.500411 | 0.499953 | +0.10 | 0.45 |
+
+**χ² against a uniform effect = 52.21 on 7 df.** Also heterogeneous on the missing-count cut
+(χ² 15.05 / 4 df; 0-missing **z +4.91**, 3+-missing **z +0.15**) and on base-score decile
+(χ² 42.41 / 7 df; concentrated in deciles 4–5).
+
+**⚠ The finding inverts this workspace's standing instruction.** w14d located the AUC *deficit*
+in cell D — 13.5% within-cell plus the four largest cross-cell terms — and showed the
+"coin-flip band" is only 4.9%. But the one correction that works is worth **essentially nothing
+in D (z +0.32) and everything in A (z +5.16)**, the cell where the pack is *already strongest*
+(within-cell AUC 0.9845, base rate 0.9956). The mask cut says the same thing: the correction
+pays where **nothing** is missing and vanishes at 3+ missing, while pack AUC falls monotonically
+the other way (0.9775 → 0.9450).
+
+So **"fix the model where it is worst" is backwards here.** Where the pack is bad (D, G,
+3+ missing) it is bad because the frame genuinely does not separate those rows, and nothing
+built in this workspace has ever touched them. Recoverable signal sits where the pack is already
+good. Every regional idea tried here — w14d isotonic, w14d cellboost, `iso_regime`,
+`resid_boost2` — was aimed at D or the band. **That is why they all read null.** Aim regional
+work at A/B.
+
+**Scale confound checked and ruled out.** `c_avg` is standardised to unit sd *within fold*, not
+within cell, so a bigger optimal weight in a cell could be pure rescaling. sd(`c_avg`) by cell:
+A **0.724**, B 1.024, BAND 1.248, D 0.913, E 1.000, F 0.954, G 0.998. A's scale is 28% below
+global and would explain a ~1.4× weight ratio; the fitted ratio is **6–9×**. And the cond-AUC
+instrument is rank-based, so it never saw the scale at all.
+
+### 3. The decision test — `experiments/w16b_cellweight.py`
+
+Does letting the weight vary by segment beat one global weight **out of fold**? Coordinate
+ascent, 2 passes, grid 0…0.02 step 5e-4, on the frozen SKF5 seed42 folds, searched on four folds
+and scored on the fifth, against **size-matched permuted-membership** control segmentations.
+This script reproduces `w16a_where.py`'s global and per-cell arms to every printed digit
+(+3.338e-6 / +6.195e-6 / control +2.370e-6) and adds a 2-parameter arm and its own control.
+
+| arm | params | cross-fitted ΔAUC | folds+ | CV |
+|---|---|---|---|---|
+| GLOBAL — this is w15f's shipped file | 1 | +3.338e-06 | 4/5 | 0.9700525 |
+| A-ONLY (`A` vs everything else) | 2 | +5.031e-06 | 4/5 | 0.9700542 |
+| **PER-CELL** | 7 | **+6.195e-06** | 4/5 | **0.9700554** |
+| CTRL permuted 7 | 7 | +2.370e-06 | 4/5 | |
+| CTRL permuted 2 | 2 | +3.078e-06 | 4/5 | |
+
+- A-only − global **+1.693e-6**; A-only − its own matched control **+1.953e-6**
+- per-cell − global **+2.857e-6**; per-cell − its own matched control **+3.825e-6**
+- per-cell − A-only **+1.164e-6**
+
+**The controls are the point.** Splitting one weight into seven *at random* costs −0.97e-6
+(3.338 → 2.370) and into two at random costs −0.26e-6: selection noise is a real toll, and the
+real segmentation has to pay it back before it can show a gain. It does, by ~2e-6 (2 params)
+and ~3.8e-6 (7 params).
+
+**Why this is not seven knobs finding seven ways to fit noise.** Five independent coordinate
+ascents, one per fold, agree on a structure:
+
+| fold | A | B | BAND | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| 0 | 0.0075 | 0.0025 | 0.0015 | 0.0000 | 0.0005 | 0.0005 | 0.0000 |
+| 1 | 0.0090 | 0.0020 | 0.0015 | 0.0000 | 0.0010 | 0.0005 | 0.0000 |
+| 2 | 0.0080 | 0.0025 | 0.0015 | 0.0000 | 0.0015 | 0.0005 | 0.0000 |
+| 3 | 0.0060 | 0.0025 | 0.0020 | 0.0005 | 0.0010 | 0.0010 | 0.0000 |
+| 4 | 0.0080 | 0.0020 | 0.0010 | 0.0000 | 0.0020 | 0.0015 | 0.0000 |
+
+**G is exactly 0.0000 in 5/5 folds, D in 4/5, and A lands 6–9× the global weight (0.0011) in
+5/5.** The ordering A > B > BAND > E ≈ F > D ≈ G reproduces §2's cond-AUC column, which was
+measured by a completely different, permutation-controlled, rank-based instrument. Two
+instruments, one ordering.
+
+**Honest caveat on the CV number.** The arm was picked by a rule fixed in the script's docstring
+before the run (highest cross-fitted arm; tie inside 1e-6 → fewer parameters), but it is still a
+choice among candidates scored on the same cross-fitted folds, so **0.9700554 carries perhaps
+0.5–1e-6 of selection optimism.** The conservative reading of this file is "+5e-6 over
+`blend159av_h3`, against a matched-control floor of +2.4e-6", not "+6.2e-6".
+
+### 4. Submitted
+
+`submissions/w16b_cellweight.csv` — ref **55542810**, 2026-08-16 04:00:42 UTC. CLI reported
+**"8 submissions remaining today"**, which confirms 2 of 10 used (the recovered `blend160orig`
+plus this one) and settles §0(b) against the run-context file's "zero".
+
+Cross-fitted CV **0.9700554** — the best CV number this workspace holds; previous best was
+`w15f_antistudent_avg` at 0.9700528, which is the *global-weight* version of the same object.
+Full-data per-cell weights: A 0.0075, B 0.0025, BAND 0.0015, D **0.0000**, E 0.0010, F 0.0010,
+G **0.0000**. Test-side cell shares recomputed from `test.csv` by the same function (A 0.1172,
+B 0.2687, BAND 0.1552, D 0.2383, E 0.0606, F 0.1197, G 0.0402) — nothing is transferred by row
+index, and the script asserts the fitted level set and the test level set are identical.
+
+Validated before sending: 296,302 rows, ids equal `sample_submission` exactly, all finite,
+296,302 distinct values, range [3.37e-6, 1.0]. **Not identical to any file already sent** —
+294,901 of 296,302 rows differ from `w15f_antistudent_avg`; spearman 0.9999801 vs that file and
+0.9999649 vs the base.
+
+**PRE-REGISTERED PREDICTION: 0.97107, with 0.97108 as the alternative.** Reasoning stated
+before the send: w15f's global-weight version sits at CV 0.9700528 / LB **0.97107**; this file
+is +2.6e-6 of CV above it; the within-family CV→LB slope is +1.77, so the predicted move is
++4.6e-6 — under one grid step. A return of 0.97108 would be a new account best and would say the
+slope under-states the correction family; 0.97106 would say the correction family does not obey
+the ladder at all, which is worth more than the score. **RESULT: 0.97107 — the prediction was right on the nose.**
+That ties the account best and is the fourth out-of-sample confirmation of w15i's within-family
+CV→LB fit in two days. It also says something useful about the correction family: +2.6e-6 of CV
+buys a real but sub-grid-step move, so **the corrected-file ladder behaves exactly like the ens4
+and h3 ladders** and can be pre-registered the same way. To print 0.97108 a corrected file needs
+roughly CV ≥ 0.970058.
+
+**This is NOT a deadline pick.** Seven fitted parameters above the stack, where
+`blend159av_h3` and `blend160origm_h3` fit zero. The deadline picks are unchanged.
+Nothing in it was chosen with reference to the public slice.
+
+### 5. ⚠ Standing-state corrections — three things every entry above this one now gets wrong
+
+**(a) The auto-selection risk has SHRUNK, and the last five entries all open with a stale
+version of it.** `experiments/check_selection.py` still exits 1 — nothing selected, control
+reads 42 successful submissions — but the sentence it *prints* was written when best-public was
+a 4-way tie. It is not any more:
+
+| public | files |
+|---|---|
+| **0.97107** | **2** — `w15f_antistudent_avg` (55529992, CV 0.9700528) and `w16b_cellweight` (55542810, CV **0.9700554**) |
+| 0.97106 | 7 — blend160orig, blend159, blend160origm, blend159av, **blend158_logit**, blend158, blend156 |
+| 0.97105 | 13, all CV-good |
+
+Kaggle's default is best-public. Its **first** pick is now drawn from a 2-way tie at 0.97107
+whose members are the workspace's **two best-CV files** — after this run's submission, both
+possible first picks are CV-endorsed, so that slot is safe under every tiebreak rule. `blend158_logit` (CV 0.969961, ~10σ below the CV pick) can only reach the
+**second** slot, out of a 7-way tie in which w15j showed it is uniquely selected under **none**
+of six enumerated tiebreak rules. **Still make the click** — w15i prices it at +9.2e-6 (limit 2)
+/ +36.5e-6 (limit 1) — but stop opening runs with it as the headline item, and **do not spend a
+slot "diluting" the tie**: it is already 6-of-7 good and dilution buys ~1e-6.
+
+**(b) The public-notebook ceiling is no longer 0.97101, and the thing above it is not a model.**
+`najiama/ensemble-of-ensembles-lb-0-97111` (11 votes, run 08-16 03:28) claims **0.97111**, which
+retires w15a's "nothing published is above our pack" as stated. I read it in full
+(`notebooks/najiama_eoe_97111/`). It is a **self-declared LB-probing demo** built on
+raykkretzschmar's public 0.97100 file. Its headline trick is `-df.lgbm_rank` inside `np.lexsort`
+over 500 buckets — deliberately sorting **against** its own LightGBM because the public slice
+paid 1e-5 for it, captioned by the author "THE LB OVERFITTING HACK" and predicted by the author
+to collapse on private. Its only live cell is `0.1*Rayk + 0.9*Blend_submission`. No OOF
+anywhere, by the author's own statement. **Nothing to take. Do not fork, do not blend.** It does
+independently confirm the public slice is ~20% of the test set — the `f = 0.20` assumed since
+w14b.
+
+**(c) The board moved and the gap widened.** MILANFX was static at 0.97124 from 08-10 and is now
+**0.97132** (08-16 01:51); four other teams set new bests overnight. The field is **1,943 teams**
+and we are **rank 41** at 0.97107, against rank 19 on 08-13 at 0.97106. Gap to first
+18e-5 → **25e-5**; the field passes a static file at roughly **7 teams/day**. At the measured
+CV→LB slope of +1.77, closing 25e-5 needs ≈ **+140e-6 of CV**. The entire CV spread across all
+42 scored files here is ~1e-5, and no mechanism ever measured in this workspace has moved CV by
+more than ~1e-5. **Stack refinement does not close this gap** — say so out loud rather than
+implying it with another 2e-6 blend.
+
+### 6. What is still open, ranked. Spend your slot at the top of this list.
+
+Everything on the 2026-08-13, w14b, w14d and w15j §6 closed lists stands. Do not re-open: the
+original dataset, feature work, stacker `C`, meta-models, regime-aware anything,
+NNLS/hill-climbing, combiner bagging, transform-subset enumeration, final-submission
+calibration, seed-twinning, member hunting, public-submission blending, row identity, in-fold
+lookups, `id` structure, the quantisation lattice, the transform CV→LB displacement, the
+`max_bin` ladder, CatBoost/XGBoost tuning, or the API route to the selection toggle.
+
+**1. Per-cell MEMBER weights, starting with `xgb_cat_lattice`. This is the biggest thing on the
+board and I measured it but did not have the slot to build it.** §2's instrument applied to pack
+*members* rather than to `c_avg`, same 8-seed matched control:
+
+| member | cell A | cell B | cell BAND | cell D |
+|---|---|---|---|---|
+| **`xgb_cat_lattice`** | cond 0.556267, **z +6.88** | +0.44 | +0.71 | −1.45 |
+| `cat_native` | cond 0.539967, **z +3.41** | −0.73 | −4.80 | −0.20 |
+| `c_avg` (for scale) | **z +5.16** | +4.42 | +3.50 | +0.32 |
+
+`xgb_cat_lattice` carries **more** information the 159-member stack is not using in cell A than
+`c_avg` does — z +6.88 against +5.16 — and it is null-to-negative everywhere else. These are the
+two most decorrelated members ever built here (maxcorr 0.9746 / 0.9762 against a pack median of
+0.9949) and **the stack weights them globally, which averages a strong cell-A signal against
+nothing elsewhere.** blend153 already showed the decorrelated pair is worth a sign-flipping
+±1–5e-6 *globally*; nobody asked whether that null is a regional cancellation. The build is
+`experiments/w16b_cellweight.py` with `c` swapped from `w15f_c_avg.npy` to
+`oof/oof_xgb_cat_lattice.npy` and the test side from `oof/test_xgb_cat_lattice.npy` — same
+arms, same controls, ~10 min. **Pre-register your LB from §0(c) before sending.**
+
+**2. Build a genuinely transductive member and score it on our folds.** Still the only candidate
+*class* the workspace has not closed, and w15f narrowed rather than settled it: his rebuild
+proved the *specific* teacher-minus-student object is **not** transductive (inductive twin
+ρ +0.967, pure difference cond AUC 0.500579 at z +0.52). So the class is untested, not refuted.
+Anything whose fit legitimately sees the 296,302 unlabelled test rows qualifies: self-training
+on high-confidence test rows, test-inclusive frequency/quantile encodings, a test-inclusive
+lattice count. The concrete hook is w15c's finding that **train and test were masked
+separately** — adversarial train-vs-test is 100% mask, observed values identical between splits
+to a 382k-row instrument's precision. w15c showed reweighting the *OOF pool* to the test mask
+moves estimated AUC +905e-6 and is decision-neutral for scoring. **It has never been tried as a
+training weight**, which is a different object.
+
+**3. How much of the +200e-6 OOF/test bagging asymmetry survives 160-member blending.** w15g
+§5's own words, the last unmeasured piece of the CV→LB gap, and it is **two extra configurations
+inside `experiments/w15g_cvgap.py`'s existing loop**. The argument that most of it survives
+(fold *f*'s training subsample is common to every member, so fold-model idiosyncrasy does not
+average out the way independent seed noise would) is an argument, not a measurement.
+
+**4. Re-test any closed item that was closed by a POOLED fit over a strong categorical.** This
+is the generalisable lesson of the wave's only reversal: w15i overturned "the CV→LB regression
+is dead" — load-bearing for two days — purely by adding transform-family fixed effects to a
+regression w14a had fitted pooled. §2 of this entry shows the same shape is present again:
+several closed nulls were measured **pooled across the rule cells** on a residual now known to
+be 6–9× concentrated in one of them. Sweep the closed list for that pattern specifically.
+
+**5. The human click.** `check_selection.py` exits 1. Select `blend159av_h3` and
+`blend160origm_h3` on the competition submissions page. §5(a) has the corrected price — smaller
+than the journal has been claiming, but not zero, and it costs one click.
+
+**Already spent, do not repeat:** the obvious version of item 1 was `orig_bin`/`orig_binm`,
+because w15d measured that the original dataset's label function matches the competition's
+**only above `social = 4`** — which is precisely cell A. Same instrument, 8-seed control:
+`orig_bin` cell A **z +0.72** (B −1.83, D +1.20), `orig_binm` cell A **z +1.32** (B −3.18,
+D +0.87). Against `c_avg`'s +5.16 and `xgb_cat_lattice`'s +6.88 in the same cell, that is
+nothing. **The original dataset is now closed a third time, regionally.**
+
+**Do NOT spend a slot on:** another investigation of the 18e-5 (now 25e-5) gap — w15j item 4 is
+the answer and §5(c) prices why; another error analysis aimed at cell D or the coin-flip band
+(§2 explains why every one of those read null); or anything constructed to top the public slice
+(w14b §4: the private gap is borrowed from the public one at 4:1).
+
+### Files created
+
+`experiments/w16b_cellweight.py` + `w16b_cellweight.json`, `logs_w16b_cellweight.txt`,
+`submissions/w16b_cellweight.csv`, `notebooks/najiama_eoe_97111/`. Recovered from the
+interrupted attempt: `experiments/w16a_where.py` + `w16a_where.json`, `logs_w16a_where.txt`.
+Nothing existing was modified except `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md`, all
+append-only apart from the one flagged w15j-item-6 correction in `RESEARCH.md`.

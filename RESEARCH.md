@@ -3913,3 +3913,29 @@ Per-fold weights, five independent ascents:
 ordering A > B > BAND > E ≈ F > D ≈ G reproduces the cond-AUC column above, measured by a
 different instrument. `experiments/w16b_cellweight.py` is reusable on any saved OOF vector —
 `BASE`/`c` are the only two things to swap.
+
+### w16a result and the corrected-file CV→LB ladder
+
+`w16b_cellweight.csv` (ref 55542810, CV 0.9700554, per-cell weights) returned **0.97107**,
+exactly its pre-registered prediction, tying `w15f_antistudent_avg` (CV 0.9700528, same LB).
+Fourth out-of-sample confirmation of w15i's within-family fit in two days. **The
+base-plus-fitted-correction family obeys the same ladder as `ens4` and `h3`**, so pre-register:
+a corrected file needs roughly **CV ≥ 0.970058** to print 0.97108.
+
+Also measured on the way, both with §2's instrument and an 8-seed matched control, so nobody
+re-spends a slot on them:
+
+- **`orig_bin` / `orig_binm` in cell A is a NULL.** w15d showed the original dataset's label
+  function matches the competition's only above `social = 4` — exactly cell A — so this was the
+  obvious regional rescue. `orig_bin` cell A **z +0.72** (B −1.83, D +1.20); `orig_binm` cell A
+  **z +1.32** (B −3.18, D +0.87). **The original dataset is now closed a third time, regionally.**
+- ⚠ **`xgb_cat_lattice` in cell A is the biggest unexploited reading on the board.** cond AUC
+  **0.556267, z +6.88** — larger than `c_avg`'s +5.16 in the same cell with the same instrument —
+  and null-to-negative everywhere else (B +0.44, BAND +0.71, D −1.45). `cat_native` reads
+  **z +3.41** in A (B −0.73, BAND −4.80, D −0.20). These are the two most decorrelated members
+  ever built here (maxcorr 0.9746 / 0.9762 vs a pack median 0.9949), and **the stack weights them
+  globally**, averaging a strong cell-A signal against nothing elsewhere. blend153 measured the
+  pair at a sign-flipping ±1–5e-6 globally and called it a null; nobody asked whether that null
+  is a regional cancellation. Build: `experiments/w16b_cellweight.py` with `c` swapped to
+  `oof/oof_xgb_cat_lattice.npy` (test side `oof/test_xgb_cat_lattice.npy`), same arms, same
+  permuted controls, ~10 min.
