@@ -511,3 +511,46 @@ That is a statement about the *public* slice only, and the private projection in
 `lbhist.py` still says a ±5e-5 band this dense is mostly resorting noise. The conclusion is
 unchanged and it is not "push harder on the public score": it is that the stack is saturated
 and the remaining decision is **which** saturated file goes in as the final entry.
+
+---
+
+## 2026-08-16 03:5x UTC — w16a/w16b read, 1,943 teams
+
+Full board pulled to `Teddy Tennant` row: **rank 41 of 1,943, score 0.97107**
+(`w15f_antistudent_avg`, ref 55529992). 41 teams sit at or above us.
+
+| rank | team | score | last sub |
+|---|---|---|---|
+| 1 | MILANFX | **0.97132** | 08-16 01:51 |
+| 2 | Utkarsh | 0.97124 | 08-15 22:40 |
+| 3 | Optimistix | 0.97123 | 08-16 01:08 |
+| 4 | Maher el Ouahabi | 0.97122 | 08-16 00:26 |
+| 5 | cstdy | 0.97121 | 08-15 23:30 |
+| 6 | Laura Liepa | 0.97117 | 08-16 01:49 |
+| 7-8 | Malhar Ujawane / Don Mani | 0.97116 | |
+| 9-12 | choqui62, Felipe Tamaki, Miłosz, william950615 | 0.97115 | |
+| **41** | **Teddy Tennant** | **0.97107** | 08-16 03:35 |
+
+**The head of the board moved and it is not noise-shaped.** MILANFX was 0.97124 and static
+since 08-10; it is now **0.97132**, +8e-5 in one step, and it moved on 08-16 01:51. Four
+other teams also set new personal bests between 08-15 22:40 and 08-16 01:51. The gap from us
+to first was 18e-5 on 08-15 and is now **25e-5**.
+
+**Drift rate, the number that matters for the 15 days left.** Rank 41 today against rank 19
+on 08-13 at a score 1e-5 higher. The field is passing a static file at roughly **7 teams/day**
+and accelerating. Nothing this workspace has measured moves CV by more than ~1e-5, and the
+CV→LB slope is +1.77, so the entire remaining internal toolkit is worth **<2e-5 LB** against
+a 25e-5 gap. Do not plan a run that assumes stack refinement closes this.
+
+### The top public notebook is now above us — and it is worthless
+
+`najiama/ensemble-of-ensembles-lb-0-97111` (11 votes, run 08-16 03:28) claims **0.97111**,
+which retires w15a's "no public notebook exceeds 0.97101". **It contains no model.** Read in
+full (`notebooks/najiama_eoe_97111/`): it is a self-declared LB-probing demo built on
+raykkretzschmar's public 0.97100 file, whose headline trick is `-df.lgbm_rank` inside
+`np.lexsort` — sorting *against* his own LightGBM because the public slice rewarded it, which
+the author labels "THE LB OVERFITTING HACK" and predicts will collapse on private. The only
+live cell is a 0.1/0.9 average of Rayk's file with an undisclosed `Blend_submission.csv`.
+There is no OOF anywhere in it by the author's own statement. **Do not pull, fork, or blend
+it.** It also independently confirms the public slice is ~20% of the test set, which is the
+`f = 0.20` this workspace has assumed since w14b.
