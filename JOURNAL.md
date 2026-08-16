@@ -8836,3 +8836,211 @@ w16o §6 and w16q §6 closed lists stands, **plus §7 above**.
 `experiments/w16s_pickcheck3.py` + `w16s_pickcheck3.json`, `logs_w16s_pickcheck3.txt`.
 `experiments/check_selection.py` is the only existing file modified — comment block only,
 **`WANTED` untouched**. No submission. `JOURNAL.md` / `RESEARCH.md` appended to only.
+
+## 2026-08-16 — w16t/w16u, slot 9/10, ANGLE (as handed): "Blending: rank-average or weight the tuned models by out-of-fold performance, search blend weights on OOF"
+
+**The angle is live in form but its generic version is closed** — naive OOF weight sweeps are on
+the 08-13, w14b and w15j §6 closed lists, and w16m/w16n measured the correction grid's ceiling at
+an exact zero and its resolution at +0.046e-6. The slot went to **w16s §8.1**, which is the same
+family done on the one axis where the option set was empty. No cycles spent on the generic sweep.
+
+**Slots 10+: §1 corrects a number that BOTH w16b and w16q published, and §5 is a side effect of
+this slot's own submission that makes the un-made human click ~1.5× more expensive.**
+
+### 0. Housekeeping, counted rather than quoted
+
+- Live API before sending: **8 rows dated `2026-08-16`** (blend160orig, w16b_cellweight,
+  w16f_armavg, w16i_schemeavg, w16l_maskw_h3, w16n_finegrid, w16h_h3av6, w16q_ens4avg). Counted
+  twice. After my send the CLI printed **"1 submissions remaining today"**, which agrees exactly:
+  **9 of 10 used, one send left for slot 10.** Slot 8's allocation held.
+- Board after the send: **rank 52 of 1,970** at 0.97108 (w16q read 50 of 1,964 at 08:17). MILANFX
+  0.97132, Optimistix 0.97125, Utkarsh 0.97124, Maher el Ouahabi 0.97122, cstdy 0.97121.
+- `check_selection.py` **still exits with nothing selected after nine slots.** See §5 — the price
+  changed today for the third time, and this slot is the reason.
+
+### 1. ⚠ THE CORRECTION — both published control readings were single draws, and one of them was the maximum of its distribution
+
+`experiments/w16t_cellens4.py` Part 1. The whole argument for the 7-weight per-cell arm is
+"splitting one weight into seven *at random* costs selection noise, so the real segmentation has
+to pay that toll back before it can show a gain". Both entries that made it measured the toll with
+**one permuted-membership draw**:
+
+| | real | control | real − control | draws |
+|---|---|---|---|---|
+| w16b (h3 base) | +6.195e-6 | +2.370e-6 | **+3.825e-6** | **1** |
+| w16q (ens4 base) | +6.399e-6 | +5.021e-6 | **+1.378e-6** | **1** |
+
+Those control numbers differ by 2.65e-6 and neither entry said whether that is a property of the
+base or of the draw. It is the draw. **Seven draws per base** — the published one reproduced
+exactly as a gate, plus six fresh seeds — same folds, same grid, same protocol:
+
+| base | real | control mean | control sd | control range | **real − control** |
+|---|---|---|---|---|---|
+| `blend159av` (ens4) | +6.399e-6 (se 2.458) | **+1.929e-6** | 1.671 | [+0.200, **+5.021**] | **+4.470e-6 ±2.537** (t +1.76) |
+| `blend159av_h3` (h3) | +6.195e-6 (se 2.585) | **+1.545e-6** | 1.028 | [+0.352, +2.923] | **+4.650e-6 ±2.614** (t +1.78) |
+
+**w16q's published control draw is the MAXIMUM of the seven** (+5.021e-6 against a mean of
++1.929e-6, 1.85 sd above it); w16b's is the second highest. So w16q's "+1.378e-6" understates the
+ens4 margin by 3.1e-6, and the h3/ens4 difference in that margin — **+2.447e-6 off single draws —
+measures +0.180e-6 ±3.643 once both sides carry an error bar.** There is no base effect here.
+
+Two things follow that are worth more than the correction itself:
+
+- **The random-split toll is now a measured quantity with two consistent readings:** control mean
+  minus the global arm is **−1.434e-6** (ens4: 1.929 vs 3.363) and **−1.793e-6** (h3: 1.545 vs
+  3.338). w16b quoted −0.97e-6 from its single draw. The real segmentation clears its own toll on
+  both bases by ~+4.5e-6.
+- ⚠ **Honest limit: t ≈ 1.76 / 1.78, so neither margin is individually significant.** The error is
+  dominated by the *real* arm's fold-to-fold spread (se 2.46 / 2.59), not by the control any more
+  — going from 1 to 7 control draws cut the control's contribution to 0.63 / 0.39 and the residual
+  uncertainty is now on the real side, where a bigger control ensemble cannot help. The point
+  estimate is what moved; the confidence did not, and this entry does not claim it did.
+
+**Generalise it.** This is the wave's third catch of the same shape after w16o's `gap_bagging` and
+w16q's mix-gap estimator, and it is the first where the single-observation quantity was a
+**control**. A matched control is not a constant; it is a draw from a distribution with an sd of
+its own (1.0–1.7e-6 here, comparable to the effects being tested). **Any "real minus control"
+figure in this workspace that rests on one permutation seed is quoted to a precision it does not
+have.** The instrument for fixing it is cheap and it is now in `w16t_cellens4.py`.
+
+### 2. The build, and the two things that transferred exactly
+
+`submissions/w16t_cellens4.csv` — `w16b_cellweight`'s object (the 7-weight per-cell `c_avg`
+correction) rebuilt on the **ens4** base `blend159av`. Pooled cross-fitted CV **0.9700513727**,
+frozen SKF5 seed42.
+
+- **Gate: six published quantities re-derived in a fresh process, all at exactly 0.000e-12** —
+  w16q's three ens4 arm deltas (glob / a_only / per_cell), w16b's h3 per-cell delta, and *both*
+  entries' single control draws (w16q's requires replaying its shared rng through the `a_only`
+  call first; w16b's uses the gather form at seed 4242). Fourth independent confirmation of
+  w16q §2: **the reproducibility floor for objects on a fixed stored base is exactly zero.**
+- **The full-data per-cell weight vector is IDENTICAL on the two bases:** A 0.0075, B 0.0025,
+  BAND 0.0015, D **0.0000**, E 0.0010, F 0.0010, G **0.0000**. Not similar — identical to the grid
+  step. Per fold the two tables differ in exactly one cell (F, 0.0010 vs 0.0005, folds 0–2) out of
+  35 entries. **The correction's spatial structure is a property of `c_avg` and the data, not of
+  the base it is applied to**, which is a stronger version of w16q §5's "within 0.5e-6".
+- **Nested-pick stability 5/5 with arm-selection optimism of exactly +0.000e-6.** Leave-one-fold-out
+  argmax over {glob, a_only, per_cell} picks `per_cell` in all five folds, so the nested and naive
+  deltas coincide to the digit. (w16q's five-*scheme* version got 4/5 and +1.263e-6 because
+  `decile` won one fold — that optimism belongs to the scheme axis, not to this one.) The shipped
+  arm was fixed in the docstring regardless; this prices the selection the script does **not** make.
+- Test-side cell shares recomputed from `test.csv` by the same function (A 0.1172, B 0.2687,
+  BAND 0.1552, D 0.2383, E 0.0606, F 0.1197, G 0.0402); the script asserts the fitted level set
+  and the test level set are identical. Nothing transferred by row index.
+
+### 3. Submitted — `w16t_cellens4`, **LB 0.97108**, the pre-registered primary
+
+ref **55549182**, 2026-08-16 09:33:19 UTC. CLI: **"1 submissions remaining today"**.
+
+**PRE-REGISTERED PREDICTION: 0.97108, alternative 0.97107**, written in full to
+`experiments/w16t_prereg_lb.txt` before the script ran once. The rule was
+`LB = CV + 0.0010284829`, the ens4 corrected-file gap — a quantity with **exactly one
+observation** (`w16q_ens4avg`, eight hours old), which is the shape §1 is about. The competing
+derivation agreed: ens4 base gap 0.0010151233 plus the correction's h3-side gap displacement
+(+13.50e-6) gives 0.0010286, within 0.15e-6. **RESULT: 0.97108** — ties the account best and is
+the second file this account has put in that bin.
+
+⚠ **The prereg file also states, before the result, that this test was near-certain and worth
+little**, and that stands: w16q_ens4avg's 0.97108 pins the true gap to a 10e-6 window, this file's
+CV is only 0.144e-6 below it, so a 0.97107 needed the gap in the bottom **1.5%** of that window.
+The rule was recorded because a rule stated and honoured beats one quoted afterwards, not because
+the digit was informative. The slot's content is §1.
+
+Validated before sending: 296,302 rows, ids equal `sample_submission` exactly, all finite, 296,302
+distinct, range [3.375e-6, 1.0], **rank-identical to none of the 49 sent files**. Closest is
+`w16q_ens4avg` at spearman 0.9999918 with 294,713 of 296,302 rows differing in rank; 0.9998072 vs
+`w16b_cellweight` (its h3 twin), 0.9999648 vs `blend159av`.
+
+### 4. A third matched h3/ens4 pair, at p7 — w16s's result holds on a third object
+
+Same instrument, 500 reps, seed 1616, f 0.20, both of w16s's pairs reproduced at **0.000e-12**:
+
+| pair | CV d | sim d (private-sized) | **P(h3 better, ONE draw)** | P(public-sized slice reverses) |
+|---|---|---|---|---|
+| p0 `blend159av_h3` − `blend159av` | +4.30e-6 | +4.19e-6 ±0.13 | **0.912** | 0.244 |
+| **p7 `w16b_cellweight` − `w16t_cellens4`** | **+4.23e-6** | **+4.15e-6 ±0.13** | **0.906** | **0.240** |
+| p23 `w16i_schemeavg` − `w16q_ens4avg` | +4.15e-6 | +4.05e-6 ±0.13 | 0.908 | 0.248 |
+
+Three matched pairs at 0, 7 and 23 fitted parameters agree to **0.14e-6**. w16s inferred from two
+pairs that the h3 advantage belongs to the transform rather than the base; a third object at a
+different parameter count says the same. **This changes nothing** — it was pre-registered (S5) as
+a confirmation of a settled question, ineligible to move anything, and it is reported that way.
+
+### 5. ⚠ THIS SLOT'S SUBMISSION MADE THE UN-MADE CLICK MORE EXPENSIVE — `experiments/w16u_autoprice.py`
+
+`w16t_cellens4` scoring 0.97108 put a **second** file in auto-slot 1:
+
+```
+auto-slot 1: public 0.97108, 2-way tie — w16q_ens4avg, w16t_cellens4
+auto-slot 2: public 0.97107, 5-way tie — w15f_antistudent_avg, w16b_cellweight,
+                                         w16f_armavg, w16i_schemeavg, w16n_finegrid
+```
+
+**At limit 2 the auto-pick is now DETERMINED** — exactly those two files — so w16s's range, which
+existed only because the tier-2 tiebreak is undocumented, collapses to a point. And both of them
+are ens4-side *and* built on the same `c_avg`, so they fail together: that is precisely the
+pairing `WANTED` was constructed to avoid (w16i §4 spends the second slot on a zero-parameter file
+as insurance against the correction family reversing). Repriced on the same 500 paired draws,
+gated against w16s at 0.000e-12 first:
+
+| branch | E[max] | vs `WANTED` | P(auto better) | **cost of not clicking** |
+|---|---|---|---|---|
+| limit 2: `w16q_ens4avg` + `w16t_cellens4` | 0.97004058 | −3.326e-6 ±0.142 | 0.144 | **+3.326e-6** |
+| limit 1: `w16q_ens4avg` | — | −4.07e-6 ±0.13 | 0.090 | +4.07e-6 |
+| limit 1: `w16t_cellens4` | — | −4.16e-6 ±0.16 | 0.122 | +4.16e-6 |
+
+w16s's limit-2 figure was **−0.24e-6 to +2.14e-6**. It is now **+3.33e-6, determinate**, and the
+E[max] instrument still cannot price the zero-parameter hedge, so that is a lower bound. **Slot 9
+raised the price of the click by roughly 1.5–14×, depending which end of w16s's range you read.**
+
+Stated plainly because it is a cost this slot imposed: the file is a legitimate CV object and
+worth having, but its side effect is that an unattended deadline now hands Kaggle two ens4-side
+correlated files instead of one. **Slot 10 cannot fix this by submitting** — reaching 0.97108 on
+the h3 base needs CV ≥ ~0.9700607 and the best h3 CV in the workspace is 0.9700557, ~5e-6 short.
+Only the click fixes it.
+
+### 6. CLOSED by this run
+
+- **"real minus control" as a single-draw quantity** — retired. Seven draws per base; the control
+  has sd 1.0–1.7e-6, comparable to the effects it gates. Re-read any null in this workspace that
+  quotes one permutation seed.
+- **The h3/ens4 control-margin difference (+3.825 vs +1.378e-6)** — retired, it was draw noise:
+  +0.180e-6 ±3.643.
+- **"the `c_avg` weights reproduce on the ens4 base"** — strengthened from "within 0.5e-6" to
+  **identical full-data weight vectors**.
+- **The ens4-side option-set asymmetry** — closed. Two ens4-side corrected files now exist (p23
+  and p7) against five h3-side ones.
+- **w16s's limit-2 click price (−0.24 to +2.14e-6)** — stale within one slot. Use §5.
+- Add to the closed list: the handed angle, **generic OOF blend-weight search** (closed 08-13,
+  re-skipped).
+
+### 7. What slot 10 should do with the LAST send
+
+Everything on the 2026-08-13, w14b, w14d, w15j §6, w16a §6, w16c §7, w16h §6, w16l §4, w16m §5,
+w16o §6, w16q §6 and w16s §7 closed lists stands, **plus §6 above**.
+
+1. **Re-run `check_selection.py` and put the LIVE tiers in the journal** — w16s §8.4 asked for
+   this and §5 above is the third time in one day a quoted exposure figure went stale. It will go
+   stale again if slot 10's send scores 0.97108.
+2. **Spend the send on a real candidate, and prefer one that does not add a THIRD ens4-side file
+   to auto-slot 1.** §5 is the reason. Two options that do not:
+   (a) the h3-side arm this workspace has never shipped alone — `a_only`, the 2-parameter arm
+   (h3 xfit +5.031e-6, CV 0.9700542; ens4 +4.987e-6, CV 0.9700500) — which lands on the 0.97107
+   shelf on either base and is the cheapest object in the family by parameter count, so it is the
+   natural hedge *within* the correction family that nothing has tested;
+   (b) `w14a_repro159av_h3` (CV 0.9700472), still unsent and verified non-duplicate, if a
+   zero-parameter reading is wanted instead.
+   Either way, **pre-register the LB from the ladder before sending** and say which shelf and why.
+3. **Do NOT** re-open h3-vs-ens4 (§4 is the third confirmation), the correction grid, per-cell
+   member weights, the transductive class, the mask as a training weight, member tuning, feature
+   engineering, the original dataset, or the gap to first.
+4. **Do NOT move the deadline picks on anything measured against the public slice.** `WANTED` is
+   unchanged for the sixth consecutive slot and §5 makes it more load-bearing, not less.
+
+### Files created
+
+`experiments/w16t_cellens4.py` + `w16t_cellens4.json` + `w16t_prereg_lb.txt`,
+`logs_w16t_cellens4.txt`; `experiments/w16u_autoprice.py` + `w16u_autoprice.json`,
+`logs_w16u_autoprice.txt`; `submissions/w16t_cellens4.csv` + `oof_w16t_cellens4.npy` (sent).
+`experiments/check_selection.py` is the only existing file modified — the printed repricing block
+only; **`WANTED` is untouched.** `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.

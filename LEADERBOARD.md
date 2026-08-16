@@ -680,3 +680,13 @@ any tiebreak rule. The exposure remains auto-slot 2, the 7-way tie at 0.97106 th
   of the top two tiers, so w15i's +9.2e-6 / +36.5e-6 / +112e-6 exposure ladder is quoted from a
   stale tier structure — re-read the script's live output before using it.
 - 8 of 10 submissions used today. Slots 8/9/10 have **two** sends between three slots.
+
+## 2026-08-16 09:35 UTC — after slot 9 (`w16t_cellens4`, LB 0.97108)
+
+- **Us: rank 52 of 1,970** at 0.97108 (tied best, set by `w16q_ens4avg` at 08:17). w16q read
+  rank 50 of 1,964 an hour and a quarter earlier — the field passed us 2 places while our own
+  score was unchanged, consistent with the ~7 teams/day drift w16a measured.
+- Top: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124, Maher el Ouahabi 0.97122,
+  cstdy 0.97121. Gap to first **24e-5**, unchanged since w16a.
+- Account submission count 50. Two files now sit at 0.97108 (`w16q_ens4avg`, `w16t_cellens4`),
+  five at 0.97107.

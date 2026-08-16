@@ -1,0 +1,53 @@
+w16t — PRE-REGISTERED LB PREDICTION
+written 2026-08-16, before experiments/w16t_cellens4.py was executed for the first time.
+
+OBJECT: the PER-CELL (7-weight) `c_avg` correction arm — the object `w16b_cellweight` ships —
+rebuilt on the ENS4 base `blend159av` instead of the h3 base `blend159av_h3`.
+
+INPUTS, all already on the board, none of them measured by this run:
+
+  pooled cross-fitted CV                      public LB     gap = LB - CV
+  blend159av        (ens4, p0)  0.9700448767   0.97106      0.0010151233
+  blend159av_h3     (h3,   p0)  0.9700491721   0.97105      0.0010008278
+  w16b_cellweight   (h3,   p7)  0.9700556065   0.97107      0.0010143935
+  w16i_schemeavg    (h3,   p23) 0.9700556663   0.97107      0.0010143337
+  w16n_finegrid     (h3,   p23) 0.9700556965   0.97107      0.0010143035
+  w16q_ens4avg      (ens4, p23) 0.9700515171   0.97108      0.0010284829
+
+THE RULE (fixed here, applied without adjustment):
+
+  predicted LB = (this file's pooled cross-fitted CV) + 0.0010284829
+
+  i.e. the corrected-file gap measured on the ENS4 base. That gap has exactly ONE
+  observation — `w16q_ens4avg`, scored 8 hours ago — which is precisely the
+  single-observation shape this wave has spent two slots catching. The competing derivation
+  agrees: ens4 base gap 0.0010151233 plus the correction's gap displacement measured on the
+  h3 base (+13.50e-6, w16q §5) gives 0.0010286, within 0.15e-6 of the direct reading.
+  On the h3 base the p7 and p23 corrected gaps agree to 0.06e-6, so parameter count does not
+  appear to move the gap.
+
+THE NUMBER: this file's cross-fitted CV is already known from `w16q_ens4base.json`, where the
+same arm was computed as a component of the 5-arm average: **0.9700513727**. Part 0 of the
+script gates on reproducing it exactly, so this is a genuine point prediction, not a fit.
+
+  0.9700513727 + 0.0010284829 = 0.9710798556  ->  **0.97108**
+
+PRIMARY: 0.97108 (ties the account best, set by w16q_ens4avg this morning).
+ALTERNATIVE: 0.97107.
+
+HOW MUCH THIS TEST IS WORTH — stated up front so it is not oversold afterwards. The LB is
+rounded to 5 dp. w16q_ens4avg printing 0.97108 pins the true ens4-corrected gap G to
+[0.0010234829, 0.0010334829). This file's CV is 0.144e-6 BELOW w16q_ens4avg's, so it prints
+0.97107 only if G sits in the bottom 0.144e-6 of that 10e-6 window — about **1.5%** of it.
+The prediction is therefore near-certain and its information content is low. It is recorded
+because a rule that is stated and then honoured is worth more than one quoted afterwards, and
+because a 0.97107 here would be a genuine surprise worth a lot. The value of this slot is in
+the control measurement (Part 1) and in the file existing at all, not in the digit.
+
+FALSIFYING OUTCOMES AND WHAT EACH WOULD MEAN:
+  0.97108  — as predicted. The ens4 corrected gap transfers from a 23-parameter object to a
+             7-parameter one on the same base, as it does on the h3 base.
+  0.97107  — G is near the bottom of its window; the ens4 ladder needs a second calibration
+             point before anything is pre-registered off it again.
+  0.97109  — would need +5e-6 of gap this file has no mechanism for. Would retire the ladder.
+  0.97106 or below — the correction buys nothing on the ens4 base, contradicting w16q §5.

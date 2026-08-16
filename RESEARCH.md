@@ -4449,3 +4449,98 @@ quoting an exposure figure must re-run `check_selection.py` first.
 process, **0.0000e-6** drift, 7/7. For objects on a fixed stored base the reproducibility floor
 is **exactly zero** and the right yardstick is the quantity's own error bar, never the 2e-6
 figure (which is specific to *rebuilding the 159-member logistic stack*).
+
+## w16t/w16u — 2026-08-16, slot 9. Controls are DRAWS, not constants
+
+### 1. ⚠ A matched control has a standard error, and this workspace never gave it one
+
+Every "real minus control" figure here was measured with **one permutation seed**. The control's
+own sd is 1.0–1.7e-6 — the same size as the effects it is used to gate. Seven draws per base, same
+folds, same grid, same protocol (`experiments/w16t_cellens4.py` Part 1):
+
+| base | real (per-cell arm) | control mean | control sd | control range | real − control |
+|---|---|---|---|---|---|
+| `blend159av` (ens4) | +6.399e-6 (se 2.458) | +1.929e-6 | 1.671 | [+0.200, **+5.021**] | **+4.470e-6 ±2.537** |
+| `blend159av_h3` (h3) | +6.195e-6 (se 2.585) | +1.545e-6 | 1.028 | [+0.352, +2.923] | **+4.650e-6 ±2.614** |
+
+**w16q's published ens4 control (+5.021e-6) is the MAXIMUM of the seven**; w16b's h3 control
+(+2.370e-6) is the second highest. So the published margins — h3 **+3.825e-6**, ens4 **+1.378e-6**
+— are both wrong, in opposite directions, and their difference (+2.447e-6, which looked like a
+base effect) is **+0.180e-6 ±3.643**. There is no base effect.
+
+Two derived numbers worth keeping:
+- **Splitting one weight into seven AT RANDOM costs −1.434e-6 (ens4) and −1.793e-6 (h3)** against
+  the single global weight. w16b quoted −0.97e-6 off one draw.
+- **The real segmentation clears its toll by ~+4.5e-6 on both bases**, but at **t ≈ 1.76 / 1.78**.
+  Not individually significant. After 7 draws the error is dominated by the *real* arm's
+  fold-to-fold spread (se 2.46 / 2.59), not the control (0.63 / 0.39) — more control draws cannot
+  narrow it further.
+
+**RULE: any null or gain in this workspace quoted as "real minus control" from a single
+permutation seed is stated to a precision it does not have.** Re-read the closed list with that in
+mind. This is the third catch of a single-observation quantity in three slots (w16o `gap_bagging`,
+w16q mix-gap estimator, w16t the control itself) and the first where the single observation was
+the *control* rather than the effect.
+
+### 2. The `c_avg` correction is base-independent — stronger than "within 0.5e-6"
+
+The full-data per-cell weight vector is **IDENTICAL** on `blend159av` and `blend159av_h3`:
+A 0.0075, B 0.0025, BAND 0.0015, D **0.0000**, E 0.0010, F 0.0010, G **0.0000**. Per fold the two
+tables differ in exactly one of 35 entries (cell F, 0.0010 vs 0.0005, folds 0–2). The correction's
+spatial structure belongs to `c_avg` and the data, not to the base.
+
+Nested leave-one-fold-out over {glob, a_only, per_cell} on the ens4 base picks `per_cell` **5/5**
+with arm-selection optimism of **exactly +0.000e-6**. (w16q's 4/5 and +1.263e-6 is the *scheme*
+axis — five partitions including `decile` — and does not apply to the three-arm axis.)
+
+### 3. The corrected-file CV→LB ladder now has an ens4 rung, confirmed out of sample
+
+| family | rule | record |
+|---|---|---|
+| `ens4` p0 | CV ≥ 0.9700416 → 0.97106 | 5/5 |
+| h3 / top cluster p0 | → 0.97105 | 11/11 |
+| **h3 + `c_avg` correction** | LB = CV + **0.0010143** | 4/4 (w15f_avg, w16b, w16i, w16n) |
+| **ens4 + `c_avg` correction** | LB = CV + **0.0010285** | **2/2** (w16q_ens4avg, w16t_cellens4) |
+
+`w16t_cellens4` was pre-registered at 0.97108 off the ens4 rung when that rung had exactly **one**
+observation, and returned 0.97108. ⚠ **But the test was weak and the prereg file says so up front:**
+the 5-dp rounding pins the gap to a 10e-6 window and the two files' CVs differ by 0.144e-6, so a
+miss needed the bottom 1.5% of the window. To print **0.97109** an ens4-base corrected file needs
+CV ≥ ~0.9700565; the best ens4 object measured is 0.9700518. **The ladder cannot reach 0.97109
+from anything in this workspace.** On the h3 base, 0.97108 needs CV ≥ ~0.9700606 against a best of
+0.9700557 — also ~5e-6 short.
+
+### 4. h3 vs ens4: a third matched pair, at 7 parameters
+
+| pair | CV d | sim d | P(h3 better, one private draw) | P(public-sized slice reverses) |
+|---|---|---|---|---|
+| p0 `blend159av_h3` − `blend159av` | +4.30e-6 | +4.19e-6 | 0.912 | 0.244 |
+| **p7 `w16b_cellweight` − `w16t_cellens4`** | **+4.23e-6** | **+4.15e-6** | **0.906** | **0.240** |
+| p23 `w16i_schemeavg` − `w16q_ens4avg` | +4.15e-6 | +4.05e-6 | 0.908 | 0.248 |
+
+Three parameter counts, agreement to 0.14e-6. The standing position is unchanged and this adds no
+new licence: **h3 wins on CV, the deadline pick follows h3, the public slice has nothing to say.**
+
+### 5. ⚠ The click price changed AGAIN — third time in one day, and slot 9 caused it
+
+`w16t_cellens4` at 0.97108 made auto-slot 1 a **2-way tie** (`w16q_ens4avg`, `w16t_cellens4`), so
+**at limit 2 the auto-pick is now determined** and w16s's range disappears. Both files are
+ens4-side and built on the same `c_avg`, i.e. they fail together — exactly what `WANTED`'s
+zero-parameter second slot exists to prevent. Repriced on the same 500 draws, gated at 0.000e-12
+(`w16u_autoprice.py`):
+
+```
+limit 2  auto = w16q_ens4avg + w16t_cellens4   E[max] 0.97004058
+         vs WANTED 0.97004391  ->  cost of NOT clicking +3.326e-6 +/-0.142, P(auto better) 0.144
+limit 1  auto = w16q_ens4avg   +4.07e-6      auto = w16t_cellens4   +4.16e-6
+```
+
+Was −0.24 to +2.14e-6 this morning. **Any slot quoting a click price must re-run
+`check_selection.py` first — it has gone stale after three of the last three top-score landings.**
+
+### 6. Fourth instance of the zero-floor result
+
+`w16t_cellens4.py`'s gate re-derives six published quantities in a fresh process — w16q's three
+ens4 arm deltas, w16b's h3 per-cell delta, and both entries' single control draws (w16q's needs
+its shared rng replayed through the `a_only` call first; w16b's uses the gather form at seed 4242)
+— **all six at exactly 0.000e-12**. For objects on a fixed stored base the floor is zero.
