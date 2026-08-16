@@ -4365,3 +4365,87 @@ E +2.09, F +1.16, G +0.10).
 cells and was read pooled across them; `w15b` §6's power calibration, which injected a spatially
 **uniform** signal and certifies the whole closed list against alternatives now known to be
 cell-concentrated.
+
+---
+
+## w16s (slot 8, 2026-08-16) — h3 vs ens4 is SETTLED, and the auto-pick ladder is repriced
+
+Source: `experiments/w16s_pickcheck3.py`, `w16s_pickcheck3.json`, `logs_w16s_pickcheck3.txt`.
+w16k's instrument unchanged: 500 reps, seed **1616**, f **0.20**, every candidate scored on the
+same simulated slice each rep so every ± is a **paired** standard error. Gated first — all seven
+of w16k's candidates reproduce its stored means at **exactly 0.0000e-6, 7/7**.
+
+### 1. The instrument's limits, fixed before it was run
+
+The slices are drawn from **train rows**, so the mean over reps is a resample of the same OOF
+that produces the CV (uniform **−11.7e-6** offset across all nine candidates). **It cannot
+contradict CV in direction and is not an independent third opinion on the CV/LB conflict.**
+Quoting "the simulation prefers h3" as evidence against the public slice is double-counting CV.
+What it adds is **dispersion** — P(win on a single draw), which is what a one-draw private set
+actually needs.
+
+### 2. h3 beats ens4, and the margin is not a coin flip
+
+| pair | CV d | sim d (private-sized) | draw sd | **P(h3 better, ONE draw)** |
+|---|---|---|---|---|
+| `blend159av_h3` − `blend159av` | +4.30e-6 | +4.19e-6 ±0.13 | 2.98e-6 | **0.912** |
+| `w16i_schemeavg` − `w16q_ens4avg` | +4.15e-6 | +4.05e-6 ±0.13 | 2.99e-6 | **0.908** |
+
+The two agree to 0.15e-6, so **the h3 advantage is a property of the transform, not of the base**
+— it survives the p23 `c_avg` correction undiminished.
+
+### 3. ⚠ The public-LB counter-reading is slice noise. Do not reopen this.
+
+Same 500 draws scored on the **public-sized** complement (59,260 rows vs 237,042):
+
+| pair | public-sized mean | draw sd | P(reverses h3) | P(d ≤ −20e-6) |
+|---|---|---|---|---|
+| `blend159av_h3` − `blend159av` | +5.17e-6 | **7.08e-6** | **0.244** | **0.000** |
+| `w16i_schemeavg` − `w16q_ens4avg` | +5.04e-6 | **7.09e-6** | **0.248** | **0.000** |
+
+The public slice is 4× smaller, its draw sd is 2.4× larger, and it swamps a ~5e-6 signal.
+**w16q's "6/6 member sets" is ONE observation of the slice, not six** — nested near-identical
+objects all scored against the same fixed public slice. So the LB reading is a **p ≈ 0.24 event**.
+w16q bounded the true LB difference at (−20e-6, 0); this model puts **0.244 of its mass in exactly
+that window** and **0 of 500 draws** below −20e-6. The reading lands entirely inside the model's
+own reversal mass. **No train/test distribution difference is implied and none is claimed.**
+
+**Standing position, replacing w16q's "open":** h3 wins on CV at P 0.91 on a single private-sized
+draw; the deadline pick follows h3; the public slice has no further information on this axis.
+
+### 4. The cross-axis hedge — priced and declined
+
+Both `WANTED` files are h3-side, so they fail together if the transform axis flips.
+`{w16i_schemeavg, blend159av}` would hedge the correction family *and* the transform at the same
+p23+p0 cost. **E[max] 0.97004390 vs WANTED's 0.97004391 — price −0.009e-6 ±0.006.** Pre-registered
+rule was `>=`; it is `<`; pick unchanged. ⚠ But E[max] on train draws only ever sees the world
+where the CV ordering is *right*, which is not the world the hedge is for. **The result is that
+the transform hedge is nearly FREE, not that it is worthless.**
+
+### 5. ⚠ w15i's auto-pick exposure ladder (+9.2 / +36.5 / +112e-6) is RETIRED
+
+It was dominated by `blend158_logit` (CV 0.969961) sitting in a top-two public tie. Slot 7's
+0.97108 pushed it **out of both tiers**. Live tiers 2026-08-16 08:33 UTC:
+
+```
+auto-slot 1: 0.97108, 1-way - w16q_ens4avg
+auto-slot 2: 0.97107, 5-way - w15f_antistudent_avg, w16b_cellweight, w16f_armavg,
+                              w16i_schemeavg, w16n_finegrid
+```
+
+Repriced on the same 500 draws: **cost of not clicking is between −0.24e-6 and +2.14e-6 if the
+final-submission limit is 2** (depends which tier-2 file the undocumented tiebreak takes) and
+**+4.07e-6 if the limit is 1**. Three of the five tier-2 pairings actually beat `WANTED` on
+E[max], because they pair two corrected files while `WANTED` deliberately spends its second slot
+on a zero-parameter hedge this instrument cannot price. **The click is still right; it is worth
+~2e-6, not ~112e-6.** `check_selection.py`'s printed output carries these numbers now.
+
+⚠ **The tiers move whenever a new top public score lands — twice stale in one day.** Any slot
+quoting an exposure figure must re-run `check_selection.py` first.
+
+### 6. Third instance of the zero-floor result
+
+`w16s_pickcheck3.py`'s gate is a third independent confirmation of w16q §2: seven files, fresh
+process, **0.0000e-6** drift, 7/7. For objects on a fixed stored base the reproducibility floor
+is **exactly zero** and the right yardstick is the quantity's own error bar, never the 2e-6
+figure (which is specific to *rebuilding the 159-member logistic stack*).

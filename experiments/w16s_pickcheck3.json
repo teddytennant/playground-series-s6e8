@@ -1,0 +1,303 @@
+{
+ "names": [
+  "blend159av_h3",
+  "blend159av",
+  "blend160origm_h3",
+  "blendtop3",
+  "w15f_antistudent_avg",
+  "w16b_cellweight",
+  "w16f_armavg",
+  "w16i_schemeavg",
+  "w16q_ens4avg",
+  "w16n_finegrid"
+ ],
+ "cv": {
+  "blend159av_h3": 0.9700491721182697,
+  "blend159av": 0.9700448767129297,
+  "blend160origm_h3": 0.9700486549808679,
+  "blendtop3": 0.9700494604052071,
+  "w15f_antistudent_avg": 0.9700527033896812,
+  "w16b_cellweight": 0.9700556065059196,
+  "w16f_armavg": 0.9700553641118757,
+  "w16i_schemeavg": 0.9700556662570055,
+  "w16q_ens4avg": 0.9700515171213085,
+  "w16n_finegrid": 0.9700556964750705
+ },
+ "mean": [
+  0.9700374038877052,
+  0.9700332138409107,
+  0.9700368987199067,
+  0.9700376800780168,
+  0.9700409494904947,
+  0.9700438984199502,
+  0.9700436102745937,
+  0.9700438870777556,
+  0.9700398356591295,
+  0.9700439150831744
+ ],
+ "h3_ens4": [
+  {
+   "h3": "blend159av_h3",
+   "ens4": "blend159av",
+   "cv_d": 4.295405339971303e-06,
+   "sim_d": 4.1900467953939204e-06,
+   "p_h3": 0.912,
+   "pub_sim_d": 5.1674838486273074e-06,
+   "pub_sd": 7.08092568957043e-06,
+   "pub_p_reverse": 0.244
+  },
+  {
+   "h3": "w16i_schemeavg",
+   "ens4": "w16q_ens4avg",
+   "cv_d": 4.1491356969070026e-06,
+   "sim_d": 4.051418625711678e-06,
+   "p_h3": 0.908,
+   "pub_sim_d": 5.040848810417664e-06,
+   "pub_sd": 7.09296509885734e-06,
+   "pub_p_reverse": 0.248
+  }
+ ],
+ "pairs": [
+  {
+   "e_max": 0.9700446803543982,
+   "a": "w16b_cellweight",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700443794978366,
+   "a": "w16b_cellweight",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700441511337451,
+   "a": "w16b_cellweight",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.9700441471373662,
+   "a": "w15f_antistudent_avg",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700441012710567,
+   "a": "blendtop3",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700440848334283,
+   "a": "blend160origm_h3",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700440614909207,
+   "a": "w16f_armavg",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.970044053644647,
+   "a": "blend159av_h3",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700440287107315,
+   "a": "w16i_schemeavg",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.970043952286952,
+   "a": "blend160origm_h3",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700439416025145,
+   "a": "blendtop3",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700439385711949,
+   "a": "blend159av",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700439081250765,
+   "a": "blend159av_h3",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700438994747016,
+   "a": "blend159av",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700438882873831,
+   "a": "w15f_antistudent_avg",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700437952603895,
+   "a": "w16f_armavg",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.9700437071788337,
+   "a": "blend160origm_h3",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700436975463808,
+   "a": "blendtop3",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700436580668081,
+   "a": "blend159av_h3",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700436376167106,
+   "a": "w15f_antistudent_avg",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700436253106042,
+   "a": "blend159av",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.970041768650413,
+   "a": "w15f_antistudent_avg",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.970041186246028,
+   "a": "blendtop3",
+   "b": "w15f_antistudent_avg"
+  },
+  {
+   "e_max": 0.9700411758205801,
+   "a": "blend160origm_h3",
+   "b": "w15f_antistudent_avg"
+  },
+  {
+   "e_max": 0.9700411252857325,
+   "a": "blend159av_h3",
+   "b": "w15f_antistudent_avg"
+  },
+  {
+   "e_max": 0.970041005403327,
+   "a": "blend159av",
+   "b": "w15f_antistudent_avg"
+  },
+  {
+   "e_max": 0.9700408141194474,
+   "a": "blendtop3",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.9700407362286151,
+   "a": "blend159av_h3",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.9700406754333488,
+   "a": "blend160origm_h3",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.9700398535724885,
+   "a": "blend159av",
+   "b": "w16q_ens4avg"
+  },
+  {
+   "e_max": 0.9700379820590205,
+   "a": "blend159av_h3",
+   "b": "blend160origm_h3"
+  },
+  {
+   "e_max": 0.9700379704654114,
+   "a": "blend159av_h3",
+   "b": "blendtop3"
+  },
+  {
+   "e_max": 0.9700378684939656,
+   "a": "blend160origm_h3",
+   "b": "blendtop3"
+  },
+  {
+   "e_max": 0.9700377757441617,
+   "a": "blend159av",
+   "b": "blendtop3"
+  },
+  {
+   "e_max": 0.9700375262315271,
+   "a": "blend159av_h3",
+   "b": "blend159av"
+  },
+  {
+   "e_max": 0.9700371187519428,
+   "a": "blend159av",
+   "b": "blend160origm_h3"
+  }
+ ],
+ "current": [
+  "w16i_schemeavg",
+  "blend159av_h3"
+ ],
+ "hedge": [
+  "w16i_schemeavg",
+  "blend159av"
+ ],
+ "e_current": 0.9700439081250765,
+ "e_hedge": 0.9700438994747016,
+ "auto": {
+  "tier1": "w16q_ens4avg",
+  "tier2": [
+   "w15f_antistudent_avg",
+   "w16b_cellweight",
+   "w16f_armavg",
+   "w16i_schemeavg",
+   "w16n_finegrid"
+  ],
+  "limit2": [
+   {
+    "x": "w15f_antistudent_avg",
+    "e_max": 0.970041768650413,
+    "d_vs_wanted": -2.1394746634548767e-06,
+    "se": 7.324556022766689e-08,
+    "p": 0.094
+   },
+   {
+    "x": "w16f_armavg",
+    "e_max": 0.9700437952603895,
+    "d_vs_wanted": -1.1286468691307228e-07,
+    "se": 4.2129712479439026e-08,
+    "p": 0.398
+   },
+   {
+    "x": "w16i_schemeavg",
+    "e_max": 0.9700440287107315,
+    "d_vs_wanted": 1.2058565505768115e-07,
+    "se": 2.549453020686191e-08,
+    "p": 0.09
+   },
+   {
+    "x": "w16n_finegrid",
+    "e_max": 0.970044052998869,
+    "d_vs_wanted": 1.4487379251515442e-07,
+    "se": 2.6104817577897518e-08,
+    "p": 0.59
+   },
+   {
+    "x": "w16b_cellweight",
+    "e_max": 0.9700441511337451,
+    "d_vs_wanted": 2.4300866862914107e-07,
+    "se": 8.890111281240103e-08,
+    "p": 0.544
+   }
+  ],
+  "limit1": {
+   "e": 0.9700398356591297,
+   "d_vs_wanted": -4.072465946755255e-06
+  }
+ }
+}

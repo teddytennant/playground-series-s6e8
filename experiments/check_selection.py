@@ -67,6 +67,30 @@ COMP = "playground-series-s6e8"
 #     0 of 296,302 test rows differ in rank. The floor there is EXACTLY ZERO. Those two hedge
 #     costs are real, not noise; they are small, and both decisions stand on their own error
 #     bars, but do not dismiss a future sub-2e-6 quantity "because it is under the floor".
+# NOT CHANGED 2026-08-16 by w16s (slot 8) either, but this is where h3/ens4 gets SETTLED.
+# w16q left it open. w16s added `w16q_ens4avg` and `blend159av` to w16k's 500-rep simulated
+# private slice (seed 1616, f 0.20, same paired protocol; the seven old candidates reproduced
+# w16k's means at exactly 0.0000e-6, 7/7). experiments/w16s_pickcheck3.py:
+#
+#   blend159av_h3  - blend159av      CV d +4.30e-6   P(h3 better on ONE private draw) 0.912
+#   w16i_schemeavg - w16q_ens4avg    CV d +4.15e-6   P(h3 better on ONE private draw) 0.908
+#
+# So the CV margin is not a coin flip, and BOTH WANTED files are on the winning side.
+#
+# The public-LB counter-reading is fully explained and needs no train/test story. Scoring the
+# SAME draws on a public-SIZED slice (59,260 rows vs 237,042) the draw sd rises from 2.98e-6 to
+# 7.08e-6 and swamps the ~5e-6 signal: P(a public-sized slice REVERSES h3) = 0.244. w16q's 6/6
+# is ONE observation, not six — nested near-identical files scored against the same fixed slice
+# — so it is a p~0.24 event. And w16q bounded the true LB difference at (-20e-6, 0): this model
+# puts 0.244 of its mass in exactly that window and 0 of 500 draws below -20e-6. Do not reopen.
+#
+# The CROSS-AXIS HEDGE was evaluated and declined. Both WANTED files being h3-side means they
+# fail together if the transform axis flips; {w16i_schemeavg, blend159av} would hedge the
+# correction family AND the transform at the same p23+p0 cost. Its E[max] is 0.97004390 against
+# WANTED's 0.97004391 — a price of -0.009e-6, tiny but real (w16q: the floor here is ZERO), so
+# the pre-registered rule ">= current" failed and the pick stands. Recorded because E[max] on
+# train draws can only see the world where the CV ordering is RIGHT, which is not the world the
+# hedge is for: it shows the hedge is nearly FREE, not that it is worthless.
 WANTED = {"w16i_schemeavg.csv", "blend159av_h3.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
@@ -129,12 +153,23 @@ def main() -> int:
             tier = 1 + tiers.index(next(sc for sc, fn in scored if fn == risk[0]))
             print(f"  ** blend158_logit (CV 0.969961, ~88e-6 below the CV pick) is in "
                   f"auto-slot {tier}'s tie. **")
-        print("Priced by w15i: +9.2e-6 if the final-submission limit is 2, +36.5e-6 if it")
-        print("is 1, +112e-6 in the worst branch. ~2.5 places per 1e-5 at the local density.")
+        print("REPRICED 2026-08-16 by w16s. w15i's +9.2/+36.5/+112e-6 ladder is STALE: it was")
+        print("dominated by blend158_logit (CV 0.969961) sitting in a top-two tie, and slot 7's")
+        print("0.97108 pushed it out of BOTH tiers. On w16k's 500 paired draws the click is now")
+        print("worth between -0.24e-6 and +2.14e-6 if the final-submission limit is 2 (it")
+        print("depends which tier-2 file the undocumented tiebreak picks), and +4.07e-6 if the")
+        print("limit is 1. ~2.5 places per 1e-5 at the local density. See w16s_pickcheck3.json.")
+        print("  Still worth clicking, but no longer an emergency. Note WHY it is worth it:")
+        print("  auto-slot 1 is held by the best PUBLIC score, which is one of the WEAKEST")
+        print("  corrected files on CV — auto-selection is the Rogii failure run by Kaggle.")
+        print("  The E[max] figures above UNDERSTATE the click: WANTED spends its second slot")
+        print("  on a zero-parameter file as insurance against the whole corrected family")
+        print("  failing, and a simulation drawn from train rows cannot price that.")
         print(f"Wanted: {', '.join(sorted(WANTED))}")
-        print("  note (w16q): both wanted files are h3-side. h3 beats ens4 on CV 6/6 and")
-        print("  loses to it on the public LB 6/6. WANTED follows CV, as the brief requires;")
-        print("  switching the zero-parameter hedge to blend159av costs -4.30e-6 of CV.")
+        print("  note (w16s): both wanted files are h3-side and that is now SETTLED, not")
+        print("  deferred. h3 beats ens4 on CV with P 0.912 on a single private-sized draw;")
+        print("  the public slice disagrees, but a public-SIZED slice reverses a true h3")
+        print("  advantage 24% of the time and w16q's 6/6 is one draw. WANTED follows CV.")
         return 1
 
     print("\nselected:")

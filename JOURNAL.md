@@ -8620,3 +8620,219 @@ gap to first; or anything built to top the public slice.
 `experiments/check_selection.py` is the only existing file modified — a comment block recording
 §1 and §2 and a printed note under the "nothing is selected" branch; **`WANTED` is untouched**.
 `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.
+
+## 2026-08-16 — w16s, slot 8/10, ANGLE (as handed): "Feature engineering: interactions, in-fold target and count encodings, careful categorical treatment"
+
+**The handed angle is CLOSED.** Feature engineering on the original columns has been on the
+2026-08-13 closed list since that day and is re-skipped here without spending anything on it.
+Noted and moved on, per the run-context rule.
+
+**⚠ THIS SLOT DID NOT SUBMIT, AND THAT WAS THE ASSIGNMENT — NOT A WASTED SLOT.** Verified live
+before starting: `kaggle competitions submissions -c playground-series-s6e8 -v` returns **8 rows
+dated 2026-08-16** (blend160orig, w16b_cellweight, w16f_armavg, w16i_schemeavg, w16l_maskw_h3,
+w16n_finegrid, w16h_h3av6, w16q_ens4avg), so **2 of 10 sends remain** and the quota does not roll
+until 00:00 UTC 2026-08-17. Three slots (8, 9, 10) sit inside that same day. The two sends are
+allocated to slots 9 and 10; this slot's product is a **decision**, not a file. The exception in
+the slot prompt (send anyway if fewer than 8 were used, or the quota had rolled) was checked and
+did not apply.
+
+Everything below is one script, `experiments/w16s_pickcheck3.py`, log `logs_w16s_pickcheck3.txt`,
+JSON `experiments/w16s_pickcheck3.json`. It is w16k's instrument — 500 reps, seed **1616**,
+f **0.20**, every file scored on the SAME simulated slice each rep so every ± is a paired
+standard error — with the two ens4-side candidates added, exactly as w16q §7.1 specified.
+
+### 0. The instrument was gated against w16k first, and reproduces to the digit
+
+All seven of w16k's candidates, re-run here in a fresh process with the same seed and protocol:
+
+| file | w16k stored mean | here | d |
+|---|---|---|---|
+| `blend159av_h3` | 0.97003740 | 0.97003740 | +0.0000e-6 |
+| `blend160origm_h3` | 0.97003690 | 0.97003690 | +0.0000e-6 |
+| `blendtop3` | 0.97003768 | 0.97003768 | +0.0000e-6 |
+| `w15f_antistudent_avg` | 0.97004095 | 0.97004095 | +0.0000e-6 |
+| `w16b_cellweight` | 0.97004390 | 0.97004390 | +0.0000e-6 |
+| `w16f_armavg` | 0.97004361 | 0.97004361 | +0.0000e-6 |
+| `w16i_schemeavg` | 0.97004389 | 0.97004389 | +0.0000e-6 |
+
+**Gate PASSED**, 7/7 at exactly zero — another instance of w16q §2's point that the floor for
+objects on a fixed stored base is zero, not 2e-6. The whole run was executed three times while
+Parts 2 and 3 were added, and every Part 1 number was byte-identical each time.
+
+### 1. ⚠ Stated BEFORE running: this instrument cannot break the CV-vs-LB tie, and it was never going to
+
+The slices are drawn from **train rows**. The mean over reps is therefore a resample of the same
+OOF vectors that produce the CV — measured here at a uniform **−11.7e-6** offset for all nine
+candidates — so it **cannot contradict CV in direction**. Reading "the simulation prefers h3" as
+fresh evidence against the public slice would be double-counting CV, and this was written into
+the script's docstring before the first number printed so it could not be claimed afterwards.
+
+What it genuinely adds is **dispersion**, and that is the number the deadline pick actually needs:
+the private set is **one draw**, not a mean. A +4.3e-6 CV margin at P(win) 0.55 is a coin flip
+dressed as a decision; the same margin at P 0.91 is not.
+
+### 2. The answer: h3 wins, and the margin is NOT a coin flip
+
+Paired within matched file, on a private-sized draw (237,042 rows):
+
+| pair | CV d | sim d | draw sd | **P(h3 better on ONE draw)** |
+|---|---|---|---|---|
+| `blend159av_h3` − `blend159av` (p0, the hedge slot) | +4.30e-6 | +4.19e-6 ±0.13 | 2.98e-6 | **0.912** |
+| `w16i_schemeavg` − `w16q_ens4avg` (p23, the corrected slot) | +4.15e-6 | +4.05e-6 ±0.13 | 2.99e-6 | **0.908** |
+
+The two slots agree to within 0.15e-6, which is itself worth noting: the h3/ens4 advantage
+survives the 23-parameter `c_avg` correction essentially undiminished, so it is a property of the
+transform and not of the base it is measured on.
+
+### 3. ⚠ The public-LB disagreement does NOT need explaining — it is a 1-in-4 slice event
+
+This is the part I did not expect to be able to settle, and it is the most useful thing here.
+w16q read h3 one 1e-5 reporting step **below** ens4 on the public slice in 6/6 member sets and
+left open whether that implies something the OOF cannot see. Same 500 draws, scored on the
+**public-sized complement** (59,260 rows) instead:
+
+| pair | public-sized mean | draw sd | P(slice REVERSES h3) | P(d ≤ −20e-6) |
+|---|---|---|---|---|
+| `blend159av_h3` − `blend159av` | +5.17e-6 | **7.08e-6** | **0.244** | **0.000** |
+| `w16i_schemeavg` − `w16q_ens4avg` | +5.04e-6 | **7.09e-6** | **0.248** | **0.000** |
+
+**The public slice is 4× smaller, so its draw sd is 2.4× larger than the private one and it
+swamps a 5e-6 signal.** Under the CV-side model — h3 genuinely ahead — a public-sized slice
+reverses the ordering **~24% of the time**.
+
+⚠ **And those six member sets are ONE observation of the slice, not six.** They are nested builds
+of near-identical objects and, decisively, they were all scored **against the same fixed public
+slice**. There is exactly one draw in that data. So the LB reading is a p ≈ 0.24 event. That is
+not evidence of anything.
+
+The magnitude bound closes it. w16q bounded the true LB difference at **(−20e-6, 0)** from the
+5-dp rounding steps. This model puts **0.244** of its mass in that window and **0.000 of 500
+draws** below −20e-6. The observed reading does not merely fail to contradict the CV model — it
+lands **entirely inside** the region where that model puts its reversal mass. **No train/test
+distribution difference has to be invoked, and none is claimed.**
+
+**h3 vs ens4 is therefore settled for the deadline pick: h3, on CV, at P 0.91 on a single
+private-sized draw, with the LB counter-reading fully accounted for as slice noise.**
+
+### 4. Pre-registered rules, fixed before the first run, both evaluated mechanically
+
+**R1 — move `WANTED` to an ens4-side file?** Predicted False in the docstring so a "no move"
+could not be read as inertia. Came out False on every clause:
+
+```
+blend159av   CV > blend159av_h3   CV ?  0.97004488 > 0.97004917  -> False
+w16q_ens4avg CV > w16i_schemeavg  CV ?  0.97005152 > 0.97005567  -> False
+ens4-side pair E[max] 0.97003985 > current 0.97004391 ?  -> False  (d -4.05e-6)
+```
+
+**R2 — the cross-axis hedge `{w16i_schemeavg, blend159av}`.** This is the one genuinely new
+option the slot created. Both current picks are h3-side, so if the transform axis goes the other
+way on private rows they fail **together**; that pair hedges the correction family *and* the
+transform axis with the same second file at no extra parameter cost (p23+p0, identical to now).
+
+```
+hedge E[max] 0.97004390 >= current 0.97004391 ?  -> False
+price of the transform hedge = -0.009e-6 +/-0.006   P(hedge better on a draw) 0.006
+```
+
+**The pick does not move.** The cost is −0.009e-6, which is 1/478 of the CV margin it hedges and
+by any practical standard nothing — but w16q §2 established the floor here is **exactly zero**, so
+it is a real cost and may not be waved through as sub-noise. The pre-registered rule said `>=`.
+It is `<`. Rule honoured.
+
+⚠ **But record the instrument's blind spot rather than pretending R2 was informative.** E[max] on
+train draws prices the hedge at ~0 because it can only ever see the world in which the CV
+ordering is *correct* — which is precisely the scenario the hedge does not exist for. R2
+establishes that the transform hedge is **nearly free**, not that it is worthless. Whether to buy
+a free hedge against a proposition the same instrument assigns P 0.09 is a judgement, and it is
+now on the page for the human with a price attached instead of being invisible.
+
+### 5. ⚠ The auto-selection exposure ladder was stale and is repriced — it collapsed by ~50×
+
+`check_selection.py` still exits 1 after eight slots. w16q §5 flagged that the tiers moved; read
+live here:
+
+```
+auto-slot 1: public 0.97108, 1-way tie - w16q_ens4avg
+auto-slot 2: public 0.97107, 5-way tie - w15f_antistudent_avg, w16b_cellweight,
+                                         w16f_armavg, w16i_schemeavg, w16n_finegrid
+```
+
+**`blend158_logit` (CV 0.969961, ~88e-6 below the CV pick) has dropped out of both tiers.** It
+was the catastrophic branch that dominated w15i's **+9.2 / +36.5 / +112e-6** ladder, and that
+ladder has been quoted in every slot since. It is now **dead**. Repriced against the same 500
+draws (`w16n_finegrid` added to the candidate set **for pricing only**, pre-registered as
+ineligible to move `WANTED`, so adding a file after seeing Part 1 could not touch the pick):
+
+| auto pair, limit 2 | E[max] | vs `WANTED` |
+|---|---|---|
+| `w16q_ens4avg` + `w15f_antistudent_avg` | 0.97004177 | −2.14e-6 ±0.07 |
+| `w16q_ens4avg` + `w16f_armavg` | 0.97004380 | −0.11e-6 ±0.04 |
+| `w16q_ens4avg` + `w16i_schemeavg` | 0.97004403 | +0.12e-6 ±0.03 |
+| `w16q_ens4avg` + `w16n_finegrid` | 0.97004405 | +0.14e-6 ±0.03 |
+| `w16q_ens4avg` + `w16b_cellweight` | 0.97004415 | +0.24e-6 ±0.09 |
+
+**Cost of not clicking, limit 2: between −0.24e-6 and +2.14e-6.** Limit 1 branch (auto takes
+`w16q_ens4avg` alone): **+4.07e-6 ±0.13**, P(auto better) 0.090.
+
+⚠ **Three of the five tier-2 members give the auto-pick a HIGHER E[max] than `WANTED`.** That is
+not a reason to stop wanting the click, and the reason it happens is worth stating plainly: the
+auto-pick pairs two *corrected* files, while `WANTED` deliberately spends its second slot on a
+**zero-parameter** file as insurance against the whole corrected family failing — insurance this
+instrument structurally cannot price, the same blind spot as §4/R2. What has genuinely changed is
+the **magnitude**: the click is worth **at most ~2.1e-6, not 112e-6**, and any future slot
+quoting w15i's ladder is quoting a tier structure that stopped existing at 08:17 UTC today.
+
+⚠ Note what the platform would do unattended: **`w16q_ens4avg` holds auto-slot 1 on the strength
+of being the best PUBLIC score while being one of the account's weakest corrected files on CV**
+(0.97005152 vs `w16i_schemeavg`'s 0.97005567). Auto-selection by public score is the Rogii
+failure executed by Kaggle instead of by us. Still worth the click; just no longer an emergency.
+
+### 6. Deadline picks — UNCHANGED, and now for a measured reason rather than a deferred one
+
+`WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}` — **five consecutive slots without a move.**
+The difference this slot makes is that the h3/ens4 question is no longer *open and deferred*
+(w16q §1's position), it is **settled on CV-legitimate grounds** with the LB counter-reading
+quantitatively accounted for. `check_selection.py`'s comment block is updated with §3 and §5;
+**`WANTED` itself is untouched.**
+
+### 7. CLOSED by this run
+
+- **h3 vs ens4 for the deadline pick** — settled: h3, P 0.912 / 0.908 on a single private-sized
+  draw. Do not re-open it on the public slice; §3 shows that reading is a p≈0.24 event on **one**
+  draw and its magnitude bound sits inside the model's own reversal mass.
+- **"Does the CV/LB disagreement imply a train/test difference?"** — no. Fully explained by
+  public-slice size. Nothing further to spend here.
+- **w15i's +9.2 / +36.5 / +112e-6 auto-pick ladder** — retired, stale tier structure. Use §5.
+- **The cross-axis hedge pair** — priced at −0.009e-6, not adopted, does not need re-pricing.
+- Add to the closed list: the handed angle, **feature engineering on the original columns**
+  (closed 08-13, re-skipped).
+
+### 8. What slot 9 should build with the FIRST of the two remaining sends
+
+Everything on the 2026-08-13, w14b, w14d, w15j §6, w16a §6, w16c §7, w16h §6, w16l §4, w16m §5,
+w16o §6 and w16q §6 closed lists stands, **plus §7 above**.
+
+1. **Send something on the ens4 base.** §2 and §3 together say h3 wins CV and the slice
+   disagreement is noise — but the account has exactly **one** ens4-side corrected file
+   (`w16q_ens4avg`, sent 8 hours ago) against a large h3-side family, and that asymmetry is why
+   w16q had to build one from scratch. `w16b_cellweight` on the ens4 base is the obvious gap:
+   it is the p7 arm, it is the highest-CV single arm on the h3 side, and w16q §5 already showed
+   the `c_avg` weight structure reproduces on the ens4 base (all five arms within 0.5e-6). It
+   costs one refit of stored weights. It also directly tests §2's claim that the h3/ens4 gap is
+   a property of the transform, on a third base.
+2. **Or the unhedged optimum**, `w16b_cellweight + w16i_schemeavg`, which tops the E[max] table
+   at **+0.77e-6 ±0.06** over `WANTED` — but note P is only 0.496 and both w16c and w16i already
+   declined it on hedging grounds. If slot 9 wants it, it needs an argument about the *hedge*,
+   not about the +0.77e-6.
+3. **Do NOT** spend either remaining send on: anything ens4-vs-h3 (§7); anything sized to move
+   the public slice; or re-pricing the click.
+4. **Slot 10 must re-run `check_selection.py` and put the live tiers in the journal** — the
+   tiers move every time a new top score lands, and §5 is the second time in one day a quoted
+   ladder went stale.
+
+### Files created
+
+`experiments/w16s_pickcheck3.py` + `w16s_pickcheck3.json`, `logs_w16s_pickcheck3.txt`.
+`experiments/check_selection.py` is the only existing file modified — comment block only,
+**`WANTED` untouched**. No submission. `JOURNAL.md` / `RESEARCH.md` appended to only.
