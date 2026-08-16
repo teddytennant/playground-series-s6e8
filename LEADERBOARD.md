@@ -654,3 +654,15 @@ Our public best is now a **5-way tie at 0.97107** — `w15f_antistudent_avg`, `w
 above every zero-parameter file on CV, so Kaggle's default auto-pick's first slot is safe under
 any tiebreak rule. The exposure remains auto-slot 2, the 7-way tie at 0.97106 that contains
 `blend158_logit`. 47 submissions total, none selected.
+
+## 2026-08-16 07:45 UTC (w16o, slot 6)
+
+- 1,954 teams. **We are rank 47 at 0.97107**, unchanged from w16m's 06:45 reading — the field
+  did not pass us this hour.
+- Top: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124, Maher el Ouahabi 0.97122,
+  cstdy 0.97121. Gap to first 25e-5.
+- Sent this slot: `w16h_h3av6.csv` ref 55546833, CV 0.97004873, **public 0.97105** — matches
+  the pre-registered h3-shelf prediction and makes that shelf 10 of 10.
+- 7 of 10 submissions used on the 2026-08-16 Kaggle day (CLI: "3 submissions remaining today").
+- `check_selection.py` still exit 1 after 48 submissions. Auto-slot 1 is a 5-way tie at
+  0.97107, all CV-good; auto-slot 2 is the 7-way 0.97106 tie containing `blend158_logit`.

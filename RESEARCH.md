@@ -4228,3 +4228,54 @@ per outer split, two splits minimum for an error bar. Budget a whole slot. The s
 baseline it must be compared against is already measured, three outer splits:
 `gap_bagging` **+662.6e-6 ± 6.9**, `gap_total` +432.4e-6 ± 53.8, `gap_honesty` −230.2e-6 ± 60.5,
 `gap_size` +339.2e-6 ± 59.9.
+
+## w16o (2026-08-16) — the OOF/test bagging asymmetry, priced at PACK scale
+
+Durable facts. Everything here is measured, in `experiments/w16o_blendbag.json`.
+
+**The asymmetry itself.** `agent/run_lgbm.py:116-118` and the standard 5-fold convention: a
+member's OOF column is ONE model trained on 80%; its test column is the MEAN of FIVE. So the
+two arrays are different estimators and the difference is variance reduction, worth real AUC.
+
+**Its size depends on how many members you blend, and the law is exact.**
+
+    gap_aligned(k)    = A + B/k        A = +112.9e-6 +- 0.3   (common 80% subsample)
+    gap_misaligned(k) = (A + B)/k      B = +490.5e-6 +- 3.3   (member-specific)
+
+Fitted per outer split, 5 points, rms <= 0.26e-6 in all three splits. Measured curve
+(aligned / misaligned, e-6): k1 +603.3+-3.1 / -, k2 +358.6+-1.5 / +290.6, k3 +276.5+-0.8 /
++200.7, k4 +235.4+-0.6 / +152.8, k5 +210.9+-0.4 / +123.4.
+
+- **SURVIVAL A/(A+B) = 18.7% +- 0.1.** At the real 160-member pack size, **+116.0e-6 +- 0.3**.
+- Rescaled onto w15g's single-member +662.6e-6 baseline: **+127.4e-6** at pack scale.
+- The misaligned control is a ZERO-free-parameter prediction of the same fit and matches the
+  measurement to 1-4%, so w15g's proposed mechanism (fold f's training subsample is common to
+  every member) is REAL and is exactly the A floor — but it is 19% of the effect, not most.
+
+**⚠ CORRECTION to w15g §5, inherited by w15j, w16a and w16m.** "The bagging asymmetry is the
+first mechanism at least as large as the +98e-6 residual CV→LB gap" is true for ONE member and
+false for a blend. `gap_honesty` does NOT shrink with k (−243.7e-6 at k=1, −261.5 +- 57.1 at
+k=5) while bagging collapses, so blend-level `gap_total`, measured directly with the
+missingness confound removed by construction, is **−50.6e-6 +- 56.8** — wrong size and wrong
+sign. The +98e-6 residual has no mechanism of the right size and should be treated as
+closed-by-exhaustion, not as a live lead.
+
+**Method note worth reusing.** In a TRAIN/HOLD design where no fold model saw any HOLD row,
+ALL M x 5 models are valid HOLD predictors, so scoring the blend with the members' fold indices
+MISALIGNED is an exactly MATCHED control — same models, same rows, same operator, only the
+index tuple differs. Nothing is refitted, resampled or shuffled. Prefer this over a permuted
+control whenever the construction allows it.
+
+**⚠ Instrument lesson (the wave's fourth).** A per-member effect does not transfer to the pack
+at its own size. The transfer law is how it decomposes into common and member-specific parts,
+and 81% of this one was member-specific. Before quoting a single-member number as a property of
+the 160-member stack, measure it at two blend sizes and fit A + B/k.
+
+**Harness gate that any rerun should reproduce.** `w16o`'s `lgbm_te` is `w15g_cvgap.py`'s member
+verbatim: gap_bagging **+663.3e-6 [+662.7, +651.8, +675.5]** against w15g's **+662.6
+[+660.4, +652.0, +675.5]**; gap_honesty −235.7 against −230.2. Geometry: 691,369 labelled rows
+→ TRAIN 483,959 / HOLD 207,410 stratified, inner SKF5 seed42, 400 rounds, 3 outer splits,
+~13 min per split at 14 threads.
+
+**CV→LB ladder, updated.** The h3 / top-cluster shelf is now **10 of 10 at 0.97105**
+(`w16h_h3av6` ref 55546833 the tenth, CV 0.97004873, pre-registered and hit).

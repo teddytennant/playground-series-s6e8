@@ -8053,3 +8053,262 @@ slice.
 `submissions/w16n_finegrid.csv` (sent, 55545549) + its `oof_`. **No existing file was
 modified** — `check_selection.py` is untouched for the second slot running, and
 `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.
+
+## 2026-08-16 — w16o/w16p, slot 6/10, ANGLE (as handed): "CatBoost: tune and compare on identical folds"
+
+**The handed angle is closed and I spent nothing on it.** Member hyperparameter tuning was
+measured as a null on 2026-08-13 (slot 9 was the CatBoost version specifically) and sits on
+the 08-13, w14b, w15j §6, w16a §6 and w16m §6 closed lists. Slot 5 was handed the LightGBM
+version of the same angle and skipped it; the slot prompt told me to do the same. Noted,
+skipped, no cycles spent. The slot went to **w16a §6 item 1 / w16m §6 item 1** — the bagging
+asymmetry through blending, the last substantial open item.
+
+**Slots 7–10: §2 CLOSES w16a item 3 with a reversal, and §3 is a number the workspace has
+been quoting the wrong way round for a day. Read both before picking your angle.**
+
+### 0. Housekeeping, verified rather than assumed
+
+- Live API before sending: **6 rows dated `2026-08-16`** (`blend160orig` 03:35,
+  `w16b_cellweight` 04:00, `w16f_armavg` 04:16, `w16i_schemeavg` 05:08, `w16l_maskw_h3` 05:46,
+  `w16n_finegrid` 06:43). After my send the CLI printed **"3 submissions remaining today"**,
+  which agrees exactly: 7 of 10 used. The prompt's "6 of 10" was right.
+- `experiments/check_selection.py` → **still exit 1, nothing selected**, control reads 47
+  successful submissions. Untouched by this run — third w16 slot running that has not moved
+  `WANTED`. The auto-tiers it prints live: slot 1 is a **5-way tie at 0.97107**, all five
+  corrected files and all five above every zero-parameter file on CV; slot 2 is the 7-way tie
+  at 0.97106 that contains `blend158_logit`. **The human click is still outstanding.**
+- Board at 07:40 UTC from the downloaded leaderboard: **1,954 teams**, we are **rank 47** at
+  0.97107, MILANFX **0.97132**, Optimistix 0.97125, Utkarsh 0.97124, Maher el Ouahabi 0.97122,
+  cstdy 0.97121. Identical to w16m's reading an hour earlier — the field did not move past us
+  this hour.
+
+### 1. What was actually measured, and why the cheap version of it does not exist
+
+`agent/run_lgbm.py:116-118`, which is also the standard 5-fold convention and therefore holds
+for every member of the 160-member pack and for the public library members too:
+
+```python
+oof[iva] = pb                 # ONE model, trained on 80%
+tp += pt / N_SPLITS           # the MEAN of FIVE such models
+```
+
+Every member's OOF column is a single model; its test column is a five-model bag. w15g §5
+priced that asymmetry **for one member** at `gap_bagging` **+662.6e-6 ± 6.9**, called it the
+first named mechanism at least as large as the +98e-6 residual CV→LB gap, and then stated its
+own honest limit: it had **not** measured how much survives 160-member blending. Its argument
+that most of it does — fold *f*'s training subsample is **common to every member**, so
+fold-model idiosyncrasy does not average out the way independent seed noise would — was
+labelled "an argument, not a measurement."
+
+w16m §4 corrected the cost estimate three entries had repeated: this is **not** two extra
+configurations in `w15g_cvgap.py`'s loop, because that loop trains six LightGBMs per outer
+split for **one** member and the quantity is a property of a *blend*, which the loop cannot
+represent. I took w16m's version and budgeted the whole slot. `experiments/w16o_blendbag.py`
+is the scaled stack: **five diverse members**, not 160 and not 3–4.
+
+**Geometry, identical to `w15g_cvgap.py` on purpose so the numbers are comparable.** 691,369
+labelled rows → **TRAIN 483,959 / HOLD 207,410**, stratified, so TRAIN and HOLD have the same
+missingness distribution and w15c's +905e-6 confound is off by construction. Inner
+`StratifiedKFold(5, shuffle, random_state=42)` inside TRAIN, **the same five partitions for
+every member**. Members: `lgbm_te` (w15g's exact configuration), `lgbm_raw`, `xgb_te`,
+`cat_te`, `xgb_raw` — three learner families, two feature sets. 400 rounds, 3 outer splits,
+25 models per split.
+
+**HARNESS GATE, pre-registered in the docstring and passed.** `lgbm_te` is w15g's member
+verbatim and must land inside w15g's per-split range or the geometry has drifted:
+
+```
+w16o lgbm_te   gap_bagging +663.3e-6  se 6.9   [+662.7, +651.8, +675.5]
+w15g reference gap_bagging +662.6e-6  se 6.9   [+660.4, +652.0, +675.5]
+```
+
+Its `gap_honesty` also reproduces: **−235.7e-6** here against w15g's −230.2e-6.
+
+**The control is exactly MATCHED, not permuted, and the construction is the reason.** No model
+saw any HOLD row, so **all 25 models per split are valid predictors of all of HOLD** and any
+(member, fold) combination may be scored. The real pipeline's OOF geometry is the **aligned**
+one — a row in fold *f* gets every member's fold-*f* model, all trained on the identical 80%.
+Break exactly that and nothing else: rescore the same blend with the members' fold indices
+**misaligned**, over all 5^k − 5 non-constant tuples. Same models, same rows, same rank-average
+operator, same model count; only the index tuple differs. Nothing is refitted, resampled or
+reshuffled. Blend operator is a plain unweighted rank average — zero fitted parameters, so
+there is no argmax anywhere in this run.
+
+### 2. THE ANSWER: 18.7% survives, not "most" — and w15g's mechanism is real but is only the floor
+
+`gap_bagging` by blend size *k*, every subset of every size enumerated, 3 outer splits:
+
+| k | ALIGNED (the real geometry) | MISALIGNED (matched control) | aligned − misaligned | survival vs k=1 |
+|---|---|---|---|---|
+| 1 | **+603.3e-6 ± 3.1** | — | — | 100.0% |
+| 2 | +358.6 ± 1.5 | +290.6 | +68.0 ± 0.2 | 59.4% |
+| 3 | +276.5 ± 0.8 | +200.7 | +75.8 ± 0.2 | 45.8% |
+| 4 | +235.4 ± 0.6 | +152.8 | +82.5 ± 0.3 | 39.0% |
+| 5 | **+210.9 ± 0.4** | +123.4 | +87.5 ± 0.3 | 35.0% |
+
+Per member at k=1: `lgbm_te` +663.3, `cat_te` +626.9, `xgb_te` +592.7, `lgbm_raw` +568.6,
+`xgb_raw` +564.9. Member pairwise rank correlation on HOLD: min 0.9733, median 0.9874, max
+0.9983 — **the real pack's median maxcorr is 0.9949 and its decorrelated pair 0.9746/0.9762**,
+so this blend is at least as diverse as the thing it stands in for, which if anything makes it
+average *more* than the real pack does, not less.
+
+**The model, and it fits absurdly well** (`experiments/w16p_extrap.py`). Split the fold-model
+error into a part **common** to every member at the same fold index — the shared 80% subsample,
+exactly w15g's named mechanism — and a **member-specific** part. Blending *k* members at the
+same fold index averages the specific part and leaves the common part; misaligning averages
+both. So `gap_aligned(k) = A + B/k` and `gap_misaligned(k) = (A+B)/k`.
+
+```
+seed 1000  A +112.6  B +496.1   fit rms 0.26e-6
+seed 1007  A +113.5  B +484.6   fit rms 0.15e-6
+seed 1014  A +112.7  B +490.8   fit rms 0.25e-6
+```
+
+A two-parameter fit to five points with residuals **under 0.3e-6 on quantities of 200–600e-6**,
+reproduced in all three splits.
+
+| quantity | value |
+|---|---|
+| **A** — the common-subsample floor, k → ∞ | **+112.9e-6 ± 0.3** |
+| **B** — the member-specific part, averages away as 1/k | **+490.5e-6 ± 3.3** |
+| **A + B/160 — the projection at the real pack size** | **+116.0e-6 ± 0.3** |
+| **SURVIVAL A/(A+B)** | **18.7% ± 0.1** |
+
+**The control validates the model with no free parameter.** `(A+B)/k` is fully determined by
+the aligned fit, and the measured misaligned curve matches it to **1–4%** (k=2 292.7 vs 304.3;
+k=3 201.8 vs 202.9; k=4 153.4 vs 152.2; k=5 123.6 vs 121.7, seed 1000, and the other two splits
+the same). So **w15g's mechanism is real and is precisely the A term** — the common fold
+partition genuinely does stop that part averaging out. **But it is 19% of the effect, not most
+of it.** Rescaled onto w15g's own +662.6e-6 single-member baseline, the 160-member pack keeps
+**+127.4e-6**.
+
+### 3. ⚠ THE REVERSAL — at blend level the confound-free gap is NOT +98e-6 and does not even have that sign
+
+The bagging term is only one of two, and w15g reported both for a single member: `gap_total =
+gap_bagging + gap_honesty`, with honesty **−230.2e-6**. Bagging collapses with *k*; **honesty
+does not.** Measured at both ends: **−243.7e-6 at k=1** (mean over the five members) and
+**−261.5e-6 ± 57.1 at k=5**. Flat within its own error.
+
+| | gap_bagging | gap_honesty | gap_total |
+|---|---|---|---|
+| w15g, single member | +662.6 ± 6.9 | −230.2 ± 60.5 | **+432.4 ± 53.8** |
+| w16o, single member (k=1) | +603.3 ± 3.1 | −243.7 | — |
+| **w16o, 5-member blend** | **+210.9 ± 0.4** | **−261.5 ± 57.1** | **−50.6e-6 ± 56.8** [−51.7, +48.4, −148.5] |
+
+**`gap_total` for a blend, measured directly with the missingness confound removed by
+construction, is −50.6e-6 ± 56.8.** Not +98e-6, not +432e-6, and not positive. The surviving
+bagging term is more than cancelled by the honesty term, which blending does not shrink.
+Projecting to k=160 with honesty held flat gives ≈ **−146e-6**, i.e. CV should *overstate*
+— but honesty is measured at only two blend sizes and carries se ~57e-6, so treat the
+projection of the **total** as suggestive and the projection of **bagging** (±0.3) as solid.
+
+**What this retires.** w15g §5's closing claim — "the bagging asymmetry is the first mechanism
+anyone has named that is at least as large as the thing it has to explain, rather than 25× too
+small" — is **true for a single member and false for our pack**, and w15j, w16a and w16m all
+inherited it. The +98e-6 residual is once again without a mechanism of the right size. That is
+not a licence to hunt for one: w15c closed row identity, w15b closed the lattice and
+power-calibrated the whole regional family, w15g closed cell-count tracking at z +0.02 against
+an in-sample control at z +1151, and the direct blend-level measurement above says the
+scoring-asymmetry family as a whole delivers something indistinguishable from zero. **Treat the
+residual as closed-by-exhaustion rather than as a live lead.**
+
+⚠ **Generalisable, and it is the fourth instrument lesson of this wave.** w16c gave one (a high
+cond-AUC z on a pack member does not convert into AUC), w16h the second (nested-pick stability,
+not the existence of a selection), w16m the third (a fitted parameter on a grid boundary is not
+evidence the boundary binds). This one: **a per-member effect measured at k=1 does not transfer
+to a 160-member pack, and the transfer law is not the effect's own size but how the effect
+decomposes into common and member-specific parts.** 81% of this one was member-specific and
+died on contact with averaging. Before quoting any single-member number as a property of the
+stack, measure it at two blend sizes and fit A + B/k — it costs one script and it changed the
+sign of the headline here.
+
+### 4. Pre-registration, written before either script produced a number, and honoured
+
+`w16o_blendbag.py`'s docstring fixed five rules before the run, because "measure a curve, then
+pick the reading you like" is the same argmax bug that cost w16c +1.778e-6 and w16i +1.546e-6:
+
+1. Report the k=M number against **both** the single-member baseline measured in the same run
+   and w15g's +662.6e-6, with the control beside it, whatever the sign. Honoured — §2's table
+   drops no arm.
+2. The **aligned** arm is the headline because it is the geometry the real pipeline has; the
+   misaligned arm is the control, not an alternative headline. Honoured.
+3. **Ship decision, fixed before any number existed**: this measurement builds no object over
+   the competition test set, so it **cannot** yield a candidate. The slot ships
+   `submissions/w16h_h3av6.csv` unconditionally — the highest-CV file this account has never
+   sent that is not rank-identical to one it has. It shipped on that rule and nothing else.
+   `w16m_widegrid.csv` has higher CV and was excluded because w16m §1 measured it
+   rank-identical to the already-sent `w16i_schemeavg.csv`.
+4. **Deadline picks**: nothing here can move them. They stay `{w16i_schemeavg.csv,
+   blend159av_h3.csv}` and `check_selection.py` is untouched.
+5. The harness gate in §1. Passed at +663.3 against [+660.4, +652.0, +675.5].
+
+### 5. Submitted — `w16h_h3av6`, prediction pre-registered and right
+
+`submissions/w16h_h3av6.csv` — ref **55546833**, 2026-08-16 07:42:43 UTC. CLI: **"3
+submissions remaining today"**. CV **0.97004873**, recomputed here from
+`submissions/oof_w16h_h3av6.npy` rather than trusted from w16h's entry.
+
+**PRE-REGISTERED PREDICTION: 0.97105**, the h3 / top-cluster shelf, which was 9 of 9 in the
+files I looked up live (`blendtop3`, `blend159av_h3`, `blend160origm_h3`, `blend159_h3`,
+`blend156_h3`, `blend160orig_h3`, `blend159av_wh3`, `w16l_maskw_h3`, `blend159av_w`).
+**RESULT: 0.97105.** The shelf is now 10 of 10 and this is the ninth consecutive out-of-sample
+confirmation of w15i's within-family CV→LB fit.
+
+Validated before sending: 296,302 rows, ids equal `sample_submission` exactly, all finite,
+296,302 distinct, range [3.375e-6, 1.0], rank-checked against **every** sent file — closest is
+`blendtop3` with **295,107 of 296,302 rows differing in rank**. Spearman 0.9999890 vs
+`blend159av_h3`. Nothing about it was chosen with reference to the public slice. **Not a
+deadline pick.**
+
+**Honest note on the file.** w16h called `w16h_h3av6` "a measured loss and there is no reason
+to spend a slot on it", and that judgement stands *within its own dimension* — the k=3 pick
+`blendtop3` beats it by ~0.7e-6 on nested CV. It is nonetheless the highest-CV unsent
+non-duplicate file this account holds, and under the brief's submission economics an unused
+slot is pure waste while an extra send can only help public rank. Those are compatible: do not
+spend a slot **building** it, do spend a spare send **on** it.
+
+### 6. CLOSED by this run
+
+- **w16a §6 item 3 / w16m §6 item 1 — how much of the bagging asymmetry survives blending.**
+  **18.7% ± 0.1**, projection **+116.0e-6 ± 0.3** at 160 members, against a matched control
+  that confirms the named mechanism is exactly the surviving floor. Do not re-open with more
+  members, a different blend operator or a different learner mix — the A + B/k law fits at rms
+  ≤ 0.26e-6 in three independent splits and the control is a zero-free-parameter prediction it
+  also matches.
+- **The bagging asymmetry as an explanation of the +98e-6 residual CV→LB gap.** Blend-level
+  `gap_total` is **−50.6e-6 ± 56.8**, wrong size and wrong sign (§3). w15g §5's closing claim
+  does not survive at pack scale.
+- Add to the closed list: the handed angle, **CatBoost member tuning** (already closed 08-13,
+  re-confirmed skipped here).
+
+### 7. What slot 7 should look at first
+
+Everything on the 2026-08-13, w14b, w14d, w15j §6, w16a §6, w16c §7, w16h §6, w16l §4 and
+w16m §5 closed lists stands, **plus §6 above**.
+
+1. **The human click, and it is now unambiguously the top item on the board.** With w16a item 3
+   closed, `check_selection.py` exiting 1 after 48 submissions is the largest priced quantity
+   left: +9.2e-6 if the final-submission limit is 2, +36.5e-6 if it is 1, +112e-6 worst branch,
+   on top of w16i §4's +6.48e-6 for the pick itself. The pick is `w16i_schemeavg.csv` +
+   `blend159av_h3.csv`. It has survived **five** slots unmade and no agent on this box can make
+   it — there is no browser and no display here, so it has to go to a human.
+2. **w16c §7 item 4 / w16a §6 item 4** — sweep the closed list for nulls measured **pooled**
+   over a strong categorical. Still the generalisable lesson of the wave's reversals and still
+   not systematically done. §3 above adds a second pattern worth sweeping for: **any number
+   quoted as a property of the pack that was actually measured on a single member.** w15g's
+   bagging figure was one; there may be others.
+3. **Build a genuinely transductive member** (w16a §6 item 2). Still the only candidate *class*
+   the workspace has not closed, and w15f narrowed rather than settled it.
+
+**Do NOT spend a slot on:** the bagging asymmetry in any framing (§6); the correction's grid on
+either axis (w16m §5); member hyperparameter tuning on any of the three algorithms; averaging a
+dimension whose nested pick is 5/5 stable (w16h §1); the mask as a training weight (w16l §2);
+per-cell member weights (w16c §5); the original dataset (closed four times); re-investigating
+the 25e-5 gap to first; or anything built to top the public slice.
+
+### Files created
+
+`experiments/w16o_blendbag.py` + `w16o_blendbag.json`, `logs_w16o_blendbag.txt`;
+`experiments/w16p_extrap.py`, `logs_w16p_extrap.txt`. **No existing file was modified** —
+`check_selection.py` is untouched for the third slot running, and `JOURNAL.md` /
+`RESEARCH.md` / `LEADERBOARD.md` are appended to only.
