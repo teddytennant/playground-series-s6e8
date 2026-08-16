@@ -4057,3 +4057,85 @@ rank-correlated with the base and is *already in* the 159-member stack at its fi
 its z is information the additive route cannot reach. **Before spending a slot on any future
 `cond AUC z` reading, ask whether the vector is a residual or a pack member.** The same caveat
 applies to `cat_native` (z +3.41 in cell A), which is the same shape and should be assumed null.
+
+## w16h/w16i — the pick-vs-average sweep, 2026-08-16 (slot 3). Read §A before averaging anything.
+
+### A. ⚠ THE TEST IS NESTED-PICK STABILITY, NOT THE EXISTENCE OF A SELECTION
+
+w16c fixed w16b by averaging three arms instead of picking one, and asked the next slot to sweep
+the workspace for the same shape. Swept (`experiments/w16h_pickavg.py`), leave-one-fold-out —
+run the selection rule on four folds, read the chosen object on the fifth:
+
+| dimension | candidates | nested pick | optimism | average − argmax |
+|---|---|---|---|---|
+| member set (6 zero-param `*_h3`) | 6 | `blend159av_h3` 5/5 | **+0.000e-6** | **−0.316e-6** |
+| transform subset, full lattice | 15 | `h3` 5/5 | **+0.000e-6** | **−4.724e-6** |
+| transform subset, logit-free | 7 | `h3` 5/5 | **+0.000e-6** | +0.001e-6 |
+| *(w16c, for contrast)* arms | 3 | a_only 3/5, per_cell 2/5 | **+1.778e-6** | +0.4e-6 and tighter |
+
+**"It was picked rather than averaged" is not by itself a defect.** A pick the data can make
+*consistently* costs nothing; a pick it cannot make is where the optimism lives. Measure the
+stability first — it is one cheap script — and only average when the rule flip-flops. Averaging a
+stable argmax is dilution and here it costs up to 4.7e-6.
+
+Consequences: the member set, the transform lattice and `blendtop3`'s top-k are **closed**. The
+2026-08-11 result "every subset containing `logit` is beaten by the same subset without it, 7/7"
+is structural and untouched by this. Top-k nested fold-means over the h3 family:
+k=1 0.97005270, k=2 …288, **k=3 …312**, k=4 …253, k=5 …234, k=6 …238 — the whole column spans
+0.8e-6, so **treat the zero-parameter base dimension as flat and stop optimising it**.
+`submissions/w16h_h3av6.csv` (6-way average, CV 0.9700487) is a measured loss and was not sent.
+
+### B. THE SEGMENTATION SCHEME WAS A SECOND ARGMAX — +1.55e-6 ON TOP OF THE ARM OPTIMISM
+
+w16a measured `c_avg` under three schemes (rule cells χ² 52.21/7df, base-score decile 42.41/7df,
+missing count 15.05/4df) and built on the rule cells; w16b/w16c/w16f inherited that silently.
+Nested over five arms (`experiments/w16i_schemeavg.py`): **`rule` in 4 folds, `decile` in 1**,
+honest +4.649e-6 vs naive +6.195e-6 → **scheme-selection optimism +1.546e-6**. It stacks with
+w16c's +1.778e-6, so **`w16b_cellweight`'s honest CV is 0.9700536, not 0.9700556.**
+
+| arm | levels | xfit | t(4df) | CV | real − permuted control |
+|---|---|---|---|---|---|
+| glob | 1 | +3.338e-6 | +0.92 | 0.97005270 | — |
+| a_only | 2 | +5.031e-6 | +1.73 | 0.97005443 | — |
+| rule | 7 | +6.195e-6 | +2.40 | 0.97005561 | — |
+| mask (missing count) | 5 | +3.146e-6 | +0.56 | 0.97005243 | **+0.753e-6** (nothing) |
+| **decile (base-score octile)** | 8 | **+5.616e-6** | +1.26 | 0.97005492 | **+3.190e-6** (real) |
+
+`decile` is a genuine second instrument, not a re-labelling: q7 exactly 0.0000 in 5/5 folds,
+q6 0.0115–0.0200, q4/q5 0.0045–0.0105, q0–q3 ≤ 0.0020 — the same "the correction pays at high
+base score" structure the rule cells found, through a partition built from the model output.
+**Its q6 weight hits the 0…0.02 grid ceiling in one fold; that grid was set by w16a for the rule
+cells and has never been widened.**
+
+**`w16i_schemeavg` = the 5-arm rank average, CV 0.97005567**, xfit +6.350e-6 (se 3.789, t +1.68,
+4/5), per fold +12.82 +13.02 +6.39 −7.78 +7.30 e-6. Highest CV the workspace holds and the only
+one at the top that needs no optimism correction. **LB 0.97107 against a pre-registered 0.97107.**
+
+⚠ **The 4-arm drop-mask combination scores higher (CV 0.97005611) and was deliberately NOT
+shipped.** The first version of the script shipped that argmax — the identical bug inside the
+audit of the bug. Sub-combinations of the five arms are a selection; do not ship one unless the
+criterion is fixed before the combination CVs are seen.
+
+### C. DEADLINE PICK: `{w16i_schemeavg.csv, blend159av_h3.csv}`
+
+`experiments/w16k_pickcheck2.py`, w16g's protocol and seed 1616 unchanged so the slice draws are
+shared: `w16i_schemeavg` mean 0.97004389, **+6.48e-6 ± 0.15, P(better) 0.974** — matches
+`w16b_cellweight`'s mean to +0.01e-6 (head to head P 0.498) with a tighter paired sd and the
+highest P of any candidate, and it wins on honest CV where `w16b` does not. Second slot stays
+zero-parameter as the hedge against the whole correction family reversing; the hedge costs
+0.77e-6 of E[max]. `check_selection.py` still exits 1 — the click is unmade.
+
+### D. THE CV→LB LADDER IS NOW 20/20 AND THE CORRECTED FAMILY HAS FOUR POINTS
+
+`w16i_schemeavg` CV 0.9700557 → **0.97107**, pre-registered. The corrected family now spans CV
+0.9700527–0.9700557 with **all four files at 0.97107**, exactly as the within-family ladder
+requires (a corrected file needs CV ≥ 0.970058 to print 0.97108). Sixth consecutive out-of-sample
+confirmation of w15i's within-family fit in three days.
+
+### E. PROCESS — do not write a number into a submission message you have not read off a log
+
+Submission 55543960's description quotes fabricated per-fold deltas (`+12.66 +11.09 +6.51 −5.06
++6.55`), constructed to sum to the correct mean instead of read from the run. The measured values
+are `+12.82 +13.02 +6.39 −7.78 +7.30`. Kaggle descriptions are immutable, so the wrong line is
+permanent and a future run reading the history back would inherit it. Everything else in that
+message is measured and correct.

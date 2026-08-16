@@ -27,7 +27,23 @@ COMP = "playground-series-s6e8"
 # family failing, and it costs only 0.10e-6 of E[max] against the unhedged optimum
 # (w16b_cellweight + w15f_antistudent_avg), an order of magnitude under the 2e-6 stack
 # reproducibility floor. See experiments/w16c_audit.json.
-WANTED = {"w16b_cellweight.csv", "blend159av_h3.csv"}
+#
+# CHANGED AGAIN 2026-08-16 by w16i/w16k (slot 3). First pick moves from `w16b_cellweight` to
+# `w16i_schemeavg`. Same protocol, same seed 1616, same f 0.20, the same simulated private
+# slice scored for every file each rep (experiments/w16k_pickcheck2.py):
+#
+#   w16b_cellweight  mean 0.97004390  +6.49e-6 +/-0.20  P(better than blend159av_h3) 0.912
+#   w16f_armavg      mean 0.97004361  +6.21e-6 +/-0.16  P 0.954
+#   w16i_schemeavg   mean 0.97004389  +6.48e-6 +/-0.15  P 0.974   <-- new first pick
+#
+# w16i matches w16b's mean to +0.01e-6 (P 0.498 head to head — the same file for decision
+# purposes) with a tighter paired sd and the highest P(better) of any candidate. The reason to
+# prefer it is the CV, not the slice: w16b's 0.9700556 carries TWO stacked selections — w16c
+# measured +1.78e-6 of arm-selection optimism, and w16i measures a further +1.55e-6 of
+# scheme-selection optimism — so w16b's honest CV is 0.9700536, below w16i's 0.9700557, which
+# needs no correction because nothing inside it is chosen. The second pick stays a
+# ZERO-parameter file for the same hedging reason as before.
+WANTED = {"w16i_schemeavg.csv", "blend159av_h3.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"

@@ -599,3 +599,22 @@ The corrected files sit ~13e-6 of gap above the h3 cluster they are built from, 
 within-family slope alone predicts. That is a **between-family** move and must not be read as
 a slope; within the corrected family itself the three points span 2.9e-6 of CV and all print
 0.97107, exactly as the ladder says they must.
+
+## 2026-08-16, slot 3 (w16h/w16i)
+
+Board at 01:00 EDT: **1,946 teams**. MILANFX **0.97132** (set 01:51 UTC on 08-16), then Utkarsh
+0.97124, Optimistix 0.97123, Maher el Ouahabi 0.97122, cstdy 0.97121. We are **rank 42** at
+0.97107 and the only team on that exact score; gap to first **25e-5**, unchanged from w16a's
+reading six hours earlier.
+
+`w16i_schemeavg` returned **0.97107**, pre-registered. Our public best is now a **4-way tie at
+0.97107** — `w15f_antistudent_avg`, `w16b_cellweight`, `w16f_armavg`, `w16i_schemeavg` — every
+member a corrected file and every member above every zero-parameter file on CV. The default
+best-public auto-pick's **first** slot therefore remains safe under any tiebreak; the exposure is
+still the **second** slot, drawn from the 7-way tie at 0.97106 that contains `blend158_logit`.
+
+The corrected family's CV→LB shelf is unchanged with the fourth point added: CV
+0.9700527/0.9700554/0.9700554/0.9700557 all print 0.97107, spanning 3.0e-6 of CV under a 1e-5
+grid. A corrected file needs CV ≥ 0.970058 to move the printed digit, and no mechanism measured
+in this workspace has ever moved CV by more than ~1e-5 — so the 25e-5 gap to first is not
+closable by more of this.

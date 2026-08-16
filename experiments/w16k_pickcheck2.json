@@ -1,0 +1,127 @@
+{
+ "names": [
+  "blend159av_h3",
+  "blend160origm_h3",
+  "blendtop3",
+  "w15f_antistudent_avg",
+  "w16b_cellweight",
+  "w16f_armavg",
+  "w16i_schemeavg"
+ ],
+ "mean": [
+  0.9700374038877052,
+  0.9700368987199067,
+  0.9700376800780168,
+  0.9700409494904947,
+  0.9700438984199502,
+  0.9700436102745937,
+  0.9700438870777556
+ ],
+ "pairs": [
+  {
+   "e_max": 0.9700446803543982,
+   "a": "w16b_cellweight",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700443794978366,
+   "a": "w16b_cellweight",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700441471373662,
+   "a": "w15f_antistudent_avg",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700441012710567,
+   "a": "blendtop3",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700440848334283,
+   "a": "blend160origm_h3",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.9700440614909207,
+   "a": "w16f_armavg",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.970044053644647,
+   "a": "blend159av_h3",
+   "b": "w16b_cellweight"
+  },
+  {
+   "e_max": 0.970043952286952,
+   "a": "blend160origm_h3",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700439416025145,
+   "a": "blendtop3",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700439081250765,
+   "a": "blend159av_h3",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700438882873831,
+   "a": "w15f_antistudent_avg",
+   "b": "w16i_schemeavg"
+  },
+  {
+   "e_max": 0.9700437071788337,
+   "a": "blend160origm_h3",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700436975463808,
+   "a": "blendtop3",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700436580668081,
+   "a": "blend159av_h3",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.9700436376167106,
+   "a": "w15f_antistudent_avg",
+   "b": "w16f_armavg"
+  },
+  {
+   "e_max": 0.970041186246028,
+   "a": "blendtop3",
+   "b": "w15f_antistudent_avg"
+  },
+  {
+   "e_max": 0.9700411758205801,
+   "a": "blend160origm_h3",
+   "b": "w15f_antistudent_avg"
+  },
+  {
+   "e_max": 0.9700411252857325,
+   "a": "blend159av_h3",
+   "b": "w15f_antistudent_avg"
+  },
+  {
+   "e_max": 0.9700379820590205,
+   "a": "blend159av_h3",
+   "b": "blend160origm_h3"
+  },
+  {
+   "e_max": 0.9700379704654114,
+   "a": "blend159av_h3",
+   "b": "blendtop3"
+  },
+  {
+   "e_max": 0.9700378684939656,
+   "a": "blend160origm_h3",
+   "b": "blendtop3"
+  }
+ ]
+}
