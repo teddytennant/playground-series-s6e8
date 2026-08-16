@@ -666,3 +666,17 @@ any tiebreak rule. The exposure remains auto-slot 2, the 7-way tie at 0.97106 th
 - 7 of 10 submissions used on the 2026-08-16 Kaggle day (CLI: "3 submissions remaining today").
 - `check_selection.py` still exit 1 after 48 submissions. Auto-slot 1 is a 5-way tie at
   0.97107, all CV-good; auto-slot 2 is the 7-way 0.97106 tie containing `blend158_logit`.
+
+## 2026-08-16 08:20 UTC — w16q, slot 7
+
+- **NEW ACCOUNT BEST: 0.97108** (`w16q_ens4avg`, ref 55547584), first score above 0.97107.
+- **Rank 50 of 1,964.** Readings this Kaggle day: w16h 42/1,946, w16m 47/1,954 (06:45),
+  w16o 47/1,954 (07:40), w16q 51/1,959 at 0.97107 (08:05) → **50/1,964 at 0.97108** (08:20).
+  The field is passing us ~4 places/hour at this density; +1e-5 bought back one place.
+- Top: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124, Maher el Ouahabi 0.97122,
+  cstdy 0.97121, Malhar Ujawane 0.97118. Gap to first now **24e-5**.
+- **Auto-pick tiers moved.** `check_selection.py` now reads auto-slot 1 = 0.97108, a 1-way tie
+  (`w16q_ens4avg`), and auto-slot 2 = the old 0.97107 5-way tie. `blend158_logit` has dropped out
+  of the top two tiers, so w15i's +9.2e-6 / +36.5e-6 / +112e-6 exposure ladder is quoted from a
+  stale tier structure — re-read the script's live output before using it.
+- 8 of 10 submissions used today. Slots 8/9/10 have **two** sends between three slots.

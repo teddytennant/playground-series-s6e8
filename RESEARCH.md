@@ -4279,3 +4279,89 @@ verbatim: gap_bagging **+663.3e-6 [+662.7, +651.8, +675.5]** against w15g's **+6
 
 **CV→LB ladder, updated.** The h3 / top-cluster shelf is now **10 of 10 at 0.97105**
 (`w16h_h3av6` ref 55546833 the tenth, CV 0.97004873, pre-registered and hit).
+
+---
+
+## ⚠ CORRECTIONS from w16q (slot 7, 2026-08-16) — two standing claims above are wrong
+
+### 1. "`h3` and `ens4` are not separable" is retired
+
+The section above states: *"Standing position: `h3` and `ens4` are not separable. Do not claim
+either is better, and do not resolve it on the public LB."* It rests on the **mix-gap
+estimator**, and that estimator's validation, as stated above, is **one member set** ("validated
+on 150fx … error −7e-6"). Six member sets now have BOTH the ens4 mix and the h3 mix scored.
+Paired within member set (`experiments/w16q_ens4base.py` Part 1):
+
+| set | dCV (h3 − ens4) | dLB (h3 − ens4) |
+|---|---|---|
+| `blend156` | +4.51e-6 | one 1e-5 reporting step DOWN |
+| `blend158` | +5.09e-6 | one step down |
+| `blend159` | +3.56e-6 | one step down |
+| `blend159av` | +4.30e-6 | one step down |
+| `blend160orig` | +4.02e-6 | one step down |
+| `blend160origm` | +4.41e-6 | one step down |
+
+**h3 above ens4 on CV 6/6 (mean +4.32e-6); h3 below ens4 on the public slice 6/6.** The LB is
+rounded to 5 dp, so the true LB difference is only bounded: **(−20e-6, 0)**, strictly negative,
+magnitude unresolved. The CV→LB gap difference therefore lies in **(−24.3e-6, −4.3e-6)**, which
+contains the estimator's −21e-6. These six sets are **nested builds** sharing almost all 160
+members, so this is one highly-replicated contrast, **not** six independent draws — no p-value.
+
+Confirmed out of sample the same slot: `w16q_ens4avg` (the 5-arm `c_avg` correction on the ens4
+base `blend159av`) scored **0.97108**, against 0.97107 for the identical correction on the h3
+base. The correction's +13.50e-6 gap displacement and the ens4 transform displacement are
+**additive**.
+
+**Both ladders were already in this file.** "ens4 4/4 at 0.97106" and "the h3 shelf at 0.97105"
+have been quoted daily for pre-registration. Two ladders at different shelves on matched member
+sets *is* the separation. Nobody differenced them.
+
+**This does NOT license moving a deadline pick.** Final selection stays on CV and h3 wins on CV.
+Price of switching the zero-parameter hedge to `blend159av`: **−4.30e-6 of CV**. Slot 8's item 1
+is to settle it with `w16k_pickcheck2.py`'s simulated-private-slice instrument, which is CV-side.
+
+### 2. The "2e-6 stack reproducibility floor" is not a universal threshold
+
+w14a measured it on **one rebuild of one file** (`blend159av_h3`, the 159-member logistic stack;
+mechanism = BLAS reduction order in `lbfgs` at condition number ~1e18). It has since been quoted
+as the believability threshold for every paired delta in the workspace.
+
+It does **not** apply to objects built on a fixed stored base OOF, which is what the entire
+corrected-file family is — deterministic rank averages plus a deterministic coordinate ascent,
+no logistic refit anywhere. Measured directly, from two independent runs of the same computation
+already on disk (`w16i_schemeavg` and `w16m_widegrid`):
+
+```
+OOF max abs difference        0.0
+CV difference                 0.000e+00      (both 0.9700556663)
+test rows differing in rank   0 of 296,302
+```
+
+**That floor is exactly zero.** Consequences: w16c's 0.33e-6 hedge cost and w16i's 0.77e-6 E[max]
+cost, both dismissed as "under the 2e-6 floor" before moving the deadline pick, are **real
+costs**. Neither decision flips — each quantity is also small against its own standard error —
+but the reasoning was wrong. **Use the quantity's own error bar, not the floor**, for anything
+derived from stored OOF vectors. The 2e-6 figure remains correct for *rebuilding the logistic
+stack*, which is the only thing it ever measured.
+
+### 3. Two pooled nulls re-read segmented by the 7 rule cells — both HOLD
+
+`experiments/w16r_pooledsweep.py`, no model refits, `c_avg` run alongside as a positive control
+that reproduces w16a's per-cell z column to the digit (A +5.16, B +4.42, BAND +3.50, D +0.32,
+E +2.09, F +1.16, G +0.10).
+
+- **w15f §6(a) transductive component `c_trans − c_induc`**: per-cell z = −0.31 / −0.12 / +1.03 /
+  +0.72 / −0.45 / +0.15 / −1.90. Sum z² **5.52 on 7 df**, below its own df. Cell A, where `c_avg`
+  reads +5.16, reads **−0.31**. Genuinely zero everywhere, not a cancellation.
+- **w16l §2 mask training weight** (`imp − unw`, harness gated at the published pooled
+  −3.432e-6): every cell negative or flat, largest **+6.82e-6 at se 9.39**; real spread sd
+  17.94e-6 vs permuted-membership control 9.67e-6. Caveat: only the `imp` arm's OOF was saved, so
+  `anti` is unavailable and this shows the pooled null is not a cancellation, not that there is
+  no directional effect.
+
+**Do not re-open either.** Still unswept and worth a slot: `w14d_cellboost.py` was run on
+`--cells BAND,D,G` only (A/B/E/F never run, and w16a §2 says aim regional work at A/B);
+`w15c` §2's in-fold lookups, whose top subset is keyed on the two columns that define the rule
+cells and was read pooled across them; `w15b` §6's power calibration, which injected a spatially
+**uniform** signal and certifies the whole closed list against alternatives now known to be
+cell-concentrated.

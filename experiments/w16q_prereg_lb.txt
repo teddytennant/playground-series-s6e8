@@ -1,0 +1,36 @@
+w16q PRE-REGISTERED LB PREDICTION for submissions/w16q_ens4avg.csv
+written 2026-08-16 before experiments/w16q_ens4base.py printed its 5-arm CV
+(the arm-level CVs visible at the time of writing were glob 0.97004837 and
+a_only 0.97005002; the 5-arm average, the rule/mask/decile arms and the
+combination table had NOT been printed).
+
+MEASURED INPUTS, all read off logs or the live API, none constructed:
+
+  blend159av      (ens4 base)   CV 0.97004488   LB 0.97106   gap +0.00101512
+  blend159av_h3   (h3 base)     CV 0.97004917   LB 0.97105   gap +0.00100083
+  w16i_schemeavg  (corrected,   CV 0.97005567   LB 0.97107   gap +0.00101433
+                   h3 base)
+
+  So on the h3 base the 5-arm correction moves the CV->LB GAP by
+  +0.00101433 - +0.00100083 = +13.50e-6.  (This is w16c section 3's
+  "the corrected family sits ~13e-6 of gap above h3", re-derived here.)
+
+THE PREDICTION, stated as a rule rather than a point so it is falsifiable:
+
+  0.97108  if the correction's +13.50e-6 gap displacement TRANSFERS to the
+           ens4 base, i.e. gap ~ +0.00101512 + 13.50e-6 = +0.00102862.
+           This would be a NEW ACCOUNT BEST (current best 0.97107) and would
+           say the transform displacement and the correction displacement are
+           additive.
+  0.97107  if it does not transfer and the file simply inherits the ens4
+           base's own gap. Ties the account best.
+  0.97106  would say the correction buys nothing at all on an ens4 base,
+           which would contradict the cross-fitted OOF measurement and is the
+           outcome that would be worth the most.
+
+0.97108 is the primary, 0.97107 the alternative.
+
+Nothing about this file was chosen with reference to the public slice: the
+BASE swap was motivated by the ens4 half of the deadline-pick option set
+being empty, and the ship rule was fixed in w16q_ens4base.py's docstring
+before the script was first run.

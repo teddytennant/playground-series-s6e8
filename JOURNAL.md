@@ -8323,3 +8323,300 @@ and no row was removed. It is committed in that state because a regenerated cach
 48 submissions is more useful to slot 7 than a stale one reflecting 40. `check_selection.py`
 itself is still untouched and `WANTED` is unchanged. Any future slot that runs the status check
 should expect this file to show as modified and should not read it as a hand edit.
+
+## 2026-08-16 — w16q/w16r, slot 7/10, ANGLE (as handed): "XGBoost: third leg of the ensemble, tuned on the same folds"
+
+**The handed angle is closed and I spent nothing on it.** Member hyperparameter tuning was
+measured null on 2026-08-13 (slot 8 was the XGBoost one specifically) and sits on the 08-13,
+w14b, w15j §6, w16a §6, w16m §6 and w16o §6 closed lists. Slots 5 and 6 were handed the LightGBM
+and CatBoost versions of the same angle and both skipped it; the slot prompt told me to do the
+same. Noted, skipped, no cycles spent. The slot went to **w16o §7 item 2** — the sweep.
+
+**Slots 8–10: §1 is a reversal of a standing position that both deadline picks sit on the wrong
+side of, and §2 retires a threshold that four entries have used in place of an error bar. §5 is
+a new account best at 0.97108.**
+
+### 0. Housekeeping, verified rather than assumed
+
+- Live API before sending: **7 rows dated `2026-08-16`** (`blend160orig` 03:35, `w16b_cellweight`
+  04:00, `w16f_armavg` 04:16, `w16i_schemeavg` 05:08, `w16l_maskw_h3` 05:46, `w16n_finegrid`
+  06:43, `w16h_h3av6` 07:42). Counted twice, half an hour apart, both times 7. After my send the
+  CLI printed **"2 submissions remaining today"**, which agrees exactly: 8 of 10 used. The
+  prompt's "7 of 10" was right. **Slots 8, 9 and 10 are three slots with two sends between
+  them** — one of them cannot submit.
+- `experiments/audit.py` re-run over all 80 files: 80 files pass integrity, **79 distinct
+  rankings**, the one collision being `w16i_schemeavg` / `w16m_widegrid` which w16m already
+  flagged. Its "sent" column is stale for today's files (it reads a cached `lb_scores.json`), so
+  the unsent set was recomputed against the live 48-row API listing instead. Genuinely unsent
+  and non-duplicate before this run: `w14a_repro159av_h3` (CV 0.9700472) and `w14a_repro159av`
+  (0.9700444). Those were the fallback and were not needed.
+- `experiments/check_selection.py` → **still exit 1, nothing selected**, control reads 48
+  successful submissions. **The human click is still outstanding after six slots.**
+- Board at 08:05 UTC: 1,959 teams, we were **rank 51** at 0.97107. w16o read rank 47 of 1,954 an
+  hour earlier — the field passed us four places in an hour. After my send: **rank 50 of 1,964**
+  at 0.97108. MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124, Maher el Ouahabi 0.97122.
+
+### 1. ⚠ THE REVERSAL — "h3 and ens4 are not separable" was a one-member-set claim, and six member sets now say otherwise
+
+`RESEARCH.md` carries this as a standing position:
+
+> **Standing position: `h3` and `ens4` are not separable. Do not claim either is better, and do
+> not resolve it on the public LB.**
+
+It rests on the **mix-gap estimator** (a mix's CV→LB gap = the mean of its components' gaps),
+which put `ens4 − h3` at **+21e-6** in the gap against `h3 − ens4` = +5e-6 in CV — "the bias is
+4.2× the margin it would overturn, in the opposite direction". `RESEARCH.md` states the
+estimator's validation in full, and it is one line: *"validated on 150fx where all four
+components and the mix are scored, error −7e-6"*. **One member set.** That is w16o's pattern
+exactly — a quantity measured at one scale and quoted as a property of the pack — and unlike
+w16o's case it is checkable for free, because the account has since scored **six** member sets
+where the ens4 mix and the h3 mix are *both* on the board.
+
+`experiments/w16q_ens4base.py` Part 1, arithmetic only, CV recomputed from each file's own
+`oof_*.npy` and LB read from the live API:
+
+| member set | ens4 CV | ens4 LB | h3 CV | h3 LB | dCV (h3−e) | dLB (h3−e) |
+|---|---|---|---|---|---|---|
+| `blend156` | 0.9700416 | 0.97106 | 0.9700461 | 0.97105 | **+4.51** | one step down |
+| `blend158` | 0.9700432 | 0.97106 | 0.9700483 | 0.97105 | **+5.09** | one step down |
+| `blend159` | 0.9700434 | 0.97106 | 0.9700469 | 0.97105 | **+3.56** | one step down |
+| `blend159av` | 0.9700449 | 0.97106 | 0.9700492 | 0.97105 | **+4.30** | one step down |
+| `blend160orig` | 0.9700423 | 0.97106 | 0.9700463 | 0.97105 | **+4.02** | one step down |
+| `blend160origm` | 0.9700442 | 0.97106 | 0.9700487 | 0.97105 | **+4.41** | one step down |
+
+**h3 is ABOVE ens4 on CV in 6/6 (mean +4.32e-6) and BELOW it on the public slice in 6/6.**
+
+**The LB is rounded to 5 dp and this entry does not pretend otherwise.** All that is measured is
+that h3 rounds one 1e-5 reporting step below ens4 every time, so the true LB difference is
+somewhere in **(−20e-6, 0)** — strictly negative, magnitude unresolved. Propagating, the CV→LB
+gap difference `h3 − ens4` lies in **(−24.3e-6, −4.3e-6)**, and the single-member-validated
+estimator's **−21e-6** sits inside that interval.
+
+**These six member sets are NOT independent** and no p-value is computed from them. They are
+nested builds sharing almost all 160 members; their h3/ens4 contrasts are near-identical objects.
+What the replication establishes is that the contrast is not an artefact of one member list —
+not that there are six draws from the slice.
+
+⚠ **The uncomfortable part: the workspace already had both halves and never put them side by
+side.** The "ens4 ladder is 4/4 at 0.97106" and "the h3 shelf is 10/10 at 0.97105" have been
+quoted daily to pre-register predictions — w15j, w16a, w16c, w16h, w16l, w16m and w16o all used
+one or the other. Two ladders at *different* shelves on *matched* member sets **is** the
+separation, and it was in front of every one of those entries. The failure was not a missing
+measurement; it was never differencing two numbers already on the page.
+
+**Bearing on the deadline pick, stated carefully.** Both picks — `w16i_schemeavg` (built on base
+`blend159av_h3`) and `blend159av_h3` itself — are h3-side. **I did not move them.** The brief
+says final selection is on CV, h3 wins on CV, and §1 is an LB measurement; moving a deadline
+pick on an LB reading is the Rogii failure however clean the reading is. The price is recorded
+instead: switching the zero-parameter hedge from `blend159av_h3` to `blend159av` costs
+**−4.30e-6 of CV**, and it is now written into `check_selection.py` where the human will see it.
+
+### 2. ⚠ The "2e-6 stack reproducibility floor" does not apply to most of what quotes it
+
+w14a measured it on **one rebuild of one file** — `blend159av_h3`, the 159-member logistic stack
+— and named the mechanism: BLAS reduction order in `lbfgs` on a design with condition number
+~1e18. It has since become the workspace's universal believability threshold, quoted in w15b,
+w15d, w15f, w15g, w15i, w15j, w16a, w16c, w16h, w16m and w16n.
+
+**The corrected-file family refits no logistic stack at all.** Those files are deterministic
+rank-averages of a *fixed stored base OOF* plus scalar weights from a deterministic coordinate
+ascent. Their floor was never measured — and it is already on disk, twice, unnoticed:
+`w16i_schemeavg` and `w16m_widegrid` are two independent runs of the identical computation in
+separate processes on separate days.
+
+```
+OOF max abs difference    0.0
+CV difference             0.000e+00   (both 0.9700556663)
+test rows differing in rank   0 of 296,302
+```
+
+**The applicable floor for that layer is EXACTLY ZERO**, and w16m's own log already asserted the
+weights reproduce to 1e-12; nobody connected that to the threshold. So:
+
+- w16c §2 dismissed a **0.33e-6** hedge cost as "an order of magnitude under the 2e-6 floor" and
+  **moved the deadline pick**. w16i §4 dismissed a **0.77e-6** E[max] cost as "well under the
+  2e-6 floor" and **moved it again**. Both quantities are E[max] differences computed from fixed
+  stored OOF vectors in a simulation. No logistic refit appears anywhere in either. **Those costs
+  are real, not noise.**
+- w15i declined to move the pick because an optimum beat it by +0.19e-6, "ten times below the
+  stack's own 2e-6 floor". w16n dismissed +0.046e-6 as "1/43 of the 2e-6 floor".
+
+**Neither decision flips**, and I checked before writing this: each of those quantities is also
+small against its *own* standard error (w16n's is +0.046e-6 at se 0.286, t +0.16), so all four
+conclusions survive. What does not survive is the reasoning. ⚠ **The 2e-6 figure is the floor for
+REBUILDING THE LOGISTIC STACK. For any comparison among objects derived from a fixed stored base
+the floor is zero and the right yardstick is the quantity's own error bar.** The next slot that
+waves away a 1.5e-6 effect "because it is under the floor" will be making a mistake.
+
+### 3. Both POOLED nulls survive segmentation — `experiments/w16r_pooledsweep.py`
+
+The sweep's other half. A null measured pooled over a strong categorical can hide a real effect
+inside one level; w16a proved that shape is live here (`c_avg` pooled z +4.11 → cell A **+5.16**,
+cell D **+0.32**). Two nulls were re-readable with **no model refits** because the vectors were
+already on disk. Both are load-bearing: between them they close the transductive class.
+
+**The instrument was gated first.** `c_avg` was run through the same segmented instrument as a
+positive control and reproduces w16a's published per-cell z column **to the digit**: A **+5.16**,
+B +4.42, BAND +3.50, D +0.32, E +2.09, F +1.16, G +0.10.
+
+**(a) w15f §6(a), the transductive component `c_trans − c_induc`.** Measured pooled at z +0.52
+(`w15f_extract.py` contains no segment code; `cond_auc_seg` did not exist until a day later) and
+quoted as the reason the transductive class is "narrowed rather than settled" by w16a, w16c,
+w16h and w16l. Segmented:
+
+| cell | A | B | BAND | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| **z** | −0.31 | −0.12 | +1.03 | +0.72 | −0.45 | +0.15 | −1.90 |
+
+Sum z² = **5.52 on 7 df** — *below* its own degrees of freedom, i.e. indistinguishable from
+uniform zero. Max |z| is 1.90 and it is **negative**. Cell A, where `c_avg` reads +5.16, reads
+**−0.31**. **The null is not a pooled cancellation; it is genuinely zero in every cell.**
+
+**(b) w16l §2, the mask as a training weight.** Measured pooled, its only cuts being transform
+family and arm — neither a data categorical. Harness gated first: pooled `imp − unw` reproduces
+w16l's published **−3.432e-6** exactly. Per cell, per fold, against a size-matched
+permuted-membership control partition:
+
+| cell | A | B | BAND | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| real `imp−unw` e-6 | −27.21 | −22.00 | −12.76 | −0.60 | −36.36 | **+6.82** | −41.57 |
+| se | 48.86 | 27.00 | 9.92 | 13.47 | 22.41 | 9.39 | 8.90 |
+| control e-6 | −18.51 | −0.52 | −5.50 | +1.74 | −21.59 | +0.88 | −0.96 |
+
+Every cell is negative or flat; the single positive is **+6.82e-6 at se 9.39, 3/5 folds**, which
+is nothing. Spread across levels: real sd **17.94e-6**, control sd **9.67e-6** — some extra
+spread, no cell carrying a directional gain. **The null holds.** Caveat fixed before the run and
+kept: only the `imp` arm's OOF was saved (`w16l_maskweight.py:277`), so `anti` is unavailable and
+`imp − unw` confounds the directional component with the ESS toll. This can therefore establish
+that the pooled null is not a cancellation — which it does — and not that there is no directional
+effect, which remains w16l's `anti` arm's result.
+
+**Two nulls swept, two nulls hold.** That is the honest yield: the sweep's value this slot was in
+§1 and §2, not here. But "closed by a pooled fit" is now checked rather than assumed for the two
+items that close a whole candidate class.
+
+### 4. Pre-registration, written before either script produced a number, and all four honoured
+
+`w16q_ens4base.py`'s docstring fixed these before the first run:
+
+1. **Ship the 5-arm average on the ens4 base unconditionally, whatever its CV.** Honoured — and
+   it mattered: the **4-arm drop-mask** combination came out with the higher CV (0.97005184 vs
+   0.97005152) and was **not** shipped, which is the same argmax the script exists to refuse.
+2. **Fallback only on rank-identity** with a sent file → `w14a_repro159av_h3.csv`. Not needed;
+   the file is distinct from all 48.
+3. **Move `WANTED` only if the ens4-base CV exceeds `w16i_schemeavg`'s 0.97005567**, and never
+   touch the second slot, because w16i §4 fixed that to a zero-parameter file as a hedge against
+   the `c_avg` correction reversing on private rows, and a 23-parameter file on the same `c_avg`
+   cannot serve that role. The script evaluated it mechanically and printed **False**.
+   **`WANTED` is unchanged** — the second w16 slot not to move it.
+4. **Part 1 is an LB measurement and cannot move a deadline pick.** Honoured; see §1.
+
+The LB prediction was written to `experiments/w16q_prereg_lb.txt` **before the 5-arm CV printed**
+(only the glob and a_only arm CVs were visible at the time), as a rule rather than a point.
+
+### 5. Submitted — `w16q_ens4avg`, and it is a NEW ACCOUNT BEST at 0.97108
+
+`submissions/w16q_ens4avg.csv` — ref **55547584**, 2026-08-16 08:17:45 UTC. CLI: **"2
+submissions remaining today"**. Cross-fitted CV **0.97005152**.
+
+**The object.** `w16i_schemeavg` rebuilt on the **ens4** base `blend159av` instead of
+`blend159av_h3`, because §1's finding is about an axis on which the workspace's entire corrected
+option set was empty. Everything else identical: frozen SKF5 seed42 folds, the same `c_avg`, the
+same five partitions, the same 0…0.02 grid at step 5e-4 (w16m measured its ceiling at an exact
+zero and w16n its resolution at +0.046e-6, so freezing it changes one thing only). All five arms
+refit from scratch — w16b's stored per-fold weights were fitted against the h3 base and are not
+valid here — so all five get their own permuted-membership control instead of w16i's two.
+
+| arm | xfit | se | t | folds+ | CV | real − permuted control |
+|---|---|---|---|---|---|---|
+| glob | +3.363e-6 | 3.419 | +0.98 | 4/5 | 0.97004837 | — (1 level) |
+| a_only | +4.987e-6 | 2.632 | +1.89 | 4/5 | 0.97005002 | **+2.300e-6** |
+| rule | +6.399e-6 | 2.458 | +2.60 | 4/5 | 0.97005137 | **+1.378e-6** |
+| mask | +3.622e-6 | 5.098 | +0.71 | 4/5 | 0.97004876 | **+2.757e-6** |
+| decile | +5.613e-6 | 4.164 | +1.35 | 4/5 | 0.97005057 | **+2.330e-6** |
+
+Against the h3 base's published arms (+3.338 / +5.031 / +6.195 / +3.146 / +5.616) every one
+lands within 0.5e-6. **The `c_avg` correction is not specific to the h3 base** — its per-cell
+weight structure reproduces too (A 0.0075, D and G exactly 0.0000 on full data). Scheme
+stability 4/5, selection optimism +1.263e-6. Shipped 5-arm average: **CV 0.97005152, xfit
++6.494e-6, se 3.504, t +1.85, 4/5.**
+
+**PRE-REGISTERED PREDICTION: 0.97108, alternative 0.97107.** The rule, from three measured gaps:
+`blend159av` +0.00101512, `blend159av_h3` +0.00100083, `w16i_schemeavg` +0.00101433 — so the
+correction moves the gap **+13.50e-6** on the h3 base. 0.97108 if that displacement transfers to
+the ens4 base, 0.97107 if the file merely inherits the ens4 base's own gap, 0.97106 if the
+correction buys nothing there. **RESULT: 0.97108 — the primary, and the first score above 0.97107
+this account has ever recorded.** The transform displacement and the correction displacement are
+**additive**, and §1's finding is confirmed out of sample on real test rows: the same correction
+that reached 0.97107 on the h3 base reaches 0.97108 on the ens4 base.
+
+Validated before sending: 296,302 rows, ids equal `sample_submission` exactly, all finite,
+296,302 distinct, range [3.375e-6, 1.0], rank-checked against **all 48** sent files — closest is
+`blend159av` with **295,553 of 296,302 rows differing in rank**. Spearman 0.9998067 vs
+`w16i_schemeavg`, 0.9999736 vs `blend159av`, 0.9997784 vs `blend159av_h3`.
+
+**NOT a deadline pick** (§4 rule 3, printed False). Nothing about it was chosen with reference to
+the public slice — the base swap answers §1's empty half of the option set, and §1 is reported
+whichever way it comes out.
+
+⚠ **Side effect on the auto-pick that slots 8–10 must know.** `check_selection.py` computes its
+tiers live, so it now reads **auto-slot 1: 0.97108, a 1-way "tie" — `w16q_ens4avg`**, with the
+old 5-way 0.97107 tie demoted to auto-slot 2. `blend158_logit` has therefore dropped out of the
+top two tiers entirely and the auto-pick exposure w15i priced is **smaller than it was this
+morning**. It is not zero and the click is still worth making, but re-read the script's live
+output before quoting w15i's +9.2e-6 / +36.5e-6 / +112e-6 ladder.
+
+### 6. CLOSED by this run
+
+- **"h3 and ens4 are not separable"** — retired. Six paired member sets, CV and LB in opposite
+  directions 6/6, and the ens4 side confirmed out of sample by §5's 0.97108. Do not re-open with
+  another mix-gap estimate; the direct paired reading supersedes it. What is still open is the
+  **magnitude**, which the 5-dp LB cannot resolve, and whether the deadline pick should act on it.
+- **The 2e-6 floor as a universal threshold** — retired for objects on a fixed stored base (§2).
+- **w15f §6(a) transductive component, per cell** — null holds, sum z² 5.52 / 7 df.
+- **w16l §2 mask training weight, per cell** — null holds, no cell positive against its control.
+- Add to the closed list: the handed angle, **XGBoost member tuning** (closed 08-13, re-skipped).
+
+### 7. What slot 8 should look at first
+
+Everything on the 2026-08-13, w14b, w14d, w15j §6, w16a §6, w16c §7, w16h §6, w16l §4, w16m §5
+and w16o §6 closed lists stands, **plus §6 above**.
+
+1. **Decide the h3/ens4 question for the deadline pick, on CV-legitimate grounds.** §1 leaves it
+   deliberately unresolved: h3 wins CV by 4.32e-6, ens4 wins the slice 6/6, and I would not move
+   a pick on the latter. The honest way to settle it is to price it the way w16k priced the last
+   pick move — `w16k_pickcheck2.py`'s 500-rep simulated private slice, seed 1616, with
+   `w16q_ens4avg` and `blend159av` added as candidates. That is a **CV-side** instrument and it
+   is the right one. It is also cheap: the script exists and takes OOF vectors.
+2. **The human click.** Still exit 1 after seven slots. Re-read §5's warning: the tiers moved
+   today and the old price ladder is quoted from a stale tier structure.
+3. **The remaining single-member claims from the sweep, in load-bearing order:** the cross-team
+   paired-slice sd of **53–84e-6** (measured on three *weaker non-leader* files, applied to all
+   five leaders to conclude "three have a CI including zero" — and the likely error is
+   anti-conservative, since correlation to us should *rise* with score, which would make the gap
+   *more* significant, not less; it closes an entire research direction on six do-not-spend
+   lists); the **1.4% solo→stack pass-through** (one member, `xgb_latcat`, and w15g re-derived its
+   own numerator 20% differently without propagating it); **`oofsim`'s 5.72× down-scaling**, a
+   10-member → 161-member transfer done by dividing by an asymmetry ratio, i.e. an *asserted
+   linear* transfer law, which is precisely the shape w16o §3 proved wrong for `gap_bagging`.
+4. **The remaining pooled nulls**, in order: `w14d_cellboost.py` was run on **`--cells BAND,D,G`
+   only** — A, B, E and F were never run, and w16a §2 says explicitly to aim regional work at
+   A/B; `w15c` §2's in-fold lookups, whose top subset is literally keyed on the two columns that
+   *define* the rule cells and was read out pooled across them; and `w15b` §6's power calibration,
+   which injected a *spatially uniform* signal and is used to certify the entire closed list
+   against alternatives now known to be cell-concentrated.
+
+**Do NOT spend a slot on:** member hyperparameter tuning on any algorithm; the bagging asymmetry
+in any framing; the correction's grid on either axis; averaging a dimension whose nested pick is
+5/5 stable; the mask as a training weight, globally or per cell (§3b); the transductive component,
+globally or per cell (§3a); per-cell member weights; the original dataset; re-investigating the
+gap to first; or anything built to top the public slice.
+
+### Files created
+
+`experiments/w16q_ens4base.py` + `w16q_ens4base.json` + `w16q_prereg_lb.txt`,
+`logs_w16q_ens4base.txt`; `experiments/w16r_pooledsweep.py` + `w16r_pooledsweep.json`,
+`logs_w16r_pooledsweep.txt`; `submissions/w16q_ens4avg.csv` + `oof_w16q_ens4avg.npy` (sent).
+`experiments/check_selection.py` is the only existing file modified — a comment block recording
+§1 and §2 and a printed note under the "nothing is selected" branch; **`WANTED` is untouched**.
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.
