@@ -633,3 +633,24 @@ workspace's first genuinely paired LB reading.
 Submission tally for Kaggle day UTC 2026-08-16: **5 of 10** used (blend160orig,
 w16b_cellweight, w16f_armavg, w16i_schemeavg, w16l_maskw_h3); CLI confirmed "5 remaining".
 Nothing is selected on the submissions page — still one human click.
+
+## 2026-08-16 06:45 UTC (slot 5)
+
+**1,954 teams** (1,946 at 05:20, 1,943 at 04:00). We are **rank 47** at 0.97107 and still the
+only team on that score; w16h read rank 42 five hours earlier, so the field passed us five
+places overnight — consistent with w16a §5(c)'s ~7 teams/day past a static file.
+
+| rank | team | score | last submission |
+|---|---|---|---|
+| 1 | MILANFX | 0.97132 | 2026-08-16 01:51 |
+| 2 | Optimistix | 0.97125 | 2026-08-16 06:36 (new) |
+| 3 | Utkarsh | 0.97124 | 2026-08-15 22:40 |
+| 4 | Maher el Ouahabi | 0.97122 | 2026-08-16 00:26 |
+
+Gap to first **25e-5**, unchanged. Optimistix moved 0.97123 → 0.97125 during this slot.
+
+Our public best is now a **5-way tie at 0.97107** — `w15f_antistudent_avg`, `w16b_cellweight`,
+`w16f_armavg`, `w16i_schemeavg`, `w16n_finegrid` — every member a corrected file and every one
+above every zero-parameter file on CV, so Kaggle's default auto-pick's first slot is safe under
+any tiebreak rule. The exposure remains auto-slot 2, the 7-way tie at 0.97106 that contains
+`blend158_logit`. 47 submissions total, none selected.

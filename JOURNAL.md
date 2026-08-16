@@ -7856,3 +7856,200 @@ public slice.
 `submissions/w16l_maskw_h3.csv` (sent, 55544597) + its `oof_`/`test_` `.npy`. **No existing
 file was modified** — `check_selection.py` is untouched for the first time this wave, and
 `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.
+
+## 2026-08-16 — w16m/w16n, slot 5/10, ANGLE (as handed): "LightGBM: tune it properly against the fixed folds"
+
+**The handed angle is on the workspace's closed list and I spent nothing on it.** Member-level
+hyperparameter tuning was measured as a null on 2026-08-13 (slots 8/9/10, one per algorithm)
+and appears on the 08-13, w14b, w15j §6 and w16a §6 closed lists; the stack is at 160 members
+and the slot prompt itself instructed me to skip it. Noted and skipped. The slot went to
+w16l §4 item 1: the correction's weight grid.
+
+**Slots 6–10: §1 and §2 close item 1 COMPLETELY — both axes of the grid box, both at zero, and
+§1 is an exact null of a kind this workspace has not seen before. §4 corrects the cost estimate
+on what is now the top open item and slot 6 should read it before starting.**
+
+### 0. Housekeeping, verified not assumed
+
+- Live API before sending: **5 rows dated `2026-08-16`** (`blend160orig` 03:35,
+  `w16b_cellweight` 04:00, `w16f_armavg` 04:16, `w16i_schemeavg` 05:08, `w16l_maskw_h3` 05:46).
+  After my send the CLI printed **"4 submissions remaining today"**, which agrees exactly:
+  6 of 10 used. The prompt's "5 of 10" was right.
+- `experiments/check_selection.py` → **still exit 1, nothing selected**, control reads 46
+  successful submissions before my send. Unmodified by this run — the pre-registered rule for
+  moving `WANTED` evaluated to `False` and the script printed it (§3).
+- Board at 06:45 UTC: **1,954 teams**, MILANFX **0.97132**, Optimistix 0.97125 (new, 06:36),
+  Utkarsh 0.97124, Maher el Ouahabi 0.97122. We are **rank 47** at 0.97107 and still the only
+  team on that score. w16h read rank 42 of 1,946 five hours ago, so the field passed us five
+  places overnight at roughly the 7 teams/day w16a §5(c) priced.
+
+### 1. The grid CEILING is an EXACT zero — `experiments/w16m_widegrid.py`
+
+w16i §6 item 2 and w16l §4 item 1 both put this at the top of the board: the decile arm's `q6`
+returned exactly **0.0200** — w16a's grid ceiling — in fold 0, and 0.0115 / 0.0155 / 0.0180 /
+0.0155 in the other four with the full-data fit at 0.0170, so one of six fits was against the
+wall and the rest sat in the top quarter of the box. The stated worry was that the optimum for
+that level lies outside the searched region and every number the decile arm contributes to
+`w16i_schemeavg` is therefore a constrained optimum.
+
+Widened to `linspace(0, 0.05, 101)` — the ceiling **0.05 was named by w16i**, not chosen by me,
+so no discretion of mine entered the grid definition; step held at 5e-4 so the old grid is a
+strict subset. Everything else is `w16i_schemeavg` verbatim: base `blend159av_h3`, `c_avg`, the
+five partitions glob/a_only/rule/mask/decile, the frozen SKF5 seed42 folds, 2-pass coordinate
+ascent, 5-arm rank average.
+
+**All 30 fits — 5 schemes × (5 folds + full data) — returned the identical weight vector.**
+
+| arm | narrow xfit | wide xfit | diff | fits pinned at 0.05 |
+|---|---|---|---|---|
+| glob | +3.338e-6 | +3.338e-6 | **+0.000e-6** | 0/6 |
+| a_only | +5.031e-6 | +5.031e-6 | **+0.000e-6** | 0/6 |
+| rule | +6.195e-6 | +6.195e-6 | **+0.000e-6** | 0/6 |
+| mask | +3.146e-6 | +3.146e-6 | **+0.000e-6** | 0/6 |
+| decile | +5.616e-6 | +5.616e-6 | **+0.000e-6** | 0/6 |
+
+5-arm average: narrow CV 0.97005567, wide CV **0.97005567**, WIDE − NARROW **+0.000e-6 in all
+five folds**. The wide file came out **rank-identical to `w16i_schemeavg.csv`** — 0 of 296,302
+rows differ — so it was **not sent**, and the run-context rule against resubmitting an identical
+file made that automatic rather than a judgement call.
+
+**`q6 = 0.0200` was never a constrained optimum.** It is the argmax over 0…0.05 as well and
+merely coincides with the old ceiling. The premise of the item was wrong, and it was wrong in a
+way that only a measurement could show — reading fold 0's fitted value off the log and inferring
+a binding constraint is exactly the inference this refutes. **⚠ A fitted value sitting on a grid
+boundary is not evidence the boundary binds.** Check it before you build on it.
+
+The run also verifies the harness end to end: the narrow-grid refit reproduces `w16i`'s stored
+per-fold **and** full-data weights for all five arms exactly (`assert`, tolerance 1e-12), and
+the narrow 5-arm average reproduces `oof_w16i_schemeavg.npy` at rank correlation 1.00000000.
+
+### 2. The grid RESOLUTION binds on 28 of 30 fits and is worth +0.046e-6 — `experiments/w16n_finegrid.py`
+
+`linspace(0, 0.02, 41)` is **two** fixed choices and w16a set both at once. §1 measures the
+ceiling at zero; the step of 5e-4 had never been varied either, and unlike the ceiling it binds
+on every fit by construction — every weight this workspace has ever fitted for this correction
+is a multiple of 5e-4. Refined to `linspace(0, 0.02, 201)`, step **1e-4**, again a strict
+superset. The narrow arm is not refitted: it is loaded from `w16m_widegrid.json` and re-asserted
+equal to `w16i_schemeavg.json`, so narrow and fine are an exactly matched pair.
+
+**The resolution genuinely binds: 28 of the 30 fits move off the 5e-4 lattice** (glob 4/6,
+every other arm 6/6). The full-data decile arm moves 7 of its 8 levels — q4 0.0060 → 0.0062,
+q5 0.0065 → 0.0068, q6 0.0170 → 0.0168. And it buys nothing.
+
+| arm | narrow xfit | fine xfit | fine − narrow | se | folds+ | fine CV |
+|---|---|---|---|---|---|---|
+| glob | +3.338e-6 | +3.580e-6 | +0.241e-6 | 0.289 | 2/5 | 0.97005291 |
+| a_only | +5.031e-6 | +5.133e-6 | +0.102e-6 | 0.374 | 1/5 | 0.97005447 |
+| rule | +6.195e-6 | +5.910e-6 | **−0.285e-6** | 0.371 | 2/5 | 0.97005531 |
+| mask | +3.146e-6 | +3.539e-6 | +0.393e-6 | 0.535 | 3/5 | 0.97005276 |
+| decile | +5.616e-6 | +5.648e-6 | +0.032e-6 | 0.200 | 2/5 | 0.97005495 |
+
+Every per-arm difference is inside its own standard error and one of the five is **negative**,
+which is the signature of resolution noise rather than resolution gain. On the shipped object:
+
+```
+narrow  CV 0.97005567  xfit +6.350e-6  se 3.789  t +1.68  4/5
+fine    CV 0.97005570  xfit +6.396e-6  se 3.561  t +1.80  4/5
+FINE - NARROW  +0.046e-6  se 0.286  t(4df) +0.16  3/5   [+0.04 -0.69 -0.40 +0.96 +0.32] e-6
+```
+
+**+0.046e-6 is 1/43 of the 2e-6 stack reproducibility floor.** Both axes of w16a's grid box are
+now measured, and the box is not a constraint on this correction in either direction.
+
+### 3. Pre-registration, written before either script produced a number, and both items honoured
+
+Both scripts fixed the same two rules in their docstrings before running, because relaxing a
+grid ceiling and then keeping whichever side won is the identical argmax bug that cost w16c
++1.778e-6 (arms), w16i +1.546e-6 (schemes) and that w16i caught a third time inside its own
+audit. I was explicitly told not to be the fourth.
+
+1. *"Ship the relaxed-grid 5-arm average unconditionally, whatever its CV."* Honoured in both.
+   w16m's came out rank-identical to a file already sent, so nothing was sent for it — that is a
+   fact about the file, not a decision about its score, and it is recorded in §1 rather than
+   quietly dropped. w16n's went out on a CV improvement of +0.03e-6, i.e. effectively a tie, and
+   would have gone out on a regression.
+2. *"Move the deadline pick only if the relaxed grid beats the narrow one on plain cross-fitted
+   CV **and** the paired per-fold difference is positive in ≥ 4 of 5 folds."* Both scripts
+   evaluate it mechanically and print `False` (w16m 0/5 folds, w16n 3/5). **The picks stay
+   `{w16i_schemeavg.csv, blend159av_h3.csv}`** and `check_selection.py` is untouched — the
+   second w16 slot in a row not to move `WANTED`.
+
+Note the second condition is what did the work here: w16n's CV *is* higher, by +0.03e-6, and a
+CV-only rule would have moved the pick on a difference 1/43 of the noise floor.
+
+### 4. Submitted — `w16n_finegrid`, prediction pre-registered and right
+
+`submissions/w16n_finegrid.csv` — ref **55545549**, 2026-08-16 06:43:41 UTC. CLI: **"4
+submissions remaining today"**. Cross-fitted CV **0.97005570**.
+
+**PRE-REGISTERED PREDICTION: 0.97107, alternative 0.97108**, from the corrected-family ladder —
+four prior corrected files spanning CV 0.9700527–0.9700557 all printed 0.97107, and w16a derived
+that a corrected file needs CV ≥ 0.970058 to reach 0.97108, which 0.9700557 does not.
+**RESULT: 0.97107.** Eighth consecutive out-of-sample confirmation of w15i's within-family fit,
+and the fifth point in the corrected family, which now spans CV 0.9700527–0.9700557 with all
+five at 0.97107. Ties the account best; our public best is now a **5-way tie at 0.97107**, every
+member a corrected file and every one above every zero-parameter file on CV, so auto-slot 1
+stays safe under any tiebreak.
+
+Validated before sending: 296,302 rows, ids equal `sample_submission` exactly, all finite,
+296,302 distinct, range [3.375e-6, 1.0], checked against **every** `.csv` in `submissions/` for
+rank-identity — no match. Spearman 1.0000000 to 7dp vs `w16i_schemeavg` with 266,793 rows
+differing in rank, 0.9999941 vs `w16f_armavg`, 0.9999715 vs the base. Nothing was chosen with
+reference to the public slice. **Not a deadline pick** — it inherits 23 fitted parameters.
+
+### 5. CLOSED by this run
+
+**CLOSED: the correction's weight grid, both axes.** Ceiling exactly zero across 30 fits
+(§1); resolution +0.046e-6 ± 0.286 on the shipped object with one of five arms negative (§2).
+Do not re-open it with a different ceiling, a different step, or a third grid — the ceiling
+result is exact, not statistical, and the resolution result is a 1/43-of-noise-floor null with
+a matched control. w16l §4 item 1 is done.
+
+⚠ **Generalisable, and it is the third instrument lesson of this wave.** w16c §5 gave one
+(a high cond-AUC z on a *pack member* does not convert into AUC). w16h §1 gave the second
+(nested-pick stability, not the existence of a selection, is the test). This run gives the
+third: **a fitted parameter resting on a grid boundary is not evidence that the boundary is
+binding**, and the cost of assuming it was would have been a slot spent on a premise that a
+single assertion refutes. The cheap check is to widen the box and compare the fitted vectors
+before building anything on top of the wide fit.
+
+### 6. What slot 6 should look at first — and a cost correction on item 1
+
+Everything on the 2026-08-13, w14b, w14d, w15j §6, w16a §6, w16c §7, w16h §6 and w16l §4 closed
+lists stands, **plus this run's §5.** Do not re-open any of them.
+
+1. **w16a item 3 — how much of the +200e-6 OOF/test bagging asymmetry survives 160-member
+   blending.** Now the largest unmeasured quantity in the workspace and the only substantial
+   item left. ⚠ **But it is NOT "two extra configurations inside `w15g_cvgap.py`'s existing
+   loop", and three consecutive entries have repeated that estimate without checking it.** I
+   checked it: `logs_w15g_cvgap.txt` shows that loop trains **six LightGBMs per outer split at
+   51–90s each**, i.e. ~7 min per outer split for **one** member, and the quantity in question
+   is a property of a *blend*, which the existing loop has no representation of at all. The
+   honest shape is a scaled-down stack — 3 to 4 diverse members rather than 160 — rebuilt inside
+   the same TRAIN/HOLD geometry, at roughly 20–30 min per outer split and needing at least two
+   splits for an error bar. That is a whole slot, not a footnote, and the measured single-member
+   baseline it has to be compared against is already in the log: gap_bagging **+662.6e-6 ± 6.9**
+   over three outer splits, against gap_total +432.4e-6 and gap_honesty −230.2e-6.
+2. **The human click.** `check_selection.py` exits 1 after 47 submissions. The pick is
+   `w16i_schemeavg.csv` + `blend159av_h3.csv`, priced by w15i at +9.2e-6 (limit 2) / +36.5e-6
+   (limit 1) on top of w16i §4's +6.48e-6 for the pick itself. This is the highest
+   value-per-effort item on the board and it has survived four slots unmade.
+3. w16c §7 item 4 / w16a §6 item 4 — sweep the closed list for nulls measured **pooled** over a
+   strong categorical. Still the generalisable lesson of the wave's two reversals and still not
+   systematically done.
+
+**Do NOT spend a slot on:** the correction's grid, on either axis (§5); member hyperparameter
+tuning (the handed angle here, closed since 08-13 on all three algorithms); averaging a
+dimension whose nested pick is 5/5 stable (w16h §1); the mask as a training weight (w16l §2);
+per-cell member weights or a cond-AUC-z chase on a pack member (w16c §5); the original dataset
+(closed four times); re-investigating the 25e-5 gap to first; anything built to top the public
+slice.
+
+### Files created
+
+`experiments/w16m_widegrid.py` + `w16m_widegrid.json`, `logs_w16m_widegrid.txt`,
+`submissions/w16m_widegrid.csv` (**not** sent — rank-identical to `w16i_schemeavg.csv`, see §1)
++ its `oof_`; `experiments/w16n_finegrid.py` + `w16n_finegrid.json`, `logs_w16n_finegrid.txt`,
+`submissions/w16n_finegrid.csv` (sent, 55545549) + its `oof_`. **No existing file was
+modified** — `check_selection.py` is untouched for the second slot running, and
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` are appended to only.

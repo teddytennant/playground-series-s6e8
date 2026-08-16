@@ -4178,3 +4178,53 @@ only cheap tripwire for this, and it fired once in w16l's first launch.
 Normalise weights to mean 1 so `sum(w) = n` and a shared `C` regularises every arm equally.
 
 **Ladder.** The h3 / top-cluster rule (CV in the h3 cluster → LB **0.97105**) is now **12/12**.
+
+## The `c_avg` correction's weight grid is closed on BOTH axes (w16m/w16n, 2026-08-16)
+
+w16a set the coordinate-ascent grid to `linspace(0, 0.02, 41)` when the only partition being
+fitted was the seven generator rule cells. That is **two** fixed choices — a ceiling of 0.02 and
+a step of 5e-4 — and w16i's decile arm returned `q6` at exactly 0.0200 in fold 0, which looked
+like a binding constraint. Both axes are now measured against the frozen SKF5 seed42 folds, on
+the `w16i_schemeavg` object (base `blend159av_h3`, `c_avg`, five partitions, 5-arm rank average).
+
+- **Ceiling: an exact zero.** Widening to `linspace(0, 0.05, 101)` returns the **identical
+  weight vector in all 30 fits** (5 schemes × 5 folds + 5 full-data), 0/6 pinned at 0.05 in
+  every arm, every arm's cross-fitted delta unchanged to 0.000e-6, and the resulting 5-arm
+  average is rank-identical to `w16i_schemeavg.csv` (0 of 296,302 rows differ). `q6 = 0.0200`
+  is the argmax over 0…0.05 as well; it merely coincides with the old ceiling.
+- **Resolution: binds, and is worth nothing.** Refining to step 1e-4 (`linspace(0, 0.02, 201)`)
+  moves **28 of the 30 fits** off the 5e-4 lattice — the full-data decile arm moves 7 of its 8
+  levels — for **+0.046e-6 ± 0.286** on the shipped object (t(4df) +0.16, 3/5 folds), with the
+  `rule` arm going **negative** at −0.285e-6. CV 0.97005570 against 0.97005567.
+
+**Do not re-open the grid** with a different ceiling, step, or third grid. The ceiling result is
+exact rather than statistical; the resolution result is 1/43 of the 2e-6 reproducibility floor
+against an exactly matched control (the narrow fit, reproduced and asserted equal to `w16i`'s
+stored per-fold and full-data weights).
+
+⚠ **Instrument lesson, the third of this wave.** *A fitted parameter resting on a grid boundary
+is not evidence that the boundary is binding.* w16i's fold-0 `q6 = 0.0200` was read off a log
+and taken as a constrained optimum; it was not one. The check is one script: widen the box and
+compare the fitted vectors before building anything on the wide fit. Companion lessons: w16c §5
+(a high cond-AUC z on a *pack member* does not convert into AUC) and w16h §1 (nested-pick
+stability, not the existence of a selection, is the test).
+
+### The corrected-family CV→LB ladder is 5/5
+
+`w16n_finegrid` CV 0.9700557 → **0.97107**, pre-registered. The corrected family now holds five
+files spanning CV 0.9700527–0.9700557, all printing **0.97107**, exactly as the ladder requires
+(a corrected file needs CV ≥ 0.970058 to print 0.97108). That is the eighth consecutive
+out-of-sample confirmation of w15i's within-family fit.
+
+### ⚠ w16a item 3 is NOT cheap — the "two extra configurations" estimate is wrong
+
+Three consecutive entries have carried "how much of the +200e-6 OOF/test bagging asymmetry
+survives 160-member blending — two extra configurations inside `experiments/w15g_cvgap.py`'s
+existing loop". Checked against `logs_w15g_cvgap.txt`: that loop trains **six LightGBMs per
+outer split at 51–90s each**, about 7 min per outer split for **one** member, and the quantity
+is a property of a *blend*, which the loop has no representation of. The honest shape is a
+scaled-down stack of 3–4 diverse members rebuilt inside the same TRAIN/HOLD geometry, ~20–30 min
+per outer split, two splits minimum for an error bar. Budget a whole slot. The single-member
+baseline it must be compared against is already measured, three outer splits:
+`gap_bagging` **+662.6e-6 ± 6.9**, `gap_total` +432.4e-6 ± 53.8, `gap_honesty` −230.2e-6 ± 60.5,
+`gap_size` +339.2e-6 ± 59.9.
