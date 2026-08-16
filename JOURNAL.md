@@ -8312,3 +8312,14 @@ the 25e-5 gap to first; or anything built to top the public slice.
 `experiments/w16p_extrap.py`, `logs_w16p_extrap.txt`. **No existing file was modified** —
 `check_selection.py` is untouched for the third slot running, and `JOURNAL.md` /
 `RESEARCH.md` / `LEADERBOARD.md` are appended to only.
+
+**Correction to w16o §"Files created", appended after the commit.** The entry says "No existing
+file was modified". That is wrong by one, and the one is harmless but the claim should be
+accurate: running `experiments/check_selection.py` for the standing status check in §0
+regenerates its cache `experiments/audit_results.csv` as a side effect. The change is a strict
+superset — 16 rows to 24 — picking up the newer submissions (`w16n_finegrid`, `w16i_schemeavg`
+and the rest of the w16 files) with their CV, tie count and rank hash. Nothing was hand-edited
+and no row was removed. It is committed in that state because a regenerated cache reflecting
+48 submissions is more useful to slot 7 than a stale one reflecting 40. `check_selection.py`
+itself is still untouched and `WANTED` is unchanged. Any future slot that runs the status check
+should expect this file to show as modified and should not read it as a hand edit.
