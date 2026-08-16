@@ -1,0 +1,308 @@
+[
+ {
+  "id": 735342,
+  "title": "\ud83d\ude80 [Classification Blueprint] GPU Target Encoding + XGBoost + Probe Feature Selection Body UNDER 5 MINUTES",
+  "votes": 0,
+  "comments": 1,
+  "author": "",
+  "date": "2026-08-15 06:54:34.989000",
+  "url": null
+ },
+ {
+  "id": 735339,
+  "title": "\ud83d\ude80 Breaking the 0.97100 Wall (Highest Public Notebook) & The Art of LB Probing",
+  "votes": -1,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-15 06:04:53.077000",
+  "url": null
+ },
+ {
+  "id": 735000,
+  "title": "Non-ratio Feature Engineered columns",
+  "votes": 0,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-13 14:08:40.102000",
+  "url": null
+ },
+ {
+  "id": 734990,
+  "title": "Model capacity was worth 18x my feature engineering \u2014 and then made it worthless",
+  "votes": 1,
+  "comments": 5,
+  "author": "",
+  "date": "2026-08-13 12:50:31.788000",
+  "url": null
+ },
+ {
+  "id": 734978,
+  "title": "\ud83d\udcf1 EDA Blueprint for Phone Addiction",
+  "votes": 1,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-13 10:43:04.058000",
+  "url": null
+ },
+ {
+  "id": 734963,
+  "title": "Help: Long waiting to appear in the 'Submissions' web page!",
+  "votes": 0,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-13 08:45:06.298000",
+  "url": null
+ },
+ {
+  "id": 734636,
+  "title": "\ud83d\udcf1 S6E8 | Boosting AUC with Rank Transformation & Missing Value Indicators",
+  "votes": 2,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-12 08:14:25.124000",
+  "url": null
+ },
+ {
+  "id": 734628,
+  "title": "How are you designing Private-LB-robust validation for S6E8?",
+  "votes": 0,
+  "comments": 1,
+  "author": "",
+  "date": "2026-08-12 07:10:56.227000",
+  "url": null
+ },
+ {
+  "id": 734501,
+  "title": "The Generator Didn't Just Smooth the Labels \u2014 It Fixed the Data",
+  "votes": 0,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-11 17:44:08.151000",
+  "url": null
+ },
+ {
+  "id": 734063,
+  "title": "Decoding the Synthetic Generator: 0.9689+ via Stringified Target Encoding and Rank Averaging",
+  "votes": 5,
+  "comments": 5,
+  "author": "",
+  "date": "2026-08-09 17:31:34.973000",
+  "url": null
+ },
+ {
+  "id": 734005,
+  "title": "Changing the random seed moves you 60 places \u2014 what this leaderboard can and can't resolve",
+  "votes": 0,
+  "comments": 6,
+  "author": "",
+  "date": "2026-08-09 13:55:44.168000",
+  "url": null
+ },
+ {
+  "id": 733983,
+  "title": "A quarter of the rows describe people who can't exist \u2014 and LightGBM already knew",
+  "votes": 0,
+  "comments": 1,
+  "author": "",
+  "date": "2026-08-09 11:56:17.860000",
+  "url": null
+ },
+ {
+  "id": 733908,
+  "title": "An interesting competition",
+  "votes": -1,
+  "comments": 1,
+  "author": "",
+  "date": "2026-08-09 01:17:20.453000",
+  "url": null
+ },
+ {
+  "id": 733730,
+  "title": "My finding on the data and some questions",
+  "votes": 1,
+  "comments": 2,
+  "author": "",
+  "date": "2026-08-08 02:55:17.995000",
+  "url": null
+ },
+ {
+  "id": 733708,
+  "title": "5 Features, Logistic Regression, ~0.945 ROC AUC",
+  "votes": 0,
+  "comments": 1,
+  "author": "",
+  "date": "2026-08-07 23:18:51.840000",
+  "url": null
+ },
+ {
+  "id": 733619,
+  "title": "Question about Top 3 Prizes for Teams ",
+  "votes": -1,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-07 16:50:20.401000",
+  "url": null
+ },
+ {
+  "id": 733618,
+  "title": "27 teams show 0.97086. None of them are tied.",
+  "votes": 1,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-07 16:38:10.166000",
+  "url": null
+ },
+ {
+  "id": 733552,
+  "title": "I Injected Real-World Data Into My Model and Every Single Fold Got Worse",
+  "votes": 0,
+  "comments": 2,
+  "author": "",
+  "date": "2026-08-07 10:55:34.634000",
+  "url": null
+ },
+ {
+  "id": 733541,
+  "title": "Feature Engineering: What Works, What Fails, and the Math Behind It",
+  "votes": 5,
+  "comments": 4,
+  "author": "",
+  "date": "2026-08-07 10:04:48.756000",
+  "url": null
+ },
+ {
+  "id": 733495,
+  "title": "As a Beginner, What's the First Thing You Check in a Tabular Competition?",
+  "votes": 8,
+  "comments": 14,
+  "author": "",
+  "date": "2026-08-07 05:29:53.012000",
+  "url": null
+ },
+ {
+  "id": 733214,
+  "title": "There is no distribution shift in this data - only missingness. What that means for the private LB",
+  "votes": 1,
+  "comments": 2,
+  "author": "",
+  "date": "2026-08-06 06:42:46.602000",
+  "url": null
+ },
+ {
+  "id": 733023,
+  "title": "Single Model Feature Engineering technique...",
+  "votes": 2,
+  "comments": 4,
+  "author": "",
+  "date": "2026-08-05 15:55:49.440000",
+  "url": null
+ },
+ {
+  "id": 732985,
+  "title": "XGBoost + Optuna on GPU | 0.96514 LB \u2014 sharing what worked",
+  "votes": 3,
+  "comments": 8,
+  "author": "",
+  "date": "2026-08-05 12:20:50.184000",
+  "url": null
+ },
+ {
+  "id": 732955,
+  "title": "The Signal in the Noise: Treating Missing Values as Features in S6E8",
+  "votes": -1,
+  "comments": 3,
+  "author": "",
+  "date": "2026-08-05 09:36:26.078000",
+  "url": null
+ },
+ {
+  "id": 732503,
+  "title": "Example Submission and Expected outputs are different",
+  "votes": 2,
+  "comments": 5,
+  "author": "",
+  "date": "2026-08-03 12:17:34.566000",
+  "url": null
+ },
+ {
+  "id": 732434,
+  "title": "The generator turned a hard rule into a smooth field: a forensic look at the synthetic layer",
+  "votes": 4,
+  "comments": 3,
+  "author": "",
+  "date": "2026-08-03 00:06:15.009000",
+  "url": null
+ },
+ {
+  "id": 732428,
+  "title": "Generation model of the missing \"original\" dataset",
+  "votes": 16,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-02 20:56:03.503000",
+  "url": null
+ },
+ {
+  "id": 732427,
+  "title": "Train and test have different missingness rates \u2014 in all twelve columns",
+  "votes": 2,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-02 20:47:46.059000",
+  "url": null
+ },
+ {
+  "id": 732358,
+  "title": "Baseline Keras training, all categoricals",
+  "votes": 13,
+  "comments": 0,
+  "author": "",
+  "date": "2026-08-02 13:51:06.456000",
+  "url": null
+ },
+ {
+  "id": 732256,
+  "title": "LightGBM Gain Importance: What the Model Actually Cares About (and What it Ignores)",
+  "votes": 6,
+  "comments": 2,
+  "author": "",
+  "date": "2026-08-02 09:23:22.125000",
+  "url": null
+ },
+ {
+  "id": 732223,
+  "title": "Plot Twist: Why My \"Golden\" EDA Features Dropped My CV Score (EDA vs LightGBM)",
+  "votes": 3,
+  "comments": 5,
+  "author": "",
+  "date": "2026-08-02 07:49:10.531000",
+  "url": null
+ },
+ {
+  "id": 731764,
+  "title": "Handling Class Imbalance & Missing Values in This Dataset",
+  "votes": 3,
+  "comments": 5,
+  "author": "",
+  "date": "2026-08-01 03:10:04.438000",
+  "url": null
+ },
+ {
+  "id": 731755,
+  "title": "Nomophobia: No Mobile Phone Phobia on Kaggle Playground : )",
+  "votes": 17,
+  "comments": 4,
+  "author": "",
+  "date": "2026-08-01 02:09:44.577000",
+  "url": null
+ },
+ {
+  "id": 731719,
+  "title": "Original Dataset not available ",
+  "votes": 7,
+  "comments": 10,
+  "author": "",
+  "date": "2026-08-01 00:02:34.996000",
+  "url": null
+ }
+]

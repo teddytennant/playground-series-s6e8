@@ -1,0 +1,41 @@
+{
+  "base_auc": 0.9700491721182697,
+  "fallback_auc": 0.9700433779222748,
+  "A_additive": {
+    "xfit_w": [
+      0.014,
+      0.016,
+      0.014,
+      0.018000000000000002,
+      0.014
+    ],
+    "xfit": 1.6075230324208434e-06,
+    "folds_pos": 4,
+    "w_full": 0.016,
+    "insample": 1.912953213056845e-06
+  },
+  "B_rankblend": {
+    "xfit_w": [
+      0.0018000000000000002,
+      0.0022,
+      0.0022,
+      0.003,
+      0.0026000000000000003
+    ],
+    "xfit": 1.0211457237563337e-06,
+    "folds_pos": 4,
+    "w_full": 0.0022,
+    "insample": 1.4229689372369236e-06
+  },
+  "chosen": {
+    "form": "A_additive",
+    "xfit": 1.6075230324208434e-06,
+    "w": 0.016,
+    "candidate_cv": 0.9700507796413022
+  },
+  "file": {
+    "path": "/home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w15f_antistudent_cv.csv",
+    "spearman_vs_base": 0.9999967880478713,
+    "moved": 294267
+  }
+}

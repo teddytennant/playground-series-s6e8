@@ -1,0 +1,23 @@
+{
+  "base_auc": 0.9700491721182697,
+  "fallback_auc": 0.9700433779222748,
+  "cond_auc": 0.5058186023473161,
+  "cond_z": 4.836937697504187,
+  "xfit_w": [
+    0.001,
+    0.001,
+    0.0012000000000000001,
+    0.0014,
+    0.0011
+  ],
+  "w_full": 0.0011,
+  "xfit": 3.5796917662755947e-06,
+  "folds_pos": 4,
+  "candidate_cv": 0.9700527518100359,
+  "net": 7.3162526822434515e-06,
+  "net_z": 4.462869044717417,
+  "file": {
+    "path": "/home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w15f_antistudent_avg.csv",
+    "spearman_vs_base": 0.9999928403380743
+  }
+}

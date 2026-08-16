@@ -1,0 +1,20 @@
+{
+ "argmax_pooled": "blendtop3",
+ "argmax_within": "blendtop3",
+ "boot_pair": [
+  "blend159av_h3",
+  "blend160origm_h3"
+ ],
+ "boot_pooled_sd": 1.5382579344988262e-06,
+ "boot_within_sd": 1.5324198386855272e-06,
+ "n_lb": 30,
+ "rho_pooled": 0.7214483924073172,
+ "residsd_pooled": 2.3761341553250677e-05,
+ "rho_within": 0.707950761118125,
+ "residsd_within": 2.43699123244492e-05,
+ "rho_cv_w": 0.7048013138173135,
+ "residsd_cv_w": 2.4072885253279687e-05,
+ "rho_tight_pooled": 0.6182925406924898,
+ "rho_tight_within": 0.5996972763107609,
+ "rho_tight_cv_w": 0.5953583812883573
+}

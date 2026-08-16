@@ -1,0 +1,106 @@
+{
+ "lb": "playground-series-s6e8-publicleaderboard-2026-08-15T11:41:26.csv",
+ "topk": 30,
+ "our_rank": 21,
+ "obs_gap_leader": 0.00017999999999995797,
+ "obs_sd": 4.780708358998095e-05,
+ "obs_range": 0.00021000000000004349,
+ "sims": [
+  {
+   "sd_gap": 2e-05,
+   "bestof": "off",
+   "mean_gap": 3.575250000000001e-05,
+   "p_gap_ge_obs": 0.0,
+   "mean_sd": 1.4305286773107203e-05,
+   "mean_range": 5.7725000000000014e-05
+  },
+  {
+   "sd_gap": 2e-05,
+   "bestof": "on",
+   "mean_gap": 3.6395000000000006e-05,
+   "p_gap_ge_obs": 0.0,
+   "mean_sd": 1.4506204803459878e-05,
+   "mean_range": 5.8742500000000016e-05
+  },
+  {
+   "sd_gap": 3e-05,
+   "bestof": "off",
+   "mean_gap": 5.330750000000001e-05,
+   "p_gap_ge_obs": 0.0,
+   "mean_sd": 2.1202573951455337e-05,
+   "mean_range": 8.6555e-05
+  },
+  {
+   "sd_gap": 3e-05,
+   "bestof": "on",
+   "mean_gap": 5.3647500000000004e-05,
+   "p_gap_ge_obs": 0.0,
+   "mean_sd": 2.139559040004559e-05,
+   "mean_range": 8.728250000000002e-05
+  },
+  {
+   "sd_gap": 4e-05,
+   "bestof": "off",
+   "mean_gap": 7.133e-05,
+   "p_gap_ge_obs": 0.0,
+   "mean_sd": 2.82326732938537e-05,
+   "mean_range": 0.0001157425
+  },
+  {
+   "sd_gap": 4e-05,
+   "bestof": "on",
+   "mean_gap": 7.115250000000001e-05,
+   "p_gap_ge_obs": 0.0,
+   "mean_sd": 2.823195266308486e-05,
+   "mean_range": 0.00011556000000000001
+  },
+  {
+   "sd_gap": 5.3e-05,
+   "bestof": "off",
+   "mean_gap": 9.398e-05,
+   "p_gap_ge_obs": 0.00025,
+   "mean_sd": 3.7223158678756664e-05,
+   "mean_range": 0.00015309
+  },
+  {
+   "sd_gap": 5.3e-05,
+   "bestof": "on",
+   "mean_gap": 9.4585e-05,
+   "p_gap_ge_obs": 0.00075,
+   "mean_sd": 3.7379477503204914e-05,
+   "mean_range": 0.00015377999999999998
+  },
+  {
+   "sd_gap": 6.5e-05,
+   "bestof": "off",
+   "mean_gap": 0.00011560000000000002,
+   "p_gap_ge_obs": 0.01725,
+   "mean_sd": 4.5822589510027114e-05,
+   "mean_range": 0.00018869500000000004
+  },
+  {
+   "sd_gap": 6.5e-05,
+   "bestof": "on",
+   "mean_gap": 0.00011617750000000002,
+   "p_gap_ge_obs": 0.018,
+   "mean_sd": 4.5804342789272774e-05,
+   "mean_range": 0.00018842250000000003
+  },
+  {
+   "sd_gap": 8.4e-05,
+   "bestof": "off",
+   "mean_gap": 0.0001490325,
+   "p_gap_ge_obs": 0.19225,
+   "mean_sd": 5.8875864989004e-05,
+   "mean_range": 0.00024176500000000001
+  },
+  {
+   "sd_gap": 8.4e-05,
+   "bestof": "on",
+   "mean_gap": 0.0001497325,
+   "p_gap_ge_obs": 0.2065,
+   "mean_sd": 5.896102966079254e-05,
+   "mean_range": 0.00024271750000000002
+  }
+ ]
+}

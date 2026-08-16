@@ -1,0 +1,35 @@
+{
+  "n_pairs": 56,
+  "null": {
+    "blend159av_h3": [
+      -1.0024929178335344e-05,
+      2.7626189704229257e-06
+    ],
+    "blend158_logit": [
+      -9.417034486401226e-06,
+      2.7230226634314843e-06
+    ],
+    "blend150fx_hybrid": [
+      -9.925126597265522e-06,
+      2.5562720028795004e-06
+    ]
+  },
+  "z_main_mean": 2.368694277903581,
+  "z_main_max": 3.9382006223360886,
+  "n_pos_z2": 40,
+  "n_pos_delta": 6,
+  "delta_main_max": 8.548185702617062e-07,
+  "best": {
+    "teacher": "ext2:bolt_lookup_v2_s42",
+    "student": "own:linlat",
+    "rho_teacher_student": 0.9420558795402965,
+    "rho_anti_vs_rayk_family": null,
+    "delta_blend159av_h3": 8.548185702617062e-07,
+    "z_blend159av_h3": 3.9382006223360886,
+    "folds_pos": 2,
+    "delta_blend158_logit": 2.1850832537806397e-06,
+    "z_blend158_logit": 4.260749605940176,
+    "delta_blend150fx_hybrid": 2.758242055866944e-07,
+    "z_blend150fx_hybrid": 3.9905576524569386
+  }
+}
