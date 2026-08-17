@@ -1,0 +1,49 @@
+w19e SHIP PRE-REGISTRATION — written BEFORE the upload, 2026-08-17 slot 5.
+
+FILE: submissions/w14a_repro159av.csv     CV 0.9700436164 on the frozen SKF5 seed42 folds.
+Never sent.  Rank-distinct from all 55 sent files (checked file-by-file on the test-side ranks,
+not against a remembered list — w18 found w16m_widegrid to be a rank-duplicate that way).
+296,302 rows, no NaN, range [9.28e-6, 0.99979].
+
+NOT A LEADERBOARD CANDIDATE, and priced as such before the send.  12.0e-6 below the CV pick
+(w16i_schemeavg, 0.9700556663) and its whole predictive mass sits at 0.97105-0.97107.
+P(it reaches the 0.97108 auto-slot-1 tier) = 0.000 under every model below.  It cannot move the
+auto-pick tiers and it is not sent in the hope that it will.
+
+WHY THIS FILE.  Named in experiments/w19_prereg.txt before any number in this slot existed, on
+the rationale "tau is identified at tight pairs".  That rationale survived the slot and got
+stronger, by a route the pre-registration did not anticipate: w19c/w19d showed the ENTIRE click
+price hangs on tau, so tau is now the single most decision-relevant unknown in the workspace,
+and tight pairs are where the board says anything about it.  The ship is unchanged from the
+pre-registration; only its importance moved.
+
+    reference blend159av (same ens4 family, LB 0.97106, CV 0.9700448767)
+    dCV -1.260e-6
+    LAW-IF paired sd 3.597e-6   <- the SMALLEST paired sd any send from this workspace has had
+                                   (w17e 8.6, w17j 5.76, w18b 7.34)
+
+REGISTERED PREDICTION — 0.97106, P 0.697.
+Full distribution, LAW-IF closed form, exact triangular grid convolution, ZERO draws:
+
+    0.97106  P 0.697
+    0.97105  P 0.213
+    0.97107  P 0.089
+    0.97104  P 0.001
+    0.97108  P 0.000
+
+REGISTERED IN ADVANCE, so it cannot be claimed afterwards: this send CANNOT separate the three
+tau models.  At tau = 0, tau = 0.588 (w19a posterior median) and tau = 1.716 (95% upper) the
+grid distribution changes by at most 0.053 in probability on any cell.  One print is not an
+experiment about tau and will not be written up as one.  What the send buys is data: it adds
+~11 new ens4 pairs to w19a's 194, at the tightest paired sd in the set, and w19a is re-run
+cumulatively every slot from here.
+
+FOURTH out-of-sample test of the paired instrument, and the first in the ens4 base family
+(after logit w17e, hybrid w17j, rankraw w18b).  Running score BEFORE this send: 2 hits /
+2 misses.  A print of 0.97105 or 0.97107 counts as a MISS and will be recorded as one; the
+instrument's calibration is now measured by w19a/w19b over 194 pairs and does not depend on
+this tally, which is why the tally can be reported honestly.
+
+ALSO REGISTERED: WANTED = {w16i_schemeavg.csv, blend159av_h3.csv} does not change as a result of
+this send, whatever it prints.  Final selection runs on CV; this file's CV is 12.0e-6 below the
+pick and its LB is irrelevant to the choice.

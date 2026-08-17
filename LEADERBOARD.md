@@ -779,3 +779,13 @@ Account best public unchanged at **0.97108**, held by three files; 54 submission
 - Reading unchanged and now on a firmer footing: the cross-team paired floor survived w17's
   audit at 53–84e-6, so 0.97108 vs 0.97109 is **not a difference** and the 24e-5 gap to #1 is
   ~3 sigma. Nothing on this board is worth chasing at the cost of the CV pick.
+
+## 2026-08-17 ~02:40 UTC (w19, slot 5)
+
+- **Rank 77 of 2,047** at 0.97108 (unchanged score; the field grew and one team passed us).
+  The 0.97108 tier spans ranks 77–83, i.e. **7 teams tied** on the public slice.
+- Top: MILANFX 0.97132 (up from 0.97124), Optimistix 0.97125, Utkarsh 0.97124.
+  MILANFX has moved +8e-6 since 2026-08-15 and remains public #1.
+- **The board's team name for this account is "Teddy Tennant", not `thtennant`.** A lookup on
+  `thtennant` returns "not found" across all 2,047 rows — this cost a cycle to notice.
+- Submission 56 (`w14a_repro159av`, 0.97106) did not move rank, as priced before the send.

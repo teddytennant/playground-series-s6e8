@@ -5059,3 +5059,88 @@ criterion look like provenance. **Test deviance; use provenance to decide where 
 (w18d: 4.90–5.51×, posterior 0.635) because it is the only model carrying a *measured* width —
 the group gaps are estimated on n=3–6 files and are demonstrably too narrow. Pool these four with
 their LAW-IF sds and test the calibration; each future send adds a point for free.
+
+## w19 (slot 5, 2026-08-17) — the paired CV→LB instrument is CALIBRATED, and the click is not robust
+
+Two durable results and one hard limit. Read all three before re-opening any CV→LB question.
+
+### A. The instrument is calibrated — and w18b's "z −3.58" is RETRACTED
+
+`experiments/w19a_transfer.py` fits the per-file transfer sd `tau` by composite ML over **every
+within-family pair of sent files** (194 pairs over 51 files; 205 over 52 after this slot's send),
+with LAW-IF paired sds and exact rounding:
+
+```
+LB_k = round_G( cv_k + g_fam(k) + d_k + e_k + u_k ),   (d+e) ~ N(0, S_t+S_p),  u_k ~ N(0, tau^2)
+tau_hat = 0.000e-6      95% profile upper 1.72e-6 (194 pairs) -> 1.50e-6 (205 pairs)
+```
+
+`experiments/w19b_calib.py` then fits the general `beta`/`lambda`/`tau` model and — the part that
+matters — locates every statistic in **500 whole-system draws from the perfectly-calibrated
+null**. `beta_hat` 2.12 sits at the null's **95.8th** percentile, `lambda_hat` 0.67 at the 34.6th,
+and **none of 11 statistics escapes its own null's central 95%.** The alarming parametric
+structure is the estimator, not the board.
+
+**Consequently `RESEARCH.md`'s and `check_selection.py`'s w18b note is wrong and is retracted.**
+`blend159av_rankraw`'s "z −3.58" was computed against a **family sd estimated on n = 4**; as a
+proper LAW-IF paired z its worst pairing is **+2.08**, unremarkable in a set of 194.
+
+**Rounding, exactly.** For a *pair*, with the per-file marginal sd (522e-6) 52× the grid, the
+phase is uniform mod G and
+`P(dLB = mG) = [I(mG+G) − 2 I(mG) + I(mG−G)] / G`, `I(z) = s[t Φ(t) + φ(t)]`, `t = (z−mu)/s`.
+That is a **triangular** convolution — so **adding two independent U(−G/2, G/2) is EXACT for a
+pair**, even though rounding is not additive noise. What is wrong is a Gaussian of matched
+variance G²/6. Use `w19a_transfer.pmf_exact`.
+
+### B. ⚠ HARD LIMIT: the public board cannot resolve the CV→LB slope, ever
+
+Under the *correct* model, `beta_hat` over our within-family pairs has **sd 0.66** (500-draw
+null). 56 submissions do not contain the slope and 100 will not either. **Any future run that
+reports a fitted CV→LB slope from leaderboard pairs is reporting noise.** Same for `lambda`
+(null sd 0.25) and `tau` (null sd 1.63 — a calibrated board yields `tau_hat` up to 4.7e-6).
+
+Related and separate: a 30-draw bootstrap ratio is not a number. `boot se / naive se` read 0.91
+at 30 draws and **1.90** at 400 on identical data.
+
+### C. ⚠ THE CLICK IS NOT ROBUST — supersedes w18a's +2.328/+5.509/+5.666
+
+Everything in w16w → w17d → w17g → w18a is conditional on **tau = 0 exactly**. `tau` is free:
+
+| TEST-level tau | w16e_aonly | w16q_ens4avg | w16t_cellens4 | P(auto beats both), aonly |
+|---|---|---|---|---|
+| 0.00 (w18a) | +2.328 | +5.509 | +5.666 | 0.043 |
+| **1.72** (w19a 95% upper) | **−1.493** | +3.497 | +4.679 | **0.733** |
+
+A **sign flip inside the 95% interval**. The auto-pick holds public slot 1 on a **30e-6 public
+lead against a 5.3e-6 CV lead**, and tau = 0 is the only assumption under which that excess is
+100% slice noise.
+
+**The board provably cannot identify the split.** A test-level `u_k` (in both slices) and a
+public-level `u_k` (only in the slice we saw) add the *same* tau² to the *same* observed
+variance. **No future submission resolves this.** So the only honest readout is marginal —
+`experiments/w19d_taupost.py`, flat prior × w19a likelihood, flat prior on the split:
+
+| | tau=0 corner | **marginalised** | P(the click LOSES) |
+|---|---|---|---|
+| w16e_aonly | +2.328e-6, P 0.043 | **+1.890e-6, E[P] 0.128** | **0.037** |
+| w16q_ens4avg | +5.509e-6, P 0.031 | +5.300e-6, E[P] 0.044 | 0.000 |
+| w16t_cellens4 | +5.666e-6, P 0.058 | +5.562e-6, E[P] 0.067 | 0.000 |
+
+**STILL CLICK.** But quote the marginalised row, not the corner, and **retire the phrase "the
+click is not a coin flip"** for the `w16e_aonly` branch (E[P] 0.128, not 0.043).
+
+**Scope, do not delete, w18a's collapse theorem.** "Conditioning on all six public scores jointly
+is provably identical to conditioning each contrast on itself" holds **at tau = 0 only**: the
+off-scalar residual of `M = S_t (S_t+S_p)^{-1}` is 1.06e-10 at tau = 0 and **0.235** at tau = 1.7.
+
+### D. Operational
+
+- The leaderboard team name is **"Teddy Tennant"**, not `thtennant`. A `teamName == 'thtennant'`
+  lookup returns "not found" over all 2,047 rows. Paginate with `--csv` + `--page-token`; the
+  CLI prints `Next Page Token = …` as a line *above* the CSV header and it must be stripped.
+- `get_submission_limits` needs the token passed explicitly (see the auth gotcha above); it
+  returned `numToday 4 / numAllowedNow 6 / numTotal 55` at this slot's start. **Cap 10,
+  re-confirmed for the fifth consecutive slot.**
+- Prefer ships that are **tight pairs in a populated family**: that is where `tau` is identified,
+  and after §C `tau` is where the marginal value of a submission now lives. Re-run
+  `w19a_transfer.py` after every send — 194 → 205 pairs moved the 95% upper 1.72 → 1.50e-6.

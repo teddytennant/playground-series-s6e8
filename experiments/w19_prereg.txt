@@ -1,0 +1,71 @@
+w19 PRE-REGISTRATION — 2026-08-17, slot 5 of 10.  Written BEFORE any number in this slot exists.
+
+HANDED ANGLE: "LightGBM: tune it properly against the fixed folds."  DECLINED.
+RESEARCH.md section "LightGBM tuning — CLOSED, including the max_bin ladder (2026-08-13)" records
+the full two-stage sweep (one knob at a time, then 7 combinations, then 5-fold finalists): net
++0.00003 full-OOF, below the 5e-5 within-pack noise floor, and the max_bin ladder was walked to
+2047 and peaks at 511.  There is no untried knob and the shipped stack is 24 slots downstream of
+single-model CV.  Taking slot 4's next-run items 1 and 2 instead, which are one question:
+
+    Is the paired CV->LB instrument CALIBRATED, and if not, does the click reprice?
+
+THE TENSION THIS SLOT EXISTS TO SETTLE.  Two numbers in this workspace disagree.
+  w17a: over 46 sent files, within tight families, observed rms(dLB - dCV) = 7.4e-6 against
+        9.4e-6 predicted by slice draw + grid rounding ALONE.  Ratio 0.79.  No room for any
+        extra mechanism; residuals are TIGHTER than the model.
+  w18b: blend159av_rankraw printed 0.97102 against a registered paired 0.97104 (LAW-IF paired
+        sd 7.344e-6), and its realised family gap was z -3.58 against its four siblings.
+        Residual LOOSER than the model, and slot 4 wrote that every conditioned number in the
+        click price is "sharp in the same direction".
+Both cannot be read at face value.  w19a fits the per-file transfer sd tau by maximum likelihood
+over every within-family pair of sent files, with LAW-IF paired sds and EXACT grid rounding, and
+reports where w18b's print sits in the fitted model's own null.
+
+P1  GATE.  LAW-IF's closed-form paired sd reproduces w17a's simulated paired sd over the pairs
+    the two share: median |ratio-1| < 5%, max < 25%.  If this fails every number below is void.
+
+P2  tau_hat, the per-file CV->LB transfer sd, comes back SMALL: point estimate tau_hat < 3.0e-6
+    and 95% profile upper bound < 6.0e-6.  Registered from w17a's 0.79 ratio, which leaves no
+    variance to allocate.  FALSIFIED if tau_hat >= 3.0e-6.  If it is falsified, w18b was right,
+    the click is over-sharp, and P6 below moves.
+
+P3  The reconciliation is TAIL, not variance: the standardised pair residuals are heavier-tailed
+    than the fitted model.  Registered on the model's OWN parametric bootstrap (which carries the
+    rounding discreteness and the pair-sharing correlation, so a naive Gaussian kurtosis test is
+    not what is being run): the observed max |z| over all pairs lands above the 90th percentile
+    of the bootstrap's max |z|.  FALSIFIED if it lands below the 90th.
+
+P4  The naive composite-likelihood standard error on tau_hat is too narrow, because pairs sharing
+    a file are correlated and the composite likelihood ignores it.  Registered: the parametric
+    bootstrap sd of tau_hat exceeds the naive curvature sd by a factor > 1.3.
+
+P5  Exact rounding MATTERS.  Refitting with rounding folded in as an additive Gaussian variance
+    G^2/6 instead of the exact triangular kernel moves tau_hat by more than 1.0e-6, because
+    near-duplicate pairs (paired sd ~2-3e-6) dominate the fit and for them the rounding is the
+    whole signal and is bounded where a Gaussian is not.
+
+P6  THE CLICK.  Re-pricing w18a's conditioning with tau_hat inserted (two branches, because the
+    public board identifies the TOTAL transfer variance and not its split: TEST-level, tau into
+    S_t, present in both slices; and PUBLIC-level, tau into S_p, present only in the slice we
+    saw) moves the limit-1 prices from w18a's +2.328 / +5.509 / +5.666e-6 by LESS than 2.0e-6 on
+    every one of the three files, and P(the auto file beats BOTH wanted files privately) stays
+    below 0.15 in both branches.  FALSIFIED if any price moves by >= 2.0e-6 or any P >= 0.15.
+
+P7  DEADLINE PICKS UNCHANGED.  WANTED = {w16i_schemeavg.csv, blend159av_h3.csv} at the end of
+    this slot.  Registered in advance that nothing here can move it: every quantity in w19a/w19b
+    concerns the PUBLIC slice and the private slice conditional on it, final selection runs on
+    CV, and the file this slot ships is chosen for being a tight-pair probe, not for its CV.
+    FALSIFIED if WANTED changes for any reason other than a CV recomputation.
+
+THE SHIP, decided before the fit and stated here so it cannot be retrofitted.
+    w14a_repro159av, CV 0.9700436164, never sent, ens4 family, 12.0e-6 below the CV pick.
+    NOT a leaderboard candidate.  It is chosen because it is the TIGHTEST unsent pair in the
+    workspace: it is a reproduction of blend159av (CV 0.9700448767, LB 0.97106), dCV -1.26e-6,
+    so its LAW-IF paired sd should be the smallest any send has had.  A tight pair is where
+    tau is IDENTIFIED: at sd ~2e-6 the tau=0 model and a tau=5e-6 model put very different mass
+    on the neighbouring grid steps, so one print discriminates them where a loose pair cannot.
+    Registered predictions under both models go in w19c_shipprereg.txt before the upload.
+    This is also the FOURTH transform family to carry a registered paired prediction (h3-side
+    ens4 base), after logit (w17e), hybrid (w17j) and rankraw (w18b).
+
+Running score of the paired instrument BEFORE this slot: 2 hits / 2 misses out of sample.

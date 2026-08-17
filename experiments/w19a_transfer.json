@@ -1,0 +1,34 @@
+{
+ "P1": {
+  "passed": true,
+  "n": 161,
+  "median_err": 0.013806705684946907,
+  "max_err": 0.06624726011333903
+ },
+ "K": 52,
+ "n_pairs": 205,
+ "tau": 0.0,
+ "tau_gaussround": 0.0,
+ "prof_lo": 0.0,
+ "prof_hi": 1.5,
+ "dev_vs_zero": 0.0,
+ "se_naive": 1.0282928966225549,
+ "se_boot": 1.9550776473658749,
+ "boot_bias": 1.2153192456011312,
+ "boot_q_maxabsz": 0.63,
+ "boot_q_kurt": 0.525,
+ "boot_q_rms": 0.755,
+ "stat_obs": {
+  "maxabsz": 2.661768551609143,
+  "kurt": 2.7461898922942236,
+  "rms": 1.099862925951446
+ },
+ "P2": true,
+ "P3": false,
+ "P4": true,
+ "P5": false,
+ "rms_resid": 29.81274374452722,
+ "rms_pred_tau0": 18.007270520688277,
+ "boot": 400,
+ "seed": 192026
+}
