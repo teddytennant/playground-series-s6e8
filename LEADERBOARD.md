@@ -710,3 +710,21 @@ any tiebreak rule. The exposure remains auto-slot 2, the 7-way tie at 0.97106 th
   consolidation first.
 - Wave net: **+1e-5 public** (0.97107 → 0.97108) across ten submissions, one place lost to field
   drift. The score is not what this wave produced; the corrections list is.
+
+## 2026-08-17 (UTC), after w17 slot 1
+
+Top of board: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124, Keanan 0.97124,
+Maher el Ouahabi 0.97123, cstdy 0.97123, Don Mani 0.97120, Malhar Ujawane 0.97118,
+Szymon Kłapiński 0.97117. Our best public **0.97108** (three-way tie: `w16e_aonly`,
+`w16q_ens4avg`, `w16t_cellens4`). Gap to first **24e-5**, unchanged.
+
+Slot 1 sent `w14a_repro159av_h3` → **0.97105**, matching its pre-registered point estimate
+exactly. Not a rank move (it is a rebuild of an existing 0.97105 file); it was sent as an
+out-of-sample test of the new paired-slice CV→LB instrument, and it passed.
+
+**New, and it matters for the final-selection click:** ranking all 46 sent files by how far
+their public score sits above what their CV predicts puts Kaggle's three auto-slot-1 holders
+at the top of the tight families — `w16q_ens4avg` +1.20 sd, `w16e_aonly` +1.12,
+`w16t_cellens4` +1.07 — against the CV pick `w16i_schemeavg` at +0.26. `w16e_aonly` leads
+`blend159av_h3` by 30e-6 on public but only 5.3e-6 on CV. Board density is ~2.5 places per
+1e-5, so the click is still the largest single quantity available.

@@ -1,0 +1,118 @@
+w17a PRE-REGISTRATION — written 2026-08-17 ~00:2x UTC, before w17a_cvlb_scatter.py was run once.
+
+WHY NOT THE HANDED ANGLE
+------------------------
+Handed angle for this slot: "Error analysis: find where the current best model is wrong.
+Segment the out-of-fold errors and look for structure a feature could capture."
+
+That is w14d, and w14d closed it in writing (JOURNAL.md ~line 4203: "Error analysis on the
+rule cells joins the closed list"). Its evidence: the AUC deficit 0.029951 decomposed exactly
+over the generator's seven rule cells; a cell-local LightGBM specialist against a within-cell
+permuted control was negative at 9 of 9 checkpoints on BAND/D/G; cross-fitted per-cell isotonic
+was real-ctrl +6e-6 with both arms below base.
+
+§5.4 of the wave summary keeps one residue alive: cellboost was never run on cells A, B, E, F.
+Priced before deciding, from w14d_bandmap.log rather than from a hunch:
+
+  total AUC deficit                   0.029951
+  within-cell deficit                 0.006964   (23.3% of total)
+    of which D-D  0.004049 (13.5% of total)  } already run, negative
+    of which BAND-BAND 0.001461 (4.9%)       } already run, negative
+    remainder A-A + B-B + E-E + F-F + G-G  <= 0.001454  (<= 4.9% of total)
+    and G-G is inside that remainder and was ALSO already run, negative.
+
+So the untested cells hold at most 4.9% of the deficit between them, the three cells already
+run hold ~79% of the within-cell deficit, and all three returned solidly negative and MORE
+negative with capacity. Cell A additionally has 77,654 rows at a 0.9956 positive rate, i.e.
+345 negatives, so its within-cell AUC is an estimate on 2.7e7 of ~1.4e11 pairs and cannot
+move the global number whatever it says. Spending a slot there buys a fourth confirmation of
+a null over a region that cannot matter. Recorded here rather than silently skipped.
+
+WHAT THIS SLOT DOES INSTEAD
+---------------------------
+§5.2 of the wave summary, the top actionable open item: "Re-cut the CV->LB relation now that
+the ladder is falsified. The right object is not a within-family gap constant but a
+residual-scatter estimate: how far can LB sit from CV + gap, given the 10e-6 reporting grid?
+Until that exists, no LB prediction in this workspace is defensible, and several 'unreachable'
+claims are unsupported."
+
+THE CLAIM UNDER TEST
+--------------------
+H0 (the null this workspace should have been holding all along): every public LB score this
+account has ever received is consistent with
+
+    LB_i = CV_i + gap_fam(i) + eps_i ,   eps_i = public-slice draw noise, then rounded to 1e-5
+
+with a SINGLE eps distribution whose sd is set by the geometry of a 59,260-row slice of a
+296,302-row test set — not by anything about the file.
+
+Two independent estimates of sd(eps), which must agree if H0 holds:
+
+  (A) EMPIRICAL. 80 files with stored cross-fitted CV, ~50 with a live public score. Regress
+      LB on CV with per-family offsets; report the residual sd, and the paired residual sd
+      for same-family pairs (which cancels gap_fam and is the quantity §5.2 actually names).
+
+  (B) SIMULATED. The workspace's calibrated instrument (w14b_slicenoise / w15a_crossteam
+      geometry): draw a pseudo-test of 296,302 rows from the 691,369 labelled OOF rows, cut a
+      20% (59,260-row) pseudo-public slice, score every file's stored OOF vector on it. The
+      pooled ordering of these vectors IS the CV ordering by construction, so every
+      public/pooled disagreement the simulation produces is pure slice draw. Report
+      sd(slice AUC - pooled AUC) per file, and the PAIRED sd of
+      (slice_i - slice_j) - (pooled_i - pooled_j) for the leader files specifically.
+
+PRE-REGISTERED PREDICTIONS, in order of how much they would cost to be wrong about
+-----------------------------------------------------------------------------------
+P1. The paired simulated sd for two of OUR OWN corrected leader files will land in
+    20-35e-6. Basis: w14b measured 22-32e-6 for within-pack transform contrasts; the
+    corrected files differ from each other by less than the transforms do, so if anything
+    this should come in at or below the low end. If it comes in ABOVE 40e-6 the workspace has
+    been under-pricing its own LB noise for four waves.
+
+P2. GIVEN P1, slot 10 §3's "falsification" of the corrected-h3 ladder is NOT a falsification
+    of anything, because the test could not have passed. w16e_aonly (CV 0.9700544, LB 0.97108)
+    against w16i_schemeavg (CV 0.9700557, LB 0.97107) is a true CV difference of -1.3e-6 read
+    through noise of sd ~25e-6 onto a 10e-6 grid. Predicted P(reversal) ~ 0.48, i.e. a coin
+    flip. Concretely: I predict the observed |Delta LB| between same-family file pairs will be
+    UNCORRELATED with their Delta CV (|Spearman| < 0.3, and not significant at n_pairs).
+    This is the same error as wave-summary §4.2 — nine ladder "confirmations" that were tests
+    the rule could not lose — and it would mean the falsification was equally uninformative.
+
+P3. The empirical (A) residual sd will EXCEED the simulated (B) single-file sd, because (A)
+    also carries the 1e-5 rounding and any real gap_fam misspecification. I predict
+    (A) in 25-60e-6 against (B) in 15-30e-6 single-file.
+
+WHAT WOULD FALSIFY EACH, stated so the test can actually fail
+------------------------------------------------------------
+- P1 fails if the paired sd is outside 20-35e-6. That is a two-sided interval on a quantity
+  I have not computed, over a range the prior measurement does not cover (w14b measured
+  transform contrasts, not corrected-file contrasts).
+- P2 fails if Delta LB tracks Delta CV among same-family pairs with |Spearman| >= 0.3 at
+  p < 0.05. That is a live outcome: the workspace believed exactly this for nine slots, and
+  if it is true then LB IS resolving 3e-6 CV differences and the ladder was real.
+- P3 fails if (A) <= (B), which would mean the gap model is over-fitted to the same data that
+  estimates its residual, and the residual sd is not an honest predictive sd.
+
+GATE, run before anything downstream is believed
+------------------------------------------------
+Re-derive from the stored artifacts, and require 0.000e-12 drift:
+  - pooled OOF AUC of blend159av_h3 = 0.9700491721182696 (experiments/audit_results.csv)
+  - pooled OOF AUC of w16i_schemeavg = 0.9700556964750705? (NO -- that row is w16n_finegrid;
+    take whatever audit_results.csv stores and print both, do not assume they are equal)
+  - w14d_bandmap's global OOF AUC 0.970049 for blend159av_h3
+Any drift kills the run.
+
+SHIP DECISION, pre-registered
+-----------------------------
+This measurement produces no new submission file by itself. Slot 1 of 10 on a fresh UTC day
+(the last submission landed 2026-08-16 09:58 UTC; it is now 2026-08-17), and the brief says an
+unused slot is pure waste. So the ship is decided by the measurement:
+
+  - If P2 holds (LB cannot resolve intra-family CV differences), then NO file chosen for its
+    LB prospects is worth sending, and the correct send is the best-CV file this account has
+    never sent, whatever its predicted LB. I will identify it from audit_results.csv x the
+    live API and send that.
+  - If P2 fails (LB does resolve 3e-6), the ladder is alive, and the correct send is the
+    highest-CV corrected h3 file, since the ladder then predicts it tops the family.
+
+Either way WANTED (the deadline pick) is NOT touched by this slot: it is chosen on CV, and
+nothing here measures CV. Stated in advance so the temptation cannot arise afterwards.

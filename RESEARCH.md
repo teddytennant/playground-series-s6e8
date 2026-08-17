@@ -4687,3 +4687,109 @@ price the zero-parameter hedge at all.
 
 ⚠ **That price has gone stale four times in one Kaggle day**, twice caused by the slot quoting
 it. **Re-run `check_selection.py` before quoting it a fifth time.**
+
+---
+
+## The CV→LB relation, re-cut properly (w17a/w17b, 2026-08-17). Supersedes every earlier gap rule.
+
+**Use this section instead of any "LB = CV + constant" ladder anywhere above.**
+
+### The instrument, and the one number people keep taking from it
+
+Draw a pseudo-test of 296,302 rows from the 691,369 labelled OOF rows, cut a 20% public slice
+(59,260), score stored OOF vectors on it. Two quantities come out and **only one is usable**:
+
+| quantity | value | usable? |
+|---|---|---|
+| single-file sd(slice AUC − pooled AUC) | **568.8e-6** | **NO** |
+| common small-sample AUC bias | +47.7e-6 | **NO** |
+| **paired** sd[(slice_i−slice_j) − (pooled_i−pooled_j)] | **17.6e-6** median, **3.2–14.2e-6** for leader pairs | **YES** |
+
+Every file's public score is read off the **same fixed slice**, so the 568.8e-6 and the
++47.7e-6 are shifts common to all 50 files and are absorbed by the gap constant. Comparing an
+observed CV→LB scatter against the single-file sd is a test that cannot fail. Only the paired
+quantity survives, and it depends strongly on how alike the two files are — sd scales as
+sqrt(2(1−rho)).
+
+### ⚠ The paired sd this workspace carried for four waves was ~3× too big
+
+w14b's **22–32e-6** was measured on **transform contrasts** (h3 vs logit vs hybrid). Two files
+inside one family are far more correlated, and their paired sd is **3.2–14.2e-6**. Applying a
+paired sd measured on one population to another is the same error §5.3 flags in the cross-team
+**53–84e-6** figure — check that one before reusing it.
+
+### The relation, and what the public slice can actually resolve
+
+| pair set | n | Spearman(ΔCV, ΔLB) | grid-separated | sign agreement |
+|---|---|---|---|---|
+| within transform family | 108 | **+0.850** (p 2.6e-31) | 57 | **53/57 = 0.930**, z +6.49 |
+| all pairs | 1,035 | +0.672 | 878 | 724/878 = 0.825, z +19.24 |
+
+Is the scatter explained by slice geometry alone? Observed rms(ΔLB − ΔCV) against the sd
+predicted by slice draw + two 1e-5 roundings:
+
+| within-group pairs | n | observed | predicted | ratio |
+|---|---|---|---|---|
+| **tight: h3, h3+corr, ens4, ens4+corr, w, rankraw, rescale** | 87 | **7.4e-6** | **9.4e-6** | **0.79** |
+| h3-side only | 31 | 7.9e-6 | 7.1e-6 | 1.11 |
+| hybrid + logit | 21 | 74.5e-6 | 37.9e-6 | 1.97 |
+| all | 108 | 33.5e-6 | 18.7e-6 | 1.79 |
+
+**Among the tight families slice draw plus rounding fully explains the scatter.** The 1.79 is
+entirely hybrid/logit, whose CV spans are 300–350e-6.
+
+### The rule to use
+
+`LB = CV + gap_group + eps`, with sd(eps for a PAIR) ≈ **7–9e-6** in tight families:
+
+| group | n | gap | resid sd | CV span | LB span |
+|---|---|---|---|---|---|
+| h3 | 7 | +1002.1e-6 | 1.4e-6 | 3.3e-6 | **0.0** |
+| h3+corr | 5 | +1012.0e-6 | 9.6e-6 | 10.0e-6 | 30e-6 |
+| ens4 | 9 | +1013.5e-6 | 5.0e-6 | 12.9e-6 | 20e-6 |
+| ens4+corr | 2 | +1028.6e-6 | 0.1e-6 | 0.1e-6 | 0.0 |
+| rankraw | 6 | +1000.7e-6 | 4.1e-6 | 14.6e-6 | 20e-6 |
+| hybrid | 6 | +1005.2e-6 | 59.0e-6 | 350.5e-6 | 230e-6 |
+| logit | 4 | +1103.4e-6 | 32.1e-6 | 301.4e-6 | 250e-6 |
+
+- A CV difference **under ~5e-6 is a coin flip** on the public slice; **over ~15e-6 it is
+  resolved**. Never quote a gap constant to 1e-6 — the pair sd is ±1 grid step.
+- The h3 group is the cautionary case: 7 files, 3.3e-6 of CV span, **LB span exactly zero**.
+  That is why nine ladder "confirmations" could not fail.
+- **Slot 10's "the ladder is DEAD / not monotone" is corrected.** It was one file 2.2 sd high
+  (`w16e_aonly`), not a broken law.
+- **Out-of-sample confirmation:** `w14a_repro159av_h3` was predicted at 0.97105 (95% interval
+  {0.97104, 0.97105, 0.97106}, paired sd 4.75e-6) before upload and **printed 0.97105**.
+
+### Public-inflation ranking (`experiments/w17b_outliers.csv`)
+
+Mean standardised residual over all 45 pairs a file appears in; positive = public high for CV.
+`w16q_ens4avg +1.20`, `w16e_aonly +1.12`, `w16t_cellens4 +1.07` (all three of Kaggle's
+auto-slot-1 tie) against `w16i_schemeavg +0.26`, `blend159av_h3 −0.78`. Logit files +2.1…+2.8,
+hybrid −1.7…−2.3 (the known transform displacement, now against a correct null). Ranking by
+"public high for CV" and finding the public-selected files on top is **partly circular** — the
+non-circular part is that `w16e_aonly` leads `blend159av_h3` by 30e-6 on public but only
+5.3e-6 on CV, so **~83% of the lead is slice-specific**.
+
+## Rule-cell error analysis: §5.4 item 1 closed by pricing (w17, 2026-08-17)
+
+`w14d_cellboost.py` was never run on cells A, B, E, F, and six wave summaries kept that alive.
+From `w14d_bandmap.log`: total AUC deficit 0.029951, within-cell 0.006964 (23.3%), of which
+D×D 0.004049 and BAND×BAND 0.001461 were **already run and negative**. The remainder — all four
+untested cells **plus G, which was also already run and negative** — is **≤0.001454, i.e. ≤4.9%
+of the deficit**. Cell A has 77,654 rows at a 0.9956 positive rate = **345 negatives**, so its
+within-cell AUC prices 2.7e7 of ~1.4e11 pairs. **Do not spend a slot there.**
+
+## Practical, re-confirmed 2026-08-17
+
+- The run prompt's "submissions already reported for today" can be **stale across the UTC
+  rollover**. Run `date -u` and read the CLI's "N submissions remaining today" after a send.
+  On 08-17 the prompt said 10 used; the true count was 0 and the CLI said 9 remaining after
+  slot 1.
+- `audit_results.csv` is **not** a complete registry: it has no row at all for `w16e_aonly`,
+  `w16q_ens4avg`, `w16t_cellens4` and a NaN CV for `w15e_antistudent`,
+  `w15f_antistudent_avg`, `w16b_cellweight`, `w16f_armavg`. Deriving CV from the stored OOF
+  vector (`submissions/oof_<stem>.npy`) is safer and agrees with the audit to 2.2e-16.
+- **Check `rhash` before sending a "never-sent" file.** `w16m_widegrid` is the highest-CV
+  never-sent file and is **rank-identical** to the already-sent `w16i_schemeavg`
+  (`e8b3c57b8493`), so it would score 0.97107 by construction.

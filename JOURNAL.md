@@ -9453,3 +9453,229 @@ product.** Every one came from the same small set of habits, and they are cheap:
 - The nightly `kaggle-playground.timer` fires 20:10 EDT. It failed on 2026-08-15 with an expired
   headless OAuth session, which is why this wave was driven by hand; if the next wave is
   automated, that expiry is the first thing to check.
+
+---
+
+# ══ 2026-08-17 (UTC) — WAVE w17, SLOT 1 of 10 ══
+
+**Handed angle:** "Error analysis: find where the current best model is wrong. Segment the
+out-of-fold errors and look for structure a feature could capture."
+**Angle NOT taken.** Reason stated below and pre-registered in `experiments/w17a_prereg.txt`
+before anything was computed. Took wave-summary §5.2 instead, the top actionable open item.
+
+**Quota note first, because the prompt was stale.** The run prompt said "Submissions the Kaggle
+API already reports for today: 10". It was computed before 00:00 UTC. `date -u` at the start of
+this slot read **2026-08-17 00:10 UTC**, the last submission landed 2026-08-16 09:58 UTC, and
+the CLI confirmed **"9 submissions remaining today"** after this slot's send. The day had
+rolled. **Counting beat quoting again** (§4.8) — quoting the prompt would have cost the whole
+day's ten slots.
+
+### 0. Why the handed angle was declined — priced, not dismissed
+
+The angle is w14d, and w14d closed it in writing (JOURNAL.md ~line 4203: "Error analysis on the
+rule cells joins the closed list"). §5.4 keeps one residue alive — cellboost was never run on
+cells A, B, E, F. Priced from `w14d_bandmap.log` rather than from a hunch:
+
+| | deficit | share of total |
+|---|---|---|
+| total AUC deficit | 0.029951 | 1.000 |
+| within-cell | 0.006964 | 0.233 |
+| — D×D (run, negative) | 0.004049 | 0.135 |
+| — BAND×BAND (run, negative) | 0.001461 | 0.049 |
+| — **A+B+E+F+G within, all four untested cells plus G** | **≤0.001454** | **≤0.049** |
+
+G was also already run and also negative. So the four untested cells hold **at most 4.9%** of
+the deficit between them, against three already-run cells holding ~79% of the within-cell
+deficit and returning negative at 9/9 checkpoints, monotonically more negative with capacity.
+Cell A additionally has 77,654 rows at a 0.9956 positive rate — **345 negatives** — so its
+within-cell AUC prices 2.7e7 of ~1.4e11 pairs and cannot move the global number whatever it
+says. **§5.4 item 1 is hereby closed by pricing rather than by measurement**, and the price is
+recorded so a future slot does not re-open it on the same "never run" grounds.
+
+### 1. What §5.2 asked for, and the two-sided instrument built for it
+
+§5.2: *"the right object is not a within-family gap constant but a residual-scatter estimate:
+how far can LB sit from CV + gap?"* Two independent estimates that must agree:
+
+- **(B) simulated** — `experiments/w17a_cvlb_scatter.py`, 500 draws, seed 20260817. The
+  workspace's calibrated geometry (w14b/w15a): draw a pseudo-test of 296,302 from the 691,369
+  labelled OOF rows, cut a 20% public slice (59,260), score all 46 sent files that carry a
+  stored OOF vector. The pooled ordering IS the CV ordering by construction, so every
+  public/pooled disagreement produced is pure slice draw.
+- **(A) empirical** — `experiments/w17b_famfix.py`, the 46 files' live public scores against
+  their CV, grouped by base transform.
+
+Gated before anything was believed: `blend159av_h3` pooled OOF **drift +1.1e-16**,
+`w16n_finegrid` **+0.000e+00**, the 6dp value against `w14d_bandmap.log`, and the OOF-derived
+CV against `audit_results.csv` across 43 files at **max drift 2.2e-16**.
+
+### 2. ⚠ TWO DEFECTS IN MY OWN FIRST PASS, both found by reading its output not by trusting it
+
+1. **The file set silently dropped the three files the whole argument is about.** CV came from
+   `audit_results.csv`, which has **no row at all** for `w16e_aonly`, `w16q_ens4avg` or
+   `w16t_cellens4` — i.e. both halves of the pair slot 10 called a falsification, and all three
+   auto-slot-1 holders. The script printed "not both present" and I nearly read past it. CV is
+   now the pooled AUC of the stored OOF vector, gated against the audit where both exist.
+2. **The comparison used the wrong (B).** The single-file slice sd is **568.8e-6**, with a
+   common **+47.7e-6** small-sample AUC bias. Comparing the observed scatter to that "explains"
+   any scatter whatever — it is a test that cannot fail, §4.2's exact error. Every file's public
+   score is read off the **same fixed slice**, so all 568.8e-6 is a shift common to all 50 files
+   and is absorbed by the gap constant. The right quantity is the **paired** sd,
+   sd[(slice_i − slice_j) − (pooled_i − pooled_j)], which is **17.6e-6** median over all pairs
+   and **3.2–14.2e-6** among the leader files. Both scripts were rewritten before any number
+   below was believed. Also fixed: `family()` was w15j's name-suffix rule, so every w15/w16
+   corrected file fell through to the "ens4" default, mixing the h3-side corrected family with
+   its own opposite; and three NaN-CV rows entered the pair set and printed Spearman `nan`.
+
+### 3. ⚠ BOTH OF MY PRE-REGISTERED PREDICTIONS WERE FALSIFIED. That is the finding.
+
+**P1 — WRONG.** Predicted the leader-pair paired slice sd at 20–35e-6, "and if it comes in above
+40e-6 the workspace has been under-pricing its own LB noise for four waves." It came in at
+**3.2–14.2e-6** (median ~8.6e-6) — the error is in the *other* direction and ~3× in size.
+**This workspace has been systematically OVER-pricing its own LB noise.** The 22–32e-6 it has
+carried since w14b was measured on **transform contrasts** (h3 vs logit vs hybrid). Two files
+inside one family correlate far more tightly than that, and paired sd scales as
+sqrt(2(1−rho)). This is §4.7's error — a number measured on one kind of object and applied to
+another — and it is now the *second* load-bearing noise floor in this workspace found to be
+measured on the wrong population (the first was §5.3's cross-team 53–84e-6).
+
+**P2 — WRONG, decisively, at z +6.49.** Predicted ΔLB would be uncorrelated with ΔCV
+(|Spearman| < 0.3) and that slot 10's ladder falsification was therefore a test that could not
+pass. The opposite holds:
+
+| pair set | n | Spearman(ΔCV, ΔLB) | p | grid-separated | sign agreement | z |
+|---|---|---|---|---|---|---|
+| within-group | 108 | **+0.850** | 2.6e-31 | 57 | **53/57 = 0.930** | +6.49 |
+| all pairs | 1,035 | +0.672 | 1.1e-136 | 878 | 724/878 = 0.825 | +19.24 |
+
+**P3 — right in the loose families, reversed in the tight ones**, and the tight ones are the
+only ones any decision here is about:
+
+| within-group pairs | n | observed rms(ΔLB−ΔCV) | predicted by slice+grid | ratio |
+|---|---|---|---|---|
+| all | 108 | 33.5e-6 | 18.7e-6 | 1.79 |
+| **tight (h3, h3+corr, ens4, ens4+corr, w, rankraw, rescale)** | **87** | **7.4e-6** | **9.4e-6** | **0.79** |
+| h3-side only (h3, h3+corr) | 31 | 7.9e-6 | 7.1e-6 | 1.11 |
+| loose (hybrid, logit) | 21 | 74.5e-6 | 37.9e-6 | 1.97 |
+
+The apparent 1.79 "excess mechanism" is **entirely hybrid and logit**, whose CV spans are
+300–350e-6 and which carry the long-known transform displacement. Among the tight families
+slice draw plus grid rounding **fully explains, and slightly over-explains, the scatter**.
+There is no residual mechanism left to find there.
+
+### 4. ⚠ SLOT 10 §3 IS CORRECTED: the ladder is not dead, it has one 2.2-sd outlier
+
+Slot 10 §3 declared "the corrected-h3 CV→LB ladder — DEAD… the family's LB is not a monotone
+function of its CV at this resolution" and killed every derived claim. Against the correct
+paired null:
+
+```
+w16e_aonly vs w16i_schemeavg   dCV -1.24e-6  dLB +10.0e-6  pred sd 5.2e-6  -> +2.17 sd
+w16e_aonly vs w16n_finegrid    dCV -1.27e-6  dLB +10.0e-6  pred sd 5.2e-6  -> +2.17 sd
+w16e_aonly vs blend159av_h3    dCV +5.26e-6  dLB +30.0e-6  pred sd 9.6e-6  -> +2.59 sd
+w16i_schemeavg vs blend159av_h3 dCV +6.49e-6 dLB +20.0e-6  pred sd 8.7e-6  -> +1.55 sd
+w16q_ens4avg vs w16t_cellens4  dCV +0.14e-6  dLB  +0.0e-6  pred sd 6.5e-6  -> -0.02 sd
+```
+
+The observation slot 10 read as a broken law is **one file sitting ~2.2 sd high**, inside a
+relation that holds at 53/57 elsewhere. What survives of slot 10 §3 is the *practical* half —
+do not quote "LB = CV + 0.0010143" to 1e-6 and do not derive point predictions from it, because
+the pair sd is 5–9e-6 which is ±1 grid step. What does **not** survive is "not monotone",
+"the relation is noise", and the retirement of the whole family of LB reasoning.
+
+### 5. The honest replacement for the ladder
+
+For a file in a tight family, `LB = CV + gap_group + eps`, gaps measured over 46 sent files:
+
+| group | n | gap | resid sd | CV span | LB span |
+|---|---|---|---|---|---|
+| h3 | 7 | +1002.1e-6 | 1.4e-6 | 3.3e-6 | **0.0** |
+| h3+corr | 5 | +1012.0e-6 | 9.6e-6 | 10.0e-6 | 30e-6 |
+| ens4 | 9 | +1013.5e-6 | 5.0e-6 | 12.9e-6 | 20e-6 |
+| ens4+corr | 2 | +1028.6e-6 | 0.1e-6 | 0.1e-6 | 0.0 |
+| rankraw | 6 | +1000.7e-6 | 4.1e-6 | 14.6e-6 | 20e-6 |
+| hybrid | 6 | +1005.2e-6 | **59.0e-6** | 350.5e-6 | 230e-6 |
+| logit | 4 | +1103.4e-6 | **32.1e-6** | 301.4e-6 | 250e-6 |
+
+**Pairwise** (the form that cancels the gap and is what §5.2 named): sd(ΔLB − ΔCV) ≈ **7–9e-6**
+for tight-family pairs, so a CV difference is resolved on the public slice once it exceeds
+roughly **15e-6**, and is a coin flip below ~5e-6. That is the sentence the workspace did not
+have. Note the h3 group: 7 files, 3.3e-6 of CV span, LB span **exactly zero** — the grid alone
+answers why nine ladder "confirmations" could not fail.
+
+### 6. What this does to §0, the unmade click — a new and non-circular number
+
+Every file's mean standardised residual over all 45 pairs it appears in, sign-oriented so
+positive = *public score high for its CV* (`experiments/w17b_outliers.csv`):
+
+```
+w16q_ens4avg   +1.196   } all three of Kaggle's auto-slot-1 tie, and the top three
+w16e_aonly     +1.117   } tight-family public-inflation outliers in the entire
+w16t_cellens4  +1.072   } 46-file history
+...
+w16n_finegrid  +0.264      w16i_schemeavg +0.264   <- the CV pick
+blend159av_h3  -0.777      blendtop3      -0.830   <- the insurance file
+```
+
+(Logit files sit at +2.1 to +2.8 and hybrid at −1.7 to −2.3; that is the known transform
+displacement, re-confirmed against a correct null for the first time, not news.)
+
+**Stated plainly because it is the weak part of my own argument:** ranking files by
+"public high for CV" and then observing that the *public*-selected files rank top is **partly
+circular**. The non-circular content is the decomposition: `w16e_aonly` leads `blend159av_h3`
+by **30e-6 on public but only 5.3e-6 on CV**, so **~83% of that lead is slice-specific**. The
+same holds for both ens4-side files. Kaggle's auto-selection is not merely picking on public
+score — it is picking the three files whose public score is most inflated relative to CV, which
+is the Rogii failure with a measured magnitude. I did **not** measure the public/private
+coupling here, so no private-penalty number is quoted; w14b's negative coupling implies the
+sign, not the size.
+
+### 7. Ship — and it was an out-of-sample test of the instrument, which it passed
+
+`submissions/w14a_repro159av_h3.csv` (ref **55566530**), an independent rebuild of
+`blend159av_h3`, cross-fitted CV **0.9700472005**, Spearman 0.999953 against the original,
+never sent. Chosen because it is the only configuration in this workspace that can **falsify**
+the instrument rather than be fitted by it: tiny known ΔCV, one LB already observed
+(`blend159av_h3` 0.97105), the other unobserved by anyone. (`w16m_widegrid` has a higher CV but
+is **rank-IDENTICAL** to the already-sent `w16i_schemeavg` — rhash `e8b3c57b8493` — so it would
+print 0.97107 by construction and is the forbidden re-send of an identical file.)
+
+Pre-registered in `experiments/w17c_repropair.py` and printed **before** the upload:
+point **0.97105**, 95% interval spanning {0.97104, 0.97105, 0.97106}, P(prints exactly
+0.97105) = 0.646, from the pair's own paired slice sd of **4.75e-6**. A print outside those
+three values falsifies the instrument.
+
+**Result: 0.97105.** The point estimate, exactly. First out-of-sample confirmation of the
+paired-slice instrument against a real public score.
+
+### 8. Deadline picks — UNCHANGED, eighth consecutive slot
+
+`WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}`. Nothing here is eligible to move it:
+§5 measures LB, §6 measures LB, final selection runs on CV, and I pre-registered in §"SHIP
+DECISION" that WANTED would not be touched by this slot. `check_selection.py`'s printed block
+gains §5 and §6; **`WANTED` itself is untouched.**
+
+### 9. Next run should look at, in order
+
+1. **The click (§0).** Unchanged, still the largest priced quantity, now with §6's
+   decomposition behind it. Re-run `check_selection.py` before quoting any price.
+2. **§5.3's cross-team paired-slice sd of 53–84e-6.** This slot proved the *same class of
+   error* on the workspace's other noise floor: a paired sd measured on one population and
+   applied to another, wrong by ~3×. The cross-team figure was measured on three weaker
+   non-leader files and applied to all five leaders, and §5.3 already flags the likely error as
+   anti-conservative. It is now the highest-value remaining number, and it closes an entire
+   research direction on six do-not-spend lists.
+3. **Public/private coupling for the three auto-slot-1 files.** §6 has the public inflation but
+   no private penalty. w14b's regression of private deviation on public deviation is built and
+   would convert §6 into an actual private-score cost for not clicking. Cheap; the OOF vectors
+   and the geometry are both in place.
+4. §5.4 items 2 and 3 (w15c's in-fold lookups, w15b's power calibration). §5.4 item 1 is closed
+   by §0 above.
+
+### Files created
+
+`experiments/w17a_prereg.txt`; `experiments/w17a_cvlb_scatter.py` + `.json` + `w17a_pairs.csv`,
+`logs_w17a_cvlb_scatter.txt`; `experiments/w17b_famfix.py` + `.json` + `w17b_pairs.csv` +
+`w17b_outliers.csv` + `w17b_sent.csv`, `logs_w17b_famfix.txt`; `experiments/w17c_repropair.py`
++ `.json`, `logs_w17c_repropair.txt`. Modified: `experiments/check_selection.py` (printed block
+only, `WANTED` untouched). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
