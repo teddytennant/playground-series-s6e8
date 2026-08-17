@@ -1,0 +1,201 @@
+w21 (slot 7, 2026-08-17) — PRE-REGISTRATION
+Written 04:0x UTC, BEFORE w21a_ad187corr.py printed its 5-arm CV and before any
+submission this slot. Nothing below is conditioned on a public-leaderboard number.
+
+===============================================================================
+1. THE DEADLINE-PICK RULE
+===============================================================================
+w20 left a written precondition: "the next slot should set
+WANTED = {w20_ad187_h3.csv, w16i_schemeavg.csv}". That was authored before
+w21a existed, and it pairs a 187-pack file with a 159-pack file. The RULE that
+the standing pair {w16i_schemeavg, blend159av_h3} actually encodes is:
+
+    slot 1 = the highest-CV object built on the pack
+    slot 2 = the ZERO-FITTED-PARAMETER hedge on the SAME pack
+
+Both of the standing files are 159-pack; one is corrected, one is the raw h3
+base. So the consistent update is the 187-pack analogue of the same pair, not a
+mixed-pack pair. Registered rule, decided now:
+
+  IF  CV(w21_ad187corr) > CV(w20_ad187_h3)
+      WANTED := {w21_ad187corr.csv, w20_ad187_h3.csv}
+  ELSE
+      WANTED := {w20_ad187_h3.csv, w16i_schemeavg.csv}      (w20's precondition,
+                                                             unmodified)
+
+Either branch is a >=45e-6 CV improvement on the standing pair, which is an order
+of magnitude clear of the 2e-6 rebuild floor and of the 5e-5 public-slice gap
+scale (a DIFFERENT quantity, and it does not govern a CV comparison on frozen
+folds). The branch is decided by CV alone. No LB number enters it.
+
+Note what is GIVEN UP in the IF branch: cross-base insurance. Both files then
+come from one 187-member pack, so a defect in that pack hits both. That is the
+same exposure the standing pair carried (both 159-pack) and it is accepted on
+the same grounds — the packs are nested, the 187 pack CONTAINS the 159 pack,
+and every one of the 22 new members cleared w20a's fold-signature gate and
+reproduces its published OOF AUC to <5e-9.
+
+===============================================================================
+2. WHAT GETS SHIPPED THIS SLOT, AND IN WHAT ORDER
+===============================================================================
+Three sends remain (7 of 10 used at slot start; cap 10, to be re-confirmed from
+the CLI's "N submissions remaining today" line).
+
+  SHIP 1  w21_ad187corr.csv   — UNCONDITIONAL, whatever its CV comes in at, and
+          whatever the LB says. It is the 5-arm scheme average, the object with
+          no selection inside it. If the argmax sub-combination (drop-mask,
+          drop-decile, ...) scores higher it is NOT shipped, for the reason
+          w16i exists.
+
+  SHIP 2  w20_ad187_all4.csv  — the four-transform average of the 187 pack,
+          CV 0.970098, built and never sent. Registered here as ship 2 BEFORE
+          ship 1's LB print, so that a good or bad print on ship 1 cannot
+          reshuffle the queue.
+
+  SHIP 3  decided after w21b, from the family table, and it is NOT the argmax of
+          that table. See §3.
+
+If a build fails, the slot ships fewer files rather than substituting an
+unregistered one.
+
+===============================================================================
+3. w21b — THE ANGLE, AND THE OUTCOME THAT WOULD FALSIFY LAST SLOT'S HEADLINE
+===============================================================================
+RESEARCH now carries: "Whose pipeline built it is the dominant variable, and it
+is NOT observable from the family label." That was measured across a confound —
+foreign CatBoost vs OUR GBDTs — so it cannot separate pipeline from family.
+
+w21b holds the pipeline fixed (all 22 members are adarsh's) and varies the
+family, with xgb and cat SIZE-MATCHED at 5 members each.
+
+  cat5 - xgb5 within ~1 sd   -> the sentence stands as written; the family label
+                                carries nothing and an XGBoost third leg is worth
+                                the same as a CatBoost one.
+  cat5 - xgb5 beyond 2 sd    -> the sentence is OVERSTATED and gets rewritten.
+                                w20d's +10.3e-6 would then be part pipeline,
+                                part CatBoost, and the record must say so.
+
+REPRODUCTION GATE, registered as a condition on believing ANY row: the `cat4`
+arm re-runs w20d's exact four-member group. w20d got +0.000041 +/- 0.000001 on
+3 reps. If cat4 here misses that by more than 3 sd, the harness is not the same
+instrument, and no row of the new table is comparable to the record. In that
+case the table is reported as UNGATED and no conclusion is drawn from it.
+
+No submission is selected on the argmax of the family table. If ship 3 comes
+from w21b it will be a size-matched, pre-named object (the GBDT-17 pack), not
+whichever family arm happened to win.
+
+===============================================================================
+4. WHAT THIS SLOT IS NOT DOING, SAID IN ADVANCE
+===============================================================================
+- Not re-tuning our own XGBoost. RESEARCH: tuning ANY GBDT is worth ~4e-7 into
+  the stack, closed 2026-08-13. The angle is taken in the form that can pay.
+- Not importing kenchanhodgkin exp011/exp012. They ship joblibs and no test
+  predictions; the `early_stopping` block in results.json has to be checked for
+  the golem_a/golem_f defect first, and that check does not fit alongside two
+  builds and three sends. Named here so a later slot does not think it was
+  silently dropped.
+- Not re-running w19a_transfer.py's tau fit as a headline. It is cheap and will
+  be run after the sends if time allows, but two sends at |dCV| ~ 55e-6 landed
+  last slot and the beta/tau question needs more than one slot of data.
+
+===============================================================================
+5. SHIP 3, NAMED NOW — added 04:2x UTC, still before any w21 LB print and before
+   w21a's 5-arm CV printed
+===============================================================================
+§2 left ship 3 "decided after w21b". That was a hole and it is closed here
+instead, because deciding a ship after a table exists is exactly the argmax
+this workspace keeps pricing. Ship 3 is:
+
+    w21_ad187corr_ens4.csv — the SAME 5-arm scheme-average correction, applied
+    to the all-four-transform base of the same 187 pack (`w20_ad187`,
+    CV 0.9700978895) instead of its h3 base.
+
+This is precisely w16q's move one pack later: w16q built the correction on
+`blend159av` (ens4) because "every corrected file this workspace holds is
+h3-side and the ens4 half of the option set was empty". The same asymmetry has
+re-appeared on the new pack. It is run by the identical code path with only
+W21A_BASE / W21A_TAG swapped, so the h3 run reproduces byte-for-byte.
+
+Registered consequence, decided now: this file does NOT enter WANTED under any
+outcome. §1's rule names slot 1 as the highest-CV object and slot 2 as the
+ZERO-fitted-parameter hedge; a second corrected file is neither, and swapping
+it in on a CV coin-flip against the h3-corrected twin would be the argmax with
+extra steps. It ships as a candidate and as a tight pair in a populated family
+(where w19/w20 agree tau is identified), not as a pick.
+
+The GBDT-17 idea floated in §2 is DROPPED, and the reason is recorded rather
+than left silent: it is a strict SUBSET of the 187 pack, so its CV is expected
+below the file we already lead with, and shipping a deliberately weakened pack
+buys a family-value read that w21b already measures directly and for free.
+
+CLARIFICATION (same sitting, no numbers seen): the file named "w20_ad187_all4.csv"
+in §2 exists on disk as `submissions/w20_ad187.csv` (the untagged member of the w20
+family IS the four-transform average). Verified CV 0.9700978895. Same object, and the
+name in §2 is a typo, not a substitution.
+
+===============================================================================
+6. SHIP 1 — REGISTERED BEFORE UPLOAD
+===============================================================================
+w21_ad187corr.csv   CV 0.9701068814   (5-arm scheme average, 187-member h3 base)
+
+  vs w20_ad187_h3   CV 0.9701008150   dCV  +6.066e-6   <- the account best, LB 0.97115
+  vs w16i_schemeavg CV 0.9700556663   dCV +51.215e-6   <- the standing deadline pick
+
+Sanity: 296,302 rows, ids == sample_submission, finite, 296,302 DISTINCT values,
+rhash 37a4aab3ed0d, rank-duplicate of nothing on disk. Max is exactly 1.0 by the
+strict-rank construction; `w16i_schemeavg` is built the same way and scored
+0.97107, so that is not a defect.
+
+PRIMARY registered prediction — the TIGHT pair, against the account best:
+  reference w20_ad187_h3 LB 0.97115, dCV +6.066e-6, LAW-IF paired sd 7.394e-6
+  (zero draws), reference's own +/-5e-6 grid rounding integrated out.
+
+  beta = 1 (paired instrument, tau = 0):
+     0.97114 0.078 / 0.97115 0.365 / **0.97116 0.423** / 0.97117 0.122 / 0.97118 0.008
+     P(strictly above 0.97115) = 0.554
+  beta = 2 (w20's wide-pair slope):
+     0.97114 0.015 / 0.97115 0.170 / **0.97116 0.456** / 0.97117 0.306 / 0.97118 0.051
+     P(strictly above 0.97115) = 0.815
+
+REGISTERED IN ADVANCE, so it cannot be claimed afterwards: both models name
+0.97116 as the modal cell, so **a 0.97116 print does NOT separate beta = 1 from
+beta = 2.** What separates them is the upper tail — P(>= 0.97117) is 0.130 under
+beta = 1 and 0.357 under beta = 2 — and one file cannot settle that either. This
+send is registered as a TIGHT pair in a populated family, which is where w19/w20
+agree tau is identified, not as a test of beta.
+
+Secondary, from w20f_presend.py's own automatic reference choice (it picks the
+best-CV reference in the same family that has an LB score, and it chose
+`blend159av_h3` LB 0.97105 at dCV +57.7e-6, paired sd 26.8e-6): modal 0.97111,
+P(above 0.97108) = 0.801. Recorded because the script printed it, and flagged as
+the WIDER and therefore weaker of the two pairings.
+
+DEADLINE-PICK BRANCH RESOLVED by §1's rule, on CV alone:
+  CV(w21_ad187corr) 0.9701068814 > CV(w20_ad187_h3) 0.9701008150  -> TRUE
+  WANTED := {w21_ad187corr.csv, w20_ad187_h3.csv}
+This is decided before the upload and does not move on whatever prints.
+
+===============================================================================
+7. SHIP 2 — REGISTERED BEFORE UPLOAD (and before ship 1's LB print was read)
+===============================================================================
+w20_ad187.csv  — the FOUR-TRANSFORM average of the 187 pack, CV 0.9700978895.
+Built last slot, never sent. 296,302 rows, rank-duplicate of nothing on disk;
+275,745 distinct (the all-four average ties ~20k rows, which is the file as
+built and is left alone).
+
+  reference w20_ad187_h3 LB 0.97115, dCV -2.925e-6, LAW-IF paired sd 6.963e-6
+
+  beta = 1:  0.97113 0.053 / 0.97114 0.337 / **0.97115 0.460** / 0.97116 0.140
+  beta = 2:  0.97113 0.108 / **0.97114 0.431** / 0.97115 0.381 / 0.97116 0.073
+
+⚠ **This file discriminates the two slopes where ship 1 does not, and that is
+why it is worth a slot.** The two models name DIFFERENT modal cells here
+(0.97115 vs 0.97114), because dCV is negative and the beta = 2 hypothesis
+doubles a LOSS rather than a gain. A 0.97115 print is 1.21x more likely under
+beta = 1; a 0.97113-or-below print is 2.0x more likely under beta = 2. Neither
+is decisive on one file. Registered now so the reading is not chosen afterwards.
+
+Not a deadline pick under any outcome: 2.9e-6 below the zero-parameter hedge
+already in WANTED, on the same pack, so it can only be a worse version of a
+slot that is already filled.

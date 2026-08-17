@@ -10681,3 +10681,207 @@ logs `logs_w20a_foldgate.txt`, `logs_w20b_screen.txt`, `logs_w20d_value.txt`,
 `logs_w20e_build.txt`. Modified: `experiments/blend_lab.py` (new optional `--extra-dirs`,
 default empty so every earlier build reproduces byte-for-byte), `check_selection.py` printed
 block only (`WANTED` untouched). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to.
+
+---
+
+# ══ 2026-08-17 (UTC) — WAVE w21, SLOT 7 of 10 ══
+
+**Handed angle:** "XGBoost: third leg of the ensemble, tuned on the same folds so the blend
+weights mean something." **TAKEN, and it falsified the headline this workspace wrote one slot
+ago.** Re-*tuning* our own XGBoost is closed (RESEARCH: ~4e-7 into the stack, 2026-08-13). What
+was open is whether the *family label* means anything at all — w20 said it does not — and the
+adarsh library contains all three GBDT families from ONE pipeline, so the question is now
+answerable with the confound removed. It is: **cat > xgb > lgb at t +6.0 and t −11.0.**
+
+**Quota:** 7 used at slot start; the CLI printed **"2 submissions remaining today"** after ship 1
+and **"1 submissions remaining today"** after ship 2 — **cap 10 re-confirmed for the seventh
+consecutive slot**. The prompt's "10 already today" was stale across the UTC rollover for the
+seventh consecutive slot; `date -u` read 03:54 at slot start.
+
+Pre-registered in `experiments/w21_prereg.txt`, in four passes, each written before the number
+it governs existed.
+
+### 0. Pool enumeration — run, per w20's new every-run rule. Nothing new is importable.
+
+`kaggle datasets list -s s6e8 --sort-by updated` returns two entries published since w20's
+sweep — `anthonytherrien/predicting-smartphone-addiction-vault` (08-16) and `najiama/s6e8-psa`
+(08-16). **Both are already in RESEARCH as excluded**: submission CSVs only, no OOF, and the
+vault is md5-identical to files already screened. `kenchanhodgkin/pg-s6e8-exp011/exp012` are
+new datasets in a family RESEARCH already flags as "worth a second look but NOT as an import"
+— they ship `model_fold{0..4}.joblib` and no test predictions, and the `early_stopping` block
+in `results.json` has to be cleared of the `golem_a`/`golem_f` defect first. **Named as
+deferred in the prereg rather than silently skipped.** The rule held up: the call costs one
+API request and it is the only defence against repeating w20's six-day miss.
+
+### 1. THE ANGLE — `w21b_famvalue.py`. **w20's headline is FALSIFIED as written.**
+
+RESEARCH currently says, from w20d: *"Whose pipeline built it is the dominant variable, and it
+is NOT observable from the family label."* **That was measured across a confound.** The four
+CatBoosts in it were foreign; every "another GBDT is worth nothing" number they were weighed
+against was measured on a GBDT *we* built on *our* features. Pipeline and family move together
+in that table, so it cannot separate "foreign beats ours" from "CatBoost beats XGBoost".
+
+The adarsh library breaks the confound for free: `xgb` and `cat` are **size-matched at 5
+members**, same author, same feature pipeline, same frozen folds. Paired 50/50 stratified
+splits, **5 reps** (raised from w20d's 3 because the quantity of interest is a *difference of
+two group deltas*, which carries ~sqrt(2) the noise of either).
+
+| group added to the 165-member base | n | paired delta | per member | sign |
+|---|---|---|---|---|
+| `gbdt17` all three GBDT families | 17 | +0.000052 ± 0.000010 | +3.06e-6 | consistent |
+| **`cat5`** | 5 | **+0.000041 ± 0.000007** | **+8.11e-6** | consistent |
+| **`xgb5` — the handed angle** | 5 | **+0.000028 ± 0.000004** | **+5.55e-6** | consistent |
+| `lgb7` | 7 | +0.000026 ± 0.000009 | +3.67e-6 | consistent |
+| `lgb5` (size-matched prefix) | 5 | +0.000012 ± 0.000004 | +2.34e-6 | consistent |
+| `nonGBDT5` (hgb + 3 MLP + logreg) | 5 | +0.000006 ± 0.000002 | +1.24e-6 | consistent |
+| `cat4` — **w20d's exact group, as a gate** | 4 | +0.000044 ± 0.000005 | +11.0e-6 | consistent |
+
+**REPRODUCTION GATE PASSES.** `cat4` re-runs w20d's four-member group and returns +0.000044
+against its published +0.000041 — inside 1 sd, so this is the same instrument and every row
+above is comparable to the record. The gate was registered *as a condition on believing any
+row* before the run, precisely so a surprising table could not be reported ungated.
+
+**THE SIZE-MATCHED CONTRASTS, pipeline held fixed, paired within rep so the base cancels too:**
+
+| contrast | delta | se | t | reps |
+|---|---|---|---|---|
+| **cat5 − xgb5** | **+0.000013** | 0.000002 | **+6.04** | **5/5** |
+| **cat5 − lgb5** | **+0.000029** | 0.000002 | **+12.63** | **5/5** |
+| **lgb5 − xgb5** | **−0.000016** | 0.000001 | **−10.96** | **0/5** |
+
+The prereg set the falsification threshold at 2 sd. **This is 6 sd, and the ordering is
+strict and unanimous across all five splits: cat > xgb > lgb.** Within a single pipeline the
+family label carries real, large, reproducible signal. w20's sentence must be rewritten:
+whose pipeline built it is *a* dominant variable, not *the* dominant variable, and the family
+label is **not** uninformative.
+
+**The angle's own answer, stated plainly: an XGBoost third leg is worth +5.55e-6 per member —
+2.4× LightGBM and 68% of CatBoost.** It is the *second*-best family here, not a redundant
+one. The record's older "another GBDT is worthless" line came from LightGBM-shaped evidence
+and was over-generalised to XGBoost.
+
+⚠ **Three things this does NOT show, said here rather than left to be over-read later.**
+(i) It is one pipeline. Family ordering within adarsh's feature set need not be the ordering
+within anyone else's. (ii) `cat4` beats `cat5` per member (+11.0 vs +8.11e-6) because the 5th
+CatBoost is `ad_gcatnote`, which overlaps the no-TE `note` direction w20d measured separately
+— per-member value is not monotone in group size and should never be read as if it were.
+(iii) `gbdt17` at +52e-6 is far below the +94e-6 sum of its parts; the families overlap
+heavily in what they explain, which is expected and is not an inconsistency.
+
+### 2. SHIP 1 — `w21_ad187corr`, ref **55578970**, printed **0.97117. NEW ACCOUNT BEST, RANK 19 → 14.**
+
+The journal's own #2 next-step: the 5-arm scheme-average `c_avg` correction had never been
+applied to the 187-member base. `w21a_ad187corr.py` is `w16q_ens4base.py`'s Part 2 with the
+base swapped; all five arms **refit from scratch**, since w16b's stored per-fold weights were
+fitted against the 159-pack base.
+
+**CV 0.9701068814**, +6.066e-6 on `w20_ad187_h3` and **+51.215e-6 on the standing deadline
+pick**. Arms: glob +2.856, a_only +4.634, rule +6.060, mask +3.432, decile +4.892 e-6, against
+size-matched permuted-membership controls netting +2.194 / +4.927 / +1.716 / +3.376e-6 — every
+arm clears its own null. Scheme-selection optimism +1.810e-6 at stability 4/5, close to w16i's
++1.55e-6 at 4/5, so averaging over schemes is still right and **the argmax is still not
+shipped**: the 4-arm drop-mask combination has the higher CV at 0.9701071263 and was not sent.
+
+**THE FINDING, which was registered as a prediction before the run and is the reason the run
+was worth doing:** the prereg said *"the honest prior is that the correction buys LESS on a
+stronger base — 22 new members may already span part of the direction `c_avg` points in.
+Registered range +2 to +7e-6; a NEGATIVE delta would say the pack has absorbed it."* It came in
+at **+6.066e-6, the top of the range and statistically indistinguishable from the +6.494e-6 it
+bought on the 159-member base.** 22 imported members worth +51.6e-6 of CV did **not** span this
+direction at all. That is a fact about what `c_avg` is — a train/test missingness-allocation
+residual, not a model-space direction — and it means the correction is expected to survive
+future imports too.
+
+### 3. SHIP 2 — `w20_ad187` (all-four), ref **55578981**, printed **0.97116**
+
+The four-transform average of the same pack, CV 0.9700978895, built last slot and never sent.
+Not a pick under any outcome (2.9e-6 below the hedge already in WANTED, same pack). It was
+sent because **it discriminates the one live open question where the higher-CV files do not**:
+its dCV against the reference is **negative** (−2.925e-6, LAW-IF paired sd 6.963e-6), so
+`beta = 2` doubles a *loss* and the two slope hypotheses name **different modal cells** —
+beta=1 0.97115 P0.460, beta=2 0.97114 P0.431.
+
+### 4. ⚠ THE REGISTERED SLOPE TEST CAME BACK NULL, AND ONE STEP OF IT IS A REAL PUZZLE
+
+| file | dCV vs ref | print | P under beta=1 | P under beta=2 | LR |
+|---|---|---|---|---|---|
+| `w21_ad187corr` | +6.066e-6 | **0.97117** | 0.122 | 0.306 | 2.51 for beta=2 |
+| `w20_ad187` | −2.925e-6 | **0.97116** | 0.140 | 0.073 | 1.92 for beta=1 |
+
+**Combined likelihood ratio 1.31 in favour of beta = 2 — which is nothing.** The two prints
+point in opposite directions and cancel. w19b's conclusion that the board cannot resolve the
+slope is **partially rehabilitated** against w20 §5's excitement, and the honest position is
+that beta remains unidentified after two more files.
+
+**But the residual is sharper than the slope question and no slope model explains it.** The
+reference printed 0.97115, so its true score lies in [0.971145, 0.971155]. Both files printed
+**one grid step above their own modal cell**, and their dCVs have **opposite signs**. Under
+beta=1 with no noise, `w21_ad187corr` cannot reach 0.97117 from anywhere in that interval;
+under beta=2, `w20_ad187` cannot reach 0.97116. **No single value of beta puts both prints
+inside the grid without slice noise doing the work.** A slope scales with dCV and therefore
+cannot displace a positive-dCV and a negative-dCV file in the *same* direction. What can is a
+**level** term shared by both — and both files differ from the reference by a transform or a
+correction while sharing its pack. Next slot should test that directly instead of fitting
+another slope: it is a two-parameter (level, slope) fit on the pairs already stored, and the
+level term has never been separated from beta in this workspace.
+
+### 5. DEADLINE PICK — **MOVED, for the first time in fourteen slots**
+
+`WANTED = {w21_ad187corr.csv, w20_ad187_h3.csv}`, replacing `{w16i_schemeavg, blend159av_h3}`.
+The rule was written in `w21_prereg.txt` §1 **before `w21a` printed its CV**, and it is the
+rule the old pair already encoded: slot 1 = highest-CV object on the pack, slot 2 = the
+zero-fitted-parameter hedge on the **same** pack. +51.2e-6 and +51.6e-6 respectively, an order
+of magnitude clear of every noise scale that governs a CV comparison on the frozen folds.
+
+Two things recorded rather than buried. **(a)** w20's written precondition named a MIXED-pack
+pair `{w20_ad187_h3, w16i_schemeavg}`; that is not what shipped, because w21a did not exist
+when w20 wrote it and w20's own text said "or the corrected rebuild of the former, if it lands
+higher". It landed higher. **(b)** Cross-base insurance is genuinely **given up** — both picks
+are now one pack. Accepted on the grounds that the packs are *nested* (187 ⊃ 159) and all 22
+new members cleared w20a's fold gate; and noting the prior pair carried the identical exposure
+(both 159-pack) and nobody called that a hedge. The LB prints were **not** an input.
+
+`check_selection.py`'s `WANTED` is changed **and** its supersession block is re-headed
+✅ RESOLVED with the slot-6 notice kept underneath, marked superseded-in-turn.
+
+### 6. ⚠ THE CLICK IS NOW WORTH ~2.9e-6, AND ONLY ON SLOT 2
+
+Live tiers after this slot:
+
+```
+auto-slot 1: public 0.97117, 1-way — w21_ad187corr   <- IDENTICAL to WANTED slot 1
+auto-slot 2: public 0.97116, 1-way — w20_ad187       <- WANTED slot 2 is w20_ad187_h3
+```
+
+**Kaggle's auto-pick and the CV pick now agree exactly on slot 1.** The entire w16–w19 click
+analysis priced the risk of a public-inflated file taking slot 1 from the CV pick; that risk is
+now zero. The click's whole remaining value is the slot-2 difference between two files on the
+same pack separated by 2.9e-6 of CV. It is still worth making, and it is no longer a decision
+worth another slot of decision theory. **Do not quote w19d's +1.890/+5.300/+5.562e-6 again** —
+already stale last slot, and now describing a board state two moves gone.
+
+### 7. Next run should look at, in order
+
+1. **Enumerate the pool. Every run. One API call.** It found nothing new this slot; that is the
+   expected outcome and not a reason to stop.
+2. **Fit LEVEL and SLOPE together on the stored pairs (§4).** This is the sharpest open
+   question the workspace has, it is local and free, and beta has now consumed three slots
+   while being unidentified in all of them. A shared level term is the only hypothesis
+   consistent with two opposite-signed dCVs both printing high.
+3. **Screen `kenchanhodgkin` exp011/exp012 properly** — check `results.json`'s `early_stopping`
+   for the `golem_a`/`golem_f` defect, then, if clean, generate test columns from the
+   `model_fold*.joblib` files. It is the only importable-looking material left in the pool, and
+   §1 now says a foreign GBDT is worth 2–8e-6 per member depending on family.
+4. **Re-cut w20d's `note` group against §1's family cut.** `ad_gcatnote` sits in both `cat` and
+   `note`, and it is why `cat4` beats `cat5` per member. The no-TE direction and the CatBoost
+   direction have never been separated from each other.
+5. **Rebuild the correction on the rankraw base** if a slot is spare — `w20_ad187_rankraw` is
+   the CV #3 file and is the only transform base with no corrected sibling.
+
+### Files created
+
+`experiments/w21_prereg.txt` (four timestamped passes); `w21a_ad187corr.py` + `.json` +
+`logs_w21a_ad187corr.txt`; `w21b_famvalue.py` + `.json` + `.csv` + `logs_w21b_famvalue.txt`;
+`submissions/w21_ad187corr.csv` + `oof_w21_ad187corr.npy`. Modified: `check_selection.py`
+(`WANTED` **changed** — first time in fourteen slots — and the supersession block re-headed).
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.

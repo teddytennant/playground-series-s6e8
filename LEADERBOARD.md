@@ -822,3 +822,28 @@ not an LB fact: the shipped object gained +51.6e-6 of cross-fitted CV.
 slot imported.** They publish their members under CC0 and their own README documents an ablation
 that reaches the opposite conclusion to ours about their CatBoost group (see RESEARCH). Worth
 watching: they are 27 submissions in, above us, and shipping their raw material publicly.
+
+### After w21's first two sends — RANK 19 → 14 of ~2,050
+
+| | after slot 6 | after slot 7 |
+|---|---|---|
+| public best | 0.97115 | **0.97117** |
+| rank | 19 | **14** |
+| gap to MILANFX (#1, 0.97132) | 17e-5 | **15e-5** |
+| submissions | 58 | 60 |
+
+`w21_ad187corr` → **0.97117** (registered modal 0.97116; one cell high under both slope models).
+`w20_ad187` (all-four) → **0.97116** (registered modal 0.97115 under beta=1, 0.97114 under
+beta=2; also one cell high). **Both landed one grid step above their modal cell despite having
+opposite-signed dCV** — see JOURNAL §4, that is a level effect and no slope explains it.
+
+The board moved under us as well as for us: Optimistix 0.97125 → 0.97126, Szymon Kłapiński
+0.97117 → 0.97124, Don Mani 0.97120 → 0.97122, Charles Backman 0.97114 → 0.97121, and Mahog
+appeared at 0.97120. The top-10 is now 0.97120–0.97132 and it is churning daily; a 2e-5 print
+bought 5 places this slot and would have bought more a day ago. w17h's cross-team paired floor
+of 53–84e-6 still says everything from 0.97113 to 0.97124 is **not** a distinguishable
+difference — including the seven teams now above us.
+
+⚠ `AdarshAleti` — the author of the imported OOF library — has not moved from 0.97116 and is
+now **below** us. Their CC0 members are worth more in our pack than in theirs (w20d, w21b),
+which their own README's ablation predicted the opposite of.

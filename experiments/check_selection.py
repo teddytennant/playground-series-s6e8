@@ -91,7 +91,38 @@ COMP = "playground-series-s6e8"
 # the pre-registered rule ">= current" failed and the pick stands. Recorded because E[max] on
 # train draws can only see the world where the CV ordering is RIGHT, which is not the world the
 # hedge is for: it shows the hedge is nearly FREE, not that it is worthless.
-WANTED = {"w16i_schemeavg.csv", "blend159av_h3.csv"}
+# CHANGED 2026-08-17 by w21 (slot 7) — the first move of WANTED in fourteen slots, and the
+# rule that moved it was written down before the number that triggered it existed
+# (experiments/w21_prereg.txt §1, authored before w21a_ad187corr.py printed its CV).
+#
+# The pair {w16i_schemeavg, blend159av_h3} never encoded two particular files. It encoded:
+#       slot 1 = the highest-CV object built on the pack
+#       slot 2 = the ZERO-FITTED-PARAMETER hedge on the SAME pack
+# w20 imported 22 vetted members and the pack changed. Both slots move together, to the
+# 187-pack analogues of exactly those two roles:
+#
+#   w21_ad187corr   CV 0.9701068814   <- slot 1, the 5-arm scheme average on the 187 h3 base
+#   w20_ad187_h3    CV 0.9701008150   <- slot 2, the zero-parameter hedge, same pack
+#   w16i_schemeavg  CV 0.9700556663   <- SUPERSEDED, -51.2e-6
+#   blend159av_h3   CV 0.9700491721   <- SUPERSEDED, -57.7e-6
+#
+# +51e-6 is an order of magnitude clear of every noise scale that governs a CV comparison on
+# the frozen folds (w16q: the rebuild floor for objects built on a fixed stored base is
+# EXACTLY ZERO; the 5e-5 figure quoted elsewhere is a public-SLICE gap and does not apply
+# here). Decided on CV alone. The LB prints that followed — 0.97117 and 0.97116, a new
+# account best — are recorded in the journal and were NOT an input to this.
+#
+# What is GIVEN UP: cross-base insurance. Both files are now one pack, so a defect in that
+# pack hits both. Registered in advance and accepted on the grounds that the packs are
+# NESTED — the 187 pack CONTAINS the 159 pack — and that all 22 new members cleared w20a's
+# fold-signature gate and reproduce their published OOF AUC to <5e-9. The prior pair carried
+# the identical exposure (both 159-pack) and it was never called a hedge then.
+#
+# w20's own written precondition named {w20_ad187_h3, w16i_schemeavg}, a MIXED-pack pair.
+# That is not what shipped, and the reason is recorded rather than left silent: w21a did not
+# exist when w20 wrote it, so w20's slot-1 candidate was the uncorrected file. With the
+# correction rebuilt, the same rule that produced w20's sentence produces this pair instead.
+WANTED = {"w21_ad187corr.csv", "w20_ad187_h3.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"
@@ -243,7 +274,24 @@ def main() -> int:
         print("   [w19a_transfer.json, w19b_calib.json, w19c_clicksens.json, w19d_taupost.json]")
         print(f"Wanted: {', '.join(sorted(WANTED))}")
         print("  ############################################################")
-        print("  ## ⚠⚠ WANTED IS SUPERSEDED ON CV. ACT ON THIS FIRST.      ##")
+        print("  ## ✅ RESOLVED 2026-08-17 (w21 slot 7). WANTED HAS MOVED.  ##")
+        print("  ############################################################")
+        print("  WANTED is now {w21_ad187corr.csv, w20_ad187_h3.csv}. The block below")
+        print("  is the slot-6 supersession notice, KEPT because its preconditions are")
+        print("  what authorised the move — but its closing recommendation is now")
+        print("  SUPERSEDED IN TURN and must not be acted on. It named a MIXED-pack pair")
+        print("  {w20_ad187_h3, w16i_schemeavg} because w21a did not exist when it was")
+        print("  written; it also said 'or the corrected rebuild of the former, if it")
+        print("  lands higher', and that rebuild landed higher:")
+        print("      w21_ad187corr   CV 0.9701068814  LB 0.97117  <- slot 1, NEW BEST")
+        print("      w20_ad187_h3    CV 0.9701008150  LB 0.97115  <- slot 2, 0-param hedge")
+        print("      w20_ad187       CV 0.9700978895  LB 0.97116  (sent, not a pick)")
+        print("      w16i_schemeavg  CV 0.9700556663  LB 0.97107  <- superseded, -51.2e-6")
+        print("      blend159av_h3   CV 0.9700491721  LB 0.97105  <- superseded, -57.7e-6")
+        print("  The move is on CV, by w21_prereg.txt §1's rule, written before the CV")
+        print("  existed. The LB prints are recorded and were NOT an input.")
+        print("  ############################################################")
+        print("  ## (slot-6 notice follows, for the record)                 ##")
         print("  ############################################################")
         print("  w20 (08-17 slot 6) imported 22 members from adarsh1077's OOF library,")
         print("  vetted by a new fold-signature gate (experiments/w20a_foldgate.py).")
