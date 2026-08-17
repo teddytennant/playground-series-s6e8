@@ -5160,6 +5160,7 @@ last run **2026-08-11**. Six days later the pool contains material that did not 
 | `masayakawamata/s6e8-catstr-aug16` | 08-16 | 1 CatBoost, raw string cats | held out — unverifiable AND maxcorr 0.9977 |
 | `kenchanhodgkin/pg-s6e8-exp002…012` | 08-15/16 | 11 datasets, **OOF only, no test preds** | still not importable as-is — but see below |
 | `yadoy666/94-verified-oof-gpu-accelerated-meta-stack` | 08-17 | level-2 meta-stack, submission only | excluded on mechanism (as `sixmember_*`) |
+| `stephentarter/ps-s06e08-artifacts` | 08-17 | **1,829 bytes** — 4 Optuna param JSONs (cat/hgb/lgb/xgb) + a 42-name XGB feature list | **excluded, nothing to import** — downloaded and read in w22. No OOF, no test predictions, no models. The feature list is the standard ratio/per-age/per-sleep set plus 12 `is_missing_*` flags, i.e. squarely inside the closed "feature engineering on the original columns" territory; the params are ordinary (lgb 84 leaves depth 5, xgb depth 5 lr 0.19). Do not re-download. |
 
 **Weekly is too slow at this stage of an episode.** The single largest gain ever recorded in
 this workspace (+0.000340 CV) came from importing a pool the previous runs had walked past.
@@ -5479,3 +5480,70 @@ reverses a ~5e-6 signal with p 0.244, and 6/6 nested files is one observation no
 still the better argument, and final selection is on CV for exactly this reason. But it is now
 stretched over 8/8 and two packs, and it should be re-run rather than re-quoted. **This is the
 largest live threat to the deadline pick and it deserves a dedicated slot.**
+
+## The h3/ens4 public-LB reversal is settled — measured 2026-08-17 (w22a, w22b)
+
+It is **10/10**, not the 8/8 the journal repeated: ten h3/ens4 pairs have both sides LB-scored
+and both sides stored as OOF (blend156/158/159/159av/160orig/160origm, w14a_repro159av,
+w16i_schemeavg vs w16q_ens4avg, w20_ad187, w21_ad187corr vs _ens4). CV puts h3 above ens4 in
+all ten; the public slice puts it below in all ten.
+
+**Rounding cannot explain the direction.** Rounding to 1e-5 is monotone non-decreasing, so
+`round(a) < round(b)` **implies** `a < b`. Every one of the ten is hard evidence about the sign.
+Only the magnitude is censored. Do not re-raise the rounding objection.
+
+**The ten are ONE latent coin flip.** 2,000 draws on w16s's protocol (seed 1616, f 0.20; the two
+w16s marginals reproduce at z +1.83 / +1.62):
+
+- P(all ten reverse on the same slice) **0.190**; mean marginal 0.280; independence would give
+  2.8e-6. Pairwise correlation of the slice-level deltas **0.940 – 0.993**.
+- The reversal-count histogram is **bimodal**: 60.9% of slices reverse zero pairs, 19.0% reverse
+  all ten, 20.1% in between. w16s's "one draw against a fixed slice" is now measured, not asserted.
+
+**⚠ Public and private are DISJOINT COMPLEMENTS, and this inverts the threat.** A slice that
+favours ens4 mechanically pushes its complement toward h3. corr(public delta, private delta) is
+**−0.203 to −0.218** for every pair, and:
+
+| | range |
+|---|---|
+| P(h3 wins private), unconditional | 0.838 – 0.956 |
+| **P(h3 wins private \| that pair's public half reversed)** | **0.879 – 0.976** |
+| P(h3 wins private \| all ten reversed) | 0.905 – 0.979 |
+
+Conditioning on the observed reversal **raises** P(h3 wins private). The public reading is weak
+evidence *for* the h3-side pick, not against it.
+
+**Decomposition (w22b, 40 blocks × 50 splits, seed 22022).** Design gates both land: within-block
+corr −0.992/−0.993, between-block corr +0.870/+0.897.
+
+- sd within-block (unlucky *split*, anti-carries) **6.36 – 6.72e-6**
+- sd between-block (unlucky *test set*, carries) **1.76 – 2.07e-6**
+- **between-block share of variance 0.078** (0.071 – 0.088) → 92% of the risk anti-carries.
+- P(h3 wins private | public half reversed), within block: **0.962 – 1.000**.
+
+**⚠ The tail, and it is specific to the pack we actually ship.** Per-block P(h3 *loses* private)
+averages 0.076–0.131 but reaches **0.80–0.98 in 2–3 of 40 blocks**. The two `ad187` pairs are the
+worst row on every measure (P 0.921/0.927 pooled, 3/40 bad blocks) because their CV margin is the
+smallest of the ten (2.9e-6 vs 4.5–5.1e-6). The axis is safe; it is *less* safe on the 187 pack
+than on the 159 pack the reassurance was originally measured on.
+
+**Disposition: CLOSED as a threat.** Only P(h3 wins private | public reversed) < 0.5 would justify
+moving WANTED off the h3 side, and it is 0.92–1.00.
+
+## ⚠ `c_avg`'s value is NOT transform-independent — w21 §8 corrected 2026-08-17 (w22c)
+
+w21 §8 concluded from **two** transforms that the correction's value is independent of the pack
+*and* of the transform. The third transform breaks the transform half:
+
+| base | base CV | correction worth |
+|---|---|---|
+| h3 | 0.9701008150 | +6.066e-6 |
+| ens4 | 0.9700978895 | +6.044e-6 |
+| **rankraw** | **0.9700915300** | **+8.606e-6** |
+
+h3 and ens4 agreeing to 0.022e-6 was two nearby points, not a law. The correction is worth **more
+on a weaker base** and partly substitutes for base quality. Scheme-selection optimism tracks it:
+**+3.523e-6** on rankraw against +1.810e-6 on h3, both at stability 4/5.
+
+⚠ **The pack-independence half (159→187) rests on the identical two-point reasoning and has never
+had a third pack.** Do not quote it as established until it does.

@@ -1,0 +1,96 @@
+w22 — slot 8 of 10, 2026-08-17. WRITTEN BEFORE ANY NUMBER WAS COMPUTED.
+
+QUOTA: verified live, 10 of 10 submissions already used today (kaggle competitions
+submissions -v shows ten rows dated 2026-08-17, newest w21_ad187corr_ens4 ref 55579386).
+THIS SLOT CANNOT SUBMIT. Its product is a measurement, not a file.
+
+HANDED ANGLE: "Feature engineering: interactions, in-fold target and count encodings,
+careful categorical treatment." SKIPPED, and the reason is on file rather than invented
+here: feature engineering on the original columns has been on the closed list since
+2026-08-13 and has already been re-skipped twice under this identical angle (w16s slot 8
+on 08-16, and slot 10). Nothing has changed to re-open it. Per the run-context rule the
+reason is stated and a better target is taken. Cost of the skip: one grep.
+
+POOL SWEEP (mandatory, every run, done first): two datasets appear that RESEARCH has not
+screened. `masayakawamata/s6e8-catstr-aug16` turns out to be already excluded in RESEARCH
+line 5160 (unverifiable, maxcorr 0.9977). `stephentarter/ps-s06e08-artifacts` is NEW
+(2026-08-17 13:14, 1,829 bytes) and was downloaded and read: five JSON files of Optuna
+hyperparameters plus an XGB feature list. No OOF, no test predictions, nothing importable.
+Recorded as excluded. Nothing else new.
+
+
+=== THE TARGET: is the h3/ens4 public-LB reversal ONE draw or TEN? ===
+
+The w21 addendum §10 calls this "the strongest live threat to the deadline pick" and says
+it "deserves a slot of its own, not a paragraph". Both deadline picks are h3-side. The
+standing defence is w16s §3: a public-sized slice reverses a true ~5e-6 h3 advantage with
+probability 0.244, and the observed run of reversals "is ONE draw against a fixed slice".
+
+That defence has never actually been TESTED. w16s computed the MARGINAL reversal
+probability for two pairs separately. It asserted, but did not measure, that the pairs are
+so correlated that the run counts as a single observation. That assertion is the entire
+load-bearing element and it is checkable locally for free, because the JOINT distribution
+of all pairs on the SAME simulated slice is exactly what the instrument already draws.
+
+FIRST, A COUNT CORRECTION registered before the measurement: the journal says 8/8. Pairing
+lb_scores.json with the five newest API rows, there are TEN h3/ens4 pairs with BOTH sides
+scored on the public LB and BOTH sides available as stored OOF:
+
+  blend156, blend158, blend159, blend159av, blend160orig, blend160origm,
+  w14a_repro159av, (w16i_schemeavg vs w16q_ens4avg), w20_ad187, (w21_ad187corr vs _ens4)
+
+and the h3 side is one 1e-5 reporting step BELOW the ens4 side in all ten. So it is 10/10,
+not 8/8. Registered here so the correction cannot look like it was tuned to a result.
+
+A LOGICAL POINT that removes the rounding objection before it is raised: rounding to 1e-5
+is a monotone non-decreasing map, so round(a) < round(b) IMPLIES a < b. Every one of the
+ten observations is therefore HARD evidence that h3's true public-slice score is strictly
+below ens4's. There is no rounding-cell ambiguity in the DIRECTION, only in the magnitude.
+This makes the joint question the only question.
+
+MEASUREMENTS, fixed now:
+
+  M1. Per pair, the CV delta (h3 - ens4) on full-train OOF. Expected all positive.
+  M2. 2000 reps. Each rep draws ONE index permutation, takes a public-sized block
+      (59,260 = round(296,302 * 0.20)) and its private-sized complement (237,042), and
+      scores ALL TWENTY files on BOTH. Same protocol, seed and f as w16s/w16k so the
+      numbers are comparable to the record; REPS raised 500 -> 2000 because a JOINT tail
+      probability needs far more reps than a marginal mean.
+  M3. Marginal P(pair reverses on a public-sized slice), per pair. GATE: the two pairs
+      w16s already published (blend159av at 0.244, w16i/w16q at 0.248) must reproduce
+      inside sampling error, or this is not w16s's instrument and nothing below stands.
+  M4. THE HEADLINE: joint P(ALL TEN reverse on the same slice), and the full correlation
+      matrix of the ten slice-level deltas.
+  M5. THE PART THAT ACTUALLY PRICES THE THREAT, and which no run has done: public and
+      private are DISJOINT COMPLEMENTARY halves of one fixed test set. If a slice happens
+      to favour ens4, the complement is mechanically pushed toward h3. So the
+      decision-relevant quantity is not P(public reverses) at all, it is
+          P(h3 wins the PRIVATE complement | the public slice reversed, all ten)
+      together with corr(public delta, private delta) across reps. Report both.
+
+PRE-REGISTERED INTERPRETATION, so neither outcome can be spun after the fact:
+
+  R1. If M4's joint probability is close to M3's marginal (say >= 0.15), the ten pairs are
+      one measurement, w16s's defence is CONFIRMED as stated, and the deadline pick is
+      safe on this axis. Write it as confirmed and close the question.
+  R2. If M4's joint probability is small (say <= 0.01) then the ten pairs are NOT one
+      draw, w16s's central assertion is FALSIFIED, and the public slice is seeing
+      something the OOF cannot. That is a genuine threat and must be written as one.
+  R3. R2 does NOT by itself argue for switching the pick to ens4, and I am recording that
+      in advance because it is the trap. Under M5's complementarity, a public slice that
+      genuinely favours ens4 is evidence the private complement favours h3 MORE. The
+      switch is only justified if M5 shows P(h3 wins private | public reversed) < 0.5.
+      Any move of WANTED requires that number, not M4's.
+  R4. My honest prior, written before running: the ten pairs share most of their member
+      sets and all share one transform contrast, so I expect the correlations to be high
+      and R1 to hold — but NOT as high as w16s assumed, because the 187-pack pairs have 22
+      members the 159-pack pairs do not, and the corrected pairs carry a 23-parameter
+      correction the raw pairs do not. Predicted joint in the range 0.10 - 0.22. A joint
+      below 0.05 would genuinely surprise me.
+  R5. Everything is reported whichever way it comes out, including a result that says both
+      deadline picks are on the wrong side of the transform axis.
+
+WANTED is NOT moved this slot on any outcome short of M5 < 0.5, and no submission is
+possible in any case. check_selection.py is left alone unless M5 fires.
+
+Script: experiments/w22a_jointslice.py -> .json + .csv, log logs_w22a_jointslice.txt.

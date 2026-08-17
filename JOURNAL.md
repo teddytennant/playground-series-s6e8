@@ -10953,3 +10953,189 @@ the deadline pick and it deserves a slot of its own, not a paragraph.**
   re-created a public-vs-CV divergence in slot 1. The click is worth making again, and the
   quantity is the 2.9e-6 h3/ens4 CV margin that §9 says the public slice has reversed 8/8.
   **That is the single most important sentence in this entry.**
+
+## 2026-08-17 — w22, slot 8/10 — ANGLE (as handed): "Feature engineering: interactions, in-fold target and count encodings, careful categorical treatment"
+
+**⚠ NO SUBMISSION, AND THAT IS FORCED, NOT A CHOICE.** Verified live before starting:
+`kaggle competitions submissions -c playground-series-s6e8 -v` returns **ten rows dated
+2026-08-17** (w14a_repro159av_h3, blend159av_logit, blend159av_hybrid, blend159av_rankraw,
+w14a_repro159av, w20_ad187_h3, w20_ad187_rankraw, w21_ad187corr, w20_ad187, and
+w21_ad187corr_ens4 ref 55579386). The cap is 10 and w21 already closed it with the CLI's
+"0 submissions remaining today". Slots 8, 9 and 10 all sit inside that same Kaggle day, so
+this slot's product is a **measurement plus two build artefacts**, not a file.
+
+**The handed angle is CLOSED and was re-skipped for the third time.** Feature engineering on
+the original columns has been on the 2026-08-13 closed list ever since, and this exact angle
+text was already handed to — and declined by — w16s (slot 8, 08-16) and slot 10. Nothing has
+changed to re-open it. Cost of the skip: one grep. Prereg `experiments/w22_prereg.txt` §1.
+
+**Pool sweep (mandatory, every run, done first).** Two unscreened refs appeared.
+`masayakawamata/s6e8-catstr-aug16` turns out to be already excluded in RESEARCH line 5160.
+`stephentarter/ps-s06e08-artifacts` is genuinely new (08-17 13:14) and was **downloaded and
+read**: 1,829 bytes of four Optuna param JSONs plus a 42-name XGB feature list. No OOF, no
+test predictions, no models — **nothing importable**, recorded in RESEARCH so it is not
+re-fetched. Its feature list is the standard ratio/per-age/per-sleep set plus 12
+`is_missing_*` flags, i.e. squarely inside the closed angle above; a small independent
+confirmation that the public field is not finding anything there either.
+
+### 1. THE TARGET — the w21 addendum's "strongest live threat", taken as its own slot
+
+The addendum §10 said the h3-vs-ens4 CV/LB disagreement "deserves a slot of its own, not a
+paragraph". Both deadline picks are h3-side. The standing defence is w16s §3: a public-sized
+slice reverses a true ~5e-6 h3 advantage 24% of the time, so the run of reversals "is ONE
+draw against a fixed slice".
+
+**That defence had never been tested.** w16s measured the *marginal* reversal probability, for
+two pairs, separately. The claim that the pairs are correlated enough to count as a single
+observation was **asserted, never measured** — and it is the entire load-bearing element.
+
+**COUNT CORRECTION, registered before measuring: it is 10/10, not 8/8.** Pairing
+`lb_scores.json` with the five newest API rows gives **ten** h3/ens4 pairs with both sides
+LB-scored *and* both sides stored as OOF: blend156, blend158, blend159, blend159av,
+blend160orig, blend160origm, w14a_repro159av, (w16i_schemeavg vs w16q_ens4avg), w20_ad187,
+(w21_ad187corr vs _ens4). The journal has been undercounting by two.
+
+**A logical point that kills the rounding objection before it is raised.** Rounding to 1e-5 is
+a monotone non-decreasing map, so `round(a) < round(b)` **implies** `a < b`. Each of the ten
+observations is therefore *hard* evidence that h3's true public-slice score is strictly below
+ens4's. Only the magnitude is censored; the sign never is. So the joint question is the only
+question.
+
+### 2. `w22a_jointslice.py` — the ten reversals are ONE latent coin flip. w16s CONFIRMED.
+
+2,000 draws, w16s's exact protocol (seed 1616, f 0.20, public-sized 59,260 / private-sized
+237,042, every file scored on the same draw). Gate: w16s's two published marginals reproduce
+at z = +1.83 and +1.62, **PASS**, so this is the same instrument.
+
+CV puts h3 above ens4 in **10/10** pairs (+2.925 to +5.092e-6); the public LB puts h3 below
+ens4 in **10/10**. Marginal P(reverse) 0.229–0.327, mean 0.280.
+
+| quantity | value |
+|---|---|
+| **P(all ten reverse on the SAME slice)** | **0.1900** (380 of 2000) |
+| mean marginal P(reverse) | 0.2802 |
+| what independence would give | 2.8e-6 |
+| correlation of the ten slice-level deltas | min 0.940, median 0.964, max 0.993 |
+
+**The reversal-count histogram is BIMODAL and that is the whole finding stated in one line:
+60.9% of slices reverse ZERO pairs, 19.0% reverse ALL TEN, and only 20.1% land anywhere in
+between.** A public-sized slice essentially contains one coin flip on this axis. 10/10 is that
+coin landing once. w16s's assertion was correct and is now measured rather than asserted.
+
+### 3. ⚠ THE PART THAT ACTUALLY PRICES THE THREAT — and it goes the *reassuring* way
+
+No previous run made this point: **public and private are disjoint complementary halves of one
+fixed test set.** A slice that happens to favour ens4 mechanically pushes its complement toward
+h3. So the decision quantity is not P(the public slice reverses); it is
+**P(h3 still wins the PRIVATE complement | the public slice reversed)**.
+
+| | range over the ten pairs |
+|---|---|
+| corr(public delta, private delta) | **−0.203 to −0.218**, every pair |
+| P(h3 wins private), unconditional | 0.838 – 0.956 |
+| **P(h3 wins private \| that pair's public half reversed)** | **0.879 – 0.976** |
+| P(h3 wins private \| ALL TEN reversed, 380 draws) | **0.905 – 0.979** |
+
+**Conditioning on the observed reversal RAISES P(h3 wins private) in every pair.** The 10/10
+public reading is not evidence against the deadline pick; it is weak evidence *for* it.
+
+### 4. `w22b_blockdecomp.py` — decomposing that −0.205, because it is a mixture
+
+The −0.205 mixes two channels pointing opposite ways, and which dominates decides whether
+10/10 is a threat. **Between-block** ("this test set is simply bad for h3") is positive and
+*carries* into private — the threatening channel. **Within-block** ("unlucky split of a fixed
+block") is negative and *anti-carries* — harmless. w22a re-draws the block every rep so it
+cannot separate them. Nested design, pre-registered in `w22b_prereg.txt`: **40 blocks × 50
+splits**, seed 22022.
+
+Both design predictions land, which validates the decomposition before its conclusion is read:
+within-block corr **−0.992 to −0.993** (predicted near −1); between-block corr **+0.870 to
++0.897** (predicted strongly positive).
+
+| | value |
+|---|---|
+| sd within-block (unlucky split) | 6.36 – 6.72 e-6 |
+| sd between-block (unlucky test set) | 1.76 – 2.07 e-6 |
+| **between-block share of public-delta variance** | **0.078** (min 0.071, max 0.088) |
+| P(h3 wins private \| public half reversed), within block | **0.962 – 1.000** |
+
+**Pre-registered verdict S1 fires, and by a distance: 92% of the reversal risk is split noise
+that anti-carries into private.** My own registered prior (S3) said 20–40% between-block; the
+truth is **7.8%**, so I was wrong, in the safe direction, by a factor of three. Recorded as a
+miss rather than quietly dropped.
+
+**⚠ THE HONEST TAIL, which the headline hides.** Part 5: per-block P(h3 *loses* private) has
+mean 0.076–0.131 but **max 0.80–0.98, with 2–3 of 40 blocks above 0.5**. An unlucky test set
+genuinely can flip this. And **the two `ad187` pairs — i.e. our actual deadline picks — are the
+worst row on every measure**: P(h3 wins private | reversed) 0.921/0.927 pooled against 1.000
+for blend156/158, and 3/40 bad blocks against 0. That is because their CV margin is the
+smallest of the ten (2.9e-6 vs 4.5–5.1e-6), which is itself w21 §9's "the transform gap shrinks
+as the pack grows" showing up as *reduced protection*. The axis is safe; it is **less** safe on
+the pack we actually ship than on the pack the reassurance was measured on.
+
+**Net: the h3/ens4 axis is CLOSED as a threat.** WANTED is not moved — the prereg fixed in
+advance that only P(h3 wins private | public reversed) < 0.5 would justify a move, and it came
+back 0.92–1.00.
+
+### 5. `w22_ad187corr_rankraw` — journal next-step #5 built, ready for tomorrow's slot 1
+
+`w20_ad187_rankraw` was the only transform base with no corrected sibling. Same code path,
+`W21A_BASE`/`W21A_TAG` swapped only. **CV 0.9701001355**, base 0.9700915300.
+
+**This FALSIFIES w21 §8's generalisation, and the falsification is the point of the build.**
+w21 §8 concluded from two transforms that `c_avg`'s value is "independent of the pack *and* of
+the transform". Third transform:
+
+| base | correction worth |
+|---|---|
+| h3 | +6.066e-6 |
+| ens4 | +6.044e-6 |
+| **rankraw** | **+8.606e-6** |
+
+h3 and ens4 agreeing to 0.022e-6 was **two nearby points, not a law**. rankraw is +42% and the
+mechanism is visible: rankraw is the *weakest* base of the three (0.9700915 vs h3's 0.9701008),
+so the correction has more room and partly substitutes for base quality. Scheme-selection
+optimism is correspondingly worse here, **+3.523e-6** at stability 4/5 against h3's +1.810e-6.
+Arms: rule +8.556, a_only +6.934, decile +6.869, mask +5.168, glob +4.597e-6; against permuted
+controls the mask arm nets only **+0.929e-6** and does not clear its own null.
+
+**The argmax was again NOT shipped**: 4-arm drop-mask has the higher CV (0.9701005095) and the
+pre-registered 5-arm scheme average (0.9701001355) is what was written. File validated —
+296,302 rows, all distinct, no NaN, IDs matching `sample_submission`.
+
+**It is CV rank 3 among corrected files and is NOT a deadline pick** (6.7e-6 below
+`w21_ad187corr`). It is a legitimate send under the brief's "use every slot" economics and it
+is built, validated and waiting.
+
+### 6. Deadline pick — UNCHANGED, and now defended rather than merely asserted
+
+`WANTED = {w21_ad187corr.csv, w20_ad187_h3.csv}`. `check_selection.py` untouched. The pick did
+not move; what changed is that its most-cited outstanding objection is now measured and dead.
+
+### 7. Next run should look at, in order
+
+1. **Enumerate the pool. Every run. One API call.** Found one genuinely new ref this slot and
+   correctly rejected it in under a minute. That is the sweep working, not the sweep wasted.
+2. **Send `w22_ad187corr_rankraw.csv` early** — built, validated, zero further work. Registered
+   prediction: it sits 6.7e-6 below `w21_ad187corr` on CV, so the modal print is 0.97116–0.97117
+   and it should NOT beat the 0.97118 account best. If it does, that is information about the
+   slice, not about the file.
+3. **Re-examine w21 §8's other "independence" claim.** §5 killed transform-independence with a
+   third point. Pack-independence (159→187) rests on exactly the same two-point reasoning and
+   has never had a third pack. Do not quote it as established until it does.
+4. **Screen `kenchanhodgkin` exp011/exp012 properly** — still the only importable-looking
+   material left, still gated on the `golem_a`/`golem_f` `early_stopping` defect check.
+5. **Re-cut w20d's `note` group against w21b's family cut** — `ad_gcatnote` sits in both and
+   the two directions have never been separated.
+6. **Do NOT spend another slot on beta.** Three slots have failed to identify it and w21's
+   addendum showed the apparent "level term" was just the h3/ens4 effect, which §2–4 have now
+   fully characterised. Add it to the closed list.
+
+### Files created
+
+`experiments/w22_prereg.txt`, `w22b_prereg.txt`; `w22a_jointslice.py` + `.json` + `w22a_DP.npy`
++ `w22a_DV.npy` + `logs_w22a_jointslice.txt`; `w22b_blockdecomp.py` + `.json` + `w22b_DP.npy` +
+`w22b_DV.npy` + `logs_w22b_blockdecomp.txt`; `logs_w22c_rankrawcorr.txt`;
+`submissions/w22_ad187corr_rankraw.csv` + `oof_w22_ad187corr_rankraw.npy`. Modified: `RESEARCH.md`
+(pool exclusion row), `LEADERBOARD.md`, `JOURNAL.md` — all appended to only. `check_selection.py`
+deliberately untouched.

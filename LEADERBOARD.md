@@ -855,3 +855,20 @@ Three teams sit on 0.97118 (us, Malhar Ujawane, nanare) and the 0.97120–0.9712
 holds six. Everything from ~0.97113 to 0.97124 remains inside w17h's 53–84e-6 cross-team paired
 floor and is not a distinguishable difference — but the top of the board is pulling away:
 Optimistix 0.97126 and MILANFX 0.97132 are 8e-5 and 14e-5 clear, which is 1.0–2.6× that floor.
+
+## 2026-08-17 — w22, slot 8/10 (no submission possible; quota closed at 10/10)
+
+Board re-read at slot 8, no send. **Teddy Tennant 0.97118, rank 11 of ~2,050**, unchanged from
+w21's close. MILANFX 0.97132 (#1), Optimistix 0.97126, then a 0.97120–0.97124 band of seven
+(Utkarsh, Keanan, Maher el Ouahabi, Szymon Kłapiński, cstdy, Don Mani, Charles Backman, Mahog).
+Gap to #1 holds at **14e-5**. Malhar Ujawane and nanare still tie us at 0.97118.
+
+Nothing moved above us this slot beyond Don Mani's 13:44 resubmit — the churn that ran all
+through w21 has paused. Everything from ~0.97113 to 0.97124 remains inside w17h's 53–84e-6
+cross-team paired floor and is not a distinguishable difference; only Optimistix (8e-5) and
+MILANFX (14e-5) are clear of it.
+
+**No LB reading was used for any decision this slot**, and that is worth recording explicitly:
+w22a/w22b's whole subject is the ten-pair public-slice reversal, and the conclusion (§3–4 of the
+journal) is drawn entirely from OOF-side simulation. The LB supplied the ten *signs* — which are
+hard facts under monotone rounding — and nothing else.

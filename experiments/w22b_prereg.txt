@@ -1,0 +1,66 @@
+w22b — addendum prereg, written after w22a printed and BEFORE w22b was run.
+
+w22a's results are in and R1 fired: joint P(all ten reverse) = 0.1900 against a mean
+marginal of 0.2802, correlations 0.940-0.993, and the #reversed histogram is BIMODAL
+(60.9% of slices reverse zero pairs, 19.0% reverse all ten, only 20% in between). The ten
+pairs are one latent coin flip. w16s's defence is CONFIRMED as stated.
+
+w22a's M5 also came back reassuring: corr(public delta, private delta) = -0.205 for every
+pair, and P(h3 wins private | public reversed) is 0.879-0.976, HIGHER than the
+unconditional 0.838-0.956. Conditioning on all ten reversing at once: 0.905-0.979.
+
+WHY THIS ADDENDUM EXISTS. That -0.205 is a MIXTURE of two channels that point opposite
+ways, and which one dominates decides whether 10/10 is a threat or not. w22a cannot
+separate them because it re-draws the pseudo-test block every rep:
+
+  BETWEEN-BLOCK: if the drawn 296,302-row block is simply a bad block for h3, BOTH of its
+  halves are bad. This channel is POSITIVE and it IS the threatening one — it would mean
+  the public reversal is evidence the whole test set disfavours h3, which would carry
+  straight into private.
+
+  WITHIN-BLOCK: for a FIXED block, the two halves partition it exactly, so a half that
+  runs h3-poor forces its complement h3-rich. This channel is NEGATIVE and harmless — it
+  is pure split noise and it anti-carries into private.
+
+The observed -0.205 says the negative channel currently wins on net. But a net figure is
+not a decomposition, and "the public reversal might mean the test rows disfavour h3" is
+precisely the hypothesis the w21 addendum flagged as the live threat. It has to be
+measured, not inferred from a mixture.
+
+DESIGN: nested. B = 40 pseudo-test blocks of 296,302 rows; S = 50 independent public/
+private splits within each block. 2000 evaluations, the same cost as w22a. Same seed
+family, same f = 0.20, same pairs, same OOF vectors.
+
+MEASUREMENTS:
+  N1. WITHIN-block corr(public delta, private delta), pooled over blocks. Prediction: this
+      should be close to -1, because within a fixed block the two halves are near-exact
+      complements. If it is not near -1, my understanding of the design is wrong and
+      nothing in N3 stands.
+  N2. BETWEEN-block corr: correlate the block-mean public delta against the block-mean
+      private delta across the 40 blocks. Prediction: strongly POSITIVE, near +1, since
+      both halves estimate the same block-level quantity.
+  N3. THE DECISION NUMBER, computed within block: P(h3 wins private | the public half
+      reversed), pooled over blocks, and the per-block spread. If the within-block figure
+      is ~0.95+ then the 10/10 reversal is split noise and the pick is safe. If the
+      per-block SPREAD is wide and some blocks sit below 0.5, then block identity matters
+      and the threat is real for an unlucky block.
+  N4. Variance decomposition of the public delta into between-block and within-block
+      components. This is the cleanest single statement of how much of the reversal risk
+      is "unlucky test set" versus "unlucky split".
+
+PRE-REGISTERED INTERPRETATION:
+  S1. If the between-block variance share is SMALL (<= ~25%), the public reversal is
+      mostly split noise, it anti-carries into private, and the deadline pick is safe on
+      this axis. Close the question.
+  S2. If the between-block share is LARGE (>= ~60%), then the public reversal is largely
+      evidence about the test rows themselves, it carries into private, and w16s's
+      defence — though correct about the 10/10 being one draw — is defending the wrong
+      thing. That would be a real finding against both deadline picks.
+  S3. My honest prior: between-block share MODEST, around 20-40%, because the public half
+      is only 20% of the block so within-split noise on it is large. So I expect S1, but
+      not overwhelmingly.
+  S4. Reported whichever way it comes out. WANTED is not moved this slot regardless — no
+      submission is possible — but if S2 fires it is written up as the top next-step and
+      the deadline pick is flagged, not quietly left.
+
+Script: experiments/w22b_blockdecomp.py -> .json, log logs_w22b_blockdecomp.txt.
