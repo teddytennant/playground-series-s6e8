@@ -847,3 +847,11 @@ difference — including the seven teams now above us.
 ⚠ `AdarshAleti` — the author of the imported OOF library — has not moved from 0.97116 and is
 now **below** us. Their CC0 members are worth more in our pack than in theirs (w20d, w21b),
 which their own README's ablation predicted the opposite of.
+
+**After ship 3: `w21_ad187corr_ens4` → 0.97118, rank 14 → 11 of ~2,050.** Gap to MILANFX
+(#1, 0.97132) now 14e-5, from 17e-5 at slot start. Public best 0.97115 → 0.97118 in one slot.
+
+Three teams sit on 0.97118 (us, Malhar Ujawane, nanare) and the 0.97120–0.97124 band above us
+holds six. Everything from ~0.97113 to 0.97124 remains inside w17h's 53–84e-6 cross-team paired
+floor and is not a distinguishable difference — but the top of the board is pulling away:
+Optimistix 0.97126 and MILANFX 0.97132 are 8e-5 and 14e-5 clear, which is 1.0–2.6× that floor.

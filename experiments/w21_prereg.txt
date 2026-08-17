@@ -199,3 +199,51 @@ is decisive on one file. Registered now so the reading is not chosen afterwards.
 Not a deadline pick under any outcome: 2.9e-6 below the zero-parameter hedge
 already in WANTED, on the same pack, so it can only be a worse version of a
 slot that is already filled.
+
+===============================================================================
+8. SHIP 3 — REGISTERED BEFORE UPLOAD (§5's named file, built and verified)
+===============================================================================
+w21_ad187corr_ens4.csv   CV 0.9701039331   (5-arm scheme average, 187 all-four base)
+  296,302 rows, all distinct, rhash 13fbea81dae0, rank-duplicate of nothing.
+  vs its own base w20_ad187 (CV 0.9700978895):  +6.044e-6
+  vs the h3-corrected twin w21_ad187corr:       -2.948e-6
+
+FIRST RESULT, and it is a replication rather than a new claim: the correction is
+worth +6.044e-6 on the all-four base against +6.066e-6 on the h3 base — a
+difference of 0.022e-6. Combined with w16q's finding that the full-data weight
+VECTOR is identical across bases, the correction's value is now shown to be
+independent of both the pack (159 -> 187, §6) and the transform (h3 -> ens4).
+
+WHAT THIS SEND ACTUALLY TESTS — h3 vs ens4, an EIGHTH time
+----------------------------------------------------------
+w16q measured h3 minus ens4 paired within member set on six sets and found h3
+ABOVE on CV 6/6 (mean +4.32e-6) and BELOW on the public LB 6/6. w16s priced that
+as a p ~ 0.24 slice event and closed it. The 187 pack has now reproduced BOTH
+halves without being asked to:
+
+  uncorrected   h3 - ens4  CV +2.925e-6   LB 0.97115 vs 0.97116  (ens4 ABOVE)
+  corrected     h3 - ens4  CV +2.948e-6   LB 0.97117 vs ???
+
+The two CV margins agree to 0.023e-6, and both are SMALLER than the 159-pack's
+~4.2e-6 — the transform gap shrinks as the pack grows, which is new and was not
+predicted by anything on file.
+
+REGISTERED, against reference w21_ad187corr LB 0.97117, dCV -2.948e-6, LAW-IF
+paired sd 6.960e-6, zero draws:
+  beta = 1:  0.97115 0.054 / 0.97116 0.338 / **0.97117 0.460** / 0.97118 0.137
+  beta = 2:  0.97115 0.108 / **0.97116 0.432** / 0.97117 0.380 / 0.97118 0.072
+
+Cross-check against reference w20_ad187 LB 0.97116, dCV +6.044e-6, sd 7.358e-6:
+  beta = 1:  0.97116 0.366 / **0.97117 0.424** / 0.97118 0.121
+  beta = 2:  0.97116 0.172 / **0.97117 0.457** / 0.97118 0.305
+
+⚠ REGISTERED IN ADVANCE, so it cannot be spun afterwards: **this is close to a
+coin flip and it will not settle the h3/ens4 anomaly.** P(prints at or above its
+h3 twin, i.e. the anomaly replicates an 8th time) = 0.606 under beta = 1 and
+0.452 under beta = 2. P(prints strictly BELOW, i.e. CV order is respected on the
+public slice for once) = 0.392 and 0.545. Neither outcome is surprising under
+either model. It is recorded as one more paired observation in a family where
+w19a's tau is identified, and the h3/ens4 tally is reported as a tally.
+
+Not a deadline pick under any outcome — registered in §5 before it was built,
+and 2.9e-6 below the h3-corrected file that holds slot 1.

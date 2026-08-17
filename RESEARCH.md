@@ -5445,3 +5445,37 @@ public-inflated file over the CV pick **in slot 1**. That risk is now **zero**: 
 file *is* the best CV file. All that remains is slot 2, between two files on the same pack
 2.9e-6 apart on CV. Still click. **Stop spending slots pricing it**, and never quote w19d's
 +1.890 / +5.300 / +5.562e-6 again — it describes a board state two moves gone.
+
+## ⚠ UPDATE, same slot (w21 ship 3): the h3/ens4 anomaly is 8/8 and it is the live threat
+
+`w21_ad187corr_ens4` (CV 0.9701039331) printed **0.97118**, above its h3 twin
+`w21_ad187corr` (CV 0.9701068814, LB 0.97117), while sitting **2.948e-6 below it on CV**.
+
+| contrast on the 187 pack | dCV | public LB |
+|---|---|---|
+| ens4 − h3, uncorrected | −2.925e-6 | 0.97116 vs 0.97115 — **ens4 above** |
+| ens4 − h3, corrected | −2.948e-6 | 0.97118 vs 0.97117 — **ens4 above** |
+
+w16q had this 6/6 on the 159 pack; it is now **8/8 across two independent packs**. The two new
+CV margins agree to 0.023e-6 and are both **smaller** than the 159-pack's ~4.2e-6 — **the
+transform gap shrinks as the pack grows**, which nothing on file predicted and which is worth a
+measurement of its own.
+
+**This retires the "shared level term" idea floated earlier in this slot.** Two of the three
+sends printed one grid step above their modal cell, and the negative-dCV one is simply the
+h3→ens4 contrast doing what it has done 8/8. Once that is accounted for there is no residual
+level effect and **w19b stands: do not fit the CV→LB slope from the board.** Any future fit of
+level and slope must carry an **h3/ens4 indicator in the design**, or the indicator is absorbed
+into whichever term is left free.
+
+**The correction's value is pack- and transform-independent**: +6.066e-6 on the h3 base,
++6.044e-6 on the all-four base, +6.494e-6 on the 159-pack h3 base. Budget +6e-6 and ~40 min
+after any pack change, on any base.
+
+⚠ **Standing risk, stated plainly for whoever makes the final click.** Both deadline picks are
+h3-side, and CV and the public slice disagree on the h3/ens4 axis **systematically and
+reproducibly, 8/8, across two packs**. w16s's defence — a public-sized slice (59,260 rows)
+reverses a ~5e-6 signal with p 0.244, and 6/6 nested files is one observation not six — is
+still the better argument, and final selection is on CV for exactly this reason. But it is now
+stretched over 8/8 and two packs, and it should be re-run rather than re-quoted. **This is the
+largest live threat to the deadline pick and it deserves a dedicated slot.**

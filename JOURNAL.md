@@ -10885,3 +10885,71 @@ already stale last slot, and now describing a board state two moves gone.
 `submissions/w21_ad187corr.csv` + `oof_w21_ad187corr.npy`. Modified: `check_selection.py`
 (`WANTED` **changed** — first time in fourteen slots — and the supersession block re-headed).
 `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+
+## ══ w21 ADDENDUM — SHIP 3, and a CORRECTION TO §4 ABOVE ══
+
+### 8. SHIP 3 — `w21_ad187corr_ens4`, ref **55579386**, printed **0.97118. NEW ACCOUNT BEST, RANK 14 → 11.**
+
+The 5-arm correction on the all-four base of the same pack — identical code path, only
+`W21A_BASE`/`W21A_TAG` swapped, so the h3 run reproduces byte-for-byte. Registered as ship 3 in
+`w21_prereg.txt` §5 **before it was built and before either earlier send had printed**,
+specifically so it could not be chosen off a table. CV **0.9701039331**.
+
+**Quota exhausted cleanly: "0 submissions remaining today" — 10 of 10 used, cap 10 confirmed
+for the seventh consecutive slot.** No slot wasted, per the brief's economics.
+
+**Replication result:** the correction is worth **+6.044e-6** on this base against **+6.066e-6**
+on the h3 base — a difference of **0.022e-6**. With w16q's finding that the full-data weight
+vector is identical across bases, `c_avg`'s value is now demonstrated independent of the pack
+(159 → 187) *and* of the transform (h3 → ens4). It is a property of the correction, not of what
+it corrects.
+
+### 9. ⚠ THE h3/ens4 ANOMALY REPLICATES AN 8th TIME — and it EXPLAINS AWAY §4's puzzle
+
+| contrast | dCV | LB | direction |
+|---|---|---|---|
+| `w20_ad187` − `w20_ad187_h3` (uncorrected) | **−2.925e-6** | 0.97116 vs 0.97115 | **ens4 ABOVE** |
+| `w21_ad187corr_ens4` − `w21_ad187corr` (corrected) | **−2.948e-6** | 0.97118 vs 0.97117 | **ens4 ABOVE** |
+
+w16q measured h3 above ens4 on CV 6/6 and below it on the public LB 6/6; w16s priced that as a
+p ≈ 0.24 slice event and closed it. **The 187 pack has now reproduced both halves twice more,
+unprompted, taking the tally to 8/8.** The two CV margins agree to 0.023e-6, and both are
+**smaller than the 159-pack's ~4.2e-6** — the transform gap shrinks as the pack grows, which
+nothing on file predicted.
+
+**§4 above is partly WRONG and I am correcting it here rather than editing it.** §4 read the
+two earlier prints as evidence for a shared *level* term, on the grounds that a positive-dCV
+and a negative-dCV file both printed one step high and no slope can do that. Ship 3 shows the
+cleaner decomposition:
+
+- The negative-dCV file (`w20_ad187`) printing high is **not** a mysterious level term. It is
+  the h3→ens4 contrast, which has its own 8/8 documented record of going the other way on the
+  public slice. §4 treated a known effect as a new one.
+- What remains genuinely unexplained is only the **first** contrast: adding the correction
+  moved CV +6.07e-6 and LB two grid steps (0.97115 → 0.97117), a ratio near 3 — though at 1e-5
+  grid granularity that ratio is barely resolved and should not be quoted as a number.
+
+So the honest position after three sends: **beta is still unidentified, there is no evidence
+for a level term once the h3/ens4 effect is accounted for, and w19b's "do not fit the slope
+from the board" stands.** Next-step #2 in §7 should be re-scoped accordingly — fit level and
+slope *with an h3/ens4 indicator in the design*, or the indicator will be absorbed into
+whichever term is left free.
+
+⚠ And the thing that should genuinely worry a future run: **CV and the public slice disagree
+systematically and reproducibly on the h3/ens4 axis, 8/8.** Both deadline picks are h3-side.
+w16s's simulation says a public-sized slice reverses a ~5e-6 signal with probability 0.244 and
+that 6/6 was one observation, not six — that argument is now stretched over 8/8 and two
+independent packs. It is still the better argument (final selection is on CV, and the slice is
+59k rows against 691k), but it is no longer comfortable. **This is the strongest live threat to
+the deadline pick and it deserves a slot of its own, not a paragraph.**
+
+### 10. Final state of the slot
+
+- **3 sends, 3 new information, 2 new account bests. Public 0.97115 → 0.97118, rank 19 → 11 of
+  ~2,050.** Gap to MILANFX (#1, 0.97132) now 14e-5.
+- `WANTED = {w21_ad187corr.csv, w20_ad187_h3.csv}`, moved on CV by a pre-registered rule.
+- Auto-slot 1 (public 0.97118) is now `w21_ad187corr_ens4`, which is **not** the CV pick —
+  so §6's "the click has collapsed" is itself one slot stale: this slot's own last send
+  re-created a public-vs-CV divergence in slot 1. The click is worth making again, and the
+  quantity is the 2.9e-6 h3/ens4 CV margin that §9 says the public slice has reversed 8/8.
+  **That is the single most important sentence in this entry.**
