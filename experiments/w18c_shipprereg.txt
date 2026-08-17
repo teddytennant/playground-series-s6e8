@@ -1,0 +1,53 @@
+w18 SHIP PRE-REGISTRATION — written before the upload, 2026-08-17 slot 4.
+
+SHIP: submissions/blend159av_rankraw.csv
+  CV 0.9700338607 on the frozen SKF5 seed42 folds. Never sent. Rank-distinct from all 54 sent
+  files (checked against every sent CSV, not against a list).
+  NOT a leaderboard candidate: 21.8e-6 below the CV pick. P(it reaches the 0.97108 auto-slot-1
+  tier) = 0.00000, so the send provably cannot move the auto-pick tiers or reprice the click.
+  It is an out-of-sample test of the paired CV->LB instrument in a THIRD transform family, and
+  the first send whose paired REFERENCE was chosen rather than assumed.
+
+REGISTERED PREDICTION — model A: **0.97104**, P 0.451.
+  Full distribution: 0.97104 P0.451 / 0.97103 P0.321 / 0.97105 P0.156 / 0.97102 P0.056 /
+  0.97106 P0.013 / 0.97101 P0.002.
+  Construction: LB(blend158_rankraw) = 0.97104, plus dCV = -2.559e-6, with the reference's own
+  +/-5e-6 rounding integrated out and a paired public-slice sd of 7.344e-6.
+  THE SD IS CLOSED-FORM, NOT SIMULATED. w17h's LAW-IF, gated this slot by w18a against w17d's
+  6,000-draw simulated sds over 15 pairs at a median error of 0.51%. The 500-draw simulation run
+  here as a check returned 7.381e-6, ratio 0.995 — inside the simulation's own 3.2% MC error.
+
+THE REFERENCE WAS CHOSEN, and that is new. Every sent file in the family is a legal reference;
+the sharpest is the one with the smallest paired sd against the ship. LAW-IF prices all six for
+one pass, so the choice is free. Here it happened to agree with the highest-CV reference
+(blend158_rankraw, 7.34e-6) — but for blend153_rankraw it would have moved the sd from 10.49 to
+8.72e-6, so the mechanism is live even though this ship did not need it.
+
+RIVALS, all fixed before the upload:
+  B  group gap, all 6 sent rankraw files (contaminated)          +1000.7e-6 -> 0.97103
+  C  group gap, 5 — drop the CV-farthest sent file               +1001.2e-6 -> 0.97104
+  D  group gap, our 4 blends only (the PROVENANCE criterion)     +1000.4e-6 -> 0.97103
+
+WHAT THIS SEND CAN AND CANNOT SETTLE — stated first, so neither can be claimed afterwards.
+
+1. IT IS A NEGATIVE CONTROL FOR PROVENANCE, AND THAT IS THE FINDING ALREADY, BEFORE THE PRINT.
+   Slot 3 concluded that a family is contaminated wherever a foreign stack_pub* file sits in it,
+   and that the exclusion criterion should be provenance rather than CV distance. Rankraw carries
+   TWO foreign files and was chosen as the third family for exactly that reason. But their gaps
+   are +1005.5 and +996.9e-6 against our four at +1003.6/+1003.9/+995.9/+998.1e-6 — INSIDE our own
+   spread. Excluding them moves the group gap by +0.3e-6 and does not change a single predicted
+   grid value: B and D are the SAME number here. So provenance is a PRIOR for deviance, not
+   deviance itself, and the rule slot 3 wanted to write ("drop foreign files") would have been a
+   no-op in this family. That is registered now, not after the print.
+
+2. THE PRINT SEPARATES {A, C} = 0.97104 FROM {B, D} = 0.97103, AND NOTHING FINER.
+   A and C coincide by arithmetic accident, exactly as A and B did in the hybrid ship. A 0.97104
+   print does NOT separate the paired form from the CV-distance group gap. Recorded in advance.
+
+3. A CARRIES ONLY P 0.451 ON ITS OWN MODE. A miss is weak evidence against the paired form, and
+   I will read the outcome as a likelihood ratio with each rival given its own sd, not as a
+   verdict. The paired instrument stands at 2 hits / 1 miss out of sample going in.
+
+NOT MOVED BY THIS SEND: WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}. Final selection runs on
+CV; this file is 21.8e-6 below the pick and its public score is irrelevant to that. The click is
+unchanged and unmade at 54 submissions.

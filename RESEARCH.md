@@ -4963,3 +4963,99 @@ CV and still poison the group gap. `w17b_famfix.py` still pools them and its pub
   is fine; only the push fails. Fix:
   `PATH="/run/current-system/sw/bin:$PATH" git push`. Check `git status -sb` for `[ahead N]`
   before assuming a slot's work reached the remote.
+
+---
+
+## LAW-IF, part 2 — the conditioning has a CLOSED FORM, and the joint form provably collapses
+
+w17h found that the paired public-slice sd of two scorers is the AUC influence function, exact to
+~2%, with zero simulation. w18a (2026-08-17, slot 4) shows the same law dissolves the *entire*
+public→private conditioning machinery, not just the sd.
+
+### The covariances, once, for any subset geometry
+
+For file `k`, per pool row: `a_k(i) = F0_k(s_i)` over positives (mid-rank fraction of negatives
+below), `b_k(j) = 1 − F1_k(s_j)` over negatives. Let `C1 = cov(a)` across files over pool
+positives and `C0 = cov(b)` across files over pool negatives — two K×K matrices, one pass.
+
+For **any** simple random subsample of size `m` from a pool of `n` (π1 the pool positive rate):
+
+```
+Cov(AUC deviations) = (1 − m/n) · [ C1/(m·π1) + C0/(m·(1−π1)) ]
+```
+
+Gated against w17d's 6,000 simulated draws over 15 pairs: **median error 0.51%, max 2.58%** on
+both σ_t (pseudo-test draw) and σ_p (public slice within test).
+
+### The theorem that kills the simulation
+
+The pseudo-test draw and the public-slice draw are **the same operation at two different sizes**,
+so `S_t = a·C` and `S_p = c·C` with the **same** `C`. Verified: `S_t/S_p = 0.142855576` on all 36
+entries, spread **1.0e-12**. Therefore:
+
+- `M = S_t(S_t + S_p)^-1 = w·I` (measured: `max|M − wI| = 1.1e-10`), `w = 0.1249988` — a **pure
+  row-count constant**, `w = [(1−m/n)/m] / [(1−m/n)/m + (1−p/m)/p]`, with **no pair dependence**.
+- Conditioning on all K observed public scores jointly is **identical** to conditioning each
+  contrast on its own public difference. The free gap `G` drops out of contrasts entirely.
+- `E[private contrast | public] = dCV + gamma·(dLB − dCV)`, `gamma = beta + (1−beta)·w =
+  −0.091758` at w17d's measured `beta = −0.2477`.
+
+**Consequences for what to run.** w17g's per-contrast parametric branch was **exact**, not an
+approximation — its docstring's claim that the joint form carries "strictly more information" is
+false for this geometry. w17d's 6,000-draw importance sampler (ESS 14.3) was estimating a
+closed-form quantity, and its GLOBAL/PERFAM bracket is empty. **Do not re-run
+`w16w_reprice.py` or `w17d_coupling.py` as instruments; keep them only as gates.**
+
+### The click, sixth repricing, zero simulation
+
+| | limit 1 (w16e_aonly / w16q_ens4avg / w16t_cellens4) |
+|---|---|
+| w16w, unconditioned | +1.253 / +4.212 / +4.346e-6 |
+| w17d GLOBAL (ESS 14.3 — do not quote) | +1.827 / +6.727 / +6.263e-6 |
+| w17d PERFAM (ESS 100) | +1.704 / +4.097 / +4.185e-6 |
+| w17g parametric | +2.306 / +5.417 / +5.562e-6 |
+| **w18a closed form** | **+2.328 / +5.509 / +5.666e-6** |
+
+limit 2: +1.977 … +4.772e-6. **P(the auto file beats BOTH wanted files privately) = 0.043 / 0.031
+/ 0.058.** Not a coin flip. Click still unmade at 55 submissions.
+
+⚠ **And one reason they are over-sharp.** The model assumes `A_k(test) = cv_k + slice noise`, i.e.
+no file-specific train→test transfer term. w18b's ship printed a realised family gap **z = −3.58**
+against its own siblings, so that term is probably not zero and every number above is sharp in
+the same direction.
+
+### `sd(single) = 567e-6` is the POOL convention — do not mix it with within-test figures
+
+LAW-IF: **558.0e-6** drawing the 59,260-row public slice out of the 691,369-row pool, **521.9e-6**
+drawing it out of a 296,302-row test. Ratio `sqrt(0.9143/0.8000) = 1.069`, pure fpc.
+
+### Operationally: the paired reference is now a CHOICE
+
+Every already-sent file in a transform family is a legal reference for a paired CV→LB prediction,
+and LAW-IF prices all of them for one pass. Pick the **minimum-sd** reference, not the highest-CV
+one. (w18b: agreed for the shipped file, but would have cut `blend153_rankraw`'s paired sd from
+10.49 to 8.72e-6.) `experiments/w18b_rankraw.py::lawif_sd` is a self-contained implementation.
+
+## Decontamination: PROVENANCE IS A PRIOR FOR DEVIANCE, NOT DEVIANCE ITSELF
+
+Slot 3 concluded that per-family CV→LB group gaps are contaminated by foreign `stack_pub*` files
+and that the exclusion criterion should be provenance rather than CV distance. **Scoped by w18b
+in the rankraw family, which was chosen because it carries two foreign files.** Their gaps are
++1005.5 and +996.9e-6 against our four at +1003.6/+1003.9/+995.9/+998.1e-6 — *inside our own
+spread*. Excluding them moves the group gap by **+0.3e-6** and changes no predicted grid value.
+In the logit and hybrid families the foreign files were also *deviant*, and that is what made the
+criterion look like provenance. **Test deviance; use provenance to decide where to look.**
+
+## The paired CV→LB instrument's out-of-sample record — keep this updated
+
+| slot | file | registered | printed | |
+|---|---|---|---|---|
+| w17 slot 1 | `blend159av_logit` | 0.97105 | 0.97105 | hit |
+| w17 slot 2 | (logit family test) | 0.97106 | 0.97106 | hit |
+| w17 slot 3 | `blend159av_hybrid` | 0.97103 | 0.97102 | miss by 1 |
+| w18 slot 4 | `blend159av_rankraw` | 0.97104 | **0.97102** | **miss by 2** |
+
+**2 hits / 2 misses.** It still wins every likelihood readout against the group-gap rivals
+(w18d: 4.90–5.51×, posterior 0.635) because it is the only model carrying a *measured* width —
+the group gaps are estimated on n=3–6 files and are demonstrably too narrow. Pool these four with
+their LAW-IF sds and test the calibration; each future send adds a point for free.

@@ -1,0 +1,71 @@
+w18 (2026-08-17, slot 4) PRE-REGISTRATION — written before any number in this slot exists.
+
+TARGET: slot 3's next-run item 2, "re-cut every published paired sd with LAW-IF ... w17d's
+ESS-14.3 GLOBAL branch is the prize".
+
+THE CLAIM I AM ABOUT TO TEST. w17d's conditioning is a linear-Gaussian problem wearing a
+Monte-Carlo costume. Its GLOBAL branch draws 6,000 pseudo-tests and reweights each by the length
+of the interval of common gaps G consistent with all six observed public scores; the weights
+collapse (ESS 14.3) because six simultaneous +/-5e-6 constraints are improbable under the prior.
+But LAW-IF (w17h) gives the ENTIRE covariance structure of those deviations in closed form, and
+under a Gaussian the conditioning is a GLS solve, not a resampling problem. If that is right the
+GLOBAL branch can be computed exactly, with ZERO draws and therefore zero ESS, and the number
+w17g had to disbelieve becomes quotable.
+
+THE MODEL, stated before it is fitted:
+  pool P = the 691,369 labelled rows.  test T ~ SRS(296,302) of P.  public U ~ SRS(59,260) of T.
+  A_k(T) = cv_k + d_k          d ~ N(0, S_t)      S_t = (1-m/n)[C1/m1 + C0/m0]
+  A_k(U) = A_k(T) + e_k        e ~ N(0, S_p)      S_p = (1-f) [C1/p1 + C0/p0]
+  A_k(V) = A_k(T) + b*e_k + r  b = w17d's measured -0.2477 (exact partition -0.2500)
+  C1 = cov over pool POSITIVES of the AUC influence values F0_k(s_i)
+  C0 = cov over pool NEGATIVES of 1 - F1_k(s_j)          [the w17h LAW-IF quantities]
+  observed:  LB_k = round_1e-5( cv_k + G + d_k + e_k ),  G a single free constant (GLOBAL)
+             or one free constant per transform family (PERFAM).
+  E[d + b e | x] = b x + (1-b) M x,  M = S_t (S_t+S_p)^-1;  Cov = (1-b)^2 (S_t - M S_x M').
+  CLOSED branch: drop the grid, condition on equality, G by GLS -> one 6x6 solve, no draws.
+  GRID branch: keep the +/-5e-6 boxes, Gibbs on (x, G) -- a truncated MVN sampler that MIXES,
+  as opposed to importance weights that do not.
+
+P1  GATE. LAW-IF's closed-form sigma_t and sigma_p for the 15 pairs of w17d's six files
+    reproduce w17d's 6,000-draw simulated values: MEDIAN |ratio - 1| < 0.05 and MAX < 0.20.
+    FALSIFIED if the median exceeds 0.05. Everything downstream is void if this fails, and I
+    will say so rather than quoting the conditioning anyway.
+
+P2  The variance split w = sigma_t^2/(sigma_t^2+sigma_p^2) is a pure row-count constant under
+    LAW-IF -- the pair-specific covariance cancels -- so all 15 LAW-IF w's are equal to each
+    other to <1e-9 and equal 0.1250. w17d's 15 SIMULATED w's then scatter around it: predicted
+    all 15 inside 0.125 +/- 0.010. FALSIFIED if any simulated w falls outside, which would mean
+    the split is pair-dependent and the closed form is missing a mechanism.
+
+P3  THE PRIZE. The closed-form GLOBAL limit-1 cost of not clicking, for the three auto-slot-1
+    files, lands inside [+1.0, +6.0]e-6, and is CLOSER (mean absolute difference over the three
+    files) to w17g's parametric +2.306/+5.417/+5.562e-6 than to w17d's ESS-14 GLOBAL
+    +1.827/+6.727/+6.263e-6. Reason registered in advance: the parametric branch costs no ESS
+    and only omits cross-file information, whereas the ESS-14 branch is noise-dominated.
+    FALSIFIED if the closed form sits nearer the ESS-14 numbers, which would mean the ESS-14
+    branch was picking up real joint information and I was wrong to discount it.
+
+P4  P(the auto file beats the CV pick on the private slice) lands in [0.00, 0.25] for all three
+    files AND is >= 0.001 for every one of them. The ESS-14 branch's exact 0.000 for
+    w16q_ens4avg is registered here as a 14-effective-draw artifact. FALSIFIED if the closed
+    form also returns < 0.001 for any file -- then the resolution is real and I was wrong.
+
+P5  The GRID (Gibbs, rounding kept) and CLOSED (equality, no rounding) branches agree on all six
+    conditioned contrast expectations within 1.0e-6, i.e. the +/-5e-6 reporting grid is not what
+    was driving w17d's answer. FALSIFIED if any contrast moves by more than 1.0e-6.
+
+P6  Joint conditioning is NOT the same as per-contrast conditioning: the closed-form GLOBAL
+    differs from w17g's parametric on at least one of the six contrasts by > 0.5e-6. This is the
+    thing w17g explicitly could not do and flagged for a later slot. FALSIFIED if every contrast
+    agrees within 0.5e-6, in which case w17g's cheap form was sufficient all along and this slot
+    bought only certainty, not a number.
+
+P7  WANTED = {w16i_schemeavg.csv, blend159av_h3.csv} is UNCHANGED by anything in this slot.
+    Everything above concerns the public slice and the private slice conditional on it; final
+    selection runs on CV. Registered so that no post-hoc "the conditioning moved the pick" can
+    be claimed. The one live CV question -- w16m_widegrid ties the pick's CV to 12 dp -- was
+    already answered in pre-flight: it is RANK-IDENTICAL to w16i_schemeavg on the test side, so
+    it is the same file, not a rival, and it cannot be sent either.
+
+THE SHIP is chosen and registered separately in w18c_shipprereg.txt before the upload, under the
+standing rule that its predicted value and its tier risk are both written down first.

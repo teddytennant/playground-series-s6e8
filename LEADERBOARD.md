@@ -768,3 +768,14 @@ private. Chasing public rank remains unpriceable; the do-not-spend lists hold.
 
 Our sends this slot: `blend159av_hybrid` → **0.97102** (registered 0.97103, missed by one step).
 Account best public unchanged at **0.97108**, held by three files; 54 submissions total.
+
+## 2026-08-17 (w18, slot 4)
+
+- **Rank 76 of 2,046** at public **0.97108**, 55 submissions. The field has grown from the
+  brief's ~1,326 teams to 2,046.
+- Top: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124. Gap to #1 is **24e-5**.
+- Immediate neighbourhood is a wall: 0.97109 × 3 at ranks 73–75, then **0.97108 × 4** at 76–79
+  (us, FunnyBishop, AJboos, LeTuanM). One grid step is ~3-4 board places here.
+- Reading unchanged and now on a firmer footing: the cross-team paired floor survived w17's
+  audit at 53–84e-6, so 0.97108 vs 0.97109 is **not a difference** and the 24e-5 gap to #1 is
+  ~3 sigma. Nothing on this board is worth chasing at the cost of the CV pick.

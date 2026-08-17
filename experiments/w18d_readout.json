@@ -1,0 +1,21 @@
+{
+ "ship": "blend159av_rankraw",
+ "printed": 0.97102,
+ "registered": 0.97104,
+ "hit": false,
+ "sd_all": 4.127422581502635e-06,
+ "sd_5": 4.402585182737515e-06,
+ "sd_ours": 3.983505251683769e-06,
+ "likelihood": {
+  "A paired (REGISTERED)": 0.0555575,
+  "B group gap, all 6": 0.010484328175717782,
+  "C group gap, 5 (CV-far out)": 0.011333720311571873,
+  "D group gap, our 4 (prov.)": 0.010087462038834344
+ },
+ "posterior": {
+  "A paired (REGISTERED)": 0.6352113843989596,
+  "B group gap, all 6": 0.11987156756496802,
+  "C group gap, 5 (CV-far out)": 0.12958301164566757,
+  "D group gap, our 4 (prov.)": 0.1153340363904048
+ }
+}
