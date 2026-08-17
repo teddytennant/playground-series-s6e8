@@ -1,0 +1,253 @@
+w23 PRE-REGISTRATION — 2026-08-17, slot 9 of 10
+================================================================================
+Written BEFORE any code in this wave was written or run. Nothing below is edited
+afterwards; corrections go in the journal.
+
+HANDED ANGLE
+    "Blending: rank-average or weight the tuned models by out-of-fold performance.
+     Search blend weights on OOF predictions, never on the public leaderboard."
+
+STATE OF THE QUOTA (verified live, 14:31 UTC)
+    `kaggle competitions submissions -v` returns TEN rows dated 2026-08-17
+    (w21_ad187corr_ens4 55579386 at 13:40 is the newest). Cap is 10, confirmed for
+    the eighth consecutive slot. THIS SLOT CANNOT SUBMIT. Its product is a
+    measurement plus, if the measurement earns it, a built-and-validated file for
+    tomorrow's slot 1. `w22_ad187corr_rankraw.csv` is already queued ahead of it.
+
+--------------------------------------------------------------------------------
+0. WHY THIS ANGLE IS OPEN (it is the only handed angle in three days that is)
+--------------------------------------------------------------------------------
+The blending literature of this workspace has three loose ends, and all three are
+the same loose end seen from different sides. All are "search the blend weights on
+OOF", i.e. squarely inside the handed angle, and none has ever been measured:
+
+(a) JOURNAL 08-13 §"Two library defects": "C is not transferable across sample
+    sizes. The pipeline fits at three different n -- 345,684 (paired instrument),
+    553,095 (cross-fit fold), 691,369 (full fit, THE ONE THAT PREDICTS TEST). One
+    shared C regularises the submission model 2.0x harder than the instrument it
+    was validated on." `blend_lab --lam` was written to fix this and the journal
+    says verbatim: "Not yet measured."
+
+(b) Same entry: "The L2 penalty on unstandardised columns is not a neutral prior.
+    Hybrid column sds run 1.81 to 27.58, so at any C the widest member is shrunk
+    ~230x less than the narrowest." `--standardize` exists. "Not yet measured."
+
+(c) Same entry: "C=0.01 at +5e-6 +/- 3e-6 consistent ... Six positive measurements
+    across two sweeps and two member sets, all ~5e-6." That was at 149 members and
+    it was CLOSED on performance grounds. The pack is now 187 members and 25%
+    wider, and a variance-limited fit gets MORE from a penalty as K/n grows. The
+    closure was correct for the pack it was made on and has never been re-tested.
+
+And the theory that ties all three together is journal next-step #4 from w20,
+deferred by w21 and again by w22:
+
+(d) w20 §5 observed dLB ~= 2x dCV on two wide pairs and named the mechanism:
+    "the OOF/test bagging asymmetry (w16o) -- each fold's meta-model is fitted on
+    4/5 of the rows while the submitted test column comes from a full-data fit, and
+    a wider stack gains more from that extra fifth than a narrow one does.
+    TESTABLE LOCALLY AND FOR FREE NEXT SLOT."  It is now three slots later.
+
+⚠ SCOPE GUARD, written here so it cannot be quietly widened later: w22 next-step #6
+says "do NOT spend another slot on beta." This wave does NOT fit beta, does not read
+the board, and does not use any LB number as data. It measures a property of the
+BLENDER on train rows only. If the measurement happens to be the size of the
+observed dLB-dCV residual that is a consistency check to be reported in one line,
+not a beta estimate.
+
+--------------------------------------------------------------------------------
+1. THE INSTRUMENT — `w23a_bagasym.py`
+--------------------------------------------------------------------------------
+One honest holdout, never fitted on:
+
+    H  = 20% stratified holdout, seed fixed per replicate
+    P  = the remaining 80% = 553,095 rows  <-- EXACTLY the fold-fit n of the
+                                                shipped pipeline, by construction
+
+Every number below is `roc_auc_score(y[H], decision_function(Z[H]))`. No
+cross-fitting, no OOF re-use, no member selection. Members: the 187-member pack
+(`data/ext_members3` on top of ext_members{,2}), HONEST_DROP applied, `hybrid`
+transform only (one transform; the asymmetry is a property of each individual stack
+fit, and h3/ens4 are rank-averages of such fits).
+
+PART A — the learning surface in (K, n).
+    K in {24, 47, 94, 187}   nested member subsets, fixed seed, wider superset of
+                             narrower, so dK is not confounded with which members
+    n in {0.5, 0.625, 0.8, 1.0} x |P|  = 276k / 345k / 442k / 553k, nested in n
+    => 16 fits per replicate, R = 3 replicates (different H and different subsets)
+
+    The quantity of interest is the LAST STEP,
+        D_K = AUC(K, n=|P|) - AUC(K, n=0.8|P|),
+    which is a 1.25x increase in fit rows -- the same ratio as the shipped
+    pipeline's 553,095 -> 691,369. Registered in advance as an UPPER bound on the
+    real 553k->691k step, because learning curves flatten, so if D_K comes back
+    small the conclusion is safe and if it comes back large it is inflated.
+
+PART B — the penalty, on the same holdout, at K = 187, n = |P|.
+    lam (L2 penalty PER ROW) in {0, 1e-8, 3e-8, 1e-7, 3e-7, 1e-6, 3e-6, 1e-5},
+    each x {unstandardised, standardised}. C = 1/(lam*n) per fit, so the winner
+    transfers to the 691k full fit CORRECTLY -- which is defect (a) above being
+    fixed rather than restated. lam=0 maps to the shipped C=1.0.
+    16 fits per replicate, R = 3.
+
+Total ~96 fits at ~30s = ~50 min plus a ~120s load. Deterministic given seeds.
+
+--------------------------------------------------------------------------------
+2. GATE — registered as a CONDITION ON BELIEVING ANY ROW
+--------------------------------------------------------------------------------
+Adopting w21b's pattern: re-run an OLD cell inside the NEW harness and let a miss
+invalidate the table.
+
+    GATE 1 (Part A): at K=187, n=|P|, lam=0, the holdout AUC must land within
+    0.0004 of the shipped cross-fitted 0.970077 for `w20_ad187_hybrid`. A 138k-row
+    holdout has an AUC se of roughly 2e-4, and the two numbers are different
+    estimands (single 553k fit scored on 138k held-out rows vs a 5-fold mosaic
+    scored on all 691k), so this is a sanity gate on the loader/transform/row
+    order, NOT a precision test. A miss means the member matrix is wrong.
+
+    GATE 2 (Part B): lam = 1e-8 gives C = 1/(1e-8*553095) = 181, i.e. essentially
+    no penalty, and must reproduce lam=0 to within 5e-6 on the same rows. A miss
+    means the C-per-fit derivation is wrong.
+
+    Both gates must pass or the wave reports "instrument failed" and ships nothing.
+
+--------------------------------------------------------------------------------
+3. HYPOTHESES, WITH THE PREDICTION WRITTEN DOWN FIRST
+--------------------------------------------------------------------------------
+H1 (Part A, direction). D_K > 0 for every K. Trivially expected; it is here so
+   that a NEGATIVE D_K is recorded as a surprise rather than smoothed over.
+
+H2 (Part A, THE LOAD-BEARING ONE). D_K is INCREASING in K. Mechanism: a
+   variance-limited fit's AUC deficit goes like K/n, so the gain from n -> 1.25n
+   goes like 0.2*K/n, i.e. LINEAR in K. Registered point prediction, and I expect
+   to be wrong about the level rather than the sign:
+       D_24 ~ +3e-6, D_47 ~ +6e-6, D_94 ~ +12e-6, D_187 ~ +25e-6,
+       ratio D_187/D_24 registered as > 3.
+   FALSIFIED if D_187 is not the largest of the four, or if the four are flat
+   within their own se. A flat surface says the 187-member fit is NOT
+   variance-limited at 553k rows, which would kill Part B's premise too and would
+   be the more interesting outcome.
+
+H3 (Part B). If H2 lands, an L2 penalty must buy something at K=187, and MORE than
+   the +5e-6 measured at 149 members on 08-13. Registered: best lam beats lam=0 by
+   +4 to +15e-6, consistent in sign across all 3 replicates, with the optimum at
+   lam between 1e-7 and 3e-6. FALSIFIED if the sweep is flat or the argmax is
+   lam=0.
+
+H4 (Part B, standardisation). Registered as the weakest of the four and I expect a
+   NULL: standardising helps only where the penalty bites, so if H3 fails H4 is
+   undefined, and if H3 lands standardisation is worth 0 to +5e-6. The 08-13 note
+   calls the unstandardised penalty a 230x-uneven prior, so the honest prior is
+   "standardised should be no worse". A standardised-WORSE result at every lam
+   would be genuinely informative about which members the fit needs to keep large.
+
+--------------------------------------------------------------------------------
+4. WHAT GETS BUILT, DECIDED NOW AND NOT REVISITED AFTER SEEING THE TABLE
+--------------------------------------------------------------------------------
+IF AND ONLY IF H3 lands (best lam beats lam=0, consistent in sign across 3/3
+replicates, by at least +4e-6), then build ONE file:
+
+    `w23_ad187lam_h3` = blend_lab --build --kinds hybrid,rankraw,rescale
+                                  --lam <the argmax lam> [--standardize if H4 wins]
+                                  --extra-dirs ext_members3
+
+chosen because h3 is the transform ensemble both deadline picks live in. The
+cross-fitted CV it prints is the number that decides anything, and it is comparable
+to `w20_ad187_h3`'s 0.9701008150 because the folds are frozen.
+
+⚠ THE SELECTION-OPTIMISM DISCOUNT IS REGISTERED NOW, NOT ARGUED LATER. The argmax
+over 16 (lam, std) cells is chosen on the SAME holdout that scores it. Following
+w16i/w21a, the honest expectation for the cross-fitted CV gain is the sweep's
+observed gain MINUS a selection premium, and the pre-registered discount is
+"assume half of the holdout gain survives". A cross-fitted gain BELOW +2e-6 (the
+measured reproducibility floor of this pipeline, JOURNAL 08-13) is NOT a gain and
+the file is recorded as a null, not shipped as an improvement.
+
+WHAT DOES NOT HAPPEN, whatever the table says:
+  - `WANTED` is NOT moved this slot. Any new file has to clear the floor on
+    cross-fitted CV AND have the `c_avg` correction rebuilt on it before it can be
+    compared with `w21_ad187corr` on equal terms, and that is a later slot's work.
+    Registered here so a good-looking number cannot promote itself.
+  - No submission. The quota is closed.
+  - Part A's D_187 is NOT converted into a beta estimate (see the scope guard).
+
+--------------------------------------------------------------------------------
+5. THE CONSEQUENCE THAT MATTERS EVEN IF EVERYTHING IS NULL
+--------------------------------------------------------------------------------
+If H2 lands, then the shipped cross-fitted CV number is a DOWNWARD-BIASED estimate
+of the file's true test quality, and the bias GROWS WITH STACK WIDTH. That makes
+every CV comparison between stacks of DIFFERENT widths biased -- against the wider
+one. Two live comparisons are affected and the direction is worth writing down
+before the number exists:
+    - `w20_ad187_h3` (187) vs `w16i_schemeavg` (159): the bias favours the 187
+      file, i.e. its +45.2e-6 CV lead UNDERSTATES its test advantage. Reassuring
+      for the pick that was already made.
+    - any future narrow-but-clever file vs the 187 pack: CV would flatter the
+      narrow one. This is the trap the finding protects against.
+If H2 is FALSE, the correct conclusion is that w20 §5's named mechanism does not
+exist at this scale and the 2x residual needs a different explanation -- and
+w22's "stop spending slots on beta" then applies with more force, not less.
+
+--------------------------------------------------------------------------------
+6. POOL SWEEP (mandatory, done before this file was written)
+--------------------------------------------------------------------------------
+`kaggle kernels list --sort-by dateRun` at 14:33 UTC: three refs newer than w22's
+13:14 sweep -- `obiaf88/predicting-smartphone-addiction-pytorch`,
+`vh10935cse20/mobile-addiction-lgbm`, `adnanik23/s6e8-training`. All three are
+NOTEBOOKS, not datasets, so none can carry an importable OOF+test pair; the dataset
+enumeration is the one that matters for imports and is run separately. Recorded so
+the next run does not re-screen them.
+
+================================================================================
+ADDENDUM — appended AFTER the runs, in the file rather than by editing above.
+Nothing in §0-§6 has been altered. This records how the registered rules were
+applied, including where I overrode one and why.
+================================================================================
+
+A1. GATE 2 FAILED (5.28e-6 against a 5e-6 tolerance). §2 says "the wave reports
+    'instrument failed' and ships nothing". THAT IS HONOURED: no file was built off
+    w23a's argmax cell, no `--lam` was used, and nothing was submitted (the quota was
+    closed regardless). The gate's failure turned out to BE the finding -- C=181 and
+    C=1 pose nearly the same problem and cannot legitimately differ by 5.28e-6, and
+    w23c/w23d traced that irreproducibility to the optimiser's stopping rule.
+
+A2. H1 partial, H2 LANDS on the registered ratio, level over-predicted ~1.7x.
+    D_K = +2.32 / +2.14 / +7.24 / +15.20e-6 for K = 24/47/94/187 (std=0).
+    D_187/D_24 = 6.54 against the registered "> 3"; argmax K = 187 as registered;
+    "monotone in K" FALSE (D_47 < D_24, both inside their own se). My registered
+    levels were +3/+6/+12/+25e-6, so the shape is right and the level is high.
+
+A3. H3 FALSIFIED FLAT. The lam axis is a null at every level: std=0 deltas run
+    -1.41 to +3.38e-6 and every one SIGN FLIPS across reps. The 08-13 "+5e-6 at
+    C=0.01" does not reappear at 187 members. The `--lam` n-correction remains
+    arithmetically right and operationally worthless, which is a closure, not a lead.
+
+A4. H4 MISSED, AND IT IS THE SLOT'S FINDING. I registered standardisation as a null
+    worth "0 to +5e-6" and expected it to be the weakest of the four hypotheses. It
+    came in at +19.21e-6, se 2.85, consistent 3/3 -- the largest free effect found in
+    this workspace since the 22-member import. Recorded as a miss by a factor of ~4.
+
+A5. I OVERRODE §4's build condition, and state it plainly rather than reinterpreting
+    the gate. §4 conditioned the build on H3, and H3 failed. I built anyway, because
+    the object built is NOT the thing the gate protects: it is a cross-fitted stack on
+    the frozen folds with NO cell chosen off any holdout table (no lam, no argmax --
+    `--standardize` is a numerical setting justified by the mechanism in w23c/w23d,
+    not by a score). The registered selection-optimism discount therefore does not
+    apply and I do not claim it does; instead the claim rests on the frozen-fold
+    cross-fitted CV, which is the same instrument every other CV in the journal uses.
+    A future run is entitled to treat this build as UNREGISTERED and weigh it less.
+
+A6. §4's "WANTED is NOT moved this slot" is HONOURED, and it now costs something
+    real: `w23_ad187std_h3` is the highest cross-fitted CV in the workspace
+    (0.9701092751 vs `w21_ad187corr`'s 0.9701068814). It is NOT promoted, because the
+    prereg fixed in advance that a new file must have `c_avg` rebuilt on it before it
+    can be compared with a corrected file on equal terms, and +2.39e-6 is inside the
+    territory of this pipeline's ~2e-6 reproducibility floor. That is exactly the
+    situation the rule was written for.
+
+A7. §5's consequence, evaluated. The bagging asymmetry is REAL but QUANTITATIVELY
+    INSUFFICIENT: D_187 re-measured on a converged fit (w23c Part 2) is +9.08e-6
+    (se 5.84), against the +48e-6 and +62e-6 dLB-dCV residuals w20 attributed to it.
+    It explains at most a fifth. w20 §5's named mechanism is closed as the
+    explanation for the 2x slope, which strengthens w22's "stop spending slots on
+    beta" rather than weakening it. The CV-understates-wide-stacks direction in §5
+    stands but at ~9e-6, not the ~25e-6 I registered.

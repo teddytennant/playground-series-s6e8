@@ -5547,3 +5547,112 @@ on a weaker base** and partly substitutes for base quality. Scheme-selection opt
 
 ⚠ **The pack-independence half (159→187) rests on the identical two-point reasoning and has never
 had a third pack.** Do not quote it as established until it does.
+
+---
+
+# ⚠⚠ w23 (slot 9, 2026-08-17) — THE META-LOGISTIC WAS NEVER CONVERGING. Read this before quoting any blend CV.
+
+## 1. The defect, the mechanism, and the one-flag fix
+
+`sklearn.LogisticRegression`'s lbfgs stops when the **max gradient** drops under
+`tol=1e-4`. That rule carries the columns' scale. The hybrid meta-matrix has member
+column **sd 1.82 … 27.59**, so one fixed `tol` is a ~15× looser stopping rule on the
+narrow columns than the wide ones, and the fit terminates on that slack **with no
+warning emitted**. Every blend this workspace has ever built stopped early.
+
+**The fix is `blend_lab --standardize`.** It makes the metric isotropic so the default
+stopping rule lands on the real optimum, and it is **6× faster** (69 iterations vs 414).
+
+| 2×2 on one honest 20% holdout, K=187, n=553,095, 3 reps, paired | Δ vs shipped | se | reps |
+|---|---|---|---|
+| `float32` unstandardised — **what every build on record used** | 0 | — | — |
+| `float32` **standardised** | **+19.21e-6** | 2.85 | 3/3 |
+| `float64` unstandardised | +6.52e-6 | 1.03 | 3/3 |
+| `float64` standardised | +17.76e-6 | 4.41 | 3/3 |
+
+**Proof it is a stopping rule and not a prior:** refitting the unstandardised float64 cell
+at `tol=1e-7` takes **8,000 iterations / 1,582 s** and lands on holdout AUC **0.970370** —
+identical to what standardising reaches at the default `tol` in **11 s**. Residual gap once
+both are converged: **−0.21e-6**. Fit log-loss also converges to the same value
+(0.200313901 vs 0.200312290), so the two parameterisations descend to the same point.
+⚠ `w23c_convergence.py`'s printed verdict line says "(ii) BETTER PRIOR" — **it is wrong**;
+it compares two *both-unconverged* fits' training loss. The tol arms overturn it.
+
+## 2. Cross-fitted CV effect on the 187 pack, and the built-in negative control
+
+| transform stack | base CV | `--standardize` CV | Δ |
+|---|---|---|---|
+| `hybrid` | 0.9700773470 | 0.9700977970 | **+20.45e-6** |
+| `rescale` | 0.9700778471 | 0.9700937039 | **+15.86e-6** |
+| `logit` | 0.9700247998 | 0.9700298055 | +5.01e-6 |
+| **`rankraw`** | 0.9700915300 | 0.9700917912 | **+0.26e-6 — NULL** |
+| `h3` | 0.9701008150 | **0.9701092751** | **+8.46e-6** |
+| `ens4` | 0.9700978895 | 0.9701058972 | +8.01e-6 |
+
+**⚠ `rankraw` is the control and it was not planned.** `rankraw` maps every member through
+`ndtri((rank−0.5)/n)`, so its columns are already standard normal and standardising is a
+no-op. It reads **+0.26e-6**. The gain appears **only where column sds are unequal**. The
+ensembles gain less than their best members because they rank-average *with* `rankraw`.
+
+**Operationally: pass `--standardize` on every future build.** `--dtype float64` exists too
+but is worth only +6.5e-6 alone, is 10× slower, and is redundant once standardised
+(`float32`+std − `float64`+std = +1.46e-6).
+
+## 3. What this does and does not invalidate
+
+- **Does NOT invalidate** h3/ens4, `c_avg`, member-value or family-ordering results —
+  all are *differences between cells measured with the same combiner*, so the artefact is
+  common-mode and cancels.
+- **DOES mean every absolute blend CV in this workspace built with `std=0` is 8–20e-6
+  low.** Do not compare a pre-w23 absolute CV with a post-w23 one without naming both.
+- **Open caveat, flagged not retracted:** w20d/w21b per-member and per-family values were
+  measured with the under-converged combiner. If it cannot fully exploit added members
+  those values may be *understated*. One re-cut with `--standardize` would settle it.
+
+## 4. Closures from the same wave
+
+- **`--lam` / stacker `C` is CLOSED, again and harder.** At 187 members every `lam` from
+  1e-8 to 1e-5 reads −1.41 … +3.38e-6 and **every cell SIGN FLIPS across reps**. The 08-13
+  "+5e-6 at C=0.01" does not reappear on the wider pack. The n-correction
+  (`C = 1/(lam·n)` per fit) is arithmetically right and operationally worthless.
+- **The OOF/test bagging asymmetry is REAL but far too small to be the 2× CV→LB slope.**
+  Learning surface on the same holdout, `D_K` = AUC(553k) − AUC(442k), a 1.25× row step
+  matching the pipeline's 553k→691k: **+2.32 / +2.14 / +7.24 / +15.20e-6** for
+  K = 24/47/94/187, ratio 6.54, and the full-curve deficit at half the rows is
+  −10.5 / −13.0 / −28.6 / **−48.9e-6** — cleanly monotone in K.
+  ⚠ Re-measured on a **converged** fit, **D_187 = +9.08e-6 (se 5.84)**. w20 attributed
+  dLB−dCV residuals of **+48e-6 and +62e-6** to this mechanism; +9e-6 explains at most a
+  fifth. **The mechanism is closed as the explanation for the slope.**
+  The surviving consequence: cross-fitted CV understates *wider* stacks by ~9e-6 per 1.25×
+  row step, so CV comparisons across different stack widths are biased against the wider —
+  direction favours the 187 picks, magnitude a fifth of what w20 implied.
+
+## 5. `blend_lab.py` API additions (defaults preserve every frozen build)
+
+```bash
+# the new standard build. --standardize is no longer optional in practice.
+cd experiments && ../.venv/bin/python blend_lab.py --reps 0 --build --standardize \
+    --extra-dirs ext_members3 --kinds hybrid,rankraw,rescale --submit-name <name>
+```
+`--dtype {float32,float64}` — default `float32` **only** so artefacts on disk reproduce.
+Also fixed: `build()`'s standardisation path hard-coded `.astype("float32")`, silently
+undoing a float64 load.
+
+## 6. `experiments/w23b_sendqueue.py` — run this at the top of every slot
+
+Scores every built CSV's stored OOF on the frozen folds, ranks the **unsent** ones, writes
+`experiments/w23b_sendqueue.csv`. 92 CSVs built against 50 ever sent, so the queue is deep
+and re-deriving it by hand each slot was pure waste.
+
+**It dedupes on md5, and that is not cosmetic.** `blend_lab` writes per-transform stacks on
+every build, so a 3-kind run and a 4-kind run emit **byte-identical** singles under
+different names. Scores here are deterministic, so an identical file is a wasted slot.
+First run caught a live one: **`w16m_widegrid.csv` is byte-identical to the already-sent
+`w16i_schemeavg.csv`** and was ranked #4 in the pre-dedup queue.
+
+## 7. Pool, 2026-08-17 ~15:00 UTC — nothing importable
+
+Kernels newer than w22's sweep: `obiaf88/predicting-smartphone-addiction-pytorch`,
+`vh10935cse20/mobile-addiction-lgbm`, `adnanik23/s6e8-training` — **notebooks**, so none can
+carry an OOF+test pair. New dataset: `dariushafshar/kaggle-competition-leaderboard-intelligence`
+(1.3 MB of leaderboard scrapes) — **excluded, nothing to import, do not re-fetch.**

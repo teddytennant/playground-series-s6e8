@@ -58,7 +58,17 @@ def rk(v):
     return (rankdata(v) - 0.5) / len(v)
 
 
-def load_all(kinds, drop, quiet=False, extra_dirs=None):
+def load_all(kinds, drop, quiet=False, extra_dirs=None, dtype="float32"):
+    """`dtype` defaults to float32 so every build on record reproduces byte-for-byte.
+
+    ⚠ float32 is not a neutral storage choice for the meta-fit and w23d measured the
+    price. lbfgs stops when the max gradient falls under `tol=1e-4`, single-precision
+    gradients on columns whose sd spans 1.8..27.6 are noisy at about that level, and the
+    fit terminates early on that noise -- the shipped 187-member cell stops after 319
+    iterations where the same fit in float64 runs 686 and reaches a lower training loss.
+    Pass `--dtype float64` for anything new; the flag exists rather than a changed
+    default because the frozen artefacts on disk are the record.
+    """
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
     extra = (os.path.join(DATA, "ext_members"), os.path.join(DATA, "ext_members2"))
@@ -66,12 +76,12 @@ def load_all(kinds, drop, quiet=False, extra_dirs=None):
         extra = extra + tuple(extra_dirs)
     names, O, T = load_members(y, len(te), extra_dirs=extra, drop=set(drop))
     if not quiet:
-        print(f"{len(names)} members", flush=True)
+        print(f"{len(names)} members, dtype {dtype}", flush=True)
     mats = {}
     for k in kinds:
         t0 = time.time()
         Z, Zt = transform(O, T, k)
-        mats[k] = (Z.astype("float32"), Zt.astype("float32"))
+        mats[k] = (Z.astype(dtype), Zt.astype(dtype))
         if not quiet:
             print(f"  transform {k:8s} {time.time()-t0:5.0f}s", flush=True)
     del O, T
@@ -183,7 +193,10 @@ def build(names, y, mats, kinds, te, C, submit_name, lam=0.0, std=False):
         if std:
             s = Z.std(0)
             s[s <= 0] = 1.0
-            Z, Zt = (Z / s).astype("float32"), (Zt / s).astype("float32")
+            # keep whatever precision load_all was asked for; the old hard-coded
+            # float32 here silently undid a --dtype float64 load.
+            dt = Z.dtype
+            Z, Zt = (Z / s).astype(dt), (Zt / s).astype(dt)
         mo = np.zeros(len(y))
         for itr, iva in folds:
             Cf = 1.0 / (lam * len(itr)) if lam else C
@@ -238,6 +251,9 @@ def main():
     ap.add_argument("--extra-dirs", default="",
                     help="comma-separated member dirs to load ON TOP of ext_members{,2}; "
                          "the default is empty, so every earlier build reproduces")
+    ap.add_argument("--dtype", default="float32", choices=("float32", "float64"),
+                    help="meta-matrix precision. float32 is the default ONLY so the "
+                         "frozen builds reproduce; see load_all's note (w23d)")
     a = ap.parse_args()
 
     kinds = [k for k in a.kinds.split(",") if k]
@@ -245,7 +261,8 @@ def main():
     names, y, mats, te = load_all(tuple(dict.fromkeys(list(kinds) + ["rankraw"])),
                                   set(filter(None, a.drop.split(","))),
                                   extra_dirs=[os.path.join(DATA, d) for d in
-                                              filter(None, a.extra_dirs.split(","))])
+                                              filter(None, a.extra_dirs.split(","))],
+                                  dtype=a.dtype)
     print(f"loaded in {time.time()-t0:.0f}s", flush=True)
 
     if a.reps:

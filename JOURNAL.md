@@ -11139,3 +11139,231 @@ not move; what changed is that its most-cited outstanding objection is now measu
 `submissions/w22_ad187corr_rankraw.csv` + `oof_w22_ad187corr_rankraw.npy`. Modified: `RESEARCH.md`
 (pool exclusion row), `LEADERBOARD.md`, `JOURNAL.md` — all appended to only. `check_selection.py`
 deliberately untouched.
+
+---
+
+# ══ 2026-08-17 (UTC) — WAVE w23, SLOT 9 of 10 ══
+
+**Handed angle:** "Blending: rank-average or weight the tuned models by out-of-fold
+performance. Search blend weights on OOF predictions, never on the public leaderboard."
+**TAKEN, first handed angle in four slots that was actually open** — and it found a
+**+20.5e-6 free defect in the blender that has been degrading every stack in this
+workspace for the whole episode.**
+
+**⚠ NO SUBMISSION, AND IT IS FORCED.** Verified live at slot start:
+`kaggle competitions submissions -c playground-series-s6e8 -v` returns **ten rows dated
+2026-08-17** (newest `w21_ad187corr_ens4`, ref 55579386, 13:40). Cap 10, **confirmed for
+the eighth consecutive slot**. Slots 8, 9 and 10 all sit inside the same Kaggle day, which
+w22 already recorded. This slot's product is three measurements, one library fix, **nine
+built-and-validated files including the new CV leader**, and a persistent send queue.
+
+**Pool sweep (mandatory, done first, before the prereg was written).** Kernels: three refs
+newer than w22's 13:14 sweep (`obiaf88/predicting-smartphone-addiction-pytorch`,
+`vh10935cse20/mobile-addiction-lgbm`, `adnanik23/s6e8-training`) — all **notebooks**, so
+none can carry an importable OOF+test pair. Datasets, three search terms: one genuinely
+new ref, `dariushafshar/kaggle-competition-leaderboard-intelligence` (1.3 MB of
+leaderboard scrapes, **nothing importable**). Everything else on the list is already
+screened in RESEARCH. Nothing to import.
+
+## 0. Why this angle was open when the last three were not
+
+Three loose ends in the blender, all recorded on 08-13 and all *verbatim* "not yet
+measured", plus w20's three-times-deferred next-step #4. All four are the same question —
+how the blend weights are fitted on OOF — so one harness answers them. `w23_prereg.txt`
+§0 states the case; §2 registered two gates, §3 four hypotheses with **point predictions
+written down first**, §4 the ship rule and a selection-optimism discount.
+
+## 1. ⚠ THE FINDING: the meta-logistic has been stopping short of its own optimum
+
+`w23d_dtype.py`, a 2×2 on one honest 20% holdout never fitted on, 3 reps, K=187, all
+553,095 pool rows, paired within rep against the **shipped** cell:
+
+| cell | paired vs shipped | se | reps | mean iters |
+|---|---|---|---|---|
+| `float32`, unstandardised — **THE SHIPPED CELL** | 0 | — | — | 414 |
+| `float32`, **standardised** | **+19.21e-6** | 2.85 | **3/3 consistent** | **69** |
+| `float64`, unstandardised | +6.52e-6 | 1.03 | 3/3 consistent | 751 |
+| `float64`, standardised | +17.76e-6 | 4.41 | 3/3 consistent | 81 |
+
+The shipped cell is the **worst of the four in all three reps**. The mechanism, isolated
+by `w23c_convergence.py` on the same rows:
+
+`LogisticRegression`'s lbfgs stops when the **max gradient** falls under `tol=1e-4`. That
+rule carries the columns' scale, and the hybrid member columns have **sd 1.82 … 27.59**
+(measured, and already on file from 08-13). One fixed `tol` is therefore a ~15× looser
+stopping rule on the narrow columns than the wide ones, and the fit terminates on that
+slack **without any warning**. Standardising makes the metric isotropic, so the default
+rule lands on the actual optimum — in **69 iterations instead of 414**.
+
+**The decisive arm.** Refitting the unstandardised `float64` cell at `tol=1e-7` runs
+**8,000 iterations / 1,582 s** and reaches holdout AUC **0.970370** — which is exactly
+what the standardised cell reaches at the default `tol` in **11 s**. Residual gap once
+both are converged: **−0.21e-6**. So this is a stopping-rule artefact, not a prior.
+
+**⚠ I ALSO HAVE TO CORRECT `w23c`'s OWN PRINTED VERDICT LINE.** It prints
+"(ii) BETTER PRIOR" from the fit-log-loss sign, because `std1` at the default `tol` has
+*higher* training loss (0.200384753) than `std0` (0.200317800). That discriminator was too
+crude: `std1` at the default `tol` is **itself** unconverged (65 iters), and at `tol=1e-7`
+its training loss falls to 0.200313901, essentially matching `std0`'s 0.200312290. Both
+parameterisations descend to the same point. **The printed verdict is wrong; the tol arms
+overturn it.** Recorded rather than re-run with a nicer print.
+
+## 2. It carries to the cross-fitted CV, and it brought its own negative control
+
+`blend_lab.py` gained `--dtype` (default `float32`, so **every build on record still
+reproduces byte-for-byte**) and a one-line fix: `build()`'s standardisation path
+hard-coded `.astype("float32")`, which silently undid a float64 load. Then the 187-pack
+stacks were rebuilt with `--standardize`, everything else identical:
+
+| transform stack | base CV | standardised CV | Δ |
+|---|---|---|---|
+| `hybrid` | 0.9700773470 | 0.9700977970 | **+20.45e-6** |
+| `rescale` | 0.9700778471 | 0.9700937039 | **+15.86e-6** |
+| `logit` | 0.9700247998 | 0.9700298055 | +5.01e-6 |
+| **`rankraw`** | 0.9700915300 | 0.9700917912 | **+0.26e-6** |
+| `h3` (hybrid+rankraw+rescale) | 0.9701008150 | **0.9701092751** | **+8.46e-6** |
+| `ens4` (all four) | 0.9700978895 | 0.9701058972 | +8.01e-6 |
+
+**⚠ THE `rankraw` ROW IS THE WHOLE ARGUMENT AND IT WAS NOT PLANNED.** `rankraw` maps every
+member through `ndtri((rank-0.5)/n)`, so its columns are **already standard normal** and
+standardising them is a no-op. It reads **+0.26e-6** — a null. The gain appears **only
+where the column sds are unequal**, on data selected for nothing of the kind. That is the
+mechanism confirming itself, and it is stronger evidence than the three positive rows.
+
+The `h3`/`ens4` ensembles gain less (+8.5, +8.0e-6) than their best members (+20.5) because
+they rank-average *with* `rankraw`, which did not move. Consistent, not contradictory.
+
+## 3. ⚠ NEW CV LEADER — and it is deliberately NOT promoted
+
+`submissions/w23_ad187std_h3.csv`, cross-fitted **0.9701092751**, is the **highest CV in
+the workspace**, above `w21_ad187corr`'s 0.9701068814 by **+2.39e-6** — while fitting
+**zero** correction parameters, which is the criterion `blend159av_h3` was originally
+picked for. `w21_ad187corr` carries the 5-arm `c_avg` correction; this file has none yet.
+
+**`WANTED = {w21_ad187corr.csv, w20_ad187_h3.csv}` is UNCHANGED**, and that hold was
+**pre-registered in §4 before any number existed**: a new file must have `c_avg` rebuilt on
+it before it can be compared with a corrected file on equal terms, and **+2.39e-6 is inside
+the territory of this pipeline's own ~2e-6 reproducibility floor**. Rebuilding `c_avg` on
+this base (budget ~+6e-6, 40 min, `w21a` with two env vars) is next slot's first job, and
+*then* the comparison is fair. This is exactly the case the rule was written for.
+
+## 4. The other three hypotheses: one lands, one dies flat, one I got badly wrong
+
+- **H2 (bagging asymmetry scales with stack width) LANDS on the registered ratio.**
+  `D_K` = +2.32 / +2.14 / +7.24 / **+15.20e-6** for K = 24/47/94/187, `D_187/D_24` =
+  **6.54** against the registered "> 3", argmax K = 187 as registered. "Monotone in K" is
+  **false** (D_47 < D_24, both inside their se). My registered levels were +3/+6/+12/+25e-6
+  — shape right, level ~1.7× high. The full-curve deficit is cleanly monotone: at half the
+  rows, −10.5 / −13.0 / −28.6 / **−48.9e-6**.
+- **H3 (an L2 penalty helps at 187 members) FALSIFIED FLAT.** Every `lam` from 1e-8 to
+  1e-5 reads −1.41 … +3.38e-6 and **every one SIGN FLIPS across reps**. The 08-13 "+5e-6
+  at C=0.01" does not reappear on the wider pack. `--lam`'s n-correction is arithmetically
+  right and operationally worthless. **Closed.**
+- **H4 (standardisation is a null worth 0…+5e-6) MISSED BY ~4×.** I registered it as the
+  weakest of the four hypotheses. It is the slot's entire finding. Recorded as a miss.
+
+## 5. ⚠ GATE 2 FAILED, the failure WAS the finding, and I honoured the stop rule anyway
+
+`w23a`'s GATE 2 required `lam=1e-8` (C = 181, i.e. no penalty) to reproduce `lam=0` (C = 1)
+to 5e-6. It came in at **5.28e-6 — FAIL**. §2 says a gate miss means the wave "ships
+nothing", and that **was honoured**: nothing was built off `w23a`'s argmax cell, no `--lam`
+was used, nothing was submitted. Two near-identical problems cannot legitimately differ by
+5.28e-6, and §1 says why they did: the baseline cell is not reproducible to that precision
+because it stops early on optimiser noise. **The gate caught the defect it was not looking
+for.** GATE 1 passed (+96.4e-6 against a 400e-6 tolerance).
+
+**I did then override §4's build condition, and say so rather than reinterpreting the
+gate.** §4 conditioned a build on H3, which failed. I built anyway because the object built
+is not what the gate protects: it is a frozen-fold cross-fitted stack with **no cell chosen
+off any holdout table** — no `lam`, no argmax; `--standardize` is a numerical setting
+justified by §1's mechanism. So §4's selection-optimism discount does not apply and I do not
+claim it does. **A future run is entitled to treat this build as unregistered and weigh it
+less.** Prereg addendum A1–A7.
+
+## 6. ⚠ w20 §5's mechanism for the 2× CV→LB slope is QUANTITATIVELY DEAD
+
+`w23a`'s `D_187 = +15.20e-6` was measured with the **under-converged** fit, so it mixes real
+learning-curve gain with optimiser wobble. `w23c` Part 2 re-ran that row standardised:
+**D_187 = +9.08e-6 (se 5.84, consistent 3/3)**, so ~40% of it was wobble.
+
+Against that, w20 attributed dLB−dCV residuals of **+48e-6 and +62e-6** to this exact
+mechanism. **+9e-6 explains at most a fifth of it.** The OOF/test bagging asymmetry is real,
+is the right sign, scales with width as predicted — and is far too small to be the
+explanation. This **strengthens** w22's "do not spend another slot on beta" rather than
+weakening it, and it closes journal next-step #4 after three deferrals.
+
+The §5 consequence survives at the smaller size: cross-fitted CV **understates** wider
+stacks, by ~9e-6 over a 1.25× row step, so CV comparisons between stacks of *different*
+widths are biased against the wider one. Direction favours the 187 picks over 159-member
+rivals; magnitude is a fifth of what I registered.
+
+## 7. `w23b_sendqueue.py` — infrastructure, and it saved a slot on its first run
+
+92 CSVs built, 50 ever sent. Every wave has rediscovered that queue by hand. This scores
+every built file's stored OOF on the frozen folds, ranks the unsent ones, and writes
+`experiments/w23b_sendqueue.csv`.
+
+It also **dedupes on md5**, because the brief is explicit that an identical file scores
+identically and resubmitting one is pointless. `blend_lab` emits per-transform stacks on
+every build, so a `--kinds a,b,c` run and a 4-kind run produce byte-identical singles under
+different names — three such twins appeared this slot alone. **And it caught a live one:
+`w16m_widegrid.csv` is byte-identical to the already-sent `w16i_schemeavg.csv` and was
+ranked #4 in the pre-dedup queue.** A future slot would have spent a submission on bytes
+Kaggle has already scored.
+
+Top of the queue for tomorrow: `w23_ad187std_h3` (0.9701092751), `w23_ad187std`
+(0.9701058972), `w22_ad187corr_rankraw` (0.9701001355, built by w22),
+`w23_ad187std_h3_hybrid` (0.9700977970), `_rescale` (0.9700937039), `_rankraw`
+(0.9700917912), `w20_ad187_rescale`, `w20_ad187_hybrid`, `w23_ad187std_logit`. **That is
+nine sends ready with zero further compute** — enough to fill tomorrow, per the brief's
+"an unused slot is pure waste".
+
+All nine new files validated: 296,302 rows, ids identical to `sample_submission`, no NaN,
+no inf.
+
+## 8. ⚠ SCOPE — what this does and does not invalidate
+
+**Does not invalidate** the h3/ens4, `c_avg`, member-value or family-ordering results.
+Those are all *differences between cells measured with the same combiner*, so the artefact
+is common-mode and cancels. **Does** mean every absolute blend CV in this journal built with
+`std=0` is **8–20e-6 low**, so cross-wave absolute CVs are not comparable to the new ones
+unless both sides are named.
+
+**One caveat that deserves a future check, flagged not retracted:** w20d's and w21b's
+per-member and per-family values were measured with the under-converged combiner. If an
+under-converged fit cannot fully exploit added members, those per-member values may be
+*understated*. Common-mode cancellation makes a sign flip unlikely, but the magnitudes
+(cat 8.11 / xgb 5.55 / lgb 2.34 e-6 per member) are worth one re-cut.
+
+## 9. Next run should look at, in order
+
+1. **Send the queue. It is nine deep and needs no compute.** `w23_ad187std_h3` first —
+   registered prediction: it is +8.5e-6 on `w20_ad187_h3` (LB 0.97115) and +2.4e-6 on
+   `w21_ad187corr` (LB 0.97117), so the modal print is **0.97117–0.97118** and it should
+   roughly tie the 0.97118 account best rather than clear it. A print above 0.97119 would
+   be information about the slice, not the file.
+2. **Rebuild `c_avg` on `w23_ad187std_h3`** — `W21A_BASE=w23_ad187std_h3
+   W21A_TAG=w23_ad187stdcorr`, ~40 min, budget +6e-6. **Only after that is
+   `WANTED` re-examined**, and then the comparison against `w21_ad187corr` is like-for-like.
+   This is also the **third pack** the correction has been fitted on, which is w22
+   next-step #3's missing third point for the pack-independence claim — two jobs, one run.
+3. **Enumerate the pool. Every run. Two API calls.** Four refs screened this slot, none
+   importable, ~2 minutes.
+4. **Re-cut w20d / w21b member values with `--standardize`** (§8's caveat). Cheap, and it
+   decides whether the cat > xgb > lgb magnitudes need restating.
+5. **Do NOT re-open `--lam` or stacker `C`.** H3 is flat at 187 members with every cell
+   sign-flipping (§4). Add it to the closed list.
+6. **Do NOT spend a slot on beta** — §6 removed its last named mechanism.
+
+### Files created
+
+`experiments/w23_prereg.txt` (+ addendum A1–A7); `w23a_bagasym.py` + `_A.csv` + `_B.csv` +
+`.json`; `w23b_sendqueue.py` + `.csv`; `w23c_convergence.py` + `.csv` + `.json` +
+`w23c_curve187.csv`; `w23d_dtype.py` + `.csv` + `.json`; logs `logs_w23a_bagasym.txt`,
+`logs_w23c_convergence.txt`, `logs_w23d_dtype.txt`, `logs_w23e_stdbuild.txt`,
+`logs_w23f_stdbuild4.txt`; `submissions/w23_ad187std{,_h3,_logit,_hybrid,_rankraw,_rescale,
+_h3_hybrid,_h3_rankraw,_h3_rescale}.csv` + their OOF vectors. Modified:
+`experiments/blend_lab.py` (new `--dtype`, default float32 so all earlier builds reproduce;
+`build()`'s standardisation no longer downcasts to float32). `check_selection.py` and
+`WANTED` **deliberately untouched**. `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md`
+appended to only.

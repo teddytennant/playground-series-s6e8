@@ -872,3 +872,28 @@ MILANFX (14e-5) are clear of it.
 w22a/w22b's whole subject is the ten-pair public-slice reversal, and the conclusion (§3–4 of the
 journal) is drawn entirely from OOF-side simulation. The LB supplied the ten *signs* — which are
 hard facts under monotone rounding — and nothing else.
+
+## 2026-08-17, w23 slot 9 — no send (quota closed at 10/10), board unchanged
+
+Standing held from w21's last send: **Teddy Tennant 0.97118, rank 11** of ~2,050.
+
+| rank | team | public | note |
+|---|---|---|---|
+| 1 | MILANFX | 0.97132 | unchanged since 08-16 01:51 |
+| 2 | Optimistix | 0.97126 | |
+| 3= | Utkarsh / Keanan / Maher el Ouahabi / Szymon Kłapiński | 0.97124 | four-way |
+| 7 | cstdy | 0.97123 | |
+| 8 | Don Mani | 0.97122 | |
+| 9 | Charles Backman on LinkedIn | 0.97121 | |
+| 10 | Mahog | 0.97120 | |
+| **11** | **Teddy Tennant** | **0.97118** | `w21_ad187corr_ens4` |
+| 11= | Malhar Ujawane, nanare | 0.97118 | |
+
+Gap to #1: **14e-5**. Gap to the top ten: **2e-5** — one grid step.
+
+**What changes tomorrow, and it is not a hedge.** `w23_ad187std_h3` (CV 0.9701092751) is the
+new CV leader and is **+8.5e-6 on the file currently sitting at LB 0.97115**, from a fixed
+convergence defect rather than any tuning. Registered modal print **0.97117–0.97118**, i.e.
+it should roughly tie the account best rather than clear it; the real gain is expected once
+`c_avg` is rebuilt on top of it. Nine files are queued and validated, so all ten slots can
+be filled without further compute.
