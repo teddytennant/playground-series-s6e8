@@ -1,0 +1,177 @@
+w24 PRE-REGISTRATION — written 2026-08-17 ~12:25 UTC-local (16:25 UTC), BEFORE any w24 number
+exists. Slot 10 of 10, 2026-08-17. NO SUBMISSION IS POSSIBLE this slot (verified: ten rows
+dated 2026-08-17 in `kaggle competitions submissions -v`, newest ref 55579386 at 13:40 UTC,
+cap 10 confirmed for the NINTH consecutive slot). Everything below is CV-only by force, which
+is exactly the condition under which the deadline pick is supposed to be decided.
+
+§0. THE HANDED ANGLE IS CLOSED, FOR THE FOURTH TIME
+---------------------------------------------------
+Handed: "Seed and fold diversity: same models across multiple seeds and fold splits,
+averaged." This angle was handed and worked on 2026-08-11 slot 6 (JOURNAL:1425), handed
+again 2026-08-13 slot 3 (JOURNAL:2800), handed again 2026-08-16 slot 10 (JOURNAL:9048) and
+re-skipped, and it sits in the consolidated closed table at JOURNAL:9325 with its closer
+recorded: member-level seed averaging is +138e-6 solo but +2e-6 once stacked (1.4% survival),
+and nested-pick stability on that dimension is 5/5. The playbook says honour the angle unless
+the journal gives a concrete reason not to; three prior closings and a table row are that
+reason. Stated here, not silently.
+
+TAKEN INSTEAD: journal next-step #2 from w23, which is also w22 next-step #3. One run, two
+open questions.
+
+§1. WHAT RUNS
+-------------
+    W21A_BASE=w23_ad187std_h3 W21A_TAG=w23_ad187stdcorr .venv/bin/python \
+        experiments/w21a_ad187corr.py
+
+`w21a_ad187corr.py` UNMODIFIED — same file that produced `w21_ad187corr` (h3 base of the 187
+pack) and `w21_ad187corr_ens4` (ens4 base), pointed by env var at a THIRD base. The 5-arm
+scheme-average `c_avg` correction: glob / a_only / rule / mask / decile, all five refit from
+scratch inside each of the five frozen folds, then rank-averaged. No argmax is shipped; the
+5-arm average is shipped unconditionally, which is why `w16i` exists.
+
+The new base `w23_ad187std_h3` (CV 0.9701092751) is the current workspace CV leader and
+differs from `w20_ad187_h3` (CV 0.9701008150) by ONE numerical setting: the meta-logistic's
+member columns are standardised before the lbfgs fit, which w23 §1 showed is the difference
+between converging and stopping early on a scale-carrying `tol` rule (+8.46e-6 on this
+transform stack, and a measured NULL of +0.26e-6 on `rankraw` whose columns are already unit
+sd — the mechanism confirming itself).
+
+§2. HYPOTHESES, WITH POINT PREDICTIONS WRITTEN DOWN FIRST
+----------------------------------------------------------
+H1 — the correction still pays on the standardised base.
+    Prior points for the 5-arm cross-fitted delta: +6.494e-6 (159 pack, h3 base, w16i),
+    +6.066e-6 (187 pack, h3, w21a), +6.044e-6 (187 pack, ens4, w21a). Registered range
+    **+3.5 to +7.0e-6**, point estimate **+5.6e-6**. Reason the point is below the three
+    priors rather than at them: a converged combiner extracts strictly more from the same 187
+    columns than an unconverged one, so any part of `c_avg`'s direction that the member set
+    spans should now be picked up by the stack itself and no longer be available to the
+    correction. A delta BELOW +3.5e-6 is the interesting outcome and is the first evidence
+    that the correction and the combiner compete. A NEGATIVE delta would say the standardised
+    stack has absorbed it entirely.
+
+H2 — the correction's value is independent of the base (THIRD POINT).
+    w21 §8 claimed pack-independence (159 -> 187) from two points, and w22 §5 killed the
+    parallel transform-independence claim once a third point existed. w22 next-step #3 says
+    explicitly: do not quote pack-independence as established until it has a third pack. This
+    base is a third point on a NEW axis (combiner convergence) rather than a third pack, so
+    it tests the general claim "c_avg's value does not depend on what it is corrected onto".
+    Registered: |delta_new - 6.05e-6| < **1.5e-6** upholds the claim on a third point;
+    > **3.0e-6** falsifies it, and I will write it as falsified rather than reinterpreted.
+    The three prior points agree to 0.45e-6 total spread, so a >3e-6 move is not subtle.
+
+H3 — the resulting CV clears `w21_ad187corr` by more than the reproducibility floor.
+    `w21_ad187corr` CV = 0.9701068814. New base = 0.9701092751. If H1's point estimate is
+    right the new corrected CV is **0.9701148**, i.e. **+7.9e-6** over `w21_ad187corr`.
+    Registered range for that margin: **+5.4 to +8.9e-6** conditional on H1's range holding
+    on its high side, and the whole question is whether it clears the pipeline's own ~2e-6
+    reproducibility floor (w14a's figure for a logistic-stack rebuild; note check_selection
+    §(b): the floor for pure stored-OOF arithmetic with no refit is EXACTLY ZERO, but this
+    object contains 25 fresh `ascend` fits so the 2e-6 figure is the right one here).
+
+§3. SHIP / SELECTION RULE — fixed here, not revisited after the numbers land
+----------------------------------------------------------------------------
+The file `submissions/w23_ad187stdcorr.csv` is BUILT unconditionally (the script builds it;
+there is no argmax in the path). Building is not selecting. What is pre-registered is what
+happens to `WANTED` in `experiments/check_selection.py`, currently
+`{w21_ad187corr.csv, w20_ad187_h3.csv}`:
+
+  (R1) If H1 lands in [+3.5, +7.0]e-6 AND the resulting CV beats `w21_ad187corr` by
+       >= +5.0e-6, then `WANTED` becomes **{w23_ad187stdcorr.csv, w21_ad187corr.csv}**.
+       Justification fixed in advance: the two files are THE SAME CONSTRUCTION — 5-arm
+       `c_avg` on an h3 mix of the 187-member pack — differing only in a numerical setting
+       of the combiner that has an isolated mechanism and a matched negative control. That
+       is the like-for-like comparison w23 §3 said had to exist before `WANTED` could move,
+       and it now exists. The second slot stays on `w21_ad187corr` as insurance against the
+       standardisation itself, which is a two-week-old change with one wave of evidence.
+
+  (R2) If the margin is < +5.0e-6, or H1 falls outside its range, `WANTED` is UNCHANGED and
+       the journal says why. A margin of 2-5e-6 is inside the territory where a 25-fit
+       rebuild's own floor is arguable, and the standing rule is that a pick does not move on
+       a margin that a rerun could produce.
+
+  (R3) `WANTED` does NOT move on anything measured on the public leaderboard, and cannot this
+       slot in any case, because no submission is possible. The nine-deep send queue
+       (`experiments/w23b_sendqueue.csv`) is untouched and is tomorrow's first job.
+
+  (R4) The argmax sub-combination (4-arm drop-mask etc.) is NOT shipped under any outcome,
+       for the reason w16i exists. Only the 5-arm average.
+
+§4. WHAT WOULD MAKE ME WRONG
+-----------------------------
+- If the five per-arm deltas this time have a different SIGN PATTERN from the three prior
+  runs (all five arms positive, decile largest), that is a signal the base has changed the
+  correction's character and H2 should be read as falsified even if the mean happens to land
+  near 6e-6. I will print and read the per-arm table, not just the average.
+- The permuted-assignment CONTROL arms must stay near zero. If a permuted control comes in
+  materially positive on this base, the whole 5-arm object is measuring fold noise on this
+  base and R1 is void regardless of the CV margin. w16t §1 already closed "real minus
+  control" as a single-draw quantity, so the control is a sanity gate here, not an estimate.
+
+§5. SECOND JOB IF TIME REMAINS (registered as exploratory, not gated)
+---------------------------------------------------------------------
+w23 §8's flagged caveat / journal next-step #4: the per-member and per-family values in w20d
+and w21b (cat 8.11 / xgb 5.55 / lgb 2.34 e-6 per member) were measured with the
+under-converged combiner. Common-mode cancellation makes a sign flip unlikely; the
+MAGNITUDES may be understated if an unconverged fit cannot exploit added members. Registered
+prediction: the ordering cat > xgb > lgb survives, and the magnitudes move by LESS than 50%.
+Exploratory because it changes no shipped object either way.
+
+§5a. ADDENDUM — registered at launch of the w20d re-cut, BEFORE its first rep printed
+--------------------------------------------------------------------------------------
+`experiments/w20d_value.py` gained `--standardize` (default OFF, so the numbers already in
+the journal reproduce exactly) and `--out`. Running as
+`--reps 3 --standardize --out w24b_value_std.csv`. Same three paired 50/50 splits
+(random_state 0/1/2), same 187 members, same `hybrid` transform, same C=1 — the ONLY change
+is unit-sd columns inside `fit_score`, scale taken from the fitting half.
+
+The numbers being re-cut (`logs_w20d_value.txt`, per-member paired gain, unstandardised):
+
+    all22     +2.15e-6    note   +8.03e-6    cat    +10.3e-6
+    nn        +0.84e-6 [SIGN FLIPS]          logreg +2.65e-6    redundant +0.96e-6
+
+Registered predictions, in order of how much I would bet on them:
+  (a) EVERY group keeps its sign. The paired design makes the artefact common-mode.
+  (b) The ordering cat > note > logreg > redundant, and `nn` stays the flat one.
+  (c) The magnitudes move by LESS than 50% in either direction. The direction I expect is
+      UP: if an under-converged fit cannot fully exploit added columns, added columns were
+      being undervalued. But I hold this weakly — w23 §8 flagged it as a caveat precisely
+      because the sign of the magnitude change is not obvious, and the base half-split fit
+      is 165-187 columns rather than the full stack, so the convergence deficit may differ.
+  (d) The BASE column's own AUC rises in all three reps (this is not a paired quantity and
+      is the direct read on whether the half-split fits were under-converged at all). If it
+      does NOT rise, the whole caveat is void at this stack width and I will say so.
+
+A (c) violation is a finding, not a failure: it would mean the per-member values quoted
+through w20/w21 need restating, which is exactly why w23 flagged it rather than retracting.
+
+§5b. ADDENDUM — registered at launch of the w21b re-cut, BEFORE its first rep printed
+---------------------------------------------------------------------------------------
+`experiments/w21b_famvalue.py` gained the same `--standardize` / `--out` pair (default OFF).
+Running `--reps 5 --standardize --out w24c_famvalue_std`, i.e. the same five paired splits,
+the same seven configs, only the fit changed.
+
+The family table being re-cut (per-member paired gain, unstandardised, from `w21b_famvalue`):
+cat 8.11 / xgb 5.55 / lgb 2.34 e-6 per member — the numbers w23 §8 flagged.
+
+Registered: the ordering **cat > xgb > lgb** survives (this is the claim w21 §4 rests on, and
+it is a within-pipeline size-matched 5v5 for the cat/xgb pair, so it is the one that matters);
+magnitudes move by LESS than 50%. `w21b`'s built-in `cat4` REPRODUCTION GATE now has a second
+job: it must match the `cat` row of `w24b_value_std` to within split noise, because the two
+scripts are running the same four members through the same standardised estimator on the same
+splits. A mismatch there means the two harnesses have diverged and BOTH re-cuts are void.
+
+§5c. AND ONE QUESTION I AM NOT SPENDING A RUN ON, BECAUSE w23c ALREADY ANSWERED IT
+------------------------------------------------------------------------------------
+The obvious follow-on to w23 §1 is "if the standardised fit at the default `tol` is itself
+only at 65 iterations, does tightening `tol` buy more?" — and it is exactly the kind of
+plausible, expensive job a future slot would launch. It is already measured, in w23c's own
+table, which the w23 write-up quoted only for its training loss:
+
+    std1_tol1e-4    65 iters    11.3s   fit_logloss 0.200384753   hold_auc 0.970369924
+    std1_tol1e-7  1376 iters   438.1s   fit_logloss 0.200313901   hold_auc 0.970369626
+
+**-0.30e-6 for 39x the compute.** The residual training loss is real and the holdout AUC does
+not follow it. All four cells of w23c land at 0.97037 except unstandardised-at-default, which
+is 3e-6 below. So the defect was the SCALE ANISOTROPY, not under-convergence per se, and
+`tol` is closed on evidence already on disk. Recorded here so no future slot pays 438s to
+rediscover a null. NOT a new measurement — a reading of an existing one.

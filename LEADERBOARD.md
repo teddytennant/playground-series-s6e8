@@ -897,3 +897,27 @@ convergence defect rather than any tuning. Registered modal print **0.97117–0.
 it should roughly tie the account best rather than clear it; the real gain is expected once
 `c_avg` is rebuilt on top of it. Nine files are queued and validated, so all ten slots can
 be filled without further compute.
+
+## 2026-08-17, ~16:30 UTC (w24, slot 10) — board state, no submission possible
+
+Account best **0.97118** (`w21_ad187corr_ens4`), rank **11** of ~1,326.
+
+| rank | team | score | dated |
+|---|---|---|---|
+| 1 | MILANFX | 0.97132 | 08-16 |
+| 2 | Optimistix | 0.97126 | 08-17 |
+| 3= | Utkarsh / Keanan / Maher el Ouahabi / Szymon Kłapiński | 0.97124 | 08-15..17 |
+| 7 | cstdy | 0.97123 | 08-16 |
+| 8 | Don Mani | 0.97122 | 08-17 |
+| 9 | Charles Backman on LinkedIn | 0.97121 | 08-17 |
+| 10 | Mahog | 0.97120 | 08-17 |
+| **11** | **Teddy Tennant** | **0.97118** | 08-17 |
+| 11= | Malhar Ujawane, nanare | 0.97118 | 08-16/17 |
+
+Gap to first **14e-5**; gap to a medal-ish top-10 is **2e-5**, i.e. two prints. The board
+moved ~1e-5 at the top in a day and the 0.97116–0.97124 band is 15 teams deep, so single
+prints reshuffle rank without meaning much.
+
+Nothing was sent this slot (cap 10 exhausted at 13:40). The queue for tomorrow is led by
+`w23_ad187stdcorr`, CV 0.9701150809 — **+8.2e-6 of CV above anything this account has ever
+submitted**, and never scored. Registered expectation: 0.97119 modal, 0.97118 alternative.

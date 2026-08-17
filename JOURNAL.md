@@ -11367,3 +11367,215 @@ _h3_hybrid,_h3_rankraw,_h3_rescale}.csv` + their OOF vectors. Modified:
 `build()`'s standardisation no longer downcasts to float32). `check_selection.py` and
 `WANTED` **deliberately untouched**. `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md`
 appended to only.
+
+---
+
+# ══ 2026-08-17 (UTC) — WAVE w24, SLOT 10 of 10 ══
+
+**Handed angle:** "Seed and fold diversity: same models across multiple seeds and fold
+splits, averaged." **SKIPPED — this is the FOURTH time this exact angle has been handed**
+(08-11 slot 6, JOURNAL:1425; 08-13 slot 3, JOURNAL:2800; 08-16 slot 10, JOURNAL:9048) and it
+sits in the consolidated closed table at JOURNAL:9325 with its closer on file: member-level
+seed averaging is +138e-6 solo and +2e-6 once stacked (1.4% survival), nested-pick stability
+on that dimension 5/5. Reason stated in `w24_prereg.txt` §0, not silently.
+
+**TAKEN INSTEAD:** w23 next-step #2 (rebuild `c_avg` on the new standardised base) and
+next-step #4 (re-cut the member-value tables with `--standardize`), which is also w22
+next-step #3. Three jobs, one slot.
+
+**⚠ NO SUBMISSION, AND IT IS FORCED.** Verified live at slot start: `kaggle competitions
+submissions -v` returns **ten rows dated 2026-08-17** (newest `w21_ad187corr_ens4`, ref
+55579386, 13:40 UTC). Cap 10, **confirmed for the ninth consecutive slot**. Slots 8, 9 and 10
+all sit inside the same Kaggle day. Everything below is CV-only by force — which is the exact
+condition the brief says the final pick must be made under.
+
+**Pool sweep (mandatory, done first).** Kernels sorted by dateRun: six refs newer than w23's
+sweep (`sarveshchhetri/zero-extra-libraries-one-model`,
+`georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new` (44 votes),
+`justcode1/smart-phone-addiction`, `ern711/multi-level-deep-univariate-spline-transformer`,
+`funguscakehead/da-thig`, `junkonno/fork-of-notebookd256aca73c`) — all **notebooks**, none can
+carry an importable OOF+test pair. Datasets, two search terms: `najiama/…-oof-submission-csv`
+was re-published today (04:12) but is on RESEARCH's **permanent exclusion list** (its blend
+weights are fitted on the full OOF, so the published OOF is not out-of-fold);
+`anthonytherrien/…-vault` updated today is other people's submissions, already screened.
+**Nothing importable, for the third consecutive sweep.**
+
+## 1. ⚠ NEW CV LEADER, AND `WANTED` HAS MOVED ON A PRE-REGISTERED RULE
+
+`submissions/w23_ad187stdcorr.csv`, **CV 0.9701150809** — the highest this workspace has
+produced. `w21a_ad187corr.py` run **verbatim**, only `W21A_BASE`/`W21A_TAG` swapped, pointing
+the 5-arm scheme-average `c_avg` correction at w23's standardised h3 base.
+
+| object | CV | LB | role |
+|---|---|---|---|
+| **`w23_ad187stdcorr`** | **0.9701150809** | **never sent** | **new slot 1** |
+| `w21_ad187corr` | 0.9701068814 | 0.97117 | slot 2 (demoted from slot 1) |
+| `w23_ad187std_h3` | 0.9701092751 | never sent | base of the new file |
+| `w20_ad187_h3` | 0.9701008150 | 0.97115 | **dropped from the pair** |
+| `w16i_schemeavg` | 0.9700556663 | 0.97107 | superseded, −59.4e-6 |
+
+`WANTED` is now **{w23_ad187stdcorr.csv, w21_ad187corr.csv}**, by `w24_prereg.txt` §3 rule
+R1, which was written before any number existed and required BOTH that the correction land in
+[+3.5, +7.0]e-6 AND that the resulting CV clear `w21_ad187corr` by >= +5.0e-6. It landed at
+**+5.716e-6** and **+8.20e-6**. The margin is 4x the ~2e-6 floor that applies to an object
+containing 25 fresh `ascend` fits.
+
+**⚠ SLOT 1 IS NOT SELECTABLE UNTIL IT IS SENT.** The file has never been uploaded — the cap
+was gone before it existed — so `check_selection.py` will report slot 1 unsatisfied until
+tomorrow's first submission. That is the intended state and it is written into the script's
+header. **Send it first, then click.**
+
+Slot 2 changed role deliberately: what is new and uninsured is the **standardisation**, one
+wave old. `w21_ad187corr` is the identical construction without it. The old pairing hedged
+nothing (both files were already one pack), so this is a strictly better use of slot 2 at a
+cost of 6.0e-6 of CV against pairing with the base.
+
+## 2. The correction's own numbers — H1 hit almost exactly, H2 upheld on a third point
+
+Registered point estimate **+5.6e-6**, registered range [+3.5, +7.0]. Landed **+5.716e-6**
+(se 3.781, 4/5 folds). The registered *reason* for putting the point below the three priors
+was that a converged combiner should already span part of `c_avg`'s direction — and the arms
+did all come in below their unstandardised twins, which is the predicted direction:
+
+| arm | on `w20_ad187_h3` (unstd) | on `w23_ad187std_h3` | Δ |
+|---|---|---|---|
+| glob | +2.856 | +2.649 | −0.21 |
+| a_only | +4.634 | +4.310 | −0.32 |
+| rule | +6.060 | **+5.477** | −0.58 |
+| mask | +3.432 | +3.217 | −0.22 |
+| decile | +4.892 | +4.130 | −0.76 |
+| **5-arm shipped** | **+6.066** | **+5.716** | **−0.35** |
+
+All five positive, `rule` still the argmax, same sign pattern as both prior runs — §4's
+falsification check passes. Permuted controls +0.89 … +2.26e-6, in line with the prior run's
++1.13 … +2.44, so the sanity gate holds. Scheme-selection optimism +2.810e-6 at 4/5 stability
+(prior run: +1.810e-6 at 4/5) — which is *why* the argmax arm is not what ships. The CV-argmax
+combination was again the 4-arm drop-mask (0.9701153120) and again **was not shipped**.
+
+**H2 (the correction's value does not depend on what it is corrected onto) UPHELD on a third
+point.** |5.716 − 6.05| = **0.334e-6**, against a registered <1.5e-6 for upheld and >3.0e-6
+for falsified. The four points now on file:
+
+    159 pack, h3 base       +6.494e-6   (w16i)
+    187 pack, h3 base       +6.066e-6   (w21a)
+    187 pack, ens4 base     +6.044e-6   (w21a)
+    187 pack, h3, CONVERGED +5.716e-6   (this run)
+    187 pack, rankraw base  +8.521e-6   (w22)  <- the exception, and it is a TRANSFORM
+
+So: independent of the **pack** (159->187), independent of the **combiner's convergence**,
+and NOT independent of the **transform** — exactly the split w22 §5 found when it killed
+transform-independence on its own third point. The claim w21 §8 overstated is now correctly
+bounded rather than either quoted or retracted.
+
+## 3. w23 §8's flagged caveat was RIGHT, the direction was UP, and it changes no conclusion
+
+Both value tables re-cut with a new `--standardize` flag (default OFF in both scripts, so
+every number already in the journal reproduces byte-for-byte). Full tables in RESEARCH.md.
+Per-member paired gain, e-6:
+
+| w20d group | unstd | std | | w21b family | unstd | std |
+|---|---|---|---|---|---|---|
+| all22 | +2.15 | +2.45 | | xgb5 | +5.55 | +6.24 |
+| note | +8.03 | +8.14 | | cat5 | +8.11 | +9.08 |
+| cat | +10.3 | +12.1 | | lgb5 | +2.34 | +2.28 |
+| nn | +0.84 *flips* | +1.55 | | lgb7 | +3.67 | +3.85 |
+| logreg | +2.65 | +3.89 | | gbdt17 | +3.06 | +2.97 |
+| redundant | +0.96 | +1.07 | | nonGBDT5 | +1.24 | +1.43 *flips* |
+
+Registered predictions: (a) every group keeps its sign — **TRUE**; (b) ordering holds —
+**TRUE for cat > xgb > lgb, the one the w21 conclusion rests on**; (c) magnitudes move <50% —
+**TRUE for 11 of 12 rows**, the exception being `nn` at +85% off a near-zero base; (d) the
+base half-split AUC rises in every rep — **TRUE 3/3** (+14, +8, +9e-6), which is the direct
+confirmation that those fits were under-converged at all.
+
+The size-matched contrasts, which is what the family conclusion actually stands on:
+`cat5−xgb5` +12.8 -> **+14e-6** (t +3.53, 4/5); `cat5−lgb5` +28.9 -> **+34e-6** (5/5);
+`lgb5−xgb5` −16.0 -> **−20e-6** (0/5). `w21b`'s built-in `cat4` reproduction gate passes
+against both the old w20d row and w24b's standardised `cat` row.
+
+**Nothing needs rebuilding.** Every conclusion drawn from these tables was an ordering or a
+size-matched contrast and both survive; the artefact is common-mode in a paired design, as
+w23 §8 predicted. What changes is the *level* — quote the standardised column.
+
+Two small verdict changes, both stated as weak: the three adarsh MLPs were dismissed on a sign
+flip and now read +1.55e-6/member consistent over 3 reps; `nonGBDT5` moved the other way and
+lost consistency. n=3 and n=5 reps. Recorded so nobody quotes the old verdict as settled, not
+because either is actionable.
+
+## 4. ⚠ A SLOT SAVED: the obvious next experiment is already answered on disk
+
+The natural follow-on to w23 §1 is "the standardised fit stops at 65 iterations, so tighten
+`tol`" — a plausible, expensive job a future slot would launch. It is **already measured**, in
+`logs_w23c_convergence.txt`, which w23 quoted only for its training loss:
+
+    std1_tol1e-4     65 iters   11.3s  fit_logloss 0.200384753  hold_auc 0.970369924
+    std1_tol1e-7   1376 iters  438.1s  fit_logloss 0.200313901  hold_auc 0.970369626
+
+**−0.30e-6 for 39x the compute.** The residual training loss is real and holdout AUC does not
+follow it; all four w23c cells reach 0.97037 except unstandardised-at-default, ~3e-6 below.
+The defect was the **scale anisotropy**, not under-convergence per se. Closed on existing
+evidence, no run spent. Added to the closed list.
+
+## 5. What was and was not selected here
+
+Built: one new submission file, validated (296,302 rows, ids identical to
+`sample_submission`, no NaN, no inf, 296,302 distinct values, rank-identical to nothing on
+disk). Not selected off any table: the 5-arm average ships unconditionally, the CV-argmax
+sub-combination does not, and `WANTED` moved only because a rule written in advance fired.
+No public-LB number was an input to anything in this entry — there could not have been one,
+since the new file has never been scored.
+
+The send queue is regenerated and is **ten deep with zero further compute**, led by the new
+file: `w23_ad187stdcorr` (0.9701150809), `w23_ad187std_h3` (0.9701092751), `w23_ad187std`,
+`w22_ad187corr_rankraw`, `w23_ad187std_h3_{hybrid,rescale,rankraw}`,
+`w20_ad187_{rescale,hybrid}`, `blend160orig_rankraw`. md5-deduped against everything ever sent.
+
+**Registered prediction for tomorrow's first send**, so it cannot be rationalised afterwards:
+`w23_ad187stdcorr` is +8.20e-6 of CV on `w21_ad187corr` (LB 0.97117). At the workspace's
+observed CV->LB slope of roughly 2x, the modal print is **0.97119**, with 0.97118 the main
+alternative. **A print at or below 0.97117 would be information about the slice, not about the
+file** — and would NOT be grounds to move `WANTED` back, because R3 forbids it.
+
+## 6. Next run should look at, in order
+
+1. **Send the queue, `w23_ad187stdcorr` FIRST, then click it into selection slot 1.** Ten
+   sends are ready and need no compute. The click is the only thing standing between the CV
+   leader and the private board, and `check_selection.py` will keep reporting slot 1
+   unsatisfied until the file exists on Kaggle.
+2. **Enumerate the pool. Every run. Two API calls, ~2 minutes.** Three consecutive sweeps have
+   found nothing importable, which is itself the reason to keep the check cheap rather than
+   drop it.
+3. **Do NOT re-open `tol`, `--lam`, stacker `C`, seed/fold diversity, member tuning, feature
+   engineering, the original dataset, or beta.** All closed, several of them four times over.
+4. If a genuinely open question is wanted: w23 §6 left the CV->LB slope with no named
+   mechanism (+9e-6 of bagging asymmetry against a +48…62e-6 residual). That is a real hole,
+   but w22 and w23 both concluded it is not worth a slot. Prefer sending files.
+
+### Files created
+
+`experiments/w24_prereg.txt` (+ addenda §5a, §5b, §5c); `submissions/w23_ad187stdcorr.csv` +
+`oof_w23_ad187stdcorr.npy` + `experiments/w21a_w23_ad187stdcorr.json`;
+`experiments/w24b_value_std.csv`, `experiments/w24c_famvalue_std.{csv,json}`; logs
+`logs_w24a_stdcorr.txt`, `logs_w24b_value_std.txt`, `logs_w24c_famvalue_std.txt`,
+`logs_w24d_sendqueue.txt`. Modified: `experiments/w20d_value.py` and
+`experiments/w21b_famvalue.py` (new `--standardize` / `--out`, both default OFF so published
+numbers reproduce); `experiments/check_selection.py` (**`WANTED` moved, with the rule and the
+not-yet-sent caveat written into the header**); `experiments/w23b_sendqueue.csv` (regenerated).
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+
+### ⚠ Addendum to w24 — a defect I introduced this slot, caught and fixed
+
+`w20d_value.py` took the new `--out` for its CSV but its **JSON path was still hard-coded**,
+so the standardised re-cut **overwrote `experiments/w20d_value.json`**, the machine-readable
+record of the original unstandardised run, while writing its CSV to the new name. Caught by
+`git status` before the commit — the file showed as modified when nothing should have touched
+it. Restored with `git checkout --`, verified field-by-field against the journal's published
+numbers (all22 +2.153, note +8.028, cat +10.285, nn +0.842, logreg +2.646, redundant +0.958 —
+all match), and the standardised copy preserved as `w24b_value_std.json`.
+
+Both scripts now route the JSON through `--out` as well and record a `standardize` field in
+it, so a re-cut cannot silently destroy the run it is being compared against. Recorded rather
+than quietly fixed: **the near-miss is the finding**. `w21b_famvalue.py` was safe only because
+I happened to parameterise its JSON in the same edit, and every other script in this workspace
+that writes a fixed-name artefact has the same exposure. `git status` before staging is what
+caught it, exactly as the playbook says.

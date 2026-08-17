@@ -122,7 +122,39 @@ COMP = "playground-series-s6e8"
 # That is not what shipped, and the reason is recorded rather than left silent: w21a did not
 # exist when w20 wrote it, so w20's slot-1 candidate was the uncorrected file. With the
 # correction rebuilt, the same rule that produced w20's sentence produces this pair instead.
-WANTED = {"w21_ad187corr.csv", "w20_ad187_h3.csv"}
+#
+# ─────────────────────────────────────────────────────────────────────────────────────────
+# 2026-08-17 (w24, slot 10). WANTED MOVES AGAIN, ON A PRE-REGISTERED RULE (w24_prereg §3 R1,
+# written before any w24 number existed), and slot 2 is REPLACED, not just re-labelled:
+#
+#   w23_ad187stdcorr  CV 0.9701150809  <- slot 1, NEW. NOT YET SUBMITTED, see below.
+#   w21_ad187corr     CV 0.9701068814  <- slot 2, demoted from slot 1, LB 0.97117
+#   w20_ad187_h3      CV 0.9701008150  <- dropped from the pair, LB 0.97115
+#
+# The new file is the SAME CONSTRUCTION as the old slot 1 — the 5-arm scheme-average c_avg
+# correction on an h3 mix of the 187-member pack, `w21a_ad187corr.py` run verbatim with
+# W21A_BASE swapped — differing ONLY in that its base stack standardises the member columns
+# before the meta-logistic. w23 isolated why that matters (lbfgs's tol=1e-4 stopping rule
+# carries the columns' scale; the members span sd 1.82..27.59; the unstandardised fit
+# terminates early on that slack) and w24 confirmed the correction still pays on the fixed
+# base: +5.716e-6 cross-fitted, against +6.066e-6 on the same base unstandardised.
+#
+# Margin over the old slot 1: +8.20e-6, which is 4x the ~2e-6 floor that applies to an object
+# containing 25 fresh `ascend` fits. R1 required >= +5.0e-6 and got it. Decided on CV; the new
+# file has NO leaderboard print at all, which is the cleanest possible version of that rule.
+#
+# ⚠ SLOT 1 IS NOT SELECTABLE UNTIL IT IS SENT. Today's cap (10) was exhausted before this file
+# existed, so `w23_ad187stdcorr.csv` has never been uploaded and Kaggle cannot select what it
+# has not received. This script will therefore report slot 1 UNSATISFIED until the next day's
+# first submission goes out — that is the intended state, not a fault. It is #1 in
+# `experiments/w23b_sendqueue.csv`. SEND IT FIRST, THEN CLICK.
+#
+# Why slot 2 is `w21_ad187corr` and not the zero-parameter hedge `w20_ad187_h3`: the exposure
+# worth insuring against changed. Both WANTED files were already one pack, so pack risk was
+# never hedged by that pair; what IS new and uninsured is the standardisation itself, which is
+# one wave old. `w21_ad187corr` is the identical object WITHOUT it, so the pair now hedges the
+# only untested variable, at a cost of 6.0e-6 of CV against the alternative pairing.
+WANTED = {"w23_ad187stdcorr.csv", "w21_ad187corr.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"

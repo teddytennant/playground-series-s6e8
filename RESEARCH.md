@@ -5656,3 +5656,62 @@ Kernels newer than w22's sweep: `obiaf88/predicting-smartphone-addiction-pytorch
 `vh10935cse20/mobile-addiction-lgbm`, `adnanik23/s6e8-training` — **notebooks**, so none can
 carry an OOF+test pair. New dataset: `dariushafshar/kaggle-competition-leaderboard-intelligence`
 (1.3 MB of leaderboard scrapes) — **excluded, nothing to import, do not re-fetch.**
+
+## ⚠ The per-member value tables were measured with an under-converged combiner — RESTATED 2026-08-17 (w24)
+
+w23 §8 flagged this as a caveat rather than a retraction and w24 re-cut both tables with
+`--standardize` (a flag both scripts now carry, default OFF so the published numbers still
+reproduce). The caveat was right, the direction was UP, and the magnitude is small.
+
+`w20d_value.py --standardize --out w24b_value_std` (3 paired 50/50 splits, hybrid, C=1,
+187 members). Per-member paired gain, e-6:
+
+| group | unstandardised | standardised | change |
+|---|---|---|---|
+| all22 | +2.15 | **+2.45** | +14% |
+| note | +8.03 | **+8.14** | +1% |
+| cat | +10.3 | **+12.1** | +17% |
+| nn | +0.84 **[SIGN FLIPS]** | **+1.55 [consistent 3/3]** | +85%, and the flip stopped |
+| logreg | +2.65 | **+3.89** | +47% |
+| redundant | +0.96 | **+1.07** | +11% |
+
+`w21b_famvalue.py --standardize --out w24c_famvalue_std` (5 paired splits, same members):
+
+| family | unstandardised | standardised | change |
+|---|---|---|---|
+| xgb5 | +5.55 | **+6.24** | +12% |
+| cat5 | +8.11 | **+9.08** | +12% |
+| lgb5 | +2.34 | **+2.28** | −3% |
+| lgb7 | +3.67 | **+3.85** | +5% |
+| gbdt17 | +3.06 | **+2.97** | −3% |
+| nonGBDT5 | +1.24 [consistent] | +1.43 **[SIGN FLIPS]** | +15%, consistency lost |
+| cat4 (gate) | +11.0 | **+11.7** | +6% |
+
+Size-matched contrasts, the rows w21's family conclusion actually rests on:
+`cat5-xgb5` +12.8e-6 (5/5) -> **+14e-6 (t +3.53, 4/5)**; `cat5-lgb5` +28.9 -> **+34 (5/5)**;
+`lgb5-xgb5` -16.0 -> **-20 (0/5)**. **The ordering cat > xgb > lgb is unchanged and every
+magnitude moved by ≤17%.** `w21b`'s built-in `cat4` reproduction gate passes against BOTH the
+old w20d row and w24b's standardised `cat` row (+11.7 vs +12.1, different rep counts).
+
+USE THE STANDARDISED COLUMN from now on — it is the value a converged stack actually realises.
+Nothing built on the old column needs rebuilding: every conclusion drawn from these tables was
+an ORDERING or a size-matched contrast, and both survive.
+
+Two verdict changes, both small and both stated as weak: the three adarsh MLPs (`nn`) were
+recorded as noise on a sign flip and now read +1.55e-6/member consistent across 3 reps;
+`nonGBDT5` moved the other way and lost its consistency. n is 3 and 5 reps respectively, so
+neither is worth acting on — they are recorded so nobody quotes the old verdict as settled.
+
+## ⚠ CLOSED on evidence already on disk: tightening lbfgs `tol` on a STANDARDISED stack
+
+The natural follow-on to w23's standardisation finding is "the standardised fit stops at 65
+iterations, so tighten `tol`". **It is already measured** in `logs_w23c_convergence.txt`,
+which the w23 write-up quoted only for training loss:
+
+    std1_tol1e-4    65 iters    11.3s   fit_logloss 0.200384753   hold_auc 0.970369924
+    std1_tol1e-7  1376 iters   438.1s   fit_logloss 0.200313901   hold_auc 0.970369626
+
+**-0.30e-6 for 39x the compute.** The residual training loss is real and holdout AUC does not
+follow it. All four cells of w23c reach 0.97037 EXCEPT unstandardised-at-default, which is
+~3e-6 below. So the defect was the **scale anisotropy**, not under-convergence as such. Do not
+spend a slot re-measuring this.

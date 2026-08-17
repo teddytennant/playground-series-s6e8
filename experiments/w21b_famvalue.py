@@ -98,7 +98,15 @@ GROUPS = {
 }
 
 
-def fit_score(Z_tr, y_tr, Z_te, y_te, C):
+def fit_score(Z_tr, y_tr, Z_te, y_te, C, std=False):
+    """`std` unit-sds each member column using the FITTING half's sd. See `w20d_value.py`
+    for the mechanism: lbfgs's `tol=1e-4` stopping rule carries the columns' scale, the
+    hybrid members span sd 1.82..27.59, and the fit terminates early on that slack. Off by
+    default so the family table already in the journal reproduces exactly."""
+    if std:
+        s = Z_tr.std(0)
+        s[s <= 0] = 1.0
+        Z_tr, Z_te = Z_tr / s, Z_te / s
     m = LogisticRegression(max_iter=3000, C=C).fit(Z_tr, y_tr)
     return roc_auc_score(y_te, m.predict_proba(Z_te)[:, 1])
 
@@ -108,6 +116,8 @@ def main():
     ap.add_argument("--reps", type=int, default=5)
     ap.add_argument("--C", type=float, default=1.0)
     ap.add_argument("--transform", default="hybrid")
+    ap.add_argument("--standardize", action="store_true")
+    ap.add_argument("--out", default="w21b_famvalue")
     a = ap.parse_args()
 
     tr, te = load_raw()
@@ -145,13 +155,13 @@ def main():
             cols = [idx[m] for m in mem]
             t1 = time.time()
             r[cname] = fit_score(Z[np.ix_(iA, cols)], y[iA],
-                                 Z[np.ix_(iB, cols)], y[iB], a.C)
+                                 Z[np.ix_(iB, cols)], y[iB], a.C, a.standardize)
             print(f"  rep {rep} {cname:9s} n_mem {len(mem):3d} "
                   f"AUC {r[cname]:.6f}  ({time.time()-t1:.0f}s)", flush=True)
         rows.append(r)
 
     df = pd.DataFrame(rows)
-    df.to_csv(os.path.join(EXP, "w21b_famvalue.csv"), index=False)
+    df.to_csv(os.path.join(EXP, a.out + ".csv"), index=False)
     print("\nheld-out AUC per 50/50 split")
     print(df.to_string(index=False, float_format="%.6f"))
 
@@ -189,11 +199,11 @@ def main():
     print(f"  cat4 here {out['cat4']['mean']:+.6f} +/- {out['cat4']['sd']:.6f}  "
           f"-> {'PASS' if abs(out['cat4']['mean'] - 0.000041) < 3*max(out['cat4']['sd'],1e-6) else 'FAIL'}")
 
-    json.dump(dict(transform=a.transform, C=a.C, reps=a.reps,
+    json.dump(dict(transform=a.transform, C=a.C, reps=a.reps, standardize=a.standardize,
                    n_base=len(base), n_new=len(new),
                    families={k: v for k, v in GROUPS.items()},
                    paired=out, contrasts=ctr),
-              open(os.path.join(EXP, "w21b_famvalue.json"), "w"), indent=1)
+              open(os.path.join(EXP, a.out + ".json"), "w"), indent=1)
 
 
 if __name__ == "__main__":

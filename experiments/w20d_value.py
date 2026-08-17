@@ -54,7 +54,26 @@ GROUPS = {
 }
 
 
-def fit_score(Z_tr, y_tr, Z_te, y_te, C):
+def fit_score(Z_tr, y_tr, Z_te, y_te, C, std=False):
+    """`std` divides each member column by its sd on the FITTING half, applied to both.
+
+    w23 measured why this is not cosmetic: lbfgs stops when the max gradient falls under
+    `tol=1e-4`, that rule carries the columns' scale, and the hybrid members span sd
+    1.82..27.59 -- so the default rule is ~15x looser on the narrow columns than the wide
+    ones and the fit terminates on that slack with no warning. Unstandardised, the
+    187-member cell stops at 414 iterations; standardised it converges in 69 and reaches
+    the SAME point an unstandardised fit only gets to at `tol=1e-7` after 8,000 iterations
+    (residual gap -0.21e-6). Every per-member value in the w20d/w21b tables was measured
+    with the under-converged fit, which is what this flag exists to re-cut.
+
+    The scale comes from the fitting half rather than blend_lab's whole-OOF convention,
+    because here the two halves are a held-out pair; a column sd is not target-dependent
+    so the difference is immaterial, but the fitting-half version needs no argument.
+    """
+    if std:
+        s = Z_tr.std(0)
+        s[s <= 0] = 1.0
+        Z_tr, Z_te = Z_tr / s, Z_te / s
     m = LogisticRegression(max_iter=3000, C=C).fit(Z_tr, y_tr)
     return roc_auc_score(y_te, m.predict_proba(Z_te)[:, 1])
 
@@ -64,6 +83,10 @@ def main():
     ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--C", type=float, default=1.0)
     ap.add_argument("--transform", default="hybrid")
+    ap.add_argument("--standardize", action="store_true",
+                    help="unit-sd the members before the meta-fit; default off so the "
+                         "w20d numbers already in the journal reproduce exactly")
+    ap.add_argument("--out", default="w20d_value.csv")
     a = ap.parse_args()
 
     tr, te = load_raw()
@@ -103,13 +126,13 @@ def main():
             cols = [idx[m] for m in mem]
             t1 = time.time()
             r[cname] = fit_score(Z[np.ix_(iA, cols)], y[iA],
-                                 Z[np.ix_(iB, cols)], y[iB], a.C)
+                                 Z[np.ix_(iB, cols)], y[iB], a.C, a.standardize)
             print(f"  rep {rep} {cname:10s} n_mem {len(mem):3d} "
                   f"AUC {r[cname]:.6f}  ({time.time()-t1:.0f}s)", flush=True)
         rows.append(r)
 
     df = pd.DataFrame(rows)
-    df.to_csv(os.path.join(EXP, "w20d_value.csv"), index=False)
+    df.to_csv(os.path.join(EXP, a.out), index=False)
     print("\nheld-out AUC per 50/50 split")
     print(df.to_string(index=False, float_format="%.6f"))
 
@@ -126,9 +149,12 @@ def main():
         print(f"  {c:10s} n {n_new:2d}  {d.mean():+.6f} +/- {d.std(ddof=1):.6f}"
               f"  per member {d.mean()/n_new:+.2e}  [{ok}]")
 
-    json.dump(dict(transform=a.transform, C=a.C, reps=a.reps,
+    # ⚠ the JSON follows --out too. It did NOT until 2026-08-17 (w24), and a re-cut run
+    # with --out set silently overwrote the ORIGINAL run's json while writing its csv to
+    # the new name. Restored from git that same slot; the flag exists so it cannot recur.
+    json.dump(dict(transform=a.transform, C=a.C, reps=a.reps, standardize=a.standardize,
                    n_base=len(base), n_new=len(new), paired=out),
-              open(os.path.join(EXP, "w20d_value.json"), "w"), indent=1)
+              open(os.path.join(EXP, os.path.splitext(a.out)[0] + ".json"), "w"), indent=1)
 
 
 if __name__ == "__main__":
