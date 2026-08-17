@@ -1,0 +1,20 @@
+156 members on the 'hybrid' scale | 691,369 rows
+FULL 156-member stack, cross-fitted on the frozen folds: 0.97002305
+
+  s0a: 78 members -> 0.96991889  (204s)
+  s0b: 78 members -> 0.96984894  (242s)
+  s0: deficit between halves 69.9e-6 | mean half is 139.1e-6 below the full stack
+
+  s1a: 78 members -> 0.96999515  (522s)
+  s1b: 78 members -> 0.96978173  (305s)
+  s1: deficit between halves 213.4e-6 | mean half is 134.6e-6 below the full stack
+
+  s2a: 78 members -> 0.96989564  (214s)
+  s2b: 78 members -> 0.96987057  (231s)
+  s2: deficit between halves 25.1e-6 | mean half is 139.9e-6 below the full stack
+
+  s3a: 78 members -> 0.96981572  (216s)
+  s3b: 78 members -> 0.96997272  (179s)
+  s3: deficit between halves 157.0e-6 | mean half is 128.8e-6 below the full stack
+
+wrote w17i_disjoint.json

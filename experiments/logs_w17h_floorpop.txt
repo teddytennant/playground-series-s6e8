@@ -1,0 +1,70 @@
+# captured stdout (tail) of the FINAL run: w17h_floorpop.py --reps 700, 2026-08-17 ~01:55 UTC.
+# An earlier 0-byte/partial file here was from a --reps 1000 run this box killed mid-way; it is
+# superseded. The gate below is what makes this run trustworthy: w15a_crossteam.json's six
+# published sd_gap values reproduce at exactly 0.000e-12.
+pool 691,369 labelled rows | public slice 59,260 | prevalence 0.709424
+
+  member pool for disjoint halves: 86 members, AUC 0.91880..0.96881
+  7 disjoint-half logistic stacks loaded from w17i
+
+41 vectors: 14 ours, 4 foreign, 16 rank-avg halves, 7 stack halves
+
+fast AUC checked against scipy: 0.970036549781
+
+GATE vs w15a_crossteam.json (seed 15, first 400 draws)
+  OURS:blend158_logit        got   27.71e-6  want   27.71e-6  drift    0.000e-12
+  OURS:blend150fx_hybrid     got   19.31e-6  want   19.31e-6  drift    0.000e-12
+  OURS:blend156_h3           got    5.98e-6  want    5.98e-6  drift    0.000e-12
+  NAJI:18_blend              got   52.98e-6  want   52.98e-6  drift    0.000e-12
+  NAJI:12_blend              got   74.79e-6  want   74.79e-6  drift    0.000e-12
+  BOLT:rankavg_top12         got   83.87e-6  want   83.87e-6  drift    0.000e-12
+  MAX DRIFT 0.000e-12  -> PASS  (registered < 1e-12)
+
+820 pairs over 41 vectors
+
+P2  LAW-RHO ratio observed/predicted: min 0.363 max 2.742 spread 7.56x   -> CONFIRMED (registered >= 3x)
+P3  partial corr of log sd_gap with log(1-rho) | deficit = +0.506
+    partial corr of log sd_gap with log deficit | rho     = +0.858   -> CONFIRMED
+P4  median |LAW-IF/sim - 1|        3.00%   (with fpc 2.07%)
+    median |LAW-RHO/sim - 1|      56.89%   ratio 19.0x   -> CONFIRMED (registered <10% and >5x)
+
+P5  THE DECISIVE CELL -- matched-quality, genuinely diverse partners
+    pair                                auc_a    deficit       rho      sd_gap
+    s2a vs s2b                       0.969896      25.1e-6   0.99620      66.30e-6  <-- VIOLATES P5
+    s0a vs s0b                       0.969919      69.9e-6   0.99509      63.40e-6  (not matched; excluded)
+    s1a vs s1b                       0.969995     213.4e-6   0.99555      63.69e-6  (not matched; excluded)
+    iv24s0a vs iv24s0b               0.969140       6.4e-6   0.99872      34.39e-6  <-- VIOLATES P5
+    rd16s0a vs rd16s0b               0.969290      42.4e-6   0.99911      33.79e-6  (not matched; excluded)
+    rd40s0a vs rd40s0b               0.969178      93.6e-6   0.99910      40.21e-6  (not matched; excluded)
+    rd86s0a vs rd86s0b               0.967181      98.2e-6   0.99949      30.59e-6  (not matched; excluded)
+    iv16s0a vs iv16s0b               0.969187     103.6e-6   0.99786      45.40e-6  (not matched; excluded)
+    iv40s0a vs iv40s0b               0.969057     167.0e-6   0.99851      36.45e-6  (not matched; excluded)
+    rd24s0a vs rd24s0b               0.969224     184.6e-6   0.99885      42.26e-6  (not matched; excluded)
+    iv86s0a vs iv86s0b               0.967328     188.8e-6   0.99917      28.30e-6  (not matched; excluded)
+    2 of 11 sibling pairs are quality-matched (<40e-6)
+    -> FALSIFIED (registered: deficit<40e-6 pairs all sd_gap < 25e-6)
+
+P6  READOUT -- what the board gaps are actually worth
+    our own pairs, deficit<40e-6:  n 55  sd_gap median 15.2e-6 range 3.5-28.4e-6
+    disjoint STACK halves, matched: n 1  sd_gap median 66.3e-6 range 66.3-66.3e-6
+    UPPER BOUND from the most-disagreeing matched pair: 66.3e-6
+    board gap                                 incumbent 53-84e-6     our own matched pairs     disjoint stack halves               upper bound
+    MILANFX 0.97124       18.0e-5                           2.6s                    11.8s                     2.7s                     2.7s
+    the 0.97117 team      11.0e-5                           1.6s                     7.2s                     1.7s                     1.7s
+    the 0.97113 team       5.0e-5                           0.7s                     3.3s                     0.8s                     0.8s
+
+wrote experiments/w17h_floorpop.json
+
+# LAW-IF accuracy by pair type (median |ratio-1|), from w17h_pairs.csv:
+#   foreign/foreign      n    6   IF 1.32%   RHO 23.13%
+#   foreign/ours         n   40   IF 2.29%   RHO 33.94%
+#   foreign/stackhalf    n   28   IF 1.65%   RHO 33.66%
+#   foreign/synth        n   64   IF 1.58%   RHO 56.38%
+#   ours/foreign         n   16   IF 2.48%   RHO 25.64%
+#   ours/ours            n   91   IF 2.36%   RHO 29.86%
+#   ours/stackhalf       n   98   IF 1.18%   RHO 19.01%
+#   ours/synth           n  224   IF 2.66%   RHO 79.32%
+#   stackhalf/stackhalf  n   21   IF 1.58%   RHO 16.12%
+#   synth/stackhalf      n  112   IF 1.91%   RHO 71.98%
+#   synth/synth          n  120   IF 1.73%   RHO 70.80%
+#   overall IF(fpc) 2.07%  RHO 56.89% | IF range 0.908..1.092  RHO range 0.363..2.742

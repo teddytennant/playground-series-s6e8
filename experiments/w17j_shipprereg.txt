@@ -1,0 +1,61 @@
+w17 SLOT 3 — SHIP PRE-REGISTRATION
+written 2026-08-17 ~01:35 UTC, BEFORE the upload. Numbers below are read off
+experiments/w17j_hybridpair.json, which was produced before this file was written.
+
+SHIP: submissions/blend159av_hybrid.csv
+  CV 0.9700291725 (cross-fitted, frozen SKF5 seed42 folds, recomputed from its own stored OOF)
+  never sent (verified live against a --page-size 200 read: 53 submissions on the account)
+  rank-distinct from all 53 sent files (checked against every csv in submissions/)
+  296,302 rows, ids equal sample_submission in order, all finite, 295,054 distinct values
+
+NOT A LEADERBOARD CANDIDATE, said plainly: 26.5e-6 below the CV pick, and the hybrid
+transform has never beaten h3 here. It is sent as an instrument test, which is what a slot
+in this account is now worth.
+
+WHY THIS FILE. Slot 2 found w17b's per-family CV->LB gaps are contaminated wherever a
+foreign `stack_pub*` file sits in the group, named TWO such families (logit and hybrid),
+tested logit out of sample, and left hybrid as next-run item 4. Hybrid is the better test
+of the two because its group gap is genuinely noisy (five comparable sent files, sd
+15.3e-6) and there is no single obvious decontamination -- so three defensible choices of
+"which files are comparable" name three DIFFERENT grid values instead of agreeing.
+
+REGISTERED PREDICTION: 0.97103, from model A (paired).
+
+  A  PAIRED (registered)  LB(blend158_hybrid)=0.97103 + dCV(+0.839e-6), the reference's own
+     +/-5e-6 rounding integrated out, paired slice sd 5.759e-6 measured on THIS exact pair
+     over 2,000 draws of the leaderboard's geometry.
+     Full distribution: 0.97103 P 0.556 / 0.97104 P 0.247 / 0.97102 P 0.177 /
+                        0.97105 P 0.014 / 0.97101 P 0.007
+  B  GROUP GAP, all 6 sent hybrid files, +1005.2e-6           -> 0.97103
+  C  GROUP GAP, 5 files, dropping stack_pub86_hybrid which is 340e-6 below the rest on CV,
+     +981.7e-6                                                 -> 0.97101
+  D  GROUP GAP, our 3 blend files only, +990.4e-6              -> 0.97102
+  E  A's construction with the paired sd replaced by w17h's LAW-IF value -> 0.97103, P 0.561
+
+WHAT EACH OUTCOME MEANS, written down before the outcome is known:
+  0.97103 -> A survives; B survives too, so this print does NOT separate A from the
+             contaminated group gap. Honest note: A and B coincide here by accident of the
+             arithmetic, and I am recording that in advance rather than claiming a clean
+             win afterwards. C and D both fail.
+  0.97102 -> D wins. The strict decontamination is the right estimator and the paired form
+             is displaced by one step -- within A's distribution (P 0.177) but not its mode.
+  0.97101 -> C wins, and both A and D fail. This would be the informative outcome: it would
+             say the group gap is right once ONE far file is removed, and that the paired
+             form does not transfer to a family whose members scatter at sd 15e-6.
+  0.97104 or 0.97105 -> every group-gap model fails and only A's tail survives; the paired
+             form would be confirmed as the only estimator that even contains the answer.
+
+TIER RISK, PRICED BEFORE THE SEND (the check slot 10 skipped and slot 2 reinstated):
+  P(this file reaches the 0.97108 auto-slot-1 tier) = 0.0000 under A. The send cannot
+  change the auto-pick tiers, cannot change the click price, and cannot make the unmade
+  final-selection click more expensive under any outcome in A's support.
+
+A SEPARATE, ALREADY-SETTLED RESULT, registered here so it is not re-read as a prediction:
+w17h's LAW-IF (the AUC influence function) reproduced this pair's simulated paired slice sd
+at 5.655e-6 against 5.759e-6, ratio 0.982, on a pair it was not fitted to and with ZERO
+simulation. That is an out-of-sample confirmation of the law this slot proposes, and it was
+obtained before w17h's own main run finished.
+
+DEADLINE PICKS UNCHANGED, TENTH CONSECUTIVE SLOT:
+  WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}, chosen on CV.
+Nothing in this slot can move them and w17h_prereg.txt registered that in advance.

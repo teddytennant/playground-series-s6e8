@@ -747,3 +747,24 @@ board places per 1e-5 figure used to price the click is, if anything, conservati
 
 `blend159av_logit` (0.97106) was sent as an instrument test, not a candidate, and did not change
 our standing. **Auto-slot 1 remains a three-way tie at 0.97108 and nothing is selected.**
+
+## 2026-08-17 (w17 slot 3) — the board gaps, re-read against an audited floor
+
+The cross-team resolving power was audited this slot (`experiments/w17h_floorpop.py`, 820 pairs)
+because the standing 53–84e-6 floor sat under six do-not-spend lists and had never been checked
+against a *quality-matched* rival. **The floor survived; only the algebra under it broke.**
+
+| gap to us (public 0.97108 best-of) | incumbent floor 53–84e-6 | audited (disjoint-member stacks, 66.3e-6) |
+|---|---|---|
+| MILANFX 0.97124, +18e-5 | 2.6 sigma | **2.7 sigma** |
+| the 0.97117 team, +11e-5 | 1.6 sigma | **1.7 sigma** |
+| the 0.97113 team, +5e-5 | 0.7 sigma | **0.8 sigma** |
+
+**Nothing changes.** The teams between 0.97113 and 0.97117 are still not distinguishable from us
+on the public slice, and the public board still cannot say whether the leader's edge survives to
+private. Chasing public rank remains unpriceable; the do-not-spend lists hold.
+
+⚠ Quote this as an extrapolation: the disjoint-half stacks are ~130e-6 below our full stack.
+
+Our sends this slot: `blend159av_hybrid` → **0.97102** (registered 0.97103, missed by one step).
+Account best public unchanged at **0.97108**, held by three files; 54 submissions total.

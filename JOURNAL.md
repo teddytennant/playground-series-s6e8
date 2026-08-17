@@ -9914,3 +9914,195 @@ bit-for-bit (§1), which is the strongest reason yet to leave it alone.
 `w15j_cvlb.py`, `w15j_lblaw.py`, `w17a_cvlb_scatter.py`, `w17b_famfix.py`, `w17d_coupling.py`,
 `w17e_logitpair.py`; `check_selection.py` printed block only, `WANTED` untouched.
 `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+
+---
+
+# ══ 2026-08-17 (UTC) — WAVE w17, SLOT 3 of 10 ══
+
+**Handed angle:** "Foundation: confirm the metric, build the fixed-fold CV harness, and get one
+honest GBDT baseline scored." **Angle DECLINED, with the reason stated up front as the playbook
+requires.** All three clauses are 17 waves stale: the metric is confirmed ROC AUC (`RESEARCH.md`
+line 11), the frozen SKF5 seed42 harness has been the basis of every experiment since w1, and
+slot 2 — four hours ago — verified the CV pick rebuilds **bit-for-bit**. Rebuilding a GBDT
+baseline would land ~0.966 against a 0.970056 stack, i.e. it would be the regression the playbook
+names as the main way this goes wrong. Slot 2's own "next run should look at" list was taken
+instead, and this slot took **item 3**, the entry slot 2 marked highest-value.
+
+**Quota:** `date -u` 01:08 at slot start. After this slot's send the CLI printed **"7 submissions
+remaining today"** — 3 of 10 used, cap 10 re-confirmed for the third consecutive slot. The
+prompt's "10 already today" was stale across the UTC rollover for the third consecutive slot.
+
+Pre-registered in `experiments/w17h_prereg.txt` (P1–P6, each with what falsifies it) before any
+number existed, and `experiments/w17j_shipprereg.txt` before the upload.
+
+### 0. Pre-flight — slot 2's pagination fix VERIFIED on the second code path
+
+`check_selection.py` uses the python client's `list_submissions`, not the CLI, and slot 2 fixed
+its hardcoded `page_size = 50` without being able to check it against a real overflow. It now
+reads **53**, against `kaggle ... --page-size 200 | wc -l` = **53**. Both paths agree.
+`lb_refresh.py` likewise: 53 scored files from 53 submissions. **Next-run item 1 is closed.**
+Nothing is selected; auto-slot 1 is still the 0.97108 three-way tie, auto-slot 2 the 0.97107
+five-way. No tier moved this slot.
+
+### 1. ⚠ THE HEADLINE: I set out to overturn the cross-team noise floor and FAILED TO. It stands.
+
+The target was `RESEARCH.md` line 2287, the "cross-team floor is 53–84e-6" table, which sits under
+**six do-not-spend lists** and under two standing conclusions: the 18e-5 gap to public #1 is
+"2.2–3.4 sigma", and the 5–11e-5 gaps to the 0.97113–0.97117 teams are "0.8–1.7 sigma — **not a
+difference**". The second is the entire reason this workspace does not chase the top of the board.
+
+The suspicion was the same wrong-population error found three times already: all six pairs were
+{our best} × {a partner that is **worse**}, with partner CV deficits of 3/35/88/193/549/577e-6
+against sd_gap of 6.0/19.3/27.7/53.0/74.8/83.9e-6 — monotone in **deficit** — while the board
+rivals the number is applied to have deficit ~0.
+
+**P5, the cell registered as decisive, is FALSIFIED, and it is my hypothesis that dies.**
+
+| matched-quality, genuinely diverse pair | deficit | rho | **sd_gap** |
+|---|---|---|---|
+| `s2a` vs `s2b` — logistic stacks on **disjoint member halves** | 25.1e-6 | 0.99620 | **66.30e-6** |
+| `iv24s0a` vs `iv24s0b` — interleaved rank-average halves | 6.4e-6 | 0.99872 | **34.39e-6** |
+
+Registered: "deficit < 40e-6 pairs all sd_gap < 25e-6". Both violate it, one by 2.7×. **Matching
+quality does not collapse sd_gap to the within-pack 6–20e-6 level. Diversity itself carries it.**
+The disjoint-stack pairs sit at rho 0.9951–0.9962, essentially najiama's 0.9958, and return
+63.4–66.3e-6 — **inside the incumbent 53–84e-6 band.** The number was measured through a
+falsified law (§2) on a confounded population, and it is still right for the population it gets
+applied to.
+
+**Consequence: the six do-not-spend lists STAND, and so does "the public board cannot tell you
+whether the leaders' edge survives to private".** MILANFX's 18e-5 is **2.7 sigma** on the
+disjoint-stack floor against the incumbent's 2.6; the 5–11e-5 gaps are **0.8–1.7 sigma**,
+unchanged. This is the outcome that costs the most to produce and buys the least excitement, and
+it is the one that happened.
+
+⚠ Stated as the pre-registration required: the disjoint-half stacks sit **~130e-6 below the full
+156-member stack**, so reading their 66.3e-6 as the floor for two *top-quality* rivals is an
+**extrapolation**, not a measurement. It is the closest available construct, not the thing itself.
+
+### 2. What DID break: the law under the number. `sd = sd(single)·√(2(1−rho))` is not a law.
+
+The table's algebra, and the **lookup table over rho** used to price teams whose predictions we
+cannot see (0.9999→8.0e-6 … 0.98→113.5e-6), are wrong — and the stored `w15a_crossteam.json`
+already contained the counterexample: `BOLT:rankavg_top12` has rho_test **0.99736**, *higher* than
+`blend158_logit`'s 0.99715, with **3.03× the sd_gap** (83.9 vs 27.7e-6).
+
+**820 pairs over 41 vectors**, geometry gated bit-exact (§3):
+
+| | registered | result | |
+|---|---|---|---|
+| **P1** gate: first 400 draws reproduce `w15a_crossteam.json` | drift < 1e-12 | **0.000e-12 on all six** | ✅ |
+| **P2** LAW-RHO's observed/predicted ratio spreads > 3× | ≥ 3× | **7.56×** (0.363 … 2.742) | ✅ |
+| **P3** deficit predicts sd_gap better than (1−rho) | \|partial(def)\| > \|partial(rho)\| | **+0.858 vs +0.506** | ✅ |
+| **P4** LAW-IF median error < 10% **and** > 5× better than LAW-RHO | <10%, >5× | **2.07%**, **27×** | ✅ |
+| **P5** matched-quality diverse pairs sd_gap < 25e-6 | < 25e-6 | **34.4 and 66.3e-6** | ❌ |
+
+**P3 is a both-matter result, not a rho-is-irrelevant result** — +0.506 is not nothing, and reading
+it as "only deficit matters" would be the same over-generalisation this slot's ship punished (§4).
+
+**The replacement, and it is exact.** For scorers a,b on the same rows, F0 the negative-score CDF,
+F1 the positive-score CDF, n1/n0 the public slice's positive/negative counts:
+
+```
+d_i = F0a(s_i) - F0b(s_i)   over pool positives      Var(gap) = Var_pos(d)/n1 + Var_neg(e)/n0
+e_j = F1b(s_j) - F1a(s_j)   over pool negatives      × (1 - n_pub/n_pool)          [LAW-IF]
+```
+
+the AUC influence function. **Zero simulation.** Median error **2.07%** against **56.89%** for
+LAW-RHO, worst case over all 820 pairs **0.908–1.092** against **0.363–2.742**, and it is uniform
+across every pair type (1.2–2.7% for ours/ours, foreign/ours, synth/synth, stackhalf/stackhalf
+alike) where LAW-RHO ranges 16–79% by type.
+
+**And it was confirmed OUT OF SAMPLE before its own experiment finished:** on the w17j ship pair,
+a pair it was not fitted to, LAW-IF returned **5.655e-6** against the 2,000-draw simulated
+**5.759e-6** — ratio **0.982**. Every future paired prediction can now get its sd for free.
+
+### 3. The gate, and why it is worth naming
+
+`w15a_crossteam` consumes its rng only through one `permutation(n_pool)` per rep, so scoring 35
+extra vectors on the same masks leaves the stream untouched. All six of its published sd_gap
+values reproduce at **0.000e-12** — the fifth instance of the exact-zero reproducibility floor for
+objects built on fixed stored inputs. The audit is a strict superset of the thing it audits.
+
+### 4. SHIP — `blend159av_hybrid`, ref **55567642**, and **MY REGISTERED PREDICTION MISSED**
+
+`submissions/blend159av_hybrid.csv`, CV **0.9700291725**, never sent, rank-distinct from all 53,
+P(reaches the 0.97108 tier) **0.0000** priced before the send. Not a leaderboard candidate —
+26.5e-6 below the pick. Sent to close slot 2's next-run item 4 with a live test instead of a table
+edit: hybrid is the **second contaminated family**, and the better test of the two because its
+group gap genuinely scatters (sd 15.3e-6) so three defensible decontaminations name three
+different grid values.
+
+| | model | predicted | |
+|---|---|---|---|
+| **A** | **paired (REGISTERED)** — LB(`blend158_hybrid`) + dCV, sd 5.759e-6 measured on this pair | **0.97103** (P 0.556) | ❌ |
+| B | group gap, all 6 sent hybrid files (contaminated) | 0.97103 | ❌ |
+| C | group gap, 5 — drop only `stack_pub86_hybrid` (340e-6 below on CV) | 0.97101 | ❌ |
+| D | group gap, **our 3 blend files only** (strictest decontamination) | **0.97102** | ✅ |
+
+**RESULT: 0.97102.** The paired instrument is now **2 hits / 1 miss** out of sample.
+
+`experiments/w17k_readout.py`, each rival given its own sd: **D beats A by only 1.65×**, C 1.36×,
+B 1.93×; flat-prior posterior D 0.350 / C 0.258 / A 0.212 / B 0.181. **This send barely
+discriminates and I am not going to pretend otherwise** — A still gave the printed value P 0.177.
+
+What it *does* kill is the **universal** form of slot 2's rule. `RESEARCH.md` currently reads
+"use the PAIRED form, **never** a group gap … a group gap is the wrong estimator for a
+within-family contrast **even when the group is clean**". That was generalised from **one** test
+in **one** family, four hours ago. First test in a second family and the decontaminated group gap
+wins. The rule is now scoped, not deleted.
+
+What it **confirms, a second time and more strongly**: **decontamination**. B (all 6) and C (drop
+only the far file) both failed; D — every foreign `stack_pub*` file removed, not just the
+CV-distant one — hit. `stack_pub151_hybrid` and `stack_pub149_hybrid` sit only 4–10e-6 below our
+blends on CV, so "far on CV" is the wrong exclusion criterion; **provenance is.**
+
+Honest note carried from `w17j_shipprereg.txt`, written **before** the print: A and B coincide at
+0.97103 by arithmetic accident, so a 0.97103 print would **not** have separated the paired form
+from the contaminated group gap. Registered in advance precisely so it could not be claimed as a
+clean win afterwards. It did not arise; the file printed 0.97102.
+
+### 5. Operational — this box killed three background jobs in one slot
+
+Load average hit **39 on 16 cores** with none of it ours. `nohup … &` from the tool shell and one
+harness-backgrounded run both died silently mid-job with **no OOM** (21.7 GB available) and no
+traceback. Fix applied rather than diagnosed: **`w17i_disjoint.py` checkpoints every half-stack to
+disk and skips completed ones on re-run**, so the build survives being killed and resumes. That
+is why 8 stacks exist despite three kills. Any long build here should be written this way.
+
+Also: `.venv/bin/python`, never `python` — there is no `python` on PATH, and `pgrep`/`free`/`which`
+are absent from this shell. Use `ps ax`.
+
+### 6. Deadline picks — UNCHANGED, tenth consecutive slot
+
+`WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}`. `w17h_prereg.txt` registered in advance that
+nothing in this slot could move them: every quantity here concerns the **public** slice and other
+teams' files, and final selection runs on CV. `check_selection.py` **not modified** this slot —
+no tier moved, and the click price is unchanged at +2.3 … +5.6e-6 with P(auto-pick wins privately)
+0.03–0.06. **The click is still unmade after 54 submissions.**
+
+### 7. Next run should look at, in order
+
+1. **The click.** Unchanged, unmade, 54 submissions in. Re-run `check_selection.py` first. Both
+   pagination paths are now verified, so its printed count can be quoted again.
+2. **Re-cut every published paired sd in the workspace with LAW-IF.** It is exact to ~2% and free,
+   and at least four load-bearing numbers were produced by simulation at 500–2,000 draws (w14b,
+   w16s, w16w, w17d). §2 gives the formula; `w17j_hybridpair.py` has a working implementation.
+   **`w17d`'s ESS-14.3 GLOBAL branch is the prize** — LAW-IF may remove the need for the draws
+   that starved it (slot 2's next-run item 2, now cheaper than slot 2 could have known).
+3. **Scope, don't delete, the "never a group gap" rule** (§4). It needs a third family. The
+   decontamination criterion should be changed from *CV distance* to *provenance* everywhere:
+   `w17b_famfix.py` still pools `stack_pub*` files into our families.
+4. **P5's extrapolation.** The disjoint-half stacks are 130e-6 below the full stack. An
+   interleaved-by-strength member split would give a quality-matched pair at *top* quality and
+   turn §1's extrapolation into a measurement. ~2 half-stack fits, ~10–20 min on a quiet box.
+
+### Files created
+
+`experiments/w17h_prereg.txt`; `w17h_floorpop.py` + `.json` + `w17h_pairs.csv`,
+`logs_w17h_floorpop.txt`; `w17i_disjoint.py` + `.json` + `w17i_full_auc.json` +
+`w17i_syn_s{0..3}{a,b}.npy` (untracked, 5.5 MB each), `logs_w17i_disjoint.txt`;
+`w17j_hybridpair.py` + `.json`, `w17j_shipprereg.txt`; `w17k_readout.py` + `.json`.
+Modified: `experiments/lb_scores.json` + `audit_results.csv` (regenerated by the standard
+pre-flight). `check_selection.py` untouched. `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md`
+appended to only.

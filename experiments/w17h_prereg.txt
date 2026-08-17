@@ -1,0 +1,99 @@
+w17 SLOT 3 — PRE-REGISTRATION
+written 2026-08-17 ~01:20 UTC, BEFORE any number in this slot was computed.
+
+HANDED ANGLE was "confirm the metric, build the fixed-fold CV harness, get one honest GBDT
+baseline scored". That is 17 waves stale (metric confirmed ROC AUC in RESEARCH.md line 11;
+frozen SKF5 seed42 harness in use since w1; slot 2 four hours ago verified the CV pick
+rebuilds BIT-FOR-BIT). Slot 2's own "next run should look at" list is taken instead, and
+this slot takes ITEM 3, the highest-value entry on it:
+
+  "§5.3's cross-team paired-slice sd of 53-84e-6. Now the FOURTH candidate for the same
+   wrong-population error, and the only load-bearing one left unaudited. It closes an
+   entire research direction on six do-not-spend lists."
+
+--------------------------------------------------------------------------------------
+WHAT IS BEING AUDITED
+--------------------------------------------------------------------------------------
+RESEARCH.md line 2287, "The workspace's 5e-5 noise floor is the WITHIN-PACK floor". It
+states the law
+
+    sd(gap) = sd(single) * sqrt(2 * (1 - rho))                                  [LAW-RHO]
+
+measures sd(gap) on 6 pairs, and publishes a LOOKUP TABLE over rho for teams whose
+predictions we cannot see (0.9999->8.0e-6, 0.999->25.4e-6, 0.995->56.7e-6, 0.99->80.2e-6,
+0.98->113.5e-6). From it, two standing conclusions that sit on six do-not-spend lists:
+
+  (i)  the 18e-5 public gap to MILANFX is "2.2-3.4 sigma";
+  (ii) the 5-11e-5 gaps to the four teams between 0.97113 and 0.97117 are "0.8-1.7 sigma
+       -- NOT a difference".
+
+(ii) is why this workspace does not chase the top of the board.
+
+THE SUSPICION, stated before measuring: the 6 pairs were chosen as {our best} x {a partner
+that is WORSE}. Partner CV deficits run 3e-6, 35e-6, 88e-6, 193e-6, 549e-6, 577e-6 and
+sd_gap runs 6.0, 19.3, 27.7, 53.0, 74.8, 83.9e-6 -- monotone in DEFICIT. The board rivals
+the number is applied to have deficit ~0 or negative. Same structural error as the three
+already found (w14b's transform-contrast sd applied to near-identical files; slot 2's
+single-file sd applied to a 0.9999-correlated contrast; §5.3's cross-team figure applied
+to same-team files).
+
+--------------------------------------------------------------------------------------
+PREDICTIONS. Each says what falsifies it. Registered before the script was run.
+--------------------------------------------------------------------------------------
+P1 (GATE). Re-running w15a_crossteam's construction at its own seed 15 / 400 reps
+   reproduces all 6 published sd_gap values.
+   REGISTERED: max abs drift < 1e-12. Anything above that and nothing below is reported.
+
+P2. LAW-RHO is FALSE, not merely imprecise. Across a pair set of >= 60 pairs spanning
+   deficit and rho as independently as they can be made to span, the ratio
+   observed_sd_gap / LAW-RHO_prediction varies by more than 3x.
+   FALSIFIED IF: the ratio's max/min over the pair set is < 3.
+   (Prior evidence, already visible in the stored w15a_crossteam.json and the reason this
+   prediction is cheap: BOLT:rankavg_top12 has rho_test 0.99736, HIGHER than
+   OURS:blend158_logit's 0.99715, and 3.03x the sd_gap -- 83.9 vs 27.7e-6. One pair is
+   an anecdote; 60 pairs is a verdict. I register that the anecdote generalises.)
+
+P3. The partner's CV DEFICIT predicts sd_gap better than (1-rho) does.
+   REGISTERED: in a regression of log(sd_gap) on log(1-rho) and log(deficit), the partial
+   correlation with log(deficit) exceeds that with log(1-rho) in absolute value.
+   FALSIFIED IF: |partial(log(1-rho))| >= |partial(log deficit)|.
+
+P4. There is an EXACT law and it is the AUC influence function, not rho. For scorers a,b
+   on the same rows, with F0 the negative-score CDF and F1 the positive-score CDF,
+
+     d_i = F0^a(s_i^a) - F0^b(s_i^b)            for positives
+     e_j = F1^b(s_j^b) - F1^a(s_j^a)            for negatives
+     Var(gap) = Var_pos(d)/n1 + Var_neg(e)/n0                                 [LAW-IF]
+
+   computed on the pool, with n1,n0 the PUBLIC-SLICE positive/negative counts. This costs
+   no simulation at all.
+   REGISTERED: median over the pair set of |LAW-IF / simulated - 1| < 0.10, and it beats
+   LAW-RHO's median absolute relative error by more than 5x.
+   FALSIFIED IF: median relative error >= 0.10, or the 5x margin is not met.
+
+P5. The DECISIVE CELL. Partners built to have deficit ~0 but genuine approach diversity
+   (rank-averages over DISJOINT random halves of the member pool, so neither is a
+   perturbation of the other) will show sd_gap far below the cross-team 53-84e-6.
+   REGISTERED: for disjoint-half partners with |deficit| < 40e-6, sd_gap < 25e-6.
+   FALSIFIED IF: any such pair returns sd_gap >= 25e-6.
+   This is the cell that decides the audit. If sd_gap stays large when quality is matched
+   and only diversity is high, then cross-team-ness IS the driver, LAW-RHO survives in
+   spirit, and conclusions (i)/(ii) stand.
+
+P6 is NOT a prediction, it is the READOUT the slot exists to produce, and I am writing
+   down in advance that I will report it whichever way it falls: the sigma of the 18e-5
+   gap to public #1 and of the 5-11e-5 gaps to the 0.97113-0.97117 teams, under whichever
+   law survives P2-P5, WITH the extrapolation stated as an extrapolation.
+
+--------------------------------------------------------------------------------------
+WHAT CANNOT MOVE
+--------------------------------------------------------------------------------------
+WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}. Nothing in this slot can touch it:
+every quantity here is about the PUBLIC slice and about OTHER TEAMS' files, and final
+selection runs on CV (RESEARCH §4.6). Registered so that a surprising result cannot be
+retro-fitted into a pick change. TENTH consecutive slot.
+
+Note in advance, so it is not claimed as a win afterwards: a result that the top of the
+board is genuinely better than us does NOT hand this workspace a method. It reopens a
+direction; it does not walk it. Any "so we should chase X" is a LATER slot's build with
+its own CV evidence, not a conclusion of this one.

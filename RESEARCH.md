@@ -4857,3 +4857,103 @@ the two foreign files drag the mean +28.6e-6. The "loose logit family" is an art
 - ⚠ Exact non-parametric conditioning on all six files jointly costs ESS: **14.3 of 6,000 draws**
   under one global gap, 100.2 under a per-family gap. Do not read a mean off the global branch
   without far more draws.
+
+---
+
+# w17 slot 3 (2026-08-17) — the cross-team floor SURVIVES its audit; the law under it does not
+
+## ⚠ 1. `sd(gap) = sd(single)·√(2(1−rho))` is FALSE. Delete the rho lookup table.
+
+The table at line 2287 ("Quick lookup at other rho, sd(single)=567e-6: 0.9999→8.0e-6,
+0.999→25.4e-6, 0.995→56.7e-6, 0.99→80.2e-6, 0.98→113.5e-6") is **not usable** and must not be
+quoted for teams whose predictions we cannot see. Measured on **820 pairs over 41 vectors**
+(`experiments/w17h_floorpop.py`, gated bit-exact against `w15a_crossteam.json` at 0.000e-12):
+
+- observed/predicted ratio spans **0.363 … 2.742**, a **7.56×** spread; median error **56.9%**.
+- by pair type the median error runs **16% … 79%** — it is not even a consistent bias.
+- the stored `w15a_crossteam.json` always contained the counterexample: `BOLT:rankavg_top12`
+  rho_test **0.99736** > `blend158_logit` **0.99715**, yet **3.03×** the sd_gap.
+
+**rho is not irrelevant** — partial corr of log sd_gap with log(1−rho), controlling for the
+quality deficit, is **+0.506** (deficit's is +0.858). Both matter; the functional form is wrong.
+
+## ✅ 2. THE REPLACEMENT — LAW-IF, the AUC influence function. Exact, and free.
+
+For two scorers a,b on the same rows, with F0 the negative-score CDF and F1 the positive-score
+CDF computed on the pool, and n1/n0 the **public slice's** positive/negative counts:
+
+```
+d_i = F0a(s_i) - F0b(s_i)      over pool positives
+e_j = F1b(s_j) - F1a(s_j)      over pool negatives
+Var(gap) = [ Var_pos(d)/n1 + Var_neg(e)/n0 ] * (1 - n_pub/n_pool)
+```
+
+**No simulation at all.** Against 700-draw simulation over the same 820 pairs:
+
+| | median \|ratio−1\| | worst ratio over 820 pairs |
+|---|---|---|
+| **LAW-IF (with fpc)** | **2.07%** | **0.908 … 1.092** |
+| LAW-RHO | 56.89% | 0.363 … 2.742 |
+
+Uniform across pair types: ours/ours 2.36%, ours/stackhalf 1.18%, foreign/ours 2.29%,
+synth/synth 1.73%, stackhalf/stackhalf 1.58%. **Confirmed out of sample** on a pair it was not
+fitted to (the w17j ship pair): **5.655e-6** against the 2,000-draw simulated **5.759e-6**,
+ratio **0.982**. Working implementation: `w17j_hybridpair.py`, `midrank_cdf` + the block under
+"the same sd from LAW-IF". **Use this instead of drawing slices.** Every paired sd in this
+workspace produced by 500–2,000 draws (w14b, w16s, w16w, w17d) can be re-cut for free.
+
+## ⚠ 3. …but the 53–84e-6 CROSS-TEAM FLOOR ITSELF STANDS. The do-not-spend lists hold.
+
+The audit's registered hypothesis — that 53–84e-6 was an artefact of pairing our best file with
+partners 193–577e-6 *worse* — is **FALSIFIED**. Quality-matched, genuinely diverse partners still
+show a large sd_gap:
+
+| construction | deficit | rho | **sd_gap** |
+|---|---|---|---|
+| logistic stacks on **disjoint member halves** (`s2a`/`s2b`) | 25.1e-6 | 0.99620 | **66.30e-6** |
+| the other disjoint-stack pairs (not quality-matched, for scale) | 70–213e-6 | 0.9951–0.9956 | 63.4–63.7e-6 |
+| interleaved rank-average halves (`iv24`) | 6.4e-6 | 0.99872 | **34.39e-6** |
+
+Disjoint-member stacks sit at rho ≈ 0.995, i.e. najiama's 0.9958, and land **inside** the
+incumbent band. **Matching quality does not collapse sd_gap; diversity carries it.**
+
+**Board gaps, re-read and unchanged:** MILANFX's 18e-5 is **2.7 sigma** (incumbent said 2.6); the
+5–11e-5 gaps to the 0.97113–0.97117 teams are **0.8–1.7 sigma** — still not differences. The
+public board still cannot tell you whether the leaders' edge survives to private.
+
+⚠ **This is an extrapolation and must be quoted as one.** The disjoint-half stacks are ~130e-6
+*below* the full 156-member stack, so 66.3e-6 is the floor for two *mid*-quality diverse rivals.
+An interleaved-by-strength member split (2 half-stack fits) would make it a measurement.
+
+Useful by-product: **two random disjoint halves of the 156-member pack differ in CV by
+70–213e-6.** Which half of the public pool a team happened to use is worth more than the entire
+gap to the top of the leaderboard.
+
+## ⚠ 4. Scope — "never a group gap" was over-generalised from one test (see w17j below)
+
+Slot 2's rule ("use the PAIRED form, never a group gap") was generalised from **one** family.
+First test in a second family (**hybrid**) and the **decontaminated group gap won**: registered
+paired prediction 0.97103 **missed**, printed **0.97102**, which model D named exactly. Evidence
+is weak (D beats the paired form by **1.65×**; posterior D 0.350 / C 0.258 / A 0.212 / B 0.181),
+so the rule is **scoped, not deleted**. The paired instrument is **2 hits / 1 miss** out of sample.
+
+**The decontamination half is confirmed a second time and more strongly, with a corrected
+criterion:** exclude foreign `stack_pub*` files by **provenance, not by CV distance**. Dropping
+only the CV-distant `stack_pub86_hybrid` (model C) **failed**; dropping all three foreign files
+(model D) hit. `stack_pub151_hybrid`/`stack_pub149_hybrid` sit only 4–10e-6 below our blends on
+CV and still poison the group gap. `w17b_famfix.py` still pools them and its published per-family
+`resid sd` column is wrong wherever a `stack_pub*` file is in the group.
+
+## 5. Operational, 2026-08-17
+
+- **This box killed three long jobs in one slot** (load average 39/16 cores, none of it ours), with
+  **no OOM** (21.7 GB free) and no traceback — both `nohup … &` and a harness-backgrounded run.
+  **Write long builds to checkpoint per unit of work and skip completed units on re-run**;
+  `w17i_disjoint.py` does this and survived three kills.
+- There is **no `python`** on PATH — always `.venv/bin/python`. `pgrep`, `free` and `which` are
+  absent from this shell; use `ps ax` and `/proc/meminfo`.
+- **Pagination fix verified on BOTH code paths** (slot 2 could only fix the second blind):
+  `check_selection.py`'s python-client `list_submissions` now reads 53, matching
+  `kaggle … --page-size 200 | wc -l` = 53. Its printed count can be quoted again.
+- One `crossfit` of a 78-member logistic stack over the frozen folds costs **204 s on a quiet box,
+  552 s under load**. Budget accordingly.

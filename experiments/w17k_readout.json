@@ -1,0 +1,18 @@
+{
+ "ship": "blend159av_hybrid",
+ "printed": 0.97102,
+ "registered": 0.97103,
+ "hit": false,
+ "likelihood": {
+  "A paired (REGISTERED)": 0.17741,
+  "B group gap, all 6": 0.15203848866113973,
+  "C group gap, 5 files": 0.21594792131890317,
+  "D group gap, our 3": 0.29304864195963004
+ },
+ "posterior": {
+  "A paired (REGISTERED)": 0.21159406879386639,
+  "B group gap, all 6": 0.18133387311358248,
+  "C group gap, 5 files": 0.2575576310210498,
+  "D group gap, our 3": 0.34951442707150143
+ }
+}
