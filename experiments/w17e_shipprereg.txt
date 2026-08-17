@@ -1,0 +1,46 @@
+w17e SHIP PRE-REGISTRATION — written 2026-08-17 UTC slot 2, BEFORE the upload.
+================================================================================
+FILE: submissions/blend159av_logit.csv    (never sent; rank-distinct from all 52 sent files)
+CV (pooled OOF): 0.9699647645        reference: blend158_logit, CV 0.9699613899, LB 0.97106
+dCV +3.375e-6    paired slice sd 3.978e-6 (2000 draws, seed 20260817)
+
+WHY THIS FILE. Slot 1 validated the paired CV->LB instrument out of sample ONCE, on a tight-
+family pair at dCV ~ 0. It also reported that the only place the instrument does not fit is the
+LOOSE families — "the 1.79 excess is entirely hybrid and logit (ratio 1.97)". That regime has
+never been tested against a pre-registered prediction. This file tests it, and three named
+rival models predict three different grid values, so the outcome discriminates:
+
+    A  PAIRED, the registered prediction          0.97106   P 0.585
+       (LB(ref) + dCV, with the reference's own +/-5e-6 rounding integrated out)
+       full distribution: 0.97106 0.585 | 0.97107 0.363 | 0.97105 0.044 | 0.97108 0.008
+    B  w17b's published logit group gap +1103.4e-6            0.97107
+    C  slope fitted on the 3 blend logit files, dLB/dCV 2.61  0.97107
+    D  the decontaminated 3-blend gap +1087.8e-6              0.97105
+
+A is what this workspace currently believes and it is the one on the line. A print of 0.97105
+or 0.97107 does not refute A outright (it holds 4.4% and 36.3% of A's mass) but it is evidence
+for D and for B/C respectively; the honest reading is the likelihood ratio, written up as such,
+NOT a retrospective "A's interval covered it". A print of 0.97104 or below, or 0.97109 or above,
+falsifies A flatly.
+
+⚠ THE TIER RISK, PRICED BEFORE THE SEND — this is the exact check slot 10 skipped.
+w16v_prereg_lb.txt asserted a send "provably cannot make the click more expensive" on the
+strength of a ladder that the result then falsified, and the send DID move the tier structure.
+So: the only outcome that moves anything is 0.97108, which would make auto-slot 1 a FOUR-way
+tie including a file 90.9e-6 below the CV pick.
+  P(0.97108) = 0.008 under A (it is higher under B/C, but slot 1 established that a group gap
+    is the wrong estimator for a within-family contrast and C's 2.61 slope is three points on a
+    10e-6 grid spanning 30e-6, i.e. almost certainly a grid artefact).
+  cost if it happens, limit 1: P(the logit file is the tiebreak winner of a 4-way tie) ~ 0.25,
+    deficit ~90.9e-6  ->  expected +0.008 * 0.25 * 90.9e-6 = +0.18e-6.
+  cost if it happens, limit 2: max() protects — the pair (logit, X) scores ~ X alone, so the
+    branch range barely moves.
++0.18e-6 against a current click price of +0.83..+4.16e-6 is ~4-20% of one branch, and it buys
+the first out-of-sample test of the instrument outside the tight families. SEND.
+
+A print of 0.97107 is harmless: auto-slot 2 is already a 5-way tie at 0.97107 and neither the
+limit-1 nor the limit-2 auto-pick draws from that tier.
+
+WHAT THIS SEND CANNOT DO. It cannot move WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}.
+blend159av_logit's CV is 90.9e-6 below the pick and the logit transform has been beaten by the
+same subset without it 7/7 since 2026-08-11. This is an instrument test, not a candidate.

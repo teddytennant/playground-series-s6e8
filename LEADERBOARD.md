@@ -728,3 +728,22 @@ at the top of the tight families — `w16q_ens4avg` +1.20 sd, `w16e_aonly` +1.12
 `w16t_cellens4` +1.07 — against the CV pick `w16i_schemeavg` at +0.26. `w16e_aonly` leads
 `blend159av_h3` by 30e-6 on public but only 5.3e-6 on CV. Board density is ~2.5 places per
 1e-5, so the click is still the largest single quantity available.
+
+## 2026-08-17 UTC, w17 slot 2 (board read 00:35 UTC)
+
+| | |
+|---|---|
+| ours (public, best of all) | **0.97108** — unchanged; `w16e_aonly` / `w16q_ens4avg` / `w16t_cellens4` |
+| our best CV | 0.9700557 (`w16i_schemeavg`), rebuilt bit-for-bit this slot |
+| submissions | **53** (2 of 10 used today; the API default page shows only 50 — see RESEARCH.md) |
+
+Top of board: MILANFX **0.97132**; Optimistix 0.97125; Utkarsh / Keanan / Maher el Ouahabi
+0.97124; cstdy 0.97123; Don Mani 0.97120; Malhar Ujawane 0.97118; Szymon Kłapiński / Laura Liepa
+0.97117; Mursal Gorchuyev / AdarshAleti / nanare / delai50 0.97116; Will 0.97115.
+
+Gap to first **24e-5**, unchanged. The board thickened at 0.97116–0.97124 (four teams now tie or
+near-tie at 0.97124 where there was one), so the local density above us is rising and the ~2.5
+board places per 1e-5 figure used to price the click is, if anything, conservative now.
+
+`blend159av_logit` (0.97106) was sent as an instrument test, not a candidate, and did not change
+our standing. **Auto-slot 1 remains a three-way tie at 0.97108 and nothing is selected.**

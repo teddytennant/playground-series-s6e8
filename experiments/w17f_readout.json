@@ -1,0 +1,16 @@
+{
+ "likelihood": {
+  "A paired (registered)": 0.584925,
+  "B published group gap": 0.11990866848166298,
+  "C fitted slope": 0.08202575411616658,
+  "D decontaminated gap": 0.3018544013441249
+ },
+ "observed": 0.97106,
+ "posterior": {
+  "A paired (registered)": 0.5372623981958234,
+  "B published group gap": 0.11013791305368416,
+  "C fitted slope": 0.07534188719967962,
+  "D decontaminated gap": 0.27725780155081275
+ },
+ "resid_c": 3.593308803285162e-06
+}

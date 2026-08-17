@@ -9679,3 +9679,238 @@ gains §5 and §6; **`WANTED` itself is untouched.**
 `w17b_outliers.csv` + `w17b_sent.csv`, `logs_w17b_famfix.txt`; `experiments/w17c_repropair.py`
 + `.json`, `logs_w17c_repropair.txt`. Modified: `experiments/check_selection.py` (printed block
 only, `WANTED` untouched). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+
+---
+
+# ══ 2026-08-17 (UTC) — WAVE w17, SLOT 2 of 10 ══
+
+**Handed angle:** "Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check the
+CV-to-LB gap across every experiment so far, and make sure the strongest submission is the one
+selected." **Angle TAKEN, all three clauses**, mapped onto slot 1's §9 open list. Pre-registered
+in `experiments/w17d_prereg.txt` (P1–P5, each with what falsifies it) before anything was
+computed, and `experiments/w17e_shipprereg.txt` before the upload.
+
+**Quota:** `date -u` 00:30 at slot start. Slot 1 landed 00:20:43 UTC. After this slot's send the
+CLI printed **"8 submissions remaining today"** — 2 of 10 used, cap 10 re-confirmed. The prompt's
+"10 already today" was stale for the same reason as slot 1's: it was computed before 00:00 UTC.
+
+### 0. ⚠ THE FINDING NOBODY WAS LOOKING FOR: the API list is PAGINATED and we passed the page
+
+`kaggle competitions submissions -c $COMP -v` returns **50 rows**. The account has **52**
+(53 after this slot). The two oldest — `stack_pub74_logit` and `stack_pub88_mine_logit`, both
+0.97081, both sent 2026-08-10 — **fell off the page when slot 1's send pushed the count past 50**,
+and they are invisible to every API-reading script in this workspace. `--page-size 200` returns
+all of them (CLI default is documented as 20, max 200; something in this environment yields 50).
+
+- **`check_selection.py` prints "50 successful submissions visible"** — that is now the page
+  length, not the count, and it will drift further with each of the 8 remaining sends today.
+- **Slot 1's w17a/w17b tables are one file short.** They say "46 files"; there are 47 with a
+  stored OOF vector. The missing one is `stack_pub74_logit`, a logit-family file.
+- **The auto-pick tiers are UNAFFECTED** — both hidden files score 0.97081, nowhere near the
+  0.97108/0.97107 tiers. The click price does not move on this. Verified against the full list.
+- **Fixed:** every `subprocess.run(["kaggle", ..., "submissions", ...])` call site in
+  `experiments/` now passes `--page-size 200` (w15j_cvlb, w15j_lblaw, w17a, w17b, w17d, w17e).
+  `check_selection.py` uses the python client's `list_submissions` and is separate; it needs the
+  same audit before its count is quoted again.
+
+This is §4.8 ("count, do not quote") with a new edge: the *source you count from* can itself be
+truncated. It went undetected for exactly one slot.
+
+### 1. Clause 1 — the CV pick rebuilds BIT-FOR-BIT. Strongest possible end-to-end verification
+
+`submissions/w16i_schemeavg.csv` + `oof_w16i_schemeavg.npy` backed up to `/tmp/w17d_backup`,
+`experiments/w16i_schemeavg.py` re-run from scratch, md5 compared:
+
+```
+2b2c931881dfaa0e0d1442e1530f5d8e  w16i_schemeavg.csv      (rebuild == backup)
+85a8a34a880ff3e86b5bae31122b9b9f  oof_w16i_schemeavg.npy  (rebuild == backup)
+```
+
+The 55-line log is identical to `logs_w16i_schemeavg.txt` on **54 of 55 lines**. The one
+difference is line 50, `rank-identical to an existing submission?` → `['w16m_widegrid.csv']`
+instead of `no`, because `w16m_widegrid` was *created after* the original build. That is the
+already-known rank identity slot 1 used to rule `w16m_widegrid` out as a send, re-confirmed here
+from the other direction. Every per-arm number reproduced exactly (+3.338 / +5.031 / +6.195 /
++3.146 / +5.616e-6), the permuted controls reproduced (+0.753 / +3.190e-6), and the nested
+scheme pick reproduced (`['rule','rule','rule','decile','rule']`, optimism +1.546e-6).
+
+Artifact audit of both WANTED files: 296,302 rows, `id` equal to `sample_submission` in order,
+all finite, `w16i_schemeavg` 296,302 distinct values / `blend159av_h3` 261,076, rank-distinct
+from each other, Spearman 0.999972, pooled OOF CV 0.9700556663 / 0.9700491721.
+
+### 2. Clause 3 — the private cost of the unmade click. P1–P3 confirmed, **P4 and P5 FALSIFIED**
+
+Slot 1 §9 item 3 verbatim: "§6 has the public inflation but no private penalty." The standing
+price (`w16w_reprice.py`) reads each file's **private** AUC over pseudo-test draws, so
+E[private_k] = cv_k by construction and WANTED — chosen on CV — wins automatically. It never
+conditions on the public scores actually observed, which are the whole reason the auto-pick is
+what it is.
+
+`experiments/w17d_coupling.py`: same seed (1616), same protocol, **6,000 draws**, plus the public
+slice read out. Conditioning done exactly rather than with a kernel — model the board as one draw
+plus an unknown common gap G, keep the draw weighted by the LENGTH of the set of G for which every
+conditioning file's simulated public score rounds to the observed one. Two branches: **GLOBAL**
+(one G; the h3-vs-ens4 group gap is partition noise) and **PERFAM** (one G per family; the family
+displacement is granted as real).
+
+| | registered | result | |
+|---|---|---|---|
+| **P1** gate: first 500 draws reproduce `w16w_reprice.json` | < 1e-12 | **0.000e-12** on all 7 readings | ✅ |
+| **P2** coupling slope, measured not assumed (AUC is not additive over a partition) | −0.250 ± 0.010 | **−0.2477**, range −0.2487..−0.2464, \|corr\| 0.992–0.997 | ✅ |
+| **P3** variance split w = σt²/(σt²+σp²) | 0.10–0.15 | **0.1238** vs 0.125 predicted from row counts | ✅ |
+| **P4** limit-1 cost for `w16e_aonly` rises to +2.0..+3.0e-6 | +2.0..+3.0 | **+1.827e-6** | ❌ |
+| **P5** P(auto beats the CV pick privately) inside 0.30..0.50 and falling | 0.30..0.50 | **0.104 / 0.000 / 0.010** | ❌ |
+
+**P4 falsified: the direction was right, the size was over-predicted.** Conditioning does raise
+the cost at every branch and every estimator — never once the other way — but by ~46% on this
+branch, not the ~90% I registered.
+
+**P5 falsified, and the reason is the finding.** I registered a *floor* of 0.30 with the
+justification that "a number below 0.30 would be this workspace claiming a resolution the
+237,042-row private slice cannot deliver." That justification is **the exact wrong-population
+error slot 1 spent its whole slot correcting, and I made it again inside a pre-registration
+written about it.** These files correlate at 0.9999+; the conditional sd of their private
+contrast is **1.33–5.17e-6**, not the single-file scale I was implicitly using. A 237k-row slice
+resolves a 2–6e-6 contrast between near-identical files easily. That is now the **third**
+load-bearing noise floor in this workspace found to be measured on the wrong population (after
+§5.3's cross-team 53–84e-6 and slot 1's 22–32e-6 transform-contrast figure).
+
+### 3. ⚠ AND MY OWN INSTRUMENT WAS ESS-STARVED — caught by a guard I wrote before running it
+
+GLOBAL: **28 draws of positive weight out of 6,000, ESS 14.3**. The script printed its own
+`⚠ ESS is too low to read a mean off` guard. PERFAM: ESS 100.2. So P5's `0.000` is not a
+resolution, it is ~14 effective draws. **The numbers that falsified P5 are not themselves to be
+believed**, which is what my pre-registration told me to do with them.
+
+`experiments/w17g_parametric.py` does the same conditioning as a regression, which P2 and P3
+between them now license (the joint is linear at |corr| 0.992–0.997 and the split is 0.1238):
+
+```
+E[d_private | d_public = p, dCV = c] = c + gamma*(p - c),
+gamma = (sigma_t^2 + beta*sigma_p^2)/(sigma_t^2 + sigma_p^2)     [-0.0888 .. -0.0993 here]
+```
+
+Every input is already stored per pair in `w17d_coupling.json`, so it costs **no new draws and no
+ESS**. A file whose public score is inflated 10e-6 above its CV is expected to hand back ~1e-6
+privately.
+
+| auto file vs `w16i_schemeavg` | dCV | dLB | E[d_priv] | shift | cond sd | P(auto wins) |
+|---|---|---|---|---|---|---|
+| `w16e_aonly` | −1.24e-6 | +10.0e-6 | **−2.31e-6** | −1.07 | 1.33 | **0.041** |
+| `w16q_ens4avg` | −4.15e-6 | +10.0e-6 | **−5.42e-6** | −1.27 | 2.95 | **0.033** |
+| `w16t_cellens4` | −4.29e-6 | +10.0e-6 | **−5.56e-6** | −1.27 | 3.59 | **0.061** |
+
+**The click at limit 1, four ways:**
+
+| estimator | range |
+|---|---|
+| w16w, no conditioning (the standing price) | +1.253 .. +4.346e-6 |
+| w17d GLOBAL, ESS 14 — **do not quote** | +1.827 .. +6.727e-6 |
+| w17d PERFAM, ESS 100 | +1.704 .. +4.185e-6 |
+| **w17g parametric** | **+2.306 .. +5.562e-6** |
+
+The parametric figure lands inside P4's registered band. **That does not confirm P4.** P4 was
+registered against the GLOBAL branch and GLOBAL returned +1.827. Switching estimators was
+principled — the ESS<30 rule was written into the script before it ran, not chosen after seeing
+the answer — but the prediction stands falsified and calling it otherwise would be exactly the
+retrospective explanation §4.1 exists to prevent.
+
+**What actually changes for the click.** Not the magnitude, which stays a couple of e-6 (~0.6–1.4
+board places at ~2.5 places per 1e-5). What changes is the **certainty**: the workspace has been
+carrying the click as a hedge against a coin flip, and it is not one. P(the auto-pick beats the CV
+pick privately) is **0.03–0.06**, not ~0.5. And every figure above remains a **lower** bound for
+w16s's standing reason — the instrument only ever draws worlds where the CV ordering is right, so
+it cannot price WANTED's second slot buying insurance against the whole fitted-correction family
+failing, and all three auto-slot-1 files carry the same `c_avg`.
+
+### 4. Clause 2 — the CV-to-LB gap, and the one correction slot 1's tables need
+
+Slot 1 re-cut this four hours ago on 46 files and it was not worth repeating. What it needs is the
+§0 correction, and it is confined to one family: `stack_pub74_logit` (CV 0.9696414, LB 0.97081,
+gap **+1168.6e-6**) joins the logit group, n 4 → 5, **gap +1103.4 → +1116.4e-6, sd 32.1 → 40.3e-6**.
+Every tight-family number in slot 1 §5 is untouched, because the missing file is logit.
+
+**And the logit group gap is contaminated regardless of the pagination bug.** The 3 comparable
+`blend*` logit files sit at +1098.6 / +1084.6 / +1080.2e-6 — **gap +1087.8e-6, sd 9.6e-6**. The two
+foreign public stacks, **290e-6 and more below them on CV**, sit at +1150.1 and +1168.6e-6 and drag
+the family mean by **+28.6e-6**. **The "loose" logit family is not loose**; one incomparable
+member class made it look that way. Slot 1's headline — "the 1.79 excess is entirely hybrid and
+logit" — is therefore partly an artefact of pooling foreign files into our families, and §5's
+`resid sd` column should be read as contaminated wherever a `stack_pub*` file is in the group
+(logit and hybrid; hybrid holds two of them).
+
+### 5. SHIP — `blend159av_logit`, ref **55566904**, and it was a test in the regime slot 1 left open
+
+`submissions/blend159av_logit.csv`, CV **0.9699647645**, never sent, rank-distinct from all 52.
+**Not a leaderboard candidate** — 90.9e-6 below the pick, and logit is beaten by the same subset
+without it 7/7 since 08-11. Chosen because slot 1 tested the paired instrument out of sample once,
+at dCV ≈ 0 in a **tight** family, and explicitly left the loose regime as the only place the
+instrument does not fit. Reference `blend158_logit` (CV +3.375e-6 below, LB 0.97106); paired slice
+sd **3.978e-6** measured on this exact pair over 2,000 draws.
+
+**Four named rival models, registered in `w17e_shipprereg.txt` before the upload, naming three
+different grid values so the test could fail:**
+
+| | model | prediction |
+|---|---|---|
+| **A** | **paired (registered)** — LB(ref) + dCV, reference's own ±5e-6 rounding integrated out | **0.97106** (P 0.585; 0.97107 0.363, 0.97105 0.044, 0.97108 0.008) |
+| B | w17b's published logit group gap +1103.4e-6 | 0.97107 |
+| C | slope fitted on the 3 blend logit files, dLB/dCV **2.61** against the instrument's 1.00 | 0.97107 |
+| D | the decontaminated 3-blend gap +1087.8e-6 | 0.97105 |
+
+**RESULT: 0.97106.** Model A's point prediction, exactly, and the only one of the four that hit.
+Read as likelihood ratios rather than a verdict (`experiments/w17f_readout.py`, each rival given
+its own sd): **A beats C 7.1×, B 4.9×, D 1.9×**; flat-prior posterior A 0.537 / D 0.277 / B 0.110
+/ C 0.075. That is evidence, not a refutation — A carried only P 0.585 on the value it named.
+
+What it does settle: **the loose-family "excess mechanism" is not needed to predict this file**,
+and the **paired form beat BOTH group-gap forms — the contaminated one (B) and the decontaminated
+one (D) — which named different wrong values on either side.** A group gap is the wrong estimator
+for a within-family contrast even when the group is clean. Second consecutive out-of-sample hit
+for the paired instrument (slot 1: 0.97105 predicted, 0.97105 printed).
+
+**Tier risk priced BEFORE the send — the check slot 10 skipped.** `w16v_prereg_lb.txt` asserted a
+send "provably cannot make the click more expensive" on the strength of a ladder the result then
+falsified, and the send did move the tier structure. Here: only a 0.97108 print moves anything,
+P 0.008 under A, expected +0.008 × 0.25 × 90.9e-6 = **+0.18e-6** at limit 1 against a click price
+of +2.3..+5.6e-6, and max() protects the limit-2 branches. It did not occur; **auto-slot 1 is
+unchanged at three files.**
+
+### 6. Deadline picks — UNCHANGED, ninth consecutive slot
+
+`WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}`. Pre-registered in `w17d_prereg.txt` that
+nothing in this slot could move it: §2/§3 measure the private slice, §5 measures LB, and final
+selection runs on CV (§4.6). `check_selection.py`'s printed block gains §0's pagination warning
+and §3's repriced click; **`WANTED` itself is untouched.** The CV pick additionally now rebuilds
+bit-for-bit (§1), which is the strongest reason yet to leave it alone.
+
+### 7. Next run should look at, in order
+
+1. **The click (§0 of the wave summary).** Unchanged, still unmade after **53** submissions, and
+   now repriced at **+2.3 .. +5.6e-6** with P(the auto-pick is right) only **0.03–0.06**. It is
+   not a coin-flip hedge. Re-run `check_selection.py` first — and **audit its own submission
+   count**, which uses the python client's `list_submissions` and has not been checked for the
+   pagination bug §0 found in the CLI path.
+2. **Give w17d's GLOBAL branch enough draws to be readable.** ESS 14.3 at 6,000. It conditions on
+   all six files' public scores jointly, which is strictly more information than w17g's
+   per-contrast regression, so where they disagree by more than ESS-14 noise the difference is
+   real. Cheapest fix: drop `blend159av` from `COND` (it is in neither the auto-pick nor WANTED)
+   and raise reps; also make `w17d_coupling.py` save `PUB/PRI/TOT` to an `.npz` so this never has
+   to be re-drawn.
+3. **§5.3's cross-team paired-slice sd of 53–84e-6.** Now the *fourth* candidate for the same
+   wrong-population error, and the only load-bearing one left unaudited. It closes an entire
+   research direction on six do-not-spend lists.
+4. **Re-run `w17b_famfix.py` with pagination fixed and `stack_pub*` files excluded from our
+   families**, not merely added to them. §4 shows the logit and hybrid group residual sds are
+   contaminated by foreign public stacks; the tight-family conclusions are unaffected but the
+   published table is wrong as it stands.
+
+### Files created
+
+`experiments/w17d_prereg.txt`; `w17d_coupling.py` + `.json` + `w17d_contrasts.csv`,
+`logs_w17d_coupling.txt`; `logs_w17d_rebuild.txt` (the bit-identical rebuild);
+`w17e_shipprereg.txt`, `w17e_logitpair.py` + `.json`; `w17f_readout.py` + `.json`;
+`w17g_parametric.py` + `.json` + `w17g_contrasts.csv`. Modified: `--page-size 200` added to
+`w15j_cvlb.py`, `w15j_lblaw.py`, `w17a_cvlb_scatter.py`, `w17b_famfix.py`, `w17d_coupling.py`,
+`w17e_logitpair.py`; `check_selection.py` printed block only, `WANTED` untouched.
+`JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.

@@ -4793,3 +4793,67 @@ within-cell AUC prices 2.7e7 of ~1.4e11 pairs. **Do not spend a slot there.**
 - **Check `rhash` before sending a "never-sent" file.** `w16m_widegrid` is the highest-CV
   never-sent file and is **rank-identical** to the already-sent `w16i_schemeavg`
   (`e8b3c57b8493`), so it would score 0.97107 by construction.
+
+---
+
+## ⚠ The Kaggle submission list is PAGINATED (found 2026-08-17, w17 slot 2)
+
+**`kaggle competitions submissions -c $COMP -v` returns only 50 rows in this environment**
+(the CLI documents the default as 20 and the max as 200; something here yields 50). The account
+passed 50 submissions on 2026-08-17 and the oldest rows started falling off silently.
+
+```bash
+kaggle competitions submissions -c playground-series-s6e8 -v --page-size 200   # ALWAYS
+```
+
+- **Always pass `--page-size 200`.** Every call site in `experiments/` now does.
+- The python-client path has the same trap: `check_selection.py`'s `ApiListSubmissionsRequest`
+  had `r.page_size = 50` hardcoded; now 200.
+- **How it showed up:** `w17b_sent.csv` listed `stack_pub88_mine_logit` as sent while a fresh
+  API read said it was not. Both `stack_pub74_logit` and `stack_pub88_mine_logit` (0.97081,
+  sent 08-10) were invisible. Slot 1's "46 files" tables should have had 47.
+- **No tier ever moved** — both hidden files are 27e-5 below the auto-pick tiers — but a
+  truncated list feeding an auto-pick tier computation is a live hazard. Count against
+  `... --page-size 200 | wc -l` before quoting a submission count.
+
+## The CV→LB instrument, as of 08-17 slot 2 — use the PAIRED form, never a group gap
+
+Two consecutive out-of-sample hits, both pre-registered before upload:
+
+| slot | file | regime | predicted | printed |
+|---|---|---|---|---|
+| w17 s1 | `w14a_repro159av_h3` | tight family, dCV ≈ 0 | 0.97105 | **0.97105** |
+| w17 s2 | `blend159av_logit` | **loose** family, dCV +3.4e-6 | 0.97106 | **0.97106** |
+
+```
+LB(new) = LB(nearest sibling in the same family) + dCV,
+          with the sibling's own +/-5e-6 rounding integrated out,
+          paired slice sd measured on THAT pair (3-10e-6 typical)
+```
+
+Slot 2's test was built so three rival models named three different grid values. The paired
+form was the only one that hit; it beat the fitted-slope model 7.1×, the published-group-gap
+model 4.9× and the *decontaminated* group-gap model 1.9× on likelihood. **A group gap is the
+wrong estimator for a within-family contrast even when the group is clean** — the two group-gap
+variants missed in opposite directions.
+
+⚠ **Group gaps in `w17b_sent.csv` are contaminated wherever a `stack_pub*` file is in the
+group** (logit and hybrid). Those are foreign public stacks 290e-6+ below our blends on CV.
+Logit: published +1103.4e-6 sd 32.1 (4 files) → **+1087.8e-6 sd 9.6 on the 3 comparable blends**;
+the two foreign files drag the mean +28.6e-6. The "loose logit family" is an artefact of pooling.
+
+## Public/private coupling (w17d, 6,000 draws, gated 0.000e-12 against w16w)
+
+- coupling slope of a contrast's private deviation on its public deviation, at fixed test:
+  **−0.2477** (range −0.2487..−0.2464, |corr| 0.992–0.997). Exact partition −0.2500; w14b −0.2517.
+  **AUC is not additive over a partition, so this is an empirical fact, not an identity.**
+- variance split **w = σt²/(σt²+σp²) = 0.1238**, against 0.125 predicted from row counts alone
+  (σt² ∝ (1/296302)(1−296302/691369); σp² ∝ 1/59260 − 1/296302). **w < f = 0.20**, so
+  conditioning on the observed public score makes the auto-pick look *worse*, never better.
+- the conditional: `E[d_priv | d_pub = p, dCV = c] = c + γ(p − c)`, γ = (σt² + βσp²)/(σt² + σp²),
+  **γ ≈ −0.09** here. A file 10e-6 inflated on public hands back ~1e-6 privately.
+- **Cost of the unmade click, conditioned, limit 1: +2.3 .. +5.6e-6**, and
+  **P(the auto-pick beats the CV pick privately) = 0.03–0.06, not ~0.5.**
+- ⚠ Exact non-parametric conditioning on all six files jointly costs ESS: **14.3 of 6,000 draws**
+  under one global gap, 100.2 under a per-family gap. Do not read a mean off the global branch
+  without far more draws.

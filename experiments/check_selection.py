@@ -113,7 +113,7 @@ for name, g in (("selected", SubmissionGroup.SUBMISSION_GROUP_SELECTED),
         r = ApiListSubmissionsRequest()
         r.competition_name = %r
         r.group = g
-        r.page_size = 50
+        r.page_size = 200   # ⚠ was 50; see the pagination note below (w17, 08-17 slot 2)
         resp = c.competitions.competition_api_client.list_submissions(r)
         out[name] = [(s.ref, s.file_name, s.public_score) for s in resp.submissions]
 print(json.dumps(out))
@@ -132,6 +132,14 @@ def main() -> int:
     n_ok = len(data["successful"])
     selected = data["selected"]
     print(f"control: {n_ok} successful submissions visible")
+    print("  ⚠ PAGINATION (w17 slot 2, 2026-08-17). This request now asks for page_size 200.")
+    print("  It asked for 50 until this slot, and the account passed 50 submissions on 08-17,")
+    print("  so the count above was silently a PAGE LENGTH and the tier computation below was")
+    print("  reading a truncated list. The CLI path (`kaggle competitions submissions -v`) has")
+    print("  the same default and hid stack_pub74_logit and stack_pub88_mine_logit from every")
+    print("  API-reading script here. Both score 0.97081, so no tier ever moved — but COUNT the")
+    print("  number above against `kaggle competitions submissions -v --page-size 200 | wc -l`")
+    print("  before quoting it, and do not trust any list you did not ask a page size for.")
     if n_ok == 0:
         print("CONTROL FAILED — treat the selection reading below as unknown.")
         return 2
@@ -174,6 +182,24 @@ def main() -> int:
         print("  The E[max] figures above UNDERSTATE the click: WANTED spends its second slot")
         print("  on a zero-parameter file as insurance against the whole corrected family")
         print("  failing, and a simulation drawn from train rows cannot price that.")
+        print("  ⚠ REPRICED A FIFTH TIME (w17d/w17g, 08-17 slot 2) — the figures above are the")
+        print("  UNCONDITIONED ones and they are the low end. w16w reads each file's private")
+        print("  AUC over pseudo-test draws, so E[private] = CV by construction and WANTED wins")
+        print("  automatically; it never conditions on the public scores we ACTUALLY SAW, which")
+        print("  are the entire reason the auto-pick is what it is. Public and private partition")
+        print("  ONE test set, so a file inflated on public gives some of it back on private.")
+        print("  Measured on 6,000 draws, gated at 0.000e-12 against w16w: the coupling slope is")
+        print("  -0.2477 (exact partition -0.2500; AUC is not additive over a partition so this")
+        print("  had to be measured) and the variance split is w 0.1238 against 0.125 predicted")
+        print("  from row counts. w < f = 0.20 means conditioning makes the click MORE expensive.")
+        print("  Conditioned, limit 1: +2.306e-6 (w16e_aonly) / +5.417e-6 (w16q_ens4avg)")
+        print("                        / +5.562e-6 (w16t_cellens4).   [w17g_parametric.json]")
+        print("  THE MAGNITUDE IS NOT THE POINT — a couple of e-6 is ~0.6-1.4 board places. The")
+        print("  CERTAINTY is: P(the auto-pick beats the CV pick on the private slice) is")
+        print("  0.041 / 0.033 / 0.061, NOT ~0.5. This workspace has been carrying the click as")
+        print("  a hedge against a coin flip and it is not one. (w17d's exact non-parametric")
+        print("  GLOBAL branch agrees on direction but has ESS 14.3 of 6,000 draws — do not")
+        print("  quote its +1.827..+6.727e-6; PERFAM, ESS 100, gives +1.704..+4.185e-6.)")
         print(f"Wanted: {', '.join(sorted(WANTED))}")
         print("  ⚠ note (w17a/w17b, 08-17 slot 1) — CORRECTS the w16w note below it.")
         print("  The ladder is NOT dead. Against a correct PAIRED null (500 draws of the")

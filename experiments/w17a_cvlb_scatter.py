@@ -94,7 +94,7 @@ def main() -> None:
     ap.add_argument("--out", default=os.path.join(HERE, "w17a_cvlb_scatter.json"))
     a = ap.parse_args()
 
-    raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v"],
+    raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"],
                          capture_output=True, text=True).stdout
     sub = pd.read_csv(io.StringIO(raw))
     assert (sub["status"] == "SubmissionStatus.COMPLETE").all(), "a submission is not COMPLETE"

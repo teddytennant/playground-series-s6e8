@@ -1,0 +1,91 @@
+w17d PRE-REGISTRATION — written 2026-08-17, UTC slot 2, BEFORE w17d_coupling.py was run once.
+================================================================================
+
+HANDED ANGLE: "Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check the
+CV-to-LB gap across every experiment so far, and make sure the strongest submission is the one
+selected."  TAKEN, all three clauses, mapped onto the wave-summary/slot-1 open list:
+
+  clause 1 "re-verify the best pipeline end-to-end"  -> rebuild w16i_schemeavg.csv from
+      scratch and compare md5 against the shipped artifact (the artifacts are backed up to
+      /tmp/w17d_backup first and restored afterwards regardless of outcome).
+  clause 2 "check the CV-to-LB gap across every experiment"  -> slot 1 (w17a/w17b) did this
+      four hours ago on 46 files; not repeated. What is NOT done is clause 3's half of it.
+  clause 3 "make sure the strongest submission is the one selected"  -> slot 1's §9 item 3,
+      verbatim: "Public/private coupling for the three auto-slot-1 files. §6 has the public
+      inflation but no private penalty."  THIS FILE IS ABOUT THAT.
+
+THE DEFECT IN THE STANDING CLICK PRICE, stated before it is measured
+--------------------------------------------------------------------
+w16w_reprice.py prices the unmade click at +0.831..+3.326e-6 (limit 2) / +1.266..+4.162e-6
+(limit 1). It draws pseudo-tests and reads each file's PRIVATE AUC, so E[private_k] = cv_k by
+construction and WANTED (chosen on cv) wins in expectation automatically. It never conditions
+on the public scores that were ACTUALLY OBSERVED. But those are the whole reason the auto-pick
+is what it is: slot 1 §6 showed w16e_aonly leads blend159av_h3 by 30e-6 on public and 5.3e-6 on
+CV, so ~83% of the lead is slice-specific. Public and private partition ONE test set, so a file
+whose public score is inflated by partition luck must give some of it back privately. The
+standing price is therefore a LOWER bound for a reason nobody has quantified.
+
+THE INSTRUMENT
+--------------
+Same geometry, same seed (1616), same protocol as w16w so the first 500 draws GATE against
+w16w_reprice.json exactly. Extension: read the PUBLIC slice too, then reweight the draws.
+
+Weighting is exact rather than a kernel. Model the real world as one draw of this geometry
+plus an unknown common additive gap G (the +1002e-6 CV->LB constant). Draw r is consistent with
+the observed board iff there exists a G with round(P_k + G, 5) == LB_k for every conditioning
+file k, i.e. G in [LB_k - P_k - 5e-6, LB_k - P_k + 5e-6). Intersect over k; the weight is the
+LENGTH of that interval (flat prior on G, and it integrates the 1e-5 reporting grid instead of
+approximating it). Then every private quantity is a weighted mean over draws.
+
+TWO BRANCHES, because one assumption is not decidable from one fixed slice:
+  branch GLOBAL  — one free G. Every public deviation, including the h3-vs-ens4 group gap of
+      +11.4e-6, is treated as partition noise.
+  branch PERFAM  — one free G per transform family (h3, ens4). Grants the family displacement
+      as a real train/test effect and conditions only on WITHIN-family public deviations.
+The truth is bracketed by these. Slot 1 measured the within-tight-family scatter at 7.4e-6
+observed vs 9.4e-6 predicted by partition+grid alone (ratio 0.79), which supports GLOBAL for
+within-family contrasts; it says nothing about the between-family constant.
+
+PREDICTIONS, and what falsifies each
+------------------------------------
+P1 (gate, not a discovery). The unweighted limit-2 and limit-1 costs reproduce
+    w16w_reprice.json to < 1e-12. FALSIFIED by any drift above that; downstream numbers are
+    then not to be believed and the script must not write its json.
+
+P2. The public/private coupling measured on the simulated draws — the slope of (private
+    contrast deviation) on (public contrast deviation) across draws, at fixed pseudo-test —
+    lands at -0.250 +/- 0.010, matching -f/(1-f) = -0.2500 and w14b's -0.2517.
+    FALSIFIED outside -0.24..-0.26. AUC is not additive over a partition so this is an
+    empirical claim, not an identity, and it is the load-bearing assumption of the whole file.
+
+P3. The variance split. Writing sigma_t for the sd across draws of a contrast's FULL pseudo-test
+    AUC about its pooled CV, and sigma_p for the sd of (public - full) at fixed pseudo-test,
+    the shrinkage weight w = sigma_t^2/(sigma_t^2 + sigma_p^2) will be ~0.125, from row counts
+    alone: sigma_t^2 ~ (1/296302)(1 - 296302/691369) = 1.93e-6 and sigma_p^2 ~ 1/59260 -
+    1/296302 = 13.5e-6, ratio 7.0. FALSIFIED outside 0.10..0.15. w = f = 0.20 is the break-even
+    at which conditioning on public changes nothing; w < f means the click gets MORE expensive.
+
+P4 (the actual result this file exists to produce). Conditioning RAISES the cost of not
+    clicking. Specifically the limit-1 cost for w16e_aonly rises from w16w's +1.266e-6 to
+    between +2.0e-6 and +3.0e-6 under branch GLOBAL. FALSIFIED if it comes in below +1.266e-6
+    (conditioning did not bite, or bit the wrong way) or above +4.0e-6.
+
+P5. P(the auto-slot-1 file beats the CV pick privately) falls under conditioning for all three
+    auto files, and stays strictly inside 0.30..0.50 — i.e. the auto-pick is disfavoured but
+    NOT resolved. FALSIFIED by any of the three landing outside that band. A number below 0.30
+    would be this workspace claiming a resolution the 237,042-row private slice cannot deliver
+    and should be disbelieved as hard as one above 0.50.
+
+SHIP DECISION, FIXED NOW
+------------------------
+This file CANNOT move WANTED. WANTED = {w16i_schemeavg.csv, blend159av_h3.csv} is selected on
+CV; everything here is a measurement of LB and of the private slice, and wave-summary §4.6 is
+explicit that no deadline pick moves on a slice reading. Whatever P4 returns, WANTED is
+unchanged and check_selection.py's WANTED tuple is not edited.
+
+The slot's submission is chosen SEPARATELY and on the criterion fixed here: the never-sent file
+whose predicted public score is furthest from the score of its nearest already-sent sibling, so
+that the paired-slice instrument makes a claim the grid can actually resolve. Slot 1 tested the
+instrument at dCV ~ 0 (the repro pair, predicted 0.97105, printed 0.97105). The untested regime
+is large dCV, where the instrument claims the difference IS resolved. The prediction is
+pre-registered in w17e_shipprereg.txt before the upload.
