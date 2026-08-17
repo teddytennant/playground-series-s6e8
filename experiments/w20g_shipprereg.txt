@@ -1,0 +1,64 @@
+w20 SHIP PRE-REGISTRATION — written before the upload, 2026-08-17
+=================================================================
+
+FILE      submissions/w20_ad187_h3.csv
+WHAT      the h3 rank-ensemble (hybrid + rankraw + rescale, logit dropped) of a
+          187-member stack = the standing 165-member pack + the 22 members imported
+          this slot from adarsh1077/s6e8-adarsh-oof-library.
+CV        0.9701008150, cross-fitted on the frozen folds.
+          +51.6e-6 vs blend159av_h3 (the like-for-like h3 reference, LB 0.97105)
+          +45.2e-6 vs w16i_schemeavg (the standing deadline pick)
+rhash     1aa3be2fa067 — rank-distinct from all 56 sent files, checked file-by-file
+          against every CSV on disk, not against a remembered list.
+
+REGISTERED PREDICTION (LAW-IF closed form, reference blend159av_h3, paired sd 25.7e-6):
+
+  0.97104 .009 | 0.97105 .021 | 0.97106 .042 | 0.97107 .073 | 0.97108 .109
+  0.97109 .139 | 0.97110 .154 | 0.97111 .146 | 0.97112 .120 | 0.97113 .085
+  0.97114 .051 | 0.97115 .027 | 0.97116 .012
+
+  P(strictly above the account best 0.97108) = 0.741
+  modal cell 0.97110
+
+WHAT FALSIFIES IT
+  A print at or below 0.97105 (cumulative P 0.030) says the CV gain does not transfer
+  and the first thing to suspect is the fold gate — i.e. that the adarsh OOF was NOT
+  cross-validated on our partition after all and the +51.6e-6 is stack optimism.
+  A print in 0.97106-0.97108 is inside the distribution and settles nothing on its own.
+
+WHY THE PAIRED SD IS 25.7e-6 AND NOT THE USUAL 3.6-10e-6
+  Every previous send from this workspace was a near-twin of its reference, so the
+  influence vectors nearly cancelled. 22 new members from a pipeline we did not hold
+  move the ranking materially, so this pair is genuinely wide. That is the instrument
+  reporting the truth, not a defect — and it means this print carries MORE information
+  about tau than any tight pair does, in the opposite direction to w19's advice to
+  prefer tight pairs.
+
+DEADLINE PICK — NOT CHANGED BY THIS SEND, AND THE REASON IS NOT INERTIA
+  WANTED stays {w16i_schemeavg.csv, blend159av_h3.csv} for THIS slot. w20_ad187_h3 has
+  the higher CV by 45.2e-6 and final selection runs on CV, so it is the presumptive new
+  pick — but two things must be checked before the pick moves, and neither can be done
+  after the fact:
+    (1) the c_avg / scheme-average correction (+6.4e-6, w16i) has not been rebuilt on
+        the new base, so the honest comparison is 0.9701008 vs 0.9700492, not vs the
+        corrected 0.9700557 — the corrected new file will be higher still;
+    (2) w20d's paired attribution must finish. rep 0 has base 0.970104 -> all22
+        0.970161 (+57e-6), which corroborates, but one split is one split.
+  Registered here so that moving the pick next slot is a decision with a stated
+  precondition, not a drift.
+
+SECOND SEND, registered before upload
+=====================================
+FILE   submissions/w20_ad187_rankraw.csv   CV 0.9700915300, rhash checked, never sent.
+WHY THIS ONE AND NOT THE ALL-FOUR TWIN, which has the higher CV (0.970098):
+  the h3 send just took public slot 1 outright at 0.97115, and that slot is now held by
+  the file CV also ranks first. A near-twin landing at 0.97115 or 0.97116 would put an
+  undocumented tiebreak back in front of the auto-selection for a CV difference of 3e-6.
+  The rankraw family scores 2-3e-6 BELOW h3 on every pairing on file, so this send tests
+  the CV->LB ladder at a level it has never reached without disturbing the top tier.
+  Cost of the alternative priced at <=3e-6; not large, but paid for nothing.
+REFERENCE blend159av_rankraw, LB 0.97102, dCV +57.7e-6, LAW-IF paired sd 26.3e-6.
+REGISTERED  0.97107 .144 | 0.97108 .150 | 0.97109 .135 | 0.97106 .121 | 0.97110 .106
+            0.97105 .087 | 0.97111 .072 | 0.97104 .055 | 0.97112 .042 | 0.97103 .030
+            P(above 0.97108) = 0.390, modal 0.97108
+FALSIFIED BY  a print at or below 0.97103 (cumulative P 0.050).

@@ -10483,3 +10483,201 @@ final selection runs on CV; the shipped file is 12.0e-6 below the pick. `check_s
 `w19c_clicksens.py` + `.json` + `w19c_sweep.csv`; `w19d_taupost.py` + `.json`;
 `w19e_shipprereg.txt`. Modified: `check_selection.py` printed block only (`WANTED` untouched).
 `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+
+---
+
+# ══ 2026-08-17 (UTC) — WAVE w20, SLOT 6 of 10 ══
+
+**Handed angle:** "CatBoost: it usually handles categoricals better than the others on
+survey-style data. Tune and compare on identical folds." **TAKEN, in the one form the record
+says can pay, and it was the best slot this workspace has had.** Re-*tuning* CatBoost is
+closed — RESEARCH §"⚠ CLOSED 2026-08-13: tuning ANY GBDT is worth ~4e-7 into the stack", and
+solo→stack pass-through is 1.4%. What was never closed is CatBoost **from a pipeline we do not
+hold**. Four such CatBoosts were imported this slot and are worth **+41e-6 ± 1**.
+
+**Quota:** `get_submission_limits` at slot start: `numToday 5, numAllowedNow 5, numTotal 56`.
+After two sends the CLI printed **"3 submissions remaining today"** — 7 of 10 used, **cap 10
+re-confirmed for the sixth consecutive slot**. The prompt's "10 already today" was stale
+across the UTC rollover for the sixth consecutive slot; `date -u` read 02:50 at slot start.
+
+Pre-registered in `experiments/w20g_shipprereg.txt` before each upload.
+
+### 0. ⚠ THE MISS THAT COST SIX DAYS, RECORDED FIRST BECAUSE IT IS THE TRANSFERABLE LESSON
+
+RESEARCH says "re-run the pool enumeration **weekly**, not every run", on the strength of one
+observation (2026-08-11: "20 datasets, all already known, the pool has been static for two
+days"). It was last run **2026-08-11**. One `kaggle datasets list -s s6e8 --sort-by updated`
+call this slot returned `adarsh1077/s6e8-adarsh-oof-library` — **22 members, OOF + test, our
+exact frozen fold scheme, CC0, published 2026-08-15**. It was sitting there for two days while
+five slots were spent on decision theory about a 2e-6 selection click.
+
+**The rule is now: enumerate every run.** It costs one API call. The single largest gain ever
+recorded in this workspace came from an import, and so did this one.
+
+(⚠ `curl` is absent from this shell, so the "legacy REST endpoint" recipe in RESEARCH's import
+section cannot be run as written. The CLI's `datasets list --sort-by updated` works.)
+
+### 1. THE PROBLEM THE IMPORT CREATED, AND THE NEW GATE THAT SOLVED IT
+
+adarsh1077 ships **no `fold_id.npy` and no per-fold AUCs**. RESEARCH's three gates are pooled
+AUC reproduction (proves row ORDER only), credibility, and the exact fold-id gate. Under those
+rules this library was **unverifiable and would have been rejected** — and a library
+cross-validated on a foreign partition is exactly what inflates a stack's CV, because a
+training-fold row's member value then comes from a base model that saw our validation labels.
+
+**`experiments/w20a_foldgate.py` — a K-fold OOF is a mosaic of K separately-fitted models, and
+that mosaic is a signature of the partition.** Statistic: one-way ANOVA F of the member's logit
+across our five frozen folds. Null: 200 stratified random 5-way partitions. A member built on a
+*foreign* stratified partition is **exchangeable with a random one with respect to ours** — same
+sizes, same per-fold class balance, independent membership — so the permutation null **is** the
+alternative's distribution, not an approximation to it.
+
+| group | n | pass (above every null draw) | log10(F/F_null) min / med / max |
+|---|---|---|---|
+| our own `oof/` (positive control) | 20 | 11 | −0.23 / +0.85 / +1.24 |
+| beicicc, fold-id gated (positive control) | 12 | 6 | −0.22 / +0.67 / +1.87 |
+| **adarsh** | 22 | **20** | +0.46 / **+1.53** / +2.83 |
+| catstr | 1 | 0 | **−0.88** |
+
+**The workspace already owned a perfect zero-dose anchor and had never noticed.** `orig_bin`,
+`orig_binm`, `w15d_origrep_r` are fitted on the 7,500-row original, so no partition ever entered
+them and their score *must* sit at null. They read **+0.09 / −0.23 / +0.02**. That is a free
+calibration point, exactly the shape of w15g's `scale` instrument.
+
+adarsh scores **above both positive controls**, and all 22 reproduce their published OOF AUC to
+**<5e-9**. Imported. ⚠ The verdict is asymmetric — a pass is strong, a fail is inconclusive
+(9 of our own 20 controls do not clear their own null max, because a heavily-regularised model
+on 553k rows barely changes between folds). Never reject a library on a weak score alone.
+
+`masayakawamata/s6e8-catstr-aug16` reads **below** the null (F 0.047 vs median 0.35), which is
+its own anomaly: per-fold *normalisation* on the true partition produces exactly that, and so
+does leaky bagging, with opposite consequences. `w20c_import.py` separated them on three
+statistics and **none is decisive** (z −1.74 / −3.06 / +0.94 against +5.90 / −19.84 / +1.13 for
+`ad_catnative`). Recorded as **undetermined, not refuted**, and held out on the *combination* of
+unverifiable provenance and maxcorr 0.9977 — redundant even if honest.
+
+### 2. ⚠ THE PACK WAS NOT SATURATED, AND THE ANGLE'S GROUP LED THE TABLE
+
+`w20d_value.py`, paired 50/50, 3 splits, same rows with and without each group:
+
+| group | n | paired delta | per member | sign |
+|---|---|---|---|---|
+| all 22 | 22 | **+0.000047 ± 0.000009** | +2.15e-6 | consistent |
+| **`cat` — 4 CatBoost variants** | 4 | **+0.000041 ± 0.000001** | **+10.3e-6** | consistent |
+| `note` — 4 no-target-encoding views | 4 | +0.000032 ± 0.000010 | +8.0e-6 | consistent |
+| `redundant` — 10 TE-GBDT variants | 10 | +0.000010 ± 0.000005 | +1.0e-6 | consistent |
+| `logreg` — solo 0.9589, maxcorr 0.9598 | 1 | +0.000003 ± 0.000002 | +2.7e-6 | consistent |
+| `nn` — 3 MLPs | 3 | +0.000003 ± 0.000003 | +0.8e-6 | **SIGN FLIPS** |
+
+**+10.3e-6 per member is the second-highest ever measured here** (only `lookup2`'s 17.3e-6 beats
+it) and nearly double the 5.9e-6 that the `rest` group scored — the group whose existence was
+the previous evidence that ordinary GBDTs are worthless.
+
+**And the library's own author measured the opposite.** adarsh's README reports those four
+CatBoosts moved *their* 178-member nested score by **−0.000001** and gives them negative stack
+coefficients. Both measurements are right: their pack already spanned that direction, ours did
+not. **Never screen an import on the author's own ablation.** Equally, `logregte` — which they
+rank 6th of 22 *by coefficient* — is worth +3e-6 here. A large coefficient is what the fit needs
+to *cancel* a member; that is not marginal value.
+
+### 3. SHIP 1 — `w20_ad187_h3`, ref **55569373**, printed **0.97115. NEW ACCOUNT BEST, RANK 77 → 19.**
+
+The h3 rank-ensemble of the 187-member stack. **CV 0.9701008150**, +51.6e-6 on `blend159av_h3`
+and +45.2e-6 on the standing deadline pick — the largest CV move since the 63-member import,
+and an order of magnitude clear of every noise scale that applies to a CV comparison on the
+frozen folds (2e-6 rebuild floor; the 5e-5 "floor" is a *public-slice gap* quantity and does
+not govern this). Per-transform: logit 0.970025, hybrid 0.970077, rankraw 0.970092,
+rescale 0.970078, all-four 0.970098, **h3 0.970101**.
+
+Registered before upload: modal 0.97110, P(above the account best 0.97108) **0.741**.
+**Printed 0.97115** — inside the registered distribution, on the high side.
+
+**Rank 19 of 2,051**, up from 77. Gap to #1 (MILANFX 0.97132) down from 24e-5 to **17e-5**.
+
+### 4. SHIP 2 — `w20_ad187_rankraw`, ref **55569417**, printed **0.97114**
+
+Chosen over the higher-CV all-four twin **for a stated reason, registered before the send**:
+the h3 file had just taken public slot 1 outright, that slot is now held by the file CV also
+ranks first, and a near-twin landing in the same tier would put an undocumented tiebreak back
+in front of the auto-selection for a 3e-6 CV difference. The rankraw family sits 2–3e-6 below
+h3 on every pairing on file, so this send probes the ladder without disturbing the top tier.
+
+Registered modal 0.97108, P(above 0.97108) 0.390. **Printed 0.97114 — a tail cell (P 0.009).
+The paired prediction MISSED, high.** Which is the slot's second finding:
+
+### 5. ⚠ dLB CAME IN AT ~2× dCV ON BOTH FILES
+
+| file | dCV | dLB | ratio | LAW-IF sd | z of (dLB−dCV) |
+|---|---|---|---|---|---|
+| `w20_ad187_h3` | +51.6e-6 | +100e-6 | 1.94 | 25.7e-6 | **+1.9** |
+| `w20_ad187_rankraw` | +57.7e-6 | +120e-6 | 2.08 | 26.3e-6 | **+2.4** |
+
+w19b concluded "stop trying to fit the CV→LB slope from the board; `sd(beta_hat)` is 0.66".
+**That conclusion should be SCOPED, not deleted.** It was fitted on 194 pairs all with |dCV|
+under ~25e-6. These two sit at |dCV| ≈ 55e-6, where the same noise buys an order of magnitude
+more leverage — and both land ~2×, same sign, in two different transform families against two
+different references. The operational consequence inverts w19's advice: **tau is identified at
+tight pairs, beta at wide ones**, so the two instruments want opposite sends.
+
+Caveats stated rather than buried: n = 2, the two files share a pack and are strongly
+correlated with each other, and this is the public slice. A mechanism that predicts `beta > 1`
+*scaling with members added* is already on file — the **OOF/test bagging asymmetry** (w16o): the
+fold meta-models see 4/5 of the rows, the submitted column comes from a full-data fit, and a
+wider stack gains more from the extra fifth. **Testable locally and for free next slot.**
+
+### 6. DEADLINE PICK — HELD, and the hold is PRE-REGISTERED, not inertia
+
+`WANTED = {w16i_schemeavg.csv, blend159av_h3.csv}`, thirteenth consecutive slot. `w20_ad187_h3`
+is the presumptive new pick on CV (+45.2e-6) and **dominates `blend159av_h3` on the very
+criterion that file was chosen for** (zero fitted parameters). `w20g_shipprereg.txt`, written
+before the upload and before any LB number existed, named two preconditions; both are now met
+or resolved, so **the next slot should set `WANTED = {w20_ad187_h3.csv, w16i_schemeavg.csv}`.**
+Holding this slot was the point of writing the precondition down — the 0.97115 print is exactly
+the kind of public-LB evidence the brief's Rogii warning says not to select on, and the CV case
+does not need it.
+
+`check_selection.py`'s printed block now opens with a boxed supersession notice carrying all
+five CVs. **`WANTED` itself untouched.**
+
+### 7. ⚠ THE CLICK HAS LARGELY COLLAPSED AS A PROBLEM
+
+Four slots of pricing (w16w, w17d/g, w18a, w19c/d) all address one risk: Kaggle's auto-pick
+takes a **public-inflated** file over the CV pick. Live tiers after this slot:
+
+```
+auto-slot 1: public 0.97115, 1-way — w20_ad187_h3       <- CV rank 1
+auto-slot 2: public 0.97114, 1-way — w20_ad187_rankraw  <- CV rank 3
+```
+
+No ties, no tiebreak ambiguity, and both are files CV endorses. **w19d's marginalised
++1.890 / +5.300 / +5.562e-6 describes a board state that no longer exists.** Do not quote it
+again without re-running it. The click still helps (slot 2 would ideally hold the corrected
+`w16i_schemeavg` as cross-base insurance rather than a rankraw twin), but its size has fallen
+from "the largest live decision in the workspace" to a second-order hedge.
+
+### 8. Next run should look at, in order
+
+1. **Set `WANTED = {w20_ad187_h3.csv, w16i_schemeavg.csv}`** (§6). Preconditions met.
+2. **Rebuild the `c_avg` / scheme-average correction on the 187-member base.** It was worth
+   +6.4e-6 on the old base (w16i) and has never been applied to the new one. This is the
+   cheapest remaining CV gain and it makes the new pick strictly better.
+3. **Enumerate the dataset pool — every run, no exceptions (§0).** Then re-screen
+   `kenchanhodgkin/pg-s6e8-exp002…012`: `exp012` is now OOF **0.966959** (was 0.954 at
+   dismissal), ships `model_fold{0..4}.joblib` so test columns can be generated locally, and
+   ships `fold_scores` so RESEARCH's 30-second per-fold gate applies. ⚠ Its `results.json`
+   carries an `early_stopping` block — check for the `golem_a`/`golem_f` defect first.
+4. **Test the OOF/test bagging asymmetry directly (§5)** — it is the named mechanism for the
+   2× slope, and it is local, free, and currently only inferred.
+5. **Re-run `w19a_transfer.py` cumulatively.** Two sends at |dCV| ≈ 55e-6 are the widest pairs
+   the set has ever contained; they will move both `tau` and `beta`.
+
+### Files created
+
+`experiments/w20a_foldgate.py` + `.json` + `.csv`; `w20b_screen.py` + `.json` + `.csv`;
+`w20c_import.py` + `.json`; `w20d_value.py` + `.json` + `.csv`; `w20f_presend.py` + `.json`;
+`w20g_shipprereg.txt`; `data/ext_members3/` (22 `ad_*` member pairs + `_vetting_w20.csv`);
+`submissions/w20_ad187{,_logit,_hybrid,_rankraw,_rescale,_h3}.csv` + their OOF vectors;
+logs `logs_w20a_foldgate.txt`, `logs_w20b_screen.txt`, `logs_w20d_value.txt`,
+`logs_w20e_build.txt`. Modified: `experiments/blend_lab.py` (new optional `--extra-dirs`,
+default empty so every earlier build reproduces byte-for-byte), `check_selection.py` printed
+block only (`WANTED` untouched). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to.

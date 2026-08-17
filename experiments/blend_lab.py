@@ -58,10 +58,12 @@ def rk(v):
     return (rankdata(v) - 0.5) / len(v)
 
 
-def load_all(kinds, drop, quiet=False):
+def load_all(kinds, drop, quiet=False, extra_dirs=None):
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
     extra = (os.path.join(DATA, "ext_members"), os.path.join(DATA, "ext_members2"))
+    if extra_dirs:
+        extra = extra + tuple(extra_dirs)
     names, O, T = load_members(y, len(te), extra_dirs=extra, drop=set(drop))
     if not quiet:
         print(f"{len(names)} members", flush=True)
@@ -233,12 +235,17 @@ def main():
                     help="L2 penalty per row; overrides --C and rescales it per fit n")
     ap.add_argument("--standardize", action="store_true",
                     help="scale members to unit sd so the L2 penalty is isotropic")
+    ap.add_argument("--extra-dirs", default="",
+                    help="comma-separated member dirs to load ON TOP of ext_members{,2}; "
+                         "the default is empty, so every earlier build reproduces")
     a = ap.parse_args()
 
     kinds = [k for k in a.kinds.split(",") if k]
     t0 = time.time()
     names, y, mats, te = load_all(tuple(dict.fromkeys(list(kinds) + ["rankraw"])),
-                                  set(filter(None, a.drop.split(","))))
+                                  set(filter(None, a.drop.split(","))),
+                                  extra_dirs=[os.path.join(DATA, d) for d in
+                                              filter(None, a.extra_dirs.split(","))])
     print(f"loaded in {time.time()-t0:.0f}s", flush=True)
 
     if a.reps:

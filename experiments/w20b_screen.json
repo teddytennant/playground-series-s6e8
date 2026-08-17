@@ -1,0 +1,9 @@
+{
+ "n": 23,
+ "pack": 167,
+ "gate1_fail": [],
+ "gate2_fail": [],
+ "maxcorr_min": 0.9597498658435138,
+ "best": "catnative",
+ "best_auc": 0.9686011660755198
+}

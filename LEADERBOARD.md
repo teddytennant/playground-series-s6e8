@@ -789,3 +789,36 @@ Account best public unchanged at **0.97108**, held by three files; 54 submission
 - **The board's team name for this account is "Teddy Tennant", not `thtennant`.** A lookup on
   `thtennant` returns "not found" across all 2,047 rows — this cost a cycle to notice.
 - Submission 56 (`w14a_repro159av`, 0.97106) did not move rank, as priced before the send.
+
+## 2026-08-17 ~03:20 UTC (w20, slot 6)
+
+- **Rank 77 of 2,049** at public **0.97108**, 56 submissions. Unchanged from slot 5; the field
+  grew by 2 teams overnight and nothing near us moved.
+- Top five: MILANFX 0.97132, Optimistix 0.97125, Utkarsh 0.97124, Keanan 0.97124,
+  Maher el Ouahabi 0.97124. Gap to #1 **24e-5**, unchanged for two slots.
+- Submission counts are worth reading next to the scores: MILANFX reached 0.97132 in **15**
+  submissions and Keanan 0.97124 in **8**, against Optimistix's 109 and our 56. On a board
+  where the cross-team paired floor is 53-84e-6 (w17h), a 15-submission 0.97132 is not
+  distinguishable from a 109-submission 0.97125 — and neither is distinguishable from us.
+
+### After w20's two sends — RANK 77 → 19 of 2,051
+
+| | before slot 6 | after slot 6 |
+|---|---|---|
+| public best | 0.97108 | **0.97115** |
+| rank | 77 | **19** |
+| gap to MILANFX (#1, 0.97132) | 24e-5 | **17e-5** |
+| submissions | 56 | 58 |
+
+`w20_ad187_h3` → **0.97115** (registered modal 0.97110, P(>0.97108) 0.741 — hit).
+`w20_ad187_rankraw` → **0.97114** (registered modal 0.97108 — a tail cell, missed high).
+
+The 0.97115 tier holds 7 teams (ranks 15–21); one grid step is ~4 board places at this density,
+so the honest reading is unchanged from w17h — everything from 0.97113 to 0.97117 is inside the
+53–84e-6 cross-team floor and is **not** a difference. What did change is real and is a CV fact,
+not an LB fact: the shipped object gained +51.6e-6 of cross-fitted CV.
+
+⚠ **`AdarshAleti` sits at rank 13 with 0.97116 — that is the author of the OOF library this
+slot imported.** They publish their members under CC0 and their own README documents an ablation
+that reaches the opposite conclusion to ours about their CatBoost group (see RESEARCH). Worth
+watching: they are 27 submissions in, above us, and shipping their raw material publicly.

@@ -5144,3 +5144,170 @@ off-scalar residual of `M = S_t (S_t+S_p)^{-1}` is 1.06e-10 at tau = 0 and **0.2
 - Prefer ships that are **tight pairs in a populated family**: that is where `tau` is identified,
   and after §C `tau` is where the marginal value of a submission now lives. Re-run
   `w19a_transfer.py` after every send — 194 → 205 pairs moved the 95% upper 1.72 → 1.50e-6.
+
+---
+
+# w20 (slot 6, 2026-08-17) — a fold-partition gate that needs no `fold_id.npy`
+
+## ⚠ The pool was NOT static: 22 importable members appeared on 08-15 and were missed
+
+RESEARCH's import section says "re-run the pool enumeration weekly, not every run" and was
+last run **2026-08-11**. Six days later the pool contains material that did not exist then:
+
+| ref | published | what it is | disposition |
+|---|---|---|---|
+| `adarsh1077/s6e8-adarsh-oof-library` | 08-15 | **22 members**, OOF+test, our exact frozen scheme, CC0 | **IMPORTED** as `ad_*` |
+| `masayakawamata/s6e8-catstr-aug16` | 08-16 | 1 CatBoost, raw string cats | held out — unverifiable AND maxcorr 0.9977 |
+| `kenchanhodgkin/pg-s6e8-exp002…012` | 08-15/16 | 11 datasets, **OOF only, no test preds** | still not importable as-is — but see below |
+| `yadoy666/94-verified-oof-gpu-accelerated-meta-stack` | 08-17 | level-2 meta-stack, submission only | excluded on mechanism (as `sixmember_*`) |
+
+**Weekly is too slow at this stage of an episode.** The single largest gain ever recorded in
+this workspace (+0.000340 CV) came from importing a pool the previous runs had walked past.
+Re-enumerate every run; it costs one `kaggle datasets list -s s6e8 --sort-by updated` call.
+
+⚠ `curl` is **absent** from this shell — the "legacy REST endpoint" recipe in the import
+section cannot be run as written. Use `kaggle datasets list -s <term> --sort-by updated`
+over several terms; it works, and `--sort-by updated` is what surfaces new material.
+
+## ✅ THE NEW GATE — `experiments/w20a_foldgate.py`
+
+RESEARCH's three existing gates are pooled-AUC reproduction (proves ROW ORDER only),
+credibility (<0.9720), and the exact fold-id gate (needs the author to ship `fold_id.npy`).
+`adarsh1077` ships neither a fold id nor per-fold AUCs, so under the old rules it was
+unverifiable and would have been rejected — 22 members, one of them the best CatBoost this
+workspace has ever seen.
+
+**A K-fold OOF vector is a mosaic of K separately-fitted models, and that mosaic is a
+signature of the partition that produced it.** Two models fitted on 80%-overlapping data are
+not identically calibrated, so the fold-level mean of the score carries the partition.
+
+```
+statistic : one-way ANOVA F of logit(member) across OUR five frozen folds
+null      : 200 stratified random 5-way partitions, same statistic, same vector
+report    : log10(F_obs / median F_null)
+```
+
+**Why the permutation null is the exact negative control, not an approximation.** A member
+cross-validated on a *foreign* stratified 5-fold partition is exchangeable with a *random*
+stratified partition with respect to ours — same fold sizes, same per-fold class balance
+(both stratified on the same y), independent membership. So the null IS the
+foreign-partition distribution, not a stand-in for it.
+
+**The workspace already contained the perfect zero-dose anchor and nobody had noticed.**
+`orig_bin`, `orig_binm`, `w15d_origrep_r` are fitted on the 7,500-row original, so no
+partition ever entered them and their score MUST sit at null. They read **+0.09, −0.23,
++0.02**. Members fitted on our folds read **+0.45 to +1.24**. Same dose-response shape as
+w15g's `scale` instrument, with a free calibration point.
+
+| group | n | pass (F_obs above every null draw) | log10 ratio min / med / max |
+|---|---|---|---|
+| our own `oof/` | 20 | 11 | −0.23 / **+0.85** / +1.24 |
+| beicicc (fold-id gated, so on our folds by proof) | 12 | 6 | −0.22 / **+0.67** / +1.87 |
+| **adarsh** | 22 | **20** | +0.46 / **+1.53** / +2.83 |
+| catstr | 1 | 0 | **−0.88** |
+
+adarsh scores *higher* than the two positive-control groups. Its 22 members also reproduce
+their published OOF AUC to **<5e-9 on all 22** and every one is credible. Imported.
+
+⚠ **The verdict is ASYMMETRIC. A pass is strong; a fail is inconclusive.** Members whose
+base models barely differ across folds (a heavily-regularised linear model on 553k rows)
+have no signature to detect — 9 of our own 20 controls do not clear their own null max.
+Never reject a library on a weak score alone; run the controls and quote the group.
+
+## The `cat_str` anomaly, and the mechanism it does NOT establish
+
+`masayakawamata/s6e8-catstr-aug16` reads F 0.047 against a null median of 0.35 — our
+partition explains **less** between-fold variance than a random one. Two mechanisms produce
+that, and they have opposite consequences:
+
+- **(a) per-fold normalisation.** Standardising within each fold of partition P drives P's
+  between-fold mean variance to ~0 while leaving any other partition at null. Suppression
+  specific to *our* folds would then be positive evidence that P = ours — the same
+  signature with the sign flipped — and is **not a leak**.
+- **(b) averaging over models that saw the rows they score** (bagging across folds/seeds),
+  which shrinks between-fold spread under every partition. That **is** a leak.
+
+`w20c_import.py` separates them on the fold-mean spread, the per-fold sd and the per-fold
+AUC. Result: **z −1.74 / −3.06 / +0.94 — none decisive**, against **+5.90 / −19.84 / +1.13**
+for `ad_catnative` on the same three statistics. So `cat_str` is **undetermined, not
+refuted**. It is held out on the *combination* of unverifiable provenance and maxcorr
+**0.9977** to `bei_exact_value_catboost_fixed4000`, i.e. it is redundant even if honest.
+Record the disposition as "no evidence either way", not as a failed gate.
+
+## `kenchanhodgkin` is now worth a second look — but NOT as an import
+
+`exp000/001` were dismissed 2026-08-13 as "OOF-only, 0.9542/0.9534, far below the pack".
+**`exp012-child-exp003` reads OOF 0.966959** and ships `model_fold{0..4}.joblib` plus
+`fold_scores` (five per-fold AUCs, so RESEARCH's 30-second per-fold gate applies directly).
+Test predictions could be generated locally from the joblibs. Two reasons it is not this
+slot's work, and both need checking before a future slot spends on it: `results.json`
+carries an `early_stopping` block — if it early-stops on its own validation fold that is the
+`golem_a`/`golem_f` defect and the OOF is optimistic — and 0.96696 is ordinary for this pool.
+
+## ⚠ THE PACK WAS NOT SATURATED. 22 members bought +47e-6, and the CatBoost group led it
+
+`experiments/w20d_value.py`, paired 50/50 stratified splits, 3 reps, hybrid transform,
+same rows with and without each group so the ~2e-4 split noise cancels.
+
+| group added to the 165-member base | n | paired delta | per member | sign |
+|---|---|---|---|---|
+| **all 22** | 22 | **+0.000047 ± 0.000009** | +2.15e-6 | consistent |
+| **`cat` — 4 CatBoost variants** | 4 | **+0.000041 ± 0.000001** | **+10.3e-6** | consistent |
+| `note` — the 4 no-target-encoding views | 4 | +0.000032 ± 0.000010 | +8.0e-6 | consistent |
+| `redundant` — 10 TE-GBDT variants of held recipes | 10 | +0.000010 ± 0.000005 | +1.0e-6 | consistent |
+| `logreg` — one L2 logistic, solo 0.9589 | 1 | +0.000003 ± 0.000002 | +2.7e-6 | consistent |
+| `nn` — 3 PyTorch MLPs | 3 | +0.000003 ± 0.000003 | +0.8e-6 | **SIGN FLIPS** |
+
+`cat` + `note` sum to more than `all22` because the groups overlap in what they explain;
+that is expected, not an inconsistency.
+
+**Three standing beliefs are corrected by this table.**
+
+1. **"The GBDT line has plateaued" was a statement about OUR pipeline, not about the pack.**
+   Every "another GBDT is worth nothing" measurement here was made on a GBDT *we* built, on
+   *our* features. Four CatBoosts from a pipeline we did not hold are worth **10.3e-6 each**
+   — second only to `lookup2`'s 17.3e-6 in the whole record, and nearly double the 5.9e-6 of
+   the `rest` group that previously carried this argument. **Whose pipeline built it is the
+   dominant variable, and it is not observable from the family label.**
+2. **Member value is PACK-RELATIVE, and the library's own author can be wrong about it in
+   good faith.** adarsh1077's README reports that adding those four CatBoost variants after
+   `catnative` moved *their* 178-member nested score by **−0.000001**, and ranks them at
+   negative stack coefficients. In our pack the same four arrays are the **best group in the
+   import**. Nothing is contradictory: their pack already spanned that direction and ours did
+   not. **Never screen an import on the author's own ablation — re-measure it in your pack.**
+3. **The ~0.966 solo floor survives, and `logregte` is the test that could have broken it.**
+   Solo 0.9589, maxcorr 0.9598 (the most decorrelated member in the import by a distance),
+   and adarsh ranks it 6th of 22 by stack coefficient. Paired here: **+3e-6 for one member**,
+   i.e. real but ordinary. A large stack coefficient is not a large marginal value — the
+   coefficient is what the fit needs to *cancel* the member, and those are different
+   quantities. The MLPs, on the same test, are a **null with a flipping sign**.
+
+## ⚠ dLB came in at ~2x dCV on BOTH new files — the first data where the slope is identifiable
+
+| file | reference | dCV | dLB | ratio | LAW-IF paired sd |
+|---|---|---|---|---|---|
+| `w20_ad187_h3` | `blend159av_h3` 0.97105 | +51.6e-6 | **+100e-6** | 1.94 | 25.7e-6 |
+| `w20_ad187_rankraw` | `blend159av_rankraw` 0.97102 | +57.7e-6 | **+120e-6** | 2.08 | 26.3e-6 |
+
+Residuals `dLB − dCV` of **+48e-6 (z +1.9)** and **+62e-6 (z +2.4)** against the tau = 0 null,
+same sign, two different transform families, two different references.
+
+**Read this against w19b before over-claiming.** w19b fitted `beta` (the CV→LB slope) over 194
+within-family pairs, found `beta_ours` 2.12 at the null's 95.8th percentile, and concluded the
+board *cannot* resolve the slope: `sd(beta_hat) = 0.66` under the correct model. **That
+conclusion holds for the pairs it was fitted on, and those pairs all have |dCV| under ~25e-6.**
+These two have |dCV| ≈ 55e-6, an order of magnitude further out, where the same noise buys far
+more leverage. w19b's "stop trying to fit the slope from the board" should be **scoped to the
+tight-pair regime**, not deleted — and the way to make progress is now explicit: **send files
+with LARGE dCV**, which is the exact opposite of w19's "prefer tight pairs" advice, because the
+two instruments (tau, beta) are identified at opposite ends of the dCV range.
+
+**The caveats, stated because they are load-bearing:** n = 2; the two files share a pack and are
+therefore strongly correlated with each other; and this is the public slice, which w15a shows
+cannot separate real skill from slice noise cross-team. A mechanism that would produce
+`beta > 1` and scale with the number of added members already exists on file — RESEARCH's
+**OOF/test bagging asymmetry (w16o)**: each fold's meta-model is fitted on 4/5 of the rows while
+the submitted test column comes from a full-data fit, and a wider stack gains more from that
+extra fifth than a narrow one does. **The next slot should test it directly rather than by
+inference** — refit the 187-member stack with the folds' own C rescaled to the full-fit n, or
+compare a 5-fold-bagged test column against the full-fit one, both of which are local and free.

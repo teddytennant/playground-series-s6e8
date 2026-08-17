@@ -1,0 +1,46 @@
+{
+ "imported": [
+  "ad_catnative",
+  "ad_gxgbcs4",
+  "ad_gcatnote",
+  "ad_xgbte",
+  "ad_gxgbd4",
+  "ad_gxgbd8",
+  "ad_glgbcs3",
+  "ad_gcatlr02",
+  "ad_glgbd4",
+  "ad_lgbte",
+  "ad_lgbs7",
+  "ad_gcatseed7",
+  "ad_glgb127",
+  "ad_gcatd8",
+  "ad_hgbte",
+  "ad_gxgbnote",
+  "ad_lgbnote",
+  "ad_glgbnote2",
+  "ad_gnn_wide",
+  "ad_gnn_te",
+  "ad_logregte",
+  "ad_gnn_note"
+ ],
+ "catstr_anomaly": {
+  "sd of fold MEANS": {
+   "obs": 0.0023821687938897457,
+   "null_mean": 0.006703973088866686,
+   "null_sd": 0.002478414294007725,
+   "z": -1.743777989590416
+  },
+  "mean of fold SDs": {
+   "obs": 4.590135998733613,
+   "null_mean": 4.590150068165532,
+   "null_sd": 4.605025016399265e-06,
+   "z": -3.05523463367906
+  },
+  "sd of fold AUCs": {
+   "obs": 0.0004431774380292086,
+   "null_mean": 0.00033311782784429975,
+   "null_sd": 0.00011768076787207938,
+   "z": 0.9352387155099564
+  }
+ }
+}
