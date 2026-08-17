@@ -4957,3 +4957,9 @@ CV and still poison the group gap. `w17b_famfix.py` still pools them and its pub
   `kaggle … --page-size 200 | wc -l` = 53. Its printed count can be quoted again.
 - One `crossfit` of a 78-member logistic stack over the frozen folds costs **204 s on a quiet box,
   552 s under load**. Budget accordingly.
+- **`git push` fails from the tool shell** with `gh: command not found` → `could not read
+  Username for 'https://github.com'`. The credential helper is `gh`, which lives in
+  `/run/current-system/sw/bin` — a directory absent from this shell's PATH. The commit itself
+  is fine; only the push fails. Fix:
+  `PATH="/run/current-system/sw/bin:$PATH" git push`. Check `git status -sb` for `[ahead N]`
+  before assuming a slot's work reached the remote.
