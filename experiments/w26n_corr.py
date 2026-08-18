@@ -32,6 +32,10 @@ from w26k_ctscale import SCALES  # noqa: E402
 K_ARMS = [f"ct{s:.4f}" for s in SCALES]
 EXTRA = [os.path.join(DATA, d) for d in
          ("ext_members", "ext_members2", "ext_members3", "ext_members4", "ext_members5")]
+# the same four w26i_value.py drops -- two for early-stopping optimism on the very rows that
+# became their OOF. Without this the pack loads at 191 and is not the 187 anything is quoted
+# against.
+HONEST_DROP = ("golem_a", "golem_f", "lgbm_tuned_lat", "lgbm_tuned_lat_frac")
 
 
 def main():
@@ -44,7 +48,8 @@ def main():
     arms = L_ARMS if oof.shape[1] == len(L_ARMS) else K_ARMS
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
-    names, O, _ = load_members(y, len(te), extra_dirs=[d for d in EXTRA if os.path.isdir(d)])
+    names, O, _ = load_members(y, len(te), drop=HONEST_DROP,
+                               extra_dirs=[d for d in EXTRA if os.path.isdir(d)])
     print(f"pack: {len(names)} members")
 
     R = np.column_stack([rankdata(O[:, i]) for i in range(O.shape[1])])

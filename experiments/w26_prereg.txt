@@ -723,3 +723,27 @@ artefact of an undertrained model it should SHRINK as the model converges.
 number is positive.** A 2000-round gain materially BELOW the 400-round one would be evidence
 against the mechanism as stated and must be written up that way rather than as a smaller
 success.
+
+G8. THE MISSING CONTROL, named now so the next run does not skip it
+--------------------------------------------------------------------
+If correcting the CT scale is worth +3e-4, the obvious rival explanation is that the CT block
+is simply NET-HARMFUL as built, and that anything which neutralises it would score the same.
+The control that separates those is **drop the 72 CT_ columns entirely and refit** (`ct_drop`).
+
+  - `ct_drop` ~ `ct1.0`      -> the CT block was doing nothing either way; the fix is real
+                                and it is repairing a channel that does carry signal.
+  - `ct_drop` ~ `ct1.3333`   -> the block as built is net-harmful and the honest
+                                recommendation is DELETE IT, not rescale it. Simpler, and it
+                                would transfer to the public library without needing anyone's
+                                model.
+  - `ct_drop` > `ct1.3333`   -> the fix is a partial repair of something better removed.
+
+⚠ Unlike every arm in §G3, this one CANNOT be done with the saved boosters -- dropping a
+feature changes the fitted trees, so it needs its own fit. Budget for it; do not substitute
+"set CT to a constant at serve time", which is a different intervention (it keeps the split
+structure and merely sends every row down one side) and would answer a different question.
+
+⚠ Registered prior, before it is run: `ct_drop` lands BETWEEN `ct1.0` and `ct1.3333`, nearer
+`ct1.0`. Reason: the block's total gain share measured 0.2% on the 100-round probe -- small,
+but the fix is worth +3e-4, so the channel is not inert. Modal guess `ct_drop - ct1.0` =
++100e-6, i.e. about a third of the fix.

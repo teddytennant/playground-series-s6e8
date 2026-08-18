@@ -6410,3 +6410,79 @@ mechanism signature. A 120k-row/150-round smoke on the equivalence gate independ
 for this slot; if this section still ends here, the runs had not landed when it was written
 and the numbers must be read off `experiments/w26k_run.log` / `experiments/w26l_r400.log`
 rather than inferred from the probes above.
+
+## 7. WHERE the CT fix's gain lives — and it runs OPPOSITE to w16a's rule
+
+Fold 0's held-out rows, from the `r400` checkpoint, 400 rounds, `ct1.3333` against `ct1.0`
+(overall +324.9e-6 on n=138,274):
+
+| segment | n | base | fixed | Δ |
+|---|---|---|---|---|
+| `social > 4.0` (rate 0.9956, decided) | 15,459 | 0.974744 | 0.973273 | **−1471e-6** |
+| `social≤4 & daily > 8.0` | 35,020 | 0.969423 | 0.969763 | +339e-6 |
+| `social≤4 & 6 < daily ≤ 8` (the ramp) | 20,217 | 0.924526 | 0.925596 | **+1070e-6** |
+| `social≤4 & daily ≤ 6.0` | 31,120 | 0.911931 | 0.912955 | **+1024e-6** |
+| either driver missing | 37,952 | 0.946940 | 0.947257 | +318e-6 |
+
+| n_missing | 0 | 1 | 2 | 3 | 4 | ≥5 |
+|---|---|---|---|---|---|---|
+| Δ | +333 | +313 | +292 | +332 | +353 | +209 (e-6) |
+
+Two readings, and the first is the one that matters:
+
+1. **The gain is flat in missingness and strongly structured by rule cell.** It concentrates
+   in the two cells where the generator smeared its crisp two-threshold rule into a ramp and
+   where the model is *worst* (0.9245 and 0.9119), and it is **negative** in the one cell that
+   is already effectively decided. Mechanism: CT is a precision channel — it tells the model
+   how far to trust the TE beside it — and precision only matters where the label is in doubt.
+   In `social > 4.0` the answer is 0.9956 regardless, so a displaced CT threshold is free to
+   help by accident, and correcting it gives that accident back.
+2. ⚠ **This runs OPPOSITE to w16a's standing rule** (*"fix the model where it is worst is
+   BACKWARDS in this competition"*). No contradiction: w16a's rule is about fitting a
+   segment-specific *weight* on top of a stack, where the worst segments are worst because
+   they are irreducible and a per-segment parameter only fits noise. This is a global repair
+   of a feature, with no per-segment parameter and nothing selected on the segmentation — the
+   segmentation is descriptive, applied after the fact, and decides nothing. **Do not use this
+   table to motivate a segmented anything.** Within-cell AUCs also do not add up to the pooled
+   AUC; the deployed number is the pooled +324.9e-6.
+
+⚠ The structural correction factor is 4/3 for BOTH valid and test, since fit-time uses the
+inner 3/4 of the outer 4/5 while both serve sets use the full outer 4/5. The measured
+test/train ratio (median 1.3233) sits slightly below the valid/train one (1.3325) only
+because test rows fall in slightly different cells; that is a distributional artefact and is
+NOT a reason to use a different factor on the test side.
+
+### ⚠ IMMEDIATE CORRECTION to §7, caught by adding one fold before the section was an hour old
+
+The `social > 4.0` row above **does not replicate and its sign flips**. Both folds, same
+arms, same code:
+
+| segment | fold 0 | fold 1 |
+|---|---|---|
+| overall | +324.9e-6 | +308.7e-6 |
+| `social > 4.0` | **−1471** | **+1565** |
+| `social≤4 & daily > 8` | +339 | +458 |
+| `social≤4 & 6 < daily ≤ 8` | +1070 | +766 |
+| `social≤4 & daily ≤ 6` | +1024 | +1170 |
+| either driver missing | +318 | +198 |
+
+So **strike the mechanism story built on that one cell** — "a displaced CT threshold is free
+to help by accident where the answer is already decided, and correcting it gives the accident
+back" is not supported and must not be repeated. That cell is n≈15.5k at a 0.9956 base rate,
+i.e. ~68 negatives; its AUC has an enormous standard error and it is pure noise at this size.
+
+What DOES replicate, and is all that §7 supports:
+
+- **the overall gain**: +324.9 and +308.7e-6, two folds, ~5% apart;
+- **positive in every rule cell in both folds** once the near-degenerate `social>4` cell is
+  set aside;
+- **largest in the two hard cells** — the ramp and the low-`daily` cell, where base AUC is
+  0.912–0.925 — at +766 to +1170e-6, i.e. roughly 3× the pooled figure;
+- **flat in missingness**, +209 to +353e-6 across every level, so it is not a missingness
+  artefact.
+
+The w16a comparison in §7 survives, because it rested on the two hard cells and not on
+`social>4`. **General lesson, and it is the fourth instance of it in this workspace: a
+per-segment number needs a second fold before it is written down.** The pooled number needed
+no such care because it is computed on 691k rows; a 15k-row segment at a 0.996 base rate is a
+different instrument and was quoted as if it were the same one.
