@@ -1009,3 +1009,33 @@ CV by ~50e-6 was a 22-member import, i.e. members from a pipeline we did not hol
 
 Recorded so a later run does not read a +5e-6 result as progress toward first place. It is
 progress toward rank ~8.
+
+## 2026-08-18 02:2x UTC (w26 slot 6)
+
+Us: **11th, 0.97118** (`Teddy Tennant`, 2026-08-18 00:20:28) — unchanged.
+
+The top ten, and it has compressed above us since yesterday:
+
+| # | team | score | last sub |
+|---|---|---|---|
+| 1 | MILANFX | 0.97132 | 08-16 01:51 |
+| 2 | Maher el Ouahabi | 0.97127 | 08-17 20:40 |
+| 3 | Optimistix | 0.97126 | 08-18 00:02 |
+| 4 | Utkarsh | 0.97124 | 08-15 22:40 |
+| 5 | Keanan | 0.97124 | 08-17 11:01 |
+| 6 | Szymon Kłapiński | 0.97124 | 08-17 09:49 |
+| 7 | cstdy | 0.97123 | 08-17 21:45 |
+| 8 | Don Mani | 0.97122 | 08-17 14:15 |
+| 9 | Charles Backman on LinkedIn | 0.97121 | 08-17 15:59 |
+| 10 | Mahog | 0.97120 | 08-17 13:29 |
+| **11** | **Teddy Tennant** | **0.97118** | 08-18 00:20 |
+| 11= | Mursal Gorchuyev | 0.97118 | 08-17 21:42 |
+| 11= | Malhar Ujawane | 0.97118 | 08-16 16:49 |
+
+**The gap to 1st is 14e-6 and the gap to 10th is 2e-6.** Nine of the ten above us are within
+9e-6 of each other, i.e. inside one to two LB grid steps — this is a wall, not a ladder, and a
+single +5e-6 file moves several places. MILANFX has not submitted since 08-16 and still leads.
+
+⚠ Still **nothing selected** (14 days). Auto-selection would take `w21_ad187corr_ens4`
+(0.97118) and one of `w21_ad187corr` / `w22_ad187corr_rankraw` (0.97117). `WANTED` is
+{`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}, chosen on CV. **A human must tick them.**

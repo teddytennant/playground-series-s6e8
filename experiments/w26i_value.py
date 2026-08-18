@@ -56,7 +56,14 @@ HONEST_DROP = ("golem_a", "golem_f", "lgbm_tuned_lat", "lgbm_tuned_lat_frac")
 EXP = os.path.join(ROOT, "experiments")
 CAT4_W20D = ["ad_catnative", "ad_gcatlr02", "ad_gcatd8", "ad_gcatseed7"]
 W20D_CAT4 = 0.000041          # the published value the gate must return
-NEW = ["cat_native_ctr2", "cat_natlat"]
+NEW = ["cat_native_ctr2", "cat_natlat"]      # default; --new-names overrides
+
+# w26 slot 6 made this reusable for the XGBoost pair without changing ANY w26i behaviour:
+# `--new-dir` still defaults to ext_members4 and `--new-names` still defaults to the two
+# CatBoosts, and ext_members4 is only added to the base pack when it is NOT the new-dir,
+# so w26i's own invocation loads the identical member set it always did.
+PREREG_E3 = ("PREREG \u00a7E3 said: each member 0 to +4e-6 (ctr2) / 0 to +3e-6 (natlat),\n"
+             "the pair together +1 to +7e-6 on the combiner, modal +2.5e-6.")
 
 
 def fit_score(Z_tr, y_tr, Z_te, y_te, C):
@@ -65,18 +72,29 @@ def fit_score(Z_tr, y_tr, Z_te, y_te, C):
 
 
 def main():
+    global NEW
     ap = argparse.ArgumentParser()
     ap.add_argument("--new-dir", default=os.path.join(DATA, "ext_members4"))
     ap.add_argument("--reps", type=int, default=5)
     ap.add_argument("--C", type=float, default=1.0)
     ap.add_argument("--transform", default="hybrid")
     ap.add_argument("--out", default="w26i_value")
+    ap.add_argument("--new-names", default=",".join(NEW),
+                    help="comma-separated member names expected in --new-dir")
+    ap.add_argument("--prereg-note", default=PREREG_E3,
+                    help="the registered prior, echoed above the verdicts so the table "
+                         "is always read against what was written before the run")
     a = ap.parse_args()
+
+    NEW = [n for n in a.new_names.split(",") if n]
 
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
-    extra = [os.path.join(DATA, d) for d in ("ext_members", "ext_members2", "ext_members3")]
-    extra = [d for d in extra if os.path.isdir(d)] + [a.new_dir]
+    extra = [os.path.join(DATA, d)
+             for d in ("ext_members", "ext_members2", "ext_members3", "ext_members4")]
+    extra = [d for d in extra if os.path.isdir(d)]
+    if os.path.abspath(a.new_dir) not in {os.path.abspath(d) for d in extra}:
+        extra.append(a.new_dir)
     names, O, T = load_members(y, len(te), extra_dirs=tuple(extra), drop=set(HONEST_DROP))
     idx = {n: i for i, n in enumerate(names)}
 
@@ -171,9 +189,8 @@ def main():
               f"  per member {d.mean()/n_new:+.2e}  t {out[c]['t']:+5.2f}"
               f"  [{'consistent' if ok else 'SIGN FLIPS'}]")
 
-    print("\nPREREG §E3 said: each member 0 to +4e-6 (ctr2) / 0 to +3e-6 (natlat),")
-    print("the pair together +1 to +7e-6 on the combiner, modal +2.5e-6.")
-    print("Anything above +10e-6 is disbelieved on sight and re-run on fresh reps (§E5).")
+    print("\n" + a.prereg_note)
+    print("Anything above +10e-6 is disbelieved on sight and re-run on fresh reps.")
     for c, v in out.items():
         verdict = ("DISBELIEVE, re-run on fresh reps (§E5)" if v["mean"] > 10e-6
                    else "clears the null" if v["consistent"] and v["mean"] > 0

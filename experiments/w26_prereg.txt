@@ -431,3 +431,152 @@ saved nothing, and three long jobs have already been lost at session boundaries 
 w26i_run.sh WAITS for w26h_run.sh to exit, by process scan, not by sleep. The chain is now
 w26a -> w26f -> w26h -> w26i, one job at a time. w25 §8 is the reason: triple-booking 16 cores
 turned 123s fits into 270s ones.
+
+================================================================================
+§F  w26j -- TWO XGBOOST MEMBERS ON NON-HYPERPARAMETER AXES
+     Written 2026-08-18 ~02:40 UTC (slot 6), before either member was built and
+     before w26i had produced a single number. Nothing below may be edited after
+     a result exists; corrections go in a new section that quotes this one.
+================================================================================
+
+F1. WHAT IS BEING ASKED, AND WHY IT IS NOT THE CLOSED QUESTION
+--------------------------------------------------------------
+RESEARCH closed on 2026-08-13: "tuning ANY GBDT is worth ~4e-7 into the stack --
+do not tune GBDTs, do not add ordinary GBDT members." That closure is over KNOBS
+inside a fixed loss and a fixed function class, and it was earned twice (LightGBM
+tuned for solo AUC, +3e-5 solo = a null; LightGBM tuned for decorrelation, depth
+7->3 and leaves 96->8, still maxcorr 0.9961). The generalisation RESEARCH itself
+draws from it is the load-bearing sentence:
+
+    "Where a member lands is set by its function class and its pipeline, not its
+     hyperparameters."
+
+Neither member here changes a hyperparameter. F1 changes the LOSS; F2 changes the
+ADDITIVE EXPANSION. Both are function-class changes of the same kind as w26i's
+`max_ctr_complexity 1 -> 2`, which slot 5 accepted for exactly this reason. Every
+other flag -- rounds 3200, eta 0.03, depth 7, subsample 0.9, colsample 0.5,
+min_child_weight 60, reg_lambda 40, max_bin 512, max_cat_threshold 64, seed 13,
+mode latcat -- is held at `xgb_latcat`'s exact value, so each is a ONE-VARIABLE
+contrast against a control already on disk (`xgb_latcat`, solo CV 0.9676963).
+
+⚠ ROUNDS ARE FROZEN AT 3200 AND THE PROBES DO NOT CHOOSE THEM. Both objectives
+would converge at a different rate and a round-count re-tune would probably help
+each member's solo AUC. It is deliberately not done: re-tuning rounds makes each
+member a two-variable contrast and re-opens precisely the closed question. If a
+later run wants the tuned version, that is a SECOND experiment with its own
+control, not a fix to this one.
+
+F2. THE MEMBERS
+---------------
+F1  `xgb_latcat_l2`    --objective reg:squarederror
+    L2 boosting on the 0/1 label instead of logloss. The hessian becomes constant,
+    so every row is weighted equally in the Newton step instead of the confident
+    rows being down-weighted. Output is not a probability and leaves [0,1]
+    (measured -0.076 .. 1.114 on a smoke frame), so it is clipped to
+    [1e-6, 1-1e-6] -- one global monotone map applied identically to OOF and test,
+    which reorders nothing except exact ties at the boundary and keeps the `logit`
+    transform well-defined for the combiner.
+
+F2  `xgb_latcat_dart`  --rate-drop 0.10 --skip-drop 0.5 --one-drop
+    DART: each round drops a random subset of the trees already built and fits the
+    new tree against what remains, so the expansion is no longer greedy-sequential.
+    Set on the `gbtree` booster; xgboost 3.4.0 deprecates `booster=dart` in favour
+    of exactly these three parameters. Verified this slot: dropout changes the fit
+    (maxdiff 0.111 vs plain at 60 rounds) and inference is deterministic.
+
+⚠ CONSIDERED AND REJECTED: `objective=rank:pairwise`. AUC is a ranking metric so it
+is the obvious candidate, and it is rejected on a mechanism this workspace has
+already paid for. A pairwise objective has no calibration anchor -- each fold's
+model emits an arbitrarily-scaled score -- so pooling five OOF slices into one
+vector REORDERS ROWS ACROSS FOLDS. That is the same mechanism that cost -6.2e-5
+when five per-fold isotonic maps were pooled. Recorded so no later run re-derives
+it, and so nobody reads its absence as an oversight.
+
+F3. THE REGISTERED PRIOR. Deliberately low, and BELOW what a record file needs.
+-------------------------------------------------------------------------------
+The only quantitative anchor is w24c's standardised family table, and it is
+measured on FOREIGN-pipeline members from adarsh1077's library:
+
+    cat5 +9.08e-6/member    xgb5 +6.24e-6/member    lgb5 +2.28e-6/member
+
+These are ours, on our features, on the pipeline the pack is already saturated
+with. w26i registered +1 to +3e-6/member for the ours-built CatBoost pair on that
+reasoning; XGBoost sits one rung DOWN the same table, so:
+
+    xgb_latcat_l2     solo 0.9660-0.9680   marginal into the pack   0 to +3e-6, modal +1.0
+    xgb_latcat_dart   solo 0.9600-0.9675   marginal into the pack   0 to +3e-6, modal +1.0
+    the pair on the combiner CV                                     0 to +5e-6, modal +1.5e-6
+
+Against what is needed: best sent CV 0.9701150809, and w26d prices an even-money
+shot at the 0.97118 board record at cross-fitted CV 0.9701181879, i.e. +3.1e-6.
+
+    ⚠ THE MODAL OUTCOME OF THIS BUILD IS BELOW THE PRICE OF A RECORD FILE.
+    Only the top ~third of the registered range clears it. This is registered as
+    PROBABLY A NULL and must not be written up afterwards as an expected success.
+
+F4. THE NAMED FAILURE MODE, registered so it cannot be reported as a discovery
+------------------------------------------------------------------------------
+`xgb_cat_lattice` came back at solo 0.9611 with maxcorr 0.9746 -- the most
+decorrelated member ever built here -- and bought NOTHING (blend153: sign-flipping
+±1-5e-6; w16d: coordinate ascent picks weight 0.0 in 5/5 folds, in-sample). The
+lesson on file is "low correlation obtained this way is the model being worse, not
+a new direction."
+
+DART is the member at risk of exactly this, because dropout at a frozen 3200
+rounds may simply under-fit. Registered in advance:
+
+    A dart member that lands BELOW ~0.9640 solo is presumed to be the
+    xgb_cat_lattice pattern -- worse, therefore decorrelated -- and a positive
+    paired delta from it is to be treated as split noise until it survives a
+    second set of reps on fresh seeds. Its maxcorr being low is NOT evidence for
+    it. This is written before the number exists.
+
+F5. HOW THE VERDICT IS TAKEN
+-----------------------------
+Same instrument as w20d / w21b / w26i, deliberately unchanged: paired 50/50
+stratified splits, 5 reps, hybrid transform, C=1.0, the same rows scored with and
+without the member. Split noise ~2e-4 against effects of ~2e-6, so nothing is
+readable except as a within-rep difference, and A DELTA WHOSE SIGN FLIPS ACROSS
+REPS IS A NULL WHATEVER ITS MEAN.
+
+  - maxcorr screen runs FIRST. >0.999 against any existing member means
+    near-duplicate and a positive delta is split noise until re-run. The record
+    rejected an import at 0.9977 on this ground.
+  - w20d's `cat4` cell runs as a REPRODUCTION GATE and must return +0.000041
+    within ~3 sd. A miss invalidates the whole table and the script prints FAIL.
+  - The pack measured against INCLUDES w26i's two CatBoosts. Measuring against a
+    pack missing them would overstate these.
+  - No fresh 187-member control: w26i runs one on the identical code path
+    immediately before this stage.
+  - Anything above +10e-6 is DISBELIEVED on sight and re-run on fresh reps.
+
+F6. SHIP RULES, fixed now rather than read off the table later
+---------------------------------------------------------------
+  - Nothing ships on solo AUC, and nothing ships on an argmax. Solo-to-stack
+    pass-through here is ~1.4%.
+  - The augmented-pack files are SEND-DAY candidates on ANY outcome, including a
+    clean null. Sends do not evict each other here, the public LB shows best-of-all,
+    and the queue runs dry on 08-22 against an 08-31 deadline -- an unused slot is
+    pure waste and a below-noise candidate is a reason not to BELIEVE a file, not a
+    reason not to send it.
+  - They are DEADLINE-SELECTION candidates only if their cross-fitted CV clears
+    0.9701181879. This is the Rogii discipline and it is not negotiable on a public
+    -LB reading.
+  - If exactly one member clears the null, the one-member pack is built too.
+
+F7. WHAT THE 2x2 BUYS, which is the actual reason to spend the cores
+---------------------------------------------------------------------
+w26i alone cannot separate "members WE build are worth nothing" from "this family
+is worth nothing", because it varies only the family-fixed arm. With w26j the
+design is family x pipeline-origin on one instrument:
+
+                    foreign (adarsh)      ours (w26i / w26j)
+    CatBoost        +9.08e-6/member       w26i, pending
+    XGBoost         +6.24e-6/member       w26j, pending
+
+If both ours-built cells are null while both foreign cells are strongly positive,
+the operational rule in RESEARCH changes from "prefer CatBoost, then XGBoost, then
+LightGBM" to "prefer a pipeline we do not hold, and the family label only orders
+members WITHIN a foreign pipeline" -- which is materially different advice and
+would close new-member generation here for the rest of the competition. That
+conclusion is worth more than either member is, and it is unavailable from one arm.

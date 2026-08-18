@@ -53,6 +53,40 @@ THE THREE MODES
 Note `cat` keeps NaN as *missing* (default-direction), where the sibling CatBoost
 `native` mode lifts NaN to its own level. Deliberate: two members, not one member twice.
 
+THE TWO NON-HYPERPARAMETER AXES (added w26 slot 6)
+--------------------------------------------------
+RESEARCH closed "tuning any GBDT is worth ~4e-7 into the stack" on 2026-08-13, and that
+closure is about knobs inside a FIXED loss and a fixed function class -- depth, eta,
+leaves, lambda. It says nothing about changing the loss or the class, which is the one
+dimension the same file says does move a member ("where a member lands is set by its
+function class and its pipeline"). Two such changes are available in XGBoost and neither
+had ever been run here:
+
+`--objective reg:squarederror`
+       L2 boosting on the 0/1 label instead of logloss. The hessian becomes constant, so
+       the boosting weights every row equally instead of down-weighting the confident
+       ones -- a different estimator, not a differently-tuned one. Its output is NOT a
+       probability and leaves [0,1] (measured: -0.076 .. 1.114 on a smoke frame), so it
+       is clipped to [1e-6, 1-1e-6] before saving. The clip is a single global monotone
+       map applied identically to OOF and test, so it reorders nothing except exact ties
+       at the boundary, and it keeps the `logit` transform well-defined for the combiner.
+
+`--rate-drop / --skip-drop / --one-drop`
+       DART: each boosting round drops a random subset of the trees already built and
+       fits the new tree against what remains. The additive expansion is no longer
+       greedy-sequential, which is a function-class change of the same kind as
+       `max_ctr_complexity 2` on the CatBoost side. Set on the `gbtree` booster rather
+       than `booster=dart`, which xgboost 3.4.0 deprecates in favour of exactly that.
+       Verified: dropout changes the fit (maxdiff 0.111 vs plain at 60 rounds) and
+       inference is deterministic (no dropout is applied at predict time).
+
+⚠ Considered and REJECTED for this pass: `objective=rank:pairwise`. AUC is a ranking
+metric so it looks like the natural choice, but a pairwise objective has no calibration
+anchor -- each fold's model outputs an arbitrarily-scaled score. Pooling five such OOF
+slices into one vector reorders rows ACROSS folds, which is the exact mechanism that cost
+-6.2e-5 when five per-fold isotonic maps were pooled (RESEARCH, "never calibrate the
+final file"). `reg:squarederror` and DART both keep a label-scale output, so both pool.
+
 HONESTY
 -------
 Nothing early-stops on the rows that become a member's OOF. `--probe` carves its holdout
@@ -134,10 +168,14 @@ def gain_share(m):
 
 
 def build_params(a):
-    p = dict(objective="binary:logistic", eval_metric="auc", tree_method="hist",
+    p = dict(objective=a.objective, eval_metric="auc", tree_method="hist",
              max_depth=a.depth, eta=a.eta, subsample=a.subsample,
              colsample_bytree=a.colsample, min_child_weight=a.min_child_weight,
              reg_lambda=a.reg_lambda, max_bin=a.max_bin, nthread=a.threads, seed=a.seed)
+    if a.rate_drop or a.skip_drop or a.one_drop:
+        # DART on the gbtree booster. xgboost 3.4.0 deprecates `booster=dart` and tells
+        # you to set these directly, so there is no `booster` key to set here.
+        p.update(rate_drop=a.rate_drop, skip_drop=a.skip_drop, one_drop=int(a.one_drop))
     if a.mode in ("cat", "raw", "latcat"):
         # max_cat_to_onehot=1 forces the partition-based split for every categorical,
         # including the 2-3 level ones, so the whole frame goes through one mechanism.
@@ -196,6 +234,20 @@ def main():
     ap.add_argument("--max-cat-threshold", type=int, default=64)
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--threads", type=int, default=16)
+    ap.add_argument("--objective", default="binary:logistic",
+                    choices=("binary:logistic", "reg:squarederror"),
+                    help="reg:squarederror is L2 boosting on the 0/1 label; its output "
+                         "is clipped to (0,1) before saving, see the module docstring")
+    ap.add_argument("--rate-drop", type=float, default=0.0, help="DART: dropout rate")
+    ap.add_argument("--skip-drop", type=float, default=0.0,
+                    help="DART: probability of skipping dropout entirely on a round")
+    ap.add_argument("--one-drop", action="store_true",
+                    help="DART: always drop at least one tree when dropout happens")
+    ap.add_argument("--outdir", default="",
+                    help="where oof_/test_/summary_ land. DEFAULTS TO oof/, which is in "
+                         "load_members' default scan set -- saving there MOVES THE PACK "
+                         "for blend_lab and every gate stated against a member count. "
+                         "New members belong in data/ext_members*/ via an explicit path.")
     ap.add_argument("--frac", action="store_true", help="lat mode: append the decimal lattice")
     ap.add_argument("--folds", default="")
     ap.add_argument("--probe", type=float, default=0.0,
@@ -203,6 +255,13 @@ def main():
                          "report the eval curve, save nothing")
     ap.add_argument("--probe-stopping", type=int, default=150)
     a = ap.parse_args()
+
+    outdir = a.outdir or OOF
+    os.makedirs(outdir, exist_ok=True)
+    # reg:squarederror leaves [0,1]; a single global monotone clip keeps every combiner
+    # transform (logit in particular) well-defined without reordering anything.
+    squash = ((lambda v: np.clip(v, 1e-6, 1.0 - 1e-6))
+              if a.objective != "binary:logistic" else (lambda v: v))
 
     params = build_params(a)
     print(f"[{a.name}] mode={a.mode} {params} rounds={a.rounds} frac={a.frac}", flush=True)
@@ -247,9 +306,39 @@ def main():
 
     oof = np.zeros(len(y))
     tp = np.zeros(len(te))
+    got = []
     t0 = time.time()
+
+    # PER-FOLD CHECKPOINTS -- the same fix run_catboost.py got in w26 slot 5, for the same
+    # reason. `xgb_latcat` is 3200 rounds x 5 folds; before this a kill at fold 4 threw
+    # away every fold that had finished. Each fold's OOF slice and its FULL test column
+    # go to cache/xgbckpt/<name>_f<k>.npz atomically the moment the fold ends, and a
+    # re-run of the same command resumes. Keyed by --name, so two variants never read
+    # each other's folds; a checkpoint whose shape does not match the fold is reported
+    # stale and ignored rather than trusted.
+    ck = os.path.join(CACHE, "xgbckpt")
+    os.makedirs(ck, exist_ok=True)
+
+    def ckpath(f):
+        return os.path.join(ck, f"{a.name}_f{f}.npz")
+
+    done = set()
     for f, (itr, iva) in enumerate(folds):
-        if f not in want:
+        if f not in want or not os.path.exists(ckpath(f)):
+            continue
+        z = np.load(ckpath(f))
+        if z["oof"].shape != iva.shape or z["tp"].shape != (len(te),):
+            print(f"[{a.name}] fold {f}: stale checkpoint, ignoring", flush=True)
+            continue
+        oof[iva] = z["oof"]
+        tp += z["tp"] / N_SPLITS
+        got.append(f)
+        done.add(f)
+    if done:
+        print(f"[{a.name}] resumed folds {sorted(done)} from checkpoints", flush=True)
+
+    for f, (itr, iva) in enumerate(folds):
+        if f not in want or f in done:
             continue
         Xa, ya, Xb, yb, get_Xt = fold_matrices(a, f, itr, iva, y, Ftr, Fte, Ltr, Lte)
         d = dm(Xa, ya, use_cat)
@@ -257,7 +346,7 @@ def main():
             del Xa
         m = xgb.train(params, d, num_boost_round=a.rounds)
         del d
-        oof[iva] = m.predict(dm(Xb, cat=use_cat))
+        oof[iva] = squash(m.predict(dm(Xb, cat=use_cat)))
         print(f"[{a.name}] fold {f}: AUC {roc_auc_score(yb, oof[iva]):.6f} "
               f"({time.time()-t0:.0f}s)", flush=True)
         if fresh:
@@ -266,20 +355,29 @@ def main():
             print(f"[{a.name}] fold {f}: {gain_share(m):.4f} of total split gain went to "
                   f"the 12 K_ categoricals", flush=True)
         Xt = get_Xt()
-        tp += m.predict(dm(Xt, cat=use_cat)) / N_SPLITS
-        del m
+        tf = squash(m.predict(dm(Xt, cat=use_cat)))
+        tp += tf / N_SPLITS
+        got.append(f)
+        # atomic: a half-written .npz picked up by a resume is worse than no checkpoint
+        tmp = ckpath(f) + ".tmp.npz"
+        np.savez(tmp, oof=oof[iva], tp=tf, rounds=np.int64(a.rounds))
+        os.replace(tmp, ckpath(f))
+        del m, tf
         if fresh:
             del Xt
 
-    if len(want) < N_SPLITS:
-        print(f"[{a.name}] partial run, nothing saved", flush=True)
+    # `len(got) < N_SPLITS` is load-bearing: without it a resumed run passes the first
+    # check and would have to refit the folds it just resumed in order to save anything.
+    if len(want) < N_SPLITS or len(got) < N_SPLITS:
+        print(f"[{a.name}] partial run ({len(got)}/{N_SPLITS} folds), nothing saved",
+              flush=True)
         return
     cv = roc_auc_score(y, oof)
     print(f"\n[{a.name}] FULL OOF AUC = {cv:.6f}  ({time.time()-t0:.0f}s)", flush=True)
-    save_preds(a.name, oof, tp, len(y), len(te))
+    save_preds(a.name, oof, tp, len(y), len(te), out=outdir)
     json.dump(dict(name=a.name, cv=float(cv), mode=a.mode, rounds=a.rounds, frac=a.frac,
                    **params),
-              open(os.path.join(OOF, f"summary_{a.name}.json"), "w"), indent=2)
+              open(os.path.join(outdir, f"summary_{a.name}.json"), "w"), indent=2)
 
 
 if __name__ == "__main__":

@@ -6155,3 +6155,112 @@ PATH="/run/current-system/sw/bin:$PATH" git push
 ```
 
 Check `git status -sb | head -1` for `[ahead N]` before concluding a slot.
+
+---
+
+# w26 slot 6 (2026-08-18) — `run_xgb.py` now checkpoints, and the two XGBoost axes the GBDT closure does NOT cover
+
+## ⚠ THE 2026-08-13 GBDT CLOSURE IS NARROWER THAN ITS HEADLINE — read this with it
+
+The headline on file is *"tuning ANY GBDT is worth ~4e-7 into the stack — do not tune GBDTs,
+do not add ordinary GBDT members"*, and it stands. But it is a closure over **knobs inside a
+fixed loss and a fixed function class**: depth, eta, leaves, lambda, rounds, seed. It is not a
+closure over the loss or the function class, and the generalisation the same section draws is
+explicitly the opposite:
+
+> "Where a member lands is set by its **function class** and its **pipeline**, not its
+> hyperparameters."
+
+Two XGBoost changes are therefore *outside* the closure, and neither had ever been run here
+before w26j. Both are exposed on `run_xgb.py` as of this slot:
+
+| flag | what actually changes | why it is not a knob |
+|---|---|---|
+| `--objective reg:squarederror` | L2 boosting on the 0/1 label instead of logloss | the hessian becomes **constant**, so every row is weighted equally in the Newton step instead of confident rows being down-weighted — a different estimator, not a differently-tuned one |
+| `--rate-drop / --skip-drop / --one-drop` | DART: each round drops a random subset of the trees already built and fits against what remains | the additive expansion stops being greedy-sequential — the same kind of change as CatBoost's `max_ctr_complexity 1 → 2` |
+
+⚠ **`booster=dart` is DEPRECATED in xgboost 3.4.0.** It warns and tells you to set
+`rate_drop`/`skip_drop`/`one_drop` on the `gbtree` booster directly. Do that; do not set
+`booster`. Verified: dropout changes the fit (maxdiff 0.111 vs plain at 60 rounds) and
+**inference is deterministic** — no dropout is applied at predict time.
+
+⚠ **`reg:squarederror` output is NOT a probability and leaves [0,1]** (measured −0.076 …
+1.114). `run_xgb.py` clips to [1e-6, 1−1e-6] when the objective is not `binary:logistic`. The
+clip is a single **global monotone** map applied identically to OOF and test, so it reorders
+nothing except exact ties at the boundary, and it keeps the combiner's `logit` transform
+well-defined. `eval_metric="auc"` works fine under this objective.
+
+## ⚠ `objective=rank:pairwise` IS CLOSED — do not spend a slot on it
+
+AUC is a ranking metric, so a pairwise objective is the obvious idea and it will occur to
+every future run. **It is rejected on a mechanism this workspace has already paid for.** A
+pairwise objective has no calibration anchor: each fold's model emits an arbitrarily-scaled
+score. Pooling five OOF slices into one vector therefore **reorders rows across folds** — the
+identical mechanism that cost **−6.2e-5** when five per-fold isotonic maps were pooled ("never
+calibrate the final file"). `reg:squarederror` and DART both keep a label-scale output, so
+both pool correctly. The same objection applies to any unanchored per-fold score.
+
+## `run_xgb.py` per-fold checkpoints — the same fix `run_catboost.py` got in slot 5
+
+`cache/xgbckpt/<name>_f<k>.npz`, holding that fold's OOF slice, its **full** test column and
+its round count, written atomically via `os.replace` the moment the fold finishes. A re-run of
+the same command resumes. Keyed by `--name`, so two variants never read each other's folds; a
+checkpoint whose shape does not match the fold is reported stale and ignored.
+
+Why it had to exist: `xgb_latcat` is 3200 rounds × 5 folds and before this a kill at fold 4
+discarded the lot. **Verified to the bit** — `--folds 0,1` then a full run resumed 0,1, fitted
+2–4, and produced OOF and test arrays `np.array_equal` to a from-scratch run (maxdiff 0.0).
+
+⚠ The completion guard is `len(want) < N_SPLITS or len(got) < N_SPLITS`. The second clause is
+load-bearing: without it a resumed run passes the first check and would have to refit the
+folds it just resumed in order to save anything. Same clause, same reason, as CatBoost's.
+
+## ⚠ `run_xgb.py --outdir` — it defaulted to `oof/`, which MOVES THE PACK
+
+Identical trap to the one documented for `run_catboost.py`. `save_preds` defaulted to `oof/`,
+`oof/` is in `load_members`' default scan set, so saving a member there joins it to the pack
+for `blend_lab`, `w26f`, `w26h` and `w26i` **at once and silently** — and every reproduction
+gate in this repo is stated against a fixed member **count**. `--outdir` now exists and its
+help text says this. New members belong in `data/ext_members*/` and join a build only via an
+explicit `--extra-dirs`. Pack sizes:
+
+| dirs loaded | members |
+|---|---|
+| default (`data/oof/oof` + `oof/` + `ext_members` + `ext_members2`) | 165 |
+| \+ `ext_members3` | **187** — the shipped pack |
+| \+ `ext_members4` (w26i's two CatBoosts) | 189 |
+| \+ `ext_members5` (w26j's two XGBoosts) | 191 |
+
+**Assume nothing about these counts** — read what `blend_lab` prints. If an upstream stage's
+members did not land, the dir is empty and the build is smaller than its name suggests.
+
+## `w26i_value.py` is now the general per-member valuation instrument
+
+`--new-dir`, `--new-names`, `--prereg-note`, `--reps`, `--C`, `--transform`, `--out`. The base
+pack is `ext_members{,2,3,4}` plus `--new-dir` **with a dedupe guard**, so passing
+`--new-dir data/ext_members4` loads the same member set it always did. Everything else is
+unchanged and deliberately so: paired 50/50 stratified splits, the same rows with and without
+the member, maxcorr screen first, w20d's `cat4` cell as a reproduction gate that must return
++0.000041 within ~3 sd or the whole table is declared incomparable.
+
+## The 2×2 that w26i and w26j jointly resolve
+
+Neither arm alone separates *"members we build are worth nothing"* from *"that family is worth
+nothing"*. Together they do:
+
+| | foreign (adarsh, w24c standardised) | ours |
+|---|---|---|
+| **CatBoost** | +9.08e-6/member | w26i (`cat_native_ctr2`, `cat_natlat`) — pending |
+| **XGBoost** | +6.24e-6/member | w26j (`xgb_latcat_l2`, `xgb_latcat_dart`) — pending |
+
+If both ours-built cells are null while both foreign cells stay strongly positive, the
+operational rule *"prefer CatBoost, then XGBoost, then LightGBM"* becomes **"prefer a pipeline
+we do not hold; the family label only orders members *within* a foreign pipeline"** — and
+new-member generation in this workspace should stop for the rest of the competition.
+
+## ⚠ DART cost grows as rounds², so a short probe under-prices it
+
+Each DART round must undo the trees it drops, so per-round cost grows with the number of trees
+already built. A 400-round probe therefore sees ~1.6% of a 3200-round build's dropout
+overhead, not 12.5%. Guard long DART runs with `timeout`; with per-fold checkpointing in place
+a timeout costs the fold in flight and the identical command resumes.

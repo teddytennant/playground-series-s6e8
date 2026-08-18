@@ -12547,3 +12547,229 @@ Modified: `experiments/run_catboost.py` (per-fold checkpoint/resume, `--outdir`,
 natlat`; existing modes byte-identical and re-smoked), `experiments/w26_prereg.txt` (**§E**, the
 full pre-registration above). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
 No submission — none was possible, 0 of 10 slots left on the 08-18 UTC day.
+
+---
+
+# 2026-08-18 (UTC) — wave w26, slot 6 of 10
+**Angle handed: "XGBoost: third leg of the ensemble, tuned on the same folds so the blend
+weights mean something."**
+**Half-taken. The family is right and is now queued as `w26j`; the word "tuned" is the part
+the record forbids, so neither member changes a hyperparameter — one changes the loss and one
+changes the additive expansion. Also fixed the two defects in `run_xgb.py` that would have
+made a 3-hour XGB build unsurvivable and would have silently moved the pack.**
+
+## 0. At the cap. 0 of 10 slots left, confirmed live and independently
+
+`date -u` 02:13. The prompt header says DATE 2026-08-17 because local time is UTC−4; the
+**Kaggle day is 08-18** and `w26g_send.py` counts it off the API from a 500-row page:
+
+    71 submissions on record; 10 already sent on 2026-08-18 (UTC); 0 of 10 slots left today
+    71 distinct filenames sent, 71 of them still on disk and fingerprinted
+
+Same ten that landed 00:07–00:20 UTC from w25 slot 1. Slots 7–10 today are also at the cap.
+**No submission this slot, and none was possible.** Standing unchanged: **11th of the board
+at 0.97118**; MILANFX still leads at 0.97132, and ten teams now sit between us and them
+(0.97120–0.97127), which is tighter above us than it was yesterday.
+
+## 1. The angle, and the half of it the record forbids
+
+RESEARCH closed on 2026-08-13: *"tuning ANY GBDT is worth ~4e-7 into the stack — do not tune
+GBDTs, do not add ordinary GBDT members."* It was earned twice, and the section is titled
+"XGBoost is not a missing leg" — `latr1_xgb` is the **best GBDT of any family here** and the
+pack already holds `xgb_lat`, `xgb_latcat` ×3 seeds, `xgb_cat_lattice`, `xgb_raw_nan` and the
+whole `bolt_xgb_*` family. So the handed sentence "third leg… tuned on the same folds" names
+a leg that is not missing and an operation priced at 1% of the noise floor. Taking it
+literally would have been filler.
+
+**But the closure is narrower than it reads, and the distinction is the whole slot.** It is a
+closure over *knobs inside a fixed loss and a fixed function class* — depth, eta, leaves,
+lambda, rounds. The generalisation RESEARCH itself draws from it is:
+
+> "Where a member lands is set by its **function class** and its **pipeline**, not its
+> hyperparameters."
+
+XGBoost has two available changes that are not knobs, and **neither had ever been run here**:
+
+| | `xgb_latcat_l2` | `xgb_latcat_dart` |
+|---|---|---|
+| against | `xgb_latcat`, CV 0.9676963 | same |
+| the one change | `--objective reg:squarederror` | `--rate-drop 0.10 --skip-drop 0.5 --one-drop` |
+| what it changes | the **loss** — constant hessian, so every row is weighted equally in the Newton step instead of confident rows being down-weighted | the **additive expansion** — each round drops a random subset of the trees already built and fits against what remains, so it is no longer greedy-sequential |
+| everything else | rounds 3200, eta 0.03, depth 7, subsample 0.9, colsample 0.5, mcw 60, λ 40, max_bin 512, max_cat_threshold 64, seed 13, mode latcat, frozen folds — i.e. `xgb_latcat`'s exact settings | identical |
+
+This is the same argument slot 5 used to accept `max_ctr_complexity 1 → 2` on the CatBoost
+side, applied to the family the angle names.
+
+⚠ **Rounds are frozen at 3200 and the probes deliberately do NOT choose them.** Both
+objectives converge at a different rate and a round re-tune would probably raise each
+member's solo AUC. Not done on purpose: re-tuning rounds makes each member a two-variable
+contrast and re-opens exactly the closed question. If a later run wants the tuned version
+that is a **second** experiment with its own control, not a fix to this one.
+
+⚠ **`objective=rank:pairwise` was considered and REJECTED**, on a mechanism already paid for.
+AUC is a ranking metric so it is the obvious candidate — and a pairwise objective has no
+calibration anchor, so each fold's model emits an arbitrarily-scaled score and pooling five
+OOF slices into one vector **reorders rows across folds**. That is the identical mechanism
+that cost **−6.2e-5** when five per-fold isotonic maps were pooled. `reg:squarederror` and
+DART both keep a label-scale output, so both pool. Recorded so nobody re-derives it and
+nobody reads its absence as an oversight.
+
+## 2. Two defects fixed in `run_xgb.py` BEFORE the build — the same two slot 5 found in CatBoost
+
+Bookkeeping is where this workspace's failures actually are. `run_catboost.py` was fixed last
+slot; `run_xgb.py` had **both** of the same holes and nobody had looked.
+
+1. ⚠⚠ **No per-fold checkpointing.** `xgb_latcat` is 3200 rounds × 5 folds. A kill at fold 4
+   discarded everything and saved **nothing** — and three long jobs have already been lost at
+   session boundaries here. Now every fold writes its OOF slice and its full test column to
+   `cache/xgbckpt/<name>_f<k>.npz` **atomically** via `os.replace` the moment it finishes, and
+   a re-run of the same command resumes. Keyed by `--name`, so two variants cannot read each
+   other's folds; a checkpoint whose shape does not match the fold is reported stale and
+   ignored rather than trusted. The completion guard gained `len(got) < N_SPLITS` — without
+   it a resumed run passes the first check and would have to refit the folds it just resumed
+   in order to save anything.
+   **Verified end to end, and to the bit**: `--folds 0,1` then a full run printed
+   `resumed folds [0, 1] from checkpoints`, fitted only 2–4, and the resulting OOF and test
+   arrays are `np.array_equal` to a from-scratch run of the same command. Not "close" —
+   **identical, maxdiff 0.0**.
+2. ⚠ **No `--outdir`, and this is not tidiness.** `save_preds` defaulted to `oof/`, and `oof/`
+   is in `load_members`' default scan set, so **saving a new member there moves the pack under
+   `blend_lab`, `w26f`, `w26h` and `w26i` simultaneously and silently.** Every reproduction
+   gate in this repo is stated against a fixed member *count* — w26h refuses to build unless
+   w26f's C=1.0 cells reproduce hybrid 0.970098 / rankraw 0.970092 / rescale 0.970094 — and a
+   run of `run_xgb.py` at any point in the next several hours would have failed those gates
+   for a reason having nothing to do with what they test. **This was a live landmine with
+   three gated stages queued behind it.** New members now land in `data/ext_members5/`.
+
+Both new axes were smoke-tested on real data at 2 threads while the chain held the other
+cores, so none of it cost the running jobs anything measurable. `booster=dart` is **deprecated
+in xgboost 3.4.0** — it warns and tells you to set `rate_drop`/`skip_drop`/`one_drop` on
+`gbtree` directly, which is what the code does. Verified dropout bites (maxdiff 0.111 vs plain
+at 60 rounds) and that inference is **deterministic** (no dropout at predict time).
+`reg:squarederror` leaves [0,1] as expected (measured −0.076 … 1.114) and is clipped to
+[1e-6, 1−1e-6]: one global monotone map applied identically to OOF and test, so it reorders
+nothing except exact ties at the boundary and keeps the `logit` transform well-defined.
+
+## 3. `w26i_value.py` made reusable without changing one bit of w26i's behaviour
+
+`--new-names` and `--prereg-note` added, and `ext_members4` added to the base pack with a
+dedupe guard. w26i's own invocation passes `--new-dir data/ext_members4`, which is now already
+in the base list, so it is **not** appended twice and the member set it loads is byte-identical
+to what it would have loaded before the patch. Verified against the live 187-member pack: the
+patched script loads and reaches its own `nothing to measure` guard cleanly. **Patching a
+script that a queued job is about to run is exactly the class of mistake this workspace keeps
+hitting**, which is why the change was made to be a no-op on the queued path rather than
+merely "probably fine".
+
+## 4. The registered prior, and it says this is PROBABLY A NULL
+
+Full text at `experiments/w26_prereg.txt` **§F**, written before anything was built and before
+w26i had produced a single number. The only quantitative anchor is w24c's standardised family
+table, and every cell of it is measured on **foreign** members from adarsh1077's library:
+
+    cat5 +9.08e-6/member    xgb5 +6.24e-6/member    lgb5 +2.28e-6/member
+
+These are **ours**, on our features, on the pipeline the pack is already saturated with, and
+XGBoost sits one rung *down* that table from the family w26i is testing. So:
+
+    xgb_latcat_l2      solo 0.9660-0.9680   marginal into the pack   0 to +3e-6, modal +1.0
+    xgb_latcat_dart    solo 0.9600-0.9675   marginal into the pack   0 to +3e-6, modal +1.0
+    the pair on the combiner CV                                      0 to +5e-6, modal +1.5e-6
+
+Against what is needed: best sent CV 0.9701150809, and w26d prices an even-money shot at the
+0.97118 board record at cross-fitted CV **0.9701181879**, i.e. **+3.1e-6**.
+
+⚠ **The modal outcome of this build is below the price of a record file, and only the top
+third of the registered range clears it.** Registered as *probably a null* and it must not be
+written up afterwards as an expected success. Slot 5 registered its own CatBoost pair as
+roughly a coin flip; this one is registered as worse than that, on purpose, because the
+family table says so.
+
+⚠ **The named failure mode, registered before the number exists (§F4).** `xgb_cat_lattice`
+came back at solo 0.9611 with maxcorr 0.9746 — the most decorrelated member ever built here —
+and bought **nothing** (blend153 sign-flipping ±1–5e-6; w16d coordinate ascent picks weight
+**0.0 in 5/5 folds, in-sample**). The lesson on file is *"low correlation obtained this way is
+the model being worse, not a new direction."* DART at a frozen 3200 rounds is the member at
+risk of exactly this. So: **a dart member below ~0.9640 solo is presumed to be the
+`xgb_cat_lattice` pattern, and a positive paired delta from it is split noise until it
+survives a second set of reps.** Its low maxcorr is not evidence for it.
+
+## 5. Why spend the cores at all — the 2×2 is worth more than either member
+
+This is the actual argument, and it is not "XGBoost might help".
+
+w26i alone **cannot separate** "members *we* build are worth nothing" from "*that family* is
+worth nothing", because it varies only one arm. w26i + w26j is family × pipeline-origin on one
+instrument:
+
+| | foreign (adarsh) | ours |
+|---|---|---|
+| **CatBoost** | +9.08e-6/member | w26i, pending |
+| **XGBoost** | +6.24e-6/member | w26j, pending |
+
+If both ours-built cells are null while both foreign cells are strongly positive, RESEARCH's
+operational rule changes from *"prefer CatBoost, then XGBoost, then LightGBM"* to **"prefer a
+pipeline we do not hold; the family label only orders members *within* a foreign pipeline"** —
+materially different advice that would **close new-member generation here for the rest of the
+competition** and redirect the remaining days. That conclusion is unavailable from one arm,
+and it is worth more than either member is.
+
+## 6. The chain is now five deep: w26a → w26f → w26h → w26i → w26j
+
+`experiments/w26j_run.sh`, launched and confirmed waiting. It waits on the **shell script**
+`w26i_run.sh`, not on any python process — at launch a queued stage's python does not exist
+yet and the wait returns instantly, which is the w25 §8 triple-booking failure that turned
+123s fits into 270s ones. Belt and braces: it also waits on `blend_lab.py`, since w26i's last
+build could outlive its shell. Live check at launch confirmed all five shells alive and only
+`w26a_sensitivity.py --mode rawnoise` actually holding cores.
+
+Stages: two **timing probes** (diagnostic only — `--probe` carves its holdout from fold 0's
+*training* rows and saves nothing) → the two members → `w26i_value.py` with §F's prior echoed
+into its own output → the augmented-pack `h3` and `ens4` builds → requeue and reprice.
+
+⚠ **The probe under-prices DART, and quadratically.** Each DART round must undo the trees it
+drops, so total cost goes as rounds², and a 400-round probe sees ~1.6% of the 3200-round
+overhead rather than 12.5%. `timeout 28800` is the guard and **hitting it is safe** — the new
+per-fold checkpointing means a timeout costs the fold in flight and re-running the identical
+command resumes. Written into the script: *if this stage times out, re-run it; do not conclude
+DART failed.*
+
+No fresh 187-member control in w26j: w26i runs one on the identical code path immediately
+before it, so the comparison base is an hour old rather than a wave old.
+
+## 7. ⚠⚠ STILL NOTHING SELECTED. FOURTEEN DAYS.
+
+`check_selection.py`, run live this slot:
+
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+      auto-slot 1: public 0.97118, 1-way tie — w21_ad187corr_ens4
+      auto-slot 2: public 0.97117, 2-way tie — w21_ad187corr, w22_ad187corr_rankraw
+
+`WANTED` = **{`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}**, unchanged, both uploaded, both
+on disk. Cost of not clicking +0.83 to +3.33e-6, ~2.5 places per 1e-5. The API has no write
+path for selection (probed and falsified 08-13). **A human must open the submissions page and
+tick those two files.** No code in this repo can, and nothing this slot did changes that.
+
+## 8. Next run, in order
+
+1. **Read `experiments/w26i_run.log` first, then `w26j_run.log`.** For w26i: check the `cat4`
+   reproduction gate and the 187-member control gate **before** quoting any row — if either
+   failed, say so and do not quote the table. For w26j: check whether the DART probe or build
+   hit its `timeout`, and if it did, **re-run the identical command** (it resumes per fold)
+   rather than recording DART as a failure. Write both up against their registered priors
+   (§E3 and §F3) whichever way they went.
+2. **If a Kaggle day is open, run `.venv/bin/python experiments/w26g_send.py`** (dry run, then
+   `--go`). It is the whole send day. Do not hand-pick from the queue CSV.
+3. If **both** ours-built cells come back null, §F7 is the finding: stop generating members
+   here and spend the remaining days on foreign pipelines or on the correction family instead.
+   If either clears, the follow-on is more of that same axis, not a different one.
+4. The pick is still not clicked (§7).
+
+### Files this slot
+New: `experiments/w26j_run.sh`, `experiments/w26j_run.log`, `data/ext_members5/`,
+`cache/xgbckpt/`. Modified: `experiments/run_xgb.py` (per-fold checkpoint/resume, `--outdir`,
+`--objective`, DART dropout flags; existing paths verified byte-identical and re-smoked),
+`experiments/w26i_value.py` (`--new-names`, `--prereg-note`, `ext_members4` in the base pack
+with a dedupe guard — a no-op on w26i's queued invocation), `experiments/w26_prereg.txt`
+(**§F**). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+**No submission — none was possible, 0 of 10 slots left on the 08-18 UTC day.**
