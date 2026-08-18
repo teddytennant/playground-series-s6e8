@@ -12284,3 +12284,40 @@ New: `experiments/w26g_send.py`, `experiments/w26f_smoke.py`,
 guard) and its CSV, `experiments/w26d_queueprice.{csv,json}` (repriced on the corrected
 queue), `experiments/w26f_csweep.py` (seed keying, `--cv` arm, dedupe, atomic writes),
 `experiments/w26f_run.sh` (waits on w26a, runs both arms). No submission — none was possible.
+
+## 8. Addendum, 01:50 UTC — §3 has an answer, and it is cheap. `w26h_cbuild.py`
+
+§3 above says the queue empties on 08-22 with nine send days after it and nothing built for
+them, and left that as a worry. It should not be one, and leaving it as a worry would have
+made the next run rediscover the arithmetic. The answer is the axis w26f is already sweeping.
+
+Each (transform, C) cell is a genuinely different fit of the same 187 members — a real variant,
+not a re-send — and the marginal cost of turning one into a submittable file is **one
+full-data fit**, because the cross-fitted OOF that defends it on CV is already being computed
+by the `--cv` arm. 3 transforms × 7 C values + their 7 h3 mixes = **28 files ≈ three send
+days, for ~10 minutes of compute.**
+
+And sending them is an experiment rather than filler, which is the standard the playbook sets.
+w26f reads the C curve twice — on held-out rows and on cross-fitted CV — and the two disagree
+exactly insofar as the combiner's fold reuse leaks, which is w25d's open question. The public
+LB is a **third** reading of the same curve, and 21 points of it is far more than the
+one-point comparisons this workspace has been making. That holds whichever way H-D1 goes.
+
+**The convention gap, and the gate that makes it safe.** These files scale by the sd over ALL
+training rows, because that is what `blend_lab.build(std=True)` did for every standardised
+file already on the board. `w26f --cv` scales by the **fold-train** rows, which is the clean
+version, and its vectors are what defend these files on CV. Everything in this workspace
+asserts that difference is negligible; nothing has ever checked it. `w26h_cbuild.py` checks
+it and **refuses to build** unless w26f's C=1.0 cells reproduce `logs_w23f_stdbuild4.txt`
+(hybrid 0.970098 / rankraw 0.970092 / rescale 0.970094) to within 2e-6. Dry-run right now
+correctly reports `gate FAIL — the w26f --cv arm has not run` and exits 1, which is what a
+chain should do when its input does not exist yet.
+
+`w26h_run.sh` waits on **`w26f_run.sh`**, not on `w26f_csweep` — at launch the python process
+does not exist yet because w26f is itself still queued behind w26a, so waiting on the process
+would have started immediately and triple-booked the box, which is precisely the w25 §8
+failure. It then re-runs `w23b_sendqueue.py` and `w26d_queueprice.py`, so the 08-19 send day
+finds a correct, repriced, 55-file queue without a run having to think about it.
+
+Three waiters are now chained: **w26a → w26f (selector arm, then --cv arm, then report) →
+w26h (28 files, then requeue and reprice).** Every stage checkpoints and every stage resumes.
