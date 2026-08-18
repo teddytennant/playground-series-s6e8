@@ -580,3 +580,146 @@ LightGBM" to "prefer a pipeline we do not hold, and the family label only orders
 members WITHIN a foreign pipeline" -- which is materially different advice and
 would close new-member generation here for the rest of the competition. That
 conclusion is worth more than either member is, and it is unavailable from one arm.
+
+════════════════════════════════════════════════════════════════════════════
+§G — w26k: the CT_ train/serve SCALE SKEW in the lattice target-encoding block
+Written 2026-08-18 ~02:50 UTC, slot 7, BEFORE any model was fitted for it.
+════════════════════════════════════════════════════════════════════════════
+
+G1. THE DEFECT, established from the CACHE ALONE at zero compute cost
+--------------------------------------------------------------------
+`agent/features.py:te_block` emits, for each of 72 lattice keys, a smoothed target
+encoding `TE_k` and the raw cell count `CT_k`. The train part is built with an INNER
+4-fold loop (a row never encodes itself); valid and test use the map fitted on the WHOLE
+outer training part. That is correct for `TE_` — a smoothed mean is scale-free, and the
+measured train/valid difference over all 72 TE columns is 4.10e-4 mean / 1.74e-3 max.
+
+It is NOT correct for `CT_`. A count over 3/4 of the outer-training rows is on a
+different SCALE from a count over 4/4 of them. Measured on `cache/f0_*` (means over all
+72 CT columns, no model involved):
+
+    ratio valid/train   min 1.3236   median 1.3325   max 1.3382
+    ratio test /train   min 1.2802   median 1.3233   max 1.4335
+
+Median 1.3325 against the predicted 4/3 = 1.3333. **Every CT_ feature is ~33% larger at
+serve time than at fit time.** A tree learns its split thresholds on the fit-time scale
+and applies them to serve-time values, so every CT split is effectively displaced by 33%
+of its own value, in a consistent direction, on 72 of 184 columns.
+
+G2. SCOPE — this is UPSTREAM, not ours
+--------------------------------------
+`data/oof/src/train_lattice.py` (szymonkapiski's public 47-model OOF library, from which
+`agent/features.py` is adapted and which the donmarch14 CatBoost family also descends
+from) has the identical construction at its lines 172-194: `oof_ct[hi]` from the inner
+`g["count"]`, `ova`/`ote` from the full-train `g["count"]`. So the skew is in the public
+lattice recipe, and every `lat_*` member in the library carries it, as does every own-
+built `lat`/`latcat`/`natlat` member here, since 2026-08-10 when `cache/` was written.
+
+G3. THE INSTRUMENT — one fit, many predictions, exactly paired
+--------------------------------------------------------------
+A per-feature affine rescale of a tree model's INPUT is equivalent to rescaling that
+feature's THRESHOLDS: multiplying the train CT by s and refitting gives (up to binning
+ties) the same row partition with thresholds scaled by s, which is the same function as
+the ORIGINAL model applied to serve data with CT divided by s. So the correction needs
+NO refit. Fit `lgbm_fixed_lat`'s exact config once per frozen fold, then emit one OOF
+slice and one test column per scale
+
+    s in {1.0, 1.1, 4/3, 1.5, 2.0}      (predict on Xb, Xt with CT columns / s)
+
+s = 1.0 is the status quo. s = 4/3 is the pre-registered fix. The arms share the identical
+trees, the identical rows and the identical folds, so nothing separates them except the
+serve-time CT scale — the "matched on everything except the thing being tested" rule that
+this workspace has been caught by three times.
+
+G4. THE REGISTERED PRIOR — a small POSITIVE effect, and the DIRECTION is the real claim
+---------------------------------------------------------------------------------------
+CT is a *precision* channel: the model uses it to decide how far to trust the TE beside
+it. Inflating it 33% at serve time makes the model over-trust thin cells on rows in a
+band around each learned threshold. The dynamic range of CT is huge (0 to ~30k), so
+log(4/3) = 0.29 nats is a small displacement against it and MOST splits will not change
+which side a row falls on. Registered:
+
+    s = 4/3 minus s = 1.0, member solo OOF AUC     0 to +200e-6, modal +30e-6
+    the same pair, marginal into the 187 pack      0 to +3e-6, modal ~0
+    argmax of the s-curve                          at or near 4/3, NOT at 1.0
+
+⚠ The curve's ARGMAX is selected on the same OOF that scores it; this workspace has
+measured arm-selection optimism at +1.78e-6 and it must not be spent twice. **The primary
+readout is the pre-registered point s = 4/3 against s = 1.0, and nothing else.** The rest
+of the curve is MECHANISM evidence only: if the skew is what is being corrected, the curve
+should rise from 1.0, peak near 4/3, and fall away by 2.0. A curve that is flat, or that
+peaks at 1.0, is a null and must be written up as one.
+
+G5. THE NAMED FAILURE MODES, registered before the number exists
+----------------------------------------------------------------
+(a) **A null is the modal outcome for the PACK even if the member gains.** RESEARCH's
+    standing finding is that the pack's span already contains what the 12 columns can say
+    and that a new member is worth ~0. A member-level gain of +30e-6 that buys +0 into the
+    pack is CONSISTENT with everything on file and is not a disappointment; it must be
+    reported as a member-level result, not as a stack result.
+(b) **Thread-count nondeterminism is NOT a reproduction failure.** `lgbm_fixed_lat` was
+    built at `n_jobs=-1` and scored CV 0.9677108350221775; this runs at fewer threads
+    because the box is contended, and LightGBM's histogram reduction is not guaranteed
+    bit-identical across thread counts. The s = 1.0 arm is therefore compared to that
+    stored CV as a SANITY check with a 5e-6 tolerance, and the A/B claim rests entirely on
+    the within-run pairing, which shares one set of trees and cannot be affected by this.
+(c) **If s = 4/3 wins, that is a claim about the FEATURE, not about LightGBM.** It must be
+    replicated on a second function class before `te_block` is changed for good; a single
+    family is one reading, which is the "three replications are ONE reading" error.
+
+G6. ADDENDUM — the TE re-shrink arm, registered before its first number exists
+------------------------------------------------------------------------------
+Added 2026-08-18 ~03:35 UTC while `w26l_serve.py --name r400` was still on fold 0 and had
+printed no AUC of any kind. It covers the `te` and `both` arms, which §G3-G5 did not.
+
+The second skew (RESEARCH w26 slot 7 §4): `TE = (S + lam*gm)/(n + lam)` is smoothed against
+a 3/4-size count at fit time, so the train TE is shrunk MORE toward gm than the serve TE of
+the same cell. Measured, and concentrated in thin cells as the algebra requires: sd(valid)/
+sd(train) 1.0293 over the 12 thinnest keys, 0.9933 over the 12 densest. The corrector
+inverts the smoothing and re-shrinks at f = 3/4; it cuts mean |sd ratio - 1| from 0.008992
+to 0.002992 and independently recovers lam = 20 from the cache, a constant recorded nowhere
+on disk.
+
+⚠ **The sign here is NOT obvious, unlike the CT arm, and that is registered.** Two readings
+compete and only one of them favours the correction:
+
+  (a) skew reading -- the model was fitted against shrunk TE and is served un-shrunk TE, so
+      it is extrapolating past its training support. Correcting is a pure win.
+  (b) information reading -- the serve TE is estimated from 4/3 as many rows and is simply a
+      BETTER estimate of the cell rate. Re-shrinking it deliberately throws that away to
+      match a fit-time artefact. Under this reading the correction LOSES.
+
+Registered priors, deliberately wider and less committed than G4's:
+
+    te   minus ct1.0     -60e-6 to +60e-6, modal +5e-6, sign genuinely uncertain
+    both minus ct1.3333  -60e-6 to +60e-6, modal ~0    (i.e. TE adds ~nothing on top of CT)
+
+⚠ **`both` must be judged against `ct1.3333`, not against `ct1.0`.** Judging the combined
+arm against the uncorrected baseline would credit the CT fix twice. The CT fix is the
+pre-registered headline; the TE arm's only question is what it adds ON TOP of it.
+
+⚠ The sampling-noise half of the TE mismatch (a 3/4 subsample carries sqrt(4/3) = 1.155x the
+sd of a full one) is NOT correctable and is NOT attempted. If the `te` arm is a null, that
+does not show the shrinkage analysis is wrong -- it shows the systematic half is too small
+to matter next to the noise half, which is a different and weaker claim, and must be written
+up as the weaker one.
+
+G7. A DEPTH PREDICTION, registered before w26k printed its first fold line
+--------------------------------------------------------------------------
+Written 2026-08-18 ~03:50 UTC. `w26k_ctscale.py` (2000 rounds, the exact `lgbm_fixed_lat`
+config) has printed NO fold line at this point -- verified live, its log holds only the two
+header lines. `w26l_serve.py --name r400` has printed fold 0 only.
+
+The CT fix has now been read twice at two depths, on fold 0 both times:
+
+    100 rounds   ct1.0 0.958712 -> ct4/3 0.958829   +117e-6
+    400 rounds   ct1.0 0.964779 -> ct4/3 0.965104   +325e-6
+
+Mechanism, if the skew story is right: more rounds means more splits on the CT block, so
+more thresholds displaced by the same 33%, so a LARGER gain. If instead the gain were an
+artefact of an undertrained model it should SHRINK as the model converges.
+
+**Registered: at 2000 rounds the fold-0 CT fix is +250e-6 or more, and the pooled 5-fold
+number is positive.** A 2000-round gain materially BELOW the 400-round one would be evidence
+against the mechanism as stated and must be written up that way rather than as a smaller
+success.

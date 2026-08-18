@@ -6264,3 +6264,149 @@ Each DART round must undo the trees it drops, so per-round cost grows with the n
 already built. A 400-round probe therefore sees ~1.6% of a 3200-round build's dropout
 overhead, not 12.5%. Guard long DART runs with `timeout`; with per-fold checkpointing in place
 a timeout costs the fold in flight and the identical command resumes.
+
+# w26 slot 7 (2026-08-18) — ⚠⚠ THE LATTICE TARGET-ENCODING BLOCK HAS A TRAIN/SERVE SKEW, AND IT IS UPSTREAM
+
+Everything in this section except the final model table was established **from the cached
+matrices alone, with no model fitted**, and is therefore not contingent on any run.
+
+## 1. The defect: every `CT_` column is 4/3 too large at serve time
+
+`agent/features.py:te_block` emits, per lattice key, a smoothed target encoding `TE_k` and
+the raw cell count `CT_k`. The train part is built with an **inner `StratifiedKFold(4)`** so
+a row never encodes itself; valid and test use the map fitted on the **whole** outer training
+part. For `TE_` that is right — a smoothed mean is scale-free. For `CT_` it is not: a count
+over 3/4 of the rows is on a different SCALE from a count over 4/4 of them.
+
+Measured on `cache/f0_*`, means over all 72 CT columns, no model involved:
+
+| | min | median | max |
+|---|---|---|---|
+| ratio valid/train | 1.3236 | **1.3325** | 1.3382 |
+| ratio test /train | 1.2802 | **1.3233** | 1.4335 |
+| control: TE columns, \|valid−train\| of the mean | | 4.10e-4 | 1.74e-3 |
+
+Median 1.3325 against the predicted 4/3 = 1.3333. **A tree learns its CT split thresholds on
+the fit-time scale and applies them to serve values that are ~33% larger, on 72 of 184
+columns.** The `CT==0` fraction (cell unseen at encode time) is *matched* — 17.940% train vs
+17.993% valid vs 17.926% test — so the whole of the skew is scale and none of it is an
+unfixable zero-inflation difference.
+
+For calibration of how big 33% is here: `CT_daily_screen_time_hours`'s nonzero train counts
+run p05 99 / p50 562 / p95 1260, a 12.7× spread. The skew is ~1/9 of the column's own log
+dynamic range — small enough that most splits keep the same side, large enough to move the
+rows near a threshold.
+
+## 2. ⚠ SCOPE: this is in the PUBLIC library's recipe, not just ours
+
+`data/oof/src/train_lattice.py` — szymonkapiski's `s6e8-oof-library-47-models`, which
+`agent/features.py` is adapted from and which the donmarch14 CatBoost family descends from —
+has the identical construction at its lines 172–194 (`oof_ct[hi]` from the inner `g["count"]`,
+`ova`/`ote` from the full-train `g["count"]`). So the skew is carried by:
+
+- **every `lat*` member of the public library**: `lat_cat`, `lat_lgbm`, `lat_lgbm_s5`,
+  `latmax_lgbm`, `latr1_lgbm`, **`latr1_xgb`**, `lattri_lgbm`, `lattri_xgb`, `latwide_cat`,
+  `latwide_lgbm`, `latwide_xgb`, `lat_xgb`, `rmlp_lat`, `rmlp_lat3`;
+- **every own-built member that reads `cache/`** — every `lat`, `latcat` and `natlat` mode of
+  `run_lgbm.py` / `run_xgb.py` / `run_catboost.py`, since the cache was written 2026-08-10.
+
+`latr1_xgb` is the member RESEARCH already calls *"the best GBDT of any family here"*.
+
+⚠ **It does NOT explain the foreign-vs-ours asymmetry w26i/w26j is measuring**, because the
+foreign lattice members have it too. Do not reach for it as that explanation.
+
+⚠ **It DOES give a reason a corrected member could be worth something into the pack where
+every other new member has been worth ~0.** RESEARCH's standing closure is that the pack's
+span already contains what the 12 columns can say, and that a member decorrelates from that
+span only by being worse (`xgb_cat_lattice`, maxcorr 0.9746, worth 0). A corrected member is
+different in kind: it is the *same* function class on the *same* features, differing only by
+a displacement that **every member in the pack shares**. That is a direction the span cannot
+already contain. Whether it pays is still an empirical question — see §6.
+
+## 3. The correction needs NO REFIT, and that is exact, not approximate
+
+Rescaling one input feature of a tree model by `s` is the same function as rescaling that
+feature's thresholds by `s`. So *"fit with CT×s"* ≡ *"the original model applied to serve
+rows whose CT is divided by s"*. **Gated, not assumed**: 120k rows, 150 rounds, both routes
+built and compared —
+
+    maxdiff |route A (serve-side /s) − route B (refit on CT×s)| = 0.000e+00
+    spearman = 1.00000000,  and both differ from the status quo by up to 0.143
+
+So one fit per fold yields the entire s-curve, every arm sharing identical trees, rows and
+folds. **This is the cheapest honest instrument this workspace has built**: the thing being
+tested is the only thing that differs between arms, which is the rule it has been caught by
+three times (the chi2/df null, the residual-booster's permuted-feature null, the unpaired
+slice bootstrap).
+
+## 4. A SECOND skew in the same block — the smoothing is measured against the wrong count
+
+`TE_k = (S + λ·gm)/(n + λ)`. At fit time `n` is a 3/4-size count, so the train TE is shrunk
+**more** toward the global mean than the serve TE of the same cell. Systematic, not noise,
+and concentrated in thin cells exactly as the algebra says. Measured on `cache/f0`, sd(valid
+TE)/sd(train TE) by mean cell count:
+
+| band (mean train count) | 16–435 | 452–1.6k | 1.8k–6.6k | 7.3k–21k | 21k–182k |
+|---|---|---|---|---|---|
+| raw | **1.0293** | 1.0089 | 1.0021 | 1.0017 | 0.9933 |
+| after the correction below | 0.9969 | 0.9990 | 0.9999 | 1.0009 | 0.9932 |
+
+Correctable at serve time in closed form, because the count is right there in `CT_k`:
+
+```
+S      = TE_serve · (n + λ) − λ·gm            # invert the smoothing
+TE_fit = (f·S + λ·gm) / (f·n + λ),   f = 3/4  # re-shrink at the fit-time count
+```
+
+`n = 0` maps `gm → gm`, so unseen cells are untouched, and `f = 1.0` is the exact identity
+(checked, maxdiff 0.000e+00). Over 72 keys it cuts mean |sd ratio − 1| from **0.008992 to
+0.002992** and improves 53 of 72. It replicates only the *systematic* part; the extra
+sampling noise a 3/4 subsample carries is not replicable and is not attempted. The dense-cell
+residual (0.9933 → 0.9932) is untouched by it and is therefore something else, small.
+
+### ⚠ …and this recovers `TE_SMOOTH`, which is recorded nowhere on disk
+
+`build_cache.py` reads `TE_SMOOTH` from the environment and defaults to 20.0; the cache was
+written 2026-08-10 and nothing stored says what it ran with. Sweeping λ in the corrector and
+taking the value that best matches the two sd's:
+
+    λ      5      10      15      20      25      30      50     100
+    mism.  .00656  .00464  .00307  .00299  .00415  .00536  .01005  .01944
+
+Minimised at λ≈17–20. **The correction's own free parameter independently recovers the
+constant the builder used.** That is quantitative confirmation of the shrinkage mechanism,
+not just of its sign.
+
+## 5. Code
+
+- `experiments/w26k_ctscale.py` — one fit per frozen fold, OOF+test emitted at
+  s ∈ {1.0, 1.1, 4/3, 1.5, 2.0}. Per-fold checkpoint to `cache/ctckpt/<name>_f<k>.npz` via
+  temp file + `os.replace`; re-running the same command resumes.
+- `experiments/w26l_serve.py` — supersedes it: the same 5 CT arms plus `te` (re-shrink only)
+  and `both`, **and it saves the fitted booster per fold**, so any further serve-time
+  transform experiment from here costs predictions only, no fit.
+- ⚠ `np.savez(path_string)` appends `.npz` to the *name*, which breaks the temp-file +
+  `os.replace` idiom silently (the rename then fails on a file that was never created). Pass
+  an open **file handle** instead. Cost this run's first probe.
+
+## 6. Pre-registration and result
+
+Registered in full at `experiments/w26_prereg.txt` §G, before anything was fitted: the
+primary readout is the pre-registered point **s = 4/3 against s = 1.0** and nothing else;
+the rest of the curve is mechanism evidence (it should rise from 1.0, peak near 4/3, fall by
+2.0); registered prior **0 to +200e-6 member-solo, modal +30e-6**, and **0 to +3e-6, modal
+~0** into the 187 pack. Selection on the curve's argmax is forbidden — this workspace has
+measured arm-selection optimism at +1.78e-6 and must not spend it twice.
+
+First reading, a 100-round fold-0 probe (**diagnostic only — not the registered test**):
+
+    s=1.0 0.958712   s=1.1 0.958737   s=4/3 0.958829   s=1.5 0.958584   s=2.0 0.958495
+
+Peak exactly at 4/3, +117e-6 over the status quo, falling away on both sides — the registered
+mechanism signature. A 120k-row/150-round smoke on the equivalence gate independently showed
+0.962698 → 0.963013.
+
+⚠ Neither of those is the registered test. The full 5-fold numbers are in the journal entry
+for this slot; if this section still ends here, the runs had not landed when it was written
+and the numbers must be read off `experiments/w26k_run.log` / `experiments/w26l_r400.log`
+rather than inferred from the probes above.
