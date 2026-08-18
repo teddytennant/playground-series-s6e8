@@ -5983,3 +5983,75 @@ Anything that reasons about the standardisation must do it per transform, not on
 predicted LB gain is ~+6.2e-6, not the +14…+36e-6 those six matched pairs were scored against.
 The observed −10e-6 is then a ~16e-6 discrepancy, inside two paired slice sds. **The pairs no
 longer demand a near-zero conversion slope, and that puzzle is downgraded, not closed.**
+
+## ⚠⚠ THE KAGGLE CLI PAGE SIZE IS 50 AND IT HAS NOW COST REAL WORK TWICE (2026-08-18, w26 slot 4)
+
+`kaggle competitions submissions -c <comp> -v` returns **50 rows** unless you pass
+`--page-size`. `kaggle competitions leaderboard -s` caps at **200** even when asked for 500.
+Neither errors, neither warns in a way a script notices; you just get a page and it looks
+like a history.
+
+- **w17 slot 2** found two submissions hidden from every API-reading script here by this.
+- **w26 slot 4** found that `w23b_sendqueue.py` had been reading a 50-row page since the
+  account passed 50 sends on 08-17, so **21 of the 46 files it called "unsent" were already on
+  the leaderboard**, including the one `w26d_queueprice.py` quoted as the best unsent file.
+  Draining the top ten of that queue by hand would have burned 4 slots on identical re-sends.
+
+**Rules that follow, and they are not optional:**
+
+1. **Always pass `--page-size`,** to the CLI and to any SDK call, and pass it large.
+2. **Treat `len(rows) == page_size` as a hard failure, not a warning.** `w23b_sendqueue.py`
+   and `w26g_send.py` both `SystemExit` on it now. A printed warning did exist before and did
+   not save anything, because the caller was a different script on a different day.
+3. **Never trust a Kaggle list you did not ask a size for** — including one you are reading by
+   eye at the top of a slot. The first orient call of w26 slot 4 made exactly this mistake.
+
+Live counts as of 2026-08-18 01:40 UTC: **71 submissions on record**, 71 distinct filenames.
+
+## THE SEND QUEUE — how to spend a Kaggle day, as of 2026-08-18
+
+```bash
+.venv/bin/python experiments/w26g_send.py            # dry run: prints the plan, sends nothing
+.venv/bin/python experiments/w26g_send.py --go --n 10
+```
+
+`w26g_send.py` is the whole send day. It reads `w26d_queueprice.csv` (ranked by predicted LB
+under the w25f CV→LB model), re-derives what is already sent **live from the API by filename
+AND by md5**, validates every candidate CSV (`id,addicted_label`, exactly 296,302 rows, no
+NaN, no duplicate ids — a malformed file scores zero and burns the slot), counts the day in
+**UTC** (Kaggle's boundary), refuses to exceed the 10/day cap, and re-reads the API afterwards
+because `submit` has returned 400 after a 100% upload with nothing registering. It logs every
+send to `experiments/w26g_sent.csv`.
+
+**Do not hand-pick filenames out of the queue CSV.** That CSV goes stale the moment anything
+is sent, and going stale is precisely how the 21-file error above happened.
+
+**⚠ QUEUE DEPTH: 27 unsent files (25 with a stored OOF vector, 2 without) as of 08-18.** At
+ten a day that is 08-19, 08-20 and seven files on 08-21. **The queue is empty from 08-22 and
+the deadline is 08-31** — nine send days with nothing built for them. Every unsent file is
+below the best already-sent CV; the best is `blend160orig_rankraw` at 0.9700342765, which is
+**80.8e-6 under** the best sent CV of 0.9701150809 (`w23_ad187stdcorr`). w26d prices the whole
+remaining queue at **P = 6.263e-4** of producing a new account best.
+
+**What a NEW file needs to be worth building** (`w26d_queueprice.json`, w25f model,
+residual sd 8.41e-6 against a simulated slice-noise floor of 8.21e-6, i.e. the fit is
+complete): cross-fitted CV **0.9701181879** for an even-money shot at beating 0.97118 in
+family h3, or 0.9701108460 in family ens4. The current CV leader is 0.9701150809.
+
+## Reproduction targets for the standardised 187 combiner
+
+From `logs_w23f_stdbuild4.txt`, the run that produced `submissions/w23_ad187std_*.csv` —
+`blend_lab.build(std=True)`, C=1.0, cross-fitted on the frozen folds:
+
+| transform | cross-fitted CV |
+|---|---|
+| hybrid | 0.970098 |
+| rankraw | 0.970092 |
+| rescale | 0.970094 |
+| logit | 0.970030 |
+
+Any new code that cross-fits the standardised combiner at C=1.0 must return these. Note the
+convention difference: `blend_lab` takes the column scale from **all** training rows then
+cross-fits; `w26f_csweep.py --cv` takes it from the **fold-train** rows, which is the clean
+version. sd over 553k vs 691k rows differs by far less than the 1e-6 these are compared at, so
+a mismatch is a defect and not the convention gap.

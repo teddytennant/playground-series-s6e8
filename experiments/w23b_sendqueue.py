@@ -37,13 +37,28 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 N_TEST = 296_302
 
 
+PAGE = 500
+
+
 def sent_filenames():
     """Every fileName the API has ever accepted. Paginated -- the CLI prints a
     `Next Page Token` line ABOVE the header, which must be stripped (RESEARCH,
-    w17 slot 2). One page of 50 is enough while the account is under 100 sends;
-    the token line is handled anyway so this does not silently truncate later."""
+    w17 slot 2).
+
+    ⚠ FIXED 2026-08-18 (w26 slot 4). The previous version passed no --page-size and
+    reasoned "one page of 50 is enough while the account is under 100 sends". That is
+    wrong twice over: the page IS 50, not 100, and the account passed 50 sends on
+    2026-08-17. From then on this function silently returned only the most recent 50
+    filenames, so **21 files that were already on the board were reported as unsent**
+    and went into the queue this file exists to produce -- including blend158_h3, whose
+    CV w26d then quoted as "the best unsent file". Four of the ten rows a send day would
+    have drained were re-sends of byte-identical files, which the brief calls genuinely
+    pointless. The `Next Page Token` guard below did not save it, so the guard is now a
+    hard failure on a full page rather than a printed warning. Do not remove the
+    --page-size argument, and do not trust any Kaggle list you did not ask a size for."""
     out = subprocess.run(
-        ["kaggle", "competitions", "submissions", "-c", "playground-series-s6e8", "-v"],
+        ["kaggle", "competitions", "submissions", "-c", "playground-series-s6e8", "-v",
+         "--page-size", str(PAGE)],
         capture_output=True, text=True, check=True).stdout.splitlines()
     tok = None
     while out and not out[0].startswith("ref,"):
@@ -51,8 +66,11 @@ def sent_filenames():
         if "Next Page Token" in line:
             tok = line.split("=")[-1].strip()
     rows = list(csv.DictReader(out))
-    if tok:
-        print(f"  ⚠ more pages exist (token {tok[:12]}...); {len(rows)} rows read")
+    if len(rows) >= PAGE or tok:
+        raise SystemExit(
+            f"submission list is TRUNCATED: {len(rows)} rows at page size {PAGE}"
+            + (f", next-page token {tok[:12]}..." if tok else "")
+            + ". Raise PAGE. Every 'unsent' verdict below this line would be wrong.")
     return {r["fileName"] for r in rows}, rows
 
 

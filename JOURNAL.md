@@ -12095,3 +12095,192 @@ full pre-registration for the next slot's C sweep). `JOURNAL.md` / `RESEARCH.md`
 `w26a` (slot 2's registered sensitivity test) was chained behind w25d and **started at
 01:13:42 UTC**; it resumes from `w26a_sensitivity.csv`, so whatever it completes before this
 session ends is kept.
+
+---
+
+# 2026-08-18 (UTC) — wave w26, slot 4 of 10
+**Angle handed: "LightGBM: tune it properly against the fixed folds."**
+**Not followed. Reason in §1. What this slot actually did: found that the send queue this
+workspace has been planning its days around was 46% already-sent, and fixed the cause.**
+
+## 0. AT THE CAP AGAIN — no submission was possible, and this is now verified two ways
+
+`date -u` 01:33. The prompt said "already reports for today: 10" and it is right. All ten
+08-18 submissions landed 00:07–00:20 UTC from w25 slot 1. Confirmed independently by the new
+`w26g_send.py`, which counts the day live from the API in UTC:
+
+    71 submissions on record; 10 already sent on 2026-08-18 (UTC); 0 of 10 slots left today
+
+**Note the 71.** My own first orient call in this slot read the CLI with no `--page-size` and
+got exactly 50 rows back, which is the page limit, not the history. That is the same trap as
+§2 below and it caught me before I caught it.
+
+The Kaggle day rolls at 00:00 UTC on 08-19, ~22.5 hours out, so **slots 5 through 10 today are
+also at the cap.** A run reading only this entry should not go looking for a slot.
+
+## 1. Why the LightGBM angle was not taken
+
+The GBDT line here is not near a tuning frontier — it is 187 members deep and has been for
+three waves. `tune_lgbm.py`, `run_xgb.py`, `run_catboost.py`, the fixed-schedule retrains and
+the lattice/TE frames are all in the library already, and the ablation table in RESEARCH.md
+records depth 9–13 at up to −0.0011, `colsample_bytree 0.5` at −0.0006 and the learning-rate
+axis at +0.0002 — i.e. the axis the angle names has been swept and its remaining headroom is
+smaller than the 8.2e-6 slice noise on a single public score. Everything at the margin now
+lives in the **combiner** over those members, not in any one member. The registered plan
+(w26_prereg D1) is the L2 sweep on the standardised combiner, and that is what is running.
+Also: a new LGBM would be a new *member*, and members are ~1 hour of 16 cores each, which
+this slot did not have — w26a was already using them.
+
+## 2. ⚠⚠ THE PAGINATION TRAP ATE THE SEND QUEUE. 21 OF 46 "UNSENT" FILES WERE ALREADY SENT
+
+This is the finding of the slot and it invalidates a planning number two waves have quoted.
+
+`w23b_sendqueue.py` decides which files are unsent, and `w26d_queueprice.py` prices whatever
+w23b hands it. w23b called the CLI like this:
+
+```python
+["kaggle", "competitions", "submissions", "-c", "playground-series-s6e8", "-v"]
+```
+
+with a docstring reading *"One page of 50 is enough while the account is under 100 sends."*
+That reasoning is wrong twice: the page **is** 50, not 100, and **this account passed 50 sends
+on 2026-08-17.** From that moment w23b saw only the most recent 50 filenames and reported
+every older file as unsent. The `Next Page Token` guard did not save it — it only printed.
+
+Measured, by re-reading the list at `--page-size 500` and intersecting:
+
+| | before | after |
+|---|---|---|
+| submissions the tooling could see | 50 | **71** |
+| files in the "unsent" queue | 46 | **25 priceable + 2 with no OOF** |
+| of those, actually already on the board | **21** | 0 |
+| best "unsent" CV | 0.9700483189 (`blend158_h3`) | **0.9700342765** (`blend160orig_rankraw`) |
+| its gap below the best SENT CV | 66.8e-6 | **80.8e-6** |
+
+`blend158_h3` — the file w26d's docstring names as *"the best CV among the 48 unsent ones"* —
+**has been on the leaderboard for days.** So has `blend156`, `blend156_rescale` and
+`blend156_rankraw`. Those four sit at ranks 2, 4, 8 and 10 of the old priced queue, so a slot
+that had drained "the top ten of w26d_queueprice.csv" by hand on the 08-19 day — which is
+exactly what §8 of the slot-3 entry told it to do — would have spent **4 of its 10 slots
+re-sending byte-identical files.** The brief calls that out by name: *"resubmitting an
+identical file is genuinely pointless."* Four wasted slots, from one missing argument.
+
+**Fixed, three ways, because one way is what failed:**
+
+1. `w23b_sendqueue.py` now passes `--page-size 500`, and the truncation guard is a **hard
+   `SystemExit`** on a full page or a next-page token, not a printed warning. A wrong answer
+   here silently poisons every downstream file, so it must not be survivable.
+2. `w23b_sendqueue.csv` and `w26d_queueprice.{csv,json}` regenerated. The wrong versions are
+   kept as `*.stale_w26h.*` rather than overwritten into nothing — w24 and w26 §7 are both
+   about re-cuts consuming the record they were to be checked against, and this re-cut is
+   *justified* but the old numbers are still the evidence for this section.
+3. New `w26g_send.py` re-checks it **live at send time** and by md5 as well as by filename,
+   so the queue CSV going stale again cannot cost a slot. See §4.
+
+w26d's gate held through the reprice — refitted residual sd 8.41e-6 against w25f's 8.41e-6,
+PASS — and the headline probability is unchanged, because it was always dominated by
+`w20_ad187_logit` which really was unsent: **P(best unsent file beats 0.97118) = 6.263e-4**,
+and the best ten together are the same 6.263e-4. Draining the queue is still free and still
+worth doing; it is still not worth compute.
+
+## 3. ⚠ THE QUEUE NOW EMPTIES ON 08-22, AND THE DEADLINE IS 08-31
+
+27 unsent files, 10 a day. That is 08-19, 08-20, and 7 files on 08-21 — **and then the
+brief's "use all ten every day" has nothing to use them on.** The old 46-file count hid this
+by nine days' worth of nothing. Nine send days after that need files that do not exist yet, so
+**building candidates is now the constraint on the send strategy, not the reverse.** This is
+the strongest argument yet for the w26f build finishing: it is the only registered path to a
+file above the best sent CV, and w26d prices what a file needs — **CV 0.9701181879 for an
+even-money shot at the record in family h3.**
+
+## 4. What was built
+
+**`experiments/w26g_send.py`** — the last mile of the send day, so a slot costs almost nothing
+to spend. Reads the priced queue, re-derives what is sent **live** (filename *and* md5, since
+this workspace does emit byte-identical twins under different stems), validates each candidate
+CSV (columns, 296,302 rows, no NaN, no duplicate ids — a malformed file scores zero and burns
+the slot), counts the day in UTC, refuses to exceed 10, sends nothing without `--go`, and
+**re-reads the API afterwards** because `submit` has returned 400 after a 100% upload with
+nothing registering. Dry-run today produces a clean 10-file plan with no re-sends:
+
+    1. w20_ad187_logit.csv          CV 0.9700247998  pred_lb 0.971158  P 6.26e-04
+    2. blend159av_rescale.csv       CV 0.9700286702  pred_lb 0.971052  P 0
+    ... 8 more, all verified unsent
+
+**`experiments/w26f_csweep.py`** — the slot-3 pre-registration (D1), which was written but
+whose fitting path had never run. Two defects found and fixed **before** it ran, not after:
+
+- ⚠ **Cells were keyed `(kind, C, rep)` with no seed.** Prereg §D5 says a winner must be
+  re-run on fresh splits with `--seed0 2000` before anything is built on it. Under the old
+  keying that command would have found all 35 cells "already on disk", printed
+  `all 35 cells already on disk`, and **re-reported the seed-1000 numbers as the fresh-split
+  confirmation of themselves.** Same class as w24 and w26 §7 — a re-cut consuming its own
+  control — and it would have fired on the one command whose entire purpose is to be
+  independent. Artefacts are now `w26f_csweep_s{seed}.csv` / `w26f_hold_s{seed}/`.
+- **The prereg's §D3 companion arm did not exist.** D3 says "cross-fitted CV is REPORTED
+  alongside for every cell but is not the selector", and the script had only a printed
+  reminder of the gate constant. Implemented as `--cv KIND`: cross-fits each C on the frozen
+  folds, standardising on the **fold-train** rows. This is the half of the ship rule that was
+  missing, and it doubles as a C-curve reading of the same holdout-vs-CV gap w25d measures at
+  a single point. It also carries a **free reproduction gate**: C=1.0 must return the numbers
+  `logs_w23f_stdbuild4.txt` recorded for the build that actually produced the submitted
+  standardised files — hybrid 0.970098, rankraw 0.970092, rescale 0.970094 — and the script
+  prints the delta against them per cell.
+- Plus a duplicate-row guard on the CSV, atomic writes for both artefacts.
+
+**`experiments/w26f_smoke.py`** — because the bookkeeping is where this workspace's failures
+actually are, not the fitting. Exercises seed-namespace disjointness, the resume set, the
+duplicate guard, the orphan guard (a CSV row whose `.npy` vanished must not count as done),
+the report pivot, the h3 mix, the NaN path when the `--cv` arm has not run, and the JSON dump
+— all on synthetic cells in a throwaway `seed0=999999` namespace which it then deletes and
+proves it deleted. **SMOKE PASS**, and it cost no cores, which is why it could run while w26a
+had all sixteen.
+
+## 5. What is running right now
+
+- `w26a_sensitivity.py --mode logitnoise` — slot 2's registered sensitivity test, resumed from
+  its own CSV. `subset` finished (28 cells); `rawnoise` still to come.
+- `w26f_run.sh` — **waiting** on w26a in a poll loop, then runs the selector arm for all three
+  transforms, then the companion `--cv` arm, then `--report`. Selector before companion by
+  design: if the chain is cut, the arm that decides the question is the one on disk.
+  Log: `experiments/w26f_run.log`.
+
+Both checkpoint per cell. Prereg D2's registered prior stands and is not being revised now
+that the code is ready: **I expect H-D1 to fail**, best cell −2 to +5e-6, and anything above
++8e-6 gets disbelieved and re-run at `--seed0 2000` — which, as of this slot, is a command
+that actually does something different from the first run.
+
+## 6. ⚠⚠ STILL NOTHING SELECTED. THIRTEEN DAYS.
+
+`check_selection.py`, run live this slot, exit 0:
+
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+      auto-slot 1: public 0.97118, 1-way tie — w21_ad187corr_ens4
+      auto-slot 2: public 0.97117, 2-way tie — w21_ad187corr, w22_ad187corr_rankraw
+
+`WANTED` = **{`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}**, unchanged. Both uploaded, both
+on disk. Cost of not clicking, repriced: +0.83 to +3.33e-6, ~2.5 places per 1e-5. The API has
+no write path for selection (probed and falsified 08-13). **A human must open the submissions
+page and tick those two files.** Nothing in this repo can, and nothing in this repo has
+changed that.
+
+## 7. Next run, in order
+
+1. **Read `experiments/w26f_run.log` first.** If the chain finished, the C sweep has a verdict;
+   write it up against the registered prior in D2 whichever way it went, and check the C=1.0
+   reproduction gate against `logs_w23f_stdbuild4.txt` before believing any row of it.
+   If it is still running, leave it alone — it resumes, and double-booking 16 cores is what
+   wrecked w25 §8.
+2. **If a Kaggle day is open, run `.venv/bin/python experiments/w26g_send.py` (dry run first,
+   then `--go`).** It is now the whole send day. Do **not** hand-pick from the queue CSV.
+3. **Start thinking about what fills the send days after 08-22** (§3). The queue is 27 files
+   deep and there are 13 days left. This is a real gap and no wave has costed it.
+4. The pick is still not clicked (§6).
+
+### Files this slot
+New: `experiments/w26g_send.py`, `experiments/w26f_smoke.py`,
+`experiments/w26{d_queueprice,23b_sendqueue}.stale_w26h.*` (the superseded records),
+`experiments/w26f_run.log`. Modified: `experiments/w23b_sendqueue.py` (pagination fix + hard
+guard) and its CSV, `experiments/w26d_queueprice.{csv,json}` (repriced on the corrected
+queue), `experiments/w26f_csweep.py` (seed keying, `--cv` arm, dedupe, atomic writes),
+`experiments/w26f_run.sh` (waits on w26a, runs both arms). No submission — none was possible.

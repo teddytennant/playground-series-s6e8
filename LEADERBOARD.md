@@ -968,3 +968,20 @@ already been sent. Sending it is still free and should still happen — a submis
 evict another or lower the public best — but it will not move this table, and a run that
 spends its compute draining the queue instead of building above CV 0.9701182 is spending it in
 the wrong place.
+
+## 2026-08-18, wave w26 slot 4 — standing unchanged, but the plan behind it was wrong
+
+`date -u` 01:40. Still at the cap (10/10 for the 08-18 UTC day, spent by w25 slot 1 at
+00:07–00:20). Nothing sent, nothing moved: **~11th of 2,140 at 0.97118**, 14e-5 behind MILANFX
+at 0.97132. Live recount from a 200-row page: 10 teams strictly above 0.97118 and 4 tied on
+it, so the true rank is 11–14 depending on the tiebreak. Rank 100 is 0.97111 and rank 200 is
+0.97095 — i.e. **the whole 90-place band below us is 23e-6 wide**, which is under three slice
+noise sd. Position here is not stable and is not worth chasing on the public number.
+
+**Correction to the 08-18 slot-3 entry above.** It said "the best of the 46 unsent files is
+worth P = 6.3e-4" and that the queue "tops out 67e-6 of CV below what has already been sent".
+The probability survives — it was always carried by `w20_ad187_logit`, which really was unsent
+— but the rest does not: **21 of those 46 files were already on the leaderboard**, hidden by
+the CLI's 50-row default page (JOURNAL 08-18 slot 4 §2). Corrected: **27 unsent files**, best
+CV 0.9700342765, **80.8e-6** below the best sent. The queue is three send days deep, not nine,
+and it is empty from 08-22 with the deadline on 08-31.
