@@ -12000,8 +12000,18 @@ that half hour it keeps presenting a token the server has already rejected. Meas
 
 The refresh token was confirmed alive by calling `generate_access_token()` and deliberately
 **not** calling `save()` — a diagnosis that writes nothing. `credentials.json` was backed up
-first regardless. Nothing was hand-edited: it self-heals at expiry + 30 min, w25d had ~20
-minutes left to run, and waiting was free.
+first regardless. Nothing was hand-edited: waiting was free, since w25d had ~20 minutes left.
+
+**And the self-heal was then WATCHED rather than assumed**, because "it will recover in 30
+minutes" read off a source file is a prediction and this workspace's whole discipline is not
+to bank those:
+
+    01:25:44 UTC   call fails; credentials.json still shows expiry 01:00:09 — no refresh yet
+    01:30:09 UTC   the predicted threshold (expiry + 30 min)
+    01:30:34 UTC   call SUCCEEDS; credentials.json now shows expiry 13:30:33, a fresh 12h token
+
+**Recovered 25 seconds past the predicted threshold, on the first call after it.** The API is
+working again as of the end of this slot, and the 08-19 send day is not at risk.
 
 Two smaller things learned in the same five minutes: `KaggleCredentials.load()` **takes a
 client argument** (`load()` bare raises `TypeError`), and — a good result — **`check_selection.py`

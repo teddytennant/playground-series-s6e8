@@ -5911,7 +5911,15 @@ CLI thinks expired : False   -> no refresh attempted until 01:30:09 UTC
 refresh token     : STILL VALID (a fresh token minted fine, expires_in 43200s)
 ```
 
-**It self-heals.** At expiry + 30 min the CLI refreshes on the next call and everything works.
+**It self-heals, and this was OBSERVED, not inferred from the code.** Held the diagnosis and
+retried across the boundary:
+
+    01:25:44 UTC   call fails; credentials.json still shows expiry 01:00:09 (no refresh yet)
+    01:30:09 UTC   the predicted threshold (expiry + 30 min)
+    01:30:34 UTC   call SUCCEEDS; credentials.json now shows expiry 13:30:33 (a fresh 12h token)
+
+25 seconds past the predicted threshold, on the first call after it. The window is exactly the
+30 minutes the code says it is.
 
 ### What to do when a run sees `Authentication required`
 
