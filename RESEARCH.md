@@ -6137,3 +6137,21 @@ and is **not** evidence about the converged model.
 All at seed 7, l2 6.0, border_count 254, Bernoulli subsample 0.85, `one_hot_max_size` 4,
 `max_ctr_complexity` 1. Early stopping is on an 8% inner split of the fold's TRAINING rows —
 never on the rows that become the OOF, which is the defect `golem_a`/`golem_f` are dropped for.
+
+## ⚠ `git push` fails here unless `gh` is on PATH
+
+```
+gh auth git-credential get: line 1: gh: command not found
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+The remote is HTTPS and the credential helper is `gh`, which lives at
+`/run/current-system/sw/bin/gh` — present on the interactive PATH but **not** on the PATH git
+hands its credential helper from a tool-invoked shell. The commit succeeds and only the push
+fails, so the symptom is a silent "ahead 1" rather than lost work. Fix, verified 2026-08-18:
+
+```bash
+PATH="/run/current-system/sw/bin:$PATH" git push
+```
+
+Check `git status -sb | head -1` for `[ahead N]` before concluding a slot.
