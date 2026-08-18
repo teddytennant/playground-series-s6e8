@@ -5715,3 +5715,79 @@ which the w23 write-up quoted only for training loss:
 follow it. All four cells of w23c reach 0.97037 EXCEPT unstandardised-at-default, which is
 ~3e-6 below. So the defect was the **scale anisotropy**, not under-convergence as such. Do not
 spend a slot re-measuring this.
+
+## The CV→LB relation — SOLVED 2026-08-18 (w25). Use this, not any earlier gap constant.
+
+Fitted over the 60 scored files with CV ≥ 0.97 (`experiments/w25f_ancova2.py`, live LB reads,
+CVs recomputed from stored OOF vectors):
+
+    LB ≈ const + 1.909 * CV  +  family_offset  +  (-27.4 if the combiner was standardised)
+
+    family offsets, e-6 of LB, h3 = reference:
+      logit  +151.1 (se 10.3)      rescale +37.8 (4.7)     rankraw +15.1 (3.8)
+      ens4    +14.0 (3.2)          hybrid   +6.1 (4.2)     w        +0.7 (5.6)
+      h3        0 (ref)            wh3      -3.4 (8.8)
+
+**Residual sd 8.41e-6 against w17a's independently simulated paired slice sd of 8.21e-6.**
+The relation is fully accounted for: three named terms, and the leftover is exactly slice
+noise. Dropping the standardisation term → 10.74e-6. Dropping family too → 19.83e-6.
+
+Consequences, all of them load-bearing:
+
+1. **The slope is +1.909 (95% CI 1.804 … 2.013), not 1.67 or 1.75.** Fitted without the family
+   and standardisation terms it reads 1.67–1.75 and every absolute LB prediction comes out
+   low. "Roughly 2x" was right; the earlier pooled fits were biased by omitted terms.
+2. **Never predict an LB print without the family term.** A CV-only forecast missed by 1.7 to
+   2.8 reporting steps on three of this slot's ten sends.
+3. **The LB grid is 1e-5, so a predicted difference under ~10e-6 is not resolvable.** Quote a
+   2–3 step interval, not a mode. w24 quoted a mode and missed by 3 steps.
+4. Scores are deterministic — a stem sent twice must print identically. `w25a_cvlb_full.py`
+   asserts this over the whole history; 0 violations in 67 stems.
+
+### The standardisation of the combiner — buys CV, converts none of it (w25, six matched pairs)
+
+`blend_lab.py --standardize` scales every member to unit sd before the logistic fit, which
+lets lbfgs converge in ~65 iterations instead of stopping at ~686–792. It is worth +8 to
++20e-6 of **cross-fitted CV** depending on the transform. On the public LB it is worth
+**nothing**: across six pairs matched on pack, transform, C and folds, dLB regressed on dCV has
+slope **−0.402 ± 0.213**, and the standardised file never once printed higher. At dCV +0.26e-6
+the pair TIED, which rules out a fixed per-file penalty and leaves "converts at slope ~0".
+
+Named mechanism under test: the combiner is cross-fitted on the SAME frozen folds that produced
+its 187 member OOF vectors, so a better-converged combiner exploits that leak harder. See
+`experiments/w25_prereg.txt` §2 and `w25d_stdholdout.py`.
+
+### The logit family gap is REAL and is the top open question
+
++151e-6 over h3, t = +14.6, and **confirmed out of sample**: `w23_ad187std_logit` (CV
+0.9700298, +65e-6 above any logit file previously sent, so the low-CV confound is broken)
+printed 0.97114 against a registered fixed-offset prediction of 0.97114 and an artefact
+prediction of ~0.97105. Its gap reproduces the family mean to 2.7e-6.
+
++151e-6 is 18x w17a's entire simulated paired slice budget, so it is **not a slice draw**. The
+live hypothesis is a train→test effect: OOF member columns come from 5-fold models, test member
+columns from full-data models, so test columns are strictly better inputs, and the unbounded
+logit transform is the most sensitive of the four to member quality. If true, CV systematically
+**understates every logit-containing mix** — and h3 excludes logit while ens4 includes it, which
+is also the whole of the h3-vs-ens4 anomaly (now 11 matched pairs, CV prefers h3 11/11, public
+LB prefers ens4 11/11).
+
+**Not acted on. It is estimated entirely from public-LB data.** The local test that settles it
+without a leaderboard is in JOURNAL w25 §9 item 2.
+
+### Operational
+
+- **Kaggle's day rolls at 00:00 UTC.** The runner prompt's "submissions already today" count
+  can be stale across the boundary. Always `date -u` and compare against the newest submission
+  date before concluding the cap is spent. w25 recovered a full 10-slot day this way.
+- **`ps` is non-functional in this sandbox.** `ps aux | grep -c <job>` returns 0 for
+  processes that are demonstrably running. To check whether a background job is alive,
+  enumerate `/proc/*/cmdline` directly:
+  `for p in /proc/[0-9]*/cmdline; do tr '\0' ' ' < $p | grep -q myjob && echo $p; done`.
+  Trusting `ps` in w25 produced a confident, wrong "the job was SIGKILLed" diagnosis.
+- **Never point two runs at the same log path.** Each `> log.txt` truncates the file the
+  other is still writing, so a live job looks frozen. In w25 this hid the fact that three
+  copies of the same experiment were running at once, tripling contention (unstandardised
+  fits went 123s -> 270s) and inventing a phantom crash. Enumerate before relaunching.
+- Kaggle's API still has **no write path for final-submission selection**. Read-only check:
+  `.venv/bin/python experiments/check_selection.py`.

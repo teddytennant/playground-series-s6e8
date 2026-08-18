@@ -1,0 +1,193 @@
+w25 PRE-REGISTRATION — written 2026-08-18 ~00:35 UTC, BEFORE w25d is run once.
+=============================================================================
+Slot angle: consolidation. Re-verify the best pipeline, cut the CV->LB gap across every
+experiment, make sure the strongest submission is selected.
+
+§0. WHAT ALREADY LANDED THIS SLOT, AND WHY A NEW TEST IS NEEDED
+----------------------------------------------------------------
+Three matched, same-family public-LB readings of the STANDARDISATION arrived within an hour
+of each other. Each pair differs in exactly one thing (whether the combiner's design matrix
+is scaled to unit sd) and both members of each pair are the same transform family, so the
+family offset measured in w25c cancels EXACTLY:
+
+    contrast            dCV e-6   dLB e-6   predicted dLB (slope 1.750)   residual
+    corrected h3         +8.20     -10.0            +14.3                  -24.3
+    uncorrected h3       +8.46     -10.0            +14.8                  -24.8
+    uncorrected ens4     +8.01     -10.0            +14.0                  -24.0
+
+Against w17a's leaders paired slice sd of 8.21e-6 that is z ~ -3 three times over. The three
+readings are NOT independent (same 187 pack, same fixed public slice, and #1/#2 differ only
+by the c_avg correction), so this is closer to ONE z ~ -3 reading than three. It is still the
+largest unexplained residual on the account.
+
+`WANTED` slot 1 is `w23_ad187stdcorr`, whose sole distinguishing ingredient IS the
+standardisation. So this matters.
+
+§1. THE RULE THAT GOVERNS TODAY, RESTATED BEFORE ANY TEMPTATION TO BEND IT
+--------------------------------------------------------------------------
+w24_prereg §3 (R3): "`WANTED` does NOT move on anything measured on the public leaderboard."
+That rule is not suspended because the LB reading is large or because it arrived three times.
+It exists for the rogii-wellbore failure, which is this exact shape. **`WANTED` DOES NOT MOVE
+ON §0. Full stop.**
+
+Note also that w24's R1 kept `w21_ad187corr` — the identical construction WITHOUT the
+standardisation — in slot 2 with the justification written in advance: "insurance against the
+standardisation itself, which is a two-week-old change with one wave of evidence." §0 is
+precisely the scenario that insurance was bought for. The hedge is already correct. Nothing
+is required today.
+
+§2. THE CV-SIDE QUESTION, WHICH IS *NOT* FORBIDDEN AND IS THE REAL TEST
+-----------------------------------------------------------------------
+R3 forbids moving on an LB measurement. It does not forbid asking whether the CV number
+itself is honest. There is a named mechanism and it predicts §0 exactly:
+
+  The member matrix is 187 OOF vectors produced on the frozen SKF5 seed42 folds. The
+  combiner is cross-fitted on THOSE SAME folds. For a stacker fit on folds != k, the member
+  values of its training rows were produced by member models that were trained on sets
+  INCLUDING fold k. That is the standard same-folds stacking leak. It is mild — but a
+  BETTER-CONVERGED combiner can exploit it MORE, because exploiting it is exactly what extra
+  optimisation of a 187-way correlated design buys. Standardisation's whole documented effect
+  (w23 §1) is that it lets lbfgs actually converge.
+
+  If that is what is happening, the standardisation's cross-fitted CV gain of +8.46e-6 is
+  partly leak, its honest value is smaller, and the LB residual shrinks toward noise.
+
+There is already one data point and it points that way. w23c's holdout — an 80/20 row split,
+combiner fit on the pool and scored on rows it never saw, so the stacker-weight overfit is
+measured directly — gives:
+
+    std0_tol1e-4 (the SHIPPED unstandardised setting)  hold_auc 0.9703668631
+    std1_tol1e-4 (standardised)                        hold_auc 0.9703699240
+                                                        difference  +3.06e-6
+
++3.06e-6 on a holdout against +8.46e-6 cross-fitted. But w23c is n=1, on ONE transform
+(hybrid), and was run for a different purpose. It cannot carry this.
+
+§3. THE TEST — w25d, repeated holdout on the object that actually ships
+-----------------------------------------------------------------------
+Repeat w23c's geometry properly: R=5 StratifiedShuffleSplit holdouts at 20% (random_state
+1000+rep, matching w23a/w23c so the rep-0 arm must REPRODUCE w23c's numbers as a gate),
+across all THREE h3 transforms (hybrid, rankraw, rescale), combiner fit on the 80% pool and
+scored on the held-out 20%, then the three transform scores rank-averaged into the h3 mix on
+the holdout rows. Two arms per rep: std and unstd, everything else identical, tol 1e-4,
+C=1.0, float64, max_iter 5000. Paired within rep.
+
+The estimand is D = hold_auc(std) - hold_auc(unstd) for the h3 MIX, meaned over 5 reps.
+
+PREDICTIONS, registered now:
+  P1  D lands in [+1.0, +5.0]e-6, i.e. materially BELOW the +8.46e-6 cross-fitted figure.
+      Point estimate +3.1e-6, taken from w23c rep 0.
+  P2  rep 0's single-transform hybrid arms reproduce w23c's 0.9703668631 / 0.9703699240 to
+      < 0.5e-6. If they do not, the harness is wrong and NOTHING below is read.
+  P3  The unstandardised arm's fitted iteration count stays at the ~686 ceiling behaviour and
+      the standardised arm's stays ~65, reproducing w23 §1's mechanism on every rep.
+
+§4. THE DECISION RULE — FIXED HERE, NOT AFTER THE NUMBER LANDS
+---------------------------------------------------------------
+  (S1) If D >= +6.0e-6 (the cross-fitted gain is essentially corroborated by an independent
+       holdout), then the CV is honest, §0 is an LB event, `WANTED` is UNCHANGED, and the §2
+       leak hypothesis is FALSIFIED and goes on the closed list.
+
+  (S2) If D lands in [+2.0, +6.0)e-6, the cross-fitted figure is inflated but the
+       standardisation is still positive. `WANTED` is UNCHANGED — slot 1 is still the best
+       honest CV and slot 2 already hedges it — but the journal must restate the
+       standardisation's value as D, not +8.46e-6, and every future prediction uses D.
+
+  (S3) If D < +2.0e-6, or D is NEGATIVE, the standardisation's cross-fitted gain does not
+       survive an honest holdout. THEN AND ONLY THEN slots 1 and 2 SWAP, to
+       {w21_ad187corr.csv, w23_ad187stdcorr.csv}. That is a CV-side reason, which R3 permits.
+
+  (S4) Under no outcome does anything measured on the public leaderboard move `WANTED`,
+       including the three readings in §0. If the reader of a later run wants to move the pick
+       on §0, the answer is no, and w24 R3 is why.
+
+§5. WHAT WOULD MAKE ME WRONG ABOUT §2
+--------------------------------------
+The leak story predicts the gain shrinks on a holdout. A competing and duller story is that
+the +8.46e-6 is real and the LB slice simply dislikes this file — in which case the holdout
+reproduces the cross-fitted number and S1 fires. A third story: the holdout fits on 553k rows
+where the cross-fit also fits on 553k rows, so if the leak is the mechanism the holdout is
+NOT actually leak-free either — its members' OOF values were still produced with fold
+knowledge. This is a genuine limitation and it means w25d can only detect the part of the
+optimism that is stacker-weight overfit to specific ROWS, not the part that is member-level
+fold leakage. If D comes back near +8.46e-6, that does NOT fully clear the leak hypothesis;
+it only clears the row-overfit half. Recorded now so the result is not over-read later.
+
+
+=============================================================================
+ADDENDUM A1 — written 2026-08-18 ~00:55 UTC, AFTER all ten sends had printed and
+BEFORE w25d returned. This registers the NEXT slot's experiment, not this one's.
+=============================================================================
+
+THE FINDING THAT NEEDS A LOCAL TEST
+------------------------------------
+Send 10 (`w23_ad187std_logit`, CV 0.9700298) printed 0.97114 against a registered fixed-offset
+prediction of 0.97114 and a low-CV-artefact prediction of ~0.97105. It is +65e-6 of CV above
+any logit file previously sent, so the confound between "logit family offset" and "the gap
+shrinks as CV rises" is broken. The logit family gap is REAL: +151.1e-6 over h3 (t +14.6), and
+reproduced out of sample to 2.7e-6.
+
++151e-6 is 18x w17a's entire simulated paired slice budget of 8.21e-6. It is not a slice draw.
+The live hypothesis is a TRAIN -> TEST effect:
+
+  H_L: the OOF member columns are produced by 5-fold models and the test member columns by
+       full-data models, so the test columns are strictly better inputs. The logit transform
+       is unbounded and is the most sensitive of the four to member quality, so it gains more
+       from that upgrade than rank-based transforms do. Cross-fitted CV therefore
+       SYSTEMATICALLY UNDERSTATES every logit-containing mix on the test set.
+
+If H_L is true it is decision-relevant, because h3 EXCLUDES logit and ens4 INCLUDES it, both
+`WANTED` files are h3, and the h3-vs-ens4 CV margin in the 187 pack is only +2.9e-6 against a
++14.0e-6 ens4 gap term. Nothing has been acted on, because H_L is estimated entirely from
+public-LB data and that is exactly the input that produced the rogii-wellbore failure.
+
+THE TEST — w26a, and it needs NO LEADERBOARD AT ALL
+----------------------------------------------------
+H_L makes a purely local, purely CV-side prediction: if better member columns are worth more to
+logit than to the rank-based transforms, then WORSE member columns must cost logit more. So
+degrade the member matrix by a controlled amount and measure the slope of stack AUC against
+member quality, per transform.
+
+  Take the 187-member OOF matrix O. For a grid of degradation levels d, form O_d by adding
+  Gaussian noise at d x the per-column sd (d in 0, 0.05, 0.10, 0.20, 0.40), fixed seed. For
+  each d and each transform in (logit, hybrid, rankraw, rescale), cross-fit the combiner on the
+  frozen SKF5 seed42 folds and record CV. Fit CV against d per transform; the coefficient is
+  that transform's member-quality sensitivity S_k.
+
+  A second, cleaner arm if compute allows: instead of noise, degrade by SUBSETTING members
+  (187 -> 150 -> 120 -> 90, fixed random draws, 3 reps). Subsetting degrades quality without
+  changing the noise model, so agreement between the two arms is the check that S_k is a
+  property of the transform and not of Gaussian noise specifically.
+
+PREDICTIONS, registered now:
+  Q1  S_logit is the steepest of the four, and by a wide margin. If logit is NOT the most
+      sensitive, H_L is FALSIFIED and the +151e-6 gap has no local mechanism.
+  Q2  The ORDERING of S_k across the four transforms matches the ordering of the family
+      offsets in w25f (logit +151.1 > rescale +37.8 > rankraw +15.1 > hybrid +6.1). This is
+      the strong form and it is the one worth testing, because the offsets were fitted with no
+      knowledge of S_k. A rank correlation of +1.0 across four transforms is p = 1/24 under a
+      null of no relation — weak on its own, but it is a genuine prediction.
+  Q3  The magnitude is checkable, roughly. The OOF-vs-test member quality gap is one 5-fold
+      step, i.e. members trained on 80% vs 100% of the rows. If S_logit's slope implies a
+      logit advantage of the right ORDER (tens of e-6, not tenths and not thousands) for that
+      much quality change, H_L survives; if it implies 1e-6 or 5000e-6, it does not.
+
+DECISION RULE, fixed here:
+  (T1) If Q1 FAILS, H_L is falsified, the +151e-6 gap goes on the books as unexplained, and
+       `WANTED` stays on CV and on h3. No further work on this line.
+  (T2) If Q1 and Q3 both hold, H_L survives and `WANTED` becomes an OPEN QUESTION to be
+       decided by a further pre-registered step -- NOT moved on the strength of w26a alone.
+       The reason: w26a would establish a mechanism, not a magnitude on the private slice, and
+       a mechanism that predicts the public slice correctly can still be a public-slice
+       property. The follow-on would have to be a paired private-draw simulation in the
+       w16k/w16s geometry with the estimated per-transform quality effect injected.
+  (T3) Under no outcome does w26a alone move `WANTED`, and under no outcome does any public-LB
+       number move it. w24 R3 continues to hold to the deadline.
+
+WHAT I EXPECT TO BE WRONG ABOUT
+--------------------------------
+The most likely failure is that ALL FOUR transforms turn out similarly sensitive, because the
+combiner is a logistic regression on 187 highly-correlated columns and the ridge may wash out
+transform-specific sensitivity entirely. That would leave +151e-6 with no mechanism at all,
+which is a worse position than today's but an honest one. Registered so a null result reads as
+a result rather than as a failed run.

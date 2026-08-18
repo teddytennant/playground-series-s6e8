@@ -921,3 +921,31 @@ prints reshuffle rank without meaning much.
 Nothing was sent this slot (cap 10 exhausted at 13:40). The queue for tomorrow is led by
 `w23_ad187stdcorr`, CV 0.9701150809 — **+8.2e-6 of CV above anything this account has ever
 submitted**, and never scored. Registered expectation: 0.97119 modal, 0.97118 alternative.
+
+## 2026-08-18, ~00:30 UTC (w25, slot 1) — ten sends, account best unchanged
+
+Account best **0.97118** (`w21_ad187corr_ens4`, 08-17), rank **11 of 2,140**. The field has
+grown from the brief's ~1,326 to 2,140 teams.
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97132 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| 4–6 | Utkarsh / Keanan / Szymon Kłapiński | 0.97124 |
+| 7 | cstdy | 0.97123 |
+| 8 | Don Mani | 0.97122 |
+| 9 | Charles Backman on LinkedIn | 0.97121 |
+| 10 | Mahog | 0.97120 |
+| **11** | **Teddy Tennant** | **0.97118** |
+| 12 | Mursal Gorchuyev | 0.97118 |
+
+Ten sends today, best print **0.97117** (`w22_ad187corr_rankraw`) — the account best was **not
+beaten**, and the CV leader `w23_ad187stdcorr` came in at 0.97116 against a registered 0.97119.
+Gap to first 14e-5; gap to top-10 is 2e-5, two prints.
+
+Nine of the ten sends were spent as **matched pairs and registered forecasts** rather than
+attempts on the board, which is why the best print did not move: the day's value was the
+CV→LB model in RESEARCH.md, not a rank. That was the handed angle and it was the right trade —
+but note it explicitly, because a run that only reads this file will see ten sends and no
+movement.

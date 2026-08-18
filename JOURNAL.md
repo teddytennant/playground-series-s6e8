@@ -11579,3 +11579,225 @@ than quietly fixed: **the near-miss is the finding**. `w21b_famvalue.py` was saf
 I happened to parameterise its JSON in the same edit, and every other script in this workspace
 that writes a fixed-name artefact has the same exposure. `git status` before staging is what
 caught it, exactly as the playbook says.
+
+---
+
+# ══ 2026-08-18 (UTC) — WAVE w25, SLOT 1 of 10 ══
+
+**Handed angle:** "Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check
+the CV-to-LB gap across every experiment so far, and make sure the strongest submission is the
+one selected." Taken as handed, in that order. It turned out to be the most productive angle
+of the week, because the CV-to-LB re-cut it asked for found two effects nobody here had
+measured and one of them attaches directly to the file `WANTED` points at.
+
+**⚠ THE PROMPT SAID "Submissions the Kaggle API already reports for today: 10". IT WAS STALE.**
+Live check at slot start: `date -u` returned **2026-08-18 00:10 UTC** and the submission list
+showed ten rows dated 08-17 and **zero dated 08-18**. The Kaggle day had rolled over minutes
+earlier. The CLI confirmed it on the first send — "9 submissions remaining today". **All ten
+slots were available and all ten were used.** A future run that reads the prompt's count
+without checking `date -u` against the newest submission date will skip a full day of sends.
+
+## 0. What went out — all ten, ordered as sent
+
+| # | file | CV | LB | registered prediction | verdict |
+|---|---|---|---|---|---|
+| 1 | `w23_ad187stdcorr` | 0.9701150809 | **0.97116** | 0.97119 modal, 0.97118 alt | **MISS, 3 steps low** |
+| 2 | `w23_ad187std_h3` | 0.9701092751 | 0.97114 | h3 one step under send3 | HIT |
+| 3 | `w23_ad187std` | 0.9701058972 | 0.97115 | ens4 one step over send2 | HIT (11/11) |
+| 4 | `w22_ad187corr_rankraw` | 0.9701001355 | **0.97117** | 0.971153 | 1.7 steps low |
+| 5 | `w23_ad187std_h3_rescale` | 0.9700937039 | 0.97114 | 0.971166 family / 0.971142 std-shaded | **std-shaded HIT** |
+| 6 | `w20_ad187_rescale` | 0.9700778471 | 0.97115 | 0.971138 | HIT |
+| 7 | `w20_ad187_hybrid` | 0.9700773470 | 0.97113 | 0.971102 | 2.8 steps low |
+| 8 | `w23_ad187std_h3_hybrid` | 0.9700977970 | 0.97112 | 0.971138 CV / 0.97111 std-shaded | **std-shaded HIT** |
+| 9 | `w23_ad187std_h3_rankraw` | 0.9700917912 | 0.97114 | 0.97112 | **MISS — it TIED** |
+| 10 | `w23_ad187std_logit` | 0.9700298055 | **0.97114** | 0.97114 fixed-offset / 0.97105 artefact | **fixed-offset HIT, by 9 steps** |
+
+Account best is **unchanged at 0.97118** (`w21_ad187corr_ens4`, sent 08-17). Rank **11 of
+2,140** — the field has grown from the brief's ~1,326.
+
+## 1. ⚠ THE REGISTERED PREDICTION FOR THE CV LEADER MISSED, AND THE MISS IS THE FINDING
+
+w24 §5 registered, before the file could be scored: `w23_ad187stdcorr` is +8.20e-6 of CV on
+`w21_ad187corr` (LB 0.97117), so "the modal print is **0.97119**, with 0.97118 the main
+alternative. A print at or below 0.97117 would be information about the slice, not about the
+file." It printed **0.97116** — one step *below* the file it was supposed to beat, and three
+below the registered mode. Recorded first and plainly because it is the thing this entry is
+about, not a footnote to it.
+
+The pre-registered consequence stands: **`WANTED` did not move.** w24 R3 says the deadline
+pick does not move on anything measured on the public leaderboard, and that rule is not
+suspended because the print was disappointing. But R3 does not forbid asking whether the CV
+number is honest, and §4 below is that question.
+
+## 2. `w25a` — the full CV↔LB table, first cut since w17a, and CV comes out VINDICATED
+
+Every LB read live from the API, every CV recomputed here from the stored OOF against
+`data/train.csv` — nothing copied from the journal, so a transcription error in either column
+cannot survive. 67 scored stems, 63 with a local OOF vector.
+
+    all 67 files        Spearman rho +0.829 (p 4.5e-18)   Pearson +0.889
+    CV >= 0.97 (n 60)   Spearman rho +0.864               slope +1.67
+
+**This is the single most reassuring number in the workspace and it had never been computed.**
+The CV ordering this account builds on predicts the public LB ordering with rho +0.86 across
+sixty files spanning 0.97099 to 0.97118. The CV discipline is not a leap of faith; it is
+measured. Everything in §3–§5 is a refinement *on top of* a relation that basically works.
+
+## 3. `w25c` / `w25f` — the CV→LB relation is now FULLY ACCOUNTED FOR. That was w17a's ask.
+
+w17a set the standing open item explicitly: "until a residual-scatter estimate exists, no LB
+prediction in this workspace is defensible." It supplied the slice-noise half by simulation
+(**paired sd 8.21e-6** for leader-sized files). What was missing was why the *observed* scatter
+about a single CV→LB line was 12–20e-6, well above it.
+
+The answer is that the (LB − CV) gap is **not a constant**. It is structured by transform
+family, and separately by whether the combiner was standardised. Fitting
+`LB ~ CV + family + standardised` over the 60 files with CV ≥ 0.97:
+
+| term | coefficient, e-6 of LB | se | t |
+|---|---|---|---|
+| **CV slope** | **+1.909** (95% CI 1.804 … 2.013) | 0.053 | +35.8 |
+| fam[logit] | **+151.1** | 10.3 | +14.6 |
+| fam[rescale] | +37.8 | 4.7 | +8.0 |
+| fam[rankraw] | +15.1 | 3.8 | +4.0 |
+| fam[ens4] | +14.0 | 3.2 | +4.4 |
+| fam[hybrid] | +6.1 | 4.2 | +1.5 |
+| fam[w] | +0.7 | 5.6 | +0.1 |
+| fam[h3] | 0 (reference) | — | — |
+| fam[wh3] | −3.4 | 8.8 | −0.4 |
+| **standardised** | **−27.4** | 4.8 | **−5.8** |
+
+**Residual sd 8.41e-6, against an independently simulated slice-noise floor of 8.21e-6.**
+Three named terms and what is left over is *exactly* slice noise. Dropping the standardisation
+term takes it to 10.74e-6; dropping family as well takes it to 19.83e-6. w17a's open item is
+closed, and "roughly 2x" — the slope this workspace has been registering predictions on all
+week — turns out to be right at **+1.909**, but only once the other two terms are in. Fitted
+without them it reads 1.67–1.75, which is what made every absolute prediction in §0 miss low.
+
+Honest note on sequence: `w25c` fitted this on the 51 files scored *before* today and got
+residual sd 8.67e-6 with only ONE standardised file in the sample — it looked closed there
+too, for the wrong reason. Today's seven new standardised files were its out-of-sample test
+and it failed: pooled residual sd rose to 19.83e-6 until the standardisation term was added.
+The model is only trustworthy because it was broken and repaired in the same slot.
+
+## 4. ⚠ THE STANDARDISATION BUYS CROSS-FITTED CV AND CONVERTS NONE OF IT — six matched pairs
+
+This is the finding that touches the deadline pick, because the standardisation is the **sole**
+distinguishing ingredient of `w23_ad187stdcorr`, which is `WANTED` slot 1.
+
+Six pairs. Each holds the 187-member pack, the transform, `C=1.0` and the frozen SKF5 seed42
+folds fixed and varies one thing: whether the combiner's design matrix is scaled to unit sd
+before the logistic fit. Both members of every pair are the **same transform family**, so §3's
+family offset cancels exactly and no modelling is needed to read the paired column.
+
+| family | dCV e-6 | LB std | LB unstd | dLB e-6 | predicted dLB @1.75 | residual |
+|---|---|---|---|---|---|---|
+| rankraw | **+0.26** | 0.97114 | 0.97114 | **0.0** | +0.5 | −0.5 |
+| ens4 | +8.01 | 0.97115 | 0.97116 | −10.0 | +14.0 | −24.0 |
+| corrected h3 | +8.20 | 0.97116 | 0.97117 | −10.0 | +14.3 | −24.3 |
+| uncorrected h3 | +8.46 | 0.97114 | 0.97115 | −10.0 | +14.8 | −24.8 |
+| rescale | +15.86 | 0.97114 | 0.97115 | −10.0 | +27.7 | −37.7 |
+| hybrid | +20.45 | 0.97112 | 0.97113 | −10.0 | +35.8 | −45.8 |
+
+**The dCV column spans +0.26 to +20.45e-6 and the standardised file never once printed
+higher.** Regressing dLB on dCV across the six pairs gives slope **−0.402 ± 0.213** against
+the +1.909 that CV differences from every other source convert at, with residual sd 3.29e-6.
+
+Send 9 was designed for exactly this and is the reason the table is readable: at dCV +0.26e-6
+its registered prediction was 0.97112, one step down, and it **TIED at 0.97114**. That
+falsifies a fixed per-file penalty on standardised files and leaves the surviving reading —
+*the standardisation's cross-fitted CV gain converts to LB at a slope near zero*. §3's
+−27.4e-6 indicator term is the same effect seen from the pooled side, where the standardised
+files happen to sit at higher CV.
+
+The named mechanism, written into `experiments/w25_prereg.txt` §2 **before** any of this was
+tested: the combiner is cross-fitted on the SAME frozen folds that produced its 187 member OOF
+vectors, so a better-converged combiner can exploit that leak harder — and letting lbfgs
+actually converge is the entire documented effect of standardising (w23 §1: 65 iterations
+instead of 686). `w25d` tests that CV-side, on held-out rows, and is pre-registered with a
+fixed decision rule S1/S2/S3 at §4 of the prereg. **Only its verdict may move the pick.**
+
+## 5. `w25b` — h3 vs ens4 reaches 11 of 11, and §3 finally names the mechanism
+
+Matched pairs where both the h3 mix and the ens4 mix of the same member set are scored: CV
+prefers h3 in 11/11 (mean +4.05e-6) and the public LB prefers ens4 in 11/11, every one by
+exactly one reporting step. w16s closed this at 6 pairs as a p~0.24 slice event; w21 got it to
+8; send2/send3 made it 11.
+
+§3 supplies what was always missing — **a mechanism**. h3 is the mix that EXCLUDES logit,
+ens4 INCLUDES it, and the logit family carries a **+151e-6** gap over h3. Including logit buys
+gap; that is the whole pattern, and it needs no slice story.
+
+But the eleven pairs are **not eleven measurements** — they share member sets and are all read
+off ONE fixed public slice. The right effect size is §3's +14.0e-6 ens4 term, which against
+w17a's 8.21e-6 paired slice sd is z ≈ +1.7. **Not evidence, and the pick does not move on it.**
+That reproduces w16s's closure with a proper number attached instead of a p-value from an
+independence null that was never true.
+
+## 6. Send 10 — the logit gap is REAL, holds at high CV, and is now the top open question
+
+Every logit file ever sent had CV in 0.9699498–0.9699648, so the +151e-6 family offset was
+measured entirely at the bottom of the range and was fully confounded with "the gap shrinks as
+CV rises". `w23_ad187std_logit` at CV 0.9700298 is +65e-6 above any of them and breaks the
+confound. Registered in advance, two hypotheses a dozen reporting steps apart: fixed offset →
+0.97114; low-CV artefact → ~0.97105.
+
+**It printed 0.97114.** Its gap is +1110.2e-6 against the logit family mean of +1112.9e-6 —
+reproduced out of sample to within **2.7e-6**.
+
+So the logit transform's stack does genuinely better on the test rows than its OOF CV says, by
+about +151e-6 relative to h3. **That is 18x the entire simulated paired slice budget. It cannot
+be a slice draw.** The only class of explanation left is a train→test effect, and there is an
+obvious candidate: the OOF member columns are produced by 5-fold models and the test member
+columns by full-data models, so the test columns are strictly better inputs — and the logit
+transform, being unbounded, is the most sensitive to member quality of the four. If that is
+right, **CV systematically understates every logit-containing mix on the test set**, h3
+excludes logit, and both `WANTED` files are h3.
+
+**Nothing moved on this, and nothing should have.** It is estimated entirely from public-LB
+data, which is precisely the input the rogii-wellbore failure was built on. What it earns is
+the top of the next-run list and a **local, CV-side test** that needs no leaderboard at all —
+see §9 item 2.
+
+## 7. ⚠⚠ NOTHING IS SELECTED. THIS IS THE MOST IMPORTANT LINE IN THIS ENTRY.
+
+`check_selection.py` run live this slot:
+
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+      auto-slot 1: public 0.97118, 1-way tie — w21_ad187corr_ens4
+      auto-slot 2: public 0.97117, 2-way tie — w21_ad187corr, w22_ad187corr_rankraw
+
+Kaggle's public API has **no write path** for final-submission selection (probed and falsified
+2026-08-13). If nobody clicks, Kaggle auto-selects **by best public score** — which, after
+everything above, is exactly the selection rule this workspace has spent three weeks arguing
+against. The deadline is **2026-08-31**, thirteen days out.
+
+`WANTED` is unchanged at **{`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}** and both files are
+now uploaded, so the click is possible for the first time — w24 left slot 1 unsatisfiable
+because the file had never been sent. **A human has to open the submissions page and click
+those two.** Nothing else in this repo can do it.
+
+## 8. What was NOT done, and the one defect introduced
+
+- No new members, no feature engineering, no tuning, no seed/fold work. The angle said no new
+  ideas and there were none; every number above comes from files that already existed or from
+  live LB reads.
+- No file was selected off any table. Sends 5/6, 7/8 and 9 were chosen as **matched pairs**
+  before any of them printed, precisely so the standardisation column could not be assembled
+  after the fact from whichever comparisons happened to look clean.
+- **Defect, and my first diagnosis of it was WRONG — the correction is the useful part.**
+  `w25d` appeared to die silently twice: `ps aux | grep -c` returned 0 and
+  `logs_w25d_stdholdout.txt` stopped advancing, so I concluded that detached `nohup … &`
+  children were being SIGKILLed when the Bash tool call returned, and relaunched under the
+  harness's `run_in_background`. **That was not what happened.** Enumerating
+  `/proc/*/cmdline` directly showed all three launches still running concurrently:
+  `ps` is non-functional in this sandbox and silently returns nothing, and all three runs
+  redirected to the SAME log path with `>`, so each relaunch truncated the file the others
+  were still writing to. Nothing had died. What I had actually done was triple-book 16 cores —
+  which is why the unstandardised fits went from 123s in w23c to 234–270s here, and why the
+  log looked frozen. Killed 2 of the 3, kept one, and it is running clean.
+
+  Two durable lessons, and the second is the one that cost real time: **`ps` cannot be trusted
+  here — enumerate `/proc/*/cmdline` instead**, and **never point two runs at one log path**.
+  The restructuring into one transform per process with in-place scaling was still worth doing
+  and is kept, but it was a fix for a problem that did not exist.
