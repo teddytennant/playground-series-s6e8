@@ -985,3 +985,27 @@ The probability survives — it was always carried by `w20_ad187_logit`, which r
 the CLI's 50-row default page (JOURNAL 08-18 slot 4 §2). Corrected: **27 unsent files**, best
 CV 0.9700342765, **80.8e-6** below the best sent. The queue is three send days deep, not nine,
 and it is empty from 08-22 with the deadline on 08-31.
+
+## 2026-08-18, wave w26 slot 5 — unchanged, and the gap to the top is bigger than any live lever
+
+`date -u` 01:54, still at the cap (10/10 on the 08-18 UTC day, all spent by w25 slot 1). Live
+read of the top of a 200-row page:
+
+| | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97132 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| … | | |
+| **11** | **Teddy Tennant** | **0.97118** |
+
+**140e-6 behind first.** Worth stating plainly against what is actually in flight: at the
+workspace's fitted CV→LB slope of ~2, closing that needs roughly **+70e-6 of CV**, and the two
+live levers are the C sweep (registered prior −2 to +5e-6) and w26i's two new CatBoost members
+(registered prior +1 to +7e-6 on the combiner). **Neither is within an order of magnitude of
+the gap to first.** The realistic target this wave is the 0.97118 → ~0.97122 band, which is
+worth a handful of places, not the top of the board — the only thing on file that ever moved
+CV by ~50e-6 was a 22-member import, i.e. members from a pipeline we did not hold.
+
+Recorded so a later run does not read a +5e-6 result as progress toward first place. It is
+progress toward rank ~8.

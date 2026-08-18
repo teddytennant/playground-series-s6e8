@@ -12321,3 +12321,229 @@ finds a correct, repriced, 55-file queue without a run having to think about it.
 
 Three waiters are now chained: **w26a → w26f (selector arm, then --cv arm, then report) →
 w26h (28 files, then requeue and reprice).** Every stage checkpoints and every stage resumes.
+
+---
+
+# 2026-08-18 (UTC) — wave w26, slot 5 of 10
+**Angle handed: "CatBoost: it usually handles categoricals better than the others on
+survey-style data. Tune and compare on identical folds."**
+**Followed — and this is the first slot in three where the handed family angle survived
+contact with the record. What it produced: two new CatBoost members, both queued and
+building, and the pre-registration that decides what they are worth before they finish.**
+
+## 0. At the cap. 0 of 10 slots left, confirmed live and independently
+
+`date -u` 01:54. The prompt says 10 already sent today and `w26g_send.py` agrees, counting
+the day from the API in UTC off a 500-row page:
+
+    71 submissions on record; 10 already sent on 2026-08-18 (UTC); 0 of 10 slots left today
+    71 distinct filenames sent, 71 of them still on disk and fingerprinted
+
+All ten landed 00:07–00:20 UTC from w25 slot 1. The Kaggle day rolls at 00:00 UTC on 08-19,
+**~22 hours out**, so slots 6 through 10 today are also at the cap and a run reading only this
+entry should not go looking for one. That 22 hours of dead wall-clock is the reason this slot
+started a multi-hour build rather than a 20-minute one — see §4.
+
+Public standing unchanged: **11th of 2,140 at 0.97118**, MILANFX 0.97132.
+
+## 1. Why the angle was TAKEN this time, when slot 4 refused its own
+
+Slot 4 refused "tune LightGBM" and was right to. It would be lazy to refuse this one by
+inheritance, so the distinction is worth stating, because it is a measurement and not a mood:
+
+RESEARCH's `w21b_famvalue` table is size-matched (5 v 5), single-pipeline, 5-rep paired:
+
+| group | per member | vs |
+|---|---|---|
+| **cat5** | **+8.11e-6** | — |
+| xgb5 | +5.55e-6 | cat5 − xgb5 = +13e-6, t **+6.04**, 5/5 reps |
+| lgb5 | +2.34e-6 | cat5 − lgb5 = +29e-6, t **+12.63**, 5/5 reps |
+
+and the operational sentence written into RESEARCH from it is verbatim: *"when screening which
+members to spend effort generating, prefer CatBoost, then XGBoost, then LightGBM."* **This
+slot's angle names the family that table puts first; slot 4's named the one it puts last.**
+
+The second half of the argument is that new *members* are the only instrument on file with the
+right order of magnitude. w20d: 22 members bought **+47e-6**. Nothing else in this workspace's
+history has moved the combiner CV by more than a few e-6, and the registered prior for the C
+sweep currently running (prereg §D2) is −2 to +5e-6. Slot 4 §3 established that the binding
+constraint is now candidate *files*, not send slots — the queue empties 08-22 and the deadline
+is 08-31 — and a new member regenerates the whole transform × correction family rather than
+re-cutting it.
+
+⚠ **The counter-evidence, recorded before the builds finish so it cannot be dropped
+afterwards.** The +8.11e-6 was measured on **foreign** CatBoosts, from adarsh1077's pipeline.
+Every "another GBDT is worth nothing" measurement on file was made on a GBDT *we* built on
+*our* features, and w20d's own headline was that whose pipeline built it is a dominant
+variable. **These two members are ours.** The registered prior (§E3) is therefore far below
++8.11e-6/member, and the modal outcome is written down as *below* what a record file needs.
+
+## 2. What is building — two members, each a ONE-VARIABLE contrast
+
+Not two hyperparameter draws. Each changes exactly one thing against a member already on disk,
+so the comparison is identified without a new control.
+
+| | E1 `cat_native_ctr2` | E2 `cat_natlat` |
+|---|---|---|
+| against | `cat_native`, CV 0.958941 | `cat_lat`, CV 0.966353 |
+| the one change | `max_ctr_complexity` 1 → **2** | the 12 native categorical codes **appended** to the 184 dense lattice-TE columns |
+| everything else | mode native, lr 0.06, depth 6, l2 6.0, seed 7, border 254, 5000 iters, same frozen folds, same inner-split early stopping | mode natlat, lr 0.05, depth 7, l2 6.0, seed 7 — i.e. `cat_lat`'s exact settings |
+
+**Why E1 is a representation change and not a tuning knob** — the only kind of change this
+workspace has ever been paid for. At complexity 1 CatBoost estimates an ordered target
+statistic per categorical *column*. At 2 it also estimates them on **pairs**: 66 combinations
+of the 12 lattice columns, each a target statistic no member in the pack holds in any form.
+Our TE pipeline encodes single columns only; the dense lattice frames carry hand-built ratios,
+not TE-on-pairs. It is the one CatBoost knob that changes the feature *space*.
+
+**Why E2 is not a duplicate of `cat_lat`.** `lat` hands CatBoost our fold-safe **smoothed mean**
+target encoding (one map per outer fold, smoothing 20). `native` hands it the raw levels and
+lets CatBoost's own **ordered target statistic** estimate them. Two estimators of the same
+quantity at different bias/variance points; **every member in the pack holds exactly one of
+them**, and neither representation is a superset of the other. natlat lets the model choose per
+split. Nothing is removed, so it is `cat_lat` plus a channel.
+
+Registered prior, written before either build started and deliberately low:
+
+    cat_native_ctr2  solo 0.9590–0.9600   marginal into the 187 pack  0 to +4e-6, modal +1.5
+    cat_natlat       solo 0.9660–0.9670   marginal into the 187 pack  0 to +3e-6, modal +1.0
+    the pair on the combiner CV           +1 to +7e-6, modal +2.5e-6
+
+Against what is needed: best sent CV 0.9701150809, and w26d prices an even-money shot at the
+0.97118 board record at cross-fitted CV **0.9701181879**, i.e. **+3.1e-6**. So **the modal
+outcome of this build is below the price and the upper half of the registered range is above
+it. This is registered as roughly a coin flip** and must not be written up later as either an
+expected success or an expected failure. Full text at `experiments/w26_prereg.txt` §E.
+
+## 3. Three defects fixed in `run_catboost.py` BEFORE the build, not after
+
+Same discipline as slot 4's w26f. The bookkeeping is where this workspace's failures actually
+are, not the fitting.
+
+1. ⚠⚠ **No per-fold checkpointing existed.** `cat_native` took 4860s and `cat_lat` 5437s; a
+   kill at fold 4 of 5 discarded ~4 hours and saved **nothing**. Three long jobs have already
+   been lost at session boundaries here (RESEARCH). Now every fold writes its OOF slice and
+   its 1/N share of the test column to `cache/cbckpt/<name>_f<k>.npz` **atomically** as soon as
+   it finishes, and a re-run of the same command resumes. Keyed by `--name`, so two variants
+   cannot read each other's folds; a checkpoint whose shape does not match the fold is
+   reported stale and ignored rather than trusted. **Verified end to end**: a `--folds 0,1` run
+   then a full run printed `resumed folds [0, 1] from checkpoints`, fitted only 2–4, and saved.
+   The completion guard now counts resumed folds (`len(iters) < N_SPLITS`) rather than only
+   the requested ones, or a resumed run would have refused to save.
+2. ⚠ **`--outdir`, and this one is not tidiness.** `save_preds` wrote to `oof/`, and `oof/` is
+   scanned by `load_members`, so **saving a new member there changes the pack under `w26f`,
+   `w26h` and `blend_lab` simultaneously and silently.** Every reproduction gate in this repo
+   is stated against a fixed member *count* — w26h refuses to build unless w26f's C=1.0 cells
+   reproduce `logs_w23f_stdbuild4.txt`, and a 189-member pack would have failed that gate for
+   a reason having nothing to do with what the gate tests. The two new members land in
+   `data/ext_members4/` and join a build only via an explicit `--extra-dirs`.
+3. **`--mode natlat`** added. The existing `native`/`lat`/`raw` paths are untouched: the two
+   conditions that were widened are false for them, and `lat` was re-smoked after the patch.
+
+Smoke-tested at 2–3 threads while the chain held the other cores, so none of this cost the
+running jobs anything measurable.
+
+## 4. Priced before committing the cores, which the record says to do and slots often do not
+
+`cat_native` is 81 minutes at 7 threads, and `max_ctr_complexity=2` on 12 categoricals of
+167–1460 levels could plausibly have been 10× that. Probed at 100k rows / 100 iters / 3 threads,
+matched settings:
+
+| | AUC @100 iters | time |
+|---|---|---|
+| native ctr=1 | 0.951974 | 10s |
+| native ctr=2 | 0.952676 | 13s |
+| lat (patch regression check) | 0.959854 | 14s |
+
+**ctr2 costs 1.3×**, so ~1–2h at 16 threads. Affordable **only** because the next Kaggle day is
+22 hours out. ⚠ Registered in §E5 and repeated here: **the +0.0007 is not a result.** It is a
+timing probe that happened to print an AUC, at 6% of `cat_native`'s converged 1679 iterations,
+and it is not to be quoted as evidence for H-E1.
+
+## 5. How the verdict gets taken — fixed now, before any number exists
+
+`experiments/w26i_value.py`, deliberately the same instrument as `w20d_value.py` /
+`w21b_famvalue.py`: paired 50/50 stratified splits, 5 reps, hybrid transform, C=1.0, same rows
+with and without the member. Split noise is ~2e-4 against effects of ~2e-6, so nothing here is
+readable except as a within-rep difference, and **a delta whose sign flips across reps is a
+null whatever its mean** (w20d's `nn` group is the worked example).
+
+Two bases, on purpose:
+
+- `base165` = the non-`ad_` members, w21b's **exact** base. The only thing measured against it
+  is w20d's `cat4` cell as a **reproduction gate**: it must return +0.000041 within ~3 sd or
+  this is not the same instrument and no row of the new table is comparable to RESEARCH.md.
+  The script prints `FAIL` and says so itself. This is the pattern w21 adopted and it has
+  caught things before.
+- `pack` = every member a real build would stack. **The new members are measured against
+  this**, not against base165, which is missing 22 imports that already span some of the same
+  directions and would overstate them.
+
+A **maxcorr screen runs first** (R-E3): >0.999 against any existing member means near-duplicate
+and a positive delta from it is treated as split noise until it survives fresh reps. The record
+rejected an import at 0.9977 on exactly this ground.
+
+Ship rules, all pre-registered: nothing ships on solo AUC or on any argmax (solo→stack
+pass-through here is ~1.4%); the 189-pack is a **send-day** candidate on any outcome because
+sends are free and the queue is short; it is a **deadline** candidate only if its cross-fitted
+CV clears 0.9701181879; and if exactly one member clears the null the 188-pack with only that
+member is built too — a rule fixed now rather than read off the table later.
+
+**The build stage carries its own control and it runs first.** `w26i_ctrl187_h3` rebuilds the
+*187*-member h3 stack on the identical code path and must reproduce `logs_w23f_stdbuild4.txt`
+(hybrid 0.970098 / rankraw 0.970092 / rescale 0.970094). Comparing a 189-pack built today
+against 187 numbers recorded a wave ago is a cross-code-path comparison, which is the mistake
+this workspace keeps rediscovering. Control first, so it is on disk even if the chain is cut.
+
+## 6. The chain, and what it will leave behind
+
+**w26a → w26f → w26h → w26i**, one job at a time, each waiting on the previous *shell script*
+by process scan and not on its python process — at launch a queued stage's python does not
+exist yet and waiting on it returns instantly, which is the w25 §8 triple-booking failure.
+Every stage checkpoints and resumes. `experiments/w26i_run.log`.
+
+w26i ends by writing **9 new candidate files** (3 single-transform stacks + the mix, for the
+189-h3 build; 4 + the mix for the 189-ens4 build) with their OOF vectors, then re-runs
+`w23b_sendqueue.py` and `w26d_queueprice.py`. So the 08-19 send day finds a correct, repriced
+queue that is **deeper than three days for the first time since slot 4 discovered it was not**,
+without a run having to think about it. That is slot 4 §3's gap being closed rather than
+restated.
+
+## 7. ⚠⚠ STILL NOTHING SELECTED. THIRTEEN DAYS.
+
+`check_selection.py`, run live this slot:
+
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+      auto-slot 1: public 0.97118, 1-way tie — w21_ad187corr_ens4
+      auto-slot 2: public 0.97117, 2-way tie — w21_ad187corr, w22_ad187corr_rankraw
+
+`WANTED` = **{`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}**, unchanged, both uploaded, both on
+disk. Cost of not clicking +0.83 to +3.33e-6, ~2.5 places per 1e-5. The API has no write path
+for selection (probed and falsified 08-13). **A human must open the submissions page and tick
+those two files.** No code in this repo can, and none of this slot's work changes that.
+
+## 8. Next run, in order
+
+1. **Read `experiments/w26i_run.log` and `experiments/w26f_run.log`, in that order, before
+   anything else.** If w26i finished: check the `cat4` reproduction gate and the 187-member
+   control gate **first**, and if either failed, say so and do not quote the table — that is
+   what they are for. Then write the result up against §E3's registered prior whichever way it
+   went. If it is still running, **leave it alone**; it resumes per fold and double-booking 16
+   cores is what wrecked w25 §8.
+2. **If a Kaggle day is open, run `.venv/bin/python experiments/w26g_send.py`** (dry run, then
+   `--go`). It is the whole send day. Do not hand-pick from the queue CSV — slot 4 §2 is what
+   hand-picking cost.
+3. If w26i's members cleared their null, the obvious follow-on is **more of the same axis**,
+   not a different one: a third representation, or the same two at a second seed. If they were
+   a null, that is itself the finding — it converts w21b's "prefer CatBoost" into "prefer
+   **foreign** CatBoost", which is materially different advice — and the next build should go
+   after pipeline diversity some other way.
+4. The pick is still not clicked (§7).
+
+### Files this slot
+New: `experiments/w26i_run.sh`, `experiments/w26i_value.py`, `experiments/w26i_run.log`,
+`data/ext_members4/` (empty until the builds land), `cache/cbckpt/`.
+Modified: `experiments/run_catboost.py` (per-fold checkpoint/resume, `--outdir`, `--mode
+natlat`; existing modes byte-identical and re-smoked), `experiments/w26_prereg.txt` (**§E**, the
+full pre-registration above). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
+No submission — none was possible, 0 of 10 slots left on the 08-18 UTC day.

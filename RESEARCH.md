@@ -6055,3 +6055,85 @@ convention difference: `blend_lab` takes the column scale from **all** training 
 cross-fits; `w26f_csweep.py --cv` takes it from the **fold-train** rows, which is the clean
 version. sd over 553k vs 691k rows differs by far less than the 1e-6 these are compared at, so
 a mismatch is a defect and not the convention gap.
+
+---
+
+# w26 slot 5 (2026-08-18) — `run_catboost.py` now checkpoints, and where new members must land
+
+## ⚠ NEVER save a new member into `oof/` without meaning to move the whole pack
+
+`load_members` scans `data/oof/oof`, `oof/`, and whatever `extra_dirs` it is given. **`oof/` is
+in the default set**, so `save_preds(name, ...)` — the default path of every member runner here
+— makes the new member join the pack for `blend_lab`, `w26f`, `w26h` and every downstream
+script at once, silently.
+
+That matters because **every reproduction gate in this repo is stated against a fixed member
+COUNT**: w26h refuses to build unless w26f's C=1.0 cells reproduce hybrid 0.970098 / rankraw
+0.970092 / rescale 0.970094, and a 189-member pack fails that gate for a reason that has
+nothing to do with what the gate tests. A run that builds a member while another stage is
+queued would have poisoned it.
+
+`run_catboost.py` gained **`--outdir`** for this. New members go to `data/ext_members4/` and
+join a build only via an explicit `--extra-dirs`. Pack sizes, for reference:
+
+| dirs loaded | members |
+|---|---|
+| `data/oof/oof` + `oof/` + `ext_members` + `ext_members2` (the default) | 165 |
+| \+ `ext_members3` (`--extra-dirs ext_members3`) | **187** — the shipped pack |
+| \+ `ext_members4` (`--extra-dirs ext_members3,ext_members4`) | 189 — w26i |
+
+The 187-member builds on record are therefore `blend_lab.py --build --standardize --kinds
+hybrid,rankraw,rescale --extra-dirs ext_members3`. **`--extra-dirs` defaults to empty**, so a
+build that omits it silently stacks 165 members and is not comparable to anything.
+
+## `run_catboost.py` per-fold checkpoints
+
+`cache/cbckpt/<name>_f<k>.npz`, holding that fold's OOF slice, its full test column and its
+iteration count, written atomically via `os.replace` the moment the fold finishes. A re-run of
+the same command resumes; a checkpoint whose shape does not match the fold is reported stale
+and ignored. Keyed by `--name`, so two variants never read each other's folds.
+
+Why it had to exist: `cat_native` is 4860s at 7 threads and `cat_lat` 5437s at 5, and before
+this a kill at fold 4 of 5 discarded the lot and saved nothing. `--folds` interacts usefully —
+`--folds 0,1` then a full run resumes 0,1 and fits 2,3,4. Verified end to end.
+
+⚠ The completion guard is `len(want) < N_SPLITS or a.subsample_rows or len(iters) < N_SPLITS`.
+The last clause is load-bearing: without it a resumed run passes the first two checks and would
+have to refit the resumed folds to save anything.
+
+## `--mode natlat` — the union representation
+
+184 dense lattice-TE columns (`cache/f{f}_X*.npy`, the `lat` mode's matrices) with the 12
+native integer categorical codes appended, `cat_features` pointing at columns 184..195.
+Alignment is verified rather than assumed: `f{f}_Xa` rows are `y[itr]` order and `f{f}_Xb` rows
+are `y[iva]` order, both checked equal this slot.
+
+The point is that `lat` and `native` are **not nested**. `lat` carries our fold-safe smoothed
+mean TE (one map per outer fold, smoothing 20); `native` carries CatBoost's ordered target
+statistic over a random permutation. Two estimators of the same quantity at different
+bias/variance points, and every member in the pack holds exactly one.
+
+## CatBoost timing, measured at 100k rows / 100 iters / 3 threads
+
+| mode | AUC | time |
+|---|---|---|
+| native, `max_ctr_complexity=1` | 0.951974 | 10s |
+| native, `max_ctr_complexity=2` | 0.952676 | 13s |
+| lat | 0.959854 | 14s |
+
+**`max_ctr_complexity=2` costs ~1.3×, not the 10× a pairwise-CTR expansion over 12 columns of
+167–1460 levels might suggest.** Useful for pricing: a full 5-fold native build is ~1–2h at 16
+threads either way. ⚠ The AUC column is a timing probe at 6% of the converged iteration count
+and is **not** evidence about the converged model.
+
+## Exact settings of the CatBoost members on disk
+
+| member | mode | lr | depth | l2 | iters (early-stopped) | CV |
+|---|---|---|---|---|---|---|
+| `cat_lat` | lat | 0.05 | 7 | 6.0 | 2462/1862/2490/2006/2408 of 5000 | 0.966353 |
+| `cat_raw` | raw | 0.05 | 8 | 6.0 | 3821/3870/3275/3859/3822 of 6000 | 0.963075 |
+| `cat_native` | native | 0.06 | 6 | 6.0 | 1679/1977/1389/1281/2040 of 5000 | 0.958941 |
+
+All at seed 7, l2 6.0, border_count 254, Bernoulli subsample 0.85, `one_hot_max_size` 4,
+`max_ctr_complexity` 1. Early stopping is on an 8% inner split of the fold's TRAINING rows —
+never on the rows that become the OOF, which is the defect `golem_a`/`golem_f` are dropped for.

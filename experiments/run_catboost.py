@@ -85,7 +85,7 @@ def native_frames(tr, te):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--name", required=True)
-    ap.add_argument("--mode", choices=("native", "lat", "raw"), default="native")
+    ap.add_argument("--mode", choices=("native", "lat", "raw", "natlat"), default="native")
     ap.add_argument("--iterations", type=int, default=6000)
     ap.add_argument("--lr", type=float, default=0.06)
     ap.add_argument("--depth", type=int, default=6)
@@ -99,7 +99,15 @@ def main():
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--folds", default="")
     ap.add_argument("--subsample-rows", type=int, default=0, help="timing probe only")
+    ap.add_argument("--outdir", default="",
+                    help="where oof_/test_/summary_ land. Defaults to agent/common.OOF. "
+                         "Point this OUTSIDE oof/ for a member that must not silently join "
+                         "the default pack -- every reproduction gate on file is stated "
+                         "against a fixed member COUNT, and dropping a new member into oof/ "
+                         "changes that count for every script in the repo at once.")
     a = ap.parse_args()
+    outdir = a.outdir or OOF
+    os.makedirs(outdir, exist_ok=True)
 
     params = dict(loss_function="Logloss", eval_metric="AUC", iterations=a.iterations,
                   learning_rate=a.lr, depth=a.depth, l2_leaf_reg=a.l2,
@@ -114,13 +122,26 @@ def main():
     folds = get_folds(y)
     want = [int(x) for x in a.folds.split(",")] if a.folds else list(range(N_SPLITS))
 
-    Ntr = Nte = None
+    Ntr = Nte = Ncod = Ncod_te = None
     cat_idx = None
     if a.mode == "native":
         Ntr, Nte, sizes = native_frames(tr, te)
         cat_idx = list(range(Ntr.shape[1]))
         print(f"  {Ntr.shape[1]} categorical columns, levels: "
               + ", ".join(f"{c}={sizes[c]}" for c in Ntr.columns), flush=True)
+    elif a.mode == "natlat":
+        # THE UNION REPRESENTATION. Neither `lat` nor `native` is a superset of the other:
+        # `lat` gives CatBoost 184 dense columns whose categorical channel is our fold-safe
+        # SMOOTHED MEAN target encoding (one map per outer fold, smoothing 20); `native`
+        # gives it the 12 lattice columns as categoricals and lets its own ORDERED target
+        # statistic estimate them. Those are two different estimators of the same quantity
+        # with different bias/variance points, and every member in the pack holds exactly
+        # one of them. Handing CatBoost both lets it choose per split, which no member does.
+        # The 12 code columns are appended to the 184 dense ones; nothing is removed, so
+        # this is `cat_lat` plus a channel rather than a different model.
+        Ncod, Ncod_te, sizes = native_frames(tr, te)
+        print(f"  natlat: 184 dense lattice-TE + {Ncod.shape[1]} categorical codes, levels: "
+              + ", ".join(f"{c}={sizes[c]}" for c in Ncod.columns), flush=True)
     elif a.mode == "raw":
         # The 12 columns exactly as the generator wrote them: numerics stay numeric
         # (CatBoost splits on ordered thresholds and handles NaN with its own default
@@ -141,13 +162,61 @@ def main():
     tp = np.zeros(len(te))
     iters = []
     t0 = time.time()
+
+    # PER-FOLD CHECKPOINTS. A native/natlat build is 1-2 hours per fold; without this a
+    # crash or a kill at fold 4 throws away everything and the run has to start over.
+    # Each fold's OOF slice and its 1/N_SPLITS share of the test column are written as
+    # soon as the fold finishes, and a re-run of the same command picks up where it
+    # stopped. Keyed by --name so two variants never read each other's folds.
+    ck = os.path.join(CACHE, "cbckpt")
+    os.makedirs(ck, exist_ok=True)
+
+    def ckpath(f):
+        return os.path.join(ck, f"{a.name}_f{f}.npz")
+
+    done = set()
+    if not a.subsample_rows:
+        for f, (itr, iva) in enumerate(folds):
+            if f not in want or not os.path.exists(ckpath(f)):
+                continue
+            z = np.load(ckpath(f))
+            if z["oof"].shape != iva.shape or z["tp"].shape != (len(te),):
+                print(f"[{a.name}] fold {f}: stale checkpoint, ignoring", flush=True)
+                continue
+            oof[iva] = z["oof"]
+            tp += z["tp"] / N_SPLITS
+            iters.append(int(z["iters"]))
+            done.add(f)
+        if done:
+            print(f"[{a.name}] resumed folds {sorted(done)} from checkpoints", flush=True)
+
     for f, (itr, iva) in enumerate(folds):
-        if f not in want:
+        if f not in want or f in done:
             continue
         if a.mode in ("native", "raw"):
             Xa_full, ya_full = Ntr.iloc[itr], y[itr]
             Xb, yb = Ntr.iloc[iva], y[iva]
             Xt = Nte
+        elif a.mode == "natlat":
+            g = lambda k: np.load(os.path.join(CACHE, f"f{f}_{k}.npy"))
+            dcol = [f"d{i}" for i in range(184)]
+
+            def _join(D, codes_idx):
+                # D is (n, 184) float32 in the SAME row order as codes_idx -- verified:
+                # cache f{f}_Xa rows are y[itr] order and f{f}_Xb rows are y[iva] order.
+                F = pd.DataFrame(D, columns=dcol, copy=False)
+                C = Ncod.iloc[codes_idx].reset_index(drop=True)
+                for c in C.columns:
+                    F[c] = C[c].to_numpy()
+                return F
+
+            Xa_full, ya_full = _join(g("Xa"), itr), g("ya")
+            Xb, yb = _join(g("Xb"), iva), g("yb")
+            Ft = pd.DataFrame(g("Xt"), columns=dcol, copy=False)
+            for c in Ncod_te.columns:
+                Ft[c] = Ncod_te[c].to_numpy()
+            Xt = Ft
+            cat_idx = [184 + i for i in range(Ncod.shape[1])]
         else:
             g = lambda k: np.load(os.path.join(CACHE, f"f{f}_{k}.npy"))
             Xa_full, ya_full = g("Xa"), g("ya")
@@ -156,13 +225,15 @@ def main():
 
         if a.subsample_rows:
             keep = np.random.RandomState(0).choice(len(ya_full), a.subsample_rows, False)
-            Xa_full = Xa_full.iloc[keep] if Ntr is not None else Xa_full[keep]
+            Xa_full = (Xa_full.iloc[keep] if (Ntr is not None or a.mode == "natlat")
+                       else Xa_full[keep])
             ya_full = ya_full[keep]
 
         # early stopping on TRAINING rows only -- never on iva, which becomes the OOF
         ia, ie = train_test_split(np.arange(len(ya_full)), test_size=a.inner,
                                   random_state=SEED, stratify=ya_full)
-        sl = (lambda X, i: X.iloc[i]) if Ntr is not None else (lambda X, i: X[i])
+        sl = ((lambda X, i: X.iloc[i]) if (Ntr is not None or a.mode == "natlat")
+              else (lambda X, i: X[i]))
         ptr = Pool(sl(Xa_full, ia), ya_full[ia], cat_features=cat_idx)
         pev = Pool(sl(Xa_full, ie), ya_full[ie], cat_features=cat_idx)
         m = CatBoostClassifier(**params)
@@ -173,20 +244,26 @@ def main():
         del ptr, pev
 
         oof[iva] = m.predict_proba(Pool(Xb, cat_features=cat_idx))[:, 1]
-        tp += m.predict_proba(Pool(Xt, cat_features=cat_idx))[:, 1] / N_SPLITS
+        tf = m.predict_proba(Pool(Xt, cat_features=cat_idx))[:, 1]
+        tp += tf / N_SPLITS
         print(f"[{a.name}] fold {f}: AUC {roc_auc_score(yb, oof[iva]):.6f} "
               f"iters {best} ({time.time()-t0:.0f}s)", flush=True)
-        del m
+        if not a.subsample_rows:
+            # atomic: a half-written .npz read by a resume would be worse than none
+            tmp = ckpath(f) + ".tmp.npz"
+            np.savez(tmp, oof=oof[iva], tp=tf, iters=np.int64(best))
+            os.replace(tmp, ckpath(f))
+        del m, tf
 
-    if len(want) < N_SPLITS or a.subsample_rows:
+    if len(want) < N_SPLITS or a.subsample_rows or len(iters) < N_SPLITS:
         print(f"[{a.name}] partial run, nothing saved", flush=True)
         return
     cv = roc_auc_score(y, oof)
     print(f"\n[{a.name}] FULL OOF AUC = {cv:.6f}  ({time.time()-t0:.0f}s)", flush=True)
-    save_preds(a.name, oof, tp, len(y), len(te))
+    save_preds(a.name, oof, tp, len(y), len(te), out=outdir)
     json.dump(dict(name=a.name, cv=float(cv), mode=a.mode, iters=iters,
                    **{k: v for k, v in params.items() if k != "verbose"}),
-              open(os.path.join(OOF, f"summary_{a.name}.json"), "w"), indent=2)
+              open(os.path.join(outdir, f"summary_{a.name}.json"), "w"), indent=2)
 
 
 if __name__ == "__main__":
