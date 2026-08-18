@@ -1,0 +1,294 @@
+w26 PRE-REGISTRATION — written 2026-08-18 ~00:55 UTC, BEFORE w26a is run once.
+=============================================================================
+Slot: 2 of 10 on the 08-18 Kaggle day. Handed angle: "Foundation: confirm the metric,
+build the fixed-fold CV harness, get one honest GBDT baseline scored."
+
+§0. THE ANGLE IS STALE AND IS NOT BEING FOLLOWED, WITH THE REASON STATED
+------------------------------------------------------------------------
+The metric was confirmed on 08-10 (AUC, RESEARCH.md), the frozen SKF5 seed42 harness has
+been the fold scheme for every experiment for three weeks, and the GBDT line was scored,
+stacked and superseded long ago; the account best is 0.97118 from a 187-member cross-fitted
+stack, rank 11 of 2,140. Rebuilding a baseline would be the "never ship a regression" failure
+the playbook names. The playbook permits deviating when the journal gives a concrete reason;
+this is that reason, stated here rather than silently.
+
+⚠ ALSO: THE DAILY CAP IS ALREADY SPENT. `date -u` = 2026-08-18 00:39 UTC, and all ten
+submissions dated 2026-08-18 landed at 00:07-00:20 UTC from wave w25 slot 1. The prompt's
+"Submissions the Kaggle API already reports for today: 10" is CORRECT this time -- the
+opposite of the w25 situation, where the same line was stale by minutes. Both failure modes
+have now been seen; the rule is to check `date -u` against the newest submission date, never
+to trust either the prompt or the previous run's conclusion. NOTHING IS SUBMITTED THIS SLOT.
+Per the playbook that makes this run research and compute only.
+
+§1. WHAT THIS SLOT DOES
+------------------------
+Two pre-registered tests, in this order:
+
+  (a) FINISH w25d. It is the test whose verdict is the ONLY thing permitted to move the
+      deadline pick (w25_prereg §4). It DID NOT COMPLETE in w25 -- process enumeration via
+      /proc shows nothing running, no w25d_arms_*.csv or w25d_hold_*.npz on disk, and the
+      log stops after two hybrid reps. Its decision rule S1/S2/S3 is inherited UNCHANGED
+      from w25_prereg §4 and is not renegotiated here.
+
+  (b) RUN w26a, registered in w25_prereg ADDENDUM A1 by the previous run, with ONE design
+      change recorded in §2 below and made BEFORE any number was seen.
+
+§2. THE DESIGN CHANGE TO w26a, AND WHY IT IS A REPAIR AND NOT A DEGREE OF FREEDOM
+---------------------------------------------------------------------------------
+A1 registers: degrade the 187-member matrix O by adding Gaussian noise at d x the
+per-column sd, transform, cross-fit, and read each transform's sensitivity S_k. Q1 says
+S_logit is steepest; T1 says H_L is falsified if it is not.
+
+That design HAS A CONFOUND THAT WOULD MANUFACTURE A Q1 PASS. O holds raw member
+probabilities and `to_logit` (agent/stack.py:50) clips to [1e-15, 1-1e-15] before taking the
+log. Adding raw-space Gaussian noise pushes rows outside the unit interval, and every such
+row is pinned to a single constant by the clip. The `logit` transform is the one that eats
+that damage undiluted; `rankraw` is immune to it by construction (a monotone rank map),
+`rescale` rescales the observed range so it never clips at all, and `hybrid` repairs the 54
+worst columns. So the registered noise arm would show logit steepest EVEN IF H_L IS FALSE,
+purely as clipping. A test that cannot fail is not a test.
+
+The repair is to run THREE degradation modes and require the ordering to hold across the two
+that are confound-free:
+
+  MODE A  SUBSET   -- drop members at random, 187 -> 140 -> 100 -> 70, 2 draws per size,
+                     fixed seeds. Perturbs NO value, so no clipping is introduced at all.
+                     Every transform here is per-column, so subsetting COMMUTES with the
+                     transform and one transform pass serves every size.
+  MODE B  LOGITNOISE -- p' = sigmoid(logit(p) + d * sd_logit * eps). Degrades member quality
+                     while staying strictly inside (0,1), so it introduces no clipping that
+                     was not already there. This is the arm that carries Q3, because it is a
+                     genuine per-member quality change rather than a member-count change.
+  MODE C  RAWNOISE -- the literally-registered arm, kept and reported so the confound can be
+                     MEASURED rather than argued about.
+
+Fit settings: standardised design matrix, C=1.0, tol 1e-4, float64, max_iter 5000, on the
+frozen SKF5 seed42 folds. Standardisation is used deliberately: w23 §1 established that the
+unstandardised fit stops at ~686 iterations short of convergence while the standardised one
+converges in ~65. Comparing SENSITIVITY across four transforms with unconverged fits would
+measure how far down the optimiser happened to get on each transform's conditioning, not the
+transform's response to member quality. This is a measurement choice about a diagnostic and
+touches no shipped artefact.
+
+§3. PREDICTIONS, INHERITED FROM A1 AND SHARPENED
+-------------------------------------------------
+  Q1  S_logit is the steepest of the four -- IN MODE A AND IN MODE B. Mode C alone does not
+      count. If logit is not steepest in both A and B, H_L is FALSIFIED.
+  Q2  The ordering of S_k matches the w25f family offsets
+      (logit +151.1 > rescale +37.8 > rankraw +15.1 > hybrid +6.1). Rank correlation +1.0
+      across four transforms is p = 1/24 under a no-relation null: weak alone, but it was
+      predicted before S_k existed.
+  Q3  Magnitude, read off MODE B only. The OOF-vs-test member gap is one 5-fold step
+      (members trained on 80% vs 100% of rows). If Mode B's slope implies a logit-vs-h3
+      advantage of order tens of e-6 for that much quality change, H_L survives; 1e-6 or
+      5000e-6 falsifies it.
+  Q4  NEW, and it is the confound's own signature: Mode C shows a LARGER logit-vs-others gap
+      than Mode B does, and the excess tracks the fraction of rows the clip pins. Registered
+      so that if C and B agree, that is evidence the confound is small and A1's original
+      design was fine after all.
+
+§4. DECISION RULE — INHERITED FROM A1 §T, UNCHANGED
+----------------------------------------------------
+  (T1) Q1 fails -> H_L falsified, +151e-6 goes on the books as unexplained, `WANTED` stays
+       on CV and on h3, no further work on this line.
+  (T2) Q1 and Q3 both hold -> H_L survives, `WANTED` becomes an OPEN QUESTION for a further
+       pre-registered step. w26a alone DOES NOT MOVE IT: it would establish a mechanism, not
+       a magnitude on the private slice.
+  (T3) No outcome of w26a moves `WANTED`, and no public-LB number moves it. w24 R3 holds to
+       the deadline.
+
+§5. WHAT I EXPECT TO BE WRONG ABOUT
+------------------------------------
+A1's own guess -- that the ridge on 187 correlated columns washes out transform-specific
+sensitivity and all four come back alike -- is still the most likely outcome, and it now has
+a second reason: at C=1.0 nothing is actually penalised, so the combiner can undo a large
+part of any per-column monotone re-expression on its own. A null result here is a result and
+is to be written up as one, not re-run with a different d grid until something separates.
+
+=============================================================================
+ADDENDUM B1 — written 2026-08-18 ~01:05 UTC, BEFORE w26a touched real data.
+Recorded because it is a design change and design changes go in the prereg, not the
+write-up.
+=============================================================================
+Smoke-testing `degrade()` on synthetic columns (never on O) turned up a SECOND confound, in
+MY OWN repair rather than in A1's design, pointing the other way:
+
+  raw clip fraction   d=0.00  0.0079   d=0.10  0.0283   d=0.50  0.1216     <- rawnoise
+  raw clip fraction   d=0.00  0.0079   d=0.10  0.0000   d=0.50  0.0000     <- logitnoise
+
+The first row is §2's confound, now measured rather than argued: raw-space noise multiplies
+the clipped fraction 15x by d=0.5, and `logit` is the transform that eats clipping
+undiluted. Keeping that arm is right, and it is why Q1 excludes it.
+
+The second row is the new problem. `logitnoise` round-trips through logit -> sigmoid, which
+lands strictly inside (0,1) and therefore REPAIRS the 0.79% of cells that were already
+outside the unit interval. Applied only at d>0, that makes d=0 the sole level carrying the
+pre-existing clipping damage, so `logit` would appear to IMPROVE on leaving the baseline and
+S_logit would be biased DOWNWARD -- against Q1, i.e. conservative for H_L, but it corrupts
+the slope either way.
+
+FIX, applied before any real number existed: the round trip runs at EVERY level of the
+logitnoise arm, d=0 included, so noise is the only thing varying along that axis. The d=0
+baseline of the logitnoise arm is therefore NOT the shipped matrix and its absolute CV is
+not comparable to the subset arm's; only its SLOPE is, which is all Q1/Q2 read. `rawnoise`
+is deliberately left unrepaired at d=0 -- carrying the confound is that arm's only job.
+
+=============================================================================
+ADDENDUM C1 — written 2026-08-18 ~01:00 UTC by SLOT 3, BEFORE w25d produced a verdict.
+Slot 3's handed angle was "Original dataset: find the real source dataset and concatenate
+it as extra training rows." THAT ANGLE IS CLOSED THREE TIMES OVER and is not being followed;
+the reason is §C0 below. Slot 3 continues slot 2's plan instead, unchanged in substance.
+=============================================================================
+
+§C0. WHY THE HANDED ANGLE IS NOT FOLLOWED
+------------------------------------------
+The source dataset was found on 2026-08-11 (`jayjoshi37/smartphone-usage-and-addiction-
+prediction`, 7,500 x 16, in `data/orig/`) and BOTH routes were measured here, then closed a
+third time regionally by w15d:
+
+  Route 2, literal concatenation -- the exact thing the angle asks for -- is MONOTONICALLY
+  HARMFUL: -58e-6 at 1x, -986e-6 at 10x, -3,340e-6 at 50x on the frozen folds. The direction
+  is stable in dose, so this is not a noise reading.
+  Route 1, a separate estimator over the originals, is the better route and still adds
+  nothing: member `orig_binm` is worth -1e-6 to -2e-6 across logit/hybrid/rankraw/rescale/ens4
+  and exactly 0 under h3. Twelve readings, none positive.
+  Route 3, regional (`orig_bin`/`orig_binm` restricted to cell A), is a NULL at z +1.32.
+
+The brief calls this "the single most reliable edge in the entire series", and in this
+competition it is INVERTED -- the generator smeared a crisp two-threshold rule over 7,500 rows
+into a ramp over 691,369, and full-resolution target encoding on 691k rows locates the kink
+better than the 7,500 real rows can state it. Re-running it would spend a slot re-deriving a
+negative number that is already in RESEARCH.md with a measured dose-response.
+
+§C1. THE ONE DESIGN CHANGE TO w25d, MADE BEFORE ITS VERDICT EXISTED
+--------------------------------------------------------------------
+w25d has now been killed mid-run THREE times (w25 §8; w26 §1a; and again between slots 2 and
+3, where the log shows four completed hybrid reps and the disk shows no artefact at all).
+Every time it lost all completed reps, because run_kind() only wrote its two artefacts after
+the final rep. Reps 0-3 of hybrid have therefore been computed and thrown away twice.
+
+`w25d_stdholdout.py` now checkpoints after EVERY rep via a temp file + os.replace, and
+resumes from whatever is on disk. A rep counts as done only when both arms are present in
+both artefacts, so a rep killed between its unstd and std fits is recomputed whole -- the two
+arms must share a split or the paired D is meaningless.
+
+THIS CHANGES NO NUMBER. The reps, splits (StratifiedShuffleSplit, random_state 1000+r), fit
+settings and the S1/S2/S3 rule are untouched, and the P2 reproduction gate against w23c is
+still the first thing `--combine` prints. Confirmed empirically before this was written: the
+resumed run's rep-0 hybrid unstd came back 0.9703668630916813, BIT-IDENTICAL to the W23C
+constant hard-coded in the script from w23c's independent run.
+
+§C2. A SECOND NEAR-MISS OF THE w24 CLASS, RECORDED BECAUSE IT IS THE FINDING
+-----------------------------------------------------------------------------
+The first version of `w26d_queueprice.py` did `from w25b_gapfamily import family`. That module
+is a SCRIPT: it runs its whole analysis at import and rewrote `w25b_pairs.csv`,
+`w25b_families.csv` and `w25b_gapfamily.json` as a side effect, twice, before `git status`
+caught it and `git checkout --` restored them. w24 recorded exactly this class of defect (a
+re-cut silently overwriting the record it is being compared against) and it recurred within
+one day, in a different mechanism, in a fresh file. The lesson generalises past "parameterise
+your output paths": ANY module in `experiments/` is unsafe to import, because every one of
+them does its work at module scope. `family()` is now COPIED into w26d with a comment on both
+sides. `git status` before staging caught it both times, exactly as the playbook says.
+
+§C3. w26d — NOT A TEST, AND NOTHING ABOUT THE PICK TURNS ON IT
+----------------------------------------------------------------
+w26d prices the unsent send queue under the w25f model. It is descriptive: no hypothesis, no
+decision rule, and it CANNOT move `WANTED` -- w24 R3 and w25 §4 S4 both stand. Its only job
+is to inform how the 08-19 Kaggle day is spent. It carries a GATE that re-predicts the 60
+files w25f was fitted on and requires w25f's residual sd back before any queue number is
+printed; that gate FAILED on its first run at 7.68e-6 against 8.41e-6 and the cause was real
+(w25f divides by dof n-p = 50, np.std's default divides by n = 60). A 9% error that would
+otherwise have been invisible.
+
+=============================================================================
+ADDENDUM D1 — PRE-REGISTRATION for the NEXT slot's build, written 2026-08-18 ~01:10 UTC by
+slot 3, BEFORE w25d returned a verdict and BEFORE anything below was run once. Registered
+here rather than described in the journal so that a later slot can execute it without
+re-deriving the reasoning, and so its hypotheses are on record ahead of its numbers.
+=============================================================================
+
+§D0. WHY A BUILD IS NOW THE ONLY THING WORTH A RUN'S COMPUTE
+--------------------------------------------------------------
+w26d prices the whole unsent queue: the best of 46 unsent files is `w20_ad187_logit` at a
+predicted 0.97116, P(beat the account best) = 6.3e-4, and sending the best TEN together is
+also 6.3e-4 -- with independence assumed, so that is an overstatement. The queue is spent.
+The same model says a NEW file needs CV >= 0.9701182 in family h3 (+3.1e-6 on the current CV
+leader) for an even-money shot at the record. Ten sends of existing files buy 6e-4 of a
+record; one file over that line buys ~0.5. THE SENDS ARE STILL FREE AND SHOULD STILL GO OUT
+-- the brief's economics hold -- but they are no longer where a run's compute belongs.
+
+§D1. THE ONE UNEXPLORED AXIS, AND WHY IT IS UNEXPLORED RATHER THAN CLOSED
+--------------------------------------------------------------------------
+w23a tested "an L2 penalty helps at 187 members" (H3) and FALSIFIED IT FLAT: every `lam` from
+1e-8 to 1e-5 read -1.41 … +3.38e-6 and every one SIGN FLIPPED across reps. That looks like a
+closed door. It is not, and the reason is w23 §1, which landed in the SAME wave:
+
+  The unstandardised lbfgs fit STOPS SHORT OF ITS OPTIMUM. `tol=1e-4` is a max-gradient rule
+  and the hybrid member columns have sd 1.82 … 27.59, so one fixed tol is a ~15x looser
+  stopping rule on the narrow columns than the wide ones. The unstandardised cell terminates
+  at 686 iterations on that slack; refitting it at tol=1e-7 takes 8,000 iterations and 1,582s
+  to reach what the standardised cell reaches at default tol in 11s.
+
+So w23a's penalty sweep was run on a design that was (i) NOT AT ITS OPTIMUM, and (ii) subject
+to ANISOTROPIC shrinkage -- at any C the widest member is shrunk ~230x less than the narrowest,
+which is a statement about where a transform puts a member's logits and not about which
+members deserve shrinking. The workspace already flagged (ii) as a library defect on 08-13 and
+wrote "`--standardize` makes it isotropic. NOT YET MEASURED." It is still not measured.
+
+**H3 was falsified for the anisotropic, unconverged design. The isotropic, converged one has
+never been swept.** That is the gap, and it is the only axis I can find where the option set
+is genuinely empty rather than exhausted.
+
+§D2. THE HYPOTHESES, REGISTERED BEFORE ANY NUMBER
+---------------------------------------------------
+  H-D1  A C below 1.0 on the STANDARDISED design beats C=1.0 by >= +3.0e-6 of holdout AUC on
+        the h3 mix. Registered honest prior: I EXPECT THIS TO FAIL. n/p ~ 4,600 and w23a's
+        sweep, confounds and all, still found nothing that held its sign. Registered range
+        for the best cell: -2 to +5e-6. Anything above +8e-6 should be disbelieved and
+        re-run before it is built on.
+  H-D2  If any C does win, its margin is LARGER on hybrid than on rankraw or rescale, because
+        hybrid is the transform with the 15x column-sd spread that (ii) is about. rankraw is
+        a monotone rank map and its columns are near-identically scaled, so it has the least
+        to gain. A win that is FLAT across the three transforms is evidence the effect is not
+        the isotropy mechanism and should be treated as noise.
+  H-D3  The optimum, if there is one, sits in C ∈ [0.01, 1.0]. Grid: 0.003, 0.01, 0.03, 0.1,
+        0.3, 1.0, 3.0 -- seven cells, fixed here, NOT to be widened after seeing the curve.
+
+§D3. SELECTION GEOMETRY — AND THIS IS THE PART THAT MATTERS
+-------------------------------------------------------------
+C MUST NOT BE SELECTED ON CROSS-FITTED CV. The combiner is cross-fitted on the SAME frozen
+folds that produced its 187 member OOF columns, and whether that leak inflates a
+better-converged combiner's CV is EXACTLY what w25d is testing. Selecting a hyperparameter on
+the suspect instrument, to build a file for a deadline pick, is the rogii-wellbore failure
+with a different label on the axis.
+
+  - Selection runs on w25d's geometry: R=5 reps of an 80/20 StratifiedShuffleSplit
+    (random_state 1000+r), combiner fitted on the pool, scored on rows it never saw, paired
+    within rep. The SAME splits, so w25d's own arms are the C=1.0 row of the table and cost
+    nothing to reproduce.
+  - Cross-fitted CV is REPORTED alongside for every cell but is not the selector. The
+    difference between the two columns is itself a second, free reading on w25d's question,
+    over a whole C curve rather than one point.
+  - A cell ships ONLY if it wins on the holdout AND its cross-fitted CV clears 0.9701182.
+    Both, not either.
+
+§D4. COST, AND WHY IT FITS IN A SLOT
+--------------------------------------
+Standardised fits converge in 65-93 iterations, 11-16s each, against 120-135s unstandardised.
+7 C values x 3 transforms x 5 reps x ~15s ~ 26 minutes. THIS IS ONLY AFFORDABLE BECAUSE THE
+DESIGN IS STANDARDISED -- the same sweep on the unconverged design would be ~4 hours and is
+another reason w23a's version of it was not a fair test.
+
+MUST CHECKPOINT PER CELL AND RESUME FROM DISK. Background jobs do not survive the end of a
+run's session -- three long jobs have now been killed at a session boundary -- and `setsid` is
+not installed here. See RESEARCH.md.
+
+§D5. WHAT WOULD MAKE ME WRONG
+-------------------------------
+The most likely outcome is H-D1 fails and the C curve is flat inside noise, which is a
+RESULT and gets written up as one. The failure mode to guard against is the opposite: a
+cell winning by +10e-6 on five paired reps and being believed. If that happens, H-D2 is the
+discriminator -- check it is concentrated on hybrid -- and the cell gets re-run on five FRESH
+reps (random_state 2000+r) before anything is built. A win that does not reproduce on fresh
+splits is a split draw, and this workspace has the w23a sign-flip table to show what that
+looks like.

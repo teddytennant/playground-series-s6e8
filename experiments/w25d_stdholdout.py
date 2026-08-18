@@ -67,8 +67,52 @@ def splits_for(y, reps):
     return out
 
 
+def checkpoint(kind, store, rows):
+    """Write both artefacts after EVERY rep, atomically, so a kill costs one rep.
+
+    w25d has now been killed mid-run twice (w25 §8, w26 §1a), both times losing every
+    completed rep because the writes only happened after the last one. Reps 0-3 of hybrid
+    had already been computed and printed to a log when the second kill landed. Write via
+    a temp file + os.replace so a kill DURING the write cannot leave a truncated artefact
+    that the resume path would then trust.
+    """
+    npz, csv = (os.path.join(HERE, f"w25d_hold_{kind}.npz"),
+                os.path.join(HERE, f"w25d_arms_{kind}.csv"))
+    np.savez_compressed(npz + ".tmp.npz", **store)
+    os.replace(npz + ".tmp.npz", npz)
+    pd.DataFrame(rows).to_csv(csv + ".tmp", index=False)
+    os.replace(csv + ".tmp", csv)
+
+
+def resume(kind, reps):
+    """Return (store, rows, done) from a previous partial run, or empty if there is none.
+
+    A rep counts as done only when BOTH arms are on disk in BOTH artefacts -- a rep killed
+    between its unstd and std fits is recomputed whole, since the two must share the split
+    and the paired D is meaningless otherwise.
+    """
+    npz, csv = (os.path.join(HERE, f"w25d_hold_{kind}.npz"),
+                os.path.join(HERE, f"w25d_arms_{kind}.csv"))
+    if not (os.path.exists(npz) and os.path.exists(csv)):
+        return {}, [], set()
+    z = np.load(npz)
+    df = pd.read_csv(csv)
+    done = {r for r in range(reps)
+            if all(f"{a}_rep{r}" in z.files for a in ("unstd", "std"))
+            and len(df[(df.rep == r) & (df.arm.isin(["unstd", "std"]))]) == 2}
+    store = {k: z[k] for k in z.files if int(k.split("rep")[1]) in done}
+    rows = df[df.rep.isin(done)].to_dict("records")
+    if done:
+        print(f"  resuming {kind}: reps {sorted(done)} already on disk", flush=True)
+    return store, rows, done
+
+
 def run_kind(kind, reps):
     t0 = time.time()
+    store, rows, done = resume(kind, reps)
+    if len(done) >= reps:
+        print(f"{kind}: all {reps} reps already on disk, nothing to do")
+        return
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
     del tr
@@ -82,8 +126,9 @@ def run_kind(kind, reps):
     print(f"{len(names)} members, {kind} Z {Z.shape} {Z.dtype}, {time.time()-t0:.0f}s",
           flush=True)
 
-    store, rows = {}, []
     for r, (ip, ih) in enumerate(splits_for(y, reps)):
+        if r in done:
+            continue
         Ztr, Zho, ytr, yho = Z[ip], Z[ih], y[ip], y[ih]
         s = Ztr.std(0)
         s[s <= 0] = 1.0
@@ -105,9 +150,8 @@ def run_kind(kind, reps):
             del m
         del Ztr, Zho
         gc.collect()
+        checkpoint(kind, store, rows)
 
-    np.savez_compressed(os.path.join(HERE, f"w25d_hold_{kind}.npz"), **store)
-    pd.DataFrame(rows).to_csv(os.path.join(HERE, f"w25d_arms_{kind}.csv"), index=False)
     print(f"wrote w25d_hold_{kind}.npz + w25d_arms_{kind}.csv   {time.time()-t0:.0f}s")
 
 

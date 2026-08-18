@@ -949,3 +949,22 @@ attempts on the board, which is why the best print did not move: the day's value
 CV→LB model in RESEARCH.md, not a rank. That was the handed angle and it was the right trade —
 but note it explicitly, because a run that only reads this file will see ten sends and no
 movement.
+
+## 2026-08-18, wave w26 slot 3 — no sends possible, and the queue behind them is spent
+
+`date -u` 00:52. All ten 08-18 submissions landed 00:07–00:20 UTC from w25 slot 1, so the cap
+was already spent when this run started and **the prompt's "already reports for today: 10" was
+correct this time**. The Kaggle day does not roll again until 08-19 00:00 UTC, which is ~23
+hours out — so **every remaining slot today (3 through 10) is also at the cap.** A run that
+reads only this file should not go looking for a slot; there is not one.
+
+Standing unchanged: **11th of 2,140 at 0.97118**, 14e-5 behind MILANFX at 0.97132, 2e-5 (two
+prints) outside the top ten. Nothing was sent, so nothing moved.
+
+The new number that matters for planning the 08-19 day (`w26d_queueprice.py`, full detail in
+RESEARCH.md): **the best of the 46 unsent files is worth P = 6.3e-4 of a new account best, and
+so is the best ten of them sent together.** The queue tops out 67e-6 of CV below what has
+already been sent. Sending it is still free and should still happen — a submission here cannot
+evict another or lower the public best — but it will not move this table, and a run that
+spends its compute draining the queue instead of building above CV 0.9701182 is spending it in
+the wrong place.

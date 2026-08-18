@@ -5796,3 +5796,88 @@ without a leaderboard is in JOURNAL w25 §9 item 2.
   the PATH the Bash tool starts with. A bare `git push` fails with
   `gh: command not found` / `could not read Username for 'https://github.com'`. Use:
   `PATH="/run/current-system/sw/bin:$PATH" git push origin main`
+
+---
+
+## ⚠ BACKGROUND JOBS DO NOT SURVIVE THE END OF A RUN'S SESSION (w26, 08-18)
+
+Three long jobs have now been killed at a session boundary with no traceback and no artefact:
+`w25d` in wave w25, `w25d` again in slot 2, and slot 2's `w26a` while it sat in its wait loop.
+The second of those had **four completed reps printed to its log and wrote nothing to disk**,
+because the script only saved after the last rep.
+
+- `nohup … &` does **not** save a job. Neither does the harness's `run_in_background`.
+- **`setsid` is NOT INSTALLED** in this sandbox (`setsid: command not found`), so the usual
+  detach trick is unavailable. `nohup ./script.sh > log 2>&1 < /dev/null &` starts fine and
+  runs for as long as the session lives; it dies with it.
+- Consequence, and it is not optional for anything that takes more than a few minutes:
+  **every long script must checkpoint incrementally and resume from disk.** Write via a temp
+  file + `os.replace` so a kill *during* a write cannot leave a truncated artefact that the
+  resume path then trusts. `w25d_stdholdout.py` is the worked example (`checkpoint()` /
+  `resume()`); `w26a_sensitivity.py` already resumes from its CSV.
+- Two earlier lessons from w25 §8 still hold and compound with this one: **`ps` is
+  non-functional here and silently returns nothing — enumerate `/proc/*/cmdline` instead**,
+  and **never point two runs at one log path** (`>` truncates the file the other is writing).
+
+## ⚠ THE FAMILY CLASSIFIER MISLABELS THE `*corr` FILES — INCLUDING `WANTED` SLOT 1 (w26e)
+
+`family()` in `w25b_gapfamily.py` / `w25f_ancova2.py` assigns a transform family by stem
+suffix and falls through to `ens4` for a bare stem. Two stems fall through that must not:
+
+| stem | classifier said | actually is |
+|---|---|---|
+| `w23_ad187stdcorr` | ens4 | **corrected h3** — and it is `WANTED` slot 1 |
+| `w21_ad187corr` | ens4 | **corrected h3** — and it is `WANTED` slot 2 |
+
+Both are h3 mixes carrying the 5-arm `c_avg` correction; w21 §2 builds `w21_ad187corr` as the
+h3-side file and w21 §9 pairs it against `w21_ad187corr_ens4`. **The classifier put the h3
+member of a matched h3/ens4 pair into the ens4 group beside its own counterpart.** `corr` is
+not a transform, so no suffix rule can infer this — `w26e_famfix.py` keeps an explicit
+`CORR_H3` map and **any future `*corr` file must be added to it by hand.**
+
+Refitting w25f with only those two labels changed (same rows, same filter, same centring, same
+parameter count):
+
+- residual sd **8.408e-6 → 8.349e-6**, against the 8.21e-6 simulated slice floor. Lower with
+  no extra parameters, which is itself evidence the corrected labels are the right ones.
+- **every family coefficient shifts by far less than its own se** (largest −0.61e-6 on an se
+  of 3.7). The w25 §3 table is not overturned; +1.909 becomes +1.941, ens4 +14.0 stays +13.9.
+- What does move is the prediction for the pick: `w23_ad187stdcorr` goes from a predicted
+  **0.971166 → 0.971155**, i.e. from one step above its actual 0.97116 to right on it.
+
+**Honest limit: that comparison is in-sample** — the file is one of the 60 the model is fitted
+on, so it cannot be quoted as a validated forecast. What it supports is the weaker and still
+useful claim that roughly **one of the three reporting steps** w25 §1's registered forecast
+missed by was a bookkeeping error in the family label, not slice noise.
+
+## The send queue is very nearly EXHAUSTED — priced, not guessed (w26d)
+
+`w26d_queueprice.py` prices all 46 unsent files with a stored OOF vector under w25f, and takes
+the fitted residual (8.41e-6, which w25 showed is pure slice noise) as the only uncertainty.
+
+| | |
+|---|---|
+| best CV **already sent** | 0.9701150809 (`w23_ad187stdcorr`) |
+| best CV **unsent** | 0.9700483189 (`blend158_h3`) — **67e-6 below it** |
+| best unsent by predicted LB | `w20_ad187_logit`, **0.97116** (the +151e-6 logit family term carries it) |
+| P(that file beats the account best 0.97118) | **6.3e-4** |
+| P(the best TEN, sent together, produce a new best) | **6.3e-4**, and that assumes independence, so it is an **overstatement** |
+| CV a NEW file needs for an even-money shot | **0.9701182** in family h3 (**+3.1e-6** on the current CV leader), or 0.9701108 in ens4 |
+
+**This does not make sending harmful.** The brief's economics are correct and unchanged: a
+submission cannot evict another or lower the public best, so an idle slot is still waste and
+all ten should still go out. What it changes is where a *run's compute* goes. Draining the
+queue is worth ~6e-4 of a record; **building one file above CV 0.9701182 is worth ~0.5 of
+one.** A day spent sending the queue while building nothing is the expensive mistake, not the
+sending itself.
+
+`w26d_queueprice.py` carries a gate that re-predicts the 60 fitted files and requires w25f's
+residual sd back before printing any queue number. **It earned its keep on the first run**,
+failing at 7.68e-6 vs 8.41e-6 — w25f divides the residual sum of squares by dof (n−p = 50),
+`np.std`'s default divides by n = 60. A silent 9% error in every probability on this table.
+
+⚠ **Nothing in `experiments/` is safe to `import`** — every module does its work at module
+scope. `from w25b_gapfamily import family` re-ran that whole analysis and overwrote
+`w25b_{pairs,families}.csv` and `w25b_gapfamily.json` twice before `git status` caught it.
+Copy the function, don't import it. Same class of defect as w24's hard-coded JSON path,
+recurring one day later through a different mechanism.
