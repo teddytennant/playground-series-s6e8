@@ -5791,3 +5791,8 @@ without a leaderboard is in JOURNAL w25 §9 item 2.
   fits went 123s -> 270s) and inventing a phantom crash. Enumerate before relaunching.
 - Kaggle's API still has **no write path for final-submission selection**. Read-only check:
   `.venv/bin/python experiments/check_selection.py`.
+- **`git push` needs `gh` on the PATH.** The system gitconfig uses `gh auth git-credential`
+  as the credential helper, but `gh` lives at `/run/current-system/sw/bin/gh`, which is NOT on
+  the PATH the Bash tool starts with. A bare `git push` fails with
+  `gh: command not found` / `could not read Username for 'https://github.com'`. Use:
+  `PATH="/run/current-system/sw/bin:$PATH" git push origin main`
