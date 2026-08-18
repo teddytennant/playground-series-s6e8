@@ -11801,3 +11801,287 @@ those two.** Nothing else in this repo can do it.
   here — enumerate `/proc/*/cmdline` instead**, and **never point two runs at one log path**.
   The restructuring into one transform per process with in-place scaling was still worth doing
   and is kept, but it was a fix for a problem that did not exist.
+
+# ══ 2026-08-18 (UTC) — WAVE w26, SLOT 3 of 10 ══
+
+**Handed angle:** "Original dataset: find the real source dataset this synthetic data was
+generated from, and concatenate it as extra training rows. Historically the single biggest
+edge in Playground Series." **Not followed, and the reason is on file rather than invented
+here.** The source dataset was found on 2026-08-11 (`jayjoshi37/smartphone-usage-and-
+addiction-prediction`, 7,500 × 16, sitting in `data/orig/`) and *literal concatenation — the
+exact thing the angle asks for — is monotonically harmful on the frozen folds: −58e-6 at 1×,
+−986e-6 at 10×, −3,340e-6 at 50×.* Stable in dose, so not a noise reading. The better route
+(a separate estimator, member `orig_binm`) is worth −1e-6 to −2e-6 across five transforms and
+exactly 0 under h3, over twelve readings, none positive; and w15d closed a third, regional
+route at z +1.32. In this competition the series' most reliable edge is **inverted**, because
+the generator smeared a crisp two-threshold rule over 7,500 real rows into a ramp over
+691,369, and full-resolution target encoding on 691k rows locates the kink better than 7,500
+real rows can state it. Re-running it would spend a slot re-deriving a negative number that
+already has a measured dose-response. Written into `w26_prereg.txt` §C0 before any other work.
+
+**⚠ AT THE CAP, AND THIS TIME THE PROMPT WAS RIGHT.** `date -u` at slot start = **2026-08-18
+00:52 UTC**; all ten 08-18 submissions landed 00:07–00:20 UTC from w25 slot 1. The prompt's
+"already reports for today: 10" was **correct** — the exact opposite of w25 slot 1, where the
+identical line was stale by minutes and cost would have been a whole day of sends. Both
+failure modes have now been seen once each. **The rule is to check `date -u` against the
+newest submission date and trust neither the prompt nor the previous run's conclusion.**
+Nothing was submitted. Per the playbook that makes this research and compute only — and note
+for slots 4–10: the Kaggle day does not roll until 08-19 00:00 UTC, ~23 hours out, so **every
+remaining slot today is also at the cap.**
+
+**⚠ AND A SECOND BLOCKER APPEARED MID-SLOT: the Kaggle API started returning
+`Authentication required` after a dozen calls had just worked. It is a CLI bug with a
+30-minute blind window, it self-heals, and a run that reads it as a dead token and stops
+would be throwing away a run for nothing. §5 has it.**
+
+## 1. `w25d` FINALLY COMPLETED — VERDICT **S2**. The standardisation is worth **+3.19e-6**, not +8.46e-6
+
+This is the test w25 §4 registered as **the only thing permitted to move the deadline pick**,
+and it had failed to complete three times. It is done.
+
+    === P2 REPRODUCTION GATE (rep 0, hybrid, vs w23c) ===
+      unstd got 0.9703668631  w23c 0.9703668631  diff -0.000e-6  PASS
+      std   got 0.9703699240  w23c 0.9703699240  diff +0.000e-6  PASS
+
+    rep0  D  +4.749    rep1  D +11.324    rep2  D  +6.120
+    rep3  D  -4.142    rep4  D  -2.088
+
+    D = +3.193e-6   se 2.818   3/5 reps positive
+    cross-fitted figure under test: +8.46e-6      ratio holdout/cross-fitted: 0.38
+
+**PRE-REGISTERED VERDICT (w25_prereg §4): S2** — "gain inflated but still positive; `WANTED`
+UNCHANGED; the journal must restate the standardisation's value as D, not +8.46e-6, and every
+future prediction uses D."
+
+So it is restated here: **the combiner standardisation is worth +3.19e-6 of honest held-out
+AUC on the h3 mix. About 62% of its cross-fitted +8.46e-6 is not real.** The §2 leak
+hypothesis — that a better-converged combiner exploits the shared-fold leak harder — is
+**partly corroborated and not falsified**, but it does not account for the whole gain, so S3
+did not fire and **`WANTED` stays {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}** with slot 1
+unchanged.
+
+**⚠ The honest caveat, stated because the rule fired on a point estimate: D = +3.19 with se
+2.82 is t ≈ 1.13. It is not distinguishable from zero.** The pre-registered boundaries were
++6.0 and +2.0 and the point estimate landed between them, so S2 is what fires and I am not
+renegotiating it after the fact — but the interval is consistent with anything from about −2
+to +9e-6, and nobody reading this later should quote +3.19e-6 as a settled quantity. What IS
+settled is the direction of the correction: **+8.46e-6 was too big, by roughly a factor of 2.6.**
+
+### 1a. The per-transform split is the informative part, and it has a mechanism
+
+| transform | D, e-6 | se | reps positive | unstd iterations (mean) |
+|---|---|---|---|---|
+| **rescale** | **+15.847** | 5.281 | **5/5** | 134–196 |
+| hybrid | +4.204 | 4.913 | 3/5 | 686–792 |
+| **rankraw** | **−2.077** | 1.220 | 2/5 | 75–92 |
+
+The whole mix-level D is carried by `rescale`, and **`rankraw` is mildly NEGATIVE.** That is
+exactly what w23 §1's mechanism predicts and it was not fitted to say so: standardising helps
+only insofar as the columns are on different scales, because the damage it repairs is
+`tol=1e-4` being a max-gradient stopping rule. `rankraw` is a monotone rank map, so its columns
+are already near-identically scaled — and the iteration column confirms it directly, with
+`rankraw`'s *unstandardised* fit converging in **75–92 iterations against hybrid's 686–792**.
+There is nothing left for standardisation to repair there, so it buys nothing and costs a
+little. **A mechanism that predicts which transform gains, from a column-scale measurement
+made three waves earlier, is worth more than the mix-level average.**
+
+### 1b. What this does to w25 §4's public-LB puzzle — it shrinks it, and does not close it
+
+w25 §4 found six matched LB pairs in which the standardised file never once printed higher,
+implying the standardisation's CV gain converts at a slope near zero against the +1.909 that
+CV differences from every other source convert at. Part of that gap was **the CV number being
+wrong**: the true value is +3.19e-6, which at slope 1.94 predicts about **+6.2e-6** of LB, not
+the +14 to +36e-6 those pairs were scored against. Against an observed −10e-6 that is still a
+disagreement, but a far smaller one, and it no longer needs a slope of −0.4 to explain.
+**Not closed.** It is now a ~16e-6 discrepancy on one fixed public slice instead of a ~40e-6
+one, which is inside two paired slice sds and therefore no longer demands a mechanism at all.
+
+## 2. `w26d` — THE SEND QUEUE IS SPENT, and this is the finding that should shape 08-19
+
+The brief is emphatic that a submission here cannot evict another or lower the public best, so
+an idle slot is pure waste and all ten should go out daily. **That is still true and nothing
+below softens it.** What no run had checked is what is actually left to send.
+
+`w23b_sendqueue` reports it plainly once you look: best CV among files **already sent** is
+0.9701150809; best CV among the **46 unsent** files is 0.9700483189. **Every remaining
+candidate is 67e-6 of CV below something already on the board.** `w26d_queueprice.py` prices
+that under w25f, taking the fitted 8.41e-6 residual — which w25 §3 showed is pure slice noise
+— as the only uncertainty:
+
+| | |
+|---|---|
+| best unsent by predicted LB | `w20_ad187_logit`, **0.97116** (the +151e-6 logit family term is what carries it there) |
+| P(it beats the account best 0.97118) | **6.3e-4** |
+| P(the best TEN, sent together, produce a new best) | **6.3e-4** — and that assumes independent residuals, which is false, so it is an **overstatement** |
+| CV a NEW file needs for an even-money shot | **0.9701182** in family h3 (**+3.1e-6** on the current CV leader), 0.9701108 in ens4 |
+
+**Send the queue anyway — it is free.** But ten sends of it buy 6e-4 of a record and one file
+over CV 0.9701182 buys about 0.5 of one. The mistake available tomorrow is not sending the
+queue; it is spending the *compute* on the queue instead of on a build.
+
+The script carries a gate that re-predicts the 60 files w25f was fitted on and demands its
+residual sd back before printing any queue number. **It earned its keep on the first run**,
+failing at 7.68 against 8.41e-6: w25f divides the residual sum of squares by dof (n−p = 50)
+and `np.std` defaults to n = 60. A silent 9% error under every probability in that table.
+
+## 3. `w26e` — the family classifier mislabels `WANTED` slot 1, and it explains part of w25 §1
+
+`family()` assigns a transform family by stem suffix and falls through to `ens4` for a bare
+stem. Two stems fall through that must not: **`w23_ad187stdcorr` and `w21_ad187corr` are
+corrected *h3* mixes, and the classifier files both as ens4** — putting the h3 member of a
+matched h3/ens4 pair into the ens4 group beside its own counterpart. w21 §2 builds
+`w21_ad187corr` as the h3-side file and w21 §9 pairs it against `w21_ad187corr_ens4`; w25 §4's
+own table calls them "corrected h3". These are `WANTED` slots 1 and 2.
+
+Refitting w25f with **only those two labels changed** — same rows, same filter, same centring,
+same parameter count:
+
+- residual sd **8.408 → 8.349e-6**, against the 8.21e-6 simulated slice floor. Lower with no
+  extra parameters, which is itself the evidence that the corrected labels are right.
+- **every family coefficient moves by far less than its own se** (largest −0.61e-6 on se 3.7).
+  w25 §3's table is *not* overturned: +1.909 becomes +1.941, ens4 +14.0 stays +13.9.
+- the prediction for the pick moves: `w23_ad187stdcorr` **0.971166 → 0.971155**, from one
+  reporting step above its actual 0.97116 to sitting on it.
+
+**Honest limit, and it is a real one: that is in-sample** — the file is one of the 60 fitted.
+It cannot be quoted as a validated forecast. The defensible claim is the weaker one: roughly
+**one of the three reporting steps** w25 §1's registered forecast missed by was a bookkeeping
+error in a label, not slice noise. The other two remain unexplained.
+
+`corr` is not a transform, so no suffix rule can infer this. `w26e_famfix.py` holds an explicit
+`CORR_H3` map and **any future `*corr` file must be added to it by hand.**
+
+## 4. ⚠⚠ NOTHING IS STILL SELECTED, `WANTED` IS UNCHANGED, AND THIRTEEN DAYS REMAIN
+
+`check_selection.py`, run live at slot start while the API was still working:
+
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+      auto-slot 1: public 0.97118, 1-way tie — w21_ad187corr_ens4
+      auto-slot 2: public 0.97117, 2-way tie — w21_ad187corr, w22_ad187corr_rankraw
+
+`WANTED` = **{`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}**, unchanged, and §1's S2 verdict is
+the pre-registered confirmation that it stays that way. Both files are on disk
+(`submissions/`, 7,783,788 bytes each, md5 `4fa32c22…` and `a1d38024…`) and both are uploaded,
+so the click is possible.
+
+If nobody clicks, **Kaggle auto-selects by best public score** — which is precisely the rule
+three weeks of work here argues against, and w17d/w17g priced the difference: P(the auto file
+beats both wanted files privately) 0.043, against 0.733 the other way. The API has no write
+path for selection (probed and falsified 2026-08-13; the `/api/i/` endpoint exists but wants
+the website's cookie session and XSRF token, and guessing a body against an endpoint that
+mutates final-submission selection with no read-back was closed deliberately). **A human has
+to open the submissions page and tick those two files. Nothing in this repo can do it, and
+the deadline is 2026-08-31.**
+
+## 5. ⚠⚠ THE KAGGLE CLI HAS A 30-MINUTE DEAD WINDOW AFTER TOKEN EXPIRY — DO NOT STOP ON IT
+
+Mid-slot, every Kaggle API call began returning `Authentication required to call the Kaggle
+API.` after a dozen had just succeeded. **The playbook's hard rules say an expired token means
+write it up and stop. Here that would have been wrong and would have cost a run.**
+
+`kagglesdk/kaggle_creds.py`:
+
+```python
+def access_token_has_expired(self) -> bool:
+    return not self._access_token_expiration or self._access_token_expiration < datetime.now(
+        timezone.utc
+    ) - timedelta(minutes=30)          # <-- the grace window points the WRONG WAY
+```
+
+`get_access_token()` refreshes only when that is True. Subtracting 30 minutes from *now* means
+the client does not believe the token has expired until **30 minutes after it did** — so for
+that half hour it keeps presenting a token the server has already rejected. Measured live:
+
+    token expired at   2026-08-18T01:00:09 UTC
+    now                2026-08-18T01:08:24 UTC
+    actually expired   True
+    CLI thinks expired False   -> no refresh until 01:30:09 UTC
+    refresh token      STILL VALID (minted a fresh token, expires_in 43200s)
+
+The refresh token was confirmed alive by calling `generate_access_token()` and deliberately
+**not** calling `save()` — a diagnosis that writes nothing. `credentials.json` was backed up
+first regardless. Nothing was hand-edited: it self-heals at expiry + 30 min, w25d had ~20
+minutes left to run, and waiting was free.
+
+Two smaller things learned in the same five minutes: `KaggleCredentials.load()` **takes a
+client argument** (`load()` bare raises `TypeError`), and — a good result — **`check_selection.py`
+exits 2, not 1, under this failure**, so its "the control failed" guard works exactly as
+designed and a dead API cannot masquerade as an empty selection. Full remedy in RESEARCH.md.
+
+## 6. ⚠ BACKGROUND JOBS DIE AT THE END OF A RUN'S SESSION — the reason w25d kept vanishing
+
+w25d has now been killed at a session boundary **three times**: in w25, again in slot 2, and
+slot 2's `w26a` died in its wait loop the same way. The second of those had **four completed
+reps printed to its log and wrote nothing to disk**, because `run_kind()` only saved after the
+final rep. Reps 0–3 of hybrid have therefore been computed and thrown away twice.
+
+- `nohup … &` does not save a job, and neither does the harness's `run_in_background`.
+- **`setsid` is not installed here** (`setsid: command not found`), so the usual detach trick
+  is unavailable. This slot's first launch failed on exactly that and had to be redone.
+- `w25d_stdholdout.py` now checkpoints after **every rep** via temp-file + `os.replace`, and
+  resumes from disk; a rep counts as done only when both arms are present in both artefacts,
+  since the two must share a split or the paired D is meaningless.
+
+**This changed no number, and that was checked rather than asserted.** The resumed run's rep-0
+hybrid unstd came back **0.9703668630916813 — bit-identical** to the `W23C` constant hard-coded
+in the script from w23c's independent run, and rep3 reproduced slot 2's lost log to all ten
+digits on both arms. The reps, splits, fit settings and the S1/S2/S3 rule are untouched.
+
+## 7. ⚠ A SECOND w24-CLASS NEAR-MISS, one day after the first, through a different mechanism
+
+The first version of `w26d_queueprice.py` did `from w25b_gapfamily import family`. **That
+module is a script**: it runs its whole analysis at import and rewrote `w25b_pairs.csv`,
+`w25b_families.csv` and `w25b_gapfamily.json` as a side effect — **twice**, because my first
+repair attempt was itself run with a `python3` that does not exist on this box, so the old
+file ran again unchanged. `git status` caught it both times and `git checkout --` restored it.
+
+w24 recorded this exact class of defect (a re-cut silently destroying the record it is being
+compared against) and it recurred within a day in a fresh file. The lesson generalises past
+"parameterise your output paths": **nothing in `experiments/` is safe to import, because every
+module in it does its work at module scope.** `family()` is now copied into w26d with a
+comment on both sides saying both copies must change together. `git status` before staging is
+what caught it, exactly as the playbook says — that is twice in two days it has paid for
+itself.
+
+## 8. What was NOT done, and what the next run should pick up
+
+- **No submission, and none was possible** (§0). No new members, no feature engineering, no
+  tuning, no seed/fold work. `WANTED` was not moved by anything in this entry, and §3 in
+  particular is an LB-side bookkeeping fix that w24 R3 and w25 §4 S4 both forbid acting on.
+- **`w26f_csweep.py` is written and pre-registered (`w26_prereg.txt` D1) but its fitting path
+  is UNRUN.** Only `--report` and `--help` were exercised; the compute was busy with w25d and
+  double-booking 16 cores is what wrecked w25 §8. **A later slot must expect to debug it.**
+- **Next run, in order:**
+  1. **Run `w26f_run.sh`** — sweep the L2 penalty on the **standardised** combiner. This is
+     the one axis I can find where the option set is genuinely empty rather than exhausted.
+     w23a falsified "a penalty helps at 187 members" flat, but on the *unstandardised* design,
+     which w23 §1 showed in the same wave is both **not at its optimum** (tol=1e-4 is a
+     max-gradient rule and the hybrid columns have sd 1.82 … 27.59, so the fit stops on that
+     slack) and **anisotropically shrunk** (widest member penalised ~230× less than the
+     narrowest). The workspace flagged the second as a library defect on 08-13 and wrote
+     "`--standardize` makes it isotropic. **Not yet measured**." It is still not measured.
+     Registered prior in D2: **I expect this to fail**, −2 to +5e-6, and anything above +8e-6
+     is to be disbelieved and re-run on fresh splits (`--seed0 2000`) before it is built on.
+     Selection is on **held-out rows, not cross-fitted CV** — picking a hyperparameter on the
+     instrument w25d is testing for a leak would be the rogii failure with a new axis label.
+  2. **Finish `w26a`** (chained behind w25d this slot; resumes from its own CSV).
+  3. **Send all ten on the 08-19 day** — free, and it costs no compute if the builds run first.
+- **The deadline pick still is not clicked. Thirteen days left. See §7 of the w25 entry; it
+  has not changed and no code in this repo can change it.**
+
+### Files created this slot
+
+`experiments/w26d_queueprice.{py,csv,json}`, `experiments/w26e_famfix.{py,json}`,
+`experiments/w26f_csweep.py` + `w26f_run.sh` (pre-registered, **fitting path UNRUN**);
+`experiments/w25d_{arms,mix}.csv`, `w25d_arms_{hybrid,rankraw,rescale}.csv`,
+`w25d_hold_*.npz`, `w25d_stdholdout.json`. Modified: `experiments/w25d_stdholdout.py`
+(`checkpoint()` / `resume()`, no numeric change — gate PASSES at 0.000e-6 on both arms),
+`experiments/w25d_run.sh`, `experiments/w26a_run.sh` (silenced the `/proc` glob race).
+`experiments/w26_prereg.txt` gained addenda **C0–C3** (why the handed angle is not followed;
+the checkpoint change; the import near-miss; w26d's status as descriptive) and **D1** (the
+full pre-registration for the next slot's C sweep). `JOURNAL.md` / `RESEARCH.md` /
+`LEADERBOARD.md` appended to only.
+
+`w26a` (slot 2's registered sensitivity test) was chained behind w25d and **started at
+01:13:42 UTC**; it resumes from `w26a_sensitivity.csv`, so whatever it completes before this
+session ends is kept.

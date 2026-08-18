@@ -5881,3 +5881,97 @@ scope. `from w25b_gapfamily import family` re-ran that whole analysis and overwr
 `w25b_{pairs,families}.csv` and `w25b_gapfamily.json` twice before `git status` caught it.
 Copy the function, don't import it. Same class of defect as w24's hard-coded JSON path,
 recurring one day later through a different mechanism.
+
+## ⚠⚠ THE KAGGLE CLI HAS A 30-MINUTE DEAD WINDOW AFTER TOKEN EXPIRY — DO NOT DECLARE YOURSELF BLOCKED
+
+Hit live during w26 slot 3 and diagnosed to the line. **Every Kaggle API call started returning
+`Authentication required to call the Kaggle API.` mid-session, after a dozen had just
+succeeded.** The playbook's hard rules say an expired token means write it up and stop. **In
+this window that would be the wrong call and would waste a whole run.**
+
+What actually happens. `kagglesdk/kaggle_creds.py`:
+
+```python
+def access_token_has_expired(self) -> bool:
+    return not self._access_token_expiration or self._access_token_expiration < datetime.now(
+        timezone.utc
+    ) - timedelta(minutes=30)          # <-- the grace window points the WRONG WAY
+```
+
+`get_access_token()` only refreshes when that returns True. Subtracting 30 minutes from *now*
+means the client does not consider the token expired until **30 minutes after it actually
+expired** — so for that half hour it keeps sending a token the server has already rejected,
+and every call fails. Measured on the live credential:
+
+```
+token expired at : 2026-08-18T01:00:09 UTC
+now              : 2026-08-18T01:08:24 UTC
+actually expired : True
+CLI thinks expired : False   -> no refresh attempted until 01:30:09 UTC
+refresh token     : STILL VALID (a fresh token minted fine, expires_in 43200s)
+```
+
+**It self-heals.** At expiry + 30 min the CLI refreshes on the next call and everything works.
+
+### What to do when a run sees `Authentication required`
+
+1. **Check the clock before concluding anything:**
+   ```bash
+   .venv/bin/python -c "import json,os;print(json.load(open(os.path.expanduser('~/.kaggle/credentials.json')))['access_token_expiration'])"
+   date -u
+   ```
+2. If now is **less than 30 minutes past** `access_token_expiration`, this is the bug. **You
+   are not blocked.** Do compute work and retry after `expiration + 30 min`.
+3. To force it early — back up `~/.kaggle/credentials.json` FIRST, since this rewrites it:
+   ```python
+   from kagglesdk import KaggleClient, KaggleEnv
+   from kagglesdk.kaggle_creds import KaggleCredentials
+   KaggleCredentials.load(KaggleClient(env=KaggleEnv.PROD)).refresh_access_token()   # calls save()
+   ```
+   `KaggleCredentials.load()` **takes a client argument** — `load()` with no args raises
+   `TypeError`. To diagnose *without* writing, call `generate_access_token()` and simply do
+   not call `save()`; it returns a real token and proves the refresh token is alive.
+4. Only if the **refresh token itself** fails is the account genuinely blocked, and that is a
+   different error. The access token is ~24h; the refresh token long-lived.
+
+⚠ **Plan submission days around this.** The token expiring mid-day silently costs up to 30
+minutes of send capability. If a slot needs to submit and hits the window, **wait it out** —
+do not burn the slot, and do not report the competition as inaccessible.
+
+## The combiner standardisation is worth +3.19e-6, NOT +8.46e-6 — w25d, verdict S2 (w26 slot 3)
+
+Settled by the pre-registered holdout test (`experiments/w25d_stdholdout.py`, rule fixed at
+`w25_prereg.txt` §4 before any number existed). 5 reps of an 80/20 StratifiedShuffleSplit,
+combiner fitted on the pool and scored on rows it never saw, paired within rep, h3 mix.
+
+    P2 reproduction gate vs w23c: PASS, 0.000e-6 on BOTH arms
+    D = +3.193e-6   se 2.818   3/5 reps positive
+    ratio holdout / cross-fitted = 0.38
+
+**Roughly 62% of the standardisation's cross-fitted CV gain does not survive an honest
+holdout.** The named mechanism — the combiner is cross-fitted on the same frozen folds that
+produced its 187 member OOF columns, so a better-converged combiner exploits that leak harder
+— is **partly corroborated, not falsified, and not sufficient**: S3 did not fire and `WANTED`
+is unchanged. **Use +3.19e-6, not +8.46e-6, in every future prediction.**
+
+⚠ **Do not quote +3.19e-6 as settled.** se 2.818, t ≈ 1.13 — the interval covers about −2 to
++9e-6. What is settled is that +8.46e-6 was too large by ~2.6×.
+
+### The per-transform split has a mechanism, and it predicts which transform gains
+
+| transform | D, e-6 | se | reps positive | unstd iterations |
+|---|---|---|---|---|
+| **rescale** | **+15.847** | 5.281 | **5/5** | 134–196 |
+| hybrid | +4.204 | 4.913 | 3/5 | **686–792** |
+| **rankraw** | **−2.077** | 1.220 | 2/5 | **75–92** |
+
+Standardising helps only to the extent the columns differ in scale, because what it repairs is
+`tol=1e-4` being a **max-gradient** stopping rule (w23 §1). `rankraw` is a monotone rank map,
+its columns are already near-isotropic, its *unstandardised* fit converges in 75–92 iterations
+against hybrid's 686–792 — and it is the one transform where standardisation is **negative**.
+Anything that reasons about the standardisation must do it per transform, not on the mix mean.
+
+**Consequence for w25 §4's public-LB puzzle:** at the corrected +3.19e-6 and slope +1.94, the
+predicted LB gain is ~+6.2e-6, not the +14…+36e-6 those six matched pairs were scored against.
+The observed −10e-6 is then a ~16e-6 discrepancy, inside two paired slice sds. **The pairs no
+longer demand a near-zero conversion slope, and that puzzle is downgraded, not closed.**

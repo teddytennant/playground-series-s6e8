@@ -57,6 +57,7 @@ REPS = 5
 SEED0 = 1000                 # w25d's splits exactly, so its std arm is the C=1.0 row
 CV_GATE = 0.9701182          # w26d: CV needed for an even-money shot at the record, family h3
 CSV = os.path.join(HERE, "w26f_csweep.csv")
+HOLDDIR = os.path.join(HERE, "w26f_hold")
 
 
 def splits_for(y, reps, seed0=SEED0):
@@ -74,23 +75,35 @@ def load_done():
     return pd.read_csv(CSV)
 
 
-def append_row(row, store, kind):
-    """One row + one score vector per cell, written atomically so a kill mid-write cannot
-    leave a truncated artefact the resume path then trusts."""
+def cell_path(kind, C, rep):
+    return os.path.join(HOLDDIR, f"{kind}__C{C:g}__rep{rep}.npy")
+
+
+def append_row(row, d, kind):
+    """One CSV row + ONE .npy per cell, both written atomically so a kill mid-write cannot
+    leave a truncated artefact that the resume path then trusts.
+
+    Deliberately one file per cell rather than one growing .npz per transform. A single npz
+    would be recompressed from scratch on every one of the 35 cells, and by the last cell that
+    is ~19 MB of float32 re-deflated to save 0.5 MB of new data -- tens of seconds of pure
+    waste per cell on a sweep whose whole point is that standardised fits are cheap.
+    """
+    os.makedirs(HOLDDIR, exist_ok=True)
+    np.save(cell_path(kind, row["C"], row["rep"]) + ".tmp.npy", d.astype("float32"))
+    os.replace(cell_path(kind, row["C"], row["rep"]) + ".tmp.npy",
+               cell_path(kind, row["C"], row["rep"]))
     df = pd.concat([load_done(), pd.DataFrame([row])], ignore_index=True)
     df.to_csv(CSV + ".tmp", index=False)
     os.replace(CSV + ".tmp", CSV)
-    npz = os.path.join(HERE, f"w26f_hold_{kind}.npz")
-    np.savez_compressed(npz + ".tmp.npz", **store)
-    os.replace(npz + ".tmp.npz", npz)
 
 
 def run_kind(kind, seed0):
     t0 = time.time()
-    done = load_done()
-    done = {(r.C, r.rep) for r in done[done.kind == kind].itertuples()}
-    npz = os.path.join(HERE, f"w26f_hold_{kind}.npz")
-    store = dict(np.load(npz)) if os.path.exists(npz) else {}
+    df = load_done()
+    # A cell counts as done only when BOTH artefacts are present. A cell killed between the
+    # .npy write and the CSV write is recomputed; the cost is one 15s fit.
+    done = {(r.C, r.rep) for r in df[df.kind == kind].itertuples()
+            if os.path.exists(cell_path(kind, r.C, r.rep))}
     todo = [(c, r) for c in GRID for r in range(REPS) if (c, r) not in done]
     if not todo:
         print(f"{kind}: all {len(GRID)*REPS} cells already on disk")
@@ -125,10 +138,9 @@ def run_kind(kind, seed0):
             el = time.time() - t
             d = m.decision_function(Zho)
             auc = roc_auc_score(yho, d)
-            store[f"C{C}_rep{rep}"] = d.astype("float32")
             ni = int(np.ravel(m.n_iter_)[0])
             append_row(dict(kind=kind, C=C, rep=rep, hold_auc=auc, n_iter=ni, secs=el),
-                       store, kind)
+                       d, kind)
             print(f"  C {C:<6g} rep{rep}  auc {auc:.10f}  iters {ni:5d}  {el:6.1f}s",
                   flush=True)
             del m
@@ -171,16 +183,15 @@ def report():
     have = [k for k in KINDS if not df[df.kind == k].empty]
     if len(have) == len(KINDS):
         print("\n=== the h3 MIX (rank-average of the three stacks) on held-out rows ===")
-        z = {k: np.load(os.path.join(HERE, f"w26f_hold_{k}.npz")) for k in KINDS}
         rows = []
         for C in GRID:
             ds = []
             for rep, (_ip, ih) in enumerate(sp):
-                keys = [f"C{C}_rep{rep}" for _ in KINDS]
-                if not all(k in z[kk].files for kk, k in zip(KINDS, keys)):
+                paths = [cell_path(kk, C, rep) for kk in KINDS]
+                if not all(os.path.exists(q) for q in paths):
                     ds = None
                     break
-                e = np.mean([rankdata(z[kk][f"C{C}_rep{rep}"]) for kk in KINDS], 0)
+                e = np.mean([rankdata(np.load(q)) for q in paths], 0)
                 ds.append(roc_auc_score(y[ih], e))
             if ds is not None:
                 rows.append(dict(C=C, mix_auc=float(np.mean(ds)),
