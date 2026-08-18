@@ -12773,3 +12773,202 @@ New: `experiments/w26j_run.sh`, `experiments/w26j_run.log`, `data/ext_members5/`
 with a dedupe guard — a no-op on w26i's queued invocation), `experiments/w26_prereg.txt`
 (**§F**). `JOURNAL.md` / `RESEARCH.md` / `LEADERBOARD.md` appended to only.
 **No submission — none was possible, 0 of 10 slots left on the 08-18 UTC day.**
+
+---
+
+# 2026-08-18 (UTC) — wave w26, slot 7 of 10
+**Angle handed: "Feature engineering: interactions, in-fold target and count encodings, and
+careful categorical treatment. Measure every feature on CV, keep only what pays."**
+**Taken literally and it paid — but not by adding a feature. The in-fold encoding block this
+workspace and the whole public lattice family share has a TRAIN/SERVE SKEW: every one of its
+72 cell-count columns arrives ~4/3 too large at serve time. Correcting it is worth +325e-6
+on fold 0 at 400 rounds, the largest member-level gain recorded in this workspace.**
+
+## 0. At the cap. 0 of 10 slots left, confirmed live
+
+`date -u` 02:32. The prompt header says DATE 2026-08-17 because local time is UTC−4; the
+**Kaggle day is 08-18**, and `w26g_send.py` counts it off the API from a 500-row page:
+
+    71 submissions on record; 10 already sent on 2026-08-18 (UTC); 0 of 10 slots left today
+    71 distinct filenames sent, 71 of them still on disk and fingerprinted
+
+Same ten that landed 00:07–00:20 UTC from w25 slot 1. **No submission this slot, and none was
+possible** — the fourth slot in a row in that position (5, 6, 7 and the queue for 8–10).
+Standing unchanged: 11th of the board at 0.97118.
+
+## 1. Why the angle was taken literally rather than as "build another member"
+
+RESEARCH closes member-hunting: the pack's span already contains what the 12 columns can say,
+and `orig_binm` at maxcorr 0.879 (worth −1e-6 to −2e-6) retired the "we just haven't found a
+decorrelated member" objection. The handed angle, read as *"engineer a feature, fit a member,
+stack it"*, is a priced null. **Read as written — *in-fold target and count encodings*,
+*measure every feature* — it points at the encoder itself, and nobody here had ever audited
+it.** `agent/features.py:te_block` is 40 lines that produce 144 of the 184 columns every
+own-built lattice member is fitted on. It had never been checked against its own serve path.
+
+## 2. ⚠⚠ THE DEFECT, established from the CACHE ALONE with no model fitted
+
+`te_block` builds the **train** part of each encoding with an inner `StratifiedKFold(4)` so a
+row never encodes itself, and the **valid/test** part from the whole outer training part. For
+the smoothed mean `TE_k` that is right and scale-free. For the raw cell count `CT_k` it is
+not: a count over 3/4 of the rows is on a different SCALE from a count over 4/4 of them.
+Measured on `cache/f0_*`, means over all 72 CT columns:
+
+| | min | median | max |
+|---|---|---|---|
+| ratio valid/train | 1.3236 | **1.3325** | 1.3382 |
+| ratio test /train | 1.2802 | **1.3233** | 1.4335 |
+| control: the 72 TE columns, \|valid−train\| of the mean | | 4.10e-4 | 1.74e-3 |
+
+Median 1.3325 against a predicted 4/3 = 1.3333. **A tree learns its CT split thresholds on
+the fit-time scale and applies them to serve values 33% larger, on 72 of 184 columns, on
+every fold, since the cache was written on 2026-08-10.** The `CT==0` fraction is *matched*
+(17.940% train / 17.993% valid / 17.926% test), so the whole of it is scale and none is an
+unfixable zero-inflation difference.
+
+**It is upstream, not ours.** `data/oof/src/train_lattice.py` — szymonkapiski's public
+47-model library, which `agent/features.py` is adapted from — has the identical construction
+at lines 172–194. Grepping the library's 13 trainers, **`train_lattice.py` is the only one
+that emits a count column at all**, so the CT skew is confined to, and covers all of: the 14
+public `lat*`/`rmlp_lat*` members, and every own-built `lat`/`latcat`/`natlat` member here.
+`latr1_xgb` — the member RESEARCH calls *"the best GBDT of any family here"* — is one of them.
+
+⚠ It does **not** explain the foreign-vs-ours asymmetry w26i/w26j is measuring; the foreign
+lattice members have it too. Do not reach for it as that explanation.
+
+## 3. The instrument needs NO REFIT, and that is exact — gated, not assumed
+
+Rescaling one input feature of a tree by `s` is the same function as rescaling that feature's
+thresholds by `s`. So *"fit with CT×s"* ≡ *"the original model served rows whose CT is
+divided by s"*. Built both routes on 120k rows / 150 rounds and compared:
+
+    maxdiff |serve-side /s  −  refit on CT×s| = 0.000e+00,  spearman 1.00000000
+    and both differ from the status quo by up to 0.143 in probability
+
+So **one fit per fold yields the whole s-curve**, every arm sharing identical trees, identical
+rows and identical folds — matched on everything except the thing being tested, which is the
+rule this workspace has now been caught by three times. This is the cheapest honest instrument
+built here.
+
+## 4. Pre-registered BEFORE anything was fitted — `experiments/w26_prereg.txt` §G
+
+Primary readout is the single pre-registered point **s = 4/3 vs s = 1.0**; the rest of the
+curve is mechanism evidence only (it should rise from 1.0, peak near 4/3, fall by 2.0).
+Registered prior: **0 to +200e-6 member-solo, modal +30e-6**; **0 to +3e-6, modal ~0** into
+the 187 pack. Argmax-on-the-curve selection is forbidden — arm-selection optimism is a
+measured +1.78e-6 here and must not be spent twice.
+
+§G6 (added while `r400` was still on fold 0, log verified to hold no AUC line) registers the
+TE arm separately and **registers its sign as genuinely uncertain**, because two readings
+compete: the serve TE is either an out-of-support extrapolation (correcting wins) or simply a
+better estimate from 4/3 as many rows (correcting loses). §G7 (added with `w26k`'s log
+verified to hold zero fold lines) registers the depth prediction: **≥ +250e-6 at 2000 rounds**,
+since more rounds means more displaced thresholds; a gain that *shrinks* with depth would be
+evidence against the mechanism.
+
+## 5. Results so far
+
+Fold 0, 400 rounds, all seven arms (`experiments/w26l_r400.log`):
+
+| arm | OOF AUC | vs `ct1.0` |
+|---|---|---|
+| `ct1.0` status quo | 0.964779 | — |
+| `ct1.1` | 0.964844 | +65e-6 |
+| **`ct1.3333` the registered fix** | **0.965104** | **+325e-6** |
+| `ct1.5` | 0.964819 | +40e-6 |
+| `ct2.0` | 0.964547 | −232e-6 |
+| `te` re-shrink only | 0.964758 | −21e-6 |
+| `both` | 0.965083 | +304e-6 |
+
+The CT curve peaks **exactly on the pre-registered 4/3** and falls away on both sides — the
+registered mechanism signature, at both depths tried (a 100-round fold-0 probe gave
+0.958712 → 0.958829, +117e-6). For scale: **+325e-6 is 2.4× the seed-averaging gain
+(+138e-6) that RESEARCH calls "worth ~10× a blend tweak"**, and the whole gap from our
+0.97118 to the board leader's 0.97132 is 1.4e-4 of LB.
+
+The `te` arm is a small **null-to-negative** (−21e-6), and `both` is `ct1.3333` plus the same
+−21e-6 — internally consistent. Judged against `ct1.3333` as §G6 requires (judging it against
+`ct1.0` would credit the CT fix twice), **the TE re-shrink adds nothing**, which is the
+"information reading" of §G6(b): the systematic half of the shrinkage mismatch is too small
+to matter beside the sampling-noise half, which is not correctable. That is the weaker claim
+and it is the one being made.
+
+## 6. The second skew, and why it is worth recording even though its arm is a null
+
+Same block, same cause: `TE = (S + λ·gm)/(n + λ)` is smoothed against a 3/4-size count at fit
+time, so train TE is shrunk **more** toward `gm` than serve TE of the same cell —
+systematically, and concentrated in thin cells exactly as the algebra requires. sd(valid TE)/
+sd(train TE) by cell density: **1.0293** over the 12 thinnest keys → 0.9933 over the 12
+densest. The closed-form serve-time corrector (invert the smoothing, re-shrink at `f=3/4`;
+`n=0` maps `gm→gm`, `f=1` is the exact identity) cuts mean |sd ratio − 1| from **0.008992 to
+0.002992** and improves 53 of 72 keys.
+
+⚠ **And it recovers `TE_SMOOTH`, a constant recorded nowhere on disk.** `build_cache.py`
+reads it from the environment, defaults to 20.0, and the cache was written 2026-08-10 with no
+record of what it ran with. Sweeping λ in the corrector and taking the best sd match:
+
+    λ      5      10      15      20      25      30      50     100
+    mism.  .00656  .00464  .00307  .00299  .00415  .00536  .01005  .01944
+
+Minimised at λ≈17–20. The correction's own free parameter independently reproduces the
+builder's constant — quantitative confirmation of the mechanism, not just of its sign.
+Unlike `train_lattice.py`, `train_impute.py` emits no count column, so the `imp_*` members
+carry **only** this second (null-valued) skew and not the first.
+
+## 7. ⚠ STILL RUNNING at the end of this slot — how to pick it up
+
+Both are per-fold checkpointed via temp file + `os.replace`; **re-running the identical
+command resumes**, and nothing is lost to a session boundary except the fold in flight.
+
+    .venv/bin/python experiments/w26l_serve.py --name r400  --rounds 400  --jobs 3
+    .venv/bin/python experiments/w26k_ctscale.py --name ctscale --rounds 2000 --jobs 5
+
+`w26k` is the registered primary: 2000 rounds, the exact `lgbm_fixed_lat` config (stored CV
+0.9677108350). ⚠ It is running at fewer threads than that member was built with, and
+LightGBM's histogram reduction is not guaranteed bit-identical across thread counts, so its
+`s=1.0` arm is a **sanity check with a 5e-6 tolerance, not a reproduction gate** (§G5b) — the
+A/B claim rests entirely on the within-run pairing and cannot be touched by it.
+
+⚠ The box is at load ~31 on 16 cores: `w26a_sensitivity.py --mode rawnoise` has held ~8.6
+cores since 02:12 UTC with the w26f→w26h→w26i→w26j chain queued behind it, and **14 processes
+from a different workspace** (`kaggriculture`'s `screen_many.py`) hold ~9 more. 2000-round
+folds are running ~70 min each here, so `w26k` needs roughly 6 hours of wall clock. That is
+why it is checkpointed rather than restarted.
+
+## 8. Next run, in order
+
+1. **`tail experiments/w26l_r400.log` and `experiments/w26k_run.log` first**, and resume
+   whichever has not pooled with the exact command in §7. Write both up against §G4/§G6/§G7
+   whichever way they went — §G7 in particular is a falsifiable prediction (≥ +250e-6 at 2000
+   rounds) and a shrinking gain must be reported as evidence against the mechanism.
+2. **Then the pack question, which is the one that decides whether any of this is worth a
+   submission.** `experiments/w26m_export.py --src experiments/w26l_r400 --arm ct1.3333
+   --name <n>` writes the member to `data/ext_members6/` (⚠ never `oof/` — that moves the
+   pack under blend_lab, w26f, w26h, w26i and w26j at once), then
+   `experiments/w26n_corr.py` for maxcorr and `w26i_value.py --new-dir data/ext_members6`
+   for the paired 50/50 marginal. The registered prior for the pack is **~0**, and the honest
+   reason it might not be is §2 of the RESEARCH section: a corrected member is the same
+   function class on the same features differing only by a displacement **every member in the
+   pack shares**, which is the one direction the span cannot already contain. That argument
+   is not evidence — measure it.
+3. If it pays, the follow-on is not a new idea, it is **the same fix on the other families**:
+   `run_xgb.py --mode latcat` and `run_catboost.py --mode natlat` read the identical cache,
+   and §G5(c) requires a second function class before `te_block` is changed for good.
+4. **If a Kaggle day is open, run `.venv/bin/python experiments/w26g_send.py`** (dry run, then
+   `--go`). Do not hand-pick from the queue CSV.
+5. The pick is still not clicked. `WANTED` = {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`},
+   both uploaded, both on disk; the API has no write path and a human must tick them.
+
+### Files this slot
+New: `experiments/w26k_ctscale.py`, `experiments/w26l_serve.py` (supersedes it: adds the two
+TE arms and **saves the fitted booster per fold**, so every further serve-time transform is
+predictions-only from here), `experiments/w26m_export.py`, `experiments/w26n_corr.py`,
+`experiments/w26k_run.log`, `experiments/w26l_r400.log`, `cache/ctckpt/`.
+Modified: `experiments/w26_prereg.txt` (**§G**, the full pre-registration, in three parts
+each written before the number it covers existed). `JOURNAL.md` / `RESEARCH.md` appended to
+only. **No submission — none was possible, 0 of 10 slots left on the 08-18 UTC day.**
+
+### Gotcha worth one line
+`np.savez(path_string)` appends `.npz` to the *name*, which silently breaks the temp-file +
+`os.replace` idiom — the rename then fails on a file that was never created. Pass an open
+**file handle**. It cost this slot's first probe.
