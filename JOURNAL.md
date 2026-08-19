@@ -14741,3 +14741,80 @@ on CV; only rows 1–3 are deadline candidates.
 realised per-member rate under the original claim).
 
 **No submission — at cap, 10/10 for the 08-19 UTC day.**
+
+## 10. Slot-7 addendum, written after §9 — three things landed before the slot closed
+
+### 10.1 NEW CV LEADER: `w27_ad190stdcorr` = **0.9701181344**, and M10 is 13/13 positive
+
+`w21a` finished all five correction arms. Every one is positive against its byte-identical
+188 twin:
+
+| arm | 188 | 190 | Δ |
+|---|---|---|---|
+| `glob` | 0.9701138953 | 0.9701150128 | +1.12e-6 |
+| `a_only` | 0.9701152798 | 0.9701165270 | +1.25e-6 |
+| `rule` | 0.9701168751 | 0.9701181353 | +1.26e-6 |
+| `mask` | 0.9701148279 | 0.9701157475 | +0.92e-6 |
+| `decile` | 0.9701150143 | 0.9701170996 | +2.09e-6 |
+| **5-arm (shipped)** | **0.9701168076** | **0.9701181344** | **+1.33e-6** |
+
+**With the 4 transforms, `h3` and `ens4` from §4, that is 13 of 13 readings positive.** M10(b)'s
+registered sign holds everywhere; M10(a)'s +7e-6 mode was simply too big, and M11(a)'s revised
++3e-6 mode contains the +1.87e-6 that actually landed.
+
+`w21a` again refused the argmax as designed — the 4-arm (drop mask) cell is higher at
+0.9701183470 with **scheme-selection optimism measured at +3.407e-6, stability 3/5** — and
+shipped the pre-registered 5-arm. Correct, and worth restating: the argmax is +0.2e-6 above
+the shipped cell and carries +3.4e-6 of optimism.
+
+**`w27_ad190stdcorr.csv` is now queue row 1's rival and the highest CV ever built here.**
+⚠ It does **not** become WANTED yet: R-M11d binds and M11(b) has not reported.
+
+### 10.2 ⚠ The "ship bar 0.9701181879" being quoted in live preregs is the STALE one
+
+The new leader looks like it lands 0.05e-6 under the standing ship bar. It does not — **that
+bar is wrong and RESEARCH already corrected it.** `w26d`'s standardisation bug fix (§7043)
+restated the P=0.50 bar for an h3 file two ways: **0.9701181879 unstandardised,
+0.9701325557 standardised.** Every build here since w23 is standardised. The new leader is
+therefore ~14e-6 under the correct bar, not 0.05e-6 under it.
+
+⚠ **The stale figure is still being pasted into live pre-registration notes** — `w26i_value`'s
+running `--prereg-note` for w27d says *"the ship bar is cross-fitted CV 0.9701181879"*. Any
+run reading that note gets a bar ~14e-6 too generous. Do not quote 0.9701181879 again.
+
+### 10.3 ⚠ R-M11e fired on the first launch — and caught a silent 165-vs-190 member load
+
+`w27w`'s first launch printed **`165 members`**. `load_all()` takes **absolute** paths;
+`blend_lab.main` does the `os.path.join(DATA, d)` itself, and `load_members` silently skips
+any directory that is not there (`if not os.path.isdir(d): continue`). Passing the bare names
+`("ext_members3", …)` resolved to nothing relative to CWD and dropped **25 members with no
+error, no warning, and a perfectly plausible-looking run.**
+
+**This is R-M10f's hazard arriving through a different door.** Slot 6's rule was "a live
+directory is not a valid `--extra-dir`". The general rule is bigger:
+
+> **R-M11g (standing): any `--extra-dir`/`extra_dirs` argument must be checked to EXIST and
+> the resulting member count asserted, before any fit runs. The loader's failure mode for a
+> bad path is silence, not an error.**
+
+Fixed by joining `DATA` in the script and adding an `os.path.isdir` check **before** the load,
+so the assert costs 30s rather than firing after the transforms are paid for — which is what
+happened the first time. Relaunched: **`190 members`, `repaired 54 of 190`, byte-identical to
+w27t's load.** The count gate that R-M11e registered is exactly what caught this; it is worth
+the two lines it costs.
+
+### 10.4 The `w27u` watchdog died, and arm 2 resumed anyway
+
+`pgrep -af w27u_resume` returns nothing and `w27u_resume.log` never got its `CONT sent` line —
+**the watchdog process is gone.** The failure mode slot 6 built it to prevent (a suspended job
+nobody resumes) was very nearly re-created *by the watchdog itself dying*.
+
+Arm 2 (pid 3394078) is nonetheless `RNl`, same args, 1:24 elapsed, 1.18 GB RSS — it is running
+and `w27s_lamstd.log` shows it into `[rep 1] C=1 0.970336`. No action needed. **Lesson: a
+watchdog is itself a process that can die, so it is a mitigation and not a guarantee — check
+the STOPPED pid's state directly, not the watchdog's log.**
+
+### 10.5 Queue row 2 is now built and the ordering is settled pending M11(b)
+
+`w27_ad190stdcorr.csv` written. Next run sends row 1 (`w27_ad188stdcorr`, still never sent and
+still the thing that unblocks the final-selection dialog) and then row 2.

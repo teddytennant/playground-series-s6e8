@@ -39,11 +39,18 @@ from sklearn.model_selection import StratifiedKFold
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "agent"))
 sys.path.insert(0, os.path.join(ROOT, "experiments"))
+from common import DATA  # noqa: E402
 from blend_lab import load_all  # noqa: E402
 
 H3 = ("hybrid", "rankraw", "rescale")           # the deadline mix; it EXCLUDES logit
 DROP = "golem_a,golem_f,lgbm_tuned_lat,lgbm_tuned_lat_frac,lat_ctraw_r400,lat_ctfixte_r400"
-XDIRS = ("ext_members3", "ext_members4", "ext_members6", "ext_members7pin")
+# WARNING: load_all() takes ABSOLUTE paths -- blend_lab.main does the
+# os.path.join(DATA, d) itself, and load_members SILENTLY SKIPS any dir that does
+# not exist (`if not os.path.isdir(d): continue`). Passing the bare names loaded
+# 165 members instead of 190 with no error at all. Same hazard class as R-M10f,
+# different door: not a live directory, a relative path resolving to nothing.
+XDIRS = tuple(os.path.join(DATA, d) for d in
+              ("ext_members3", "ext_members4", "ext_members6", "ext_members7pin"))
 NEW = ("lat_ctdrop_r400", "lat_encdrop_r400")   # the two members that make 190 out of 188
 
 # R-M11e gate. Shipped seed-42 numbers on disk, from w27h (188) and w27t (190).
@@ -71,6 +78,11 @@ def main():
     a = ap.parse_args()
     seeds = [int(s) for s in a.seeds.split(",")]
 
+    # fail fast: the count assert below is worthless if it only fires after the
+    # transforms have been paid for, which is what happened on the first launch.
+    for d in XDIRS:
+        if not os.path.isdir(d):
+            raise SystemExit(f"R-M11e: extra dir does not exist: {d}")
     t0 = time.time()
     names, y, mats, _te = load_all(H3, DROP.split(","), extra_dirs=XDIRS, dtype="float32")
     if len(names) != 190:
