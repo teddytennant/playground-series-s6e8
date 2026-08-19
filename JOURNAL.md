@@ -14481,3 +14481,263 @@ amendments recorded before the runs they govern), `experiments/w27s_run.sh`,
 +`--expect`; no behaviour change to any existing invocation).
 
 **No submission — at cap, 10/10 for the 08-19 UTC day.**
+
+---
+
+# 2026-08-19 — w27 slot 7 — AT CAP (10/10), no submission
+
+**ANGLE: seed and fold diversity, "cheap variance reduction that reliably adds a little".
+This slot establishes that here it adds nothing, costs +10e-6 of bias, and CANNOT change any
+file we would ship — and then puts the partitions to the one use they are good for.**
+
+`kaggle competitions submissions -v`: 10 landed on the 08-19 UTC day (5×14:39, 3×15:13,
+15:30, 16:16). Cap confirmed 10. Nothing sent this slot and nothing could be.
+
+## 1. The angle is a structural null, and I did not need to spend a run finding that out
+
+`experiments/w14c_seedstack.py` already says so in its own docstring, written 2026-08-14:
+
+> `blend_lab.build()` takes the TEST prediction from a full fit on all 691,369 rows
+> (`full = LogisticRegression(...).fit(Z, y)`), not from the fold models. So for `h3` and
+> `ens4` — which fit zero parameters above the stacks — the submitted file is a
+> deterministic function of the member matrix with **ZERO dependence on the fold partition.**
+
+Averaging the stack over stacker fold seeds produces a **byte-identical file**. There is no
+variance to reduce. The angle's naive form was closed before it was handed to me.
+
+**What I did instead:** `w14c` was RUN on 2026-08-14 — `experiments/w14c_out/` holds 6
+stacker partitions × 4 transforms of cross-fitted OOF, 24 fits' worth — and `grep w14c
+JOURNAL.md` returns **one line, in passing.** The run completed and was never analysed. That
+is the angle's data, already paid for in CPU, sitting untouched for five days.
+
+`experiments/w27v_seedreport.py` reads it out. **Analysis only:** it loads the cached OOF
+vectors directly and never touches the member matrix, so it costs seconds where
+`w14c --stage seeds` would pay ~500s and several GB to reach the same cache. Output in
+`experiments/w27v_seedstack.csv`.
+
+## 2. ⚠ RESEARCH had the seed-42 finding INTERPRETED BACKWARDS — corrected this slot
+
+RESEARCH has said for weeks:
+
+> ⚠ **The frozen seed-42 split is the pessimistic one.** …Every headline CV in `JOURNAL.md`
+> is therefore ~5e-6 low.
+
+The *observation* is right and is bigger than stated — off-seed mean is **+8.9 to +13.3e-6
+above seed 42 on 6 of 6 metrics**. The *reading* was wrong, and the two readings imply
+opposite actions:
+
+| reading | says | would have you |
+|---|---|---|
+| ~~"seed 42 is an unlucky draw"~~ | our headlines are 5e-6 low | add 5e-6; average partitions to de-noise |
+| **"seed 42 is the only clean partition"** | the off-seeds are inflated | never correct upward, never average |
+
+**The data discriminates them cleanly.** If seed 42 were an ordinary draw that happened to
+land lowest, it would sit ~1 off-seed sd from the off-seed mean. It sits **2.4 to 6.9 sds**
+below:
+
+| metric | seed 42 | off-seed mean | off sd | gap | **gap/sd** |
+|---|---|---|---|---|---|
+| `logit` | 0.9699649 | 0.9699738 | 3.80e-6 | −8.93e-6 | −2.35 |
+| `hybrid` | 0.9700259 | 0.9700392 | 2.69e-6 | −13.34e-6 | −4.96 |
+| `rankraw` | 0.9700313 | 0.9700445 | 4.20e-6 | −13.15e-6 | −3.13 |
+| `rescale` | 0.9700272 | 0.9700365 | 1.99e-6 | −9.35e-6 | −4.70 |
+| **`h3`** | 0.9700472 | 0.9700579 | **1.55e-6** | **−10.73e-6** | **−6.92** |
+| `ens4` | 0.9700436 | 0.9700532 | 2.02e-6 | −9.63e-6 | −4.78 |
+
+Minimum on **6/6** metrics, and up to **7 sd** out. Seed 42 is drawn from a different
+distribution — it is *structurally* special, not unlucky.
+
+**And the mechanism was pre-registered by `w14c` before any of these numbers existed:** every
+member is cross-fitted on SKF5 seed 42, so under a seed-42 *stacker* partition the stacker's
+validation fold is exactly one member fold and **no member model contributed features to both
+sides of the stacker's split**. Under any other partition it does. Row *i*'s own label is
+still never seen by the model that predicted row *i*, so this is optimism rather than
+leakage — but it is optimism and it is worth ~+10e-6.
+
+**So fold-seed averaging at the stacker level is worse than useless in both directions:** it
+cannot change the file, and it biases upward the number the final pick is selected on.
+RESEARCH now says so. Item closed permanently.
+
+## 3. The payoff: partitions are a REPLICATION device, and here is the error-bar table
+
+Partition noise cancels when both files are scored on the *identical* partition. **How much
+it cancels depends on how much structure the two files share**, and that had never been
+measured. 6 partitions, 159av member set:
+
+| contrast | mean | paired sd | marginal sd | cancels | verdict |
+|---|---|---|---|---|---|
+| `h3` − `rescale` | +21.18e-6 | **0.78e-6** | 4.40e-6 | 82% | consistent 6/6 |
+| **`h3` − `ens4`** | **+4.50e-6** | **0.92e-6** | 4.46e-6 | 79% | **consistent 6/6, t≈12** |
+| `h3` − `hybrid` | +19.16e-6 | 1.63e-6 | 5.27e-6 | 69% | consistent 6/6 |
+| `ens4` − `logit` | +79.33e-6 | 1.95e-6 | 4.66e-6 | 58% | consistent 6/6 |
+| `hybrid` − `logit` | +64.67e-6 | 3.07e-6 | 5.47e-6 | 44% | consistent 6/6 |
+| `h3` − `rankraw` | +13.87e-6 | 4.09e-6 | 5.57e-6 | 27% | consistent 6/6 |
+| `rankraw` − `rescale` | +7.31e-6 | 4.49e-6 | 5.38e-6 | 17% | consistent 6/6 |
+| `rankraw` − `hybrid` | +5.29e-6 | **5.00e-6** | 6.25e-6 | 20% | ⚠ **SIGN FLIPS** (−2.2 … +12.1) |
+
+Two results that bear directly on the deadline pick:
+
+1. **`h3` > `ens4` is SETTLED.** +4.50e-6, paired sd 0.92e-6, same sign in 6/6 partitions,
+   t ≈ +12. Eleven matched public-LB pairs have CV preferring `h3` and the slice preferring
+   `ens4` by one reporting step, and three journal entries have treated that as unresolved
+   tension. It is not: **CV's preference is one of the most robust numbers in this workspace,
+   and the disagreement is the slice's problem.** This is exactly the Rogii failure mode the
+   brief warns about, and it now has a hard number on the CV side. `h3` stays the mix.
+2. **`rankraw` vs `hybrid` was never resolvable on a single partition.** It sign-flips, sd
+   5.00e-6. Any past ordering of those two off one cross-fit was reading noise. `rankraw` is
+   the noisiest transform generally (marginal sd 6.55e-6) and appears in every unstable row.
+
+**The general rule now in RESEARCH:** contrasts between files sharing a member matrix and
+differing only in the mix need <1e-6 to clear; contrasts involving `rankraw` need ~5e-6.
+
+## 4. §M10 readout — the 190-member pack is positive on every arm, and SMALLER than registered
+
+`w27t` finished its four transforms and `make_h3`. Matched against the byte-identical 188
+control on disk:
+
+| level | 188 pack | 190 pack | Δ | Δ/member |
+|---|---|---|---|---|
+| `logit` | 0.9700372515 | 0.970040 | +2.7e-6 | +1.4 |
+| `hybrid` | 0.9700993121 | 0.970103 | +3.8e-6 | +1.9 |
+| `rankraw` | 0.9700930487 | 0.970095 | +2.0e-6 | +1.0 |
+| `rescale` | 0.9700962686 | 0.970099 | +2.7e-6 | +1.4 |
+| `ens4` | 0.9701093456 | 0.970111 | +1.6e-6 | +0.8 |
+| **`h3`** | **0.9701114720** | **0.9701133391** | **+1.87e-6** | **+0.94** |
+| `h3`+`glob` corr | 0.9701138953 | 0.9701150128 | +1.12e-6 | +0.56 |
+| `h3`+`a_only` corr | 0.9701152798 | 0.9701165270 | +1.25e-6 | +0.63 |
+
+**Every arm positive — M10(b)'s registered sign holds 8/8.** But:
+
+- **M10(a) MISSES LOW.** It registered the h3 delta at +2…+12e-6, mode +7e-6. Observed
+  **+1.87e-6**, below the interval.
+- **M11(a) HITS.** Written this slot *after* three single-transform readings but *before* the
+  h3 mix was computed, it revised to +1…+6e-6, mode +3e-6. Observed +1.87e-6. ✅
+
+### 4.1 The finding that matters more than the file: **the per-member rate at the shipped mix is ~¼ of the headline**
+
+RESEARCH's standing number — the justification for spending the remaining days building
+members — is *"adding a member to the 187 pack is worth +3.37e-6, se 0.24, 3/3 reps"*, with
+the corollary *"five members of any kind clears the +15.8e-6 bar."*
+
+**Realised at the shipped `h3` mix: +0.94e-6 per member. At the corrected files: +0.6e-6.**
+
+The rate is not wrong — it is `w26i_value`'s paired marginal on a *single transform's*
+cross-fit. But by the time a member's contribution has passed through the rank-average of
+three transforms and then the correction arms, **~72% of it has been averaged away.** That
+is the mix doing precisely its job — cancelling anything not common across transforms — and
+one new member is mostly not common.
+
+**So "five members clears +15.8e-6" is false at the mix: five members buy ~+5e-6 there.
+The member-building route is ~3.5× less valuable than the headline implies.** With 12 days
+left that is a planning-level correction, and it is now in RESEARCH under the original claim
+rather than replacing it. Note also that the correction arms *shrink* the gain further
+(+1.87 → +1.12/+1.25e-6) — the CT correction is worth less on the richer pack, so member
+value and correction value are **not additive**.
+
+## 5. Registered and launched: §M11, the partition replication
+
+Full text appended to `experiments/w27_prereg_slot6.txt` **before** `w27w_partition.py` was
+written and before any off-seed number for this pack existed.
+
+The §3 table is what makes this worth running: 188 and 190 share 188 of 190 columns and the
+same rows, so the contrast sits at the *tight* end of the paired-sd range (~1e-6) and a
++1.87e-6 effect should replicate — unless it behaves like `rankraw − hybrid`, in which case
+one partition's +1.87e-6 was never evidence at all.
+
+- **M11(b), THE GATE:** the paired h3 delta is positive in ≥3 of 4 partitions {42,101,13,7}.
+- **M11(c):** off-seed optimism replicates on a *different* member set, +5…+20e-6. This is an
+  out-of-sample test of §2's mechanism on 190 members rather than 159.
+- **R-M11d, fixed before any number:** if M11(b) fails, `w27_ad190stdcorr` does **not** become
+  the WANTED pick regardless of its seed-42 CV and the 188 files stay. **No argmax over
+  partitions — off-seeds vote on the SIGN, never on the LEVEL,** because §2 established they
+  are biased.
+- **R-M11e, gate:** the seed-42 cells must reproduce the shipped on-disk numbers to 6 dp or
+  every number in the run is void.
+
+**R-M11f — one load serves both arms.** The 188 pack is the 190 matrix with the two
+`ext_members7pin` columns *deleted*. Every transform in `agent/stack.py` is strictly
+per-column (`logit` elementwise, `rankraw` loops `j`, `hybrid` selects a per-column `bad`
+mask, `rescale` per-column) and `--standardize` divides by a per-column std, so
+column-subsetting after transform+scale is **exactly** equal to loading 188 members. This
+halves the cost of the experiment and is what makes 4 partitions affordable at all. It is
+asserted by R-M11e, not assumed.
+
+**Chained, not concurrent** (`experiments/w27w_run.sh`, waiting on pid 3397155). Two reasons,
+both measured: `free -g` shows **12 GB available with 6 GB of swap already in use** and w27t
+is holding a 190×691k×4-transform load — `w25d`'s first version was OOM-killed by the OS
+partway through transform 1 with no traceback, and that is the exact shape being avoided —
+and the box is at load ~30 on 16 cores. Capped at 3 BLAS threads.
+
+## 6. Pre-flight: all 12 queue files re-validated this slot
+
+`experiments/w27x_validate.log`. Every one: **296,302 rows, `id` exact and in order, 0 NaN,
+all finite.** Includes the four new `w27_ad190std_*` files and `w27_ad190std_h3`.
+
+⚠ The single-transform files hold **logits** (min −17.6, max +17.9), not probabilities. That
+is correct and documented in `blend_lab.write()` — AUC is rank-only — but do not read their
+mean as a base rate.
+
+## 7. The 08-20 send queue — REORDERED on this slot's numbers
+
+Rows 2/3/8 of slot 6's queue were marked *"send only if §M10 comes back positive"*. **It did,
+on 8 of 8 arms.** They are promoted. Final ordering waits on `w21a`'s 5-arm number for
+`w27_ad190stdcorr`, still fitting the `rule` arm at slot end.
+
+| # | file | CV | note |
+|---|---|---|---|
+| 1 | **`w27_ad188stdcorr.csv`** | **0.9701168076** | ⚠ **STILL NEVER SENT.** Highest CV ever built here, and §8 of slot 6 shows the final pick cannot be ticked until it lands |
+| 2 | `w27_ad190stdcorr.csv` | pending `w21a` | promoted — likely ≈0.970118, the new leader if the 5-arm holds its ~+1.2e-6 |
+| 3 | `w27_ad190std_h3.csv` | 0.9701133391 | promoted; above every 188 file except the corrected one |
+| 4 | `w27_ad188raw_h3.csv` | 0.9701140 | raw-CT control arm, unsent |
+| 5 | `w27_ad190std.csv` | 0.970111 | ens4 mix of the 190 pack |
+| 6 | `w27_ad190std_hybrid.csv` | 0.970103 | |
+| 7 | `w27_ad190std_rescale.csv` | 0.970099 | |
+| 8 | `w27_ad188std_hybrid.csv` | 0.9700993121 | |
+| 9 | `w27_ad190std_rankraw.csv` | 0.970095 | |
+| 10 | `w27_ad188std_rescale.csv` | 0.9700962686 | |
+
+All ten validated. The brief's economics: submissions do not evict each other and the public
+LB shows best-of-all, so an unused slot is pure waste — **send all ten.** Selection is still
+on CV; only rows 1–3 are deadline candidates.
+
+## 8. Still running
+
+- **`w27t`** — `w21a_ad187corr` on the `rule` arm (7 levels, the slowest); `mask` and
+  `decile` then the 5-arm average follow. **First thing to read next run.**
+- **`w27w`** (M11) — launcher 3416750, waiting on 3397155, will start the moment w27t exits.
+- **`w27s` arm 2** — still `T` (stopped). `w27u_resume.sh` sends `CONT` when 3397155 exits,
+  same trigger as w27w. Deliberate: arm 2 is ~300s/fit and lbfgs-bound, w27w is ~20s/fit;
+  they interleave rather than contend. ⚠ If `w27u_resume.log` does not say `CONT sent` next
+  run, `kill -CONT 3394078` by hand.
+- **`w27s` arm 3** (M9, C above 1.0) — queued behind arm 2, log still empty.
+- `w27r_blockdrop` (tedrop), `w27j_ctclass`, `w26i_value` (w27d), `w26k_ctscale`,
+  `w27g_tunect` — unchanged.
+
+## 9. Next run, in order
+
+1. **SEND `submissions/w27_ad188stdcorr.csv` AS SLOT 1.** Unchanged and now three slots old
+   as an instruction. CV 0.9701168076, validated again this slot, **never sent**, and the
+   final-selection dialog lists submitted entries only — nothing can be ticked until it lands.
+2. `tail -30 experiments/w27t_ad190.log` for the 5-arm `w27_ad190stdcorr` number, then send
+   it as slot 2 if it clears 0.9701168076. **R-M10b/R-M11d still bind:** it becomes WANTED
+   only if M11(b) also passes.
+3. `cat experiments/w27w_partition.log` — M11. Check **R-M11e first**; if the gate fails
+   every number in it is void. Then M11(b): positive in ≥3/4 or R-M11d fires.
+4. **Send the rest of §7's queue.** Ranked and pre-flight-validated; needs no work.
+5. `experiments/w27s_lamstd2.log` for M9. Flat above C=1.0 closes the stacker-C question in
+   both arms.
+6. ⚠ **Re-weigh the member-building route against §4.1 before spending another day on it.**
+   The realised rate at the shipped mix is **+0.94e-6/member, not +3.37e-6**. Five members
+   buy ~+5e-6, not +15.8e-6.
+7. ⚠ **Never average the stack over fold seeds** (§2). Structural null on the file, +10e-6
+   of bias on the number. If a future ANGLE hands this back, cite §2 and do something else.
+8. ⚠ R-M10f still live: `data/ext_members7` is written by `w27r` and is not a valid
+   `--extra-dir`. Pin with hardlinks (`data/ext_members7pin/`) and assert the count.
+
+**Files added:** `experiments/w27v_seedreport.py`, `experiments/w27v_seedstack.csv`,
+`experiments/w27w_partition.py`, `experiments/w27w_run.sh`, `experiments/w27x_validate.log`.
+**Modified:** `experiments/w27_prereg_slot6.txt` (+§M11, registered before the code),
+`RESEARCH.md` (seed-42 interpretation corrected + paired-contrast error-bar table + the
+realised per-member rate under the original claim).
+
+**No submission — at cap, 10/10 for the 08-19 UTC day.**

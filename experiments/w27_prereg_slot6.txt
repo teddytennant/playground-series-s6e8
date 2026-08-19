@@ -308,3 +308,69 @@ R-M10e DEVIATION, recorded when taken and before the build produced any number.
   pack supersedes the 188 pack only on a positive delta), R-M10c (5-arm c_avg, not the 4-arm
   argmax) and R-M10d (the `190 members` gate) all stand exactly as registered. Only the
   scheduling moved.
+
+================================================================================
+§M11 -- slot 7. Registered 2026-08-19 ~18:10Z, BEFORE w27w_partition.py was written
+        and before any off-seed partition number for the 188/190 pack existed.
+================================================================================
+
+WHY THIS AND NOT THE HANDED ANGLE AS STATED. Slot 7's angle is "same models across
+multiple seeds and fold splits, averaged -- cheap variance reduction". The naive form is
+already closed as a STRUCTURAL NULL by w14c_seedstack.py's own docstring: blend_lab.build()
+takes the test prediction from a full fit on all 691,369 rows, so for h3 and ens4 -- which
+fit zero parameters above the stacks -- the submitted file has ZERO dependence on the
+stacker partition. Averaging over fold seeds cannot change any file we would ship.
+
+w27v (this slot) adds the second, worse reason, from data computed 2026-08-14 and never
+written up: five of six partitions read HIGH against seed 42 on 6 of 6 metrics, +8.9 to
++13.3e-6. Seed 42 is the only partition where the stacker's validation fold is exactly one
+member-fold, so it is the only one where no member model contributed features to both sides
+of the split. Fold-seed averaging at the stacker level would therefore buy variance
+reduction at the price of ~+10e-6 of BIAS in the number the final pick is selected on.
+It is worse than useless and it is not being done.
+
+WHAT THE ANGLE IS GOOD FOR INSTEAD. Partition noise CANCELS in a paired contrast scored on
+identical partitions -- w27v measures the cancellation at 17-82%, leaving paired sd of
+0.8e-6 (h3-rescale) to 5.0e-6 (rankraw-hybrid, which SIGN FLIPS). So multiple partitions
+are not a variance-reduction device here, they are a REPLICATION device for the contrasts
+the deadline pick rests on. That is what M11 uses them for.
+
+THE CONTRAST UNDER TEST. 190-member pack minus 188-member pack, the §M10 result. Seed 42
+has printed three of four transforms as this is written: logit +2.7e-6, hybrid +3.8e-6,
+rankraw +2.0e-6. All positive, mean ~+2.8e-6, i.e. inside M10(a)'s +2..+12e-6 but well
+below its +7e-6 mode.
+
+  M11(a)  The h3-mix delta (190 - 188) on seed 42 lands in +1..+6e-6, mode +3e-6.
+          (Mode revised down from M10's +7 because three transforms have now printed
+          below it. Registered before the h3 mix is computed.)
+
+  M11(b)  *** THE GATE *** The paired h3 delta is POSITIVE in at least 3 of the 4
+          partitions {42, 101, 13, 7}. 188 and 190 share 188 of 190 columns and the same
+          rows, so w27v puts this contrast at the TIGHT end of the paired-sd range
+          (~1e-6), and a +2.8e-6 effect should replicate cleanly. If it instead sign-flips
+          the way rankraw-hybrid does (sd 5.0e-6, 4/6 positive), then one partition's
+          +2.8e-6 was never evidence.
+
+  M11(c)  The off-seed optimism replicates on a DIFFERENT member set: off-seed mean minus
+          seed 42 is positive for both arms, in +5..+20e-6. This is an out-of-sample test
+          of the only thing w27v established, on 188/190 members rather than 159.
+
+  R-M11d  DECISION RULE, fixed before any number. If M11(b) FAILS, w27_ad190stdcorr does
+          NOT become the WANTED pick regardless of its seed-42 CV, and the 188 files stay
+          -- this is R-M10b tightened, not replaced. If M11(b) PASSES, the seed-42
+          ordering stands and R-M10b applies as written. No argmax over partitions: the
+          seed-42 number remains the reported CV in both cases, because it is the only
+          unbiased one. Off-seed partitions vote on the SIGN, never on the LEVEL.
+
+  R-M11e  GATE. The seed-42 arm must reproduce the on-disk w27h/w27t single-transform
+          numbers to 6 dp (188: hybrid 0.9700993121, rankraw 0.9700930487, rescale
+          0.9700962686; 190: hybrid 0.970103, rankraw 0.970095). If it does not, the load
+          or the standardisation differs from the shipped build and every number in the
+          run is void and must not be quoted.
+
+  R-M11f  The 188 arm is the 190 matrix with the two ext_members7pin columns DELETED, not
+          a second load. Every transform in agent/stack.py is strictly per-column (logit
+          elementwise; rankraw loops j; hybrid selects a per-column `bad` mask; rescale
+          per-column), and blend_lab's --standardize divides by a per-column std, so
+          column-subsetting after transform+scale is EXACTLY equal to transforming and
+          scaling the 188-column load. Asserted in code by R-M11e rather than assumed.

@@ -1,0 +1,12 @@
+w27_ad188stdcorr           rows=296,302 idmatch=True nan=0 finite=True min=3.3749e-06 max=1 nuniq=296,302
+w27_ad190std_h3            rows=296,302 idmatch=True nan=0 finite=True min=5.0624e-06 max=0.99994 nuniq=261,202
+w27_ad190std               rows=296,302 idmatch=True nan=0 finite=True min=5.9061e-06 max=0.99995 nuniq=276,031
+w27_ad188raw_h3            rows=296,302 idmatch=True nan=0 finite=True min=7.3124e-06 max=0.99993 nuniq=261,041
+w27_ad188std_hybrid        rows=296,302 idmatch=True nan=0 finite=True min=-9.4573 max=13.92 nuniq=295,060
+w27_ad188std_rescale       rows=296,302 idmatch=True nan=0 finite=True min=-8.9605 max=11.375 nuniq=294,091
+w27_ad188std_rankraw       rows=296,302 idmatch=True nan=0 finite=True min=-17.576 max=17.894 nuniq=295,235
+w27_ad190std_hybrid        rows=296,302 idmatch=True nan=0 finite=True min=-9.4169 max=14.011 nuniq=295,082
+w27_ad190std_rescale       rows=296,302 idmatch=True nan=0 finite=True min=-8.9721 max=10.957 nuniq=294,232
+w27_ad190std_rankraw       rows=296,302 idmatch=True nan=0 finite=True min=-17.579 max=17.97 nuniq=295,130
+w27_ad188std_logit         rows=296,302 idmatch=True nan=0 finite=True min=-8.5497 max=16.79 nuniq=295,127
+w27_ad190std_logit         rows=296,302 idmatch=True nan=0 finite=True min=-8.4576 max=16.975 nuniq=295,245

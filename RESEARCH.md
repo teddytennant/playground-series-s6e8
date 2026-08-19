@@ -439,10 +439,76 @@ disk, and a 156-member logistic fit costs **4 seconds**, not the minute you woul
 Same lesson on a second axis: the level wanders ~10× more than the difference between two
 candidates evaluated on it. `ens3_h3` beat `ens4` in **8 of 8** splits at +4e-6.
 
-⚠ **The frozen seed-42 split is the pessimistic one.** It returns the LOWEST value of all
-eight partitions for every candidate — ens4 0.970043 vs a mean of 0.970048, h3 0.970047 vs
-0.970052. Every headline CV in `JOURNAL.md` is therefore ~5e-6 low. Harmless for selection
-because it shifts all candidates alike; do not quote the frozen numbers as unbiased.
+⚠ **The frozen seed-42 split is the ONLY UNBIASED one — it is not "pessimistic".**
+*(Corrected 2026-08-19 w27 slot 7 from `w14c_out/`, 6 stacker partitions × 4 transforms,
+computed 2026-08-14 and never analysed until now. Read out by `experiments/w27v_seedreport.py`
+→ `experiments/w27v_seedstack.csv`.)*
+
+The observation is as previously recorded and is now much larger than the "~5e-6" quoted:
+seed 42 returns the lowest value of every candidate, and the off-seed mean sits **+8.9 to
++13.3e-6 above it on 6 of 6 metrics**. What changes is the *interpretation*, and the two
+readings imply opposite actions:
+
+| reading | says | would have you |
+|---|---|---|
+| ~~"seed 42 is an unlucky draw"~~ | our headlines are 5e-6 low | mentally add 5e-6; average partitions to "de-noise" |
+| **"seed 42 is the only clean partition"** | the off-seeds are inflated | **never correct upward, never average partitions** |
+
+**The data discriminates them and picks the second.** If seed 42 were an ordinary draw that
+happened to be lowest, it would sit ~1 off-seed sd from the off-seed mean. It sits **2.4 to
+6.9 sds** below it (h3: −10.73e-6 against an off-seed sd of 1.55e-6, i.e. **−6.9 sd**), and
+is the minimum on 6/6 metrics. It is drawn from a different distribution.
+
+**The mechanism, pre-registered in `w14c_seedstack.py` before any of these numbers existed.**
+Members are all cross-fitted on SKF5 seed 42. Under a seed-42 *stacker* partition the
+stacker's validation fold is exactly one member fold, so **no member model contributed
+features to both sides of the stacker's split**. Under any other partition, a validation
+row's member prediction comes from a model trained mostly on the stacker's training half,
+which correlates the two sides. Row *i*'s own label is still never seen by the model that
+predicted row *i* — so this is optimism, not leakage — but it is optimism, and it is worth
+~+10e-6.
+
+**Operational consequences, all durable:**
+
+1. **Never average the stack over stacker fold seeds.** It is a *structural null* for any
+   file we would ship — `blend_lab.build()` takes the test prediction from a full fit on all
+   691,369 rows, so `h3` and `ens4`, which fit zero parameters above the stacks, have ZERO
+   dependence on the stacker partition — and for the CV estimate it imports ~+10e-6 of bias.
+   Worse than useless in both directions. This closes the "fold/seed diversity at the
+   stacker level" idea permanently; do not re-open it.
+2. **Do not quote off-seed numbers as levels.** Off-seed partitions may vote on the SIGN of
+   a paired contrast; the seed-42 number stays the reported CV.
+3. Every headline CV in `JOURNAL.md` is comparable to every other because they all share
+   seed 42. Nothing needs restating.
+
+#### The paired-contrast partition noise, measured per contrast — use this as the error bar
+
+Partition noise largely cancels when both files are scored on the *identical* partition,
+which is why the paired instrument works. How much it cancels depends on how much structure
+the two files share (6 partitions, 159av member set, `w27v_seedstack.csv`):
+
+| contrast | mean | paired sd | marginal sd | cancels | verdict |
+|---|---|---|---|---|---|
+| `h3` − `rescale` | +21.18e-6 | **0.78e-6** | 4.40e-6 | 82% | consistent 6/6 |
+| **`h3` − `ens4`** | **+4.50e-6** | **0.92e-6** | 4.46e-6 | 79% | **consistent 6/6, t=12** |
+| `h3` − `hybrid` | +19.16e-6 | 1.63e-6 | 5.27e-6 | 69% | consistent 6/6 |
+| `ens4` − `logit` | +79.33e-6 | 1.95e-6 | 4.66e-6 | 58% | consistent 6/6 |
+| `hybrid` − `logit` | +64.67e-6 | 3.07e-6 | 5.47e-6 | 44% | consistent 6/6 |
+| `h3` − `rankraw` | +13.87e-6 | 4.09e-6 | 5.57e-6 | 27% | consistent 6/6 |
+| `rankraw` − `rescale` | +7.31e-6 | 4.49e-6 | 5.38e-6 | 17% | consistent 6/6 |
+| `rankraw` − `hybrid` | +5.29e-6 | **5.00e-6** | 6.25e-6 | 20% | ⚠ **SIGN FLIPS** (−2.2 … +12.1) |
+
+**Read this before quoting any 1e-6 gap.** Two rules fall straight out:
+
+- **`h3` > `ens4` is settled.** +4.50e-6 with a paired sd of 0.92e-6, same sign in 6/6
+  partitions, t ≈ +12. The 11 matched public-LB pairs where the slice prefers `ens4` are
+  therefore *not* CV-vs-LB ambiguity — CV's preference is rock solid and the slice
+  disagreement is the slice's problem. `h3` stays the deadline mix.
+- **`rankraw` vs `hybrid` was never resolvable on one partition.** It sign-flips, sd
+  5.00e-6. Any past ordering of those two off a single cross-fit was reading noise.
+- ⚠ `rankraw` is the noisiest transform (marginal sd 6.55e-6, and it is in every unstable
+  contrast above). Contrasts *involving rankraw* need ~5e-6 to clear; contrasts between
+  files sharing a member matrix and differing only in the mix need <1e-6.
 
 The three instruments now available, cheapest first, all on a fixed member OOF matrix:
 
@@ -7267,6 +7333,39 @@ prereg §M5).
 **What IS a usable positive:** adding *a* member to the 187 pack is worth **+3.37e-6, se 0.24,
 3/3 reps** (t = 14.3, the tightest positive marginal measured here) and it does **not** care
 whether the member is corrected. **Five members of any kind clears the +15.8e-6 bar.**
+
+### ⚠ …but the REALISED rate at the shipped `h3` mix is ~¼ of that — measured 2026-08-19 (w27 slot 7)
+
+`w27t` added exactly two members to the shipped 188-member standardised pack (188 → 190,
+same DROP, same folds, same `--standardize`, same C, so `w27_ad188std*` on disk is a
+byte-identical matched control). Every arm came in positive, and every arm came in **well
+below +3.37e-6/member**:
+
+| level | 188 pack | 190 pack | Δ | Δ per member |
+|---|---|---|---|---|
+| `logit` | 0.9700372515 | 0.9700400 | +2.7e-6 | +1.4 |
+| `hybrid` | 0.9700993121 | 0.9701030 | +3.8e-6 | +1.9 |
+| `rankraw` | 0.9700930487 | 0.9700950 | +2.0e-6 | +1.0 |
+| `rescale` | 0.9700962686 | 0.9700990 | +2.7e-6 | +1.4 |
+| `ens4` | 0.9701093456 | 0.9701110 | +1.6e-6 | +0.8 |
+| **`h3` (the deadline mix)** | **0.9701114720** | **0.9701133391** | **+1.87e-6** | **+0.94** |
+| `h3` + `glob` correction | 0.9701138953 | 0.9701150128 | +1.12e-6 | +0.56 |
+| `h3` + `a_only` correction | 0.9701152798 | 0.9701165270 | +1.25e-6 | +0.63 |
+
+**The rate is not wrong, the level it is quoted at is.** `+3.37e-6` is `w26i_value`'s paired
+marginal on a *single* transform's cross-fit. By the time a member's contribution has passed
+through the rank-average of three transforms (`h3`) and then the correction arms, **~72% of
+it has been averaged away** — the mix is doing its job, which is to cancel anything that is
+not common across transforms, and a single new member is mostly not.
+
+**Plan on ~+1e-6 per member at the shipped `h3` level, not +3.37e-6.** Concretely: "five
+members clears the +15.8e-6 bar" is false at the mix — five members buy ~+5e-6 there. The
+member-building route is roughly **3.5× less valuable than the headline rate implies**, and
+that should be weighed against every alternative before more days are spent on it.
+
+⚠ Note the correction arms *shrink* the gain further (+1.87 → +1.12/+1.25e-6): the CT
+correction is worth slightly less on the richer pack, so it partly eats the base gain. Do
+not add "member value" and "correction value" as if they were independent.
 
 ## The CT correction is a serve-time rescale, so a matched pair costs ONE fit
 
