@@ -54,22 +54,34 @@ DROP156 = ("golem_a", "golem_f", "lgbm_tuned_lat", "lgbm_tuned_lat_frac",
            "bolt_xgb_d7_alt2", "xgb_lat", "xgb_latcat")
 
 
-def build(kind, drop, key, refresh=False):
+def build(kind, drop, key, refresh=False, extra_dirs=(), expect=0):
     """Member matrix on the stacker's scale, cached under its own key.
 
     Deliberately NOT sharing stack_lab.py's cache/meta_<transform>.npz: that file is
     rebuilt with a different drop list by whatever else is running, and a member matrix
     that changes shape underneath a sweep invalidates the whole sweep silently.
+
+    `extra_dirs` names further directories under data/ on top of the always-present
+    ext_members and ext_members2, so this sweep can address the 188-member pack that
+    w27h_run.sh ships rather than only the pinned 156. `expect`, when set, asserts the
+    resulting member count -- the failure mode that made w27l profile 114 members while
+    calling them 188 is a silently-missing extra dir, and it is invisible in the output.
     """
     p = os.path.join(CACHE, f"meta_{key}.npz")
     if os.path.exists(p) and not refresh:
         d = np.load(p, allow_pickle=True)
-        return list(d["names"]), d["Z"], d["Zt"], d["y"]
+        names = list(d["names"])
+        assert not expect or len(names) == expect, \
+            f"cache {p} holds {len(names)} members, expected {expect}"
+        return names, d["Z"], d["Zt"], d["y"]
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
     extra = (os.path.join(DATA, "ext_members"), os.path.join(DATA, "ext_members2"))
+    extra = extra + tuple(os.path.join(DATA, d) for d in extra_dirs)
     names, O, T = load_members(y, len(te), extra_dirs=extra, drop=set(drop))
     print(f"{len(names)} members loaded", flush=True)
+    assert not expect or len(names) == expect, \
+        f"loaded {len(names)} members, expected {expect} -- check --extra-dirs/--drop"
     Z, Zt = transform(O, T, kind)
     Z, Zt = Z.astype("float32"), Zt.astype("float32")
     np.savez(p, names=np.array(names, object), Z=Z, Zt=Zt, y=y)
@@ -126,6 +138,10 @@ def main():
     ap.add_argument("--key", default="hybrid156")
     ap.add_argument("--drop", default=",".join(DROP156))
     ap.add_argument("--refresh", action="store_true")
+    ap.add_argument("--extra-dirs", default="",
+                    help="comma-separated dirs under data/ on top of ext_members{,2}")
+    ap.add_argument("--expect", type=int, default=0,
+                    help="assert this member count; 0 disables (see build())")
     ap.add_argument("--cs", default="1.0,1e-2,1e-3,1e-4,3e-5,1e-5,3e-6,1e-6,1e-7")
     ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--crossfit", type=float, default=0.0,
@@ -136,7 +152,8 @@ def main():
 
     t0 = time.time()
     names, Z, Zt, y = build(a.transform, set(filter(None, a.drop.split(","))),
-                            a.key, a.refresh)
+                            a.key, a.refresh,
+                            tuple(filter(None, a.extra_dirs.split(","))), a.expect)
     print(f"matrix {Z.shape} ({time.time()-t0:.0f}s)", flush=True)
     print(f"column sd: min {Z.std(0).min():.3f} med {np.median(Z.std(0)):.3f} "
           f"max {Z.std(0).max():.3f}", flush=True)

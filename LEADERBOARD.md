@@ -1177,3 +1177,30 @@ pick). Selecting on the public slice is the mechanism that produces the bad tail
 
 (`w21_ad187corr.csv` drops off the list.) The API has no write path for selection — probed and
 falsified 08-13.
+
+## 2026-08-19, slot 6 (17:0x UTC) — public standing
+
+Checked this slot with `kaggle competitions leaderboard -c playground-series-s6e8 -s`,
+paging to find us.
+
+| | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97134 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| 4 | Don Mani | 0.97125 |
+| 5 | cstdy | 0.97125 |
+| … | | |
+| **~18** | **Teddy Tennant** | **0.97118** |
+
+**~18th of ~1,326 teams.** The 0.97118 band is four teams wide (us, Mursal Gorchuyev, Malhar
+Ujawane, Rayk Kretzschmar), so a single 1e-5 reporting step is worth several places here —
+and the whole top-18 spread is 16e-5. Gap to the leader is **+16e-5**, which against the
+corrected w25f model (LB ≈ const + 1.909·CV) needs roughly **+84e-6 of CV**. Nothing in the
+current pipeline is producing gains at that scale: this slot's best available move is
++3.37e-6 per added member. **Public rank is not reachable from here by CV improvements;
+the remaining value is in not losing the private split.** Selection stays on CV.
+
+⚠ Our 0.97118 comes from `w20_ad187_logit` / `w27_ad188std` — files the journal explicitly
+records as **not** deadline candidates. The CV leader `w27_ad188stdcorr` has never been
+sent, so our public rank is currently set by a file we would not choose.

@@ -1,0 +1,310 @@
+w27 SLOT 6 (2026-08-19) -- PRE-REGISTRATION
+Written BEFORE any code in this slot was run or edited. Append-only; nothing below is
+edited after a print.
+
+CONTEXT
+  At the daily cap AGAIN: 10 of 10 submissions landed on the 08-19 UTC day
+  (55625681 .. 55627458, 14:39-16:16 UTC). It is 17:0x UTC. NO SUBMISSION IS POSSIBLE
+  THIS SLOT. Everything here is measurement; nothing is selected and nothing is sent.
+
+HANDED ANGLE
+  "Blending: rank-average or weight the tuned models by out-of-fold performance. Search
+   blend weights on OOF predictions, never on the public leaderboard."
+
+BOTH LITERAL READINGS OF THE ANGLE ARE ALREADY CLOSED WITH MEASURED NULLS
+  Checked in RESEARCH before spending anything, per slot 4's SS10c lesson.
+    - "weight the models by OOF performance": RESEARCH "Stacking notes" --
+      `(auc - 0.5)^p` over the four transform stacks returns weights uniform to rounding
+      error at every p up to 32 and is measured EXACTLY +0.000000. The classic OOF-AUC
+      weighting needs spread between the things weighted; at 0.96996-0.97004 there is none.
+    - "rank-average": measured. Dropping the worst transform is +5e-6; a full 1,771-point
+      simplex search over the four is +6e-6, i.e. three fitted parameters buy 1e-6. The
+      shipped h3 mix already IS the drop-worst rank-average.
+    - hill-climbing / NNLS / any non-negative "average the models" blend: NEGATIVE and
+      expensive here -- 71 of 156 coefficients are negative at the shipped C=1, and forcing
+      them out costs -0.00104. Weak decorrelated members earn their keep as CORRECTIONS.
+    - combiner bagging (foldbag5 +1e-6 sign-flipping, boot5 -13e-6): closed.
+      "The linear logit stack is the right combiner. Stop looking for a better one."
+
+WHAT IS ACTUALLY OPEN, AND WHY IT IS STILL THE HANDED ANGLE
+  The blend weights ARE searched on OOF here -- by an L2 logistic combiner. The one knob
+  of that search never measured on the pack that actually ships is its PENALTY, and
+  RESEARCH says so in as many words:
+
+      "L2 on unstandardised columns is not a neutral prior. Hybrid column sds run
+       1.81-27.58, so the widest member is shrunk ~230x less than the narrowest, purely
+       from where the transform happens to put its logits. `--standardize` makes it
+       isotropic. BUILT, NOT YET MEASURED; low prior given shrinkage itself is a null."
+
+  Two facts make that stale rather than merely low-prior:
+    1. EVERY current top build is standardised AND at C=1.0. `w27h_run.sh` ships
+       `--standardize` with no `--lam`, so the penalty per row is 1/(1*553,095) = 1.8e-6
+       against a log-loss of order 0.5. The isotropic prior was switched on and then left
+       completely unpenalised. The two halves of the idea have never been run together.
+    2. The one POSITIVE reading in the whole C literature here is unstandardised:
+       C=0.01 is +5e-6 +/- 3e-6 consistent, and C=0.03 is +7e-6 on a separate 149-member
+       sweep -- six positive measurements, two sweeps, two member sets, all ~5e-6, and
+       RESEARCH's own summary line is "if anything set C=0.01". IT WAS NEVER SHIPPED.
+    3. `ridge_sweep.py`'s own docstring states the transfer rule: standardising rescales
+       the columns by 1/s, so the coefficients scale by ~s and ||w||^2 by ~s^2, and the
+       optimal C moves DOWN "roughly by the square of" the scale. With median s of order
+       5-8 on hybrid that is a 25-60x shift. So C=0.01 measured unstandardised does NOT
+       name the standardised optimum, and C=1.0 -- what ships -- is further from it than
+       the unstandardised fit ever was.
+    4. RESEARCH's own binding rule: "Whenever n or the member count changes, recompute
+       1/(C*n) before believing a C sweep." The pack has gone 156 -> 188 members since the
+       sweep. n/p has fallen 4,400 -> 3,677.
+
+  ⚠ RESEARCH also says, flatly, "Do not sweep stacker C again." That instruction is
+  honoured in the sense that matters: this slot does NOT re-run the closed unstandardised
+  156-member sweep to see if it changed its mind. It runs the single cell that sweep left
+  open and that RESEARCH itself labels "built, not yet measured", with the unstandardised
+  arm included only as a transfer control. If M8(d) fires, the instruction becomes
+  unconditional and is rewritten as such.
+
+THE INSTRUMENT
+  `experiments/ridge_sweep.py`, unmodified except for one new `--extra-dirs` argument so
+  it can address the 188-member pack instead of the pinned 156. Paired 50/50 splits,
+  3 reps, every C sees identical rows, reference cell is C=1.0 (the status quo). Resolves
+  ~4e-6. Coefficient norms and negative-count printed alongside so the answer arrives with
+  its mechanism. Transform: HYBRID only -- this is a screen, not a build.
+
+PREDICTIONS -- M8, registered before ridge_sweep.py is edited or run
+  M8(a) PRIMARY. On the STANDARDISED 188-member hybrid matrix the paired sweep's best cell
+        is at some C* < 1.0 and beats C=1.0 by a margin that is CONSISTENT IN SIGN across
+        all 3 reps. Point priors:
+            C*     in 3e-5 .. 1e-3,  MODE 3e-4
+            gain   +2 .. +10e-6,     MODE +5e-6
+        Reasoning: the unstandardised optimum sits at C~1e-2 worth ~+5e-6; the s^2 rule
+        moves it down 25-60x; the effect size should be similar or slightly larger because
+        the prior is better specified.
+  M8(b) TRANSFER CONTROL. The UNSTANDARDISED arm on the same 188-member matrix reproduces
+        the old finding: C=1e-2 beats C=1.0 by +2 .. +9e-6, consistent in sign. If it does
+        not, the +5e-6 does not transfer from 156 to 188 members, M8(a)'s prior is void,
+        and any M8(a) gain must be read as a fresh single measurement rather than a
+        seventh confirmation.
+  M8(c) MECHANISM. gain(standardised, at its own C*) >= gain(unstandardised, at its own
+        C*). This is the actual claim being tested -- that isotropy is what makes the
+        penalty worth switching on -- and it is the cell that can be wrong while (a) and
+        (b) both hold.
+  M8(d) FALSIFIER, stated so M8(a) is not unfalsifiable. If the standardised sweep's best
+        cell is within +/-4e-6 of C=1.0, or its sign flips across the 3 reps, then
+        shrinkage is a null on the standardised pack too. The "L2 on standardised columns"
+        cell CLOSES AS NEGATIVE, RESEARCH's "do not sweep stacker C again" is rewritten as
+        unconditional with the standardised arm named, and no follow-up build is run.
+  M8(e) HARNESS GATE, not a prediction. The matrix must load exactly 188 members under
+        w27h_run.sh's exact DROP and EXTRA-DIRS. Any other count aborts the run -- this is
+        the failure mode that made w27l profile 114 members while calling them 188.
+
+DECISION RULES -- binding
+  R-M8a  NOTHING IS SHIPPED FROM THIS SLOT. At cap; and no argmax over C selects anything
+         for a submission.
+  R-M8b  A follow-up cross-fitted build at a chosen lambda is run IF AND ONLY IF the
+         standardised gain is (i) consistent in sign across 3/3 reps AND (ii) >= +4e-6,
+         the paired instrument's resolution. Below that it is noise and is written up as
+         noise. This gate is set NOW, before any number is seen.
+  R-M8c  If the gate opens, lambda is taken as a PENALTY PER ROW, not a C, and every fit
+         derives its own C = 1/(lam*n) from its own n. `blend_lab.build()` already does
+         this via --lam. Quoting a C across the 345,684 / 553,095 / 691,369-row fits is the
+         latent bug ridge_sweep.py's c_for() exists to prevent.
+  R-M8d  A cross-fitted CV produced at a lambda CHOSEN from the paired sweep carries
+         selection optimism. This workspace measures arm-selection optimism at +1.78e-6
+         (w16i). Any such CV is quoted WITH that figure attached and is NOT called a new CV
+         leader unless it clears 0.9701168076 by more than +1.78e-6, i.e. 0.9701186.
+  R-M8e  The lambda build, if it happens, is a NEW FILE and does not overwrite or
+         invalidate `w27_ad188std*`. The stored 0.9701114720 (h3) and 0.9701093456 (ens4)
+         are the C=1.0 controls and must remain byte-identical on disk for the comparison
+         to mean anything.
+  R-M8f  COMPUTE. The box is 16 cores at load ~15 with five s6e8 jobs already on it
+         (w26k_ctscale, w27g_tunect, w27o_ctclass5, w27p_serveclass, w27r_blockdrop).
+         The sweep is niced -15, single-threaded per fit, run as ONE chained background
+         job (standardised arm first -- it is the open cell; unstandardised second, reusing
+         the cached matrix so the 188-member load is paid once). No fold-level GBDT fits
+         are added by this slot.
+
+================================================================================
+M9 -- GRID EXTENSION. Appended AFTER two cells of rep 0 of the standardised arm had
+printed and BEFORE the extension was written or run. Declared here rather than folded
+in silently, because extending a grid after seeing results is exactly the move that
+turns a pre-registration into a post-hoc story.
+
+WHAT PRINTED, AND WHY IT FORCES THIS
+  standardised arm, rep 0:   C=1.0  0.970185      C=0.01  0.970122   (-63e-6)
+  Column sds: min 1.813  MEDIAN 4.764  max 27.575, so s^2 = 22.7.
+
+  M8(a)'s POINT PRIOR IS ALREADY REFUTED. It said C* in 3e-5..1e-3 with mode 3e-4.
+  C=0.01 is the LEAST regularised cell below 1.0 in the registered grid and it is already
+  -63e-6, which is 15x the paired instrument's ~4e-6 resolution. Every remaining cell is
+  more strongly penalised and cannot recover. There is no C* in the registered grid.
+
+  ⚠ AND THE MECHANISM I REGISTERED HAS THE SIGN BACKWARDS. M8(a) reasoned that
+  standardising moves the optimal C DOWN by s^2. That is wrong for this direction:
+  dividing the columns by s multiplies the coefficients by ~s, so ||w||^2 rises ~s^2 = 22.7x
+  and the SAME C now buys ~22.7x MORE effective shrinkage. To hold the shrinkage fixed the
+  C must move UP, not down. The registered grid therefore searched entirely on the
+  over-penalised side of C=1.0 and could not have found an interior optimum wherever it was.
+  Record as a MISSED prediction of the mechanism, not merely of the location.
+
+  Corrected arithmetic: C=1.0 standardised is equivalent to roughly C=0.044 unstandardised,
+  and the closed 156-member sweep's positive cell was C=0.01 unstandardised -- which maps to
+  C~4.4e-4 standardised, a cell in the registered grid. It printed nothing yet. But C=0.01
+  standardised maps to C~0.23 unstandardised, which the 156-member sweep found NEUTRAL, and
+  it is -63e-6 here. Those two facts cannot both be right, so either the 156-member finding
+  does not transfer to 188 members or the equivalence is cruder than s^2. M8(b), the
+  unstandardised control arm, is already scheduled and discriminates them directly.
+
+THE EXTENSION -- one further arm, standardised, same cached matrix, same 3 paired splits
+  C grid: 30, 10, 3, 1.0, 0.3, 0.1, 0.03. Reference cell is C=1.0, identical to M8's, so
+  the two arms are directly comparable and share rep seeds (StratifiedShuffleSplit
+  random_state = rep). ~24s per fit, 21 fits, no new matrix load.
+
+PREDICTIONS -- M9, registered before the extension is written or run
+  M9(a) PRIMARY. There is NO interior optimum. The 30/10/3 cells are FLAT -- all within
+        +/-4e-6 of C=1.0 -- because at C=1.0 the penalty per row is already 2.9e-6 against
+        a log-loss of order 0.5 and raising C only makes a negligible penalty more
+        negligible. And 0.3/0.1/0.03 are monotonically WORSE than C=1.0, bridging smoothly
+        to the -63e-6 already seen at 0.01.
+  M9(b) If M9(a) holds, M8(d) FIRES: shrinkage is a null-to-negative on the standardised
+        188-member pack, exactly as it is unstandardised. The "L2 on standardised columns"
+        cell CLOSES AS NEGATIVE. RESEARCH's "do not sweep stacker C again" is rewritten as
+        UNCONDITIONAL with the standardised arm named, so no later slot re-opens it, and
+        the shipped C=1.0 is confirmed as at-or-past the optimum rather than merely
+        untested.
+  M9(c) ALTERNATIVE, stated so M9(a) is falsifiable. If any of 0.3/0.1/0.03 beats C=1.0 by
+        >= +4e-6 consistently across 3/3 reps, there IS an interior optimum, it sits one to
+        two decades above where M8(a) put it, and R-M8b's build gate opens at that lambda.
+  M9(d) The UNSTANDARDISED control arm (M8(b)) reproduces the closed sweep: C=1e-2 within
+        +2..+9e-6 of C=1.0. Unchanged from M8(b); restated because M9's arithmetic makes it
+        the load-bearing cell rather than a formality. If it too comes back negative, the
+        six historical positive measurements do not transfer past 156 members and RESEARCH's
+        "if anything set C=0.01" line must be retired.
+
+DECISION RULES -- binding, unchanged in substance
+  R-M9a  R-M8b's build gate is unchanged: 3/3 consistent sign AND >= +4e-6. Widening the
+         grid does not widen the gate. A cell that wins only because more cells were tried
+         is the arm-selection optimism w16i measures at +1.78e-6 and R-M8d prices.
+  R-M9b  NOTHING FROM M9 IS SHIPPED. At cap.
+
+================================================================================
+M10 -- THE 190-MEMBER PACK. Appended BEFORE `w27t_run.sh` was written or launched, and
+after M9's extension arm was queued but before any of its cells printed.
+
+WHY THIS AND NOT ANOTHER MEASUREMENT
+  The handed angle is "search blend weights on OOF". The only positive form of that left in
+  this workspace is not a better weight SEARCH -- every alternative combiner is closed with
+  a measured null -- it is giving the existing OOF-fitted combiner more to weight. The pack
+  pays +3.37e-6 per ADDED MEMBER (se 0.24, 3/3 reps), which at this stage of the
+  competition is a large number: the whole c_avg correction is +5.1e-6 and the gap between
+  the CV leader and the second-best file is +1.7e-6.
+
+  R-M6b and R-M7a already committed, before any correlation was seen, that the block-drop
+  members are exported unconditionally because "the combiner picks the weights and a member
+  that does not exist cannot be picked". This is that commitment being honoured. It is not
+  a new decision taken because the numbers came back well -- and it is worth noting that
+  they came back MIXED, which is the case the rule was written for:
+
+      lat_ctdrop_r400   solo 0.9656895   maxcorr 0.99941   decorr rank 181/189
+      lat_encdrop_r400  solo 0.9522289   maxcorr 0.98607   decorr rank  27/189
+
+  Opposite ends of both axes: one strong and redundant, one weak and decorrelated. Neither
+  is chosen over the other; both go in and the combiner decides.
+
+THE BUILD
+  `w27h_run.sh` verbatim, with `ext_members7` added to --extra-dirs and nothing else
+  changed: same DROP, same --standardize, same float32, same C=1.0, same frozen folds.
+  The 188-member control is therefore ALREADY ON DISK and byte-identical, so this is a
+  matched pair and not a fresh number needing its own control:
+
+      w27_ad188std_h3   0.9701114720   (h3 mix, 188 members)
+      w27_ad188std      0.9701093456   (ens4 mix, 188 members)
+      w27_ad188stdcorr  0.9701168076   (h3 + 5-arm c_avg, the CV leader)
+
+  ⚠ This is the ONLY reading of R-M7d ("a 190-member CV is not comparable to a stored
+  188-member number") that is legitimate: the arms are comparable precisely because the
+  control was produced by the identical command and still exists unmodified on disk.
+  R-M8e/R-M7d forbid OVERWRITING those files, not comparing against them. Nothing in this
+  build touches `submissions/w27_ad188std*`.
+
+PREDICTIONS -- M10, registered before the build is written or run
+  M10(a) PRIMARY. w27_ad190std_h3 - 0.9701114720 lands in +2 .. +12e-6, MODE +7e-6, i.e.
+         about two members' worth at the measured +3.37e-6 each. Reasoning: two added
+         members, one of them (encdrop) more decorrelated than 162 of the 188 already
+         there, one of them (ctdrop) more redundant than 180 of them. The mode assumes
+         they roughly average out to the standing per-member rate.
+  M10(b) SIGN. The delta is POSITIVE. This is the weaker, load-bearing claim: the standing
+         +3.37e-6 per member has se 0.24 over 3/3 reps, so a negative delta here would be
+         the first added-member measurement to come back the wrong way and would need
+         writing up as such.
+  M10(c) If (a) holds at its mode, the h3 file lands at ~0.9701185 and the c_avg-corrected
+         file at ~0.9701236 -- BOTH ABOVE the current CV leader 0.9701168076. That would
+         make `w27_ad190stdcorr` the new WANTED slot 1 and demote `w27_ad188stdcorr` to
+         slot 2. Registered now so it cannot be claimed as a surprise later.
+  M10(d) The ens4 mix again lands BELOW the h3 mix, as it has in every build on record,
+         because h3 is the drop-worst rank-average that excludes `logit`.
+
+DECISION RULES -- binding
+  R-M10a NOTHING IS SENT THIS SLOT. At cap. These are candidates for the 08-20 UTC day.
+  R-M10b NO ARGMAX OVER MEMBER SETS. If the 190 pack comes back BELOW the 188 pack, the
+         188 files remain the WANTED picks and the 190 build is written up as a negative.
+         This workspace does not get to try both member counts and keep the better one --
+         that is the selection step w16i prices at +1.78e-6 and adarsh1077 at +19..+32e-6.
+         The 190 pack supersedes the 188 pack ONLY on a positive delta, and that direction
+         was fixed here before the number existed.
+  R-M10c The c_avg correction is applied via `w21a_ad187corr.py` with W21A_BASE set to the
+         190 h3 base, refit from scratch, exactly as w27h did for 188. Its 5-arm
+         scheme-average is used -- NOT the 4-arm argmax, which w27 slot 4 correctly
+         declined to ship for the same reason as R-M10b.
+  R-M10d HARNESS GATE. blend_lab must print `190 members`. 188 means ext_members7 was not
+         picked up and every number in the build is a silent re-run of the control; 189
+         means one of the two .npy pairs is missing. Either aborts the write-up.
+  R-M10e COMPUTE. Chained behind the M9 extension arm, not run alongside it. ~24 logistic
+         fits; no GBDT fits are added.
+
+--------------------------------------------------------------------------------
+M10 AMENDMENT, written BEFORE the build started and BEFORE any of its numbers existed.
+The first `w27t_run.sh` was killed (pid 3394272, confirmed dead) and rewritten; it had
+not yet run a single fit.
+
+  DEFECT: it pointed --extra-dirs at `data/ext_members7`, which `w27r_blockdrop.py` is
+  STILL WRITING INTO. `tedrop` is on fold 4 of 5 and exports on completion, so the pack
+  would have loaded 191 members, not the 190 M10 registers -- and the third member would
+  have been one whose decorrelation profile has never been measured. This is RESEARCH's
+  own warning ("a member landing mid-run silently changes any bench that globs oof/")
+  arriving in a new place: the risk is not only a glob over `oof/`, it is ANY --extra-dir
+  that a live job also writes to.
+
+  FIX: `data/ext_members7pin/` now holds hardlinks to exactly the two registered members
+  and nothing else, and the build addresses that. Hardlinks, not copies, so the bytes are
+  provably the same inode as the ones w27q profiled. R-M10d's `190 members` gate is
+  unchanged and would have caught this after the fact; pinning prevents it instead.
+
+  R-M10f  Any later slot adding w27r's `tedrop`/`rawdrop` members must pin them the same
+          way and re-register the member count. `ext_members7` is a live directory and is
+          not a valid --extra-dir for any build while w27r is running.
+
+--------------------------------------------------------------------------------
+R-M10e DEVIATION, recorded when taken and before the build produced any number.
+
+  REGISTERED: w27t chained behind the M9 extension arm, "not run alongside it".
+  TAKEN:      w27t started immediately, in parallel with the M8(b) unstandardised arm.
+              The M9 arm still runs after M8(b); only w27t moved.
+
+  REASON. The M8(b) unstandardised arm is running ~6x slower per fit than the standardised
+  arm did (54s / 68s / 47s / 159s against 24s / 12s / 11s / 10s for the same cells). That is
+  not a surprise once stated -- it is the documented mechanism of the standardisation itself:
+  lbfgs on unstandardised columns whose sds span 1.813..27.575 converges badly, which is
+  exactly why standardising is worth +28e-6. But it means the registered chain would have
+  delayed the ONLY item in this slot with submission value by well over an hour, past the end
+  of the run, for a control arm whose direction rep 0 has already settled (+8e-6 at C=0.01,
+  +10e-6 at C=0.001 -- the historical finding reproducing).
+
+  WHY IT IS SAFE. The constraint R-M10e was written against is CPU contention. w27t adds
+  logistic fits only, nice -n 15, to a box already at load 32 where one more niced job is
+  marginal. It shares no cache key, no checkpoint path and no output file with either sweep
+  arm. Peak memory is the real risk (4 transforms x 190 members ~ 3 GB against ~11 GB
+  available); if it OOMs the log will say so and the result is simply absent, not wrong.
+
+  WHAT IS NOT CHANGED. R-M10a (nothing sent), R-M10b (no argmax over member counts; the 190
+  pack supersedes the 188 pack only on a positive delta), R-M10c (5-arm c_avg, not the 4-arm
+  argmax) and R-M10d (the `190 members` gate) all stand exactly as registered. Only the
+  scheduling moved.

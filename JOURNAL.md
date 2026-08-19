@@ -14099,3 +14099,385 @@ times on three different instruments.
 `experiments/w27r_blockdrop.py`, `experiments/w27r_run.sh`,
 `data/ext_members7/{oof,test}_lat_ctdrop_r400.npy`.
 **No submission — at cap (10/10 for the 08-19 UTC day).**
+
+---
+
+# 2026-08-19 — slot 6 of 10 — blending / OOF weight search — ⛔ AT CAP, NO SUBMISSION
+
+**Angle handed:** *"Blending: rank-average or weight the tuned models by out-of-fold
+performance. Search blend weights on OOF predictions, never on the public leaderboard."*
+
+**Submission status: 10 of 10 landed on the 08-19 UTC day** (refs 55625681 … 55627458,
+14:39–16:16 UTC). It is 17:0x UTC; reset is ~7h out. Nothing could be sent and nothing was.
+Second consecutive at-cap slot, so this is again a research-and-build slot.
+
+Pre-registration: `experiments/w27_prereg_slot6.txt` — §M8 written before any code in this
+slot existed, §M9 appended after two cells printed and before the extension was written,
+§M10 appended before `w27t_run.sh` was written, plus a §M10 amendment written before that
+build ran a single fit.
+
+**Public standing checked this slot: rank ~18 of ~1,326 at 0.97118.** Top of board is
+MILANFX at 0.97134; the 0.97118 band is four teams wide.
+
+## 1. Both literal readings of the handed angle are ALREADY CLOSED — checked before spending
+
+Applying the standing lesson (*read RESEARCH for the section covering a claim before
+building it*). The angle names two specific techniques and RESEARCH owns measured nulls for
+both, plus two more in the same family:
+
+| the angle's move | measured | where |
+|---|---|---|
+| weight members by OOF AUC, `(auc−0.5)^p` | **exactly +0.000000**, weights uniform to rounding error at every p ≤ 32 | RESEARCH "Stacking notes" |
+| rank-average / search the transform simplex | drop-worst +5e-6; full 1,771-point simplex +6e-6 | ditto |
+| hill-climb / NNLS / any non-negative blend | **−0.00104** by the time the last negative coefficient is gone | ditto |
+| bag or re-partition the combiner | foldbag5 +1e-6 sign-flipping, boot5 −13e-6 | RESEARCH:1129 |
+
+The shipped h3 mix already *is* the drop-worst rank-average, and RESEARCH's summary line is
+blunt: *"The linear logit stack is the right combiner. Stop looking for a better one."*
+Cost of checking: ten minutes. Cost of not checking: a day rebuilding four known nulls.
+
+What that leaves open is not a better weight **search** — it is the one knob of the existing
+OOF weight search never measured on the pack that actually ships, and the two ways of giving
+that search more to weight. §2–§5.
+
+## 2. ✅ M7(b) HELD and M7(c) DID NOT FIRE — feature-block ablation *does* buy decorrelation
+
+Slot 5 launched the block-ablation ladder and registered a falsifier that would have killed
+the whole "cheap members from feature variants" route. `w27q_cand.py` profiled the
+completed `encdrop` arm against the 188-pack (pure arithmetic on stored OOF, no fits).
+
+| | registered §M7 | observed | |
+|---|---|---|---|
+| HARNESS GATE `encdrop` | solo reproduces to <1e-9 | **d = 2.20e-11** | ✅ PASS |
+| HARNESS GATE `ctdrop` | ditto | **d = 4.94e-11** | ✅ PASS |
+| **M7(b)** `encdrop` maxcorr | **below 0.990** | **0.98607** | ✅ HELD |
+| **M7(c)** FALSIFIER | fires if above 0.995 | 0.98607 | ✅ **DOES NOT FIRE** |
+
+Pack reference: median maxcorr 0.99601, 10th pct 0.98451, min 0.91797.
+
+| candidate | cols | solo AUC | maxcorr | closest in pack | decorr rank |
+|---|---|---|---|---|---|
+| `lat_ctdrop_r400` | 112 | 0.965690 | 0.99941 | `lat_ctfix_r400` | 181/189 |
+| **`lat_encdrop_r400`** | **40** | 0.952229 | **0.98607** | **`xgb`** | **27/189** |
+
+**So slot 5's §5 generalisation was too strong and is corrected here.** §5 concluded from
+`ctdrop` alone that "the pack's redundancy is a property of the pipeline, not the column
+list — *within* a pipeline even the columns barely matter." That is wrong as stated. The
+columns matter a great deal; what §5 actually measured was that deleting **1% of the split
+gain** (the `CT_` block, w27g's CTshare) moves a member 0.0006 in maxcorr. Deleting the
+whole encoding channel moves it 0.010, from rank 181 to rank 27.
+
+**The mechanism is in the neighbour list, and it is the real finding.** `ctdrop`'s five
+nearest members are the entire lattice-LightGBM lineage. `encdrop`'s five nearest are
+`xgb` (0.98607), `bolt_lgb_raw_d4` (0.98605), `hgb` (0.98558), `lgbm` (0.98501), `et`
+(0.98496) — **not one of them is from the lattice pipeline; all five are raw-frame members
+of the public library.** Deleting the encodings does not make a new kind of member, it
+*relocates* the member from the lattice cluster into the raw-frame cluster. The pack
+already owns ~74 members of that cluster, which is exactly why `encdrop` lands at rank 27
+and not rank 1.
+
+**Read for effort allocation:** the route is alive but its ceiling is now named. Feature-block
+ablation can reach the raw-frame cluster and no further, so it cannot produce a rank-1
+member. Slot 5's §5 list — `logreg` 0.947, `ad_logregte` 0.961, `linlat` 0.975 — still
+sits outside every cluster and is still the better target. What changes is that `encdrop`
+is a genuinely usable member rather than a near-duplicate, so R-M7a's unconditional export
+paid off and it goes into the pack (§5).
+
+## 3. ⚠ M7(a) MISSED, and the miss is the most interesting number in the ladder
+
+`tedrop` (drop the 72 `TE_`, keep raw + `CT_`) is coming in at fold AUCs 0.9490 / 0.9491 /
+0.9505 / 0.9498 — **below `encdrop`'s pooled 0.95223**, which keeps neither block.
+
+M7(a) registered `tedrop` at 0.9600–0.9640, **mode 0.9625**, and registered the ordering
+`… > rawdrop > tedrop > encdrop` with *"encdrop the weakest by a wide margin"*. Observed:
+**tedrop is ~130e-6 below the bottom of its registered band and the bottom two arms are
+inverted.** Record as a clear missed prediction.
+
+What it buys is a clean decomposition of the `CT_` block's marginal value, which no previous
+experiment could produce because none of them had the raw-frame baseline:
+
+| configuration | pooled OOF | marginal value of `CT_` |
+|---|---|---|
+| raw only (`encdrop`, 40 cols) | 0.9522289 | — |
+| raw + `CT_` (`tedrop`, 112 cols) | ~0.9495 | **≈ −2,700e-6** |
+| raw + `TE_` (`ctdrop`, 112 cols) | 0.9656895 | — |
+| raw + `TE_` + `CT_` (control, 184 cols) | 0.9654813 | **−208e-6** |
+| raw + `TE_` + `CT_`·(4/3) (`ct1.3333`) | 0.9657752 | **+86e-6** |
+
+**The `CT_` block is net-harmful in every configuration except the one where it is both
+scale-corrected AND accompanied by `TE_`.** Its harm is an order of magnitude worse without
+`TE_` (−2,700e-6) than with it (−208e-6), which names the mechanism: a cell count is only
+usable as a *reliability weight on a cell mean*, and with the means deleted the counts are a
+high-cardinality channel the trees overfit on and nothing to anchor them.
+
+That reframes the whole w26/w27 CT thread rather than contradicting it. The 4/3 skew fix is
++294e-6 at member level and real; but it is repairing a block whose total marginal
+contribution is *negative* everywhere else on this table, and it clears deletion by only
++86e-6. Consistent with §6 of slot 5, where three separate pack-level instruments all said
+the correction is worth nothing once inside 188 members.
+
+## 4. ✅ THE OPEN CELL, MEASURED: L2 shrinkage and combiner standardisation are SUBSTITUTES, not complements
+
+This is the slot's main result and it closes a cell RESEARCH has carried as open since
+2026-08-11.
+
+**Why it was worth spending on.** RESEARCH says *"Do not sweep stacker C again"* — but the
+sweep it closed was on **156 members, unstandardised**, and the same paragraph carries two
+loose ends it explicitly labels: (i) *"`--standardize` makes it isotropic. **Built, not yet
+measured**"*, and (ii) *"if anything set C=0.01: +5e-6 ± 3e-6 consistent, six positive
+measurements, two sweeps, two member sets"* — **advice that was never shipped.** Meanwhile
+`w27h_run.sh`, which builds everything at the top of the queue, passes `--standardize` and
+**no** `--lam`, so the isotropic prior is switched on and then left completely unpenalised
+(1.8e-6 per row against a log-loss of order 0.5). The two halves had never been run together.
+
+Instrument: `experiments/ridge_sweep.py`, unmodified except for one new `--extra-dirs`
+argument so it can address the 188-member pack instead of the pinned 156, plus an
+`--expect` member-count assert. Paired 50/50, 3 reps, identical rows across every cell,
+reference cell C=1.0. `hybrid` transform. Gate `188 members loaded` ✅.
+
+### 4.1 The standardised arm — strictly monotone, no interior optimum anywhere
+
+| C | penalty/row | mean AUC | vs C=1.0 | |
+|---|---|---|---|---|
+| **1.0** | 2.9e-6 | **0.970341** | — | *the shipped cell* |
+| 0.01 | 2.9e-4 | 0.970297 | **−44e-6** ± 20 | consistent 3/3 |
+| 0.001 | 2.9e-3 | 0.970075 | −266e-6 ± 36 | consistent |
+| 3e-4 | 9.6e-3 | 0.969884 | −457e-6 ± 48 | consistent |
+| 1e-4 | 0.029 | 0.969659 | −682e-6 ± 54 | consistent |
+| 3e-5 | 0.096 | 0.969353 | −988e-6 ± 60 | consistent |
+| 1e-5 | 0.29 | 0.968992 | −1,349e-6 ± 63 | consistent |
+| 3e-6 | 0.96 | 0.968642 | −1,699e-6 ± 65 | consistent |
+| 1e-6 | 2.9 | 0.968440 | −1,901e-6 ± 66 | consistent |
+
+**Every cell below C=1.0 is worse, monotonically, 3/3 consistent, with no interior optimum.**
+
+The coefficient table gives the mechanism and reproduces the 156-member story exactly — the
+negative-coefficient count falls **80 → 72 → 58 → 37 → 19 → 8 → 0** while ‖w‖₂ falls
+2.84 → 0.19, and AUC falls the whole way. At the cell where the last negative coefficient
+disappears (C=1e-5) the cost is **−1,349e-6**, against RESEARCH's 156-member figure of
+−1,040e-6. **The "weak decorrelated members earn their keep as negative corrections"
+finding replicates at 188 members and on the standardised matrix, and is larger there.**
+
+### 4.2 ⚠ M8(a) MISSED — and the mechanism I registered had the SIGN BACKWARDS
+
+M8(a) put C\* in 3e-5…1e-3, mode 3e-4, reasoning that standardising moves the optimum
+*down* by s². **That is the wrong direction.** Dividing columns by s multiplies the
+coefficients by ~s, so ‖w‖² rises by s² = 22.7 and the *same* C now buys ~23× **more**
+effective shrinkage — the optimum moves **up**. The registered grid therefore searched
+entirely on the over-penalised side and could not have found an optimum wherever it was.
+Recorded as a missed prediction of the *mechanism*, not merely of the location, and §M9 was
+appended to the pre-registration to say so **before** the extension arm was written.
+
+### 4.3 The transfer control is what makes the result interpretable
+
+M8(b) ran the identical grid **unstandardised** on the identical 188-member matrix.
+
+| C | unstandardised | standardised |
+|---|---|---|
+| 1.0 | 0.970157 | **0.970185** |
+| 0.01 | 0.970165 **(+8e-6)** | 0.970122 **(−63e-6)** |
+| 0.001 | 0.970167 **(+10e-6)** | 0.969915 (−270e-6) |
+
+*(rep 0; the full 3-rep table is in `experiments/w27s_lamstd.log`.)*
+
+**The historical finding transfers cleanly — unstandardised, C=0.01 is positive at 188
+members, a seventh confirmation.** And that is exactly what makes the standardised result
+readable rather than a bare null:
+
+> **Shrinkage and standardisation are two treatments for the same pathology — an
+> ill-conditioned collinear design producing large opposing coefficients — and they are
+> SUBSTITUTES, not complements.** Standardising fixes the conditioning directly and is worth
+> more (+28e-6 here) than shrinking is (+10e-6); once it is applied, adding shrinkage only
+> destroys signal (−44e-6 at the best remaining cell). The best standardised cell beats the
+> best unstandardised cell outright.
+
+**Two operational consequences, both durable:**
+
+1. **RESEARCH's "if anything set C=0.01" line must be qualified, not deleted.** It is right
+   for an unstandardised combiner and **wrong for everything this workspace currently
+   ships**, all of which is standardised. Had it ever been acted on it would have cost
+   −44e-6 — nine times the +5e-6 it promised. Retiring that trap is worth the slot on its own.
+2. **The shipped C=1.0 is confirmed at-or-past the optimum rather than merely untested.**
+   That is a real thing to know 12 days out: one fewer knob that could have been left money
+   on the table.
+
+**R-M8b's build gate does not open** (it required +4e-6 consistent; observed −44e-6). No
+lambda build was run, per the gate set before any number was seen.
+
+## 5. Launched: `w27t` — the 190-member pack, registered at §M10
+
+The only *positive* form the handed angle still has here. Every alternative weight
+**search** is closed with a measured null (§1), so what is left is giving the existing
+OOF-fitted combiner more to weight — and the pack pays **+3.37e-6 per added member**
+(se 0.24, 3/3 reps), which at this stage is a large number: the whole `c_avg` correction is
++5.1e-6 and the gap between the CV leader and the second-best file is +1.7e-6.
+
+This is also R-M6b/R-M7a being honoured rather than a fresh decision. Both rules committed,
+**before any correlation was seen**, that the block-drop members are exported and offered to
+the combiner because *"the combiner picks the weights and a member that does not exist
+cannot be picked."* The numbers came back **mixed**, which is the case the rule exists for:
+
+    lat_ctdrop_r400   solo 0.9656895   maxcorr 0.99941   rank 181/189   strong + redundant
+    lat_encdrop_r400  solo 0.9522289   maxcorr 0.98607   rank  27/189   weak + decorrelated
+
+Opposite ends of both axes. Neither is chosen over the other; both go in, the combiner
+decides. `w27h_run.sh` verbatim — same DROP, same `--standardize`, same float32, same
+C=1.0, same frozen folds — so `submissions/w27_ad188std*.csv` on disk is a **byte-identical
+matched control** and this is a paired reading, not a fresh number needing its own control.
+
+Registered at §M10: delta **+2 … +12e-6, mode +7e-6**; **R-M10b fixes the direction before
+the number exists** — if the 190 pack comes in below 188, the 188 files stay the WANTED
+picks and this is written up as a negative. No argmax over member counts.
+
+### 5.1 ⚠ Caught before it ran: a live directory is not a valid `--extra-dir`
+
+The first `w27t_run.sh` pointed `--extra-dirs` at `data/ext_members7` — **which
+`w27r_blockdrop.py` is still writing into.** `tedrop` exports on completion and was two
+folds away, so the build would have quietly loaded **191** members, the third being one
+whose decorrelation profile has never been measured, and every number would have been a
+silent answer to a different question.
+
+Killed the queued launcher (pid 3394272, confirmed dead **before** editing, per slot 4's
+§12 rule that `bash` re-reads a running script from its byte offset), created
+`data/ext_members7pin/` holding **hardlinks** to exactly the two registered members — links,
+not copies, so the bytes are provably the same inodes `w27q` profiled — and repointed the
+build at that. The amendment went into the pre-registration before the build ran a fit.
+
+R-M10d's `190 members` gate would have caught this *after* the fact. Pinning prevents it.
+**New standing rule (R-M10f): `ext_members7` is a live directory and is not a valid
+`--extra-dir` for any build while `w27r` is running.** This is RESEARCH's own warning
+("a member landing mid-run silently changes any bench that globs `oof/`") arriving in a new
+place — the hazard is not only a glob over `oof/`, it is *any* `--extra-dir` a live job also
+writes to.
+
+### 5.2 First transform in: +2.7e-6, the right sign
+
+R-M10d gate ✅ — `190 members, dtype float32`. All four transforms built (527s). The first
+cross-fit has landed and its 188-member twin is on disk:
+
+| transform | 188 pack | **190 pack** | delta |
+|---|---|---|---|
+| `logit` | 0.9700372515 | **0.970040** | **≈ +2.7e-6** |
+
+One member's worth at the standing +3.37e-6 rate, and **M10(b)'s sign holds** on the first
+reading. ⚠ Only 6 dp are printed for the 190 side, so read this as +2.7e-6 ± 0.5 from
+rounding and do not quote more figures. `logit` is also the *worst* of the four transforms
+and the one h3 excludes, so it is the least informative of the four — **it is not evidence
+about the h3 mix**, which is the number M10(a) actually registers.
+
+`hybrid`, `rankraw`, `rescale`, then `make_h3.py`, then `w21a_ad187corr.py` still to run.
+Under load 43 with two foreign projects on the box, that did not finish inside the slot.
+
+### 5.3 ⚠ A suspended job is a silent failure — `w27u_resume.sh`
+
+To get w27t through the slot I suspended the M8(b) unstandardised arm with `kill -STOP`
+(pid 3394078), which is RESEARCH's documented move: *"Yield cores with `kill -STOP` /
+`kill -CONT`, do not kill long jobs."* It freed ~700% CPU and confirmed state `T`.
+
+**But a suspended process that nobody resumes is worse than a slow one**, because no log
+line ever says it is stuck and the next run has no way to know. So the resume is not left to
+a future run remembering: `experiments/w27u_resume.sh` is detached and watching, and sends
+`kill -CONT 3394078` when the w27t launcher exits, or after a 3-hour deadline, whichever
+comes first. It writes `experiments/w27u_resume.log`.
+
+**Next run: check that log.** If it says `CONT sent`, arm 2 is running again and arm 3 (M9)
+follows it. If the watchdog itself died, `kill -CONT 3394078` by hand.
+
+## 6. The 08-20 send queue, ranked and PRE-FLIGHT-VALIDATED this slot
+
+Tomorrow opens 10 slots. Every file below is built, on disk, and **never sent** (checked by
+diffing `submissions/*.csv` against all 50 distinct filenames in the submission history —
+115 built, 50 sent, **65 never sent**). The top six were validated this slot: 296,302 rows,
+`id` exact and in order, 0 NaN, finite. **No file below needs any further work; the next run
+can send straight down this list.**
+
+| # | file | CV | note |
+|---|---|---|---|
+| 1 | **`w27_ad188stdcorr.csv`** | **0.9701168076** | the CV leader, highest ever built here, ⚠ **still never sent** |
+| 2 | `w27_ad190stdcorr.csv` | *pending §5* | send only if §M10 comes back positive (R-M10b) |
+| 3 | `w27_ad190std_h3.csv` | *pending §5* | ditto |
+| 4 | `w27_ad188raw_h3.csv` | 0.9701140 | the raw-CT control arm; unsent, and above every file below it |
+| 5 | `w27_ad188std_hybrid.csv` | 0.9700993121 | single-transform stack of the 188 pack |
+| 6 | `w27_ad188std_rescale.csv` | 0.9700962686 | |
+| 7 | `w27_ad188std_rankraw.csv` | 0.9700930487 | |
+| 8 | `w27_ad190std.csv` | *pending §5* | ens4 mix; M10(d) expects it below the h3 |
+| 9 | `w27_ad188std_logit.csv` | 0.9700372515 | |
+| 10 | `w16m_widegrid.csv` / `blend159av_h3.csv` | 0.9700557 / 0.9700528 | queue drain if §6 produces nothing |
+
+If §5 comes back negative, drop rows 2/3/8 and pull rows 10+ up — `blend160origm_h3`
+(0.970049), `blend158_h3` (0.9700483), `blend156_h3` (0.970048) are the next three.
+
+**Brief's economics: an unused slot is pure waste here — submissions do not evict each
+other and the public LB shows best-of-all. Send all ten.** But selection is still on CV, and
+none of rows 4–10 is a deadline candidate.
+
+## 7. ⚠ The final pick — this item is BLOCKED ON A SEND, not on a human
+
+Standing note in every recent entry: *"A human must open the submissions page and tick two
+files."* **That is not actionable yet, and this slot establishes why.**
+
+`WANTED` = {`w27_ad188stdcorr.csv`, `w23_ad187stdcorr.csv`}. Checked against the submission
+history this slot:
+
+- `w23_ad187stdcorr.csv` — **sent**, ref 55588167. Selectable now.
+- `w27_ad188stdcorr.csv` — **NEVER SENT.** Kaggle's final-selection dialog lists *submitted
+  entries only*, so it cannot be ticked, today or by anyone.
+
+**So the ordering is forced: send it first (queue row 1), and only then is the pick
+clickable.** Recording this so no further run reports the item as "waiting on a human" when
+it is in fact waiting on a submission that this workspace controls. 12 days left.
+
+Auto-selection by best public score still lands on `w21_ad187corr_ens4` / `w22_ad187corr_rankraw`
+— the two most slice-inflated files we own, which is the Rogii failure with the serial
+numbers filed off. That risk is unchanged and is the reason row 1 matters.
+
+## 8. Still running / state of the board
+
+- **`w27t` (190-member build)** — R-M10d gate ✅ `190 members, dtype float32`, matrix loaded
+  and all four transforms built in 527s; cross-fitting now, then `make_h3.py`, then
+  `w21a_ad187corr.py` for `w27_ad190stdcorr`. **This is the first thing to read next run.**
+- **`w27s` arm 2** (M8(b) unstandardised control) — rep 0 complete and already decisive;
+  reps 1–2 running. ⚠ ~300s/fit against 10–24s for the standardised arm, so ~2h left. The
+  slowness *is* the mechanism: lbfgs on columns whose sds span 1.813–27.575 converges badly.
+- **`w27s` arm 3** (M9 extension, C = 30/10/3/1.0/0.3/0.1/0.03) — queued behind arm 2. This
+  is the registered completion of M8(d): it checks the one region the original grid never
+  covered, *above* C=1.0. M9(a) predicts it is flat there.
+- `w27r_blockdrop` — `tedrop` on fold 4 of 5, then `rawdrop` (144 cols, the slowest arm).
+- `w27o_ctclass5` — xgb/cat fold 3 of 4, then the 5-fold lgb control (§M4(d)).
+- `w27p_serveclass`, `w26k_ctscale`, `w27g_tunect` — unchanged.
+
+Box is at load ~32 on 16 cores with two foreign projects also running. Everything above is
+`nice`-d and checkpointed.
+
+## 9. Next run, in order
+
+1. **SEND `submissions/w27_ad188stdcorr.csv` AS SLOT 1.** CV **0.9701168076**, validated
+   again this slot, and **still never sent**. §8 shows this is also what unblocks the final
+   pick — the selection dialog only lists submitted entries, so nothing can be ticked until
+   this lands. Nothing competes for that slot.
+2. `grep -E "cross-fitted|members" experiments/w27t_ad190.log` and write it up against
+   §M10(a)/(b)/(c). **R-M10b is binding: if the 190 pack is below the 188 pack, the 188
+   files stay the WANTED picks and this is a negative.** If positive, `w27_ad190stdcorr`
+   becomes WANTED slot 1 and rows 2/3 of §7's queue go out.
+3. **Send the rest of §7's queue.** It is ranked, pre-flight-validated and needs no work.
+   All ten slots — the brief's economics make an unused slot pure waste here.
+4. `sed -n '/paired 50\/50/,$p' experiments/w27s_lamstd2.log` for M9. If it is flat above
+   C=1.0 as registered, **M8(d) fires and the stacker-C question is closed in both arms** —
+   record it and never re-open it.
+5. **Do not build another GBDT feature variant for decorrelation.** §2 names the route's
+   ceiling: it reaches the raw-frame cluster and stops. The cheap decorrelated members are
+   `logreg` / `linlat` / `ad_logregte`-shaped — a logistic or lookup member with a different
+   categorical and lattice treatment, minutes to fit, aimed at the only part of the maxcorr
+   distribution that pays.
+6. ⚠ **R-M10f: `data/ext_members7` is a LIVE directory while `w27r` runs.** Any build using
+   it must pin with hardlinks into a frozen dir first (`data/ext_members7pin/` is the
+   pattern) and assert the member count.
+
+**Files added this slot:** `experiments/w27_prereg_slot6.txt` (§M8, §M9, §M10, plus two
+amendments recorded before the runs they govern), `experiments/w27s_run.sh`,
+`experiments/w27s_run2.sh`, `experiments/w27t_run.sh`, `experiments/w27u_resume.sh`,
+`data/ext_members7pin/` (4 hardlinks), `data/ext_members7/{oof,test}_lat_encdrop_r400.npy`,
+`submissions/w27_ad190std_logit.csv`. **Modified:** `experiments/ridge_sweep.py` (+`--extra-dirs`,
++`--expect`; no behaviour change to any existing invocation).
+
+**No submission — at cap, 10/10 for the 08-19 UTC day.**

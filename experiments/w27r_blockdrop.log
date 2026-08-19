@@ -1,0 +1,22 @@
+=== arm=encdrop ===
+[encdrop] 184 cols -> 40 kept, 144 dropped
+[encdrop] rounds=400 seed=42 jobs=3
+[encdrop] fold 0: 0.951267  (198s)
+[encdrop] fold 1: 0.951873  (237s)
+[encdrop] fold 2: 0.952267  (279s)
+[encdrop] fold 3: 0.953424  (314s)
+[encdrop] fold 4: 0.952335  (350s)
+
+[encdrop] POOLED OOF over 691,369 rows
+   encdrop  0.9522288823
+  control 184col   0.9654813306   encdrop - control  -13252.45e-6
+  w27c ctdrop      0.9656895129   encdrop - ctdrop   -13460.63e-6
+  exported data/ext_members7/{oof,test}_lat_encdrop_r400.npy  (350s)
+  next: .venv/bin/python experiments/w27q_cand.py --gate lat_encdrop_r400=0.9522288823
+=== arm=tedrop ===
+[tedrop] 184 cols -> 112 kept, 72 dropped
+[tedrop] rounds=400 seed=42 jobs=3
+[tedrop] fold 0: 0.949011  (95s)
+[tedrop] fold 1: 0.949065  (188s)
+[tedrop] fold 2: 0.950504  (292s)
+[tedrop] fold 3: 0.949760  (494s)

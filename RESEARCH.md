@@ -7419,3 +7419,120 @@ is that the `CT_` block as built is *mostly* net-harmful and the 4/3 fix is clos
 repair of something better removed than to a repair of a live channel. The fix still wins by
 85.68e-6, so deleting is not the right move at member level — but the margin is a quarter of
 what the prior implied.
+
+---
+
+# w27 slot 6 (2026-08-19) — durable facts
+
+## ⛔ L2 shrinkage and combiner standardisation are SUBSTITUTES. Never ship both.
+
+The cell RESEARCH carried as *"`--standardize` makes it isotropic. Built, not yet measured"*
+since 2026-08-11 is now measured, on the 188-member pack that actually ships.
+`experiments/ridge_sweep.py` (+`--extra-dirs`/`--expect`), paired 50/50, 3 reps, identical
+rows per cell, `hybrid`, reference C=1.0. Logs: `experiments/w27s_lamstd{,2}.log`.
+
+| C | penalty/row | **standardised** vs C=1.0 | **unstandardised** vs C=1.0 (rep 0) |
+|---|---|---|---|
+| 1.0 | 2.9e-6 | — (mean 0.970341) | — (0.970157) |
+| 0.01 | 2.9e-4 | **−44e-6** ± 20, consistent 3/3 | **+8e-6** |
+| 0.001 | 2.9e-3 | −266e-6 ± 36 | **+10e-6** |
+| 3e-4 | 9.6e-3 | −457e-6 ± 48 | |
+| 1e-4 | 0.029 | −682e-6 ± 54 | |
+| 3e-5 | 0.096 | −988e-6 ± 60 | |
+| 1e-5 | 0.29 | −1,349e-6 ± 63 | |
+| 3e-6 | 0.96 | −1,699e-6 ± 65 | |
+| 1e-6 | 2.9 | −1,901e-6 ± 66 | |
+
+**Standardised: strictly monotone worse, no interior optimum, every cell consistent 3/3.**
+**Unstandardised: the historical +5e-6 at C=0.01 REPRODUCES at 188 members — a seventh
+confirmation** — so the standardised null is not an instrument failure.
+
+**The reading.** Shrinkage and standardisation treat the same pathology (an ill-conditioned
+collinear design producing large opposing coefficients). Standardising fixes the
+conditioning directly, is worth more (**+28e-6**, C=1.0 standardised 0.970185 vs
+unstandardised 0.970157 on rep 0) than shrinking is (+10e-6), and once applied, shrinkage
+only destroys signal. **The best standardised cell beats the best unstandardised cell
+outright.**
+
+- ⚠ **RESEARCH's "if anything set C=0.01" is QUALIFIED, not deleted.** True for an
+  *unstandardised* combiner; **wrong for everything this workspace ships**, all of which
+  passes `--standardize`. Acting on it would have cost **−44e-6** where it promised +5e-6.
+- ✅ **The shipped C=1.0 is confirmed at-or-past the optimum**, not merely untested.
+- **"Do not sweep stacker C again" is now UNCONDITIONAL**, with both arms named at 188
+  members. Do not re-open this in either arm.
+
+**Coefficient shrinkage, standardised, rep 0 — the 156-member negative-coefficient story
+replicates and is LARGER:** nneg falls **80 → 72 → 58 → 37 → 19 → 8 → 0** and ‖w‖₂ falls
+2.84 → 0.19 as C falls 1.0 → 1e-6. At the cell where the last negative coefficient
+disappears (C=1e-5) the cost is **−1,349e-6** vs the 156-member figure of −1,040e-6. Weak
+decorrelated members earning their keep as *negative corrections* is confirmed at 188
+members and on the standardised matrix.
+
+⚠ **The transfer arithmetic, corrected.** Standardising divides columns by s (median 4.764,
+min 1.813, max 27.575 on the 188 hybrid matrix), which multiplies coefficients by ~s and
+‖w‖² by s² = 22.7 — so the same C buys ~23× **MORE** effective shrinkage and the optimal C
+moves **UP**, not down. w27 slot 6 registered this backwards at §M8(a) and had to append
+§M9. `ridge_sweep.standardize`'s own docstring says "the optimal C moves with the scale,
+roughly by the square of it" without naming the direction; the direction is **up**.
+
+## The feature-block ablation ladder — decorrelation tracks the ENCODING channel, not column count
+
+`cache/cols.json` = 184 cols = **72 `TE_` + 72 `CT_` + 40 raw/derived**, exactly. All arms
+matched to w26l on model (`lgbm_fixed_lat` PARAMS), rounds 400, seed 42, frozen SKF5 folds;
+only the column set differs. Pack reference: median maxcorr **0.99601**, 10th pct 0.98451,
+min 0.91797.
+
+| arm | cols | pooled OOF | maxcorr | closest in pack | decorr rank |
+|---|---|---|---|---|---|
+| control `ct1.0000` | 184 | 0.9654813306 | — | — | — |
+| `ct1.3333` (4/3 fix) | 184 | 0.9657751945 | — | — | — |
+| `ctdrop` (drop `CT_`) | 112 | 0.9656895129 | 0.99941 | `lat_ctfix_r400` | **181/189** |
+| `encdrop` (drop `TE_`+`CT_`) | **40** | 0.9522288823 | **0.98607** | **`xgb`** | **27/189** |
+| `tedrop` (drop `TE_`) | 112 | *below `encdrop`* | | | |
+
+**Deleting 39% of the columns (`CT_`) moves maxcorr 0.0006. Deleting the whole encoding
+channel moves it 0.010.** Decorrelation tracks how much of the model's *function* is
+replaced — `CT_` is ~1.0% of LightGBM split gain (w27g CTshare) — not how many columns go.
+
+⚠ **`encdrop`'s five nearest members are `xgb`, `bolt_lgb_raw_d4`, `hgb`, `lgbm`, `et` — all
+raw-frame public-library members, none from the lattice pipeline.** Deleting the encodings
+does not create a new kind of member; it **relocates** the member from the lattice cluster
+into the raw-frame cluster, which the pack already owns ~74 members of. **That names the
+route's ceiling: feature-block ablation can reach the raw-frame cluster and no further, so
+it cannot produce a rank-1 member.** The rank-1..12 members remain linear/lookup/NN
+(`orig_binm` 0.918, `w15d_origrep_r` 0.943, `logreg` 0.947, `ad_logregte` 0.961) and are
+still the better target for cheap decorrelated members.
+
+### The `CT_` block is net-harmful except when scale-corrected AND accompanied by `TE_`
+
+The raw-frame baseline makes the marginal decomposition possible for the first time:
+
+| configuration | pooled OOF | marginal value of `CT_` |
+|---|---|---|
+| raw only (`encdrop`) | 0.9522289 | — |
+| raw + `CT_` (`tedrop`) | *below encdrop* | **≈ −2,700e-6** |
+| raw + `TE_` (`ctdrop`) | 0.9656895 | — |
+| raw + `TE_` + `CT_` (control) | 0.9654813 | **−208e-6** |
+| raw + `TE_` + `CT_`·(4/3) | 0.9657752 | **+86e-6** |
+
+Named mechanism: a cell **count** is only usable as a reliability weight on a cell **mean**.
+With the means deleted the counts are a high-cardinality channel with nothing to anchor them
+and the trees overfit on it — which is why `CT_`'s harm is an order of magnitude worse
+without `TE_` (−2,700e-6) than with it (−208e-6). The 4/3 skew fix is real at member level
+(+294e-6) but clears outright deletion by only +86e-6, and three pack-level instruments say
+it is worth nothing inside 188 members.
+
+## ⚠ OPERATIONAL: a live export directory is not a valid `--extra-dir`
+
+`w27r_blockdrop.py` exports each arm into `data/ext_members7/` on completion. A build
+pointing `--extra-dirs` there while w27r runs loads a member count that depends on *when it
+started* — 190 or 191 — and every number silently answers a different question. Caught
+before any fit, by noticing `tedrop` was two folds from exporting.
+
+**Fix pattern: pin with hardlinks.** `data/ext_members7pin/` holds `ln` links to exactly the
+registered members, so the bytes are provably the same inodes the profiler saw and the
+directory cannot grow. Then assert the member count in the build (`--expect`).
+
+This is the known warning *"a member landing mid-run silently changes any bench that globs
+`oof/`"* arriving somewhere new: the hazard is **any** `--extra-dir` a live job also writes
+to, not only `oof/`.

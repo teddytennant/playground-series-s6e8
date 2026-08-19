@@ -1,0 +1,28 @@
+pack: 188 members via stack.load_members (w27h's exact pack)
+candidates (2) from data/ext_members7: lat_ctdrop_r400, lat_encdrop_r400
+  GATE lat_encdrop_r400: solo 0.9522288823 vs registered 0.9522288823  d=2.20e-11
+  GATE lat_ctdrop_r400: solo 0.9656895129 vs registered 0.9656895129  d=4.94e-11
+
+=== pack reference (w27l) ===
+  median maxcorr over the 188 : 0.99601   10th pct 0.98451   min 0.91797
+
+=== candidates ===
+             candidate    solo AUC   maxcorr        closest in pack   medcorr   decorr rank
+       lat_ctdrop_r400    0.965690   0.99941         lat_ctfix_r400   0.98288      181/189
+      lat_encdrop_r400    0.952229   0.98607                    xgb   0.96890       27/189
+
+=== each candidate's five closest pack members ===
+  lat_ctdrop_r400
+                lat_ctfix_r400  corr 0.99941  solo 0.965775
+                lgbm_fixed_lat  corr 0.99395  solo 0.967711
+           lgbm_fixed_lat_frac  corr 0.99369  solo 0.967790
+                   lattri_lgbm  corr 0.99194  solo 0.967675
+                  latwide_lgbm  corr 0.99186  solo 0.967631
+  lat_encdrop_r400
+                           xgb  corr 0.98607  solo 0.964334
+               bolt_lgb_raw_d4  corr 0.98605  solo 0.959397
+                           hgb  corr 0.98558  solo 0.963856
+                          lgbm  corr 0.98501  solo 0.964494
+                            et  corr 0.98496  solo 0.941122
+
+  Read: LOWER maxcorr = more decorrelated. The pack median is the bar; a candidate above it is a near-copy of something already owned.
