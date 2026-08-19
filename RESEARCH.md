@@ -7149,3 +7149,76 @@ that is the *expected* result, not an anomaly. Budget the rebuild at member-valu
 **A cheap follow-on with real value:** CatBoost's +525e-6 is the largest single-member CT effect
 ever measured here, and `cat_native`/`cat_lat` are already in the pack. If any corrected member
 is worth building, it is a **CatBoost** one, not another LightGBM.
+
+### Fold congruence: no evidence of a foreign-split member in the 188-pack
+
+`w27n_foldcong.py`, the indirect test from @adarsh1077's §7, run on our pack for the first time.
+The whole cross-fitted CV instrument assumes every member's OOF was produced holding out the
+*same* rows we hold out; 188 members come from seven sources and only some publish fold ids. A
+member trained on a foreign split averages five models into each of our folds, washing out the
+shared per-fold-difficulty shape.
+
+    pack median centred fold shape (fold 0..4), x1e6:  -697.3  +10.6  +211.2  +693.5  -216.6
+    fold-congruence score: median +0.9759   10th pct +0.9003   min -0.6891
+    below +0.90: 19 / 188      below +0.50: 2      below 0.00: 1
+
+**Median +0.976, against ~+0.98 on adarsh's pool. No member looks foreign.** The three lowest —
+`orig_bin` (−0.6891, solo 0.850), `w15d_origrep_r` (+0.4508, solo 0.921), `orig_binm` (+0.5326,
+solo 0.886) — are **our own** in-house lookup/binning members, so they are congruent by
+construction, and they are also the three most decorrelated and three of the weakest members in
+the pack (w27l: maxcorr 0.918 / 0.943 / 0.918). That is exactly the failure mode adarsh documents
+— a low score flags an *unstable* member, not a foreign split; his own weakest model scored
+lowest too. Below them the tail is neural/linear members (`golem_*`, `mlp`, `bolt_dcnv2_cross`,
+`bolt_fttransformer`, `pubmk_nn`, `et`) at +0.70 to +0.88, i.e. high-variance model classes.
+
+⚠ **The clean bill of health is for the IMPORTED libraries, which is what we wanted to check** —
+every boltuzamaki, adarsh, beicicc and szymonkapiski member scores above the tail.
+
+**And it independently confirms we are on the community fold split.** adarsh states "fold 3 is
+intrinsically easier than fold 0 for *every* honest member". Our pack median shape is fold 0
+**−697e-6** (hardest) and fold 3 **+694e-6** (easiest) — his exact claim, measured on our folds,
+which we never checked against his. That is a much stronger validation of combining the imported
+members than the published `fold_id` artifacts alone, and it cost one numpy job.
+
+Per-member arrays cached to `experiments/w27n_foldcong.npz` (`names`, `fold_auc`, `score`, `ref`).
+Nothing is dropped on this number.
+
+### NEW CV LEADER: `w27_ad188stdcorr` at 0.9701168076
+
+`w21a_ad187corr.py` with `W21A_BASE=w27_ad188std_h3` (base CV 0.9701114720). The 5-arm
+scheme-average `c_avg` correction, refit from scratch on the 188-member base.
+
+| arm | xfit | se | t | folds | CV | permuted control | real − control |
+|---|---|---|---|---|---|---|---|
+| glob | +2.288e-6 | 3.977 | +0.58 | 4/5 | 0.9701138953 | — | — |
+| a_only | +3.619e-6 | 3.335 | +1.09 | 4/5 | 0.9701152798 | +1.934e-6 | +1.685e-6 |
+| **rule** | **+5.171e-6** | 2.723 | +1.90 | 4/5 | 0.9701168751 | +0.303e-6 | **+4.868e-6** |
+| mask | +3.141e-6 | 5.398 | +0.58 | 4/5 | 0.9701148279 | +0.996e-6 | +2.145e-6 |
+| decile | +3.288e-6 | 4.328 | +0.76 | 4/5 | 0.9701150143 | — | — |
+
+| combination | CV | xfit | se | t |
+|---|---|---|---|---|
+| 3-arm (glob+a_only+rule) | 0.9701164868 | +4.776e-6 | 3.384 | +1.41 |
+| **5-arm (all schemes) — SHIPPED** | **0.9701168076** | **+5.117e-6** | 3.921 | +1.30 |
+| 4-arm (drop decile) | 0.9701164402 | +4.784e-6 | 3.862 | +1.24 |
+| 4-arm (drop mask) — argmax, **NOT shipped** | 0.9701169289 | +5.195e-6 | 3.539 | +1.47 |
+
+**+5.117e-6 on the 188 base, inside w21a's registered +2 to +7e-6.** The argmax was 4-arm
+(drop mask) at 0.9701169289 and was correctly not shipped — choosing the best-CV sub-combination
+on the same folds that scored it re-introduces the selection step w16i exists to avoid, and
+adarsh1077 now prices that leak at **+19 to +32e-6 against a real effect of ~+6e-6** (above).
+
+**`w27_ad188stdcorr` = 0.9701168076 is the highest cross-fitted CV ever built in this workspace**,
++1.73e-6 above `w23_ad187stdcorr` (0.9701150809). ⚠ **`WANTED` slot 1 becomes
+`w27_ad188stdcorr.csv`**, with `w23_ad187stdcorr.csv` moving to slot 2 and `w21_ad187corr.csv`
+dropping off. **It is built but NOT YET SUBMITTED** — the 08-19 day was exhausted before it
+finished. **Send it as slot 1 of the 08-20 day; a file that is never submitted cannot be
+selected.** Predicted LB under the corrected w25f model: **0.97115**, P(beat 0.97118) ≈ 1e-4 —
+i.e. it is a *selection* candidate, not a leaderboard move, which is now true of everything here.
+
+**The permutation controls are the most useful new thing in this table** and w21a should keep
+printing them. `a_only`'s +3.62e-6 is only **+1.69e-6** above a control with the cell labels
+shuffled, while `rule`'s +5.17e-6 is **+4.87e-6** above its control. So most of `a_only`'s
+apparent gain is the free parameter, not the partition — and `rule`, the generator's own cells,
+is carrying nearly all of its gain as real signal. That is a sharper read on which partition
+matters than the t-statistics give.

@@ -1125,3 +1125,55 @@ Nothing is selected, so Kaggle auto-picks our two entries by **best public score
 three most **slice-inflated** files we own (standardised residual +1.20/+1.12/+1.07 against
 +0.26 for the CV pick). The backtest above is the price list for that policy.
 `WANTED` = {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`} and a human still has to tick them.
+
+---
+
+## 2026-08-19, 15:48 UTC — 2,329 teams
+
+| | |
+|---|---|
+| leader | 0.97134 (MILANFX, 08-18) |
+| **us** | **0.97118, rank 17 of 2329, top 0.73%** |
+| gap to leader | 1.60e-4 |
+| teams ahead | 16 |
+| tied with us | 7 |
+| within 1e-4 of the leader | 8 |
+
+Medal cuts at 2,329 teams: **gold top 14, silver top 116, bronze top 232.** We are **three
+places outside gold**, unchanged from the 14:51 snapshot (2,323 teams). ⚠ The brief's
+"~1,326 teams" is stale by about a thousand — take the count from the downloaded CSV.
+
+Movement since yesterday is at the top, not around us: Maher el Ouahabi 0.97127, Optimistix
+0.97126, Don Mani and cstdy 0.97125 all posted on 08-19. The 0.97118 shelf we sit on is thick
+and it is not moving.
+
+### ⚠ What a submission is actually FOR here now — this changed today
+
+Two findings this slot, together, close off the public leaderboard as a target:
+
+1. **The queue-pricing bug (RESEARCH, w27 slot 3).** The CV bar for an even-money shot at our own
+   0.97118 is **0.9701326** for a standardised h3 file, not the 0.9701182 this workspace has been
+   quoting — the old figure omitted the −27.43e-6 standardisation penalty. Our new CV leader is
+   0.9701168. **Nothing on disk is within 16e-6 of the bar, and the bar is against our own score,
+   not the board's.**
+2. **The ~350x stack-translation loss**, measured independently by @adarsh1077 and matching our
+   own CT thread exactly. Member-level gains of +1000e-6 arrive as +3e-6 in a saturated stack.
+
+**So public-LB movement is not reachable from here by member-level work.** A submission's value
+is now almost entirely that **a file must be submitted to be selectable for the private board.**
+
+That makes the unclicked final selection the single highest-value open item in the workspace, and
+§6 of the w27 slot-2 entry priced it: a team standing exactly where we stand has a **median
+private percentile of 6.53%**, **10.8% still gold**, **50.6% still silver**, and **33% falling out
+of the medals**. Kaggle auto-selects by best *public* score, which lands on the three most
+slice-inflated files we own (standardised residual +1.20/+1.12/+1.07 against +0.26 for the CV
+pick). Selecting on the public slice is the mechanism that produces the bad tail.
+
+### ⚠ `WANTED` has changed — a human must tick these two
+
+1. **`w27_ad188stdcorr.csv`** — CV **0.9701168076**, the highest ever built here. ⚠ **BUILT BUT
+   NOT YET SUBMITTED**; the 08-19 day ran out. **Send it as slot 1 on 08-20**, then tick it.
+2. **`w23_ad187stdcorr.csv`** — CV 0.9701150809, already uploaded.
+
+(`w21_ad187corr.csv` drops off the list.) The API has no write path for selection — probed and
+falsified 08-13.

@@ -1,0 +1,34 @@
+188 members, 5 folds
+  fold 0: mean member AUC 0.960836
+  fold 1: mean member AUC 0.961530
+  fold 2: mean member AUC 0.961791
+  fold 3: mean member AUC 0.962276
+  fold 4: mean member AUC 0.961386
+
+pack median centred fold shape (fold0..4), x1e6:   -697.3     +10.6    +211.2    +693.5    -216.6
+  (a positive entry = that fold is intrinsically EASIER than the member's own mean)
+
+fold-congruence score: median +0.9759   10th pct +0.9003   min -0.6891
+  members below +0.90: 19 of 188
+  members below +0.50: 2
+  members below  0.00: 1
+
+=== 15 LOWEST (look here first; low = unusual or unstable, NOT proof of a foreign split) ===
+                              member    score   solo AUC   per-fold centred AUC x1e6
+                            orig_bin  -0.6891   0.850261       +311     -461     +318     -971     +802
+                      w15d_origrep_r  +0.4508   0.921475       -242     -685     +867     +230     -169
+                           orig_binm  +0.5326   0.886379        -90      -52     -172     +240      +74
+                             golem_g  +0.7004   0.942163      -1369     -229     +787     +311     +501
+                           ad_gnn_te  +0.7682   0.963941       -612      +64     +534     +135     -121
+                              logreg  +0.7917   0.918800       -814     -823     +576     +940     +122
+                             golem_d  +0.7959   0.962601      -1145     +340     -609    +1256     +158
+                                 mlp  +0.8511   0.940040      -1151     -381     +621     +676     +235
+                    bolt_dcnv2_cross  +0.8512   0.938498      -1094     -699     +666     +981     +145
+         bei_lookup_fixed24_seed1042  +0.8599   0.966058       -478     +182       -8     +268      +35
+                                  et  +0.8744   0.941123      -1042     -593     +449    +1006     +180
+                             golem_b  +0.8759   0.940811      -1148     -663     +581    +1081     +149
+                  bolt_fttransformer  +0.8789   0.940109      -1040     -605     +434    +1050     +161
+                            pubmk_nn  +0.8792   0.940854      -1019     -465     +451     +841     +192
+                   bolt_neural_5fold  +0.8827   0.939228      -1089     -529     +505     +938     +174
+
+wrote experiments/w27n_foldcong.npz

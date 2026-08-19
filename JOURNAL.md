@@ -13497,3 +13497,84 @@ regardless — the argmax is not shipped, per the reason w16i exists.
    submissions page and tick two files.** §1 above makes this the highest-value item in the
    workspace: public-LB movement is not reachable from here, and auto-selection by best public
    score lands on the three most slice-inflated files we own.
+
+## 9. THE SEND — slot 10 of 10, and the corrected build's number
+
+**Sent: `w27_ad188std.csv`, ref 55627458, 16:16 UTC. "0 submissions remaining today."**
+
+Sent under the decision rule registered in yesterday's §12 — *send `w27_ad188stdcorr` if it
+exists, else this* — and `w21a` was still grinding its permutation controls when the call had to
+be made, so it did not exist. Not a rule departure.
+
+⚠ **What makes it a slot worth spending rather than filler is that it is a clean out-of-sample
+test of §1's bug fix.** This exact file was the one mispriced: built with `--standardize`, scored
+as unstandardised, handed +27.43e-6 it had not earned. **REGISTERED before the print: the
+corrected model says 0.97115, the old buggy one said 0.97118.** Three reporting steps apart, so
+one file discriminates them. 0.97115 confirms the fix and the −27.43e-6 standardisation penalty;
+0.97118 would say the penalty does not apply to this build and the whitelist was accidentally
+right. **Check this next run — it is the cheapest read available on whether §1's corrected bar
+(0.9701326 for a standardised h3 file) is the one to plan against.**
+
+### `w27_ad188stdcorr` = 0.9701168076. New CV leader. NOT YET SUBMITTED.
+
+| combination | CV | xfit | se | t |
+|---|---|---|---|---|
+| 3-arm (glob+a_only+rule) | 0.9701164868 | +4.776e-6 | 3.384 | +1.41 |
+| **5-arm (all schemes) — SHIPPED** | **0.9701168076** | **+5.117e-6** | 3.921 | +1.30 |
+| 4-arm (drop decile) | 0.9701164402 | +4.784e-6 | 3.862 | +1.24 |
+| 4-arm (drop mask) — argmax, **NOT shipped** | 0.9701169289 | +5.195e-6 | 3.539 | +1.47 |
+
++5.117e-6 on the 188 base, inside w21a's registered +2 to +7e-6. The argmax was correctly not
+shipped — and adarsh1077 now prices exactly that leak at **+19 to +32e-6 against a real effect of
+~+6e-6**, which is the sharpest justification for the w16i rule this workspace has ever had.
+
+**0.9701168076 is the highest cross-fitted CV ever built here**, +1.73e-6 above
+`w23_ad187stdcorr`. ⚠ **`WANTED` slot 1 becomes `w27_ad188stdcorr.csv`; `w23_ad187stdcorr.csv`
+moves to slot 2; `w21_ad187corr.csv` drops off.** It is built but **unsent** — the day ran out.
+**Send it as slot 1 on 08-20. A file that is never submitted cannot be selected**, and under §1's
+corrected pricing that is now the *only* thing a submission is for here.
+
+## 10. The cross-class CT result — §M3 scorecard
+
+| class | ct1.0 | ct4/3 | **d_c** | d_te | d_both | CTshare |
+|---|---|---|---|---|---|---|
+| lgb (w27g, quoted) | 0.964779 | 0.965104 | **+324.99e-6** | — | — | 1.00% |
+| xgb | 0.965439 | 0.965730 | **+291.06e-6** | −19.26e-6 | +270.45e-6 | 1.23% |
+| **cat** | 0.965123 | 0.965648 | **+525.49e-6** | −82.68e-6 | +466.29e-6 | **3.21%** |
+
+- **§M3(a) PRIMARY — HELD.** `d_c > 0` in all three classes. **The 4/3 skew is a property of the
+  feature matrix, not a LightGBM artefact.** This was the one result that could have killed the
+  thread outright, and it did not.
+- **§M3(b) MAGNITUDE — FAILED, and my mechanism reasoning was backwards.** I registered CatBoost
+  at +30 to +300e-6, modal +130e-6, *below* LightGBM, on the theory that oblivious trees spread
+  split budget away from any one column family. Observed **+525.49e-6, 1.6x LightGBM** and far
+  outside the range — CatBoost leans on `CT_` *harder* (CTshare 3.21% vs 1.00%). Recorded as a
+  failed prediction, not a pleasant surprise. XGBoost held comfortably (+291e-6 against a
+  registered +80 to +400e-6, mode +250e-6).
+- **§M3(c) SECONDARY — fails across libraries, exactly as its own caveat warned.** w27g's LGB
+  line predicts +386e-6 for xgb (observed +291) and +798e-6 for cat (observed +525), and the
+  relation is not even monotone — xgb has higher CTshare than lgb but lower d_c. **The CTshare
+  relation is readable WITHIN a library and not ACROSS libraries. Never quote a cross-library
+  CTshare slope.**
+- **§M3(d) — the TE re-shrink is NEGATIVE in both new classes** (−19.26e-6 xgb, −82.68e-6 cat),
+  and `both` lands below `ct4/3` in each. Third and fourth confirmation of §G6, now outside
+  LightGBM. **The 4/3 CT rescale is the whole effect; the smoothing re-shrink subtracts.**
+
+Cheap follow-on with real value: **CatBoost's +525e-6 is the largest single-member CT effect ever
+measured here.** If any corrected member is worth building, it is a CatBoost one, not another
+LightGBM.
+
+## 11. Fold congruence: the pack is clean, and we are on the community split
+
+`w27n_foldcong.py`, adarsh1077's §7 test, never run here before. Median score **+0.9759** (his
+pool ~+0.98); 19 of 188 below +0.90, 2 below +0.50, 1 below 0. **No member looks foreign.** The
+three lowest are our **own** `orig_bin` / `w15d_origrep_r` / `orig_binm` — congruent by
+construction, and also the three most decorrelated and weakest members in the pack. That is the
+documented failure mode: low flags *unstable*, not *foreign*. Every imported library member scores
+above the tail, which is what we actually wanted to check.
+
+**And it confirms we share the community fold split.** adarsh states "fold 3 is intrinsically
+easier than fold 0 for every honest member". Our pack median centred shape is fold 0 **−697e-6**
+(hardest), fold 3 **+694e-6** (easiest) — his exact claim, on our folds, which we had never
+checked against his. Stronger validation of combining the imported members than the published
+`fold_id` artifacts alone, and it cost one numpy job.

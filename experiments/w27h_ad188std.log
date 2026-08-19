@@ -64,3 +64,38 @@ base w27_ad188std_h3 OOF AUC 0.9701114720   (w16i's base blend159av_h3 0.9700491
   CTRL permuted a_only  xfit  +1.934e-6  -> real minus control  +1.685e-6
   CTRL permuted rule    xfit  +0.303e-6  -> real minus control  +4.868e-6
   CTRL permuted mask    xfit  +0.996e-6  -> real minus control  +2.145e-6
+  CTRL permuted decile  xfit  +2.682e-6  -> real minus control  +0.606e-6
+
+=== leave-one-fold-out over the FIVE schemes (187 base) ===
+  naive argmax arm = rule  xfit +5.171e-6
+  nested picks     = ['rule', 'rule', 'rule', 'mask', 'rule']
+  nested delta     = +2.292e-6  se 5.349
+  SCHEME-SELECTION OPTIMISM = +2.879e-6   stability 4/5
+
+=== averaged objects (no selection inside them) ===
+  3-arm (glob+a_only+rule)     CV 0.9701164868  xfit  +4.776e-6  se 3.384  t +1.41  4/5
+  5-arm (all schemes)          CV 0.9701168076  xfit  +5.117e-6  se 3.921  t +1.30  4/5
+  4-arm (drop decile)          CV 0.9701164402  xfit  +4.784e-6  se 3.862  t +1.24  4/5
+  4-arm (drop mask)            CV 0.9701169289  xfit  +5.195e-6  se 3.539  t +1.47  4/5
+
+  highest cross-fitted CV: 4-arm (drop mask)  0.9701169289
+  ** NOT SHIPPING THE ARGMAX. ** Shipping the pre-registered 5-arm (all schemes) (CV 0.9701168076).
+  full-data weights glob    {'0': np.float64(0.001)}
+  full-data weights a_only  {'A': np.float64(0.007), 'rest': np.float64(0.001)}
+  full-data weights rule    {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.0015), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+  full-data weights mask    {'m0': np.float64(0.0015), 'm1': np.float64(0.0015), 'm2': np.float64(0.001), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+  full-data weights decile  {'q0': np.float64(0.001), 'q1': np.float64(0.0005), 'q2': np.float64(0.001), 'q3': np.float64(0.0015), 'q4': np.float64(0.006), 'q5': np.float64(0.009), 'q6': np.float64(0.01), 'q7': np.float64(0.0)}
+
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188stdcorr.csv  rows 296,302  range [3.375e-06, 1.000]  distinct 296,302
+  rank-identical to an existing submission file? no
+    spearman vs w27_ad188std_h3        0.9999778  rows differing 295,572
+    spearman vs w16i_schemeavg         0.9996707  rows differing 296,203
+    spearman vs blend159av_h3          0.9996501  rows differing 296,245
+    spearman vs w16q_ens4avg           0.9995567  rows differing 296,213
+
+=== deadline-pick arithmetic (decided in the journal, not here) ===
+  w27_ad188stdcorr       CV 0.9701168076
+  w27_ad188std_h3        CV 0.9701114720   (+5.336e-6)
+  w16i_schemeavg         CV 0.9700556663   (+61.141e-6)
+
+wrote experiments/w21a_w27_ad188stdcorr.json
