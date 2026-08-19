@@ -1,0 +1,167 @@
+PRE-REGISTRATION — 2026-08-19, wave w27, slot 4 of 10
+Written BEFORE any number below existed. Timestamped by the git commit that adds it.
+
+CONTEXT / WHY THIS AND NOT THE HANDED ANGLE AS WRITTEN
+=====================================================
+Handed angle: "XGBoost: third leg of the ensemble, tuned on the same folds so the
+blend weights mean something."
+
+The literal reading is closed by this workspace's own measurements and re-running it
+would be filler:
+  - The pack already holds ~40 XGBoost members across FOUR distinct upstream
+    pipelines (run_xgb.py modes lat / cat / raw / latcat), all on the frozen
+    SKF5 seed42 folds, so the blend weights already mean something.
+  - GBDT hyperparameter tuning inside a fixed pipeline is closed at ~+4e-7 into
+    the stack (RESEARCH, 2026-08-13).
+  - w27l ranked decorrelation over all 188 members: the lat-pipeline XGB members
+    are the MOST redundant objects we own (xgb_lat 176/188, xgb_latcat 181/188).
+  - Slot 7 of 2026-08-16 (w16q/w16r) is the literal angle, already executed.
+
+What IS open in the XGBoost direction, and is the load-bearing weakness in the
+strongest live thread: w27j's cross-class CT scorecard (yesterday's SS10) rests on
+FOLD 0 ONLY, n=1, for both xgb and cat, and its LightGBM control is QUOTED from a
+different script (w27g) rather than refitted on the same harness. Three headline
+claims were written off that single cell:
+    "the 4/3 skew is a property of the feature matrix, not a LightGBM artefact"
+    "CatBoost leans on CT_ 1.6x harder than LightGBM"
+    "the TE re-shrink is negative outside LightGBM"
+w26k already shows the per-fold spread of d_c is large (LGB @2000 rounds:
++695 / +519 / +497e-6 on folds 0/1/2 -- a range of ~200e-6, ~35% of the mean), so
+a 34e-6 xgb-vs-lgb gap read off one fold is almost certainly unresolvable.
+
+w27j costs 57s (xgb) / 37s (cat) per fit at 400 rounds. All five folds are cached.
+The full 3-class x 5-fold grid is 13 remaining fits, ~15 min of 3-thread work. This
+is the cheapest available upgrade of an n=1 headline to n=5, it puts the XGBoost leg
+on the same folds as everything else it is compared to, and it costs no submission.
+
+THE RUN
+=======
+  experiments/w27o_ctclass5.sh
+    -> w27j_ctclass.py --classes lgb,xgb,cat --fold {0,1,2,3,4} --rounds 400
+       --seed 42 --threads 3, nice -n 15, sequential, per-(class,fold) checkpointed
+       in cache/ctclassckpt/. Fold 0 xgb/cat are already on disk and are NOT refitted.
+  Gate (already in the script): median valid/train CT_ ratio must print 1.3325.
+
+REGISTERED PREDICTIONS  (SS M4)
+===============================
+M4(a) PRIMARY -- SIGN.  d_c > 0 in at least 13 of the 15 (class, fold) cells.
+      Strong form, stated separately so it can fail on its own: all 15.
+      FAILS if <13. A failure demotes SS M3(a) from "held" to "held on one fold".
+
+M4(b) ORDERING.  Pooled over folds, CatBoost's d_c is the largest of the three
+      classes AND (cat - xgb) > +100e-6.
+      Registered because fold 0 gave +234e-6 for that contrast and the mechanism
+      (CTshare 3.21% vs 1.23%) is a within-fold measurement that should be stable.
+
+M4(c) RESOLUTION -- the one I expect to embarrass fold 0.  The xgb-vs-lgb ordering
+      (fold 0: lgb +325.0 > xgb +291.1, a 34e-6 gap) FLIPS on at least one fold.
+      Registered per-class between-fold sd of d_c: 60 to 200e-6.
+      If the sd comes in below 60e-6 in all three classes then fold 0 was in fact
+      an adequate instrument and I was wrong to doubt it -- record that as such.
+
+M4(d) HARNESS CHECK.  The refitted lgb fold-0 numbers land within +/-20e-6 of
+      w27g's quoted 0.964779 / 0.965104. A larger miss means w27j's harness and
+      w27g's are not the same instrument and the SS10 cross-class table was never
+      commensurable -- which would be the most important thing this slot finds.
+
+M4(e) TE RE-SHRINK.  d_te < 0 in at least 8 of the 10 xgb/cat cells (fold 0 gave
+      -19.26e-6 xgb, -82.68e-6 cat). Fifth and sixth confirmations of SS G6.
+
+RULES
+=====
+R-M4a  NOTHING IS SHIPPED FROM THIS. It is a measurement of an existing member
+       transform, not a member build and not a candidate file. Per w16i, no argmax
+       over folds or classes is permitted to select anything.
+R-M4b  The pooled d_c is the MEAN over folds of the per-fold d_c, decided here.
+       Not the AUC of pooled predictions, and not a re-weighting.
+R-M4c  CTshare stays non-commensurable across libraries (SS M3(c)). No cross-library
+       CTshare slope is to be quoted from this run either.
+
+SUBMISSION STATUS THIS SLOT
+===========================
+The Kaggle API reports 10 submissions already landed on 2026-08-19 and the 16:16 UTC
+send printed "0 submissions remaining today". THIS SLOT SENDS NOTHING. That is the
+cap, not a choice.
+
+STANDING ITEM CARRIED FORWARD, restated because it is worth more than anything above:
+  submissions/w27_ad188stdcorr.csv  -- CV 0.9701168076, the highest cross-fitted CV
+  ever built here, VALIDATED THIS SLOT (296,302 rows, ids match sample_submission
+  exactly, 0 NaN, 296,302 distinct values so no AUC ties) and STILL UNSENT.
+  It is WANTED slot 1. A file that is never submitted cannot be selected.
+  SEND IT AS SLOT 1 ON 2026-08-20.
+
+
+================================================================================
+SS M5 -- APPENDED LATER IN SLOT 4, BEFORE w27p WAS LAUNCHED AND BEFORE ANY
+         NUMBER FROM IT EXISTED. Reason for the append is recorded honestly in
+         JOURNAL SS10: I had written "do not start the lattice rebuild" off a
+         null paired Delta, which is the exact inference RESEARCH.md:6562
+         pre-registered against. That standing registration fires as written --
+         a null Delta selects the REBUILD -- and it names the probe:
+             "rebuild THREE lattice members of different function classes
+              (lgbm / xgb / catboost) and measure the paired Delta of the trio"
+         The lgbm leg exists (lat_ctfix_r400 / lat_ctraw_r400). w27p builds the
+         xgb and cat legs. XGBoost is also this slot's handed angle.
+================================================================================
+
+THE RUN
+=======
+  experiments/w27p_serveclass.py --cls xgb --rounds 400 --seed 42
+  experiments/w27p_serveclass.py --cls cat --rounds 400 --seed 42
+    One fit per (class, fold); BOTH arms served off the SAME booster, so the pair
+    is exactly matched and shares its trees. Arms:
+        ct1.0000   status quo = the skewed control member
+        ct1.3333   CT_ / (4/3) = the corrected member
+    apply_arm IMPORTED from w26l_serve (arms byte-identical to every LGB run in
+    the thread). Fitters IMPORTED from w27j_ctclass (hyperparameters identical to
+    the d_c values SS M3 measured). Xb/Xt copied per arm, not mutated-and-restored
+    (CatBoost clears the writeable flag -- yesterday's SS4.2).
+  Chained behind w27o's xgb/cat cells: same fits, and the box is five jobs deep.
+  Output: data/ext_members7/{xgb,cat}_{ctraw,ctfix}_r400
+
+REGISTERED PREDICTIONS  (SS M5)
+===============================
+M5(a) GATE, not a prediction. Fold 0 xgb ct1.0000 must reproduce w27j's
+      0.965438622483465 and ct1.3333 its 0.9657296816076262, both to < 1e-9.
+      Same fitter, same seed, same matrix, same arm code -- if this misses, the
+      two scripts are not the same instrument and NOTHING below is readable.
+
+M5(b) MEMBER-LEVEL d_c, pooled over 5 folds. Registered from fold 0 plus w26k's
+      observed between-fold spread:
+          xgb  +150 to +430e-6, mode +290e-6
+          cat  +300 to +750e-6, mode +525e-6
+      Both strictly > 0 pooled. This is the same quantity M4(b) measures on a
+      different harness, so the two are a mutual check.
+
+M5(c) THE ONE THAT MATTERS -- THE TRIO'S PAIRED PACK-LEVEL DELTA.
+      Delta_trio = value(pack + {lgb,xgb,cat}_ctfix) - value(pack + {lgb,xgb,cat}_ctraw)
+      measured by w26i_value on the same reps, all three legs swapped together.
+      Standing single-leg reading is Delta_lgb = -0.83e-6 (se 2.33, n=3).
+      REGISTERED: -3 to +6e-6, mode +1.0e-6.
+      DECISION RULE, fixed here:
+        Delta_trio >= +5e-6  -> the ~33-member rebuild is ON; it is the one
+                                remaining path sized above the SS1 bar (+15.8e-6)
+                                and there are 12 days.
+        +1 to +5e-6          -> rebuild only the OWN-BUILT lattice members (~19),
+                                not the imported ones; cheaper, same direction.
+        below +1e-6          -> the rebuild is OFF on a THREE-CLASS probe rather
+                                than a one-member lower bound, which is the
+                                evidence RESEARCH.md:6562 asked for before
+                                abandoning it. Spend the remaining days on
+                                marg_fix instead (+3.37e-6 per member, se 0.24).
+
+M5(d) DECORRELATION. The four new members' maxcorr against the 188 pack is
+      registered at 0.995 to 0.9995 -- i.e. they are REDUNDANT by the pack's usual
+      standard, and that is expected and is not a defect: the whole point is that
+      they differ from their own siblings by a displacement the span cannot
+      contain, not by being decorrelated. Registered so a high maxcorr is not
+      later read as a failure.
+
+RULES
+=====
+R-M5a  No argmax. Whatever Delta_trio comes back, the decision rule above is what
+       fires. Not the best of {lgb-only, xgb-only, cat-only, trio}.
+R-M5b  These four members do NOT go into oof/ and do NOT silently join the pack.
+       data/ext_members7/, reachable only via an explicit --extra-dirs. Every
+       reproduction gate in this repo is stated against a fixed member COUNT.
+R-M5c  Nothing here is a submission candidate on its own.

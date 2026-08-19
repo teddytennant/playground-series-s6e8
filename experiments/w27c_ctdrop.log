@@ -1,3 +1,14 @@
 [ctdrop] 184 cols -> 112 kept, 72 CT_ dropped
 [ctdrop] rounds=400 seed=42 jobs=6
 [ctdrop] fold 0: 0.965038  (3228s)
+[ctdrop] fold 1: 0.965662  (5884s)
+[ctdrop] fold 2: 0.965989  (6273s)
+[ctdrop] fold 3: 0.966344  (6631s)
+[ctdrop] fold 4: 0.965421  (7020s)
+
+[ctdrop] POOLED OOF over 691,369 rows
+  ct_drop   0.9656895129
+  w26l ct1.0000  0.9654813306   ct_drop - ct1.0      +208.18e-6
+  w26l ct1.3333  0.9657751945   ct_drop - ctfix       -85.68e-6
+  ct_drop recovers 70.8% of the fix (§G8: registered ~33%)
+  saved w27c_ctdrop_{oof,test}.npy  (7021s)

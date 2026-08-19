@@ -7222,3 +7222,108 @@ shuffled, while `rule`'s +5.17e-6 is **+4.87e-6** above its control. So most of 
 apparent gain is the free parameter, not the partition — and `rule`, the generator's own cells,
 is carrying nearly all of its gain as real signal. That is a sharper read on which partition
 matters than the t-statistics give.
+
+---
+
+# w27 slot 4 (2026-08-19) — durable facts
+
+## The corrected LB bar, now confirmed out of sample
+
+Slot 3 sent `w27_ad188std.csv` as a discriminating test between two reporting models three
+steps apart. Registered before the print: **corrected → 0.97115, old buggy → 0.97118.**
+**Observed 0.97116** — one step from corrected, two from buggy.
+
+**`w26d_queueprice`'s standardisation fix is corroborated. Quote these bars and no others:**
+
+| family | bar for an even-money shot at our own 0.97118 | vs the CV leader `w27_ad188stdcorr` 0.9701168076 |
+|---|---|---|
+| **h3, standardised** | **0.9701325557** | **+15.8e-6** |
+| ens4, standardised | 0.9701252138 | +8.4e-6 |
+
+⚠ `0.9701181879` is the **unstandardised** bar and everything built since w23 is
+standardised. Do not quote it. Account best public **0.97118**; board leader **0.97134**.
+
+## The paired pack-level value of the CT correction — measured, and it is a null
+
+`experiments/w27b_ctvalue.csv`, 3 complete reps of `w26i_value` on the 187 pack:
+
+| paired quantity, e-6 | mean | se | t | reps positive |
+|---|---|---|---|---|
+| **Δ = ctfix − ctraw** | **−0.83** | 2.33 | −0.35 | 1/3 |
+| Δ = ctfixte − ctraw | −0.27 | 1.79 | −0.15 | 1/3 |
+| **marginal of ANY of the three over the 187 pack** | **+3.4 to +4.2** | 0.24–2.26 | up to +14.3 | 3/3 |
+
+Prereg §H3 registered "Δ must clear ~+3e-6 to be worth a file". **It fails, and the sign is
+wrong.** The *uncorrected* control member is worth as much as the corrected one.
+
+⚠⚠ **DO NOT multiply this by the member count to price the rebuild.** That is the exact
+inference `RESEARCH.md` §"A null paired-Delta for ONE corrected member does NOT close the CT
+thread" pre-registered against, and slot 4's journal §2 made the mistake in writing before
+§10 retracted it. Δ is a **lower bound measured inside a uniformly-skewed span**, not an
+estimate of what un-skewing the span is worth. The standing decision rule fires as written:
+**a null Δ selects the rebuild, via the three-class trio probe** (`w27p_serveclass.py`, slot-4
+prereg §M5).
+
+**What IS a usable positive:** adding *a* member to the 187 pack is worth **+3.37e-6, se 0.24,
+3/3 reps** (t = 14.3, the tightest positive marginal measured here) and it does **not** care
+whether the member is corrected. **Five members of any kind clears the +15.8e-6 bar.**
+
+## The CT correction is a serve-time rescale, so a matched pair costs ONE fit
+
+Consequence worth stating on its own because it was missed for two waves: the skewed control
+member and the corrected member come off the **same fitted booster**. Building both arms of a
+class is 5 fits, not 10. The whole xgb + cat trio probe is **10 fits** (~57s and ~37s each at
+threads=3), not 20. Any *further* serve-time arm on a saved booster is free.
+
+## Fit costs on `cache/f*_Xa.npy` (184 cols, ~553k rows, 400 rounds, threads=3)
+
+| class | fit |
+|---|---|
+| CatBoost (depth 6, lr 0.06) | ~37 s |
+| XGBoost (depth 7, eta 0.03, hist) | ~57 s |
+| **LightGBM (63 leaves, lr 0.025)** | **~600 s** |
+
+⚠ **LightGBM is ~10x the cost of the other two on this matrix.** Order any multi-class sweep
+cheap-class-first: slot 4's first launch of `w27o` ran class-major and put 5.5 hours of
+*control* in front of every genuinely new cell. Under `nice -n 15` on a load-40 box the job
+was getting **43% of one core**, so nice-value and box load multiply the ordering mistake.
+
+## The within-LightGBM CTshare → d_c relation (w27g, 4 of 14 configs)
+
+| config | CTshare | d_c |
+|---|---|---|
+| leaves31_d6 | 0.8% | +297.11e-6 |
+| control (63 leaves, d7) | 1.0% | +324.99e-6 |
+| leaves127_d9 | 1.3% | +401.11e-6 |
+| leaves255_dinf | 2.6% | +678.83e-6 |
+
+Monotone over a 3.3x range of CTshare, **within** LightGBM. Still not readable **across**
+libraries (§M3(c): it predicts +386e-6 for xgb against an observed +291, and +798e-6 for cat
+against +525). **Never quote a cross-library CTshare slope.**
+
+## The CT_ gate ratio is fold-dependent
+
+`median(valid CT_ / train CT_)` prints **1.3325 on fold 0** and **1.3336 on fold 1**, both
+against the algebraic 4/3 = 1.3333. Any gate on this must allow a per-fold band, not a
+fold-0 constant.
+
+## `w27c_ctdrop` — deleting the CT_ block outright beats the status quo
+
+Folds 0/1/2 with all 72 `CT_` columns dropped (112 of 184 kept): **0.965038 / 0.965662 /
+0.965989**. Fold 0's status quo is 0.964779 and its 4/3 fix is 0.965104, so **deletion beats
+the status quo by +259e-6 and is only −66e-6 below the fix.** The CT_ block as built is close
+to worthless; the correction recovers slightly more than deleting it.
+
+## Operational
+
+- **Daily cap 10, re-confirmed 2026-08-19**: 10 submissions landed on the 08-19 UTC day and the
+  last printed "0 submissions remaining today".
+- `submissions/w27_ad188stdcorr.csv` **validated 08-19**: 296,302 rows, `id` matches
+  `sample_submission.csv` exactly and in order, 0 NaN, **296,302 distinct values** (no AUC
+  ties), range 3.37e-6 .. 1.0. CV **0.9701168076**, the highest cross-fitted CV built here.
+  **UNSENT.** A file that is never submitted cannot be selected.
+- Before writing "never checked before" in the journal, **grep RESEARCH.md for the claim.**
+  Slot 4 re-derived the public-library CT scope that §"SCOPE: this is in the PUBLIC library's
+  recipe" already held — and re-derived it *less* accurately (12 vs the correct **14** public
+  `lat*`/`rmlp_lat*` members, 24 vs **~33** lattice members of 191 files), because a
+  `grep -l "CT_"` misses members that consume the lattice frame without emitting the column.

@@ -13578,3 +13578,328 @@ easier than fold 0 for every honest member". Our pack median centred shape is fo
 (hardest), fold 3 **+694e-6** (easiest) — his exact claim, on our folds, which we had never
 checked against his. Stronger validation of combining the imported members than the published
 `fold_id` artifacts alone, and it cost one numpy job.
+
+# 2026-08-19 (UTC) — wave w27, slot 4 of 10 — ANGLE (as handed): "XGBoost: third leg of the ensemble, tuned on the same folds so the blend weights mean something"
+
+## 0. ⚠ AT THE DAILY CAP. NOTHING WAS SENT THIS SLOT, AND THAT IS NOT A CHOICE
+
+`kaggle competitions submissions -v` reports **10 submissions on 2026-08-19**, and slot 3's
+16:16 UTC send printed "0 submissions remaining today". The cap is 10. This slot is
+build-and-measure only. The brief's "an unused slot is pure waste" does not apply to a slot
+that does not exist.
+
+Account best public: **0.97118** (`w21_ad187corr_ens4`, 08-17). Board leader **0.97134**
+(MILANFX, 08-18). 50 scored files.
+
+## 1. Slot 3's registered prediction resolved, and the bug fix WINS
+
+Slot 3 sent `w27_ad188std.csv` explicitly to discriminate two reporting models three steps
+apart, registered before the print: **corrected → 0.97115, old buggy → 0.97118.**
+
+    OBSERVED: 0.97116.
+
+One step from the corrected model, **two** from the buggy one. `w26d_queueprice`'s
+standardisation fix is corroborated out of sample and the −27.43e-6 penalty applies to this
+build. **The bar to plan against is the corrected one: a standardised h3 file needs CV
+0.9701326 for an even-money shot at our own 0.97118** — i.e. **+15.8e-6 above the current CV
+leader `w27_ad188stdcorr` (0.9701168076)**. Quote that number, not 0.9701182.
+
+## 2. ⚠⚠ THE CT CORRECTION IS NULL AT PACK LEVEL ON THE PAIRED INSTRUMENT — AND THAT KILLS THE LATTICE REBUILD
+
+`w26i_value` (→ `experiments/w27b_ctvalue.csv`) is the workspace's paired member-value
+instrument and it now has **3 complete reps** of the arm that was registered as decisive
+(prereg §H2/§H3). Rep 3 is mid-flight; these are the reps that have been written.
+
+| paired quantity, e-6 | rep 0 | rep 1 | rep 2 | mean | se | t | pos |
+|---|---|---|---|---|---|---|---|
+| **Δ = ctfix − ctraw** | +3.73 | −2.23 | −3.98 | **−0.83** | 2.33 | −0.35 | **1/3** |
+| Δ = ctfixte − ctraw | +3.19 | −1.19 | −2.82 | −0.27 | 1.79 | −0.15 | 1/3 |
+| marginal of ctfix over the 187 pack | +3.63 | +2.89 | +3.57 | **+3.37** | 0.24 | **+14.3** | **3/3** |
+| marginal of **ctraw** (the SKEWED control) | −0.10 | +5.13 | +7.55 | **+4.19** | 2.26 | +1.86 | 2/3 |
+| marginal of ctfixte | +3.09 | +3.94 | +4.73 | +3.92 | 0.48 | +8.2 | 3/3 |
+
+**§H3 registered "Δ must clear ~+3e-6 to be worth a file". Δ = −0.83e-6. It FAILS, and the
+sign is wrong.** §H2 registered 0..+3e-6 modal +0.5e-6; the point estimate is below the range
+though inside its noise. The uncorrected control member is worth *at least as much* as the
+corrected one, and on 2 of 3 reps more.
+
+**What this does to yesterday's §2.** Yesterday priced a lattice REBUILD at
+`n_members × (325e-6 / 200) ≈ +54e-6` by borrowing adarsh1077's ~200x member→pack dilution
+ratio. That borrowing is now unnecessary: **we can measure the pack-level value of one
+corrected member directly, on our own paired instrument, and it is −0.83e-6.** The rebuild is
+therefore priced at **n × (−0.83e-6) ≈ nothing** — not +54e-6, and not the +39e-6 that §4's
+corrected member count below would have implied. ⚠ **Do not start the lattice rebuild.** This
+is the third independent instrument to return null at pack level (cross-fitted 188 build
++2.20e-6 attributable to the member not the correction; adarsh's 350x ratio; this) against a
+member-level effect that is large and mechanistically explained in every single one.
+
+**What the same table says POSITIVELY, and it is the most useful number in it.** Adding *a*
+member to the 187 pack is worth **+3.37e-6 with se 0.24 and 3/3 reps** — t = 14.3, the
+tightest positive marginal ever measured here — and it does **not** care whether the member is
+corrected. To clear §1's +15.8e-6 bar you need roughly **five more members of any kind**. That
+is a clearer, cheaper and better-evidenced directive than correcting the ones we have, and it
+is what the remaining 12 days should be spent on if anything is.
+
+## 3. The CT defect is NOT ours. It is inherited verbatim from the public library's source
+
+Never checked before. `data/oof/src/train_lattice.py:te_block` (the 74-model public library
+ships full source) against `agent/features.py:te_block`:
+
+    inner = StratifiedKFold(n_splits=4, shuffle=True, random_state=SEED + 101)
+    ...
+        for fi, hi in splits:
+            g = ...groupby("k").y.agg(["sum", "count"])
+            oof_ct[hi] = s.map(g["count"]).fillna(0.0).to_numpy()      # 3/4 of the rows
+        g = ...groupby("k").y.agg(["sum", "count"])                     # 4/4 of the rows
+        ova[f"CT_{c}"] = Kva[c].map(g["count"])...
+        ote[f"CT_{c}"] = Kte[c].map(g["count"])...
+
+**Line-for-line identical**, down to the variable names and the `.fillna(0.0)`. `agent/features.py`
+is a copy of it. So the 4/3 CT_ train/serve skew that the whole w26/w27 thread has been
+chasing is **the public library's construction, not a defect this workspace introduced**, and
+it is present in every member built through it.
+
+Scope, counted rather than guessed:
+
+| source | defect-carrying members | names |
+|---|---|---|
+| public library (`train_lattice.py`) | **12** | `lat_cat lat_lgbm lat_lgbm_s5 latmax_lgbm latr1_lgbm latr1_xgb lattri_lgbm lattri_xgb latwide_cat latwide_lgbm latwide_xgb lat_xgb` |
+| ours (`agent/features.py`) | **12** | `cat_lat et_lat_frac lgbm_fixed_lat lgbm_fixed_lat_frac lgbm_stump_lat_frac linlat xgb_cat_lattice xgb_lat xgb_latcat xgb_latcat_avg3 xgb_latcat_s17 xgb_latcat_s23` (`lgbm_tuned_lat*` are on `HONEST_DROP`) |
+| boltuzamaki / beicicc | unknown — no source shipped | — |
+
+`train_lattice.py` is the **only** file in the 74-model library that emits a `CT_` column at
+all (`grep -l "oof_ct\|CT_" data/oof/src/*.py` returns exactly one file), so the other ~62
+library members are not affected. ~24 of 188 verifiably carry it.
+
+**§2 makes the scope moot for shipping**, but it is worth recording for two reasons: it
+explains why the effect reproduces across three model classes on the *same* matrix (it is a
+property of the matrix, exactly as §M3(a) concluded), and it means nobody on this board has
+fixed it either — which is the only sense in which it was ever an edge.
+
+## 4. Why the handed angle was redirected rather than executed literally
+
+Written into `experiments/w27_prereg_slot4.txt` before anything ran. The literal angle is
+closed by this workspace's own measurements:
+
+- ~40 XGBoost members already in the pack, across **four** upstream pipelines
+  (`run_xgb.py` modes `lat`/`cat`/`raw`/`latcat`), all on the frozen SKF5 seed42 folds — so
+  the blend weights already mean something.
+- GBDT hyperparameter tuning inside a fixed pipeline: closed at ~+4e-7 into the stack
+  (RESEARCH, 2026-08-13).
+- w27l ranked all 188 by decorrelation: the lat-pipeline XGB members are the **most redundant
+  objects we own** (`xgb_lat` 176/188, `xgb_latcat` 181/188).
+- Slot 7 of 2026-08-16 (w16q/w16r) *is* the literal angle, already executed.
+
+What is open in the XGBoost direction is that **w27j's cross-class CT scorecard — yesterday's
+§10, three headline claims — rests on FOLD 0 ONLY**, with the LightGBM control *quoted* from a
+different script rather than refitted on the same harness. w26k already shows d_c has a large
+between-fold spread (LGB @2000 rounds: +695/+519/+497e-6 on folds 0/1/2), so the 34e-6
+xgb-vs-lgb gap read off one fold is very likely unresolvable. Upgrading n=1 → n=5 costs 13
+fits and no submission.
+
+## 5. Running: `w27o_ctclass5.sh` — the 3-class × 5-fold CT scorecard
+
+Pre-registered at `experiments/w27_prereg_slot4.txt` §M4 **before launch**:
+
+- **M4(a) PRIMARY** — `d_c > 0` in ≥13 of 15 cells (strong form: all 15).
+- **M4(b)** — pooled, CatBoost's `d_c` largest AND `(cat − xgb) > +100e-6`.
+- **M4(c)** — the xgb-vs-lgb ordering FLIPS on at least one fold; per-class between-fold sd of
+  `d_c` is 60–200e-6. *If the sd comes in below 60e-6 in all three classes then fold 0 was an
+  adequate instrument and I was wrong to doubt it — record it as such.*
+- **M4(d) HARNESS CHECK** — the refitted lgb fold-0 lands within ±20e-6 of w27g's quoted
+  0.964779 / 0.965104. A bigger miss means w27j and w27g were never the same instrument and
+  §10's cross-class table was never commensurable. **This is the most important cell.**
+- **M4(e)** — `d_te < 0` in ≥8 of the 10 xgb/cat cells.
+- **R-M4a: nothing is shipped from this.** It measures an existing serve-time transform, not a
+  member build. No argmax over folds or classes selects anything (w16i).
+
+**Ordering lesson, applied after a false start.** The first launch ran class-major
+(`lgb,xgb,cat` per fold) and the lgb cell alone costs ~600s of fit against xgb's 57s and cat's
+37s — under `nice -n 15` on a load-40 box it was getting **43% of one core**, so 5.5 hours of
+*control* was blocking every genuinely new cell. Killed **by PID** (never `pkill -f` — see
+yesterday's §4.3) and relaunched cheap-cells-first: xgb+cat on folds 1–4, then the lgb sweep.
+A kill now costs the control, not the result.
+
+Gate passes and is **fold-dependent**, which is itself new and reassuring: fold 0 prints
+1.3325, fold 1 prints **1.3336**, both against the predicted 1.3333.
+
+## 6. `w27g`'s within-LightGBM CTshare relation is now four points and monotone
+
+| config | CTshare | d_c |
+|---|---|---|
+| leaves31_d6 | 0.8% | +297.11e-6 |
+| control | 1.0% | +324.99e-6 |
+| leaves127_d9 | 1.3% | +401.11e-6 |
+| **leaves255_dinf** | **2.6%** | **+678.83e-6** |
+
+Monotone in CTshare across a 3.3x range of it, **within** LightGBM. §M3(c) still stands: this
+relation is **not** readable across libraries (it predicted +386e-6 for xgb against an observed
++291, and +798e-6 for cat against +525). 3 of 14 configs remain; all four so far are in the
+registered direction.
+
+## 7. Also landed / still running
+
+- `w27k_ctrawctl` (the 187+`lat_ctraw_r400` control) has written its logit stack at
+  **0.970039** and is working through the rest. Registered expectation for the arm comparison
+  was −2..+3e-6, modal +0.5e-6. §2 above already answers the same question on a paired
+  instrument with a tighter se, so read w27k as confirmation rather than as the result.
+- `w27c_ctdrop`: folds 0/1/2 = 0.965038 / 0.965662 / 0.965989. ⚠ Fold 0 says **deleting all 72
+  `CT_` columns beats the status quo by +259e-6** and sits only −66e-6 below the 4/3 fix. Read
+  that against §2: even the *best case* for the CT_ block is worth ~nothing once stacked.
+- `w26k_ctscale` (folds 3–4), `w27g` (3 of 14), `w26i_value` (rep 3 mid-flight) all resume on
+  an identical re-run.
+
+## 8. `submissions/w27_ad188stdcorr.csv` — VALIDATED, STILL UNSENT, SEND IT FIRST TOMORROW
+
+Checked this slot: **296,302 rows**, `id` column matches `sample_submission.csv` **exactly and
+in order**, **0 NaN**, **296,302 distinct** prediction values (so no AUC ties), range
+3.37e-6 .. 1.0. CV **0.9701168076**, the highest cross-fitted CV ever built here.
+
+`WANTED` = {`w27_ad188stdcorr.csv`, `w23_ad187stdcorr.csv`}. **A file that is never submitted
+cannot be selected.** Send it as slot 1 on 2026-08-20.
+
+⚠ And the pick is **still not clicked.** Auto-selection by best public score lands on
+`w21_ad187corr_ens4` / `w22_ad187corr_rankraw` — the most slice-inflated files we own, which is
+the Rogii failure with the serial numbers filed off. **A human must open the submissions page
+and tick two files.**
+
+## 9. Next run, in order
+
+1. **`tail experiments/w27o_ctclass5.log`** — write it up against slot-4 prereg §M4(a)–(e)
+   whichever way it goes. **§M4(d), the lgb harness check, is the cell that can invalidate
+   yesterday's §10 table.** Checkpointed per (class, fold) in `cache/ctclassckpt/`.
+2. **SEND `submissions/w27_ad188stdcorr.csv` AS SLOT 1.** Nothing else competes for that slot.
+3. **Re-read §2 before spending anything on the CT thread.** It is closed at pack level on
+   three instruments. The member-level result stands and is not in dispute; it is simply a
+   different currency and it does not convert.
+4. **The one positive directive §2 leaves: +3.37e-6 per member, se 0.24, 3/3 reps, correction-
+   agnostic.** Five members clears the §1 bar. Ask what five *cheap* members look like —
+   `run_catboost.py --mode native` siblings and `run_xgb.py --mode raw/cat` seeds are the
+   decorrelated end of what we own (`cat_native` is decorrelation rank 15 of 188).
+5. `w26i_value` rep 3–4, `w26k_ctscale` folds 3–4, `w27c_ctdrop` folds 3–4, `w27g` 11 configs
+   — all resume identically.
+6. `w27f_ctfull.py` **still** never run. Given §2 it is now a member-level curiosity, not a
+   ship path. Demote it.
+
+**Files added this slot:** `experiments/w27_prereg_slot4.txt`, `experiments/w27o_ctclass5.sh`.
+**No submission** — at cap.
+
+## 10. ⚠⚠ CORRECTION TO §2 AND §3 OF THIS ENTRY — I hit the exact framing error this workspace pre-registered against
+
+Appended after writing §2–§9 and after reading `RESEARCH.md:6562`. The journal is append-only,
+so §2 and §3 stand above as written; **both are wrong in the ways set out here, and this
+section is what should be quoted.**
+
+### 10a. §2's "do not start the lattice rebuild" contradicts a standing pre-registration, and I do not get to overrule it after the fact
+
+`RESEARCH.md:6562`, titled ***"⚠ A null paired-Delta for ONE corrected member does NOT close
+the CT thread"***, was written **before the Deltas landed, explicitly so that it could not be
+produced afterwards as an excuse for a null.** It says:
+
+> `w27b`/`w27d` measure **one corrected member added to a pack of 187 that still carries the
+> skew** … So the paired Delta answers *"what is one un-skewed member worth inside a span made
+> of 187 uniformly-skewed ones?"*, which is a **lower bound** on, and not an estimate of, the
+> thing that would actually pay … **If the Delta is null, the correct next move is the rebuild,
+> not abandoning the thread.**
+
+My §2 multiplied the paired Δ by the member count (`24 × −0.83e-6 ≈ nothing`) and concluded
+"do not start the lattice rebuild". **That multiplication is precisely the inference the
+pre-registration forbids**, and it is mechanically wrong for a stated reason: a lower bound
+measured inside a uniformly-skewed span does not scale to the value of un-skewing the span.
+
+**§2's factual content is correct and stands: Δ = −0.83e-6, se 2.33, 1/3 reps positive, and
+§H3's "+3e-6 to be worth a file" FAILS.** §2's *decision* is retracted. The pre-registered
+decision rule fires as written: **a null Δ selects the rebuild.**
+
+### 10b. And the pre-registration names the probe, which is the handed angle
+
+The same section names the cheap step before committing to ~30 refits:
+
+> rebuild **three** lattice members of different function classes (lgbm / xgb / catboost) and
+> measure the paired Delta of the trio, which §G5(c) requires anyway for a second function
+> class.
+
+The lgbm leg already exists (`lat_ctfix_r400` / `lat_ctraw_r400`, exported w26m). **The missing
+legs are XGBoost and CatBoost — and XGBoost is this slot's handed angle.** §4 above redirected
+the angle on the grounds that XGBoost was closed; that reasoning was right about *tuning* and
+*pipelines* and wrong about *this*. The angle and the standing pre-registration point at the
+same object, and I nearly missed it.
+
+⚠ It is also **cheap in a way I had not registered**: the CT correction needs no refit, so the
+`ct1.0` control arm and the `ct4/3` fixed arm come off the **same** fitted booster. The whole
+xgb leg is **5 fits at ~57s**, the cat leg **5 at ~37s** — both arms of both legs for ten fits,
+not twenty. That is under an hour of unstarved compute for the probe the rebuild decision has
+been waiting on since w26.
+
+### 10c. §3's scope finding was NOT new — `RESEARCH.md:6300` already had it, and had it more accurately
+
+I wrote "Never checked before." **False.** `RESEARCH.md:6300` (*"⚠ SCOPE: this is in the PUBLIC
+library's recipe, not just ours"*) already records the identical `train_lattice.py` derivation,
+attributes it to szymonkapiski's `s6e8-oof-library-47-models`, and counts the members. Its
+count is also **better than mine**: **14** public members, because it includes `rmlp_lat` and
+`rmlp_lat3`, which my `grep -l "oof_ct\|CT_"` missed (they consume the lattice frame without
+emitting the column themselves), and **~33 lattice members of 191 files** overall against the
+24 I counted. **Quote RESEARCH's 14 / ~33, not §3's 12 / 12 / 24.**
+
+What §3 does add, and it is small: `train_lattice.py` is the only file in the library's `src/`
+that *emits* a `CT_` column, so the other ~60 library members are unaffected — and the
+line-for-line diff against `agent/features.py` is now in the journal for anyone reading cold.
+
+**Lesson, and it is the same one as yesterday's §4: I enumerated by hand and searched by
+substring instead of reading what RESEARCH already said.** Read `RESEARCH.md` for the section
+covering a claim *before* writing "never checked before" in the journal.
+
+### 10d. What §2's positive number survives as
+
+`marg_fix = +3.37e-6, se 0.24, 3/3 reps` is unaffected by any of the above — it is a marginal,
+not a paired difference, and it is the tightest positive this workspace has measured. It stays
+in §9's next-run list as item 4. It is not in competition with the rebuild; they are different
+uses of the remaining 12 days and the trio probe is what decides between them.
+
+## 11. Launched: `w27p_serveclass.py` — the XGBoost and CatBoost legs of the pre-registered trio
+
+Pre-registered as §M5 in `experiments/w27_prereg_slot4.txt`, appended **before launch** and
+after §10 was written.
+
+Structure mirrors `w26l_serve.py` exactly — one fit per (class, fold), then both arms served
+off the *same* booster so the pair is exactly matched and shares its trees:
+
+    ct1.0000   the status quo, i.e. the skewed control member
+    ct1.3333   CT_ divided by 4/3, i.e. the corrected member
+
+`apply_arm` is **imported from `w26l_serve`**, not reimplemented, so the arms are byte-identical
+to every LightGBM run in the thread; the fitters are **imported from `w27j_ctclass`**, so the
+hyperparameters are identical to the d_c values §M3 measured (+291.06e-6 xgb, +525.49e-6 cat on
+fold 0). Copies `Xb`/`Xt` per arm rather than mutating and restoring — yesterday's §4.2, where
+CatBoost clears an array's writeable flag and the restore raises *after* the fit has been paid
+for. Per-(class, fold) checkpointed; boosters saved, so any later serve-time arm is free.
+
+Chained behind `w27o`'s xgb/cat cells rather than launched alongside them, because they are the
+same fits and the box is already five jobs deep at load 41.
+
+Output: four members into `data/ext_members7/` — `xgb_ctraw_r400`, `xgb_ctfix_r400`,
+`cat_ctraw_r400`, `cat_ctfix_r400` — which is what `w26i_value` needs to price the trio.
+
+## 12. ⚠ OPERATIONAL: a `setsid` job survived a kill and ran a script I had already replaced
+
+When §5's reorder happened I ran `ps | grep w27j_ctclass`, saw two PIDs, killed both, and got
+`stopped` back. **The detached `bash experiments/w27o_ctclass5.sh` itself was a third process
+my grep pattern never matched**, so it survived, moved on to fold 1, and — because `bash` reads
+a script incrementally from disk — carried on executing the *superseded* class-major order I
+had just replaced. For eight minutes two copies of w27o ran the same fold, writing to the same
+log and racing on the same `cache/ctclassckpt/` paths.
+
+Caught only because a later `ps` for the launcher happened to show two `w27o_ctclass5.sh`
+lines. Killed by PID; the survivor is the correct cheap-cells-first instance. No checkpoint was
+corrupted — `w27j` writes via temp-file + `os.replace`, which is atomic — so the cost was
+duplicated compute on an already-saturated box, not bad data.
+
+Three rules, and the first two are new:
+
+1. **Grep the LAUNCHER, not just the payload.** `ps -eo pid,ppid,etime,cmd | grep <script>.sh`
+   as well as the python. Better: kill the whole process group.
+2. **Never edit a shell script that is currently executing.** `bash` re-reads it from the
+   current byte offset, so the running job silently switches to the new text mid-flight. Write
+   a new file, or kill first and confirm the kill before editing.
+3. Still true, from yesterday: **kill by PID, never `pkill -f`** — a pattern that appears in
+   your own command line kills your own shell.
