@@ -1,0 +1,40 @@
+pack: 190 members via stack.load_members (extra: ext_members,ext_members2,ext_members3,ext_members4,ext_members6,ext_members7pin)
+candidates (4) from data/ext_members8: poly2_raw, qda_raw, rff_lat, rff_raw
+
+=== pack reference (w27l) ===
+  median maxcorr over the 190 : 0.99603   10th pct 0.98451   min 0.91797
+
+=== candidates ===
+             candidate    solo AUC   maxcorr        closest in pack   medcorr   decorr rank
+             poly2_raw    0.935057   0.98365                golem_b   0.93753       19/191
+               qda_raw    0.894459   0.88773                 logreg   0.83853        1/191
+               rff_lat    0.960747   0.98051                 linlat   0.96280       17/191
+               rff_raw    0.933708   0.97902                     et   0.93673       15/191
+
+=== each candidate's five closest pack members ===
+  poly2_raw
+                       golem_b  corr 0.98365  solo 0.940811
+                           mlp  corr 0.98255  solo 0.940040
+               bolt_tabm_rank1  corr 0.98132  solo 0.939518
+                      pubmk_nn  corr 0.98131  solo 0.940854
+             bolt_neural_5fold  corr 0.98118  solo 0.939228
+  qda_raw
+                        logreg  corr 0.88773  solo 0.918800
+                           knn  corr 0.88231  solo 0.932194
+                            et  corr 0.88219  solo 0.941122
+                   ad_gnn_note  corr 0.88173  solo 0.942090
+                        mkt_nn  corr 0.88116  solo 0.940401
+  rff_lat
+                        linlat  corr 0.98051  solo 0.961335
+            bolt_cat_nested_te  corr 0.97920  solo 0.967062
+        bolt_cat_pair_evidence  corr 0.97898  solo 0.966463
+                   latwide_cat  corr 0.97821  solo 0.967180
+                       lat_cat  corr 0.97819  solo 0.967007
+  rff_raw
+                            et  corr 0.97902  solo 0.941122
+              bolt_dcnv2_cross  corr 0.97883  solo 0.938498
+               bolt_tabm_rank1  corr 0.97790  solo 0.939518
+             bolt_tabm_missing  corr 0.97705  solo 0.940216
+                       golem_b  corr 0.97678  solo 0.940811
+
+  Read: LOWER maxcorr = more decorrelated. The pack median is the bar; a candidate above it is a near-copy of something already owned.

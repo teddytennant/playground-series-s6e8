@@ -28,7 +28,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SUB = os.path.join(ROOT, "submissions")
 
 # (corrected file, the h3 base it was built from). From the build scripts, not the names.
-PAIRS = [("w27_ad190stdcorr", "w27_ad190std_h3"),
+PAIRS = [("w29_ad194stdcorr", "w29_ad194std_h3"),
+         ("w27_ad190stdcorr", "w27_ad190std_h3"),
          ("w27_ad188stdcorr", "w27_ad188std_h3"),
          ("w23_ad187stdcorr", "w23_ad187std_h3")]
 
@@ -95,7 +96,8 @@ print("\nwrote experiments/w28c_coupling.csv")
 # re-deriving them: rank agreement with slot 1 on the TEST side (the thing that gets scored),
 # against the CV each candidate gives up.
 SLOT1 = "w27_ad190stdcorr"
-CANDS = ["w27_ad188stdcorr", "w23_ad187stdcorr", "w27_ad190std_h3", "w27_ad190std",
+CANDS = ["w29_ad194stdcorr", "w27_ad188stdcorr", "w23_ad187stdcorr", "w29_ad194std_h3",
+         "w27_ad190std_h3", "w27_ad190std",
          "w27_ad188raw_h3", "w21_ad187corr_ens4", "w22_ad187corr_rankraw",
          "w27_ad190std_rankraw", "w27_ad190std_logit", "w16i_schemeavg"]
 s1_te = pd.read_csv(os.path.join(SUB, f"{SLOT1}.csv")).sort_values("id").addicted_label.values

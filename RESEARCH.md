@@ -7887,3 +7887,133 @@ with post-w28 ones — it stops the ~4e-6 reproducibility floor from growing.
 
 Leader **MILANFX 0.97134**. Our **0.97118 is 17th** of 2,323 teams, with six teams tied at
 0.97118 and 16 above. Gold is top 14 — three places out.
+
+---
+
+# w29 slot 10 (2026-08-19) — durable facts
+
+## ⛔⛔ DECORRELATION DOES NOT PRICE A MEMBER. The cheap-new-model-class route is CLOSED.
+
+This retires the recommendation this file has carried since w20d and restated as recently as
+w27q ("cheap members should be cheap MODEL CLASSES, not cheap feature sets"). The class half
+of it is **true and useless**: new model classes decorrelate enormously, and it buys nothing.
+
+Pre-registered at `experiments/w29_prereg_slot10.txt` §M14. Two function classes were absent
+from the 190-pack — a **kernel machine** (every smooth member in the pack is built from
+half-space units; none is radial) and a **generative / density-ratio** model (all 190 are
+discriminative). Seven members were built against the frozen folds off `cache/f*_X*.npy`:
+
+| member | what it is | solo AUC | maxcorr | decorr rank |
+|---|---|---|---|---|
+| `poly2_raw` | degree-2 polynomial logistic, 40 raw cols | 0.935057 | 0.98365 | 19/191 |
+| `rff_raw` | RBF random-Fourier logistic, 40 raw cols | 0.933708 | 0.97902 | 15/191 |
+| `rff_lat` | the same kernel on the 184-col encoded frame | 0.960747 | 0.98051 | 17/191 |
+| **`qda_raw`** | **QDA, 40 raw cols (generative)** | 0.894459 | **0.88773** | **1/191** |
+| `qda_lat` | QDA on the encoded frame | 0.931180 | 0.93969 | 4/195 |
+| `gnb_raw` | Gaussian NB = QDA with diagonal covariance | 0.896341 | 0.92985 | 4/195 |
+| **`gmm_raw`** | **6-component Gaussian mixture per class** | 0.821569 | **0.81159** | **1/195** |
+
+Pack reference: median maxcorr 0.99603, 10th pct 0.98451, **previous minimum 0.91797**
+(`orig_binm`). `qda_raw` and then `gmm_raw` beat that minimum by 3.0e-2 and 10.6e-2 — they are
+the two most decorrelated members this pack has ever held, by a wide margin, and the closest
+thing in 190 members to `gmm_raw` is `qda_raw` at 0.812 with the rest of the pack below 0.76.
+
+**And the first four are jointly worth +0.30e-6.** `experiments/w29d_partition.py` (w27w's
+paired instrument, arms moved to 194 vs 190, ONE load, the 190 arm is the 194 matrix with the
+four columns deleted, seed-42 gate reproduces w27t's shipped build on 3 of 3 cells):
+
+```
+   seed     hybrid    rankraw    rescale         h3
+     42      +0.94      -5.15      -0.48      -0.34
+    101      +1.59      -6.51      +7.31      +1.97
+     13      +3.92      -1.88      +3.22      +0.67
+      7      -0.22      -7.44      +0.35      -1.13
+  h3 delta: mean +0.30e-6  sd 1.34  se 0.67  positive in 2/4
+```
+
+Registered at +8..+32e-6 for four passing arms (modal +3.4e-6 each, the pack's historical
+per-member rate). Observed +0.30 ± 0.67. **The registered null M14(b)5 fires.**
+
+⚠ **`rankraw` is negative in 4 of 4** (−1.9 to −7.4e-6) while hybrid and rescale are positive
+in 3 of 4. Whatever these members carry is in their MAGNITUDE; the rank transform deletes it
+and then they are pure cost. Do not read the h3 null as "no effect" — it is a cancellation.
+
+### The mechanism, and why `maxcorr` was the wrong currency all along
+
+`maxcorr` cannot distinguish two reasons a member disagrees with the pack:
+
+  (a) it computes a **different function** of x — a new direction, and worth something;
+  (b) it computes the same function **badly** — its disagreement is estimation noise.
+
+At solo AUC 0.82–0.96 against a pack median of 0.966, (b) is available in quantity, and a rank
+correlation cannot see the difference: **noise decorrelates exactly like signal does.** The
+seven arms are ordered by (b), not by (a) — `gmm_raw`, the most decorrelated object ever
+profiled here, is also the weakest at 0.8216, and that is not a coincidence: across the ten
+members in the w29g table, Spearman(maxcorr, solo AUC) = **+0.87**.
+
+w16c's PCA bound was already saying this and was read too loosely: 190 members span ~55 usable
+directions carrying 4.6% of the variance. A direction has to carry SIGNAL to be paid for.
+
+**Operational rule going forward: a candidate member is worth a pack refit only if it is both
+decorrelated AND within ~0.005 of the pack median solo AUC.** Every one of the seven arms
+above fails the second test, and the second test is the binding one. `maxcorr` alone is not a
+screen; it was treated as one from w27q onward and that is the error being corrected here.
+
+## ⛔ `w29g_marginal.py` IS A DEAD INSTRUMENT — do not rebuild it, and do not trust its numbers
+
+The idea is seductive and wrong. Collapse the whole pack to its single stack column S and ask
+what a member adds on top of it: cross-fit `logistic(y ~ S)` against `logistic(y ~ S, c)` on
+identical partitions, two columns, seconds instead of the hour a pack refit costs.
+
+It does not measure value. It measures **disagreement with S**, and the controls prove it:
+
+| member | marginal (e-6) | maxcorr | in the pack already? |
+|---|---|---|---|
+| `poly2_raw` | −0.94 | 0.985 | no |
+| `rff_raw` | −1.09 | 0.985 | no |
+| `rff_lat` | −2.14 | 0.981 | no |
+| **`linlat`** | **−3.65** | 0.981 | **YES** |
+| **`logreg`** | **−5.16** | 0.947 | **YES** |
+| `gmm_raw` | −5.18 | 0.812 | no |
+| `gnb_raw` | −6.93 | 0.930 | no |
+| **`orig_binm`** | **−6.96** | 0.918 | **YES** |
+| `qda_lat` | −8.15 | 0.940 | no |
+| `qda_raw` | −9.12 | 0.890 | no |
+
+The three controls are already inside S, so their true marginal value is **exactly zero** —
+and the instrument spreads them over 3.3e-6, **in maxcorr order**. Spearman(reading, maxcorr)
+= **+0.8354** over all ten, se on each reading 0.08–0.32e-6, so the ordering is not noise: it
+is the quantity being measured. A single global coefficient cannot extract a weak orthogonal
+signal without diluting S, so every column costs, and it costs in proportion to how much it
+disagrees. **Only a full paired pack refit (`w29d`/`w27w` shape) prices a member.**
+
+## The 194-member pack — built, valid, and NOT the deadline pick
+
+`experiments/w29c_run.sh` = `w27t_run.sh` with `ext_members8` added and nothing else changed.
+
+| file | CV |
+|---|---|
+| `w29_ad194std_h3` | 0.9701140064 |
+| `w27_ad190std_h3` | 0.9701133391 |
+
+⚠ **That +0.67e-6 is NOT a measurement.** The two were built on different days, and blend_lab
+only pinned its BLAS thread count at w28 — after w27t. The differenceable number is w29d's
+paired +0.30e-6 ± 0.67. `check_selection.WANTED` does **not** move: `w27_ad190stdcorr` stays.
+
+The 194 files are valid and unsent, so they belong in the send queue on economics (a slot
+costs nothing) — but they are not a CV improvement and must not be described as one.
+
+## Tooling added
+
+- `experiments/w29a_newclass.py --arm {rff_raw,rff_lat,qda_raw,poly2_raw,qda_lat,gnb_raw,gmm_raw}`
+  builds a member from the cached fold matrices in seconds to minutes. `--outdir` refuses to
+  write into `oof/`. `--folds 0 --sub N` is a probe that saves nothing.
+- ⚠ **A decision function must be rescaled before it is stored as a probability.** QDA's runs
+  to |z| ~ 9.5e3 and `expit` saturates to exactly 1.0 above z ≈ 36.7, so the first `qda_raw`
+  build put **8.0% of its OOF rows on p == 1.0** — the plateau RESEARCH already documents for
+  rf/et/naji03, which `rankraw` then averages into one tied block. The fix is one constant
+  `s = 30/max|z|` applied identically to OOF and test: monotone, so no ranking and no solo AUC
+  moves, and both sides stay on a common scale by construction. `gmm_raw` needed s = 5.3e-5.
+- `experiments/w27q_cand.py` now takes `--pack-extra` and `--expect` so a candidate can be
+  profiled against the 190- or 194-member pack; the 188 default is unchanged so its own stored
+  numbers stay reproducible. Output npz is named per `--cand-dir` for anything but the default.

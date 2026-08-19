@@ -1,0 +1,43 @@
+[gnb_raw] fold 0: design (553095, 40) gamma 0.0125
+[gnb_raw] fold 0: AUC 0.896585 (3s)
+[gnb_raw] fold 1: design (553095, 40) gamma 0.0125
+[gnb_raw] fold 1: AUC 0.895466 (5s)
+[gnb_raw] fold 2: design (553095, 40) gamma 0.0125
+[gnb_raw] fold 2: AUC 0.896729 (7s)
+[gnb_raw] fold 3: design (553095, 40) gamma 0.0125
+[gnb_raw] fold 3: AUC 0.896581 (11s)
+[gnb_raw] fold 4: design (553096, 40) gamma 0.0125
+[gnb_raw] fold 4: AUC 0.896346 (15s)
+
+[gnb_raw] FULL OOF AUC = 0.89634095  (15s)
+[gnb_raw] monotone rescale: max|z| 1.019e+04 -> scale 0.00294455
+[saved] gnb_raw -> data/ext_members9
+[qda_lat] fold 0: design (553095, 184) gamma 0.0027174
+[qda_lat] fold 0: AUC 0.931220 (66s)
+[qda_lat] fold 1: design (553095, 184) gamma 0.0027174
+[qda_lat] fold 1: AUC 0.930437 (118s)
+[qda_lat] fold 2: design (553095, 184) gamma 0.0027174
+[qda_lat] fold 2: AUC 0.931534 (175s)
+[qda_lat] fold 3: design (553095, 184) gamma 0.0027174
+[qda_lat] fold 3: AUC 0.931928 (245s)
+[qda_lat] fold 4: design (553096, 184) gamma 0.0027174
+[qda_lat] fold 4: AUC 0.930786 (303s)
+
+[qda_lat] FULL OOF AUC = 0.93117998  (303s)
+[qda_lat] monotone rescale: max|z| 9493 -> scale 0.0031601
+[saved] qda_lat -> data/ext_members9
+[gmm_raw] fold 0: design (553095, 40) gamma 0.0125
+[gmm_raw] fold 0: AUC 0.818353 (91s)
+[gmm_raw] fold 1: design (553095, 40) gamma 0.0125
+[gmm_raw] fold 1: AUC 0.805064 (168s)
+[gmm_raw] fold 2: design (553095, 40) gamma 0.0125
+[gmm_raw] fold 2: AUC 0.845981 (227s)
+[gmm_raw] fold 3: design (553095, 40) gamma 0.0125
+[gmm_raw] fold 3: AUC 0.846408 (291s)
+[gmm_raw] fold 4: design (553096, 40) gamma 0.0125
+[gmm_raw] fold 4: AUC 0.824217 (357s)
+
+[gmm_raw] FULL OOF AUC = 0.82156888  (358s)
+[gmm_raw] monotone rescale: max|z| 5.665e+05 -> scale 5.29541e-05
+[saved] gmm_raw -> data/ext_members9
+=== w29e done ===

@@ -1,0 +1,66 @@
+194 members, dtype float32
+  hybrid: repaired 54 of 194 members
+  transform hybrid      24s
+  transform rankraw     50s
+  transform rescale     25s
+194 members, 190-arm keeps 190, loaded in 106s
+  seed  42 arm 194 hybrid   0.9701037 (74s)
+  seed  42 arm 194 rankraw  0.9700900 (67s)
+  seed  42 arm 194 rescale  0.9700985 (77s)
+  seed  42 arm 194 h3       0.9701130
+  seed  42 arm 190 hybrid   0.9701028 (66s)
+  seed  42 arm 190 rankraw  0.9700952 (80s)
+  seed  42 arm 190 rescale  0.9700990 (71s)
+  seed  42 arm 190 h3       0.9701133
+  seed 101 arm 194 hybrid   0.9701249 (66s)
+  seed 101 arm 194 rankraw  0.9701064 (72s)
+  seed 101 arm 194 rescale  0.9701170 (71s)
+  seed 101 arm 194 h3       0.9701306
+  seed 101 arm 190 hybrid   0.9701233 (59s)
+  seed 101 arm 190 rankraw  0.9701129 (66s)
+  seed 101 arm 190 rescale  0.9701097 (63s)
+  seed 101 arm 190 h3       0.9701286
+  seed  13 arm 194 hybrid   0.9701195 (57s)
+  seed  13 arm 194 rankraw  0.9701089 (56s)
+  seed  13 arm 194 rescale  0.9701122 (65s)
+  seed  13 arm 194 h3       0.9701277
+  seed  13 arm 190 hybrid   0.9701156 (47s)
+  seed  13 arm 190 rankraw  0.9701108 (64s)
+  seed  13 arm 190 rescale  0.9701090 (50s)
+  seed  13 arm 190 h3       0.9701270
+  seed   7 arm 194 hybrid   0.9701137 (55s)
+  seed   7 arm 194 rankraw  0.9701014 (64s)
+  seed   7 arm 194 rescale  0.9701105 (80s)
+  seed   7 arm 194 h3       0.9701228
+  seed   7 arm 190 hybrid   0.9701139 (54s)
+  seed   7 arm 190 rankraw  0.9701088 (55s)
+  seed   7 arm 190 rescale  0.9701102 (60s)
+  seed   7 arm 190 h3       0.9701239
+
+== R-M11e gate: seed-42 cells vs the shipped on-disk numbers ==
+  arm 190 hybrid   got 0.9701028  want 0.970103  OK
+  arm 190 rankraw  got 0.9700952  want 0.970095  OK
+  arm 190 rescale  got 0.9700990  want 0.970099  OK
+  gate reproduces the shipped build
+
+== THE GATE: paired 194 - 190 delta on identical partitions (e-6) ==
+   seed     hybrid    rankraw    rescale         h3
+     42      +0.94      -5.15      -0.48      -0.34
+    101      +1.59      -6.51      +7.31      +1.97
+     13      +3.92      -1.88      +3.22      +0.67
+      7      -0.22      -7.44      +0.35      -1.13
+
+  h3 delta: mean +0.30e-6  sd 1.34e-6  se 0.67e-6  positive in 2/4
+  M14(b)4 registered +2..+8e-6 per passing arm, modal +3.4e-6, so +8..+32e-6 for four; the decision rule is positive in >=3/4: FAIL -- w27_ad190stdcorr stays WANTED
+
+== off-seed mean minus seed 42 (w14c's mechanism, new member set) ==
+  arm 190 hybrid     +14.79e-6
+  arm 190 rankraw    +15.63e-6
+  arm 190 rescale    +10.61e-6
+  arm 190 h3         +13.17e-6
+  arm 194 hybrid     +15.62e-6
+  arm 194 rankraw    +15.51e-6
+  arm 194 rescale    +14.72e-6
+  arm 194 h3         +14.01e-6
+
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w29d_partition.json

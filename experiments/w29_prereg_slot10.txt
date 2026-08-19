@@ -1,0 +1,78 @@
+w29 / 2026-08-19 slot 10 of 10 — PRE-REGISTRATION
+==================================================
+At cap (10/10 sent for the 08-19 UTC day). This slot BUILDS. Nothing here is sent today.
+
+WHY THIS ANGLE
+--------------
+The bar a new file must clear (w26e model, corrected labels, h3 + standardised) is
+CV 0.9701307114. The best object on disk is w27_ad190stdcorr at 0.9701181344 — 12.6e-6
+short. The pack pays ~+3.37e-6 per added member, so the gap is ~4 members wide, and
+w27q/w27r closed the cheap route that was tried instead: FEATURE-SET variants of an
+existing pipeline do not decorrelate (lat_ctdrop_r400 maxcorr 0.99941, rank 181/189;
+lat_encdrop_r400 0.98607, and its five nearest neighbours are the raw-frame library
+members, i.e. it RELOCATES into a cluster the pack already owns 74 members of).
+
+RESEARCH's standing conclusion is therefore the registered hypothesis here:
+  "cheap members should be cheap MODEL CLASSES, not cheap feature sets"
+and the 12 most decorrelated members in the pack are, without exception, linear models,
+lookup/binning members, or neural nets — not one is a GBDT feature variant.
+
+M14 — WHAT IS ACTUALLY ABSENT FROM THE PACK
+-------------------------------------------
+Enumerating the 190 members by function class: axis-aligned tree ensembles (the large
+majority), first-order linear models in logit(TE) space (linlat, logreg, ad_logregte),
+spline GAMs (golem_*), factorization machines (fm*), lookup/evidence tables (bolt_lookup*,
+lookup, orig_bin*), and MLP/transformer nets (realmlp, tabm*, nn2, bolt_fttransformer).
+
+Two classes are absent outright:
+  (a) a KERNEL MACHINE — a smooth isotropic (radial) function of the whole feature vector.
+      An MLP is a smooth global function too, but its units are half-space (ridge)
+      functions, not radial ones; no member in the pack is radial.
+  (b) a GENERATIVE / density-ratio classifier — every member is discriminative.
+
+M14(a) ARMS, registered before any fit:
+  rff_raw    RBF random-Fourier-feature logistic on the 40 raw/derived columns
+  rff_lat    the same kernel machine on the 184-column encoded frame
+             (logit(TE) + log1p(CT) + base), i.e. a kernelised linlat
+  qda_raw    quadratic discriminant analysis on the 40 raw/derived columns (generative)
+  poly2_raw  explicit second-order polynomial logistic on the 40 raw/derived columns
+             — the non-radial control for rff_raw: same order of nonlinearity,
+             axis-anchored rather than isotropic. If rff_raw decorrelates and poly2_raw
+             does not, the radial geometry is what bought it; if both do, it is merely
+             "not a tree".
+
+M14(b) PRE-REGISTERED PREDICTIONS (written before the first fold runs):
+  1. Solo AUC. All four arms land BELOW the pack median solo of 0.966371. The raw-frame
+     ceiling is lat_encdrop_r400 at 0.9522289 (a 400-round LightGBM on the same 40
+     columns), so rff_raw / poly2_raw / qda_raw are registered at 0.93 .. 0.952 and
+     rff_lat, which sees the encodings, at 0.960 .. 0.968.
+  2. Decorrelation is the ONLY thing that matters. Registered maxcorr (w27l convention,
+     rank-then-Pearson, against the 190-pack; pack median 0.99601, 10th pct 0.98451,
+     min 0.91797):
+        rff_raw    0.96 .. 0.985   (a new geometry on an owned frame)
+        rff_lat    0.97 .. 0.99
+        qda_raw    0.93 .. 0.97    (generative; the most likely rank-1..12 entrant)
+        poly2_raw  0.97 .. 0.99
+  3. ACCEPTANCE GATE, fixed now: an arm is carried into a pack refit iff its maxcorr is
+     BELOW 0.985 — the 10th percentile of the pack. An arm at or above that is inside
+     the span, is worth ~0 by w16c's PCA argument regardless of its solo AUC, and is
+     recorded as a null and NOT stacked. Solo AUC is explicitly NOT a gate.
+  4. Pack value, IF at least one arm passes: registered at +2 .. +8e-6 of h3 CV per
+     passing arm, modal +3.4e-6 (the pack's historical per-member rate). Registered
+     ceiling for all four passing: +14e-6, which is the only outcome in this prereg that
+     would clear the 12.6e-6 bar. That is the tail, not the expectation.
+  5. Registered null: the whole M14 route returns nothing (all four at maxcorr >= 0.985).
+     If that happens the finding is that the pack's span is closed to CHEAP members of
+     any class, which retires "add cheap members" as a route and is worth recording as
+     such rather than re-tried at a fifth model class.
+
+M14(c) DISCIPLINE
+  - Members are written to data/ext_members8, NEVER to oof/ (RESEARCH: writing into oof/
+    moves the whole pack silently).
+  - Frozen SKF5 seed-42 folds, cache/f*_X{a,b,t}.npy, no exceptions.
+  - Fill medians are computed on the fold's TRAINING part only.
+  - OMP/OPENBLAS/MKL/NUMEXPR/VECLIB pinned to 4 before numpy is imported, per w28 §8, so
+    the ~4e-6 reproducibility floor does not grow.
+  - Any refit is compared against w27_ad190std_h3 (0.9701133391) built in one process on
+    identical partitions — paired, per w27 slot 8. Stored levels are NOT differenced.
+  - Any new *corr file must be registered by hand in stdflag.CORR_MAP (w28 §3).

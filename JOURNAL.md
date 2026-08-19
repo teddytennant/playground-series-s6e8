@@ -15336,3 +15336,195 @@ at 0.97118. Gold is top 14 of 2,323 teams, so we are three places outside it. Th
    seven); the stacker C (slot 8 §5); fold-seed averaging; the original dataset.
 
 **No submission — at cap, 10/10 for the 08-19 UTC day.**
+
+---
+
+# 2026-08-19 — w29, slot 10 of 10. ANGLE: foundation (superseded). AT CAP, NO SUBMISSION.
+
+`kaggle competitions submissions --page-size 300` shows **81** submissions, **10 of them on the
+08-19 UTC day** (14:39 → 16:16). The cap is spent; nothing was sent. The handed angle —
+"confirm the metric, build the fixed-fold CV harness, get one honest GBDT baseline scored" — is
+the day-one angle and every part of it has been done since w1: the metric is ROC AUC, the
+frozen folds are `StratifiedKFold(5, shuffle=True, random_state=42)`, and the pack is 190
+members deep. Per the brief's own instruction to override a handed angle with a reason, this
+slot took the standing item 3 from the slot-9 entry instead: **build, do not drain** — the send
+queue prices the whole 37-file backlog at P=0.011 for a ten-file day, and the bar a new file
+must clear is 0.9701307114 against a best-on-disk of 0.9701181344, 12.6e-6 short.
+
+The headline is a **falsification of this workspace's own standing member-selection rule**, and
+it cost about four hours of compute to get.
+
+## 1. WHAT WAS BUILT — seven members from two function classes the pack did not contain
+
+Pre-registered in full at `experiments/w29_prereg_slot10.txt` §M14 before any fit, including
+the acceptance gate (maxcorr < 0.985, the pack's 10th percentile), the predicted solo AUCs,
+the predicted pack value, and the registered null.
+
+The route was RESEARCH's own recommendation, unchanged since w20d and restated at w27q after
+the feature-set route died: *"cheap members should be cheap MODEL CLASSES, not cheap feature
+sets"*. Enumerating the 190 by function class leaves two holes — a **kernel machine** (every
+smooth member in the pack is built from half-space units; not one is radial) and a
+**generative** model (all 190 are discriminative). `experiments/w29a_newclass.py` builds both
+off the cached fold matrices in seconds to minutes:
+
+| member | solo AUC | maxcorr | decorr rank | gate |
+|---|---|---|---|---|
+| `poly2_raw` degree-2 polynomial logistic, 40 raw cols | 0.935057 | 0.98365 | 19/191 | pass |
+| `rff_raw` RBF random-Fourier logistic, 40 raw cols | 0.933708 | 0.97902 | 15/191 | pass |
+| `rff_lat` the same kernel on the 184-col encoded frame | 0.960747 | 0.98051 | 17/191 | pass |
+| **`qda_raw`** QDA on the 40 raw cols | 0.894459 | **0.88773** | **1/191** | pass |
+| `qda_lat` QDA on the encoded frame | 0.931180 | 0.93969 | 4/195 | pass |
+| `gnb_raw` Gaussian NB (QDA, diagonal covariance) | 0.896341 | 0.92985 | 4/195 | pass |
+| **`gmm_raw`** 6-component Gaussian mixture per class | 0.821569 | **0.81159** | **1/195** | pass |
+
+**All seven cleared the registered gate, two of them spectacularly.** The pack's previous
+minimum was `orig_binm` at 0.91797; `qda_raw` came in at 0.888 and `gmm_raw` at 0.812, with
+the whole pack except `qda_raw` below 0.76 of `gmm_raw`. These are the two most decorrelated
+members this pack has ever held and it is not close.
+
+## 2. ⛔⛔ AND THEY ARE WORTH NOTHING. THE ROUTE IS CLOSED.
+
+`experiments/w29d_partition.py` — w27w's paired instrument with the arms moved to 194 vs 190,
+ONE load, the 190 arm being the 194 matrix with the four `ext_members8` columns deleted, and
+the seed-42 gate reproducing w27t's shipped build on **3 of 3** cells (w27w's own gate failed
+4 of 5 on the reproducibility floor, so it was demoted here to informative-with-a-2e-5-abort;
+this one passes outright, which is the stronger position):
+
+```
+   seed     hybrid    rankraw    rescale         h3
+     42      +0.94      -5.15      -0.48      -0.34
+    101      +1.59      -6.51      +7.31      +1.97
+     13      +3.92      -1.88      +3.22      +0.67
+      7      -0.22      -7.44      +0.35      -1.13
+  h3 delta: mean +0.30e-6  sd 1.34  se 0.67  positive in 2/4
+```
+
+Registered at **+8..+32e-6** for four passing arms. Observed **+0.30 ± 0.67**. The registered
+null M14(b)5 fires as written, and it fires on the strongest possible version of the route:
+not four marginal candidates, but the most decorrelated set of members ever added here.
+
+⚠ **Read the transform breakdown, not just the h3 mix.** `rankraw` is negative in **4 of 4**
+(−1.9 to −7.4e-6) while hybrid and rescale are positive in 3 of 4. The h3 null is a
+cancellation, not an absence of effect. Whatever these members carry lives in their
+**magnitude**, and the rank transform deletes it and leaves only the cost.
+
+### The mechanism — why `maxcorr` was the wrong currency
+
+`maxcorr` cannot tell apart the two reasons a member disagrees with the pack: **(a)** it
+computes a different function — a new direction, worth something; **(b)** it computes the same
+function badly — its disagreement is estimation noise. **Noise decorrelates exactly like
+signal does.** At solo AUC 0.82–0.96 against a pack median of 0.966 there is plenty of (b) to
+go around, and across the ten members in §3's table Spearman(maxcorr, solo AUC) = **+0.87** —
+the "most decorrelated member ever profiled here" is also the weakest object in the building.
+
+w16c's PCA bound was already saying this and was read too loosely: 190 members span ~55 usable
+directions carrying 4.6% of the variance, and a direction has to carry SIGNAL to be paid for.
+**New rule, written into RESEARCH: a candidate earns a pack refit only if it is decorrelated
+AND within ~0.005 of the pack median solo AUC.** All seven arms fail the second test and the
+second test is the binding one.
+
+## 3. ⛔ A SECOND, CHEAPER INSTRUMENT WAS BUILT AND IT IS DEAD — recorded so nobody rebuilds it
+
+`experiments/w29g_marginal.py`: collapse the pack to its stack column S, cross-fit
+`logistic(y ~ S)` against `logistic(y ~ S, c)` on identical partitions, take the paired AUC
+delta. Two columns, seconds instead of the hour a refit costs. It looks like the ideal screen.
+
+It measures **disagreement with S**, not value, and the controls prove it — three members that
+are already *inside* S, whose true marginal value is therefore exactly zero:
+
+| member | marginal (e-6) | maxcorr | already in the pack? |
+|---|---|---|---|
+| `poly2_raw` | −0.94 | 0.985 | no |
+| `rff_raw` | −1.09 | 0.985 | no |
+| `rff_lat` | −2.14 | 0.981 | no |
+| **`linlat`** | **−3.65** | 0.981 | **YES** |
+| **`logreg`** | **−5.16** | 0.947 | **YES** |
+| `gmm_raw` | −5.18 | 0.812 | no |
+| `gnb_raw` | −6.93 | 0.930 | no |
+| **`orig_binm`** | **−6.96** | 0.918 | **YES** |
+| `qda_lat` | −8.15 | 0.940 | no |
+| `qda_raw` | −9.12 | 0.890 | no |
+
+The three zero-value controls are spread over 3.3e-6 **in maxcorr order**, and
+Spearman(reading, maxcorr) = **+0.8354** over all ten with per-reading se of 0.08–0.32e-6. A
+single global coefficient cannot extract a weak orthogonal signal without diluting S, so every
+column costs, in proportion to how much it disagrees. **Only a full paired pack refit prices a
+member.** Including the controls is the only reason this was caught inside one slot instead of
+being believed for a week.
+
+## 4. THE 194-MEMBER PACK IS BUILT, VALID, AND IS *NOT* THE DEADLINE PICK
+
+`experiments/w29c_run.sh` = `w27t_run.sh` with `ext_members8` added and nothing else changed.
+Seven new CSVs, all validated by `w28b_verify.py` (**0 invalid** of 45 unsent), and
+`w28c_coupling.py` — extended this slot to cover the new pair — puts `w29_ad194stdcorr` at
+**ratio 1.060**, coupled.
+
+| file | CV |
+|---|---|
+| `w29_ad194stdcorr` | **0.9701182875** ← highest CV ever built here |
+| `w27_ad190stdcorr` | 0.9701181344 |
+| `w29_ad194std_h3` | 0.9701140064 |
+| `w27_ad190std_h3` | 0.9701133391 |
+
+**`check_selection.WANTED` DOES NOT MOVE.** `w29_ad194stdcorr` is +0.15e-6 on the leader, which
+is 4% of the ~4e-6 reproducibility floor w27 slot 8 measured, and the paired instrument that is
+allowed to resolve differences this small says +0.30e-6 at 2/4 — no preference either way. The
+190 pack was promoted over the 188 on M11(b)'s **4/4 at +2.13e-6**; nothing here comes close to
+that standard. Taking the argmax because it is the argmax is precisely the failure mode this
+workspace has a pre-registration file to prevent. **WANTED stays
+{`w27_ad190stdcorr.csv`, `w23_ad187stdcorr.csv`}.** Test rho between the two 194/190 corr files
+is 0.999979 — they are near-twins, so there is no diversification argument either.
+
+## 5. TOMORROW'S SEND PLAN IS BUILT AND DRY-RUN
+
+All three queue steps were re-run this slot with the new files on disk:
+
+```
+  PINNED first (check_selection.WANTED, unsent): w27_ad190stdcorr.csv
+   1. w27_ad190stdcorr.csv       CV 0.9701181344   4. w29_ad194stdcorr.csv    CV 0.9701182875
+   2. w29_ad194std.csv           CV 0.9701116199   ... 10 files, all valid
+```
+
+The pin works. ⚠ **The queue goes stale the moment anything is built or sent, so re-run
+`w23b_sendqueue.py` → `w26d_queueprice.py` before `--go` anyway** — this dry run is a proof the
+path works end to end with w29 files present, not a plan to execute blind.
+
+## 6. THINGS FIXED IN PASSING
+
+- ⚠ **A decision function must be rescaled before it is stored as a probability.** QDA's runs
+  to |z| ≈ 9.5e3 and `expit` saturates to exactly 1.0 above z ≈ 36.7, so the first `qda_raw`
+  build put **8.0% of its OOF rows on p == 1.0** — the same plateau RESEARCH documents for
+  rf/et/naji03, which `rankraw` then averages into one tied block. One constant `s = 30/max|z|`
+  applied identically to both sides fixes it: monotone, so no ranking and no solo AUC moves.
+  `gmm_raw` needed s = 5.3e-5. Caught by looking at the saved array, not by any assert.
+- `w27q_cand.py` takes `--pack-extra`/`--expect` so a candidate can be profiled against the 190-
+  or 194-member pack; the 188 default is untouched so its own stored numbers still reproduce.
+- `stdflag.CORR_MAP` registers `w29_ad194stdcorr` → `h3`, in the same commit as the build, per
+  the standing rule. `stdflag.py`'s gate re-passes on all 60 fitted rows.
+- `w28c_coupling.py` now covers the w29 pair; it had a hard-coded `PAIRS` list, which is the
+  same "a new file silently escapes the check" shape as w28's `CORR_MAP` bug.
+
+## 7. NEXT RUN, IN ORDER
+
+1. **`w23b_sendqueue.py` → `w26d_queueprice.py` → `w26g_send.py --go --n 10`.** The plan in §5
+   is correct and every file in it is validated. Do not hand-pick.
+2. **Then `check_selection.py`.** Once `w27_ad190stdcorr` lands, both WANTED files are
+   selectable and the only remaining blocker is a human with a browser. Seven slots unmade.
+3. **Do NOT build another cheap member of any class.** §2 closes it. The gate that replaces
+   maxcorr is: decorrelated AND within ~0.005 of the pack median solo AUC (0.966) — i.e. a
+   member has to be genuinely *good* as well as different, which is a much more expensive
+   object than anything built this slot.
+4. If a member route is attempted at all, the one thing §2 does NOT rule out is a **strong**
+   decorrelated member — the profile of `orig_binm`/`logreg` but at solo 0.965+. Nothing on
+   disk is one, and building one is a real project, not a slot.
+5. Do **NOT** re-open: `w29g`-shaped cheap value screens (§3); error analysis / OOF
+   segmentation on any axis; the stacker C; fold-seed averaging; the original dataset;
+   feature-set variants of the lattice pipeline (w27q/w27r).
+
+**Files added:** `experiments/w29_prereg_slot10.txt`, `w29a_newclass.py`, `w29a_run.sh`,
+`w29c_run.sh`, `w29d_partition.py`, `w29e_run.sh`, `w29g_marginal.py`, the `.log`/`.json`
+outputs of each, `data/ext_members8/` (4 members), `data/ext_members9/` (3 members),
+seven `submissions/w29_ad194*` CSVs with their OOF vectors.
+**Modified:** `experiments/w27q_cand.py`, `w28c_coupling.py`, `stdflag.py`, `RESEARCH.md`.
+
+**No submission — at cap, 10/10 for the 08-19 UTC day.**

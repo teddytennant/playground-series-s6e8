@@ -1,0 +1,30 @@
+=== pack reference (w27l) ===
+  median maxcorr over the 194 : 0.99596   10th pct 0.98366   min 0.88975
+
+=== candidates ===
+             candidate    solo AUC   maxcorr        closest in pack   medcorr   decorr rank
+               gmm_raw    0.821569   0.81159                qda_raw   0.70762        1/195
+               gnb_raw    0.896341   0.92985                    knn   0.88317        4/195
+               qda_lat    0.931180   0.93969                qda_raw   0.91529        4/195
+
+=== each candidate's five closest pack members ===
+  gmm_raw
+                       qda_raw  corr 0.81159  solo 0.894459
+                     poly2_raw  corr 0.75281  solo 0.935057
+                           mlp  corr 0.74377  solo 0.940040
+                       golem_b  corr 0.74182  solo 0.940811
+                        mkt_nn  corr 0.74143  solo 0.940401
+  gnb_raw
+                           knn  corr 0.92985  solo 0.932194
+                     poly2_raw  corr 0.92455  solo 0.935057
+              bolt_dcnv2_cross  corr 0.92116  solo 0.938498
+                       golem_b  corr 0.92112  solo 0.940811
+                            et  corr 0.91965  solo 0.941122
+  qda_lat
+                       qda_raw  corr 0.93969  solo 0.894459
+              lat_encdrop_r400  corr 0.93140  solo 0.952229
+                     bei_raw12  corr 0.92784  solo 0.962511
+               view_resid_lgbm  corr 0.92731  solo 0.955459
+                           xgb  corr 0.92708  solo 0.964334
+
+  Read: LOWER maxcorr = more decorrelated. The pack median is the bar; a candidate above it is a near-copy of something already owned.

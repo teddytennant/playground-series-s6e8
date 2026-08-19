@@ -55,18 +55,28 @@ def main():
                     help="directory under data/ holding oof_<name>.npy / test_<name>.npy")
     ap.add_argument("--gate", default="",
                     help="name=auc,... solo AUCs that MUST reproduce; a miss aborts")
+    # w29: the shipping pack moved to 190 members at w27t (ext_members7pin adds
+    # lat_ctdrop_r400 + lat_encdrop_r400). The reference frame is an argument rather than
+    # a constant so w27q's own stored numbers stay reproducible at the 188 default.
+    ap.add_argument("--pack-extra", default=",".join(EXTRA),
+                    help="comma-separated dirs under data/ that define the reference pack")
+    ap.add_argument("--expect", type=int, default=188,
+                    help="member count the pack MUST have; a miss aborts")
     a = ap.parse_args()
 
     tr, te = load_raw()
     y = tr[TARGET].astype(int).to_numpy()
+    pack_extra = [d for d in a.pack_extra.split(",") if d]
     names, O, _ = load_members(y, len(te),
-                               extra_dirs=[os.path.join(DATA, d) for d in EXTRA], drop=DROP)
-    assert len(names) == 188, f"expected the 188-member pack, got {len(names)}"
+                               extra_dirs=[os.path.join(DATA, d) for d in pack_extra], drop=DROP)
+    assert len(names) == a.expect, \
+        f"expected the {a.expect}-member pack, got {len(names)}"
     M = np.empty((len(names), len(y)), dtype="float32")
     for i in range(len(names)):
         M[i] = fastrank(O[:, i])
     del O
-    print(f"pack: {len(names)} members via stack.load_members (w27h's exact pack)", flush=True)
+    print(f"pack: {len(names)} members via stack.load_members "
+          f"(extra: {','.join(pack_extra)})", flush=True)
 
     cdir = os.path.join(DATA, a.cand_dir)
     cnames = sorted(f[4:-4] for f in os.listdir(cdir) if f.startswith("oof_"))
@@ -104,7 +114,7 @@ def main():
     med_c = np.median(Rc, axis=1)
 
     print(f"\n=== pack reference (w27l) ===")
-    print(f"  median maxcorr over the 188 : {np.median(mx_p):.5f}   "
+    print(f"  median maxcorr over the {len(names)} : {np.median(mx_p):.5f}   "
           f"10th pct {np.percentile(mx_p, 10):.5f}   min {mx_p.min():.5f}")
 
     print(f"\n=== candidates ===")
@@ -124,7 +134,8 @@ def main():
         for j in o:
             print(f"      {names[j]:>24s}  corr {Rc[i, j]:.5f}  solo {solo_p[j]:.6f}")
 
-    np.savez(os.path.join(HERE, "w27q_cand.npz"), cnames=np.array(cnames), solo=solo_c,
+    np.savez(os.path.join(HERE, f"w27q_cand_{a.cand_dir}.npz" if a.cand_dir != "ext_members7"
+                          else "w27q_cand.npz"), cnames=np.array(cnames), solo=solo_c,
              maxcorr=mx_c, medcorr=med_c, closest=np.array([names[j] for j in who_c]),
              pack_names=np.array(names), pack_maxcorr=mx_p)
     print("\n  Read: LOWER maxcorr = more decorrelated. The pack median is the bar; a candidate "

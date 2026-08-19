@@ -83,6 +83,7 @@ CORR_MAP = {
     "w23_ad187stdcorr": "h3",           # the standardised 187 twin of w21_ad187corr
     "w27_ad188stdcorr": "h3",           # w27 slot 6, same construction on the 188 pack
     "w27_ad190stdcorr": "h3",           # w27 slot 7, same construction on the 190 pack
+    "w29_ad194stdcorr": "h3",           # w29 slot 10, same construction on the 194 pack
 }
 
 
