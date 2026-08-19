@@ -1039,3 +1039,35 @@ single +5e-6 file moves several places. MILANFX has not submitted since 08-16 an
 ⚠ Still **nothing selected** (14 days). Auto-selection would take `w21_ad187corr_ens4`
 (0.97118) and one of `w21_ad187corr` / `w22_ad187corr_rankraw` (0.97117). `WANTED` is
 {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}, chosen on CV. **A human must tick them.**
+
+## 2026-08-19 14:51 UTC — w27 slot 1. Rank 17 of 2323 at 0.97118 (was 11th on 08-18)
+
+Downloaded in full to `lb_w27/`. We did not move; the board did.
+
+| | |
+|---|---|
+| leader | MILANFX **0.97134** (08-18 06:52, unchanged for a day) |
+| 2nd–5th | Maher el Ouahabi 0.97127, Optimistix 0.97126, Don Mani / cstdy 0.97125 |
+| Szymon Kłapiński (whose public library our lattice members come from) | 0.97124, 8th |
+| **us** | **0.97118, 17th** |
+| teams | 2,323 |
+
+**The density around us is the number that matters, and it has got worse.**
+
+| public score | rank it buys |
+|---|---|
+| 0.97116 | 62 |
+| **0.97118 (ours)** | **17** |
+| 0.97120 | 14 |
+| 0.97122 | 10 |
+| 0.97125 | 4 |
+
++2e-5 of public score is worth 45 places at 0.97116 but only 7 at 0.97118 — we are already
+past the steep part. Top-10 needs **+4e-5**; the leader is **+1.6e-4** away. For scale, the
+w26d model prices the entire unsent queue at 6.3e-4 of beating our own 0.97118, and the best
+blend-level CV differences this workspace can still find are ~1e-6. **Nothing in the blend
+family reaches top 10.** Only a member-level effect of the size of the CT fix (+294e-6 solo,
+pooled, 400 rounds) is even the right order of magnitude — and whether any of that survives
+into the 187-member combiner is exactly what w27b/w27d measure.
+
+10 slots today; 5 sent by 14:39 UTC from the priced queue, 5 held.

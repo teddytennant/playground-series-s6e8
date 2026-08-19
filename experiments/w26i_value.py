@@ -81,6 +81,10 @@ def main():
     ap.add_argument("--out", default="w26i_value")
     ap.add_argument("--new-names", default=",".join(NEW),
                     help="comma-separated member names expected in --new-dir")
+    ap.add_argument("--replace", default="",
+                    help="a pack member to DROP when adding each candidate, giving a "
+                         "replace-arm alongside the add-arm (prereg §I2b). Empty by "
+                         "default, so every existing invocation is untouched.")
     ap.add_argument("--prereg-note", default=PREREG_E3,
                     help="the registered prior, echoed above the verdicts so the table "
                          "is always read against what was written before the run")
@@ -142,6 +146,16 @@ def main():
         cfg[nm] = pack + [nm]
     if len(present) == 2:
         cfg["both"] = pack + present
+    if a.replace:
+        if a.replace not in idx:
+            raise SystemExit(f"--replace {a.replace!r} is not a loaded member")
+        if a.replace not in pack:
+            raise SystemExit(f"--replace {a.replace!r} is not in the pack")
+        # same member count as `pack`, so the paired delta isolates swap-vs-keep and not
+        # "one more column". n_new is floored at 1 below so the per-member column stays finite.
+        thin = [m for m in pack if m != a.replace]
+        for nm in present:
+            cfg[f"{nm}|repl"] = thin + [nm]
 
     rows = []
     for rep in range(a.reps):
@@ -179,7 +193,7 @@ def main():
         if c in ("rep", "base165", "gate_cat4", "pack"):
             continue
         d = (df[c] - df["pack"]).to_numpy()
-        n_new = len(cfg[c]) - len(pack)
+        n_new = max(len(cfg[c]) - len(pack), 1)   # a `|repl` arm is size-neutral
         ok = (d > 0).all() or (d < 0).all()
         se = d.std(ddof=1) / np.sqrt(len(d))
         out[c] = dict(mean=float(d.mean()), sd=float(d.std(ddof=1)), se=float(se),

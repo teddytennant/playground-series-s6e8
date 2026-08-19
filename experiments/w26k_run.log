@@ -1,0 +1,7 @@
+[ctscale] 184 cols, 72 CT_ cols, scales [1.0, 1.1, 1.3333333333333333, 1.5, 2.0]
+[ctscale] rounds=2000 seed=42 jobs=5
+[ctscale] fold 0: s=1.0000 0.966859  s=1.1000 0.967049  s=1.3333 0.967554  s=1.5000 0.967225  s=2.0000 0.966710   CTgain 3.1%  (1528s)
+[ctscale] 184 cols, 72 CT_ cols, scales [1.0, 1.1, 1.3333333333333333, 1.5, 2.0]
+[ctscale] rounds=2000 seed=42 jobs=5
+[ctscale] fold 0: resumed from checkpoint
+[ctscale] fold 1: s=1.0000 0.967771  s=1.1000 0.967944  s=1.3333 0.968290  s=1.5000 0.967916  s=2.0000 0.967358   CTgain 3.0%  (286s)

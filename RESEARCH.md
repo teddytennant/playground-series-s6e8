@@ -6486,3 +6486,107 @@ The w16a comparison in §7 survives, because it rested on the two hard cells and
 per-segment number needs a second fold before it is written down.** The pooled number needed
 no such care because it is computed on 691k rows; a 15k-row segment at a 0.996 base rate is a
 different instrument and was quoted as if it were the same one.
+
+---
+
+# w27 slot 1 (2026-08-19) — the CT_ skew, why the rescale is only an approximation, and the exact fix
+
+## The one-line statement of the defect, for anyone reading this cold
+
+`agent/features.py:te_block` — and `data/oof/src/train_lattice.py` lines 172–194, the public
+szymonkapiski library it is adapted from — builds the **train** side of each lattice encoding
+with an inner `StratifiedKFold(4)` and the **valid/test** side from the whole outer training
+part. That is correct and necessary for the smoothed mean `TE_k`. **It is wrong for the raw
+count `CT_k`**, and the error is a pure scale factor of 4/3 on 72 of the 184 columns, on every
+fold, in every own-built lattice member here and in all 14 public `lat*`/`rmlp_lat*` members.
+
+## Why the inner loop is required for TE_ and buys NOTHING for CT_
+
+The inner loop exists to stop a row entering its own encoding. For `TE_k = (S + λ·gm)/(n + λ)`
+that is essential: a target mean that saw the row's own label leaks it.
+
+**A cell count carries no label information whatsoever.** `CT_k` is how many training rows
+share the row's lattice cell; `y` never enters it. So for CT_ the inner loop leaks nothing to
+prevent, and costs two things:
+
+| | what it costs | corrected by |
+|---|---|---|
+| **scale** | a count over 3/4 of the rows is 4/3 smaller than one over 4/4 | the 4/3 serve-time rescale **and** the clean fix |
+| **noise** | a 3/4 subsample of a count carries √(4/3) = 1.155× the sd of the full one | the clean fix **only** |
+
+So **`ct1.3333` (w26k/w26l) is an approximation to the real fix.** It matches the mean and
+cannot touch the noise. The real fix is one line: build `CT_` from the full outer-train map for
+the train rows too, exactly as the valid and test rows already do. Registered as `w27f_ctfull`
+at `w26_prereg.txt` §J before it was run.
+
+⚠ The one thing that is *not* exactly matched even then: a train row is **in** the map it looks
+itself up in, a serve row is not, so `full` counts one extra row for a train row in cells of
+size ~1–5. `w27f` runs `ctfull` and `ctfull_m1` (= `full − 1`) rather than assume which side of
+that is right; §J1 names `ctfull` as the primary because it is the one-line change a fix to the
+public library would actually make.
+
+## What the serve-side instrument can and cannot do
+
+Rescaling one input feature of a tree by `s` is the same function as rescaling that feature's
+thresholds by `s`, so *"fit with CT×s"* ≡ *"the original model served rows whose CT is divided
+by s"* — verified to `maxdiff 0.000e+00, spearman 1.00000000` in w26 slot 7. That is why the
+whole s-curve comes off **one fit per fold**.
+
+⚠ **It does not extend to `ct_drop` or to `ctfull`.** Dropping a feature, or changing its
+values, changes which splits get chosen; those need their own fits. Do not substitute "set CT
+to a constant at serve time" for `ct_drop` — that keeps the split structure and merely sends
+every row down one side, which answers a different question (§G8).
+
+## Where the effect sits relative to everything else in this workspace
+
+| effect | size |
+|---|---|
+| **CT fix, member solo, pooled 5 folds, 400 rounds** | **+294e-6** |
+| CT fix, member solo, fold 0, 2000 rounds | +695e-6 |
+| seed-averaging a member ("worth ~10× a blend tweak") | +138e-6 |
+| a blend-level tweak | ~1e-6 |
+| our public LB (0.97118) to the board leader (0.97134) | 1.6e-4 of LB |
+
+The gain **grows with depth** (117e-6 at 100 rounds → 294e-6 pooled at 400 → ~600e-6 at 2000),
+which is what the mechanism predicts: more rounds means more splits on the CT_ block, so more
+thresholds displaced by the same 33%. §G7 registered "≥ +250e-6 at 2000 rounds" before w26k
+printed a fold line, and folds 0 and 1 returned +695e-6 and +519e-6.
+
+⚠ **None of that is a leaderboard claim.** Member solo AUC has ~1.4% pass-through to the stack
+in this workspace, and the standing closure is that the 187-pack's span already contains what
+the 12 columns can say. Whether a corrected member is worth anything *into the pack* is a
+separate measurement (w27b at 400 rounds, w27d at 2000) with a registered prior of ~0, and the
+ship bar is unchanged: cross-fitted CV **0.9701181879** against the current leader
+0.9701150809.
+
+## ⚠ A null paired-Delta for ONE corrected member does NOT close the CT thread
+
+This is the framing error to avoid, and it is written down before the Deltas land so it cannot
+be produced afterwards as an excuse for a null.
+
+`w27b` / `w27d` measure **one corrected member added to a pack of 187 that still carries the
+skew**. Counting `oof_*` files whose name contains `lat`: **33 of the 191 member files are
+lattice members**, and every one of them — the 14 public `lat*`/`rmlp_lat*`, and all the
+own-built `lat`/`latcat`/`natlat`/`lattri`/`latwide`/`latr1` families — was fitted on the same
+skewed CT_ block from the same cache. So the paired Delta answers:
+
+> what is one un-skewed member worth *inside a span made of 187 uniformly-skewed ones*?
+
+which is a **lower bound** on, and not an estimate of, the thing that would actually pay:
+
+> what is the pack worth if the ~30 own-built lattice members are **rebuilt** corrected?
+
+Those are different interventions with different costs. The first is one member and was
+registered at ~0 for good reasons (§H2). The second is ~30 refits — a multi-day build, and the
+deadline is 2026-08-31, so there is room for it. **If the Delta is null, the correct next move
+is the rebuild, not abandoning the thread**; if the Delta clears the bar, the rebuild is
+correspondingly more attractive, not less.
+
+⚠ The counter-argument, stated so the rebuild is not entered blindly: the pack's combiner is
+already variance-limited at maxcorr 0.995, and a uniform improvement applied to 30 correlated
+members buys far less than 30× one member. It is also possible that the skew is part of what
+*decorrelates* the lattice members from each other (each fold's inner 4-split is a different
+random subsample), in which case removing it makes them more redundant and the pack worse. The
+cheap probe for that, before committing to 30 refits: rebuild **three** lattice members of
+different function classes (lgbm / xgb / catboost) and measure the paired Delta of the trio,
+which §G5(c) requires anyway for a second function class.

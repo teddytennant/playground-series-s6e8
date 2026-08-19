@@ -747,3 +747,259 @@ structure and merely sends every row down one side) and would answer a different
 `ct1.0`. Reason: the block's total gain share measured 0.2% on the 100-round probe -- small,
 but the fix is worth +3e-4, so the channel is not inert. Modal guess `ct_drop - ct1.0` =
 +100e-6, i.e. about a third of the fix.
+
+
+================================================================================
+SS H -- w26 SLOT 8 (2026-08-18). THE PACK QUESTION FOR THE CT FIX, READ EARLY
+         FROM THE 3 FOLDS w26l HAS ALREADY CHECKPOINTED.
+         Written 03:1x UTC, BEFORE w26o_partval.py existed and before any pack-level
+         number for the CT fix had been computed anywhere in this workspace.
+================================================================================
+
+H0. WHY EARLY AND NOT AFTER w26l POOLS
+---------------------------------------
+w26l has folds 0,1,2 on disk and fold 3 in flight on a box at load ~30; at the observed
+324s / 560s / 1106s per fold under contention the 5-fold pool is hours away and will not
+land inside this slot. But the checkpoints already hold, for those 3 folds, the held-out
+predictions of ALL SEVEN ARMS from the SAME booster. That is enough to run the pack-level
+question on ~60% of the rows at zero further GBDT cost, which is the question JOURNAL w26
+slot 7 SS8 item 2 calls "the one that decides whether any of this is worth a submission".
+
+This is an EARLY READ. The 5-fold rebuild supersedes it (R-H4).
+
+H1. THE PRIMARY READOUT IS A DIFFERENCE OF MARGINALS, NOT A MARGINAL
+---------------------------------------------------------------------
+Both candidate members come off the IDENTICAL trees, the identical rows and the identical
+folds; the sole difference between them is the serve-time CT scale. So
+
+    Delta  =  value(pack + ctfix)  -  value(pack + ctraw)
+
+isolates the fix at pack level with everything else matched, which no single marginal does.
+`ctraw` (arm ct1.0000) is not a throwaway control: it is a 400-round re-fit of the config
+the pack already holds at 2000 rounds, so its own marginal absorbs "a weaker duplicate of
+lgbm_fixed_lat is worth X" and Delta nets it out.
+
+H2. REGISTERED PRIOR
+---------------------
+  Delta                     0 to +3e-6, modal +0.5e-6.
+  value(pack + ctraw)       -2 to +1e-6, modal ~0 (a 400-round duplicate of a member the
+                            pack already holds at 2000 rounds).
+  value(pack + ctfix)       -2 to +3e-6, modal +0.5e-6.
+
+The prior is near-null because RESEARCH's member-hunting closure stands: the pack's span
+already contains what the 12 columns can say, and `orig_binm` at maxcorr 0.879 retired the
+"we just have not found a decorrelated member" objection. The honest reason it might NOT be
+null, stated in advance so it cannot be produced afterwards as a rationalisation: the CT
+displacement is shared by EVERY lattice member in the pack -- all 14 public `lat*`/`rmlp_lat*`
+and every own-built `lat`/`latcat`/`natlat` -- so a corrected member differs from the span in
+the one direction a span made of uniformly-displaced members cannot contain. That is an
+argument, not evidence. The number decides.
+
+H3. WHAT WOULD MAKE THIS WORTH A FILE
+--------------------------------------
+w26d prices what a NEW file needs: cross-fitted CV 0.9701181879 in family h3 for an
+even-money shot at the 0.97118 account best, against the current CV leader 0.9701150809.
+The gap is +3.1e-6. So Delta must clear roughly +3e-6 AND survive the 5-fold rebuild before
+any of the CT work reaches a submission. Registered in advance: a Delta of +1e-6 is a real
+mechanism and still NOT worth a file, and it must be written up as such rather than shipped.
+
+H4. RULES, BINDING
+-------------------
+R-H1  Only the paired Delta is the readout. The absolute marginals are descriptive.
+R-H2  A Delta whose SIGN FLIPS across reps is a NULL whatever its mean (w20d `nn` rule).
+R-H3  A Delta above +10e-6 is disbelieved on sight and re-run on fresh reps (SS E5).
+R-H4  This is 3 of 5 folds, ~415k of 691k rows, so its se is ~1.29x the full-row
+      instrument's and the combiner is fitted on ~207k rows per half rather than ~345k.
+      It is an early read. When w26l pools, rebuild on 5 folds with w26m_export.py +
+      w26i_value.py --new-dir data/ext_members6 and let THAT supersede this table.
+R-H5  NO ARGMAX SELECTION over {ctfix, both}. SS G6 already registered the `te` arm as a
+      null judged against ct1.3333, and folds 0-2 have now confirmed it with a sign flip
+      (-21, 0, +18 e-6). If `both` beats `ctfix` here by less than the rep sd, that is
+      noise and `ctfix` is the arm that carries the claim.
+R-H6  The transform convention differs from w26i in one stated way and this is registered,
+      not discovered later: the 187 pack is transformed on ALL 691k rows exactly as w26i
+      does it and then restricted, while the two candidate columns are transformed on their
+      own ~415k rows because they have no values outside them. Both candidates get the
+      identical treatment, so the paired Delta is unaffected; the absolute marginals carry
+      the convention and are descriptive anyway (R-H1).
+R-H7  Nothing here can reach the leaderboard today -- 10 of 10 slots are spent on the
+      08-18 UTC day, verified live at slot start. Nothing below is chosen with reference
+      to the public slice.
+
+
+================================================================================
+SS I -- w27 SLOT 1 (2026-08-19). THE 2000-ROUND CT FIX AT PACK LEVEL, AND THE
+        ADD-vs-REPLACE AXIS. Written 14:5x UTC.
+        State of the world at the moment of writing, so nothing below can be
+        back-fitted: w26l has POOLED (5 folds, 400 rounds) and its numbers are
+        quoted in I1; w26k has printed folds 0 and 1 ONLY (member-level, no pool,
+        no pack number of any kind); w27b (the 5-fold pack valuation of the
+        400-round pair) has printed rep 0 base165 and NOTHING ELSE -- no pack row,
+        no candidate row, no Delta; w27c (ct_drop) has printed no fold line at all.
+================================================================================
+
+I0. WHY THE HANDED ANGLE IS NOT FOLLOWED
+-----------------------------------------
+Handed angle: "find the original dataset and concatenate it as extra training rows".
+CLOSED here four separate times and every one of them negative -- concat -58e-6 at 1x
+and -3,340e-6 at 50x, monotone in dose (2026-08-11); the separate-estimator route
+`orig_binm` at maxcorr 0.879 worth -1e-6 to -2e-6 with cross-fitted w* = 0.000, i.e.
+strictly below a uniform-noise control; a regional read (w15d) null in every cell; and
+the source dataset itself is DELETED from Kaggle (forum topic 731719). The usual
+Playground edge is inverted in this competition and re-testing it is a priced null.
+The live thread is the CT_ train/serve skew found in w26 slot 7, which is the largest
+member-level effect ever recorded in this workspace.
+
+I1. WHAT IS ALREADY ESTABLISHED, QUOTED SO I2's PRIORS ARE READ AGAINST IT
+---------------------------------------------------------------------------
+w26l, POOLED over all 5 folds, 400 rounds, one booster per fold, arms differing only in
+the serve-time CT scale:
+
+    ct1.0000  0.9654813306      --
+    ct1.1000  0.9655483258   + 67.00e-6
+    ct1.3333  0.9657751945   +293.86e-6   <- the pre-registered point, SS G4
+    ct1.5000  0.9654705777   - 10.75e-6
+    ct2.0000  0.9651571978   -324.13e-6
+    te        0.9654885869   +  7.26e-6
+    both      0.9657882074   +306.88e-6
+
+The curve peaks exactly on the registered 4/3 and falls away on both sides, which is the
+registered mechanism signature (§G4). `both` minus `ct1.3333` = +13.0e-6, inside §G6's
+registered -60/+60e-6 band and judged there as "TE adds ~nothing on top of CT" -- R-H5
+stands and `ct1.3333` is the arm that carries the claim.
+
+w26k (2000 rounds, the exact lgbm_fixed_lat config) has two folds:
+    fold 0   s=1.0 0.966859 -> s=4/3 0.967554   +695e-6
+    fold 1   s=1.0 0.967771 -> s=4/3 0.968290   +519e-6
+Both clear §G7's registered ">= +250e-6 at 2000 rounds" and the gain GROWS with depth
+(117e-6 at 100 rounds, 294e-6 pooled at 400, ~600e-6 at 2000), which is the direction the
+mechanism predicts. §G7 is confirmed at the member level. It says nothing about the pack.
+
+I2. THE TWO NEW QUESTIONS AND THEIR REGISTERED PRIORS
+------------------------------------------------------
+(a) **The 2000-round pair at pack level.** When w26k pools, export s=1.0 as `ctraw2000`
+    and s=4/3 as `ctfix2000` into their own dir and run the identical w26i_value.py
+    instrument. The readout is again the paired Delta, not either marginal (R-H1).
+
+        Delta_2000 = value(pack + ctfix2000) - value(pack + ctraw2000)
+        registered:  0 to +5e-6, modal +1e-6
+
+    Wider and slightly higher than §H2's 400-round prior for ONE stated reason: the
+    2000-round corrected member has solo AUC ~0.9682, which is ABOVE `lgbm_fixed_lat`'s
+    stored 0.9677 -- it is the first member in this workspace that beats the pack's best
+    lattice member on its own terms, whereas the 400-round pair is a weaker duplicate of
+    a member the pack already holds. That is a reason for a larger prior, not evidence of
+    a larger effect.
+
+(b) **Add versus replace.** Every reading so far ADDS a corrected member to a pack that
+    still contains its uncorrected twin. The rival intervention REPLACES: pack minus
+    `lgbm_fixed_lat`, plus the corrected member. Registered before it is run:
+
+        value(replace) - value(add)     -3 to +3e-6, modal ~0, SIGN GENUINELY UNCERTAIN
+
+    Two readings compete and neither is favoured. (i) A logistic combiner at C=1.0 can
+    already zero-weight a member, so dropping one can only remove information and replace
+    <= add. (ii) With 187 members at maxcorr 0.995 the combiner is variance-limited, not
+    information-limited, and removing a near-duplicate of the new member is exactly the
+    case where dropping helps. Registering the uncertainty is the point; whichever way it
+    lands is one reading and not three.
+
+I3. RULES, BINDING
+-------------------
+R-I1  §H's rules carry over verbatim: paired Delta is the readout, a sign flip across
+      reps is a NULL whatever the mean, anything above +10e-6 is disbelieved on sight and
+      re-run on fresh reps.
+R-I2  NO ARGMAX over {400-round pair, 2000-round pair, add, replace}. The 2000-round pair
+      is the pre-specified primary because it is the production config; the 400-round pair
+      is the early read that R-H4 already said would be superseded; add-vs-replace is a
+      separate registered axis (I2b) and is reported as its own number, not raced.
+R-I3  §H3's ship bar is unchanged and it is high: a new file needs cross-fitted CV
+      0.9701181879 (family h3) against the current CV leader 0.9701150809, a gap of
+      +3.1e-6. **A Delta of +1e-6 is a real mechanism and still NOT worth a file.** If the
+      CT work does not clear that bar today it does not get submitted today, and the
+      remaining slots go to the priced queue exactly as they would have anyway.
+R-I4  The 5 slots left on the 08-19 UTC day are already committed to the w26d-priced queue
+      (P(beat best) 6.3e-4, sent because an unused slot is waste, not because it promises
+      anything). Any CT-derived file DISPLACES a queue file only if it clears R-I3. No
+      file is chosen with reference to the public slice.
+R-I5  w27c (ct_drop) is read against §G8's registered three-way split and its registered
+      modal "+100e-6, about a third of the fix". If ct_drop ~ ct1.3333 the honest
+      recommendation flips from "rescale the block" to "delete the block", and that must
+      be written up as the finding even though it makes the fix look less interesting.
+R-I6  w27c runs at jobs=6 where w26l ran at jobs=3. §G5b applies: this is a matched-config
+      comparison and NOT a bit-exact pairing, so a difference under ~10e-6 is not read.
+      The effect being looked for is 100-300e-6.
+
+
+================================================================================
+SS J -- w27 SLOT 1. THE CLEAN CT_ FIX (w27f_ctfull.py), REGISTERED BEFORE IT RUNS.
+        State at the moment of writing: w27f has NEVER been executed -- no log, no
+        checkpoint, no fold line. w26k has folds 0-1 only. w27c has printed no fold
+        line at all. w27b has printed rep 0 through `lat_ctfix_r400` and nothing more.
+================================================================================
+
+J0. THE ARGUMENT, WHICH IS PRIOR TO ANY NUMBER
+-----------------------------------------------
+`te_block`'s inner StratifiedKFold(4) is REQUIRED for the smoothed mean TE_: a target mean
+that saw the row's own label leaks it. **It buys nothing at all for the count CT_, because a
+cell count carries no label information.** Nothing about y enters it. The inner loop therefore
+costs two things and returns nothing:
+
+  scale  a count over 3/4 of the rows is 4/3 smaller than one over 4/4 (measured: 1.3325)
+  noise  a 3/4 subsample of a count carries sqrt(4/3) = 1.155x the sd of the full one
+
+w26k/w26l's serve-time rescale corrects the SCALE only, and cannot touch the noise. Building
+CT_ from the full outer-train map for the train rows too corrects both, and is the
+construction the public library should have had. That is an argument about the estimator, not
+evidence, and it is written down here before the number so it cannot be produced afterwards.
+
+J1. THE TWO ARMS, AND THE ONE THING THAT IS NOT EXACTLY MATCHED
+----------------------------------------------------------------
+A train row is IN the map it looks itself up in; a valid or test row is not. So `full` for a
+train row counts one row more than `full` for a serve row in the same cell. It matters only in
+cells of size ~1-5, and rather than assume, both arms run:
+
+    ctfull      CT_train = full_map[cell]          scale and noise matched, self included
+    ctfull_m1   CT_train = full_map[cell] - 1      the exact "other training rows" quantity
+
+Neither is the argmax winner by construction: the PRIMARY is `ctfull`, because it is the
+one-line change a fix to the public library would actually make. `ctfull_m1` is a mechanism
+control for the self-count, reported as its own number (R-J2).
+
+J2. REGISTERED PRIORS, against w26l's pooled 400-round numbers
+---------------------------------------------------------------
+    ct1.0000  0.9654813306   status quo
+    ct1.3333  0.9657751945   +293.86e-6, the serve-time rescale
+
+    ctfull    - ct1.3333      0 to +120e-6, modal +40e-6
+    ctfull_m1 - ctfull      -30 to  +30e-6, modal ~0 (the self-count is a thin-cell effect)
+    ctfull    - ct1.0000      strictly positive, and larger than +293.86e-6
+
+The modal +40e-6 is small ON PURPOSE. The rescale already removes the whole systematic part;
+what is left for `ctfull` is only the sampling-noise half, and §G6 has already measured the
+analogous noise-vs-systematic split on the TE side and found the systematic half too small to
+beat the noise half there. Registering a large prior here would be spending the same argument
+twice in the opposite direction.
+
+J3. WHAT WOULD FALSIFY THE MECHANISM AS STATED
+------------------------------------------------
+`ctfull` materially BELOW `ct1.3333` (worse than -30e-6). Under the stated mechanism that
+cannot happen: `ctfull` matches the serve scale exactly where 4/3 matches it only on average,
+AND removes noise the rescale leaves in. If it happens, the honest reading is that the gain
+w26k/w26l measured is not the scale story but something else that co-varies with it, and the
+whole CT thread has to be reopened rather than extended.
+
+J4. RULES, BINDING
+-------------------
+R-J1  §I's ship bar is unchanged and applies here too: a new file needs cross-fitted CV
+      0.9701181879. A member-level gain, however large, is NOT a submission.
+R-J2  No argmax over {ct1.3333, ctfull, ctfull_m1}. `ctfull` is the pre-specified primary and
+      is what any recommendation to change `te_block` rests on. The other two are mechanism
+      evidence.
+R-J3  The in-run gate (cached train CT / full-map CT must be ~0.75 per fold) is a HARD stop,
+      not a warning. If the lattice keys rebuilt by `make_frames` do not line up with the
+      cached columns, every number below is meaningless and the script exits.
+R-J4  jobs differs from w26l's 3. §G5b: matched-config, not bit-exact; differences under
+      ~10e-6 are not read.
+R-J5  §G5c still stands over all of this: a second FUNCTION CLASS (xgb latcat, catboost
+      natlat) is required before `te_block` is changed for good. Nothing here is that.
