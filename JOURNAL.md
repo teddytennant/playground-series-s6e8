@@ -13903,3 +13903,199 @@ Three rules, and the first two are new:
    a new file, or kill first and confirm the kill before editing.
 3. Still true, from yesterday: **kill by PID, never `pkill -f`** — a pattern that appears in
    your own command line kills your own shell.
+
+---
+
+# 2026-08-19 — slot 5 of 10 — feature engineering / in-fold encodings — ⛔ AT CAP, NO SUBMISSION
+
+**Angle handed:** *"Feature engineering: interactions, in-fold target and count encodings, and
+careful categorical treatment. Measure every feature on CV, keep only what pays."*
+
+**Submission status: 10 of 10 already landed on the 08-19 UTC day** (refs 55625681 … 55627458;
+Kaggle's day is UTC and it is 16:5x UTC now, so the reset is ~7h out). Nothing could be sent
+this slot and nothing was. Per the standing playbook that makes this a research-and-build slot.
+
+Pre-registration: `experiments/w27_prereg_slot5.txt`, §M6 written before any code in this slot
+existed, §M7 appended before `w27r_blockdrop.py` was written.
+
+## 1. Two sub-directions of the handed angle are already CLOSED — checked before spending
+
+Applying yesterday's §10c lesson (*read RESEARCH for the section covering a claim before writing
+"never checked before"*). I was about to build both of these and RESEARCH already owns both:
+
+- **The TE re-shrink** — correcting the smoothing for the fact that `TE_k = (S + λ·gm)/(n + λ)`
+  is fitted at a 3/4-size `n` and served at full `n`. I derived it independently from
+  `agent/features.py:te_block` and it is **RESEARCH.md:6342 §4**, with the closed-form serve-time
+  corrector, an sd-ratio table by cell-count band, and the striking detail that sweeping the
+  corrector's λ independently recovers `TE_SMOOTH ≈ 17–20`, the constant the builder used and
+  which is recorded nowhere on disk. It is also **measured NEGATIVE in three model classes**:
+  RESEARCH.md:7137 gives −19.26e-6 (xgb) and −82.68e-6 (cat) on top of the LightGBM null at §G6.
+  **Do not ship a `te` or `both` arm.**
+- **Frequency-instead-of-count encoding** (`CT_/n` rather than a raw count) — this is the obvious
+  "principled" fix and it is **not a new arm at all**: it is algebraically the s=4/3 arm up to a
+  per-column global scale, and GBDTs are per-column scale-invariant. Recorded in the prereg so no
+  later slot builds it. Cost of noticing: ten minutes. Cost of not noticing: a 5-fold refit.
+
+What that leaves under this angle is the third sub-direction, which is also what journal §9 item
+4 asks for: the pack pays **+3.37e-6 per added member** (se 0.24, 3/3 reps), so five cheap
+members clears the bar, and a **feature-set variant is how a new member is made decorrelated
+rather than redundant**. One experiment, both jobs. That is what this slot built.
+
+## 2. ✅ `w27c_ctdrop` FINISHED all five folds — and it MISSED its registered prior
+
+Was fold-0-only in yesterday's entry. Now pooled over all 691,369 rows:
+
+| arm | pooled OOF AUC | vs ct1.0 |
+|---|---|---|
+| w26l `ct1.0000` (184 cols, status quo) | 0.9654813306 | — |
+| **`ct_drop` (112 cols, all 72 `CT_` deleted)** | **0.9656895129** | **+208.18e-6** |
+| w26l `ct1.3333` (the 4/3 fix) | 0.9657751945 | +293.94e-6 |
+
+`ct_drop` recovers **70.8%** of the fix. **§G8 registered ~33% ("about a third"). Record as a
+missed prediction, too low** — the registered reading was "the block carries signal and the fix
+repairs it"; the honest reading is "the block as built is *mostly* net-harmful, and the 4/3 fix
+is closer to a partial repair of something better removed than to a repair of a live channel".
+The fix still wins by 85.68e-6, so deleting is not the right move at member level — but the
+margin is a quarter of what the registered prior implied.
+
+## 3. §M6 — ✅ ALL THREE PREDICTIONS HELD, and the answer is a hard NO to the cheap route
+
+`ct_drop` was exported to `data/ext_members7/{oof,test}_lat_ctdrop_r400.npy` (**unconditionally,
+per R-M6b, decided before any correlation was seen**) and profiled against the 188-pack with
+`experiments/w27q_cand.py` — pure arithmetic on stored OOF vectors, no fits, on a box already at
+load 30 with a foreign project's 14-way screen on it.
+
+| | registered | observed | |
+|---|---|---|---|
+| **M6(d) HARNESS GATE** | solo reproduces to <1e-9 | **d = 4.94e-11** | ✅ PASS |
+| **M6(a) PRIMARY** maxcorr | 0.995–0.999, mode 0.997 | **0.99941** | ✅ held, above the mode |
+| **M6(b)** closest member | a lattice LightGBM | **`lat_ctfix_r400`** | ✅ |
+| **M6(c)** decorr rank | worse than 100/189 | **181/189** | ✅ decisively |
+
+Pack reference: median maxcorr 0.99601, 10th pct 0.98451, min 0.91797.
+
+**Deleting 39% of the columns (72 of 184) produced the 9th-most-redundant member of 189.** Its
+five nearest neighbours are `lat_ctfix_r400` (0.99941), `lgbm_fixed_lat` (0.99395),
+`lgbm_fixed_lat_frac` (0.99369), `lattri_lgbm` (0.99194), `latwide_lgbm` (0.99186) — the entire
+lattice-LightGBM lineage, in order.
+
+**R-M6c fires: `ct_drop` counts as one of item 4's five cheap members and gets no priority and
+no further fit.** R-M6d (maxcorr < 0.99, which would have licensed a direct `w26i_value` pricing
+run) does not fire.
+
+The registered reasoning was that decorrelation tracks *how much of the model's function is
+replaced*, and `CT_` is only ~1.0% of LightGBM split gain (w27g's CTshare), so a 1% perturbation
+cannot make a decorrelated member. That reasoning survived contact and is now the thing to
+generalise from — see §5.
+
+## 4. Launched: `w27r_blockdrop.py` — the rest of the ablation table, registered at §M7
+
+`cache/cols.json` is 184 columns and decomposes **exactly** three ways: **72 `TE_`** + **72
+`CT_`** + **40 raw/derived**. w27c measured one cell of that table. The ladder measures the rest,
+matched to w26l/w27c on model (`lgbm_fixed_lat` PARAMS), rounds (400), seed (42) and the frozen
+folds — only the column set differs. Column counts verified against the registration before
+launch: 40 / 112 / 144, exact.
+
+| arm | cols | what it removes |
+|---|---|---|
+| `ctdrop` | 112 | done, above |
+| `encdrop` | **40** | `TE_` **and** `CT_` — the raw frame alone, cheapest fit |
+| `tedrop` | 112 | `TE_` — counts kept, means gone |
+| `rawdrop` | 144 | the 40 raw/derived — encoding only |
+
+Registered at §M7(a) (solo ordering, point priors) and §M7(b) (maxcorr: encdrop **below 0.990**,
+tedrop 0.990–0.996, rawdrop **above 0.996**) — note that **M7(b) predicts the WEAKEST arm is the
+most valuable one**, which is not a hedge: the pack already contains `orig_bin` at solo 0.850 and
+decorrelation rank 1, so weak-and-different is a real member type here.
+
+**§M7(c) is the falsifier, and it is the point of the whole thing:** if `encdrop` — which deletes
+the channel RESEARCH calls "the single biggest win" (+0.0023 CV) — *still* comes back above
+0.995, then feature-block ablation does not buy decorrelation in this pack **at all**, the
+"cheap members from feature variants" route is dead, and item 4 must be served another way.
+
+Launched cheapest-arm-first via `experiments/w27r_run.sh` (encdrop → tedrop → rawdrop), niced,
+`jobs=3`, per-(arm, fold) checkpointed, so a kill costs the least informative arm last.
+⚠ Arm `ctdrop` is deliberately **absent** from that file's `ARMS` table: w27c already owns the
+name and its five checkpoints, and including it would either refit them or silently resume them
+under a config this file might later change.
+
+## 5. ⚠ What §3 already implies for item 4 — the cheap members are model CLASSES, not feature sets
+
+This is the useful generalisation and it can be read off w27l's existing table for free. The
+twelve most decorrelated members of the 188 are:
+
+    orig_binm 0.918 · w15d_origrep_r 0.943 · logreg 0.947 · ad_logregte 0.961 · golem_c 0.963
+    golem_g 0.963 · bolt_lookup_v3_evidence 0.966 · bolt_lookup_v1 0.970 · xgb_cat_lattice 0.973
+    realmlp 0.973 · linlat 0.975
+
+**Every one is a linear model, a lookup/binning member, or a neural net. Not one is a GBDT
+feature variant.** §3 now adds the matching negative: the most aggressive feature-set surgery
+available inside the lattice-GBDT pipeline — deleting 39% of the frame — lands at 0.99941, i.e.
+*more* redundant than the pack median. Those two facts together say the pack's redundancy is a
+property of the **pipeline and function class**, not of the column list, which is exactly w26's
+standing finding ("where a member lands is set by its PIPELINE, not by its model class or its
+hyperparameters") sharpened by one notch: *within* a pipeline even the columns barely matter.
+
+**So the answer to item 4's "what do five cheap members look like?" is: `logreg`/`linlat`/
+`ad_logregte`-shaped things — a logistic regression or a lookup/binning member with a different
+categorical and lattice treatment.** Those sit at maxcorr 0.947–0.975 against a pack median of
+0.996, and a logistic fit on 691k×184 is minutes, not hours. That is both cheaper *and* better
+targeted than another GBDT. **Do not spend the next slot on more GBDT feature variants** — w27r
+is already running the definitive test of that route and §M7(c) says what to conclude if it
+fails.
+
+## 6. ✅ `w27k_ctrawctl` completed — a THIRD instrument says the CT correction is worth nothing at pack level
+
+The paired arm comparison the CT thread has been waiting on. Two 188-member standardised packs,
+identical but for which member of the `lat_ct*_r400` pair they carry:
+
+| pack | h3 CV |
+|---|---|
+| carries `lat_ctraw_r400` (the **skewed** control) | **0.970114** |
+| carries `lat_ctfix_r400` (the **corrected** member) | **0.9701114720** |
+
+⚠ Precision: `blend_lab` printed the raw arm to 6 dp, so read this as **fix − raw ≈ −2.5e-6,
+±0.5e-6 from rounding alone** — do not quote more figures than that. Registered expectation for
+this arm comparison was −2 … +3e-6, modal +0.5e-6; observed sits at the **negative edge** of the
+band. Same sign as the paired instrument (§2 of yesterday's entry: Δ = −0.83e-6, se 2.33) and
+same sign as `w27b_ctvalue` rep 4 (`lat_ctraw_r400` 0.969815 ≥ `lat_ctfix_r400` 0.969811).
+
+**Three instruments, three times the corrected member is not worth more than the skewed one
+inside a 188-member pack.** This does **not** retract yesterday's §10a — the standing
+pre-registration at RESEARCH.md:6562 says a null Δ selects the *rebuild*, and the trio probe
+(w27p) is what decides that. It does mean the rebuild has to be justified by the trio's
+member-level physics, never by these pack-level Deltas, which have now said "nothing" three
+times on three different instruments.
+
+## 7. Still running / state of the board
+
+- `w27r_blockdrop` — encdrop fitting. ~2–6h for all three arms under this load.
+- `w27o_ctclass5` — xgb/cat fold 1 of 4, then the 5-fold lgb control (§M4(d) is the cell that
+  can invalidate w27j's §10 table).
+- `w27p_serveclass` — correctly gated behind w27o's xgb/cat cells **and** on MemAvailable > 6 GB.
+- `w26i_value` (as `w27b_ctvalue`) — **rep 4 of 5**, nearly done.
+- `w26k_ctscale` folds 3–4, `w27g_tunect` 6 of 14 configs.
+
+## 8. Next run, in order
+
+1. **SEND `submissions/w27_ad188stdcorr.csv` AS SLOT 1.** CV **0.9701168076**, the highest
+   cross-fitted CV ever built here, validated (296,302 rows, ids exact and in order, 0 NaN,
+   296,302 distinct values, range 3.37e-6…1.0), and **still never sent**. A file that is never
+   submitted cannot be selected. Nothing competes for that slot.
+2. `tail experiments/w27r_blockdrop.log` and write it up against §M7(a)/(b)/(c) whichever way it
+   goes. Then `.venv/bin/python experiments/w27q_cand.py --gate <name>=<pooled CV>` to profile
+   the new members — it takes the whole of `data/ext_members7/` at once.
+3. **If §M7(c) fires, do not build another GBDT variant.** Build the §5 members instead: a
+   logistic / lookup member with a different categorical + lattice treatment. Cheap and aimed at
+   the only part of the maxcorr distribution that pays.
+4. `tail experiments/w27o_ctclass5.log` — §M4(d), the lgb harness check, still outstanding.
+5. ⚠ **The final pick is STILL NOT CLICKED.** `WANTED` = {`w27_ad188stdcorr.csv`,
+   `w23_ad187stdcorr.csv`}. Auto-selection by best public score lands on
+   `w21_ad187corr_ens4` / `w22_ad187corr_rankraw` — the most slice-inflated files we own, which
+   is the Rogii failure with the serial numbers filed off. **A human must open the submissions
+   page and tick two files.** 12 days left.
+
+**Files added this slot:** `experiments/w27_prereg_slot5.txt`, `experiments/w27q_cand.py`,
+`experiments/w27r_blockdrop.py`, `experiments/w27r_run.sh`,
+`data/ext_members7/{oof,test}_lat_ctdrop_r400.npy`.
+**No submission — at cap (10/10 for the 08-19 UTC day).**

@@ -31,3 +31,31 @@ transform hybrid in 11s
   rep 3 lat_ctfixte_r400 n_mem 188 AUC 0.969881 (214s)
   rep 4 base165          n_mem 165 AUC 0.969752 (236s)
   rep 4 gate_cat4        n_mem 169 AUC 0.969796 (286s)
+  rep 4 pack             n_mem 187 AUC 0.969803 (195s)
+  rep 4 lat_ctfix_r400   n_mem 188 AUC 0.969811 (232s)
+  rep 4 lat_ctraw_r400   n_mem 188 AUC 0.969815 (222s)
+  rep 4 lat_ctfixte_r400 n_mem 188 AUC 0.969807 (217s)
+
+held-out AUC per 50/50 split
+ rep  base165  gate_cat4     pack  lat_ctfix_r400  lat_ctraw_r400  lat_ctfixte_r400
+   0 0.970104   0.970147 0.970161        0.970164        0.970161          0.970164
+   1 0.970291   0.970333 0.970330        0.970333        0.970335          0.970334
+   2 0.970418   0.970457 0.970465        0.970468        0.970472          0.970469
+   3 0.969806   0.969859 0.969874        0.969882        0.969884          0.969881
+   4 0.969752   0.969796 0.969803        0.969811        0.969815          0.969807
+
+REPRODUCTION GATE (prereg R-E2) -- w20d's cat4 row was +0.000041
+  here +0.000044 +/- 0.000005 over 5 reps  -> PASS
+
+PAIRED vs the pack (same rows with and without the member)
+  lat_ctfix_r400   n 1  +0.000005 +/- 0.000002  per member +4.91e-06  t +5.15  [consistent]
+  lat_ctraw_r400   n 1  +0.000007 +/- 0.000005  per member +6.76e-06  t +3.33  [SIGN FLIPS]
+  lat_ctfixte_r400 n 1  +0.000004 +/- 0.000001  per member +4.21e-06  t +7.09  [consistent]
+
+PREREG §H2 said: Delta = value(pack+ctfix) - value(pack+ctraw) is 0 to +3e-6, modal +0.5e-6; each absolute marginal -2 to +3e-6. §H3: Delta must clear ~+3e-6 to be worth a file. R-H5: NO argmax over {ctfix, ctfixte}.
+Anything above +10e-6 is disbelieved on sight and re-run on fresh reps.
+  lat_ctfix_r400   clears the null
+  lat_ctraw_r400   NULL
+  lat_ctfixte_r400 clears the null
+
+wrote w27b_ctvalue.csv / .json

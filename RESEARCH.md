@@ -7327,3 +7327,95 @@ to worthless; the correction recovers slightly more than deleting it.
   recipe" already held — and re-derived it *less* accurately (12 vs the correct **14** public
   `lat*`/`rmlp_lat*` members, 24 vs **~33** lattice members of 191 files), because a
   `grep -l "CT_"` misses members that consume the lattice frame without emitting the column.
+
+---
+
+## ⚠ Feature-set variants do NOT buy decorrelation in this pack — measured 2026-08-19 (w27q)
+
+The standing question from journal §9 item 4 is *"the pack pays +3.37e-6 per added member, so
+what do five CHEAP members look like?"*. The intuitive answer — vary the feature set of the
+lattice GBDT — is now **measured and it is wrong**.
+
+`lat_ctdrop_r400` is `lgbm_fixed_lat` with **all 72 `CT_` columns deleted: 112 of 184 columns,
+a 39% deletion of the frame.** Profiled against the 188-pack with `experiments/w27q_cand.py`
+(rank-transform then Pearson, w27l's convention; pure arithmetic over stored OOF, no fits):
+
+| | value | pack reference |
+|---|---|---|
+| solo AUC | 0.9656895129 | pack median solo 0.966371 |
+| **maxcorr** | **0.99941** | **median 0.99601, 10th pct 0.98451, min 0.91797** |
+| closest | `lat_ctfix_r400` | |
+| decorrelation rank | **181 / 189** | i.e. the 9th *most redundant* member |
+
+Next four neighbours: `lgbm_fixed_lat` 0.99395, `lgbm_fixed_lat_frac` 0.99369, `lattri_lgbm`
+0.99194, `latwide_lgbm` 0.99186 — the whole lattice-LightGBM lineage in order.
+
+**Read it against w27l's twelve most decorrelated members**: `orig_binm` 0.918, `w15d_origrep_r`
+0.943, `logreg` 0.947, `ad_logregte` 0.961, `golem_c` 0.963, `golem_g` 0.963,
+`bolt_lookup_v3_evidence` 0.966, `bolt_lookup_v1` 0.970, `xgb_cat_lattice` 0.973, `realmlp`
+0.973, `linlat` 0.975. **Every one is a linear model, a lookup/binning member, or a neural net.
+Not one is a GBDT feature variant.**
+
+Together these sharpen w26's standing finding — *"where a member lands is set by its PIPELINE,
+not by its model class or its hyperparameters"* — by one notch: **within a pipeline, even the
+column list barely matters.** The mechanism is the registered one and it survived contact:
+decorrelation tracks how much of the model's *function* is replaced, and `CT_` is only ~1.0% of
+LightGBM split gain (w27g's CTshare), so a 1% perturbation cannot make a decorrelated member.
+
+**Therefore: cheap members should be cheap MODEL CLASSES, not cheap feature sets.** A logistic
+regression or lookup/binning member with a different categorical + lattice treatment sits at
+maxcorr 0.947–0.975 against a pack median of 0.996, and a logistic fit on 691k×184 costs
+minutes. `experiments/w27r_blockdrop.py` is running the definitive test of the feature-set route
+(arms `encdrop` 40 cols / `tedrop` 112 / `rawdrop` 144, pre-registered at
+`experiments/w27_prereg_slot5.txt` §M7); §M7(c) registers that an `encdrop` maxcorr above 0.995
+kills the route outright.
+
+### Tooling
+
+`experiments/w27q_cand.py --cand-dir ext_members7 --gate <name>=<pooled CV>` — profiles every
+member in a candidate directory against the 188-pack for zero fit. `--gate` asserts the solo AUC
+reproduces a registered value to 1e-9, which catches a mis-indexed export before any correlation
+is read (it passed at d = 4.94e-11 on first use). Candidates are scored against the **pack
+only**, never against each other, so adding a second candidate cannot move the first's number.
+
+## Two dead ends under the "in-fold target/count encoding" angle — do not rebuild either
+
+1. **The TE re-shrink.** Independently re-derived from `agent/features.py:te_block` on
+   2026-08-19 before checking. It is already this file's §4 at line ~6342 (with the closed-form
+   serve-time corrector and the λ-recovery of `TE_SMOOTH`), and it is **measured negative in
+   three model classes** — see line ~7137: −19.26e-6 (xgb), −82.68e-6 (cat), on top of the
+   LightGBM null at §G6. Do not ship a `te` or `both` arm.
+2. **Frequency encoding instead of count encoding** (`CT_/n` rather than a raw count). This is
+   the obvious "principled" alternative to the s=4/3 rescale and it is **not a new arm**: it is
+   the 4/3 arm up to a per-column global scale, and GBDTs are per-column scale-invariant. It
+   cannot measure anything the `ctscale` sweep has not already measured.
+
+## Third instrument on the CT correction at pack level: still nothing (w27k, 2026-08-19)
+
+Two 188-member standardised packs, identical except for which member of the pair they carry:
+
+    carries lat_ctraw_r400  (skewed control)     h3 CV 0.970114
+    carries lat_ctfix_r400  (corrected member)   h3 CV 0.9701114720
+
+⚠ `blend_lab` printed the raw arm to 6 dp, so **fix − raw ≈ −2.5e-6, ±0.5e-6 from rounding
+alone** — do not quote more figures. Registered −2 … +3e-6, modal +0.5e-6; observed at the
+negative edge. Same sign as the paired `w26i_value` instrument (Δ = −0.83e-6, se 2.33) and as
+`w27b_ctvalue` rep 4 (`lat_ctraw_r400` 0.969815 ≥ `lat_ctfix_r400` 0.969811).
+
+**Three instruments, three nulls-to-negatives.** This does NOT retract the standing
+pre-registration at §"⚠ A null paired-Delta for ONE corrected member does NOT close the CT
+thread" — a null Δ still selects the *rebuild*, and the trio probe (`w27p_serveclass`) decides
+it. It does mean the rebuild must be justified by the trio's member-level physics and **never**
+by these pack-level Deltas.
+
+## `ct_drop` recovers 70.8% of the CT fix, not the registered ~33% (w27c, 5 folds, 2026-08-19)
+
+    ct1.0000  (184 cols, status quo)   0.9654813306
+    ct_drop   (112 cols, CT_ deleted)  0.9656895129    +208.18e-6
+    ct1.3333  (the 4/3 fix)            0.9657751945    +293.94e-6
+
+**§G8 registered "about a third". Record as a missed prediction, too low.** The honest reading
+is that the `CT_` block as built is *mostly* net-harmful and the 4/3 fix is closer to a partial
+repair of something better removed than to a repair of a live channel. The fix still wins by
+85.68e-6, so deleting is not the right move at member level — but the margin is a quarter of
+what the prior implied.

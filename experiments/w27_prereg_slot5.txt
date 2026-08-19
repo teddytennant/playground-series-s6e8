@@ -1,0 +1,141 @@
+w27 SLOT 5 (2026-08-19) -- PRE-REGISTRATION
+Written BEFORE any code in this slot was run. Append-only; nothing below is edited after a print.
+
+CONTEXT
+  At the daily cap: 10 of 10 submissions already landed on the 08-19 UTC day
+  (55625681 .. 55627458). NO SUBMISSION IS POSSIBLE THIS SLOT. Everything here is
+  measurement and build; nothing is selected and nothing is sent.
+
+HANDED ANGLE
+  "Feature engineering: interactions, in-fold target and count encodings, and careful
+   categorical treatment. Measure every feature on CV, keep only what pays."
+
+WHY THE ANGLE IS TAKEN LITERALLY THIS TIME, AND WHERE IT IS AIMED
+  The angle names the in-fold target/count encoding block, which is `agent/features.py:te_block`
+  -- the exact object the whole w26/w27 thread has been measuring. Two of its sub-directions are
+  already CLOSED and must not be re-spent:
+    - the TE re-shrink (correcting the smoothing for the 3/4 fit-time count) is measured
+      NEGATIVE in three model classes: RESEARCH.md:7137 gives -19.26e-6 (xgb), -82.68e-6 (cat),
+      and it is the 3rd/4th confirmation of the LightGBM null at RESEARCH §G6. DO NOT SHIP `te`.
+    - frequency-instead-of-count encoding (CT_/n) is ALGEBRAICALLY IDENTICAL to the s=4/3 arm
+      up to a per-column global scale, and GBDTs are per-column scale-invariant. It is not a
+      new arm. Recorded here so no later slot builds it.
+  What is genuinely open under this angle is the third sub-direction, and it is the one journal
+  §9 item 4 asks for: the pack pays +3.37e-6 per ADDED MEMBER (se 0.24, 3/3 reps), so five cheap
+  members clears the §1 bar. Feature-set variants are how a new member is made DECORRELATED
+  rather than redundant, and decorrelation is what a saturated stack pays for (w20d,
+  adarsh1077's leave-one-author-out, w27l).
+
+THE ASSET THIS SLOT PRICES
+  `experiments/w27c_ctdrop_{oof,test}.npy` COMPLETED this slot -- all 5 frozen folds, pooled OOF
+  0.9656895129 over 691,369 rows. It is a LightGBM on the 184-column lattice matrix with all 72
+  `CT_` columns DELETED, i.e. a feature-set variant no other member in the 188-pack has. It is
+  already on disk and costs zero further fit.
+
+  Its member-level scorecard, now complete and pooled (was fold-0-only in yesterday's journal):
+    ct_drop 0.9656895129   vs w26l ct1.0 0.9654813306  ->  +208.18e-6
+                           vs w26l ct4/3 0.9657751945  ->   -85.68e-6
+    recovers 70.8% of the fix; §G8 REGISTERED ~33%. Record as a MISSED prediction (too low).
+
+PREDICTIONS -- M6, registered before `w27q_cand.py` is written or run
+  M6(a) PRIMARY. `ct_drop`'s maxcorr against the 188-member pack (rank-transform then Pearson,
+        w27l's convention) lands in 0.995 -- 0.999, MODE 0.997, i.e. at or above the pack median
+        of 0.99601. Reasoning: CTshare is only ~1.0% of LightGBM split gain (w27g), so deleting
+        the block perturbs ~1% of the model's split budget; same class, same folds, same 112 of
+        184 columns. A 1% perturbation cannot make a decorrelated member.
+  M6(b). Its closest pack member is a LATTICE LIGHTGBM -- one of {lgbm_fixed_lat,
+        lgbm_fixed_lat_frac, lat_lgbm, lat_lgbm_s5, lat_ctfix_r400, latmax_lgbm, latwide_lgbm}.
+  M6(c). Its decorrelation rank is WORSE (numerically larger) than 100 of 189.
+  M6(d) HARNESS GATE, not a prediction. Solo AUC recomputed inside the profiler must reproduce
+        0.9656895 to within 1e-9. A miss means the export is mis-indexed and every number in
+        this slot is void. This is the cell that can invalidate the rest.
+  M6(e). The four w27p members (`xgb_ctraw_r400`, `xgb_ctfix_r400`, `cat_ctraw_r400`,
+        `cat_ctfix_r400`) are profiled if and only if they have finished; the cat pair lands
+        MORE decorrelated than the xgb pair, because `cat_native` is already decorr rank 15/188
+        while `xgb_lat`/`xgb_latcat` are 176/188 and 181/188 (w27l).
+
+DECISION RULES -- binding
+  R-M6a  NOTHING IS SHIPPED FROM THIS SLOT. No submission is possible (at cap) and no argmax
+         over candidate members selects anything. This workspace has measured arm-selection
+         optimism at +1.78e-6 and must not spend it twice (w16i).
+  R-M6b  The export of `ct_drop` into `data/ext_members7/` is UNCONDITIONAL and is decided
+         BEFORE the correlation is seen. Reason: the combiner chooses member weights itself, a
+         member cannot be selected if it does not exist, and the export is free. The measurement
+         therefore steers EFFORT ONLY -- it must not be read as a keep/drop gate on the member.
+  R-M6c  If M6(a) holds (maxcorr >= 0.995), `ct_drop` counts as ONE of journal §9 item 4's five
+         cheap members and gets NO priority over the others. Do not spend a fit on it.
+  R-M6d  If maxcorr comes in BELOW 0.99 that contradicts the CTshare reasoning and is worth a
+         direct w26i_value pricing run. Only that outcome licenses further compute here.
+  R-M6e  `ct_drop` is NOT added to any pack whose CV is compared against a previously recorded
+         CV, unless the comparison build re-runs BOTH arms. The 188-pack numbers on file
+         (0.9701168076 etc.) are 188-member numbers and adding a 189th silently invalidates
+         every stored comparison.
+
+COMPUTE DISCIPLINE
+  Box is 16 cores at load ~30 with five s6e8 jobs plus a foreign project's 14-way screen on it.
+  This slot adds NO FITS. `w27q_cand.py` is pure arithmetic over stored OOF vectors -- the same
+  shape w27l ran in minutes. Anything that would fit a booster is deferred.
+
+================================================================================
+M7 -- THE FEATURE-BLOCK ABLATION LADDER. Appended BEFORE `w27r_blockdrop.py` was
+written or launched, and after M6(d)'s harness gate passed (d = 4.94e-11).
+
+THE OBJECT
+  `cache/cols.json` is 184 columns and decomposes EXACTLY three ways:
+      TE_*   72   the in-fold smoothed target encoding
+      CT_*   72   the in-fold cell count
+      raw    40   the 12 predictors plus imputations, ratios, lattice/decimal features
+  The handed angle is "measure every feature on CV, keep only what pays". w27c measured
+  exactly one cell of that table (drop CT_). The other three are unmeasured, and each one is
+  ALSO a cheap member on a feature set no other member of the 188-pack has -- which is what
+  journal §9 item 4 is asking for. One experiment, both jobs.
+
+  ARMS, all matched to w27c/w26l on model (lgbm_fixed_lat PARAMS), rounds (400), seed (42),
+  and the frozen SKF5 seed42 folds. Only the column set differs.
+      ctdrop   112 cols   DONE  pooled 0.9656895129
+      tedrop   112 cols   drop the 72 TE_ -- removes what RESEARCH calls "the single biggest
+                          win" (+0.0023 CV); the model keeps counts but loses the means
+      encdrop   40 cols   drop TE_ AND CT_ -- the raw frame alone, cheapest fit of the four
+      rawdrop  144 cols   keep TE_+CT_ only -- the encoding-only model
+      (control) 184 cols  w26l ct1.0000 = 0.9654813306
+
+PREDICTIONS -- registered before any of the three new arms is fitted
+  M7(a) PRIMARY, solo AUC ordering:
+            ctdrop (0.96569, known) > control (0.96548, known) > rawdrop > tedrop > encdrop
+        with encdrop the weakest by a wide margin. Point priors:
+            tedrop   0.9600 -- 0.9640, MODE 0.9625
+            encdrop  0.9500 -- 0.9600, MODE 0.9560
+            rawdrop  0.9640 -- 0.9660, MODE 0.9650
+        Reasoning for rawdrop being near the control: TE_+CT_ is 144 of 184 columns and the
+        ablation record says composition/ratio features are "largely superseded by TE".
+  M7(b) DECORRELATION, and this is the cell that decides whether the arms are worth keeping.
+        maxcorr against the 188-pack, pack median 0.99601:
+            encdrop  BELOW 0.990 -- more decorrelated than 90% of the pack
+            tedrop   0.990 -- 0.996
+            rawdrop  ABOVE 0.996 -- a near-copy, at or above the pack median
+        Reasoning: decorrelation tracks how much of the model's function is REPLACED, and
+        RESEARCH's ablation deltas say the TE block carries an order of magnitude more of it
+        than any other block. This is a DIFFERENT ordering from M7(a) only in that it predicts
+        the WEAKEST member is the most VALUABLE one to the stack -- the pack already contains
+        `orig_bin` at solo 0.850 and decorrelation rank 1, so weak-and-different is a real
+        member type here, not a consolation prize.
+  M7(c) FALSIFIER, stated so M7(b) is not unfalsifiable: if encdrop's maxcorr lands ABOVE
+        0.995 then feature-block ablation does NOT buy decorrelation in this pack, the whole
+        "cheap members from feature variants" route is dead, and journal §9 item 4 must be
+        served by new MODEL CLASSES or new SOURCES instead. Write that up as such.
+
+DECISION RULES -- binding
+  R-M7a  All three arms are exported to `data/ext_members7/` UNCONDITIONALLY on completion,
+         decided now, before any number is seen. Same reasoning as R-M6b: the combiner picks
+         the weights, and a member that does not exist cannot be picked.
+  R-M7b  NO ARGMAX. The arm with the best solo AUC is NOT thereby selected for anything, and
+         the arm with the lowest maxcorr is NOT thereby selected either. Arm-selection
+         optimism is measured at +1.78e-6 here (w16i) and is not spent twice.
+  R-M7c  Nothing in M7 is submitted this slot -- the account is at 10 of 10 for the 08-19 UTC
+         day. Any file built from these members is a candidate for a LATER slot and must be
+         priced by cross-fitted CV on the frozen folds before it competes for one.
+  R-M7d  A pack containing these members is a 189..192-member pack. Its CV IS NOT COMPARABLE
+         to any stored 188-member number (0.9701168076 etc.) unless both arms are rebuilt.
+  R-M7e  COMPUTE: launched niced, cheapest-arm-first (encdrop 40 cols, then tedrop 112, then
+         rawdrop 144), single background chain, so a kill costs the least informative arm
+         last. The box is 16 cores at load ~30 with a foreign project's 14-way screen on it.

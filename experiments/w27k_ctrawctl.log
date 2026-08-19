@@ -1,0 +1,28 @@
+=== critical path clear and memory available, starting the ctraw control ===
+188 members, dtype float32
+  transform logit       10s
+  hybrid: repaired 54 of 188 members
+  transform hybrid      45s
+  transform rankraw    116s
+  transform rescale     52s
+loaded in 238s
+  cross-fitted stack_logit    0.970039
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188raw_logit.csv  rows=296,302  cross-fitted CV 0.970039
+  cross-fitted stack_hybrid   0.970100
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188raw_hybrid.csv  rows=296,302  cross-fitted CV 0.970100
+  cross-fitted stack_rankraw  0.970098
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188raw_rankraw.csv  rows=296,302  cross-fitted CV 0.970098
+  cross-fitted stack_rescale  0.970099
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188raw_rescale.csv  rows=296,302  cross-fitted CV 0.970099
+
+cross-fitted rank-ensemble of 4 transform stacks: 0.970111
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188raw.csv  rows=296,302  cross-fitted CV 0.970111
+
+total 1912s
+  hybrid   oof AUC 0.970100
+  rankraw  oof AUC 0.970098
+  rescale  oof AUC 0.970099
+
+w27_ad188raw_h3: cross-fitted CV 0.970114   (w27_ad188raw all-four: 0.970111)
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188raw_h3.csv  rows=296,302
+=== w27k complete: compare w27_ad188raw_h3 against w27_ad188std_h3 0.9701114720 ===
