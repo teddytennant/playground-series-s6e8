@@ -1,0 +1,36 @@
+188 members, dtype float32
+  transform logit       27s
+  hybrid: repaired 54 of 188 members
+  transform hybrid     112s
+  transform rankraw    113s
+  transform rescale     42s
+loaded in 318s
+  cross-fitted stack_logit    0.970037
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188std_logit.csv  rows=296,302  cross-fitted CV 0.970037
+  cross-fitted stack_hybrid   0.970099
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188std_hybrid.csv  rows=296,302  cross-fitted CV 0.970099
+  cross-fitted stack_rankraw  0.970093
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188std_rankraw.csv  rows=296,302  cross-fitted CV 0.970093
+  cross-fitted stack_rescale  0.970096
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188std_rescale.csv  rows=296,302  cross-fitted CV 0.970096
+
+cross-fitted rank-ensemble of 4 transform stacks: 0.970109
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188std.csv  rows=296,302  cross-fitted CV 0.970109
+
+total 998s
+  hybrid   oof AUC 0.970099
+  rankraw  oof AUC 0.970093
+  rescale  oof AUC 0.970096
+
+w27_ad188std_h3: cross-fitted CV 0.970111   (w27_ad188std all-four: 0.970109)
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w27_ad188std_h3.csv  rows=296,302
+base w27_ad188std_h3 OOF AUC 0.9701114720   (w16i's base blend159av_h3 0.9700491721, delta +62.30e-6)
+  scheme glob    1 levels  sizes [691369]
+  scheme a_only  2 levels  sizes [613715, 77654]
+  scheme rule    7 levels  sizes [175446, 154634, 102202, 93255, 77654, 47438, 40740]
+  scheme mask    5 levels  sizes [269185, 180459, 120697, 67328, 53700]
+  scheme decile  8 levels  sizes [86422, 86421, 86421, 86421, 86421, 86421, 86421, 86421]
+    fitted glob fold 0 {'0': np.float64(0.001)}
+    fitted glob fold 1 {'0': np.float64(0.001)}
+    fitted glob fold 2 {'0': np.float64(0.001)}
+    fitted glob fold 3 {'0': np.float64(0.0015)}

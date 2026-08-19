@@ -1,0 +1,5 @@
+[tunect] 184 cols, 72 CT_ cols, 14 configs, arms [1.0, 1.3333]
+[tunect] fold=0 rounds=400 seed=42 jobs=3
+[tunect] GATE  median valid/train CT_ ratio = 1.3325 (expected 1.3333)
+[tunect] control          1.0 0.964779  4/3 0.965104  d_c  +324.99e-6  CTshare   1.0%  (602s)
+[tunect] leaves31_d6      1.0 0.964129  4/3 0.964426  d_c  +297.11e-6  CTshare   0.8%  (1362s)

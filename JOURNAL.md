@@ -12972,3 +12972,299 @@ only. **No submission — none was possible, 0 of 10 slots left on the 08-18 UTC
 `np.savez(path_string)` appends `.npz` to the *name*, which silently breaks the temp-file +
 `os.replace` idiom — the rename then fails on a file that was never created. Pass an open
 **file handle**. It cost this slot's first probe.
+
+---
+
+# 2026-08-19 (UTC) — wave w27, slot 2 of 10
+**Angle handed: "LightGBM: tune it properly against the fixed folds — learning rate, leaves,
+regularisation, categorical handling."**
+**Taken as an INTERACTION question rather than a re-run, because a plain re-run is a priced
+null here. Three deliverables: the tuning×CT-correction sweep (running, pre-registered at §K),
+the 188-member ship candidate (built, §L), and the first quantitative handle this workspace
+has had on what our public rank is actually worth privately.**
+
+## 0. Slots, live from the API
+
+`w27a_send1.log` from slot 1 shows 5 sent at 14:39 UTC; this slot sent **3 more at 15:13**
+and is holding the last **2 for the files it built**. Cap is 10/day, counted in UTC by
+`w26g_send.py` off a 500-row page.
+
+The eight queue-drain files all landed where they were priced: 0.97105–0.97116, every one
+below the 0.97118 account best, exactly as `w26d` said they would (`p_beat` 0.00e+00 for
+seven of them, 6.3e-4 for `w20_ad187_logit`, which printed 0.97116 against a prediction of
+0.971158). **That is a calibration result, not a wasted day** — see §4.
+
+## 1. Why the angle was NOT taken as "sweep LightGBM again"
+
+The day-1 entry (2026-08-10) already ran a two-stage sweep on these exact features: 29
+one-knob trials plus 7 combinations, +500e-6 on fold 0, and **+30e-6 on the full OOF, under
+the 50e-6 noise floor**. Its one durable conclusion was *"less capacity, more regularisation
+wins, because 144 of the 184 features are target-derived and easy to overfit."* Re-running
+that buys nothing and the journal says so.
+
+What is new since is §G/§J: **every hyperparameter number ever recorded in this workspace was
+measured on features carrying the CT_ train/serve skew.** A model is *right* to lean away from
+a feature block that arrives 33% too large at serve time. So part of day-1's "regularise
+harder" may have been the model correctly defending itself against a defect — and if so, the
+optimum moves back toward capacity once the defect is corrected, and the correction is worth
+MORE than the +293.86e-6 already measured because it unlocks a config the skew was suppressing.
+
+That is a real, falsifiable question no sweep here has asked, and §G3's serve-side equivalence
+makes it **free relative to the sweep**: "fit with CT×s" ≡ "the same booster served CT/s"
+(verified maxdiff 0.000e+00, spearman 1.00000000), so one fit per config yields both arms on
+identical rows and identical folds.
+
+**Pre-registered in full at `experiments/w26_prereg.txt` §K before the script was started**,
+with the log verified empty: d_c > 0 for every config (K2a); spearman(CT_ gain share, d_c)
+positive, modal +0.5 (K2b); the optimum moves toward capacity (K2c); and the headline
+`best(4/3) − best(1.0) − 293.86e-6` registered at **0 to +80e-6, modal +15e-6** (K2d) —
+deliberately small, because day-1's base rate is that a 500e-6 fold-0 spread collapses to
++30e-6 on full OOF.
+
+## 2. `w27g_tunect.py` — the instrument, and the one number it has returned
+
+14 configs off `lgbm_fixed_lat`, fold 0, 400 rounds, seed 42, each fitted once and scored at
+s=1.0 and s=4/3. Per-config checkpointed to `cache/tunectckpt/`.
+
+An in-run **gate** (not registered, but free): the cached valid/train CT_ ratio must sit near
+4/3 or the premise is wrong. It printed **1.3325**, reproducing §G's cache measurement exactly.
+
+    [tunect] control   1.0 0.964779   4/3 0.965104   d_c +324.99e-6   CTshare 1.0%
+
+⚠ **That is a byte-level reproduction of w26l's fold-0 control** (0.964779 / 0.965104 /
++325e-6) from a different script at a different thread count. Nothing was riding on it and it
+passed anyway, which is worth more than a gate that was designed to pass.
+
+**And it carries a fact worth stating on its own: the CT_ block is 1.0% of total split gain.**
+Seventy-two of 184 columns, one percent of the gain — and correcting a 33% scale error on them
+is worth +325e-6, which is 2.4× the seed-averaging gain this workspace calls "worth ~10× a
+blend tweak". The effect is not proportional to how much the model uses the block.
+
+⚠ **STILL RUNNING at the end of this slot: 1 of 14 configs done.** The box is at load ~59 on
+16 cores (two other workspaces hold ~9 of them) and each config is taking ~10 min of wall
+clock at an effective 1 core. **Re-running the identical command resumes per config:**
+
+    .venv/bin/python experiments/w27g_tunect.py --name tunect --rounds 400 --jobs 3
+
+No conclusion is drawn from one config, and §K's readouts (a)–(d) are all cross-config. **Do
+not quote a partial table.**
+
+## 3. `w27h` — the 188-member ship candidate, and the member choice made BEFORE the CV existed
+
+§L registers it: `data/ext_members6` holds three exports from w26l, and the build adds
+**`lat_ctfix_r400` only**. `lat_ctraw_r400` is the control arm and exists to be measured
+against; `lat_ctfixte_r400` carries the TE re-shrink that §G6 already judged null-to-negative.
+Choosing among the three on their 188-member CVs is exactly the arm-selection optimism R-J2
+forbids and is worth a measured +1.78e-6 here. So the choice was made on prior grounds, in
+writing, before any 188-member number existed.
+
+Chain: `blend_lab --standardize --extra-dirs ext_members3,ext_members4,ext_members6` at
+float32/C=1.0 — **w23f's recipe verbatim, one member wider, so the 187-member build already on
+disk is a like-for-like control needing no refit** — then `make_h3.py`, then `w21a_ad187corr.py`
+with `W21A_BASE=w27_ad188std_h3`.
+
+Per-transform cross-fitted CV, against the stored 187-member numbers:
+
+| transform | 187 (`w23_ad187std`) | 188 (`w27_ad188std`) | delta |
+|---|---|---|---|
+| logit | 0.970030 | **0.970037** | +7e-6 |
+| hybrid | 0.970098 | **0.970099** | +1e-6 |
+| rankraw | 0.970092 | **0.970093** | +1e-6 |
+
+**One corrected member is worth ~+1e-6 into the three transforms that actually carry the
+h3 mix**, against a registered modal of +3e-6 and a range of 0 to +6e-6. It is inside the
+registered range and at the bottom of it. The `logit` +7e-6 is the outlier and `logit` is the
+transform h3 exists to drop.
+
+⚠ **A gotcha that cost the first launch:** `blend_lab`'s default `extra_dirs` is
+`(ext_members, ext_members2)` only, so `--extra-dirs ext_members6` alone loads **166**
+members, not 188. The 187-member pack is `ext_members{,2,3,4}`; `w26i_value.py` hard-codes
+that list and `blend_lab` does not. The run printed `166 members` and was killed before it
+cost anything, but a run that did not check the count would have silently built a
+different-pack file under a 188-member name.
+
+⚠ **And a second one, worth one line: never `pkill -f` a pattern that also matches your own
+shell's command line.** `pkill -f "blend_lab.py --reps 0"` killed the wrapper that was about
+to relaunch it. `w27h_run.sh` exists partly so the chain is a named script rather than a long
+command line.
+
+## 4. The CV→LB model got eight fresh out-of-sample points and it is FINE
+
+All eight of today's sends were priced by `w26d_queueprice.csv` before they were sent, so they
+are out-of-sample for the w25f model:
+
+    n=8   mean residual +5.95e-6   sd 7.24e-6   max|residual| 16.9e-6
+
+The stored fit quotes residual sd 8.41e-6 against a simulated slice-noise floor of 8.21e-6.
+**7.24e-6 out of sample confirms the model is not over-fitted.** `w20_ad187_logit` — the only
+one priced far from the pack, at 0.971158 — printed 0.97116.
+
+**The +5.95e-6 mean is not a bias and the arithmetic that makes it look like one is wrong.**
+Seven of the eight are h3/ens4 rank-mixes over heavily overlapping member sets scored on the
+*same fixed public slice*, so their residuals are near-perfectly correlated: the honest n is
+about 2, se ≈ 5e-6, t < 1.2. And the print grid is 1e-5, so "+6e-6" is under one displayed
+step. **Do not add an offset to the model.** Recorded in RESEARCH.
+
+## 5. ⚠⚠ THE BOARD IS 2,323 TEAMS, NOT 1,326 — and we are 17th, three places outside gold
+
+The brief's team count is stale. `lb_w27/…publicleaderboard…csv` (14:51 UTC) carries **2,323
+teams**. Medal cuts at that size: **gold top 14, silver top 116, bronze top 232**.
+
+| | |
+|---|---|
+| leader | 0.97134 (MILANFX, 08-18) |
+| us | **0.97118, rank 17, top 0.73%** |
+| gap to leader | 1.60e-4 |
+| within 1e-4 of the leader | 8 teams |
+| within 2e-4 | 87 teams |
+| tied with us at 0.97118 | 7 teams |
+
+## 6. `w27i_s6risk.py` — what a public rank is actually WORTH privately
+
+New this slot, off `georgymamarin/playground-series-s6-leaderboards` (7 finished S6 episodes,
+26,337 team-rows), found via Rayk Kretzschmar's notebook. His framing is "did the public top
+ten survive"; ours is not the top ten, so the question is re-asked at **our** percentile, and
+restricted to the three **ROC-AUC** episodes because the metric governs frontier compression.
+
+Band = teams in the same relative slice of their board as we are in ours (top 0.37–1.10%):
+
+| | |
+|---|---|
+| median private percentile | **6.53%** (we enter at 0.73%) |
+| 10th–90th percentile | 2.95% – 10.31% |
+| still gold privately | **10.8%** |
+| still silver (top 5%) | **50.6%** |
+| still bronze (top 10%) | **67.0%** |
+| board-wide public/private Spearman | 0.9916 |
+
+**The modal outcome for a team standing exactly where we stand is a silver, with a third of
+the mass falling out of the medals and about one chance in ten of gold.** The very high
+Spearman is not protection — it is dominated by the 99% of the board that is not at the
+frontier.
+
+Frontier compression is what sets the spread, and it varies hugely: S6E2 had **156 teams
+inside 1e-4** of its public leader and their private ranks span **4 to 1856** of 4,370; S6E5
+had 5 and they span 1 to 9. **s6e8 has 8, so it looks like S6E5, not S6E2.** That is mildly
+good news and it is the first time this workspace has been able to say anything quantitative
+about it.
+
+## 7. Two public notebooks read in full, both from today, both distilled into RESEARCH
+
+**`raykkretzschmar/why-every-s6e8-notebook-above-0-97110-overfits` (56 votes).** States the
+public slice is ~20% of 296,302 ≈ **59,260 rows**; runs a pseudo-public selection experiment
+that produces a gain on the selected split and a loss on the unused one; and reports that
+S6E2, S6E6 and S6E7 each had **zero** public-top-10 survivors, with S6E7's public winner
+finishing **private rank 440**. He documents his own 0.97115 file — a public-LB-chosen
+negative weight on an honest OOF-positive signal — and declines to select it.
+
+**`adarsh1077/s6e8-diversity-beats-strength` (50 votes, LB 0.97113).** Leave-one-author-out
+over a 178-member pool: @boltuzamaki's 45 arrays are worth +0.000189 when dropped, his own 22
++0.000057, everyone else in the noise. **We already hold both** — boltuzamaki's 47 were
+imported 08-11 and the 22 `ad_*` are `ext_members3` — so that check came back negative, which
+was worth knowing. His "rank-gauss beats logit by +8e-6" is **our `rankraw`**, already one of
+the four transforms; do not re-derive it. His Bayes-ceiling estimate is 0.97006 OOF with
+"headroom ~5e-5, possibly none" — ⚠ our cross-fitted CV is already 5e-5 **above** it, on a
+different instrument, and he flags the caveat himself. The one thing worth adopting: **test
+candidate features against the current stack's RESIDUAL, not against the target.**
+
+## 8. ⚠⚠ STILL NOTHING SELECTED. FIFTEEN DAYS. And it is now PRICED.
+
+`check_selection.py`, run live this slot:
+
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+      auto-slot 1: public 0.97118, 1-way tie — w21_ad187corr_ens4
+      auto-slot 2: public 0.97117, 2-way tie — w21_ad187corr, w22_ad187corr_rankraw
+
+Every earlier entry has recorded this as a small cost (+0.83 to +3.33e-6). **§6 is the real
+price.** Kaggle auto-selects by best *public* score; `check_selection.py`'s own residual
+decomposition already shows auto-selection lands on the three most **slice-inflated** files we
+own (standardised residual +1.20/+1.12/+1.07 against +0.26 for the CV pick); and the S6 AUC
+backtest says a team in our position has a 33% chance of losing its medal entirely. Selecting
+on the public slice is the mechanism that produces the bad tail.
+
+`WANTED` = **{`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}**, both uploaded, both on disk. The
+API has no write path (probed and falsified 08-13). **A human must open the submissions page
+and tick those two files.**
+
+## 9. The 188-member result, and the honest reading of it
+
+Exact cross-fitted CVs on the frozen folds, 188 vs the identical 187-member build:
+
+| build | 187 | 188 (+`lat_ctfix_r400`) | delta |
+|---|---|---|---|
+| `_h3` (hybrid+rankraw+rescale rank-mix) | 0.9701092751 | **0.9701114720** | **+2.197e-6** |
+| `_ens4` (all four transforms) | 0.9701058972 | 0.9701093456 | +3.448e-6 |
+
+**+2.20e-6 into h3.** Inside the pre-registered 0 to +6e-6 (§L2) and below its +3e-6 mode.
+`w27_ad188std_h3` is now the second-highest cross-fitted CV ever built here, behind
+`w23_ad187stdcorr` (0.9701150809), and it is **submitted** — 1 slot left, held for the
+corrected file.
+
+### ⚠ This is the value of ADDING A MEMBER, not the value of the CORRECTION
+
+The comparison that would price the correction is `ctfix` against `ctraw` — the *same member
+built from the same cache with the same config*, differing only in the 4/3. That control build
+does not exist; only `ctfix` was added. And the instrument that does run both, `w27b`
+(`w26i_value.py` on the paired 50/50 stack), says they are indistinguishable:
+
+| rep | pack (187) | +`ctfix` | +`ctraw` | +`ctfixte` |
+|---|---|---|---|---|
+| 0 | 0.9701606750 | 0.9701643027 (+3.63e-6) | 0.9701605712 (−0.10e-6) | 0.9701637625 (+3.09e-6) |
+| 1 | 0.970330 | 0.970333 (+3.0e-6) | **0.970335 (+5.4e-6)** | 0.970334 (+4.4e-6) |
+
+**Rep 1 gives the SKEWED control the larger marginal value.** Two reps, opposite signs, on an
+instrument built to cancel split noise: `ctfix − ctraw` is a wash so far. So the honest
+reading of +2.20e-6 is "*one more lattice LightGBM is worth about +2e-6 into a 187-member
+pack*", which is the standing per-member value (w20d: lgb ≈ 2.34e-6 per member) and **not
+evidence that the CT correction bought anything at pack level**. That is §L4's registered
+negative and it is the third confirmation of §H2's closure: the pack's span already contains
+what the 12 columns can say.
+
+⚠ The member-level effect is not in doubt — +325e-6 solo at 400 rounds, +695/+519e-6 on folds
+0/1 at 2000 rounds, and the fold-0 control reproduced byte-for-byte in `w27g` this slot. What
+is in doubt is whether it survives into a 187-member stack, and two instruments now say it
+does not, at least not one member at a time. **The follow-on that is still open is the
+REBUILD** — the ~33 lattice members in the pack all carry the identical skew, and correcting
+one of them cannot show what correcting all of them would (RESEARCH w27 slot 1, §"A null
+paired-Delta for ONE corrected member does NOT close the CT thread"). The cheap probe for
+that is three corrected members of different function classes (lgbm/xgb/catboost), which
+§G5(c) requires anyway.
+
+**The clean control this slot should have built and did not: `187 + lat_ctraw_r400`.** It is
+one `blend_lab` invocation on the same code path and it turns +2.20e-6 from "a member is worth
+2e-6" into a signed answer about the correction. Next slot, before anything else in this
+thread.
+
+## 10. `w27g` — two of fourteen configs, and both point the registered way
+
+    config           AUC@1.0    AUC@4/3      d_c        CT_ share of split gain
+    control          0.964779   0.965104   +324.99e-6   1.0%
+    leaves31_d6      0.964129   0.964426   +297.11e-6   0.8%
+
+K2(a) holds on both (d_c > 0). K2(b) has its first two points and they are in the registered
+direction: **less capacity → smaller CT_ gain share → smaller CT gain.** Two points is not a
+Spearman and §K forbids quoting a partial table; this is recorded as "running and not yet
+contradicted", nothing more.
+
+## 11. Next run, in order
+
+1. **`tail experiments/w27g_tunect.log` and resume it** — `.venv/bin/python
+   experiments/w27g_tunect.py --name tunect --rounds 400 --jobs 3`, per-config checkpointed
+   in `cache/tunectckpt/`. Write it up against §K2(a)–(d) whichever way it goes; K2(b) is the
+   informative one and a null there is evidence against §G's mechanism.
+2. **Build the missing control: `187 + lat_ctraw_r400`** (§9). One `blend_lab` call with
+   `--drop …,lat_ctfix_r400,lat_ctfixte_r400`, then `make_h3.py`. Without it the +2.20e-6 is
+   uninterpretable as a statement about the CT fix.
+3. **Resume `w26k_ctscale` (folds 2–4) and `w27c_ctdrop`** if they are not finished; both
+   checkpoint per fold and re-running the identical command resumes. `w27d_chain.sh` is
+   waiting on w26k and will fire the 2000-round pack valuation by itself.
+4. **`w27f_ctfull.py` has still never been run.** It is §J's registered PRIMARY — the clean
+   full-map fix, of which the 4/3 rescale is only an approximation — and it is the one result
+   that would justify changing `te_block` for good. It needs its own fits (the serve-side
+   trick does not cover it).
+5. **Send the day.** `.venv/bin/python experiments/w26g_send.py` (dry, then `--go`). The queue
+   is nearly drained; from 08-22 there is nothing in it, and nine send days remain.
+6. **The pick is still not clicked, and §6 of this entry prices it.** `WANTED` =
+   {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}. If `w27_ad188stdcorr` lands above
+   0.9701150809 it becomes the new CV leader and `WANTED` slot 1 — but that is a decision for
+   a slot that can see the number, not a promise made here.

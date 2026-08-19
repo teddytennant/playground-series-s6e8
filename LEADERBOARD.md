@@ -1071,3 +1071,57 @@ pooled, 400 rounds) is even the right order of magnitude — and whether any of 
 into the 187-member combiner is exactly what w27b/w27d measure.
 
 10 slots today; 5 sent by 14:39 UTC from the priced queue, 5 held.
+
+## 2026-08-19 (w27 slot 2) — the board is 2,323 teams, not 1,326, and we are 17th
+
+⚠ **The brief's "~1,326 teams" is stale.** `lb_w27/…publicleaderboard…csv`, pulled 14:51 UTC,
+carries **2,323 teams**. Every percentile computed against 1,326 is wrong.
+
+| | |
+|---|---|
+| leader | **0.97134** MILANFX (08-18) |
+| us | **0.97118**, public rank **17**, top 0.73%, 76 submissions |
+| gap to leader | 1.60e-4 |
+| teams within 1e-4 of the leader | 8 |
+| teams within 2e-4 | 87 |
+| teams tied with us at 0.97118 | 7 |
+| medal cuts (2,323 teams) | gold top **14**, silver top **116**, bronze top **232** |
+
+**We are three places outside a gold medal on the public board.** Two 0.97119s and a 0.97120
+sit between us and the cut; the whole gold band spans 1.6e-4, which is about twice our own
+CV→LB residual sd (7.24e-6) times two — i.e. it is a real gap, not one grid step.
+
+### The private-split backtest, `experiments/w27i_s6risk.py` (new this slot)
+
+Seven finished Season 6 boards (`georgymamarin/playground-series-s6-leaderboards`). Restricted
+to the three **ROC-AUC** episodes because the metric governs frontier compression. Band = the
+teams sitting in the same relative slice of their public board as we sit in ours (top
+0.37%–1.10%):
+
+| | |
+|---|---|
+| median private percentile of a team in our public band | **6.53%** (we enter at 0.73%) |
+| 10th–90th percentile of where they landed | 2.95% – 10.31% |
+| still gold privately | **10.8%** |
+| still silver (top 5%) | **50.6%** |
+| still bronze (top 10%) | **67.0%** |
+
+**Read it as: the modal outcome for a team standing exactly where we stand is a silver, with
+a third of the probability mass falling out of the medals entirely, and roughly a one-in-ten
+shot at gold.** Board-wide public/private Spearman is 0.9916 — very high, and it is not
+protection at the frontier, which is the whole point.
+
+Frontier compression varies enormously across the AUC episodes and is what decides the
+spread: S6E2 had **156 teams within 1e-4** of its public leader and their private ranks span
+**4 to 1856** of 4,370; S6E5 had 5 and they span 1 to 9. **s6e8 has 8 within 1e-4, so it looks
+much more like S6E5 than S6E2** — the frontier here is real, not a pile-up. That is mildly
+good news for us and it is the first quantitative handle this workspace has had on the
+question.
+
+### ⚠ And it makes the unclicked selection expensive, not merely untidy
+
+Nothing is selected, so Kaggle auto-picks our two entries by **best public score**.
+`check_selection.py`'s residual decomposition already showed auto-selection lands on the
+three most **slice-inflated** files we own (standardised residual +1.20/+1.12/+1.07 against
++0.26 for the CV pick). The backtest above is the price list for that policy.
+`WANTED` = {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`} and a human still has to tick them.
