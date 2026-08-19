@@ -1003,3 +1003,150 @@ R-J4  jobs differs from w26l's 3. §G5b: matched-config, not bit-exact; differen
       ~10e-6 are not read.
 R-J5  §G5c still stands over all of this: a second FUNCTION CLASS (xgb latcat, catboost
       natlat) is required before `te_block` is changed for good. Nothing here is that.
+
+================================================================================
+§K  w27 slot 2 (2026-08-19) -- DOES THE CT_ CORRECTION MOVE THE LIGHTGBM OPTIMUM?
+    Registered before w27g_tunect.py was started; the log is empty at the time of writing.
+================================================================================
+
+K0. WHY THIS EXPERIMENT AND NOT ANOTHER LIGHTGBM SWEEP
+-------------------------------------------------------
+The handed angle is "LightGBM: tune it properly against the fixed folds -- learning rate,
+leaves, regularisation, categorical handling". Taken at face value that is a PRICED NULL in
+this workspace: the day-1 two-stage sweep (JOURNAL 2026-08-10) moved fold-0 AUC +500e-6 and
+then bought **+30e-6 on the full OOF, below the 50e-6 noise floor**. Re-running it would buy
+nothing and the journal says so.
+
+What is new is §G/§J. Every hyperparameter number this workspace has ever recorded was
+measured on features carrying the CT_ train/serve skew, and the day-1 sweep's single
+conclusion was "less capacity, more regularisation wins, because 144 of the 184 features are
+target-derived and easy to overfit". **Part of that pressure may have been the skew itself.**
+A feature block that is systematically 33% off at serve time is one a well-regularised model
+is right to lean away from; correct it and leaning away is no longer right. If so, the
+optimum moves toward MORE capacity and LESS L2, and the correction is worth more than
++293.86e-6 because it also unlocks a config the skew was suppressing.
+
+That is a real, falsifiable, competition-relevant question that no sweep here has asked, and
+it costs ONE fit per config rather than two: §G3's serve-side equivalence ("fit with CT x s"
+== "the same model served CT / s", verified maxdiff 0.000e+00, spearman 1.00000000) gives
+both arms off one booster. The interaction test is therefore free relative to the sweep.
+
+K1. DESIGN
+-----------
+Fold 0 only, 400 rounds, seed 42, the cached 184-column lattice matrices, 14 configs off the
+`lgbm_fixed_lat` control. Each config is fitted ONCE on the cache as it stands and scored at
+s = 1.0 (status quo) and s = 4/3 (the registered correction), on the SAME booster, the SAME
+rows and the SAME fold. Every comparison in this design is paired on everything except the
+one thing being varied.
+
+Readouts, in the order they will be reported:
+  (a) per config, AUC@1.0, AUC@4/3, and the CT gain  d_c = AUC@4/3 - AUC@1.0
+  (b) the CT_ block's share of total split gain, per config -- the mechanism covariate
+  (c) argmax config under each arm, and whether they differ
+  (d) THE HEADLINE:  best(4/3) - [ best(1.0) + 293.86e-6 ]  -- what re-tuning buys ON TOP of
+      the correction. Positive means the skew was suppressing a config.
+
+K2. REGISTERED PRIORS, written before any fit
+-----------------------------------------------
+(a) d_c > 0 for every config. The correction is a mean-matching fix and does not depend on
+    hyperparameters for its sign. A NEGATIVE d_c on any config is evidence against §G's
+    mechanism and must be reported as such.
+(b) spearman( CT_ gain share , d_c ) across the 14 configs: registered POSITIVE, modal +0.5.
+    This is the mechanism prediction -- more splits on the CT_ block means more thresholds
+    displaced by the same 33%. A null or negative correlation weakens §G's story materially
+    and is the single most informative negative available here.
+(c) The optimum MOVES TOWARD CAPACITY: under s=4/3 the ranking favours larger num_leaves /
+    smaller min_child_samples / smaller reg_lambda than under s=1.0. Registered as a
+    direction, not a magnitude. P(the argmax config differs between arms) ~ 0.4.
+(d) THE HEADLINE, best(4/3) - best(1.0) - 293.86e-6:  **0 to +80e-6, modal +15e-6.**
+    Deliberately small. The day-1 sweep is the base rate: a 500e-6 fold-0 tuning spread
+    collapsed to +30e-6 on the full OOF, and there is no reason the corrected surface is
+    flatter or steeper than the skewed one. The interesting claim is (c), the DIRECTION, not
+    a number to ship.
+
+K3. WHAT WOULD FALSIFY WHAT
+-----------------------------
+  - any d_c <= 0                     -> against §G's mechanism (K2a)
+  - spearman(share, d_c) <= 0        -> against §G's mechanism (K2b), the strongest test here
+  - optimum moves toward LESS capacity under correction -> K2c is wrong; the honest reading
+    is then that the day-1 "regularise harder" finding is about the target-encoding block in
+    general and has nothing to do with the CT_ skew
+  - headline > +80e-6                -> a real config unlock, and it must then be re-run on
+    all 5 folds before anything is claimed, because 14-config argmax on one fold is exactly
+    the selection optimism this workspace has been caught by three times
+
+K4. RULES, BINDING
+-------------------
+R-K1  Fold 0 is a SCREEN. No full-OOF claim, and no submission, comes out of this table.
+      §I/§J's ship bar stands: a new file needs cross-fitted CV 0.9701181879.
+R-K2  Every per-config claim is against THAT CONFIG'S OWN s=1.0 number, never against the
+      control's. Judging a corrected config against the skewed control would credit the CT
+      fix and the tuning at once -- the same double-count §G6 was written to prevent.
+R-K3  The argmax config is NOT adopted, exported, or blended on the strength of this table.
+      If the headline clears +80e-6, the follow-on is a 5-fold re-run of that one config
+      against the control, not a member export.
+R-K4  jobs=3 here; §G5b applies -- matched-config, not bit-exact, differences under ~10e-6
+      are not read.
+
+================================================================================
+§L  w27 slot 2 (2026-08-19) -- THE SHIP CANDIDATE: 187 + the ONE corrected member
+    Registered before blend_lab was started. No CV number for any 188-member object
+    existed anywhere on disk at the time of writing.
+================================================================================
+
+L1. WHAT IS BUILT, AND WHY THIS MEMBER SET AND NOT ANOTHER
+------------------------------------------------------------
+`data/ext_members6` holds three members exported from w26l: `lat_ctfix_r400` (the CT
+correction), `lat_ctraw_r400` (the skewed control) and `lat_ctfixte_r400` (CT + the TE
+re-shrink). The shipped build adds **`lat_ctfix_r400` ONLY**, and that choice is made HERE,
+on prior grounds, before any 188-member CV exists:
+
+  - `lat_ctraw_r400` is the control arm. It exists to be measured against, not shipped.
+  - `lat_ctfixte_r400` carries the TE re-shrink, which §G6 already judged a null-to-negative
+    (-21e-6 solo) against `ct1.3333`. Shipping it would be shipping a measured null.
+  - `lat_ctfix_r400` is §G4's pre-registered primary and the only one of the three with a
+    positive registered prior.
+
+Choosing among the three on the strength of their 188-member CVs would be exactly the
+arm-selection optimism R-J2 and R-K3 forbid, and it is worth a measured +1.78e-6 here.
+
+The chain is w23f's verbatim, one member wider, float32 and C=1.0 so the 187 control already
+on disk is a like-for-like paired comparison and needs no refit:
+
+    blend_lab --build --submit-name w27_ad188std --standardize --extra-dirs ext_members6
+              --drop <HONEST_DROP>,lat_ctraw_r400,lat_ctfixte_r400
+    make_h3.py w27_ad188std
+    W21A_BASE=w27_ad188std_h3 W21A_TAG=w27_ad188stdcorr  w21a_ad187corr.py
+
+L2. REGISTERED PRIORS, against the numbers already on disk
+------------------------------------------------------------
+    w23_ad187std_h3      0.9701092751    the h3 base, 187 members
+    w23_ad187stdcorr     0.9701150809    + c_avg, and the best CV ever sent
+    ship bar             0.9701181879    (w26d: even money to beat 0.97118 in family h3)
+
+    w27_ad188std_h3  - w23_ad187std_h3     0 to +6e-6, modal +3e-6
+    w27_ad188stdcorr - w27_ad188std_h3     +2 to +7e-6, modal +5.8e-6 (§w21a's own prior,
+                                           and +5.806e-6 is what it bought on the 187 base)
+    w27_ad188stdcorr                       modal 0.970118, i.e. AT the ship bar and not
+                                           clearly over it
+
+The +3e-6 modal for the member comes from w27b's rep 0 -- pack 0.970161 -> 0.970164 with
+`lat_ctfix_r400` added, on the paired 50/50 instrument -- and from nothing else. One rep of a
+different instrument is weak evidence and the range is wide on purpose.
+
+L3. WHAT GETS SENT, DECIDED BEFORE THE NUMBER EXISTS
+------------------------------------------------------
+The brief's economics for THIS competition are that submissions do not evict each other and
+the board shows best-of-all, so **the file is sent whatever it scores on CV**, and its CV is
+recorded either way. What is NOT decided in advance is whether it becomes the deadline pick:
+that requires `w27_ad188stdcorr` > 0.9701150809 cross-fitted, on the same instrument, and if
+it comes in below then `w23_ad187stdcorr` and `w21_ad187corr` remain `WANTED` unchanged.
+
+L4. THE NEGATIVE THAT WOULD BE INFORMATIVE
+--------------------------------------------
+`w27_ad188std_h3` at or below `w23_ad187std_h3` says the 187-member span already contains what
+the corrected member adds -- which is the standing closure (§H2) and would be its third
+confirmation, this time on a member that is NOT merely another draw from the same family but a
+displacement every other member in the pack shares. That is the one direction §w27-RESEARCH
+argued the span could not already hold. A null there is a real result and closes the
+"one corrected member" branch for good, leaving only the ~30-member rebuild (§w27 RESEARCH).

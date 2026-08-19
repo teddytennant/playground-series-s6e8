@@ -6590,3 +6590,138 @@ random subsample), in which case removing it makes them more redundant and the p
 cheap probe for that, before committing to 30 refits: rebuild **three** lattice members of
 different function classes (lgbm / xgb / catboost) and measure the paired Delta of the trio,
 which §G5(c) requires anyway for a second function class.
+
+---
+
+# w27 slot 2 (2026-08-19) — eight fresh out-of-sample points for the w25f CV→LB model
+
+The eight files sent on the 08-19 UTC day were all priced by `w26d_queueprice.csv` **before**
+they were sent, so they are a genuine out-of-sample calibration set for the w25f model rather
+than a refit of it.
+
+| file | CV | predicted LB | printed |
+|---|---|---|---|
+| `w20_ad187_logit` | 0.9700248 | 0.971158 | **0.97116** |
+| `blend159av_rescale` | 0.9700287 | 0.971052 | 0.97105 |
+| `w14a_repro159av_rescale` | 0.9700277 | 0.971049 | 0.97105 |
+| `blend160origm_rescale` | 0.9700270 | 0.971049 | 0.97105 |
+| `blend159_rescale` | 0.9700259 | 0.971047 | 0.97105 |
+| `w14a_repro159av_logit` | 0.9699649 | 0.971043 | 0.97106 |
+| `blend159_logit` | 0.9699647 | 0.971043 | 0.97106 |
+| `blend160orig_rescale` | 0.9700233 | 0.971042 | 0.97105 |
+
+    n=8   mean residual +5.95e-6   sd 7.24e-6   max|residual| 16.9e-6
+
+**The spread is exactly as advertised.** The stored fit quotes residual sd 8.41e-6 against a
+simulated slice-noise floor of 8.21e-6; 7.24e-6 out of sample on eight new files is inside
+that and confirms the model is not over-fitted. `w20_ad187_logit`, the only file in the set
+priced far from the others (0.971158, and the only one with non-zero `p_beat`), came back at
+0.97116 — a 2e-6 residual on a 116e-6 extrapolation.
+
+**The +5.95e-6 mean is NOT evidence of bias, and the arithmetic that would make it look like
+evidence is wrong.** Naively se = 7.24/√8 = 2.56e-6 and +5.95 is 2.3 se. But (a) seven of the
+eight are h3/ens4 rank-mixes over heavily overlapping member sets scored on the **same fixed
+public slice**, so their residuals are near-perfectly correlated — the honest n is about 2,
+giving se ≈ 5e-6 and a t under 1.2; and (b) the print grid is 1e-5, so a "+6e-6 bias" is less
+than one displayed step and cannot be resolved at all. **Do not add a +6e-6 offset to the
+model.** Record the sd, ignore the mean.
+
+**Operational upshot: the model is good enough to price a slot and no better.** It correctly
+said every one of these eight was hopeless (`p_beat` 0.00e+00 for seven, 6.3e-4 for the
+eighth) and every one of them printed below the 0.97118 account best, as predicted.
+
+## Standing, 08-19 15:20 UTC
+
+Board leader **0.97134** (MILANFX, 08-18). Our 0.97118 now sits **18th** of the visible page —
+it was 11th on 08-18. Seven teams are inside 0.97118–0.97120 and the field is adding ~1e-5 a
+day at the top. **The queue-drain files cannot move this and were never expected to; the only
+thing that can is a file whose CV clears 0.9701181879.**
+
+---
+
+# w27 slot 2 (2026-08-19) — two new public notebooks, one of which is about US
+
+## 1. ⚠⚠ `raykkretzschmar/why-every-s6e8-notebook-above-0-97110-overfits` (56 votes, 08-19)
+
+Pulled to `notebooks/w27/rayk_overfit/`. **This is the single most important public artefact
+this competition has produced for this account, because it describes the exact failure mode
+the unclicked selection is currently walking into.**
+
+Three measured findings, all reproducible from public data:
+
+1. **The public slice is ~20% of the 296,302 test rows, i.e. ≈ 59,260 labels.** Stated as a
+   fact of the competition, and it is consistent with the slice-noise sd this workspace
+   simulates (8.21e-6).
+2. **A pseudo-public selection experiment.** He exposes 59,260 OOF rows as a fake public
+   board, picks the best of eleven blend weights on it, and scores that choice on the
+   untouched rows. Selection produces an apparent gain on the selected split and a **loss**
+   on the unused one — a friendly search over ONE signal and eleven weights, i.e. far less
+   multiple testing than a real leaderboard chase.
+3. **Season 6 history, from `georgymamarin/playground-series-s6-leaderboards`.** Of the seven
+   finished S6 episodes, **S6E2, S6E6 and S6E7 each had ZERO public-top-10 teams left in the
+   private top 10.** In S6E7 the **public winner finished private rank 440.** Overall
+   public/private rank correlation is high; it is not protection at the frontier.
+
+He also documents his own 0.97115 file — Naji v19 with a public-LB-chosen negative weight on
+an honest OOF-positive student — and **declines to select it**, because the OOF says add the
+student and the LB says subtract it.
+
+### ⚠ What this means for THIS account, and it is not abstract
+
+`check_selection.py` still prints `*** NOTHING IS SELECTED ***`, so **Kaggle will auto-select
+our two entries by best PUBLIC score.** That is precisely the mechanism above. The auto-picks
+would be `w21_ad187corr_ens4` (0.97118) and the 0.97117 pair; `check_selection.py`'s own
+residual decomposition already found that **auto-selection picks the three most
+slice-inflated files in the tight families** (mean standardised residual +1.20 / +1.12 /
++1.07 against +0.26 for the CV pick). Rayk's Season-6 table is the base rate for what that
+costs. **`WANTED` = {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`} is a CV pick and it still
+needs a human to tick it.** Fifteen days unclicked as of this slot.
+
+### Where his argument does NOT reach
+
+His §1 evidence is one signal (his own anti-student) on one anchor (Naji v19). This workspace
+has an independent read on the same question: w19b/w25f find the CV→LB map is a **level, not
+a slope**, and the tight-family residual rms (7.4e-6) is fully explained by slice draw plus
+grid rounding with **no residual mechanism**. Those two are consistent — both say a CV
+difference under ~5e-6 is a coin flip on the public slice — and neither licenses reading the
+board. Our own w27 calibration (8 fresh files, sd 7.24e-6) is a third confirmation.
+
+## 2. `adarsh1077/s6e8-diversity-beats-strength` (50 votes, 08-19) — LB 0.97113
+
+Pulled to `notebooks/w27/adarsh_diversity/`. Same author as the 22 `ad_*` members already in
+our pack. Most of it we already have; four things are worth recording.
+
+**(a) Leave-one-author-out over a 178-member pool** — drop everything one contributor
+published, refit, measure the loss:
+
+| contributor | arrays | nested loss when dropped | per array |
+|---|---|---|---|
+| @boltuzamaki | 45 | **+0.000189** | 4.2e-6 |
+| adarsh (`ad_*`) | 22 | **+0.000057** | 2.6e-6 |
+| @szymonkapiski | 67 | +0.000016 | 0.2e-6 |
+| everyone else (5 libraries) | 4–14 each | ≤ +0.00001 | noise |
+
+He is explicit that only the top two rows clear noise. **We already have both**: boltuzamaki's
+47 were imported on 08-11 (RESEARCH §547) and the 22 `ad_*` are `data/ext_members3`. So there
+is no missed library here — the check was worth running and it came back negative.
+
+**(b) His "rank-gauss beats logit meta-features by +8e-6" is a transform we already ship.**
+Our `rankraw` IS `ndtri((rank-0.5)/n)`, i.e. exactly his rank-gauss, and it is one of the four
+transforms the h3/ens4 mixes rank-average. Do not re-derive this.
+
+**(c) His Bayes-ceiling estimate is 0.97006 out-of-fold, "headroom ~5e-5, possibly none".**
+⚠ Our cross-fitted CV is **0.9701151**, i.e. already 5e-5 ABOVE his estimated ceiling. The
+instruments differ (his nested stack with StandardScaler at C=0.03 vs our C=1.0 standardised
+cross-fit) and he flags the caveat himself — the bound is on signal reachable *from the
+current representation*, and @tomasa2 already watched it under-predict by ~1e-4 when the
+decimal lattice appeared. **Do not quote 0.97006 as a ceiling; quote it as evidence that the
+remaining headroom is of the same order as the noise, which is what every instrument here
+says too.**
+
+**(d) Two of his closures match ours and one is new.** No exact-match/lookup channel (all
+691,369 train keys distinct, 0.00% of test rows match a train row) — we found the same.
+Thirty-five further generator-fingerprint features net −0.000182 — we closed the same family
+in w15b/w15d. **New and worth adopting: test candidate features against the CURRENT STACK'S
+RESIDUAL, not against the raw target.** A feature can look informative marginally and carry
+nothing the ensemble has not already extracted. That is the shape of experiment §2 of w27's
+CT thread should have used from the start.

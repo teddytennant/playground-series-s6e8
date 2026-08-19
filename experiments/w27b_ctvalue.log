@@ -1,0 +1,19 @@
+190 loaded = 187 pack + 3 new ['lat_ctfix_r400', 'lat_ctraw_r400', 'lat_ctfixte_r400']
+  base165 for the gate: 165 members
+  lat_ctfix_r400   solo 0.965775  maxcorr 0.994816 vs lgbm_fixed_lat  [ok]
+  lat_ctraw_r400   solo 0.965481  maxcorr 0.995731 vs lgbm_fixed_lat  [ok]
+  lat_ctfixte_r400 solo 0.965788  maxcorr 0.994515 vs lgbm_fixed_lat  [ok]
+  hybrid: repaired 54 of 190 members
+transform hybrid in 11s
+  rep 0 base165          n_mem 165 AUC 0.970104 (137s)
+  rep 0 gate_cat4        n_mem 169 AUC 0.970147 (147s)
+  rep 0 pack             n_mem 187 AUC 0.970161 (138s)
+  rep 0 lat_ctfix_r400   n_mem 188 AUC 0.970164 (151s)
+  rep 0 lat_ctraw_r400   n_mem 188 AUC 0.970161 (145s)
+  rep 0 lat_ctfixte_r400 n_mem 188 AUC 0.970164 (145s)
+  rep 1 base165          n_mem 165 AUC 0.970291 (186s)
+  rep 1 gate_cat4        n_mem 169 AUC 0.970333 (250s)
+  rep 1 pack             n_mem 187 AUC 0.970330 (232s)
+  rep 1 lat_ctfix_r400   n_mem 188 AUC 0.970333 (244s)
+  rep 1 lat_ctraw_r400   n_mem 188 AUC 0.970335 (270s)
+  rep 1 lat_ctfixte_r400 n_mem 188 AUC 0.970334 (323s)
