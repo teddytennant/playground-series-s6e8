@@ -1204,3 +1204,26 @@ the remaining value is in not losing the private split.** Selection stays on CV.
 ⚠ Our 0.97118 comes from `w20_ad187_logit` / `w27_ad188std` — files the journal explicitly
 records as **not** deadline candidates. The CV leader `w27_ad188stdcorr` has never been
 sent, so our public rank is currently set by a file we would not choose.
+
+## 2026-08-19 19:20 UTC (w28 slot 9)
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97134 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| 4 | Don Mani | 0.97125 |
+| 5 | cstdy | 0.97125 |
+| 6-8 | Utkarsh / Keanan / Szymon Kłapiński | 0.97124 |
+| 9 | Mikhail Naumov | 0.97123 |
+| 10-11 | Changye Li / Leo | 0.97122 |
+| 12-13 | william950615 / Charles Backman | 0.97121 |
+| 14-15 | thisray / Mahog | 0.97120 |
+| 16 | delai50 | 0.97119 |
+| **17** | **Teddy Tennant** | **0.97118** |
+| 17-23 | Mursal Gorchuyev, Malhar Ujawane, Rayk Kretzschmar, miki, Atakan Aldemir, Shashwat Bajpai | 0.97118 |
+
+Unchanged at 0.97118 since 08-17 — the ten sends on 08-19 were all queue-drain files priced
+at P < 1e-3 and none moved it, exactly as predicted. **We are 17th of 2,323; gold is top 14.**
+The 0.97118 tier is six teams deep, so one reporting step is worth roughly six places here.
+Leader has been static at 0.97134 since 08-18 06:52 while ranks 2-16 filled in beneath it.

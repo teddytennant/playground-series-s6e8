@@ -154,7 +154,47 @@ COMP = "playground-series-s6e8"
 # never hedged by that pair; what IS new and uninsured is the standardisation itself, which is
 # one wave old. `w21_ad187corr` is the identical object WITHOUT it, so the pair now hedges the
 # only untested variable, at a cost of 6.0e-6 of CV against the alternative pairing.
-WANTED = {"w23_ad187stdcorr.csv", "w21_ad187corr.csv"}
+# ─────────────────────────────────────────────────────────────────────────────────────────
+# 2026-08-19 (w28, slot 9, consolidation). WANTED MOVES — and the reason it had to be moved
+# HERE rather than in the journal is itself the finding: the journal moved this pair on
+# 08-19 slot 6 and again on slot 7, three separate entries say `WANTED` = {w27_ad188stdcorr,
+# w23_ad187stdcorr}, and THIS CONSTANT WAS NEVER EDITED. The script whose whole job is to
+# verify the deadline pick has been verifying the wrong pair for three slots. Journal prose
+# is not a variable. If the pick moves, it moves in this line, in the same commit.
+#
+#   w27_ad190stdcorr.csv   CV 0.9701181344   <- slot 1, the 190-member pack
+#   w23_ad187stdcorr.csv   CV 0.9701150809   <- slot 2, the 187-member pack, ALREADY SENT
+#
+# ⚠ SLOT 1 IS CHOSEN ON A PAIRED CONTRAST, NOT ON THE STORED CV LEVELS, and that distinction
+# is new. w27 slot 8 measured a ~4e-6 REPRODUCIBILITY FLOOR on absolute cross-fitted CV: the
+# same code, same matrix, same folds, varying only BLAS thread count, spans 3.68e-6 and the
+# full range against the shipped build is 5.22e-6 (`experiments/w27z2_threads.py`). Every CV
+# in the top of this workspace's table was built in a separate process:
+#
+#   w27_ad190stdcorr 0.9701181344 / w27_ad188stdcorr 0.9701168076   difference +1.33e-6
+#   w27_ad190stdcorr / w23_ad187stdcorr 0.9701150809                difference +3.05e-6
+#
+# BOTH are inside the floor. Ranking these three files by their stored levels is not a
+# measurement. What IS a measurement is w27 slot 8's M11(b): the 190 pack against the 188
+# pack, refitted IN ONE PROCESS on identical partitions, mean +2.13e-6, se 0.64e-6, positive
+# on 4 of 4 partitions. Paired contrasts cancel the thread effect EXACTLY (w27z's A-B is
+# 0.000e+00 to the last digit), so that is the only sound reason to prefer the 190 file, and
+# it is the reason. Do NOT re-justify this pick with "the highest CV ever built here".
+#
+# Slot 2 is `w23_ad187stdcorr` on the standing w24 R1 logic: the hedge insures the NEWEST
+# uninsured variable, which is now the member additions themselves (187 -> 188 -> 190, the
+# lattice CT arms and `ext_members6`). `w23_ad187stdcorr` is the IDENTICAL construction --
+# standardised h3 base, 5-arm c_avg scheme average -- on the 187 pack without them, and it
+# has a leaderboard print (0.97116) while both w27 files have none. Cost against pairing the
+# two w27 twins: -3.05e-6 of CV, i.e. inside the floor above, for a genuine pack hedge.
+#
+# ⚠⚠ SLOT 1 IS NOT SELECTABLE UNTIL IT IS SENT, and it has now been unsent for FOUR slots
+# while three journal entries said "send it first". The cause was mechanical, not editorial:
+# `w26g_send.py` sends the top of `w26d_queueprice.csv`, and until w28 that queue was stale
+# (24 rows, built before any of these files existed) so the sender could not see them. Fixed
+# in w28 by re-running `w23b_sendqueue.py` and by adding a `priority` column that pins
+# whatever is in WANTED to the head of the queue. Slot 2 IS selectable now.
+WANTED = {"w27_ad190stdcorr.csv", "w23_ad187stdcorr.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"
@@ -206,6 +246,20 @@ def main() -> int:
     if n_ok == 0:
         print("CONTROL FAILED — treat the selection reading below as unknown.")
         return 2
+
+    # SELECTABILITY. Kaggle's dialog lists SUBMITTED entries only, so a WANTED file with no
+    # submission behind it cannot be ticked no matter how good its CV is. This block exists
+    # because `w27_ad188stdcorr` spent four slots as "send this first" in the journal while
+    # nothing on this box ever checked whether it had actually gone out (w28).
+    sent_names = {fn for _, fn, _ in data["successful"]}
+    unsent = sorted(WANTED - sent_names)
+    print("\nWANTED, and whether Kaggle can even offer it:")
+    for w in sorted(WANTED):
+        print(f"  {'SENT     ' if w in sent_names else 'NOT SENT '} {w}")
+    if unsent:
+        print(f"  ⚠ {len(unsent)} WANTED file(s) have never been submitted and are therefore")
+        print("    NOT SELECTABLE. They are pinned to the head of experiments/w26d_queueprice.csv")
+        print("    and `w26g_send.py` will send them first; nothing else can fix this.")
 
     if not selected:
         print(f"\n*** NOTHING IS SELECTED for {COMP}. ***")

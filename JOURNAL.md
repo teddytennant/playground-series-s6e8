@@ -15114,3 +15114,225 @@ display. It has now survived six slots unmade.
 `RESEARCH.md`.
 
 **No submission — at cap, 10/10 for the 08-19 UTC day.**
+
+---
+
+# 2026-08-19 — w28, slot 9 of 10. ANGLE: consolidation. AT CAP, NO SUBMISSION.
+
+`kaggle competitions submissions --page-size 300` shows **81** submissions, **10 of them on the
+08-19 UTC day**. The cap is spent. Everything below is verification and repair; nothing was
+sent and nothing new was modelled.
+
+The angle asked for three things — re-verify the best pipeline end to end, check the CV-to-LB
+gap across every experiment, and make sure the strongest submission is the one selected. All
+three were done, and **all three found something broken**. The headline is not a number, it is
+that the reason `w27_ad188stdcorr` has been "SEND THIS FIRST" in four consecutive journal
+entries and has still never been sent was **mechanical, not editorial**, and no amount of
+writing it again would have fixed it.
+
+## 1. ⚠⚠ THE SEND QUEUE COULD NOT SEE THE FILES THE JOURNAL WAS SHOUTING ABOUT
+
+`w26g_send.py` — "the whole send day", per RESEARCH — sends the top of
+`experiments/w26d_queueprice.csv`. That CSV is derived from `w23b_sendqueue.csv`, and
+`w23b_sendqueue.csv` on disk this morning had **24 rows, generated before a single one of the
+w27 files existed**. `w27_ad190stdcorr`, `w27_ad188stdcorr` and all six `w27_ad188raw*` files
+were simply not in it. The sender was not ignoring the instruction; the instruction was never
+expressible in the only channel that sends anything.
+
+Fixed three ways, in increasing order of durability:
+
+1. Re-ran `w23b_sendqueue.py` (it rebuilds from disk + live API): **37 unsent valid files**, up
+   from 24, with `w27_ad190stdcorr` at the head. Old copy kept at `w23b_sendqueue.pre_w28.csv`.
+2. Re-ran `w26d_queueprice.py` on it.
+3. **Added a `priority` column.** `w26d` now imports `check_selection.WANTED` and pins any
+   wanted-but-unsent file to the head of the queue; `w26g_send.py` sorts on
+   `(priority, pred_lb)` and prints what it pinned. **A deadline pick that is never submitted
+   cannot be selected, and that outranks any public-LB ordering.**
+
+Dry run for the 08-20 day now reads:
+
+```
+PINNED first (check_selection.WANTED, unsent): w27_ad190stdcorr.csv
+  1. w27_ad190stdcorr.csv    CV 0.9701181344   ...
+  7. w27_ad188stdcorr.csv    CV 0.9701168076   ...
+```
+
+## 2. ⚠⚠ THE `standardised` FLAG WAS WRONG AGAIN — SECOND TIME IN THREE SLOTS, SAME COST
+
+w27 slot 3 found `is_std` was a hard-coded whitelist of seven `w23_*` names and replaced it
+with the substring test `"std" in stem`. **That substring test is also wrong.** The six
+`w27_ad188raw*` files are built by `experiments/w27k_ctrawctl.sh`, which passes
+`--standardize` explicitly — the "raw" refers to the **CT-raw member** (`lat_ctraw_r400` in
+place of `lat_ctfix_r400`), not to a raw combiner. They contain no substring `std`, so each
+collected the +27.43e-6 the `standardised` coefficient withholds.
+
+Under that error `w27_ad188raw` priced at **P(beat the account best) = 0.548** — the best
+number on disk, and enough to reorder a whole send day around a file whose real chance is
+three orders of magnitude smaller.
+
+**Fix, and it is a different KIND of fix: `experiments/stdflag.py`.** A filename is not
+provenance. `--standardize` entered the chain at w23 and every build since passes it, so the
+flag is a property of the **wave number**, which every stem carries in its `wNN_` prefix
+(`blend*`/`stack*` carry none and all predate w23). The module gates itself against w25f's own
+60 fitted rows and reproduces the whitelist exactly. `w26d`, `w28a` and `w28b` all import it;
+the three copied-by-hand classifiers are gone.
+
+## 3. ⚠⚠ AND THE FAMILY LABEL WAS WRONG ON THE TOP TWO QUEUE ENTRIES
+
+w26e (08-18) found that `*corr` files are **corrected h3** mixes that the suffix rule drops into
+`ens4`, refitted the model with only those two labels changed, got a **lower** residual sd
+(8.349e-6 vs 8.408e-6) with no extra parameters — and **that refit was then never wired into
+anything.** `w26d_queueprice.py` kept loading `w25f_ancova2.json` and kept the wrong labels for
+two days. Worse, `CORR_H3` was never extended to the two `*corr` files built since, which are
+**the top two entries of the send queue**: each was collecting the spurious `fam[ens4]`
++13.9e-6 on top of an h3 base.
+
+Both fixed. `stdflag.CORR_MAP` now registers all six `*corr` stems explicitly, and
+`require_corr_registered()` **raises** if a new one appears — a `*corr` file must be classified
+by reading its build script, never by the suffix rule. `w26d`/`w28a`/`w28b` now load
+`w26e_famfix.json` → `coefs_new`, because pairing w25f's coefficients with corrected labels is
+neither model. Gate re-passes at 8.35e-6 on the same 60 rows.
+
+**The compounded correction, on the same ten-file day:**
+
+| pricing | P(at least one of ten beats 0.97118) |
+|---|---|
+| as the queue stood this morning | **0.647** |
+| `standardised` flag fixed (§2) | 0.085 |
+| `*corr` family fixed too (§3) | **0.011** |
+
+**A 59× swing from two bookkeeping errors, both in the direction of flattering the queue.**
+Nothing was built or sent on either number, so no decision was actually harmed — but the 0.647
+would have justified spending a whole day draining the queue instead of building, which is
+precisely the trade w26d exists to price.
+
+## 4. `check_selection.WANTED` WAS NEVER EDITED WHEN THE PICK MOVED
+
+Three journal entries (slot 6, slot 7, slot 8) state `WANTED` = {`w27_ad188stdcorr.csv`,
+`w23_ad187stdcorr.csv`}. The constant in `experiments/check_selection.py` still read
+`{"w23_ad187stdcorr.csv", "w21_ad187corr.csv"}`. **The script whose entire job is to verify the
+deadline pick has been verifying the wrong pair for three slots.** Journal prose is not a
+variable. Standing rule now written into the file: if the pick moves, it moves in that line,
+in the same commit.
+
+**WANTED is now {`w27_ad190stdcorr.csv`, `w23_ad187stdcorr.csv`}**, and the justification is
+deliberately NOT the stored CV levels:
+
+- `w27_ad190stdcorr` 0.9701181344 − `w27_ad188stdcorr` 0.9701168076 = **+1.33e-6**
+- `w27_ad190stdcorr` − `w23_ad187stdcorr` 0.9701150809 = **+3.05e-6**
+
+Both are **inside w27 slot 8's ~4e-6 reproducibility floor**, so ranking these three files by
+their stored levels is not a measurement. Slot 1 is chosen on **M11(b)** — the 190 pack against
+the 188 pack, refit in one process on identical partitions, +2.13e-6 ± 0.64, 4/4 partitions.
+Paired contrasts cancel the thread effect exactly. **Do not re-justify this pick as "the
+highest CV ever built here".**
+
+`check_selection.py` also now prints, before anything else, whether each WANTED file has ever
+been submitted:
+
+```
+WANTED, and whether Kaggle can even offer it:
+  SENT      w23_ad187stdcorr.csv
+  NOT SENT  w27_ad190stdcorr.csv
+```
+
+Selection state itself: **still NOTHING SELECTED**, seventh slot running, still human-blocked
+(no browser, no display on this box). Auto-slot 1 = `w21_ad187corr_ens4` (public 0.97118, CV
+0.9701039331 — **14.2e-6 below the CV pick**). Auto-selection here remains the Rogii failure
+run by Kaggle on our behalf.
+
+## 5. END-TO-END VERIFICATION — clean, and one check that had never been run
+
+`experiments/w28b_verify.py`: recomputed the CV of **every** unsent file from
+`data/train.csv` (nothing copied from the journal) and validated all **41** unsent CSVs the
+way the sender will — column names, 296,302 rows, id set equality, duplicates, NaN, finiteness.
+**0 invalid.** That includes `w27_ad190stdcorr.csv`, the CV leader, which was built after
+`w27x_validate.log` was written and **had never been validated at all**.
+
+`experiments/w28c_coupling.py` runs a check this workspace has never had: **does a file's
+`.csv` come from the same run as its `oof_*.npy`?** Every CV is computed from the OOF; the
+thing that actually scores is the CSV; nothing coupled them. A `*corr` file is its h3 base plus
+a small additive correction, so the test-side correction scale must match the OOF-side scale:
+
+| file | base | d_cv | oof rho | test rho | test/oof correction scale |
+|---|---|---|---|---|---|
+| `w27_ad190stdcorr` | `w27_ad190std_h3` | +4.80e-6 | 0.999978 | 0.999975 | **1.064** |
+| `w27_ad188stdcorr` | `w27_ad188std_h3` | +5.34e-6 | 0.999978 | 0.999978 | **0.995** |
+| `w23_ad187stdcorr` | `w23_ad187std_h3` | +5.81e-6 | 0.999976 | 0.999977 | **0.973** |
+
+All three coupled. The c_avg correction also reproduces at +4.8 to +5.8e-6 across three
+independent packs, which is the cleanest replication that correction has.
+
+## 6. CV → LB ACROSS THE WHOLE HISTORY, AND THE MODEL SURVIVES OUT OF SAMPLE
+
+`experiments/w28a_cvlb_refresh.py` rebuilds the table over all 81 sent files (77 with a stored
+OOF), LB read live, CV recomputed locally. ⚠ It writes `w28a_cvlb_full.csv` and deliberately
+does **NOT** overwrite `w25a_cvlb_full.csv` — that file is the model's centring source, and
+re-running `w25a` today would silently re-centre on 18 extra rows and shift every stored
+prediction and gate downstream.
+
+Out of sample — the 8 files sent after the model was fitted, priced *before* they went:
+
+    n=8   mean residual +2.90e-6   sd 2.93e-6   max|res| 9.1e-6
+    (fitted sd 8.35e-6, simulated slice-noise floor 8.21e-6)
+
+**The model holds.** ⚠ The mean is not evidence of bias: all eight are scored on the same fixed
+public slice and most share member sets, so the honest n is ~2, and the print grid is 1e-5 —
+a +3e-6 offset is a third of one displayed step and cannot be resolved. Record the sd, ignore
+the mean. (Slot 2 reported +5.95/7.24 on a different eight and under the old labels; this is
+the same conclusion, tighter.)
+
+**The corrected bar for a new file** (even-money shot at beating 0.97118), h3 + standardised —
+which is what every build here is: **0.9701307114**. The best object on disk is
+`w27_ad190stdcorr` at 0.9701181344, **12.6e-6 short**. ⚠ The stale figures **0.9701181879**
+(uncorrected labels, unstandardised) and **0.9701325557** (corrected std, uncorrected family)
+are both superseded — quote 0.9701307114.
+
+## 7. THE SLOT-2 HEDGE HAS NO CHEAP ORTHOGONALITY LEFT — measured, not assumed
+
+Test-side rank agreement against slot 1 (`w27_ad190stdcorr`), with the CV each gives up:
+
+| candidate | d_cv | test rho | sent |
+|---|---|---|---|
+| `w27_ad188stdcorr` | −1.33e-6 | 0.999972 | no |
+| **`w23_ad187stdcorr`** | **−3.05e-6** | **0.999930** | **yes** |
+| `w27_ad190std_h3` | −4.80e-6 | 0.999975 | no |
+| `w21_ad187corr_ens4` | −14.20e-6 | 0.999772 | yes |
+| `w22_ad187corr_rankraw` | −18.00e-6 | 0.999630 | yes |
+| `w16i_schemeavg` | −62.47e-6 | 0.999638 | yes |
+| `w27_ad190std_logit` | −78.63e-6 | **0.998200** | no |
+
+Everything within 20e-6 of the leader agrees with it at rho ≥ 0.9996. The only genuinely
+different file costs **78.6e-6 of CV**. **There is no cheap diversification left**: slot 2
+should be the best CV file that is not slot 1's near-twin, which is what it now is, and
+`w23_ad187stdcorr` also happens to be the only one of the three already selectable.
+
+## 8. `blend_lab.py` NOW PINS THE BLAS THREAD COUNT (slot 8's open item 4)
+
+Set with `os.environ.setdefault` for OMP/OPENBLAS/MKL/NUMEXPR/VECLIB **before numpy is
+imported**, defaulting to 4, overridable from the environment. This does **not** make numbers
+built before today comparable with numbers built after it; it stops the ~4e-6 floor from
+growing, so two files built on different days can be differenced again.
+
+## 9. STANDING, 08-19 19:20 UTC
+
+Leader **MILANFX 0.97134**. Our **0.97118** is **17th**; 16 teams above, six teams tied with us
+at 0.97118. Gold is top 14 of 2,323 teams, so we are three places outside it. The field added
+~1e-5 at the top since yesterday.
+
+## 10. NEXT RUN, IN ORDER
+
+1. **Run `.venv/bin/python experiments/w26g_send.py --go --n 10`.** The plan is already
+   correct and validated; `w27_ad190stdcorr` is pinned first and `w27_ad188stdcorr` is in the
+   ten. Do not hand-pick — that is how the 21-file error happened.
+2. **Then re-run `check_selection.py`.** Once slot 1 is sent, both WANTED files are selectable
+   and the only remaining blocker is a human with a browser.
+3. **Build, do not drain.** The corrected queue prices the entire remaining 37 files at
+   P = 0.011 for the day. The bar a new file must clear is **0.9701307114** (h3, standardised)
+   and the best thing on disk is 12.6e-6 under it.
+4. ⚠ **Any new `*corr` file must be added to `stdflag.CORR_MAP` by hand** — the pricers now
+   raise rather than guess. Any new build gets `is_std` from its wave prefix automatically.
+5. Do **NOT** re-open: error analysis / OOF segmentation on any axis (w27 slot 8 §4 closed all
+   seven); the stacker C (slot 8 §5); fold-seed averaging; the original dataset.
+
+**No submission — at cap, 10/10 for the 08-19 UTC day.**

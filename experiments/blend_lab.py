@@ -28,6 +28,24 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+
+# ⚠ PIN THE BLAS THREAD COUNT BEFORE NUMPY IS IMPORTED (w28, 2026-08-19).
+#
+# w27 slot 8 measured a reproducibility floor on absolute cross-fitted CV that is caused by
+# nothing but this: identical code, identical matrix, identical frozen folds, varying only the
+# thread count, spans 3.68e-6 and ranges 5.22e-6 against the shipped build
+# (`experiments/w27z2_threads.py`). Threading reorders the gradient summation, lbfgs takes a
+# different path and stops at tol=1e-4 somewhere else. It is not monotone in thread count, so
+# it cannot be corrected for after the fact -- it is noise, and at 1-3e-6 it is the same size
+# as most of the effects this workspace is trying to measure.
+#
+# This does NOT make numbers built before today comparable with numbers built after it. What
+# it does is stop the floor GROWING: every build from here shares one BLAS configuration, so
+# two files built on different days can be differenced again. Override with the env var if a
+# run genuinely needs a different count -- `setdefault`, not assignment.
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+           "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+    os.environ.setdefault(_v, "4")
 import time
 
 import numpy as np

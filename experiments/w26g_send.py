@@ -118,7 +118,15 @@ def main():
     print(f"{len(sent_names)} distinct filenames sent, {len(sent_md5)} of them still on disk "
           f"and fingerprinted")
 
-    q = pd.read_csv(QUEUE).sort_values("pred_lb", ascending=False)
+    q = pd.read_csv(QUEUE)
+    # `priority` pins `check_selection.WANTED` to the head (w28). A deadline pick that is never
+    # submitted cannot be selected, and that outranks any public-LB ordering.
+    if "priority" not in q.columns:
+        q["priority"] = 0
+    q = q.sort_values(["priority", "pred_lb"], ascending=[False, False])
+    _pin = q[q.priority == 1].file.tolist()
+    if _pin:
+        print(f"PINNED first (check_selection.WANTED, unsent): {', '.join(_pin)}")
     # A dry run plans the full --n regardless of slots left, so a slot at the cap can still
     # SEE tomorrow's queue and check it is sane. Only a real send is clamped by `left`.
     cap = a.n if not a.go else min(a.n, max(left, 0))

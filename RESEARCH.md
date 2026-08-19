@@ -7757,3 +7757,133 @@ ensemble dispersion. **Do not spend another slot on OOF error analysis in any fr
 
 **Standardising at C=1 is equivalent to not standardising and tuning C.** The shipped
 configuration sits on the flat part. Closed.
+
+---
+
+# w28 slot 9 (2026-08-19) — durable facts
+
+## ⚠⚠ THE MODEL-LABEL FLAGS LIVE IN `experiments/stdflag.py`. IMPORT THEM. DO NOT COPY THEM.
+
+Two flags feed the w25f/w26e CV→LB model and both have now been wrong at least once:
+
+**`is_std` — the combiner-standardisation flag, worth −27.4e-6 of predicted LB.**
+
+| version | rule | wrong on |
+|---|---|---|
+| w25f / w26d original | whitelist of seven `w23_*` names | every build after w23 |
+| w27 slot 3 | `"std" in stem` | the six `w27_ad188raw*` files |
+| **w28, current** | **wave number ≥ 23, from the `wNN_` prefix** | — |
+
+`w27_ad188raw*` is built by `experiments/w27k_ctrawctl.sh`, which passes `--standardize`. The
+**"raw" is the CT-raw MEMBER** (`lat_ctraw_r400` swapped in for `lat_ctfix_r400`), not a raw
+combiner. A filename is not provenance. `--standardize` entered the chain at w23 and every
+build since passes it, so the wave prefix IS the flag; `blend*`/`stack*` carry no wave and all
+predate w23. `stdflag.gate()` asserts the rule reproduces w25f's whitelist on its own 60 rows.
+
+**`family` — the transform family; `fam[ens4]` is worth +13.9e-6.**
+
+`corr` is not a transform and no suffix rule can classify it. Every `*corr` file is the 5-arm
+`c_avg` correction on an **h3** mix. `stdflag.CORR_MAP` registers all six explicitly and
+`stdflag.require_corr_registered()` **raises** on an unregistered one.
+
+**⚠ USE `w26e_famfix.json` → `coefs_new` (resid sd 8.349e-6), NOT `w25f_ancova2.json` →
+`coefs` (8.408e-6).** w25f was fitted with the two known-wrong `*corr` labels in place, so
+pairing its coefficients with `stdflag.family`'s corrected labels is neither model. w26e's
+refit sat unused for two days while the pricer kept the wrong labels.
+
+**The cost of the two errors, on one ten-file day**: P(at least one beats 0.97118) read
+**0.647** with both bugs, **0.085** with `is_std` fixed, **0.011** with both fixed. 59×.
+
+## The bar a NEW file must clear — supersedes every earlier figure
+
+Even-money shot at beating the account best 0.97118, under w26e's model with corrected labels:
+
+| family | unstandardised | **standardised** |
+|---|---|---|
+| **h3** | 0.9701167323 | **0.9701307114** |
+| ens4 | 0.9701095720 | 0.9701235511 |
+| rankraw | 0.9701092705 | 0.9701232497 |
+| rescale | 0.9700975832 | 0.9701115624 |
+
+**Every build here since w23 is standardised: read the right-hand column.** The best object on
+disk is `w27_ad190stdcorr` at **0.9701181344**, i.e. **12.6e-6 short**.
+
+⚠ **Stale bars, do not quote:** `0.9701181879` (w26d, unstandardised + wrong family) and
+`0.9701325557` (w27 slot 8, std fixed but family still wrong).
+
+## The CV→LB model survives out of sample — 8 files, priced before they were sent
+
+    n=8   mean residual +2.90e-6   sd 2.93e-6   max|res| 9.1e-6
+    fitted sd 8.35e-6, simulated slice-noise floor 8.21e-6
+
+Record the sd; **ignore the mean** — all eight share the same fixed public slice and most share
+member sets, so the honest n is ~2, and the LB print grid is 1e-5.
+
+## ⚠ `w25a_cvlb_full.csv` IS THE MODEL'S CENTRING SOURCE — do not re-run `w25a_cvlb_full.py`
+
+`MU` is recomputed at import time in `w26d` (and in w28a/w28b) as the mean CV over that file's
+`cv >= 0.97` rows — the same 60 rows w25f/w26e fitted. Re-running `w25a_cvlb_full.py` today
+would re-centre the model on 18 extra rows and silently shift every stored prediction and every
+gate. The refreshed table is `w28a_cvlb_full.csv`, written by `w28a_cvlb_refresh.py`, which
+leaves w25a's file alone. Both scripts assert `MU` against the fitted model's stored `mu`.
+
+## THE SEND PATH, corrected — and why the queue could not see the right files
+
+`w26g_send.py` sends the head of `w26d_queueprice.csv`, which derives from
+`w23b_sendqueue.csv`. **That queue goes stale the moment anything is built OR sent** — on
+08-19 it still held 24 rows generated before any `w27_*` file existed, which is the whole
+reason "send `w27_ad188stdcorr` first" failed in four consecutive slots.
+
+**Run these three, in order, before every send day:**
+
+```bash
+.venv/bin/python experiments/w23b_sendqueue.py     # rebuild from disk + live API
+.venv/bin/python experiments/w26d_queueprice.py    # reprice; pins check_selection.WANTED
+.venv/bin/python experiments/w26g_send.py --n 10   # dry run, read the plan
+.venv/bin/python experiments/w26g_send.py --go --n 10
+```
+
+**New in w28: a `priority` column.** `w26d` imports `check_selection.WANTED` and pins any
+wanted-but-unsent file to the head; `w26g` sorts on `(priority, pred_lb)`. **Kaggle's
+final-selection dialog lists SUBMITTED entries only, so an unsent deadline pick cannot be
+ticked — that outranks any public-LB ordering.**
+
+## ⚠ IF THE DEADLINE PICK MOVES, IT MOVES IN `check_selection.WANTED`, IN THE SAME COMMIT
+
+Three journal entries (w27 slots 6, 7, 8) recorded a new pair; the constant was never edited,
+so the script that exists to verify the pick spent three slots verifying the old one. Journal
+prose is not a variable. `check_selection.py` now also prints whether each WANTED file has ever
+been submitted, before anything else.
+
+## `csv` ↔ `oof` coupling — the check that had never been run, and how to run it
+
+Every CV here comes from `submissions/oof_<stem>.npy`; the object that scores is `<stem>.csv`;
+nothing verified they came from the same run. `experiments/w28c_coupling.py` uses the one
+quantity that couples them: a `*corr` file is its h3 base plus a small additive correction, so
+the **test-side correction scale over the OOF-side scale must land near 1**.
+
+| file | test/oof scale | d_cv vs its base |
+|---|---|---|
+| `w27_ad190stdcorr` | 1.064 | +4.80e-6 |
+| `w27_ad188stdcorr` | 0.995 | +5.34e-6 |
+| `w23_ad187stdcorr` | 0.973 | +5.81e-6 |
+
+All coupled. The c_avg correction replicates at +4.8 to +5.8e-6 on three independent packs.
+
+## ⚠ THE SLOT-2 HEDGE HAS NO CHEAP ORTHOGONALITY LEFT (`w28c_slot2.csv`)
+
+Test-side Spearman against `w27_ad190stdcorr`: everything within 20e-6 of it on CV agrees at
+**rho ≥ 0.9996**. The only materially different file is `w27_ad190std_logit` (rho 0.9982) and
+it costs **78.6e-6** of CV. Stop pricing "insurance" pairs as though they diversify — pick the
+best two CV files that are not literal twins and say so.
+
+## `blend_lab.py` PINS THE BLAS THREAD COUNT
+
+`os.environ.setdefault` for OMP/OPENBLAS/MKL/NUMEXPR/VECLIB, default **4**, set **before numpy
+is imported**, overridable from the environment. This does not make pre-w28 numbers comparable
+with post-w28 ones — it stops the ~4e-6 reproducibility floor from growing.
+
+## Board, 2026-08-19 19:20 UTC
+
+Leader **MILANFX 0.97134**. Our **0.97118 is 17th** of 2,323 teams, with six teams tied at
+0.97118 and 16 above. Gold is top 14 — three places out.

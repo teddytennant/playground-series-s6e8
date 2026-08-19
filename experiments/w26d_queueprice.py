@@ -33,47 +33,20 @@ from scipy.stats import norm
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-# NOT imported from w25b_gapfamily. That module runs its whole analysis at import time and
-# rewrites w25b_{pairs,families}.csv and w25b_gapfamily.json as a side effect -- the first
-# version of this script did import it and silently overwrote all three. Caught by
-# `git status`, restored with `git checkout --`. Same class of near-miss as w24's hard-coded
-# JSON path, and the second time this workspace has had it. Copied verbatim instead; if the
-# classifier ever changes, BOTH copies must change.
-def family(s):
-    for f in ("wh3", "h3", "hybrid", "rankraw", "rescale", "logit"):
-        if s.endswith("_" + f):
-            return f
-    if s.endswith("_w") or s.endswith("_w2") or s in ("blend156w", "blend156w2"):
-        return "w"
-    return "ens4"          # a bare stem is the rank-average of all four transforms
-
-
-# The seven files w25f actually fitted the `standardised` coefficient on. Kept EXPLICIT so the
-# GATE below re-predicts w25f's own rows byte-for-byte and cannot drift.
-STD_FILES = {"w23_ad187stdcorr", "w23_ad187std_h3", "w23_ad187std", "w23_ad187std_logit",
-             "w23_ad187std_h3_hybrid", "w23_ad187std_h3_rankraw", "w23_ad187std_h3_rescale"}
-
-
-def is_std(stem):
-    """Was this file's combiner fitted on a unit-sd design matrix (`blend_lab --standardize`)?
-
-    ⚠⚠ BUG FIXED 2026-08-19 (w27 slot 3). This used to be `stem in STD_FILES` — a hard-coded
-    whitelist of seven `w23_*` names — applied to the QUEUE as well as to the fitted rows. Every
-    file built after w23 by a `--standardize` chain therefore scored as UNstandardised, and since
-    `standardised` carries a -27.43e-6 coefficient each one was handed +27.43e-6 of predicted LB
-    it had not earned.
-
-    That is not a rounding error, it is 3.3 reporting steps, and it produced a false headline:
-    the five `w27_ad188std*` files were priced at P(beat 0.97118) = 0.31 to 0.37 and written into
-    the w27 slot-2 journal as "the whole old queue priced at 6.3e-4, this one prices at 0.37 --
-    the difference between draining a queue and having something to send". Corrected, they price
-    at **4.6e-5 to 2.0e-4**, i.e. the queue did NOT change character and there is still nothing
-    on disk with a real chance of moving the board. Anything quoting that 0.37 is quoting a bug.
-
-    The substring rule reproduces the whitelist EXACTLY on all 60 rows w25f fitted (verified in
-    the same slot), so the gate is unaffected and only unseen files change.
-    """
-    return stem in STD_FILES or "std" in stem
+# The classifiers now live in `experiments/stdflag.py` and are IMPORTED, not copied.
+#
+# ⚠⚠ SECOND BUG IN THIS FLAG, FOUND 2026-08-19 (w28). w27 slot 3 replaced a hard-coded
+# whitelist with the substring test `"std" in stem`, which was right on every row w25f fitted
+# and WRONG on the six `w27_ad188raw*` files -- built by `w27k_ctrawctl.sh`, which passes
+# `--standardize`; the "raw" is the CT-raw MEMBER, not a raw combiner. Each was handed the
+# +27.43e-6 the `standardised` coefficient withholds, and `w27_ad188raw` consequently priced
+# at P(beat the account best) = 0.548, the best number on disk. Corrected: 8.4e-4, and the
+# whole ten-file day drops from P = 0.647 to 0.083. A filename is not provenance; `stdflag`
+# derives the flag from the WAVE NUMBER, because `--standardize` entered the chain at w23 and
+# every build since passes it. That module gates itself against w25f's own 60 rows.
+sys.path.insert(0, HERE)
+import stdflag  # noqa: E402
+from stdflag import STD_FILES, family, is_std  # noqa: E402,F401
 
 # w25f fits on CENTRED CV: cv_e6 = (cv - mu) * 1e6, mu the mean over its own 60 rows. mu is
 # not in the JSON, so it is recomputed here from the same table under the same CV >= 0.97
@@ -84,8 +57,15 @@ _t = pd.read_csv(os.path.join(HERE, "w25a_cvlb_full.csv")).dropna(subset=["cv"])
 _fit = _t[_t.cv >= 0.97].copy()
 MU = _fit.cv.mean()
 
-M = json.load(open(os.path.join(HERE, "w25f_ancova2.json")))
-C, RESID = M["coefs"], M["resid_sd_with_std"]
+# ⚠ THE MODEL IS w26e's REFIT, NOT w25f (changed w28, 2026-08-19). w26e found that the two
+# `*corr` files -- one of which is `WANTED` slot 1 -- were labelled `ens4` by the suffix rule
+# when they are corrected **h3** mixes, refitted with only those two labels changed, and got a
+# LOWER residual sd (8.349e-6 vs 8.408e-6) with no extra parameters. That refit then sat unused
+# for two days while the pricer kept the wrong labels. It matters most exactly where the
+# decision is: the queue's top two files are BOTH `*corr`, so under the suffix rule each was
+# collecting the +13.9e-6 `ens4` term on top of an h3 base.
+M = json.load(open(os.path.join(HERE, "w26e_famfix.json")))
+C, RESID = M["coefs_new"], M["resid_sd_new"]
 BEST_LB = 0.97118          # account best, w21_ad187corr_ens4
 STEP = 1e-5                # the LB reports to 5 decimals
 
@@ -117,6 +97,7 @@ assert abs(_rsd - RESID) < 0.5, "predict() does not reproduce w25f; nothing belo
 q = pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
 q = q[~q.sent].dropna(subset=["cv"]).copy()
 q["stem"] = q.file.str.replace(".csv", "", regex=False)
+stdflag.require_corr_registered(q.stem)   # a new *corr file must be classified BY HAND
 q["fam"] = q.stem.map(family)
 q["std"] = q.stem.map(is_std)          # see is_std: a whitelist here was a BUG
 q["pred_lb"] = [predict(r.cv, r.fam, r.std) for r in q.itertuples()]
@@ -124,7 +105,18 @@ q["pred_lb"] = [predict(r.cv, r.fam, r.std) for r in q.itertuples()]
 # P(beat the account best). The file must print STRICTLY above 0.97118, and the LB rounds to
 # 1e-5, so the target on the underlying scale is BEST_LB + STEP/2.
 q["p_beat"] = 1.0 - norm.cdf((BEST_LB + STEP / 2 - q.pred_lb) / (RESID * 1e-6))
-q = q.sort_values("pred_lb", ascending=False)
+
+# PRIORITY. The queue is ranked on predicted PUBLIC LB, which is the right order for chasing
+# public rank and the WRONG order for the one thing a submission is actually needed for here:
+# Kaggle's final-selection dialog lists SUBMITTED entries only, so a deadline pick that is
+# never sent cannot be ticked. `w27_ad188stdcorr` sat unsent for four slots behind three
+# journal entries saying "send it first" because the sender reads this file and this file did
+# not rank it first. Anything in `check_selection.WANTED` now goes to the head of the queue.
+from check_selection import WANTED  # noqa: E402
+q["priority"] = q.file.isin(WANTED).astype(int)
+q = q.sort_values(["priority", "pred_lb"], ascending=[False, False])
+_pin = q[q.priority == 1].file.tolist()
+print(f"PINNED to the head of the queue (check_selection.WANTED, unsent): {_pin or 'none'}")
 
 print(f"{len(q)} unsent files with a stored OOF vector, priced under w25f "
       f"(resid sd {RESID:.2f}e-6, centred at mu={MU:.10f})\n")
