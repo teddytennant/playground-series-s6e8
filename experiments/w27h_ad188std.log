@@ -43,3 +43,24 @@ base w27_ad188std_h3 OOF AUC 0.9701114720   (w16i's base blend159av_h3 0.9700491
     fitted a_only fold 4 {'A': np.float64(0.0075), 'rest': np.float64(0.001)}
   arm a_only  xfit  +3.619e-6  se 3.335  t +1.09  4/5  CV 0.9701152798
     fitted rule fold 0 {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.0015), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+    fitted rule fold 1 {'A social>4': np.float64(0.0085), 'B soc<=4 daily>8': np.float64(0.002), 'BAND 6<daily<=8': np.float64(0.0015), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+    fitted rule fold 2 {'A social>4': np.float64(0.0075), 'B soc<=4 daily>8': np.float64(0.003), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.001), 'F socialNA': np.float64(0.0), 'G both NA': np.float64(0.0)}
+    fitted rule fold 3 {'A social>4': np.float64(0.0055), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.002), 'D soc<=4 daily<=6': np.float64(0.0005), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.001), 'G both NA': np.float64(0.0)}
+    fitted rule fold 4 {'A social>4': np.float64(0.0075), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0015), 'F socialNA': np.float64(0.001), 'G both NA': np.float64(0.0)}
+  arm rule    xfit  +5.171e-6  se 2.723  t +1.90  4/5  CV 0.9701168751
+    fitted mask fold 0 {'m0': np.float64(0.0015), 'm1': np.float64(0.001), 'm2': np.float64(0.0005), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 1 {'m0': np.float64(0.0015), 'm1': np.float64(0.0015), 'm2': np.float64(0.0005), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 2 {'m0': np.float64(0.0015), 'm1': np.float64(0.0015), 'm2': np.float64(0.001), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 3 {'m0': np.float64(0.002), 'm1': np.float64(0.002), 'm2': np.float64(0.0015), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 4 {'m0': np.float64(0.001), 'm1': np.float64(0.0015), 'm2': np.float64(0.001), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+  arm mask    xfit  +3.141e-6  se 5.398  t +0.58  4/5  CV 0.9701148279
+    fitted decile fold 0 {'q0': np.float64(0.0015), 'q1': np.float64(0.0005), 'q2': np.float64(0.0005), 'q3': np.float64(0.001), 'q4': np.float64(0.0055), 'q5': np.float64(0.007), 'q6': np.float64(0.0135), 'q7': np.float64(0.0)}
+    fitted decile fold 1 {'q0': np.float64(0.001), 'q1': np.float64(0.0), 'q2': np.float64(0.001), 'q3': np.float64(0.0015), 'q4': np.float64(0.0045), 'q5': np.float64(0.008), 'q6': np.float64(0.0035), 'q7': np.float64(0.0)}
+    fitted decile fold 2 {'q0': np.float64(0.0015), 'q1': np.float64(0.0005), 'q2': np.float64(0.001), 'q3': np.float64(0.0015), 'q4': np.float64(0.0065), 'q5': np.float64(0.008), 'q6': np.float64(0.0135), 'q7': np.float64(0.0)}
+    fitted decile fold 3 {'q0': np.float64(0.0015), 'q1': np.float64(0.0005), 'q2': np.float64(0.0015), 'q3': np.float64(0.002), 'q4': np.float64(0.0065), 'q5': np.float64(0.013), 'q6': np.float64(0.0105), 'q7': np.float64(0.0)}
+    fitted decile fold 4 {'q0': np.float64(0.0), 'q1': np.float64(0.0), 'q2': np.float64(0.001), 'q3': np.float64(0.0015), 'q4': np.float64(0.007), 'q5': np.float64(0.009), 'q6': np.float64(0.006), 'q7': np.float64(0.0)}
+  arm decile  xfit  +3.288e-6  se 4.328  t +0.76  4/5  CV 0.9701150143
+
+  CTRL permuted a_only  xfit  +1.934e-6  -> real minus control  +1.685e-6
+  CTRL permuted rule    xfit  +0.303e-6  -> real minus control  +4.868e-6
+  CTRL permuted mask    xfit  +0.996e-6  -> real minus control  +2.145e-6

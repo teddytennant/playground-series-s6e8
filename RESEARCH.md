@@ -6797,3 +6797,355 @@ script (`w27h_run.sh`) so the pattern you match is the script, not the arguments
 **2,323 teams as of 2026-08-19**, not the brief's 1,326. Medal cuts: gold top 14, silver top
 116, bronze top 232. Our 0.97118 is rank 17 — three places outside gold. See `LEADERBOARD.md`
 and `experiments/w27i_s6risk.py` for the private-shuffle backtest that prices this.
+
+---
+
+## w27 slot 3 (2026-08-19) — durable facts
+
+### The CT correction is a SERVE-TIME transform, and that makes cross-class tests cheap
+
+w26 §G's 4/3 rescale of the `CT_` block needs **no refit**: for a threshold tree, dividing an
+input feature by `s` is the same function as multiplying that feature's thresholds by `s`. Two
+consequences worth remembering, because both were re-derived more than once here:
+
+1. **Every arm is a re-PREDICTION of one fitted model.** So `d_c = AUC(ct4/3) − AUC(ct1.0)`
+   carries *no fit noise at all* — it is exact for that model. The only noise left is the
+   138,274-row valid slice, and that slice is **common to both arms** and cancels in the pair.
+   That is why one fold is enough for a **sign**, and why w27g/w27j do fold 0 only.
+2. The argument is about thresholds, not about LightGBM, so it transfers to any threshold tree
+   — XGBoost and CatBoost included. Testing a new function class therefore costs **one fit per
+   class**, not five, and not a member build.
+
+`experiments/w26l_serve.py` exports `apply_arm` and `te_to_fit_scale`. **Import them; never
+reimplement them** — the whole point of a cross-class comparison is that the arms are
+byte-identical to the ones that produced the numbers being compared against.
+
+The standing **gate** for anything in this thread: median valid/train `CT_` ratio on
+`cache/f0_*` must read **1.3325** (expected 4/3 = 1.3333). Reproduced by w27g and w27j
+independently. If it does not, the cache is not what §G says it is and nothing downstream means
+anything.
+
+### ⚠ `stack.load_members` is the ONLY correct definition of the pack
+
+The 188-member pack is `data/oof` (**the 74-model public library — easy to forget**) + `oof`
+(20) + `ext_members` (12) + `ext_members2` (63) + `ext_members3` (22) + `ext_members4` (0) +
+`ext_members6` (3) = 194, minus the 6-name drop list = **188**.
+
+    DROP = golem_a, golem_f, lgbm_tuned_lat, lgbm_tuned_lat_frac, lat_ctraw_r400, lat_ctfixte_r400
+
+A script in this slot enumerated those directories by hand, silently omitted `data/oof`, and
+profiled **114** members while calling them 188. This is the same class of error as the
+`--extra-dirs` gotcha recorded in w27 slot 2 (`blend_lab`'s default extra dirs are
+`ext_members{,2}` only, so `--extra-dirs ext_members6` alone loads 166, not 188).
+
+**Rule: never write the member directory list out by hand. Call `stack.load_members` and
+`assert len(names) == 188`.** Both bugs would have been impossible with the assert.
+
+### Running this box: renice and SIGSTOP, do not kill
+
+Six resident training jobs take this 16-core machine to load ~47, at which point a niced job
+gets ~11% of one core and a 400-round fit that should take 20 minutes takes hours.
+
+- Every long-running script in `experiments/` **checkpoints** (per fold, per config, or per
+  class) and resumes on an identical re-run. So pausing is free and killing costs only the
+  partial unit.
+- Prefer `sudo renice` first, then `kill -STOP` / `kill -CONT` for a real reprioritisation.
+  `SIGSTOP` loses **no** work, unlike a kill which discards the in-flight fold.
+- ⚠ **Always arm the resume in the same command that issues the stop.**
+  `experiments/w27m_yield.sh <pids> <wait-pattern>` does this: it SIGSTOPs, waits for the
+  critical-path process to exit, then SIGCONTs, with an EXIT/INT/TERM trap so that even killing
+  the guard resumes them. A job left in state `T` looks exactly like a job that finished.
+- ⚠ And still: never `pkill -f` a pattern that also matches your own shell's command line
+  (w27 slot 2). Bracket a class in the pattern: `pgrep -f "w27j_[c]tclass.py"`.
+
+### Board size, 2026-08-19 15:48 UTC
+
+**2,329 teams** (up from 2,323 at 14:51 the same day). Medal cuts at that size: gold top 14,
+silver top 116, bronze top 232.
+
+| | |
+|---|---|
+| leader | 0.97134 (MILANFX, 08-18) |
+| us | **0.97118, rank 17, top 0.73%** — 3 places outside gold |
+| teams ahead of us | 16 |
+| teams tied with us at 0.97118 | 7 |
+| within 1e-4 of the leader | 8 |
+
+The brief's "~1,326 teams" is stale by ~1,000 and has been since at least 08-19. Take the count
+from the downloaded leaderboard CSV, never from the brief.
+
+### ⚠⚠ `adarsh1077/s6e8-my-best-cv-model-scored-worse-on-the-lb` — read in full 2026-08-19
+
+Posted 11:59 UTC, 1 vote at read time, and it is more useful to this workspace than either of
+the two 50-vote notebooks read in slot 2. Pulled to `notebooks/adarsh_cv_vs_lb/`.
+
+**His headline is our discipline, arrived at independently.** Two of his submissions:
+
+| | nested CV | public LB |
+|---|---|---|
+| A | 0.970120 | **0.97116** |
+| B | **0.970131** | 0.97115 |
+
+He selected **B** — the better CV, the worse LB. Same call this workspace has been making since
+w15 and the same reasoning: "picking the measurement with 12× the sample size."
+
+#### §4 is an independent, external replication of OUR CT result, on a different signal
+
+He built base models on the constrained-imputation feature family and ablated them cleanly:
+
+| recipe | without | with | delta |
+|---|---|---|---|
+| LightGBM, no TE | 0.963431 | 0.964382 | **+951e-6** |
+| LightGBM + fold-safe TE | 0.967020 | 0.968144 | **+1124e-6** |
+| CatBoost, ordered target statistics | 0.966798 | 0.967918 | **+1120e-6** |
+
+**Added to his 221-member stack, those models were worth +3e-6. A factor of ~350 lost in
+translation.** And not through redundancy — the new members correlated 0.974–0.986 against the
+pool's strongest member, well below the 0.99+ that is typical. His explanation: the stack's
+remaining error lives in rows where *all* members agree and are wrong together, and a new member
+that is wrong in the same places cannot fix that however novel its inputs are.
+
+⚠ **This is the single most important thing to carry forward, because it re-prices our whole CT
+thread.** Our CT correction is worth **+325e-6 solo at 400 rounds** (w26l/w27g) and **+695/+519e-6
+at 2000 rounds on folds 0/1** (w26k), and measures as a **wash at 187/188-member pack level** on
+two separate instruments (w27b's paired 50/50, and the 187-vs-188 cross-fitted build). That gap
+is a factor of ~150–350 — **exactly the translation loss he measured on a completely different
+signal, with a different pool, a different author, and a different feature family.**
+
+So our pack-level null is **not** an instrument defect, not a fold artefact and not bad luck. It
+is the generic behaviour of a saturated stack, now observed twice independently. Concretely:
+
+- **It lowers the prior on the ~33-member lattice REBUILD** (w27 slot-2 journal §9) a long way.
+  The rebuild's implicit hope was that one corrected member cannot show what correcting all of
+  them would. That may still be true, but the expected size of the effect should now be budgeted
+  at **member-value / ~200**, not at member-value. Thirty-three members × (325e-6 / 200) ≈ +54e-6
+  is the optimistic ceiling and assumes the corrections stack linearly, which nothing suggests.
+- It does **not** touch the member-level result, which is large, reproduced byte-for-byte, and
+  mechanistically explained. Those are simply different currencies. Say which one you mean.
+
+#### Other things worth having
+
+- **The in-fold selection leak, measured.** Ranking members by |coef| once on all labels and then
+  scoring the survivors inflates by **+19 to +32e-6**, against a real pruning gain of ~+6e-6 —
+  "three to five times larger than the real effect". Independent corroboration of R-J2 (no
+  argmax over arms scored on the folds that fitted them), with a number attached.
+- **Pair survival, why the public LB cannot see our work.** An AUC gain comes from reordering row
+  *pairs*; for a pair to count on the public board **both** rows must land in the ~20% slice,
+  which happens ~4% of the time. So the public board shows about **a twentieth** of an
+  improvement against noise that does not shrink. This is the cleanest one-line statement of why
+  our 8.21e-6 slice-noise floor swamps our 2e-6 CV steps.
+- **Instrument ranking by resolution:** CV (691,369 rows) > private (~237k) > public (~59k).
+- **Pool growth was worth +320e-6; thirteen meta-model refinements were worth zero or less
+  between them.** Matches w20d's per-member value finding and argues against further combiner
+  tuning here.
+- **A fold-congruence diagnostic we have never run** and could: fold 3 is intrinsically easier
+  than fold 0 for every honest member, so the shape of (per-fold AUC, centred) should be shared
+  across members. A member trained on a foreign split averages five models into each of our folds
+  and washes that shape out. Median correlation on his pool ~+0.98. Low scores flag *unstable*
+  members, not necessarily foreign splits — his own weakest model scored lowest.
+- His ceiling estimate is unchanged from the slot-2 read (~0.97006 OOF, headroom ~5e-5).
+
+### ⚠⚠⚠ TWO BUGS IN `w26d_queueprice.py`, FIXED 2026-08-19 (w27 slot 3) — the CV bar was 14e-6 too easy
+
+Both are the same omission — the `standardised` term of the w25f model — in two places, and
+both made the workspace's own position look better than it is.
+
+**Bug 1: `STD_FILES` was a hard-coded whitelist of seven `w23_*` names, applied to the QUEUE.**
+Every file built after w23 by a `--standardize` chain therefore scored as *unstandardised*.
+`standardised` carries a **-27.43e-6** coefficient, so each of those files was handed +27.43e-6
+of predicted LB — **3.3 reporting steps** — that it had not earned.
+
+The consequence is a false headline already written into the w27 slot-2 journal entry (§12):
+
+| `w27_ad188std.csv` | pred LB | P(beat 0.97118) |
+|---|---|---|
+| as priced then (std flag wrong) | 0.97118 | **0.367** |
+| corrected | 0.97115 | **1.6e-4** |
+
+and with it the claim *"the whole old queue priced at 6.3e-4. This one prices at 0.37 — that is
+the difference between draining a queue and having something to send."* **That claim is a bug.**
+Corrected, the five `w27_ad188std*` files price at 3.6e-13 to 1.6e-4 and the best ten sent
+together come to 3.7e-4. The queue did **not** change character. There is still nothing on disk
+with a real chance of moving the board.
+
+**Bug 2: the "CV needed for P=0.50" bar omitted the same term**, so every bar this script has
+ever printed was the bar for an *unstandardised* file — and every build here since w23 is
+standardised. Corrected, printed both ways now:
+
+| family | bar, unstandardised | bar, **standardised** | vs CV leader (0.9701150809) |
+|---|---|---|---|
+| h3 | 0.9701181879 | **0.9701325557** | **+17.5e-6** |
+| ens4 | 0.9701108460 | **0.9701252138** | **+10.1e-6** |
+| hybrid | 0.9701149816 | 0.9701293494 | +14.3e-6 |
+| rankraw | 0.9701102821 | 0.9701246499 | +9.6e-6 |
+| rescale | 0.9700983997 | 0.9701127675 | −2.3e-6 |
+| logit | 0.9700390116 | 0.9700533794 | −61.7e-6 |
+
+⚠ **Both figures the workspace has been quoting are wrong in the easy direction.** "A new file
+needs 0.9701181879" (h3) and "the ens4 bar is 0.9701108460, 4.2e-6 BELOW the current CV leader"
+are the *unstandardised* column. The real bars for the files we actually build are **+17.5e-6**
+and **+10.1e-6 ABOVE** the leader. **Quote the right-hand column, and always with its family and
+its scaling attached.**
+
+The fix is `is_std(stem) = stem in STD_FILES or "std" in stem`. The substring rule was verified
+to reproduce the whitelist **exactly on all 60 rows w25f fitted** before it was adopted, and the
+script's GATE (re-predict the fitted rows, require the residual sd back) still passes at 8.41e-6.
+`STD_FILES` is retained explicitly so the gate can never drift.
+
+**The strategic reading.** Nothing currently on disk, and nothing the CT thread is likely to
+produce, gets within 10e-6 of an even-money shot at 0.97118 — and 0.97118 is only our own best,
+not the board's 0.97134. Combined with the ~350x stack-translation loss measured above, the
+honest position is that **public-LB movement is not reachable from here by member-level work**,
+and the remaining value of this competition is almost entirely in *selecting correctly on CV*.
+Which makes the unclicked final selection (below) the single highest-value open item by a wide
+margin — not a tidiness issue.
+
+### The CatBoost angle, answered: the lineage is 29 of 188 and it is DEAD AVERAGE
+
+`experiments/w27l_catprofile.py`, on the exact 188-member pack, rank-transform then Pearson.
+Per-member arrays cached to `experiments/w27l_profile.npz` so no reclassification ever needs a
+recompute.
+
+| set | n | median maxcorr | median solo AUC | median decorr rank |
+|---|---|---|---|---|
+| **CatBoost lineage** | **29** | **0.99581** | **0.966463** | **86 / 188** |
+| everything else | 159 | 0.99615 | 0.966360 | — |
+| whole pack | 188 | 0.99601 | 0.966371 | — |
+
+**CatBoost is already 15% of the pack and it sits exactly at the pack median on both axes.**
+Not more decorrelated, not stronger, not weaker. The angle's premise — "CatBoost handles
+categoricals better on survey-style data" — is **measured null at pack level here**, which is
+consistent with w26's standing finding that where a member lands is set by its *pipeline*, not
+its model class or its hyperparameters. Do not spend another slot tuning a CatBoost.
+
+⚠ **A first version of this reported the opposite**, because `CATLIN` was
+`startswith("cat_") or == "mkt_cat"` and caught **6** of the 29 — a biased sample of the
+oddly-named ones, which read as median maxcorr 0.99424 (apparently *more* decorrelated than the
+pack) off `cat_native`'s genuine 15/188. The 29 are only identifiable by eye, because
+`xgb_latcat`, `xgb_latcat_avg3/s17/s23` and `xgb_cat_lattice` are **XGBoost** members with
+categorical *features* and a `"cat" in name` rule sweeps them in. The explicit list is in the
+script. **Do not re-derive it with a substring rule.**
+
+What survives as genuinely interesting is a single member, not the class:
+
+| member | solo AUC | maxcorr | closest | decorr rank |
+|---|---|---|---|---|
+| **`cat_native`** | 0.958941 | **0.97907** | `bolt_cat_dual_seed81` | **15 / 188** |
+| `cat_lat` | 0.966353 | 0.99496 | `latwide_cat` | 72 / 188 |
+| `cat_raw` | 0.963075 | 0.99424 | `bolt_cat_cpu5` | 58 / 188 |
+| `lgbm_fixed_lat` | 0.967711 | 0.99893 | `lgbm_fixed_lat_frac` | 172 / 188 |
+| `xgb_latcat` | 0.967696 | 0.99960 | `xgb_latcat_avg3` | **181 / 188** |
+
+`cat_native` — every numeric column cast to its lattice level and handed over as a *categorical*,
+so ordering is discarded and CatBoost's own ordered target statistic replaces our smoothed-mean
+TE — is one of the 15 most decorrelated members in the pack despite the **lowest** solo AUC of
+the CatBoost lineage. Meanwhile the lat-pipeline tree members are the most redundant things we
+own (172nd, 176th, 181st of 188). **That is the pipeline finding again, sharply: `cat_native` is
+decorrelated because it changed all three upstream decisions at once, not because it is CatBoost.**
+
+If a future slot wants more from this direction, the target is **more `native`-pipeline members
+(seeds, `natlat`, other ordered-TE variants), not more lat-pipeline CatBoosts** — there are
+already 29 of those and they are indistinguishable from the pack.
+
+For scale, the 12 most decorrelated members in the pack are `orig_bin` (0.91797), `orig_binm`,
+`w15d_origrep_r`, `logreg`, `ad_logregte`, `golem_c`, `golem_g`, `bolt_lookup_v3_evidence`,
+`bolt_lookup_v1`, `xgb_cat_lattice`, `realmlp`, `linlat` — i.e. the linear and lookup members,
+not any tree.
+
+### ⚠ CatBoost makes its input array READ-ONLY after predicting from it
+
+`w26l_serve.apply_arm` mutates `X` in place and the caller restores it afterwards. That is safe
+with LightGBM and **crashes with CatBoost**: `ValueError: assignment destination is read-only` on
+the restore, *after* the fit has cost its full runtime and before any checkpoint exists. The
+safety is a property of LightGBM, not of `apply_arm`.
+
+**Any cross-class use of `apply_arm` must pass a COPY per arm** (`np.array(Xb, copy=True)`), not
+mutate-and-restore. On the fold-0 valid matrix that is 138,274 x 184 float32 ≈ 100 MB per arm —
+free next to the fit it protects. `w27j_ctclass.py` does this now.
+
+### ⚠⚠ THRASHING LOOKS EXACTLY LIKE SLOWNESS — check `free`, not just `uptime`
+
+This box is **31 GB RAM + 16 GB swap**, and it runs **several Claude agent sessions at once**
+(seen live 2026-08-19: this s6e8 session, a *second* s6e8 session, plus biohub and RSNA ones,
+each with their own training jobs). Load average alone does not tell you what is wrong.
+
+What happened this slot: `w27k`'s `blend_lab` build peaked at **5.7 GB** and fired while `w21a`
+was still running. Swap went to **100% full (15929/15929 MB)** with ~1 GB free, and `w21a`'s
+**CPU time advanced 40 seconds in ten minutes of wall clock**. Every symptom read as "the box is
+busy" — `uptime` showed load 25–47 all afternoon, which had been true and normal for hours — and
+roughly an hour went by before anyone ran `free`. Killing one 5.7 GB job restored 10 GB and
+`w21a` immediately went from ~7% of a core to ~200%.
+
+**Diagnostic order when a job looks stalled:**
+1. `free -m` — if `available` is under ~2 GB, or Swap used ≈ Swap total, it is thrashing. Nothing
+   else matters until that is fixed.
+2. `ps -eo pid,rss,stat,args --sort=-rss | head` — find the big RSS, and check whether it is one
+   of *your own* chained jobs.
+3. `vmstat 1 3` — large `si`/`so` columns confirm it.
+4. Only then look at CPU and nice values.
+
+⚠ **`kill -STOP` does NOT free memory.** The pause guards are the right tool for CPU contention
+and the wrong tool for memory pressure — four stopped jobs still held ~4 GB RSS while the box
+thrashed. Under memory pressure, **kill** the checkpointed jobs instead: every long script here
+resumes from `cache/*ckpt/` on an identical re-run, so a kill costs only the in-flight unit.
+
+⚠ **Gate chained builds on memory, not only on a PID.** `w27k_ctrawctl.sh` now waits for
+`MemAvailable > 9 GB` as well as for the critical-path process, because "the other job exited" is
+not the same condition as "there is room to run".
+
+Approximate peak RSS, measured: `blend_lab` 188-member build **5.7 GB**; `w26i_value` 1.5 GB;
+`w27j_ctclass` (CatBoost fold-0) 2.2 GB; `w27n_foldcong` 1.3 GB; `w27c_ctdrop` 1.4 GB. **Two
+blend_lab-class jobs do not fit on this machine at once.**
+
+### ⚠⚠ THE CT SKEW IS A PROPERTY OF THE MATRIX, NOT OF LightGBM — three function classes
+
+`w27j_ctclass.py`, fold 0, 400 rounds, pre-registered at `w27_prereg_slot3.txt` §M before any
+number existed. One fit per class; all four arms are re-predictions of that same fitted model, so
+`d_c` carries **no fit noise** and the valid-slice noise cancels in the pair.
+
+| class | ct1.0 | ct4/3 | **d_c** | d_te | d_both | CTshare | importance measure |
+|---|---|---|---|---|---|---|---|
+| lgb\* | 0.964779 | 0.965104 | **+324.99e-6** | — | — | 1.00% | split gain |
+| xgb | 0.965439 | 0.965730 | **+291.06e-6** | −19.26e-6 | +270.45e-6 | 1.23% | total_gain |
+| **cat** | 0.965123 | 0.965648 | **+525.49e-6** | −82.68e-6 | +466.29e-6 | **3.21%** | PredictionValuesChange |
+
+\* quoted from w27g fold 0, not refitted.
+
+**§M3(a) PRIMARY — HELD.** `d_c > 0` in all three function classes, on three different libraries
+with three different tree-growth policies. **The 4/3 serve-time skew is a property of the
+FEATURE MATRIX, exactly as w26 §G claims, and is not a LightGBM artefact.** This was the one
+thing that could have killed the whole thread and it did not.
+
+**§M3(b) MAGNITUDE — FAILED, and the mechanism reasoning was backwards.** I registered CatBoost
+at **+30 to +300e-6, modal +130e-6**, and predicted it would be *smaller* than LightGBM because
+oblivious trees force one threshold per level and should spread split budget away from any single
+column family. Observed **+525.49e-6 — 1.6x LightGBM and far outside the registered range.**
+CatBoost leans on the `CT_` block *harder*, not less (CTshare 3.21% against LightGBM's 1.00%).
+Whatever oblivious trees do here, it concentrates on the count columns rather than diluting them.
+⚠ **Record this as a failed prediction, not as a pleasant surprise.** XGBoost, by contrast, came
+in at +291.06e-6 against a registered +80 to +400e-6 with a +250e-6 mode — held comfortably.
+
+**§M3(c) SECONDARY — fails across libraries, exactly as its own caveat warned.** w27g's 3-config
+LightGBM line (`d_c ≈ 131e-6 + 208e-6 × CTshare_pp`) predicts +386e-6 for xgb (observed +291,
+miss −95e-6, just inside the ±100e-6 band) and +798e-6 for cat (observed +525, miss **−273e-6**,
+far outside). And the relation is not even monotone across libraries: xgb has a *higher* CTshare
+than lgb but a *lower* d_c. **This is the registered caveat firing** — split gain, total_gain and
+PredictionValuesChange are not commensurable, and the prereg said a miss here is weak evidence
+about the relation and strong evidence about nothing. **The CTshare relation is readable WITHIN a
+library (w27g) and not ACROSS libraries. Do not quote a cross-library CTshare slope.**
+
+**§M3(d) — the TE re-shrink is NEGATIVE in both new classes.** `te` alone costs −19.26e-6 (xgb)
+and −82.68e-6 (cat), and `both` lands *below* `ct4/3` in each (+270 vs +291, +466 vs +525). That
+is the third and fourth independent confirmation of §G6's null-to-negative TE finding, now
+outside LightGBM. **The 4/3 CT rescale is the whole of the effect; the smoothing re-shrink
+subtracts from it. Do not ship a `te` or `both` arm.**
+
+**What this licenses and what it does not.** It licenses the ~33-member lattice rebuild as a
+*coherent* idea — the skew really is in the columns every lattice member consumes. It does
+**not** change the pack-level economics: two instruments say `ctfix − ctraw` is a wash inside a
+187-member pack, and the ~350x translation loss measured independently by adarsh1077 (above) says
+that is the *expected* result, not an anomaly. Budget the rebuild at member-value / ~200.
+
+**A cheap follow-on with real value:** CatBoost's +525e-6 is the largest single-member CT effect
+ever measured here, and `cat_native`/`cat_lat` are already in the pack. If any corrected member
+is worth building, it is a **CatBoost** one, not another LightGBM.

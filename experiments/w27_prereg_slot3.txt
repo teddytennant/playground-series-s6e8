@@ -1,0 +1,113 @@
+w27 slot3 PRE-REGISTRATION — the CT train/serve skew ACROSS FUNCTION CLASSES
+============================================================================
+Written 2026-08-19 ~15:50 UTC, BEFORE any CatBoost or XGBoost number exists.
+Angle for the slot: CatBoost. This is that angle pointed at the one CatBoost
+question the workspace actually needs answered, rather than at a member build
+whose value the journal has already measured as null (w26 slot: "where a member
+lands is set by its pipeline, not its hyperparameters"; cat_lat / cat_native /
+cat_raw are already in the pack).
+
+§M1 WHAT IS UNDER TEST
+----------------------
+w26 §G established that the lattice cache's `CT_k` raw cell-count columns arrive
+~4/3 too LARGE at serve time, because they are built from an inner 4-fold at fit
+time and from the whole outer train part at serve time. The fix is a pure
+serve-time rescale requiring NO refit: for a threshold tree, dividing an input
+feature by s is the same function as multiplying that feature's thresholds by s.
+
+Measured so far, ALL of it on LightGBM:
+    w26l r400 fold 0   ct1.0 -> ct1.3333    +325e-6
+    w26k r2000 fold 0                       +695e-6   (0.966859 -> 0.967554)
+    w26k r2000 fold 1                       +519e-6   (0.967771 -> 0.968290)
+    w27g r400 fold 0 control                +324.99e-6, CT_ split-gain share 1.0%
+    w27g r400 fold 0 leaves31_d6            +297.11e-6, CTshare 0.8%
+    w27g r400 fold 0 leaves127_d9           +401.11e-6, CTshare 1.3%
+
+Every one of those is the SAME function class. The skew is a property of the
+FEATURE MATRIX, not of LightGBM — but that claim has never been tested, and it is
+the claim that licenses the expensive follow-on (§9 of the w27 slot-2 journal
+entry: rebuilding all ~33 lattice members of the 188-pack with the correction).
+If the effect is LightGBM-specific, that rebuild is not worth starting.
+
+§G5(c) already asks for corrected members in three function classes. This is that,
+done as a pure serve-side probe rather than as three member builds, which makes it
+one fit per class instead of five.
+
+§M2 DESIGN — exactly paired, one fit per class
+----------------------------------------------
+Fold 0 only, matching w27g and w26l r400 so the LightGBM control needs no refit
+and is quoted from w27g.
+
+For each class C in {catboost, xgboost}:
+  1. fit ONCE on cache/f0_Xa.npy (553,095 x 184 float32), 400 rounds, no early
+     stopping, fixed seed. Nothing sees f0_Xb.
+  2. predict f0_Xb under four serve-side arms, all from the SAME fitted model:
+       ct1.0     baseline, the matrix as it actually arrives
+       ct1.3333  CT_ divided by 4/3          <- THE CORRECTION
+       te        TE_ re-shrunk to the f=3/4 fit-time count
+       both      TE_ re-shrunk AND CT_ divided by 4/3
+     Arms 2-4 are w26l's `apply_arm` verbatim, imported, not reimplemented.
+  3. record d_c = AUC(ct1.3333) - AUC(ct1.0), and the class's CT_ share of total
+     feature importance (LGB split gain / XGB total_gain / CatBoost
+     PredictionValuesChange), so the w27g CTshare relation can be extended.
+
+Because arms 2-4 are re-predictions of one fitted model, d_c has NO fit noise in
+it at all — it is exact for that model. The only noise is the 138,274-row valid
+slice, which is COMMON to both arms and cancels almost entirely in the pair. This
+is why one fold is enough for a sign.
+
+§M3 REGISTERED PREDICTIONS — written before the run, not revisited after
+-----------------------------------------------------------------------
+(a) PRIMARY, the one that matters.  d_c > 0 for BOTH CatBoost and XGBoost.
+    The skew is in the columns, so any model that splits on CT_ at all is
+    mis-calibrated at serve time in the same direction. Registered as a SIGN
+    test on two independent classes. A null or negative d_c in either class
+    is the informative outcome and would say the effect is LightGBM-specific.
+
+(b) MAGNITUDE.  Smaller than LightGBM's +325e-6 in both classes.
+      CatBoost registered range  +30 to +300e-6, modal +130e-6.
+      XGBoost  registered range  +80 to +400e-6, modal +250e-6.
+    Reasoning: CatBoost's oblivious trees force one threshold per LEVEL across the
+    whole tree, which spreads split budget away from any single column family and
+    should lower its CT_ share; XGBoost is depth-wise and leaf-wise-ish in effect
+    and sits closer to LightGBM. The intervals are wide on purpose — this quantity
+    has never been measured outside one library.
+
+(c) SECONDARY, and explicitly a 2-point extrapolation, so weak.  w27g's three LGB
+    configs give d_c ~ 208e-6 per percentage point of CTshare with a +131e-6
+    intercept. If the CTshare relation is a property of the MATRIX rather than of
+    LightGBM, each class should land within +-100e-6 of
+        d_c_pred = 131e-6 + 208e-6 * CTshare_pp
+    ⚠ Importance measures are NOT commensurable across libraries (split gain vs
+    total_gain vs PredictionValuesChange). A miss here is weak evidence about the
+    relation and strong evidence about nothing. It is registered so it cannot be
+    quoted selectively later.
+
+(d) `both` >= `ct1.3333` in both classes, i.e. the TE re-shrink adds nothing or
+    a little. Standing evidence (w26 §G6, w27 slot-2 §L4) says the TE arm is
+    null-to-negative at pack level; this asks whether it is even positive at
+    MEMBER level outside LightGBM.
+
+§M4 WHAT IS NOT CLAIMED, AND WHAT WILL NOT BE DONE WITH THE RESULT
+------------------------------------------------------------------
+- No member is shipped from this. The models fitted here are 400-round fold-0
+  probes and produce no OOF vector; nothing enters the pack.
+- A positive result does NOT re-open the pack-level value of the correction. Two
+  instruments (w27b's paired 50/50 and the 187-vs-188 cross-fitted build) already
+  say `ctfix - ctraw` is a wash INSIDE a 187-member pack, and this probe cannot
+  and does not speak to that. What a positive result licenses is exactly one
+  thing: starting the ~33-member lattice REBUILD, which is the only version of
+  the thread those two instruments have not tested.
+- NO argmax. The reported number for each class is `ct1.3333` against `ct1.0`.
+  The `te` and `both` arms are printed because they are free, and are read only
+  against §M3(d).
+- The final deadline pick does not move on this either way. Selection is on
+  cross-fitted CV, per every prior prereg on file.
+
+§M5 THE SEND, decided before the CV number exists
+-------------------------------------------------
+Nine of ten slots are already spent today. The one remaining slot follows the
+decision rule already registered in the w27 slot-2 journal entry §12 and is NOT
+re-decided here: send `w27_ad188stdcorr` if `w21a_ad187corr.py` finishes in time,
+otherwise `w27_ad188std.csv` (w26d P(beat 0.97118) = 0.367). Under no
+circumstances the 19 zero-probability queue files.

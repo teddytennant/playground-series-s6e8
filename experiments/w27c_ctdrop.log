@@ -1,0 +1,3 @@
+[ctdrop] 184 cols -> 112 kept, 72 CT_ dropped
+[ctdrop] rounds=400 seed=42 jobs=6
+[ctdrop] fold 0: 0.965038  (3228s)

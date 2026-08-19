@@ -3,3 +3,4 @@
 [tunect] GATE  median valid/train CT_ ratio = 1.3325 (expected 1.3333)
 [tunect] control          1.0 0.964779  4/3 0.965104  d_c  +324.99e-6  CTshare   1.0%  (602s)
 [tunect] leaves31_d6      1.0 0.964129  4/3 0.964426  d_c  +297.11e-6  CTshare   0.8%  (1362s)
+[tunect] leaves127_d9     1.0 0.965424  4/3 0.965825  d_c  +401.11e-6  CTshare   1.3%  (1979s)

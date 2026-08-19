@@ -1,0 +1,19 @@
+[ctclass] 184 cols | 72 TE_/CT_ pairs | arms ['ct1.0000', 'ct1.3333', 'te', 'both']
+[ctclass] classes ['xgb', 'cat'] fold=0 rounds=400 seed=42 threads=4
+[ctclass] LGB control (w27g, quoted): ct1.0 0.964779  4/3 0.965104  d_c +324.99e-6  CTshare 1.0%
+[ctclass] GATE  median valid/train CT_ ratio = 1.3325 (expected 1.3333)
+[ctclass] xgb: fitted in 57s, scoring 4 arms
+[ctclass]  xgb  1.0 0.965439  4/3 0.965730  d_c  +291.06e-6   te   -19.26e-6  both  +270.45e-6   CTshare  1.23%  (57s fit, 59s total)
+[ctclass] cat: fitted in 37s, scoring 4 arms
+[ctclass]  cat  1.0 0.965123  4/3 0.965648  d_c  +525.49e-6   te   -82.68e-6  both  +466.29e-6   CTshare  3.21%  (37s fit, 97s total)
+
+[ctclass] === SS M3 SCORECARD, fold 0, 400 rounds ===
+   class      ct1.0      ct4/3          d_c       d_both   CTshare     M3c pred
+    lgb*   0.964779   0.965104     +324.99e-6           --     1.00%           --
+     xgb   0.965439   0.965730     +291.06e-6     +270.45e-6     1.23%     +386.17e-6
+     cat   0.965123   0.965648     +525.49e-6     +466.29e-6     3.21%     +798.42e-6
+  * lgb quoted from w27g fold 0, not refitted. CTshare is NOT commensurable across libraries -- see SS M3(c).
+
+[ctclass] SS M3(a) PRIMARY: d_c > 0 in every tested class -> HELD  (2 classes)
+[ctclass] SS M3(d): both >= ct4/3 -> xgb no, cat no
+[ctclass] wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w27j_ctclass.json  (97s)

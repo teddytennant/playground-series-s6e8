@@ -13300,3 +13300,200 @@ send `w27_ad188stdcorr` if it exists (it will be the highest-CV file ever built 
 in family h3+corr); otherwise send `w27_ad188std.csv` (P = 0.367). Under no circumstances
 spend it on the 19 zero-probability files — for the first time since 08-13 there is something
 better, and the next nine send days now have five real candidates rather than nothing.
+
+---
+
+# 2026-08-19 — w27 slot 3 of 10 — ANGLE: CatBoost
+
+**Board: 2,329 teams. Us: 0.97118, rank 17, top 0.73%, three places outside the gold cut of 14.
+Leader 0.97134. Nine of ten slots already spent today; one held for the corrected 188 file.**
+
+The angle was CatBoost. The honest answer to it is **null**, and getting to that answer surfaced
+**two real bugs in this workspace's own instruments** — one of which has been inflating the
+number we use to decide what is worth building. Those are the headline, not the CatBoost result.
+
+## 1. ⚠⚠ `w26d_queueprice.py` had TWO bugs. The CV bar we quote is 14e-6 TOO EASY.
+
+Both are the same omission — the w25f model's `standardised` term — in two places.
+
+**Bug 1.** `STD_FILES` was a hard-coded whitelist of seven `w23_*` names, and it was applied to
+the **queue** as well as to the fitted rows. Every file built after w23 by a `--standardize`
+chain therefore scored as *unstandardised*. `standardised` carries **−27.43e-6**, so each of
+those files was handed +27.43e-6 of predicted LB — **3.3 reporting steps** — that it had not
+earned.
+
+That bug wrote a false headline into yesterday's entry (w27 slot 2, §12):
+
+| `w27_ad188std.csv` | pred LB | P(beat 0.97118) |
+|---|---|---|
+| as priced then | 0.97118 | **0.367** |
+| corrected | 0.97115 | **1.6e-4** |
+
+and with it the claim *"the whole old queue priced at 6.3e-4. This one prices at 0.37 — that is
+the difference between draining a queue and having something to send."* **That claim is a bug.**
+Corrected, the five `w27_ad188std*` files price at 3.6e-13 to 1.6e-4, and the best ten sent
+together come to 3.7e-4. **The queue did not change character.** Nothing on disk has a real
+chance of moving the board.
+
+**Bug 2.** The "CV needed for P=0.50" bar omitted the same term, so every bar this script has
+ever printed was the bar for an *unstandardised* file — and everything built here since w23 is
+standardised. Corrected, and now printed both ways:
+
+| family | bar, unstandardised | bar, **standardised** | vs CV leader 0.9701150809 |
+|---|---|---|---|
+| h3 | 0.9701181879 | **0.9701325557** | **+17.5e-6** |
+| ens4 | 0.9701108460 | **0.9701252138** | **+10.1e-6** |
+| rescale | 0.9700983997 | 0.9701127675 | −2.3e-6 |
+
+⚠ **Both numbers this workspace has been quoting are wrong in the easy direction.** "A new file
+needs 0.9701181879" and "the ens4 bar is 4.2e-6 BELOW the current CV leader" are the
+*unstandardised* column. The real bars for the files we actually build are **+17.5e-6** and
+**+10.1e-6 ABOVE** the leader.
+
+Fix: `is_std(stem) = stem in STD_FILES or "std" in stem`, verified to reproduce the whitelist
+**exactly on all 60 rows w25f fitted** before adoption; the script's gate (re-predict the fitted
+rows, require the residual sd back) still passes at 8.41e-6. `STD_FILES` kept explicitly so the
+gate cannot drift.
+
+**Strategic reading.** Nothing on disk, and nothing the CT thread is likely to produce, gets
+within 10e-6 of an even-money shot at **our own** 0.97118 — let alone the board's 0.97134. The
+remaining value in this competition is almost entirely in **selecting correctly on CV**, which
+makes the still-unclicked final selection the highest-value open item by a wide margin.
+
+## 2. An external replication of our own CT result — and it re-prices the rebuild
+
+`adarsh1077/s6e8-my-best-cv-model-scored-worse-on-the-lb`, posted today, 1 vote, and more useful
+than either 50-vote notebook read yesterday. He selected the **worse-LB, better-CV** file, for
+our reasons ("picking the measurement with 12x the sample size").
+
+His §4 ablates a feature family cleanly: **+951 / +1124 / +1120e-6 to three separate base
+models** — and **+3e-6 when added to his 221-member stack. A factor of ~350.** Not through
+redundancy either: the new members correlated 0.974–0.986 against the pool's strongest, well
+below the typical 0.99+.
+
+⚠ **That is our CT result, measured by someone else on a different signal.** Our correction is
++325e-6 solo at 400 rounds and +695/+519/+497e-6 at 2000 rounds on folds 0/1/2 (w26k fold 2
+landed this slot), and it is a **wash at pack level** on two independent instruments. The ratio
+is the same ~150–350x. So **our pack-level null is not an instrument defect** — it is the generic
+behaviour of a saturated stack, now seen twice independently.
+
+Consequence: **the ~33-member lattice REBUILD (yesterday's §9) should be budgeted at
+member-value / ~200, not at member-value.** 33 x (325e-6 / 200) ≈ +54e-6 is an optimistic
+ceiling that also assumes the corrections stack linearly, which nothing suggests. It does not
+touch the member-level result, which is large and mechanistically explained. Different
+currencies; say which one you mean.
+
+## 3. The CatBoost angle: answered, and it is null
+
+`w27l_catprofile.py`, on the exact 188-member pack:
+
+| set | n | median maxcorr | median solo AUC | median decorr rank |
+|---|---|---|---|---|
+| **CatBoost lineage** | **29** | **0.99581** | **0.966463** | **86 / 188** |
+| everything else | 159 | 0.99615 | 0.966360 | — |
+| whole pack | 188 | 0.99601 | 0.966371 | — |
+
+**CatBoost is already 15% of the pack and sits exactly at the pack median on both axes.** The
+angle's premise is measured null here, consistent with w26's standing finding that placement is
+set by *pipeline*, not model class. Do not spend another slot tuning a CatBoost.
+
+What survives is one member, not the class: **`cat_native` is decorrelation rank 15 of 188**
+(maxcorr 0.97907) despite the **lowest** solo AUC of the lineage (0.958941) — while the
+lat-pipeline tree members are the most redundant things we own (`lgbm_fixed_lat` 172nd,
+`xgb_lat` 176th, `xgb_latcat` 181st). `cat_native` is decorrelated because it changed all three
+upstream decisions at once, **not because it is CatBoost**. If a future slot wants more here,
+build more *native*-pipeline members (seeds, `natlat`), not more lat-pipeline CatBoosts.
+
+⚠ **A first version of this reported the opposite**, because `CATLIN` was `startswith("cat_")`
+and caught **6 of the 29** — a biased sample of the oddly-named ones. The 29 are identifiable
+only by eye: `xgb_latcat`, `xgb_latcat_avg3/s17/s23`, `xgb_cat_lattice` are **XGBoost** members
+with categorical *features*. Explicit list is in the script; do not re-derive it with a substring
+rule.
+
+## 4. Three of my own bugs this slot, all the same shape
+
+1. **`w27l` enumerated member directories by hand and missed `data/oof`** — the 74-model public
+   library — so it profiled **114** members and called them 188. Fixed to use
+   `stack.load_members` with `assert len(names) == 188`. Same class as yesterday's
+   `--extra-dirs` gotcha (166 vs 188). **Rule: never write the member dir list out by hand.**
+2. **`w27j` crashed with `ValueError: assignment destination is read-only`** — CatBoost clears
+   the writeable flag on an array it has predicted from, so `apply_arm`'s mutate-and-restore
+   failed *after* the fit had cost its full runtime and before any checkpoint existed. That
+   safety is a property of LightGBM, not of `apply_arm`. Fixed to copy per arm; verified
+   bit-identical to the old path on the smoke test (+116.35 / −70.16 / +38.09e-6).
+3. **`pkill -f` killed my own shell again** — this time because my command line contained the
+   literal filename in a `sed`/`grep`, so the `[c]` bracket trick did not help. **Kill by PID.**
+
+## 5. ⚠⚠ The box was THRASHING, and it looked exactly like slowness
+
+`w27k`'s `blend_lab` (5.7 GB peak) fired while `w21a` was running. Swap hit **100% full**
+(15929/15929 MB), free memory ~1 GB, and `w21a`'s **CPU time advanced 40 seconds in ten minutes
+of wall clock**. `uptime` showed load 25–47, which had been normal all afternoon, so the symptom
+read as "busy" and roughly an hour was lost before anyone ran `free`. Killing the one 5.7 GB job
+restored 10 GB and w21a went from ~7% of a core to a sustained 99%.
+
+Also learned: **this box runs several Claude agent sessions at once** — seen live today were this
+s6e8 session, a *second* s6e8 session, plus biohub and RSNA ones, each with their own training
+jobs.
+
+- Diagnostic order for a stalled job: `free -m` first, then `ps --sort=-rss`, then `vmstat`, and
+  only then CPU/nice.
+- ⚠ **`kill -STOP` does not free memory.** The pause guards (`w27m_yield.sh`, written this slot,
+  SIGSTOP + auto-resume with an EXIT trap and a hard deadline) are right for CPU contention and
+  **wrong** for memory pressure. Under memory pressure, kill the checkpointed jobs — they all
+  resume from `cache/*ckpt/`.
+- `w27k_ctrawctl.sh` now gates on `MemAvailable > 11 GB` as well as on the critical-path PID.
+  "The other job exited" is not the same condition as "there is room to run".
+
+## 6. Pre-registered and running: the CT correction across FUNCTION CLASSES
+
+`experiments/w27_prereg_slot3.txt` §M, written before any number existed. §G5(c) has been asking
+for corrected members in three function classes; because the correction is a **serve-time**
+transform needing no refit, that costs **one fit per class**, not five, and not a member build.
+`w27j_ctclass.py` fits CatBoost and XGBoost once each on `cache/f0_Xa.npy`, then scores four arms
+(`ct1.0`, `ct1.3333`, `te`, `both`) off the *same* fitted model, importing `apply_arm` from
+`w26l_serve` so the arms are byte-identical to the LightGBM runs. Gate reproduces 1.3325.
+Registered: **d_c > 0 in both classes** (primary), magnitude *below* LightGBM's +325e-6.
+
+Also chained: **`w27k` = `187 + lat_ctraw_r400`**, the control yesterday's §9 named as the first
+thing this slot should build — without it the +2.20e-6 of the 188 build is uninterpretable as a
+statement about the correction.
+
+## 7. The corrected 188 build
+
+`w21a_ad187corr.py` on `w27_ad188std_h3` (base CV 0.9701114720). All five arms in, plus
+permutation controls, which are the useful part:
+
+| arm | xfit | se | t | CV | permuted control | real − control |
+|---|---|---|---|---|---|---|
+| glob | +2.288e-6 | 3.977 | +0.58 | 0.9701138953 | — | — |
+| a_only | +3.619e-6 | 3.335 | +1.09 | 0.9701152798 | +1.934e-6 | **+1.685e-6** |
+| **rule** | **+5.171e-6** | 2.723 | +1.90 | **0.9701168751** | +0.303e-6 | **+4.868e-6** |
+| mask | +3.141e-6 | 5.398 | +0.58 | 0.9701148279 | — | — |
+| decile | +3.288e-6 | 4.328 | +0.76 | 0.9701150143 | — | — |
+
+The permutation controls matter: **`a_only`'s +3.62e-6 is only +1.69e-6 above chance, while
+`rule`'s +5.17e-6 is +4.87e-6 above it.** Shipping is the pre-registered 5-arm average
+regardless — the argmax is not shipped, per the reason w16i exists.
+
+## 8. Next run, in order
+
+1. **`tail experiments/w27j_ctclass.log`** — write it up against prereg §M3(a)–(d) whichever way
+   it goes. Per-class checkpoints in `cache/ctclassckpt/`; identical command resumes.
+2. **`tail experiments/w27k_ctrawctl.log`** — the ctraw control. Registered expectation
+   **−2 to +3e-6, modal +0.5e-6**. Nothing is shipped from the arm comparison (R-J2).
+3. **`experiments/w27n_foldcong.py` was written and never finished** — killed for memory. It is
+   the fold-congruence check from adarsh1077 §7: a member trained on a foreign split washes out
+   the shared per-fold-difficulty shape. **We have never verified that all 188 members are on our
+   split**, and the whole CV instrument assumes it. Cheap; run it first if the box is quiet.
+4. **Resume the paused/killed long-horizon jobs**: `w26k_ctscale` (folds 3–4), `w27c_ctdrop`
+   (folds 1–4), `w27g_tunect` (3 of 14 configs done, all three in the registered direction),
+   `w26i_value` (reps 0–2 logged and the CSV written; 3–5 lost to the memory kill). All resume on
+   an identical re-run.
+5. **`w27f_ctfull.py` has STILL never been run** — §J's registered PRIMARY, the clean full-map
+   fix of which the 4/3 rescale is only an approximation.
+6. **The pick is still not clicked.** `WANTED` = {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`},
+   superseded by `w27_ad188stdcorr` if it lands above 0.9701150809. **A human must open the
+   submissions page and tick two files.** §1 above makes this the highest-value item in the
+   workspace: public-LB movement is not reachable from here, and auto-selection by best public
+   score lands on the three most slice-inflated files we own.

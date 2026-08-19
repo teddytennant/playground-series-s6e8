@@ -1,0 +1,67 @@
+188 members loaded via stack.load_members (w27h's exact pack)
+  names containing 'cat': cat, cat_tuned, digit_cat, imp_cat, lat_cat, latwide_cat, pub_cat, pubfe_cat, pubmk_cat, view_bounds_cat, view_rank_cat, view_resid_cat, cat_lat, cat_native, cat_raw, xgb_cat_lattice, xgb_latcat, xgb_latcat_avg3, xgb_latcat_s17, xgb_latcat_s23, bei_exact_value_catboost_fixed4000, bolt_cat_cpu5, bolt_cat_dual_seed81, bolt_cat_dual_view, bolt_cat_nested_te, bolt_cat_pair_evidence, bolt_cat_unique, bolt_foldsafe_te_cat, mkt_cat, ad_catnative, ad_gcatd8, ad_gcatlr02, ad_gcatnote, ad_gcatseed7
+
+=== the CatBoost lineage, and reference members, in the 188-pack ===
+                member   solo AUC   maxcorr                closest   medcorr  decorr rank
+                   cat   0.962280   0.99534        view_bounds_cat   0.97961      77/188
+             cat_tuned   0.961631   0.99424                    cat   0.97888      59/188
+               cat_lat   0.966353   0.99496            latwide_cat   0.97685      72/188
+            cat_native   0.958941   0.97907   bolt_cat_dual_seed81   0.96450      15/188
+               cat_raw   0.963075   0.99424          bolt_cat_cpu5   0.98093      58/188
+             digit_cat   0.966663   0.99710                pub_cat   0.98334     125/188
+               imp_cat   0.966917   0.99629              digit_cat   0.98390     101/188
+               lat_cat   0.967007   0.99590            latwide_cat   0.97953      91/188
+           latwide_cat   0.967180   0.99590                lat_cat   0.97837      92/188
+               pub_cat   0.966239   0.99710              digit_cat   0.98278     124/188
+             pubfe_cat   0.960270   0.99204              cat_tuned   0.97309      48/188
+             pubmk_cat   0.963832   0.99494          bolt_cat_cpu5   0.98172      71/188
+               mkt_cat   0.964770   0.99420              digit_cat   0.98103      56/188
+       view_bounds_cat   0.963078   0.99534                    cat   0.97800      76/188
+         view_rank_cat   0.961428   0.99320        view_bounds_cat   0.97512      53/188
+        view_resid_cat   0.954582   0.98828         view_resid_xgb   0.95975      37/188
+bei_exact_value_catboost_fixed4000   0.967298   0.99661   bei_screen_relations   0.98105     107/188
+         bolt_cat_cpu5   0.963618   0.99494              pubmk_cat   0.98197      70/188
+  bolt_cat_dual_seed81   0.967827   0.99751     bolt_cat_dual_view   0.98119     143/188
+    bolt_cat_dual_view   0.967851   0.99751   bolt_cat_dual_seed81   0.98124     144/188
+    bolt_cat_nested_te   0.967062   0.99581   bolt_foldsafe_te_cat   0.97811      86/188
+bolt_cat_pair_evidence   0.966463   0.99438     bolt_cat_nested_te   0.97464      60/188
+       bolt_cat_unique   0.959295   0.99138          bolt_cat_cpu5   0.97387      47/188
+  bolt_foldsafe_te_cat   0.967737   0.99581     bolt_cat_nested_te   0.97887      87/188
+          ad_catnative   0.968601   0.99665            ad_gcatnote   0.98242     108/188
+             ad_gcatd8   0.967943   0.99842            ad_gcatlr02   0.97726     164/188
+           ad_gcatlr02   0.968275   0.99893           ad_gcatseed7   0.97928     175/188
+           ad_gcatnote   0.968405   0.99665           ad_catnative   0.97972     109/188
+          ad_gcatseed7   0.968093   0.99893            ad_gcatlr02   0.97824     174/188
+  ------------------------------------------------------------------------------------
+        lgbm_fixed_lat   0.967711   0.99893    lgbm_fixed_lat_frac   0.98459     172/188
+               xgb_lat   0.967664   0.99927        xgb_latcat_avg3   0.98393     176/188
+            xgb_latcat   0.967696   0.99960        xgb_latcat_avg3   0.98395     181/188
+        lat_ctfix_r400   0.965775   0.99460         lgbm_fixed_lat   0.98326      62/188
+   bolt_tabr_retrieval   0.937994   0.98798                golem_b   0.94470      33/188
+                fmdeep   0.966656   0.99281                  fmnum   0.97665      50/188
+                mkt_nn   0.940401   0.99423               pubmk_nn   0.94873      57/188
+
+=== the 12 most DECORRELATED members in the pack ===
+                orig_bin  maxcorr 0.91797  solo 0.850261
+               orig_binm  maxcorr 0.91849  solo 0.886379
+          w15d_origrep_r  maxcorr 0.94273  solo 0.921475
+                  logreg  maxcorr 0.94682  solo 0.918800
+             ad_logregte  maxcorr 0.96051  solo 0.958910
+                 golem_c  maxcorr 0.96316  solo 0.934384
+                 golem_g  maxcorr 0.96320  solo 0.942163
+  bolt_lookup_v3_evidence  maxcorr 0.96607  solo 0.965337
+          bolt_lookup_v1  maxcorr 0.97025  solo 0.965473
+         xgb_cat_lattice  maxcorr 0.97267  solo 0.961074
+                 realmlp  maxcorr 0.97349  solo 0.938031
+                  linlat  maxcorr 0.97499  solo 0.961335
+
+=== the CatBoost lineage is 29 of 188 members (15% of the pack) ===
+  NOT counted as CatBoost (categorical FEATURES, other model class): xgb_cat_lattice, xgb_latcat, xgb_latcat_avg3, xgb_latcat_s17, xgb_latcat_s23
+
+=== pack summary ===
+  median maxcorr over all 188 members : 0.99601
+  CatBoost lineage ( 29)  median maxcorr 0.99581   median solo 0.966463   median decorr rank 86
+  everything else  (159)  median maxcorr 0.99615   median solo 0.966360
+  whole pack       (188)  median maxcorr 0.99601   median solo 0.966371
+
+  Read: LOWER maxcorr = more decorrelated = the property w20d and adarsh1077's leave-one-author-out both say actually pays in a saturated stack.

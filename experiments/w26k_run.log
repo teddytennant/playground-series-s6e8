@@ -5,3 +5,4 @@
 [ctscale] rounds=2000 seed=42 jobs=5
 [ctscale] fold 0: resumed from checkpoint
 [ctscale] fold 1: s=1.0000 0.967771  s=1.1000 0.967944  s=1.3333 0.968290  s=1.5000 0.967916  s=2.0000 0.967358   CTgain 3.0%  (286s)
+[ctscale] fold 2: s=1.0000 0.967971  s=1.1000 0.968116  s=1.3333 0.968468  s=1.5000 0.968144  s=2.0000 0.967561   CTgain 3.0%  (5104s)

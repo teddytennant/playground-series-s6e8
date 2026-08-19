@@ -48,8 +48,32 @@ def family(s):
     return "ens4"          # a bare stem is the rank-average of all four transforms
 
 
+# The seven files w25f actually fitted the `standardised` coefficient on. Kept EXPLICIT so the
+# GATE below re-predicts w25f's own rows byte-for-byte and cannot drift.
 STD_FILES = {"w23_ad187stdcorr", "w23_ad187std_h3", "w23_ad187std", "w23_ad187std_logit",
              "w23_ad187std_h3_hybrid", "w23_ad187std_h3_rankraw", "w23_ad187std_h3_rescale"}
+
+
+def is_std(stem):
+    """Was this file's combiner fitted on a unit-sd design matrix (`blend_lab --standardize`)?
+
+    ⚠⚠ BUG FIXED 2026-08-19 (w27 slot 3). This used to be `stem in STD_FILES` — a hard-coded
+    whitelist of seven `w23_*` names — applied to the QUEUE as well as to the fitted rows. Every
+    file built after w23 by a `--standardize` chain therefore scored as UNstandardised, and since
+    `standardised` carries a -27.43e-6 coefficient each one was handed +27.43e-6 of predicted LB
+    it had not earned.
+
+    That is not a rounding error, it is 3.3 reporting steps, and it produced a false headline:
+    the five `w27_ad188std*` files were priced at P(beat 0.97118) = 0.31 to 0.37 and written into
+    the w27 slot-2 journal as "the whole old queue priced at 6.3e-4, this one prices at 0.37 --
+    the difference between draining a queue and having something to send". Corrected, they price
+    at **4.6e-5 to 2.0e-4**, i.e. the queue did NOT change character and there is still nothing
+    on disk with a real chance of moving the board. Anything quoting that 0.37 is quoting a bug.
+
+    The substring rule reproduces the whitelist EXACTLY on all 60 rows w25f fitted (verified in
+    the same slot), so the gate is unaffected and only unseen files change.
+    """
+    return stem in STD_FILES or "std" in stem
 
 # w25f fits on CENTRED CV: cv_e6 = (cv - mu) * 1e6, mu the mean over its own 60 rows. mu is
 # not in the JSON, so it is recomputed here from the same table under the same CV >= 0.97
@@ -76,7 +100,7 @@ def predict(cv, fam, standardised):
 
 # GATE. Re-predict the 60 files the model was fitted on and require its residual sd back.
 _fit["fam"] = _fit.stem.map(family)
-_fit["std"] = _fit.stem.isin(STD_FILES)
+_fit["std"] = _fit.stem.map(is_std)
 _r6 = (_fit.lb.values - np.array([predict(r.cv, r.fam, r.std)
                                   for r in _fit.itertuples()])) * 1e6
 # w25f divides the residual sum of squares by its DOF (n - p), not by n. Using np.std's
@@ -94,7 +118,7 @@ q = pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
 q = q[~q.sent].dropna(subset=["cv"]).copy()
 q["stem"] = q.file.str.replace(".csv", "", regex=False)
 q["fam"] = q.stem.map(family)
-q["std"] = q.stem.isin(STD_FILES)      # the same explicit list w25f fitted on
+q["std"] = q.stem.map(is_std)          # see is_std: a whitelist here was a BUG
 q["pred_lb"] = [predict(r.cv, r.fam, r.std) for r in q.itertuples()]
 
 # P(beat the account best). The file must print STRICTLY above 0.97118, and the LB rounds to
@@ -125,11 +149,22 @@ print(f"\npredicted LB of the best unsent file: {q.pred_lb.iloc[0]:.5f}   "
       f"({(q.pred_lb.iloc[0]-BEST_LB)/STEP:+.1f} reporting steps)")
 
 # What CV would a NEW file need for an even-money shot at the record?
+#
+# ⚠ This used to omit the `standardised` term, so every bar it printed was the bar for an
+# UNSTANDARDISED file — and every build this workspace has made since w23 is standardised. The
+# quoted "ens4 bar is 0.9701108460, 4.2e-6 BELOW the current CV leader" is that omission: the
+# real bar for the standardised ens4 files we actually build is 0.9701252, +10.1e-6 ABOVE the
+# leader. Both are printed now so the assumption can never be dropped again.
 need = (BEST_LB + STEP / 2) * 1e6
-for fam in ("h3", "ens4"):
-    cv_need = (need - C["const"] - C.get(f"fam[{fam}]", 0.0)) / C["cv_e6"] * 1e-6 + MU
-    print(f"CV needed for P(beat)=0.50 in family {fam:5s}: {cv_need:.10f}  "
-          f"({(cv_need - 0.9701150809)*1e6:+.1f}e-6 on the current CV leader)")
+print(f"\nCV needed for an even-money shot at {BEST_LB:.5f}, BY FAMILY AND BY SCALING")
+print(f"  {'family':>6s}  {'unstandardised':>16s}  {'standardised':>16s}   "
+      f"{'vs CV leader (std)':>19s}")
+for fam in ("h3", "ens4", "hybrid", "rankraw", "rescale", "logit"):
+    base = (need - C["const"] - C.get(f"fam[{fam}]", 0.0)) / C["cv_e6"] * 1e-6 + MU
+    std = base - C["standardised"] / C["cv_e6"] * 1e-6
+    print(f"  {fam:>6s}  {base:16.10f}  {std:16.10f}   "
+          f"{(std - 0.9701150809)*1e6:+15.1f}e-6")
+print("  Every file this workspace builds is standardised. Read the RIGHT-HAND column.")
 
 q.to_csv(os.path.join(HERE, "w26d_queueprice.csv"), index=False)
 json.dump(dict(n=len(q), resid_sd=RESID, best_lb=BEST_LB, p_best_single=float(pbest),
