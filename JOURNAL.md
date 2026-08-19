@@ -13268,3 +13268,35 @@ contradicted", nothing more.
    {`w23_ad187stdcorr.csv`, `w21_ad187corr.csv`}. If `w27_ad188stdcorr` lands above
    0.9701150809 it becomes the new CV leader and `WANTED` slot 1 — but that is a decision for
    a slot that can see the number, not a promise made here.
+
+## 12. ⚠ THE SEND QUEUE JUST CHANGED CHARACTER — re-priced this slot
+
+`w23b_sendqueue.py` + `w26d_queueprice.py` re-run after the build. The five unsent
+`w27_ad188std*` files are now the top five of the queue and they are **not** queue-drain:
+
+| file | family | CV | pred LB | P(beat 0.97118) |
+|---|---|---|---|---|
+| `w27_ad188std.csv` | ens4 | 0.9701093456 | 0.97118 | **3.67e-01** |
+| `w27_ad188std_logit.csv` | logit | 0.9700372515 | 0.97118 | **3.45e-01** |
+| `w27_ad188std_rescale.csv` | rescale | 0.9700962686 | 0.97118 | **3.14e-01** |
+| `w27_ad188std_hybrid.csv` | hybrid | 0.9700993121 | 0.97116 | 1.87e-04 |
+| `w27_ad188std_rankraw.csv` | rankraw | 0.9700930487 | 0.97115 | 4.56e-05 |
+| everything else (19 files) | — | ≤ 0.9700343 | ≤ 0.97104 | **0.00e+00** |
+
+    best single file        P(beat account best) = 3.667e-01
+    best TEN sent together  P(at least one)      = 7.155e-01  (independence assumed, an OVERSTATEMENT)
+
+**The whole old queue priced at 6.3e-4. This one prices at 0.37 for a single file.** That is
+the difference between draining a queue and having something to send.
+
+⚠ **And it corrects a framing this workspace has repeated for a week.** "A new file needs
+cross-fitted CV 0.9701181879" is the **family-h3** bar. The **ens4** bar is
+**0.9701108460**, 4.2e-6 BELOW the current CV leader, because the w25f model gives ens4 a
+positive family effect. `w27_ad188std` at 0.9701093456 sits just under it and still prices at
+P = 0.37. Quote the bar with its family attached from now on.
+
+**Decision rule for the last slot of the 08-19 day, written before the correction landed:**
+send `w27_ad188stdcorr` if it exists (it will be the highest-CV file ever built here and sits
+in family h3+corr); otherwise send `w27_ad188std.csv` (P = 0.367). Under no circumstances
+spend it on the 19 zero-probability files — for the first time since 08-13 there is something
+better, and the next nine send days now have five real candidates rather than nothing.

@@ -34,3 +34,12 @@ base w27_ad188std_h3 OOF AUC 0.9701114720   (w16i's base blend159av_h3 0.9700491
     fitted glob fold 1 {'0': np.float64(0.001)}
     fitted glob fold 2 {'0': np.float64(0.001)}
     fitted glob fold 3 {'0': np.float64(0.0015)}
+    fitted glob fold 4 {'0': np.float64(0.001)}
+  arm glob    xfit  +2.288e-6  se 3.977  t +0.58  4/5  CV 0.9701138953
+    fitted a_only fold 0 {'A': np.float64(0.007), 'rest': np.float64(0.001)}
+    fitted a_only fold 1 {'A': np.float64(0.0085), 'rest': np.float64(0.001)}
+    fitted a_only fold 2 {'A': np.float64(0.007), 'rest': np.float64(0.001)}
+    fitted a_only fold 3 {'A': np.float64(0.0055), 'rest': np.float64(0.0015)}
+    fitted a_only fold 4 {'A': np.float64(0.0075), 'rest': np.float64(0.001)}
+  arm a_only  xfit  +3.619e-6  se 3.335  t +1.09  4/5  CV 0.9701152798
+    fitted rule fold 0 {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.0015), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}

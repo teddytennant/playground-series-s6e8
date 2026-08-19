@@ -6725,3 +6725,75 @@ in w15b/w15d. **New and worth adopting: test candidate features against the CURR
 RESIDUAL, not against the raw target.** A feature can look informative marginally and carry
 nothing the ensemble has not already extracted. That is the shape of experiment §2 of w27's
 CT thread should have used from the start.
+
+---
+
+# w27 slot 2 — the 188-member build, and the control that makes it interpretable
+
+## The numbers
+
+Cross-fitted on the frozen folds, float32/C=1.0/`--standardize`, i.e. w23f's chain verbatim
+with one member added (`lat_ctfix_r400`, the lattice LightGBM rebuilt with the CT_ scale skew
+corrected at s=4/3):
+
+| build | 187 | 188 | delta |
+|---|---|---|---|
+| `logit` | 0.970030 | 0.970037 | +7e-6 |
+| `hybrid` | 0.970098 | 0.970099 | +1e-6 |
+| `rankraw` | 0.970092 | 0.970093 | +1e-6 |
+| `rescale` | 0.970094 | 0.970096 | +2e-6 |
+| **`_h3`** | **0.9701092751** | **0.9701114720** | **+2.197e-6** |
+| `_ens4` | 0.9701058972 | 0.9701093456 | +3.448e-6 |
+
+The four single-transform CVs reproduce the stored 187 targets exactly, so the chain is the
+same chain and the deltas are clean.
+
+## ⚠ WHAT +2.20e-6 IS AND IS NOT
+
+It is **the value of adding one more lattice LightGBM to a 187-member pack**, and that is
+already a known quantity: w20d prices a marginal `lgb` member at ~2.34e-6. It is **not** the
+value of the CT correction, because the comparison that would isolate the correction —
+`ctfix` against `ctraw`, the same member from the same cache differing only in the 4/3 — was
+never built at pack level. The instrument that does run both says they are a wash:
+
+| rep | pack (187) | +`ctfix` | +`ctraw` |
+|---|---|---|---|
+| 0 | 0.9701606750 | +3.63e-6 | −0.10e-6 |
+| 1 | 0.970330 | +3.0e-6 | **+5.4e-6** |
+
+Rep 1 gives the **skewed** member the larger marginal value. Two reps, opposite signs.
+
+**So: build `187 + lat_ctraw_r400` before quoting +2.20e-6 as anything about the correction.**
+One `blend_lab` call:
+
+```bash
+.venv/bin/python experiments/blend_lab.py --reps 0 --build --submit-name w27_ad188raw \
+  --standardize --extra-dirs ext_members3,ext_members4,ext_members6 \
+  --drop golem_a,golem_f,lgbm_tuned_lat,lgbm_tuned_lat_frac,lat_ctfix_r400,lat_ctfixte_r400
+.venv/bin/python experiments/make_h3.py w27_ad188raw
+```
+
+`w27_ad188std_h3 − w27_ad188raw_h3` is then the pack-level price of the CT fix, paired on
+everything.
+
+## The gotcha that cost the first launch of this build
+
+**`blend_lab`'s default `extra_dirs` is `(ext_members, ext_members2)` ONLY.** The 187-member
+pack is `ext_members{,2,3,4}`; `w26i_value.py` hard-codes that four-directory list and
+`blend_lab` does not. `--extra-dirs ext_members6` alone loads **166** members and builds a
+completely different object under whatever `--submit-name` you gave it. **Always read the
+`N members` line `load_all` prints before letting a build run.** The correct invocation for
+anything meant to be the 187-pack plus something is:
+
+    --extra-dirs ext_members3,ext_members4,<the new dir>
+
+And a shell one: **never `pkill -f` a pattern that also matches your own shell's command
+line** — `pkill -f "blend_lab.py --reps 0"` killed the wrapper that was about to relaunch it,
+because the relaunch command contained the same string. Put long invocations in a named
+script (`w27h_run.sh`) so the pattern you match is the script, not the arguments.
+
+## The board denominator, for anything that computes a percentile
+
+**2,323 teams as of 2026-08-19**, not the brief's 1,326. Medal cuts: gold top 14, silver top
+116, bronze top 232. Our 0.97118 is rank 17 — three places outside gold. See `LEADERBOARD.md`
+and `experiments/w27i_s6risk.py` for the private-shuffle backtest that prices this.
