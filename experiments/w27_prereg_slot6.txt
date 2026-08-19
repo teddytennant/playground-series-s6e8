@@ -374,3 +374,116 @@ below its +7e-6 mode.
           per-column), and blend_lab's --standardize divides by a per-column std, so
           column-subsetting after transform+scale is EXACTLY equal to transforming and
           scaling the 188-column load. Asserted in code by R-M11e rather than assumed.
+
+================================================================================
+§M12 — ENSEMBLE DISAGREEMENT AS A SEGMENTATION AND AS A SIGNAL
+Registered 2026-08-19 ~18:55 UTC, w27 slot 8, BEFORE experiments/w27y_disagree.py
+was written and before any number for d_sd existed.
+================================================================================
+
+WHY THIS AND NOT THE ANGLE'S DEFAULT. The slot ANGLE is "segment the OOF errors and
+look for structure a feature could capture". Every segmentation of the DATA is closed
+here with matched controls: errormap's daily_band / n_missing / other_screen_band
+(RESEARCH "Where the AUC actually lives"), the generator rule cells A-G, per-cell
+isotonic (real -118e-6 vs ctrl -124e-6), cell-local LightGBM (real-ctrl negative 9/9),
+resid_boost2 in both modes (negative 8/8), per-cell member weights (w16c §5), and the
+Bayes-ceiling-from-our-own-OOF route (a tautology, RESEARCH §"first consequence").
+Row identity is arithmetically impossible (0 duplicate groups in 691,369 rows).
+
+The one axis never used here is the ENSEMBLE'S OWN INTERNAL DISPERSION. Grepping
+JOURNAL+RESEARCH for disagree/member sd/member variance/trimmed/median-of-members
+returns only CV-vs-LB disagreement, never dispersion across the member field. It is
+a genuinely new segmentation and it is NOT a data feature, so the closed data-segment
+nulls do not cover it.
+
+MECHANISM UNDER TEST. The combiner is s = w.m over 190 transformed member columns.
+Any function in the linear span of {m_j} is already used at its fitted weight -- that
+is exactly w16c §5's lesson about pack members. d_sd = sd_j(m_ij) is a SECOND MOMENT
+and is not in that span, so the "already used" objection does not apply to it. This
+is the one property that distinguishes M12 from the closed per-cell member-weight null
+and it is the reason the instrument is worth a capped slot.
+
+ARMS (all on the frozen SKF5 seed-42 folds, rankraw view, 190-member pack, the same
+XDIRS as w27w so the member set is byte-identical to the shipped one):
+  A. Within-decile-of-d_sd AUC of oof_w27_ad190stdcorr, plus pooled-within vs global,
+     plus the crosstab against daily_band. Descriptive; no gate.
+  B. Conditional AUC z of d_sd given the stack score (thin slices of s), against a
+     size-matched permuted control. Asks whether d_sd carries label information the
+     stack does not already use.
+  C. Global AUC of robust aggregates (median rank, 10% trimmed mean) vs the stack,
+     and the same within the top and bottom d_sd deciles.
+
+REGISTERED PREDICTIONS, written before any number:
+  M12(a) Arm A is DESCRIPTIVE and I expect within-decile AUC to FALL monotonically
+     with d_sd -- high disagreement should mark hard rows. Mode: top decile within-AUC
+     0.93-0.96 against bottom decile 0.99+. If it does NOT fall, d_sd is measuring
+     member heterogeneity rather than row difficulty and arms B/C are uninterpretable.
+  M12(b) THE GATE. Arm B's real-minus-control conditional-AUC z is in (-1, +2) i.e.
+     consistent with ZERO. Prior is strongly null: eight matched-control instruments
+     on this stack have returned null, and 76.7% of AUC mass is cross-segment so a
+     within-slice signal has little to convert into.
+  M12(c) Arm C: the robust aggregates lose to the fitted stack GLOBALLY by 300e-6 or
+     more (an unweighted aggregate throws away the fitted weights). The informative
+     cell is the ratio between the top and bottom d_sd deciles, not the level.
+  R-M12d, FIXED BEFORE ANY NUMBER: this is a READOUT, not a build. No file is written
+     and no submission is proposed from M12 in this slot regardless of what arm B
+     returns. If arm B clears +2 z net of control, the correct next step is to price
+     it with resid_boost2 --mode feature carrying d_sd as an added column against its
+     existing permuted control -- NOT to ship anything. §4.1 of slot 7 binds: the
+     realised value of anything new at the shipped mix is ~+0.94e-6/member, so no M12
+     result can justify a rebuild on its own.
+  R-M12e, GATE: the pooled OOF AUC of oof_w27_ad190stdcorr recomputed inside this
+     script must reproduce 0.9701181344 to 7 dp, and the member count must assert to
+     190 (R-M11g). If either fails every number in M12 is void.
+
+================================================================================
+§M13 — IS THE CV ESTIMATOR REPRODUCIBLE TO 1e-6 AT ALL?
+Registered 2026-08-19 ~19:35 UTC, w27 slot 8, BEFORE experiments/w27z_repro.py was
+written. Triggered by R-M11e failing on 4 of 5 cells in w27w.
+================================================================================
+
+WHAT HAPPENED. w27w's seed-42 cells miss the shipped on-disk numbers by +0.5 to
++3.9e-6, with the 188 arm missing much harder than the 190 arm:
+  arm 188 hybrid  0.9701032 vs 0.9700993121   +3.9e-6   MISMATCH
+  arm 188 rankraw 0.9700943 vs 0.9700930487   +1.25e-6  MISMATCH
+  arm 188 rescale 0.9700996 vs 0.9700962686   +3.3e-6   MISMATCH
+  arm 190 hybrid  0.9701035 vs 0.970103       +0.5e-6   OK
+  arm 190 rankraw 0.9700962 vs 0.970095       +1.2e-6   MISMATCH
+
+TWO HYPOTHESES, and they have opposite consequences.
+  H1 R-M11f IS FALSE. Subsetting the standardised 190 matrix to 188 columns is not
+     equal to loading 188 members. Consequence: w27w's 188 arm is not the shipped
+     188 build and M11(b) is void as registered. Reading agent/stack.py, every
+     transform is strictly per-column (logit elementwise; rankraw loops j; hybrid's
+     `bad` is a .any(0) column reduction and its rescale `s` is a per-column .std(0);
+     rescale's lo/hi are per-column) and both build logs print "repaired 54", so H1
+     predicts NO mechanism -- but the 188-vs-190 asymmetry above is what H1 looks like.
+  H2 THE ESTIMATOR IS NOT REPRODUCIBLE TO 1e-6. blend_lab's own docstring says
+     float32 lbfgs stops on gradient noise at tol=1e-4 (the 187-member cell stops at
+     319 iterations where float64 runs 686). Different BLAS thread counts change the
+     summation order, hence the gradient at ~1e-7, hence the early-stop iteration.
+     Consequence: far worse than H1. The whole CV ladder here is ranked on differences
+     of 1.3e-6 (0.9701181344 vs 0.9701168076 for the top two files) and under H2 those
+     differences are below the estimator's own reproducibility floor.
+
+THE DECISIVE TEST, run in ONE process so threading is held fixed: fit the seed-42
+188-arm hybrid cell twice -- once from the 190 matrix subset to 188 columns, once from
+a genuine 188-member load -- and compare. Same process, same threads, same folds.
+  A == B  => R-M11f holds, H1 dead. Any gap to the shipped number is environmental (H2).
+  A != B  => H1, and M11(b) is void.
+Also reported: per-fold lbfgs n_iter_, and the same cell in float64.
+
+REGISTERED PREDICTIONS, before any number:
+  M13(a) A == B to <0.2e-6. I expect R-M11f to hold; the code reads strictly per-column
+     and both logs repaired the same 54 members.
+  M13(b) THE ONE THAT MATTERS. Both A and B miss the shipped 0.9700993121 by roughly
+     the same amount, +2 to +5e-6, i.e. the miss is environmental. If instead A and B
+     both LAND on 0.9700993121 then neither hypothesis holds and the mismatch is in
+     w27w's own fold construction (StratifiedKFold rebuilt rather than get_folds).
+  M13(c) float32 lbfgs hits max_iter or stops early with n_iter_ well under the float64
+     count; float64 moves the cell by >1e-6.
+  R-M13d, FIXED BEFORE ANY NUMBER: if H2 is confirmed, the correct response is NOT to
+     rebuild anything. It is to record a REPRODUCIBILITY FLOOR in RESEARCH and require
+     every future CV contrast under that floor to be reported as paired-on-identical-
+     partitions (which cancels it, as w27w's 4/4 shows) rather than as a difference of
+     two absolute levels. No submission and no change to WANTED comes out of M13.

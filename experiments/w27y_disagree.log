@@ -1,0 +1,47 @@
+R-M12e gate 1: pooled OOF AUC of w27_ad190stdcorr = 0.9701181344  registered 0.9701181344  d=+1.63e-11
+             -> PASS
+190 members, dtype float32
+  transform rankraw     39s
+R-M12e gate 2: 190 members, expected 190 -> PASS
+loaded (691369, 190) in 47s
+d_sd  mean 0.2073  sd 0.1055  range 0.0433..1.0203
+
+=== ARM A: within-decile-of-d_sd AUC of the stack ===
+dec        n        d_sd range    base  within AUC |med rank|
+  0    69137   0.0433.. 0.0968  0.8186    0.883349     0.2688
+  1    69137   0.0968.. 0.1165  0.7216    0.907152     0.3960
+  2    69137   0.1165.. 0.1356  0.6590    0.924762     0.4909
+  3    69137   0.1356.. 0.1565  0.6147    0.939170     0.5778
+  4    69137   0.1565.. 0.1807  0.5936    0.955128     0.6642
+  5    69136   0.1807.. 0.2104  0.6019    0.971841     0.7552
+  6    69137   0.2104.. 0.2470  0.6539    0.987082     0.8728
+  7    69137   0.2470.. 0.2919  0.7377    0.995278     1.0245
+  8    69137   0.2919.. 0.3535  0.8184    0.998650     1.2171
+  9    69137   0.3535.. 1.0203  0.8748    0.999633     1.5581
+pooled within d_sd decile 0.954846  vs global 0.970118 (-0.015272)  pair share 0.096
+
+  crosstab: mean d_sd and within-cell AUC by daily_band x d_sd tercile
+ band        n               T0               T1               T2
+   -1    95854   46594  0.88461   29057  0.95351   20203  0.99636
+    0     5738     128    --       2522  0.83188    3088  0.94426
+    1    55006   10970  0.80909   27978  0.91441   16058  0.97143
+    2   121650   52975  0.86778   51578  0.92717   17097  0.95827
+    3   128538   71264  0.89538   43189  0.93785   14085  0.97496
+    4   145496   45033  0.87916   52622  0.96307   47841  0.99514
+    5   120659    3487  0.75321   23126  0.92617   94046  0.98811
+    6    18428       3    --        389  0.85052   18036  0.99540
+
+=== ARM B (GATE): conditional AUC of d_sd within thin slices of the stack ===
+  d_sd                 cond AUC 0.498251   null 0.499898 +/- 0.001556   z   -1.06
+  d_iqr                cond AUC 0.496980   null 0.500226 +/- 0.001465   z   -2.22
+  d_p8                 cond AUC 0.498185   null 0.499768 +/- 0.001287   z   -1.23
+  CTRL uniform         cond AUC 0.502345   null 0.499934 +/- 0.001357   z   +1.78
+  CTRL d_sd shuffled   cond AUC 0.503202   null 0.500121 +/- 0.001506   z   +2.05
+
+=== ARM C: unfitted robust aggregates vs the fitted stack ===
+  stack (fitted)   global 0.970118   botdec 0.883349   topdec 0.999633
+  mean rank        global 0.967780   botdec 0.881005   topdec 0.999535
+  median rank      global 0.968649   botdec 0.881326   topdec 0.999584
+  10-90 trimmed    global 0.968267   botdec 0.881189   topdec 0.999560
+
+done in 278s

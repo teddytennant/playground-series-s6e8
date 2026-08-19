@@ -1,0 +1,28 @@
+threads: OMP=4 OPENBLAS=4
+188 members, dtype float32
+  hybrid: repaired 54 of 188 members
+  transform hybrid       8s
+190 members, dtype float32
+  hybrid: repaired 54 of 190 members
+  transform hybrid       8s
+loaded both in 24s
+
+R-M11f, checked on the MATRIX not the score: ZA == ZB -> True   max|ZA-ZB| = 0.000e+00
+
+== the seed-42 188-arm hybrid cell, one process, threads held fixed ==
+  shipped (w27h, on disk)            0.9700993121
+  B: genuine 188 load, float32       0.9701025160   n_iter [76, 77, 84, 64, 86]
+  A: 190 load subset to 188, f32     0.9701025160   n_iter [76, 77, 84, 64, 86]
+  A again (in-process determinism)   0.9701025160   n_iter [76, 77, 84, 64, 86]
+  A in float64                       0.9701022386   n_iter [82, 87, 87, 77, 60]
+  190 arm, float32                   0.9701036993   n_iter [76, 73, 73, 79, 84]
+
+== M13 readout ==
+  M13(a) A - B                      +0.000e-6   (R-M11f HOLDS)
+  A - A (same process, twice)       +0.000e-6
+  M13(b) B - shipped                +3.204e-6
+         A - shipped                +3.204e-6
+  M13(c) float64 - float32 (A)      -0.277e-6
+  paired 190 - 188 (this process)   +1.183e-6  [w27w seed42 hybrid said +0.31e-6]
+
+done in 175s

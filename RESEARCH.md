@@ -7635,3 +7635,125 @@ directory cannot grow. Then assert the member count in the build (`--expect`).
 This is the known warning *"a member landing mid-run silently changes any bench that globs
 `oof/`"* arriving somewhere new: the hazard is **any** `--extra-dir` a live job also writes
 to, not only `oof/`.
+
+---
+
+# ⚠⚠ THE REPRODUCIBILITY FLOOR ON CROSS-FITTED CV (w27 slot 8, 2026-08-19)
+
+**An absolute cross-fitted CV level is not reproducible across processes to better than
+~4e-6. The cause is BLAS thread count. Read this before ranking any two files by their
+stored CV.**
+
+Measured on one cell — the seed-42, 188-member, `hybrid`, standardised, C=1 cross-fit —
+with the matrix proven bit-identical and the folds identical. Only `OMP_NUM_THREADS` /
+`OPENBLAS_NUM_THREADS` / `MKL_NUM_THREADS` vary (`experiments/w27z2_threads.py`):
+
+| threads | cross-fitted CV | vs the shipped w27h build 0.9700993121 | lbfgs n_iter |
+|---|---|---|---|
+| 1 | 0.9701008546 | +1.54e-6 | [76, 82, 78, 64, 77] |
+| 2 | 0.9701045331 | +5.22e-6 | [74, 74, 73, 88, 81] |
+| 4 | 0.9701025160 | +3.20e-6 | [76, 77, 84, 64, 86] |
+| 8 | 0.9701034079 | +4.10e-6 | [76, 79, 84, 65, 70] |
+
+Spread from thread count alone **3.68e-6**; full range against the shipped build **5.22e-6**.
+Not monotone in thread count, so it cannot be corrected for — it is noise, not a bias.
+Mechanism: threading changes the gradient's summation order, lbfgs takes a different path
+and stops at `tol=1e-4` somewhere else.
+
+**Everything else was excluded first (`experiments/w27z_repro.py`):**
+- **Not the matrix.** `ZA == ZB` bit-exact, `max|ZA-ZB| = 0.000e+00`.
+- **Not in-process nondeterminism.** The same cell refitted twice in one process is
+  identical to the last digit, `n_iter` included.
+- **Not float32.** float64 moves the cell by **−0.277e-6**, n_iter [82,87,87,77,60] vs
+  [76,77,84,64,86]. ⚠ This **refutes the warning in `blend_lab.load_all`'s docstring** that
+  float32 lbfgs "terminates early on gradient noise" (319 iterations vs float64's 686). That
+  was measured on the **unstandardised** design and **does not transfer** to the standardised
+  builds shipped since w23, where both precisions converge in 60–90 iterations.
+
+## The rules that follow
+
+1. **Quote a cross-fitted CV level to 6 dp at most.** The 10-dp figures on file are precise,
+   not accurate.
+2. **Never resolve two separately-built files by a stored-CV difference under ~5e-6.**
+3. **To separate two files, refit both in ONE process on identical partitions and report the
+   PAIRED delta.** Paired same-process contrasts cancel the floor *exactly* (A − B = 0.000e-6
+   above), which is why the rest of this file survives: every 50/50 instrument, `subset_lab`,
+   w26i's per-member value, w21a's correction arms and slot 7's `h3 > ens4` (+4.50e-6, paired
+   sd 0.92e-6, 6/6) are paired and are **unaffected**.
+4. **Pin `OMP_NUM_THREADS` in build scripts** so the floor stops growing.
+
+⚠ **Concretely, for the deadline:** `w27_ad190stdcorr` (0.9701181344) and `w27_ad188stdcorr`
+(0.9701168076) differ by **+1.33e-6** and are **NOT separable by those numbers**. The 190 pack
+is preferred on §M11(b)'s paired evidence instead — **+2.13e-6, se 0.64e-6, positive in 4/4
+independent stacker partitions**. Cite that, never the stored levels.
+
+# Column-subsetting a standardised member matrix is EXACT — reuse it
+
+The 188-member design is the 190 matrix with two columns deleted, **bit-for-bit**
+(`max|ZA-ZB| = 0.000e+00`, verified on the matrix before any fit). Every transform in
+`agent/stack.py` is strictly per-column: `logit` elementwise; `rankraw` loops `j`; `hybrid`'s
+`bad` mask is a `.any(0)` column reduction and its restoring scale a per-column `.std(0)`;
+`rescale`'s `lo`/`hi` are per-column — and `--standardize` divides by a per-column std.
+
+**So one load serves every column-subset arm.** This halves the cost of any paired
+member-value experiment and is what made a 4-partition replication affordable at all.
+
+# ⚠ `blend_lab.HONEST_DROP` is NOT the shipped drop list
+
+`HONEST_DROP` holds **four** names (`golem_a`, `golem_f`, `lgbm_tuned_lat`,
+`lgbm_tuned_lat_frac`). Every shipped 188/190 build drops **six**, adding `lat_ctraw_r400`
+and `lat_ctfixte_r400`. Importing the constant to reproduce a shipped pack silently loads
+**192** members — no error, no warning, a plausible-looking run.
+
+> **R-M13e (standing): assert the member COUNT before any fit runs, and never take the drop
+> list from a module constant.** `HONEST_DROP` is a historical artefact, not the shipped set.
+
+Third instance of the same hazard class, after slot 6's live `--extra-dir` and slot 7's
+silent 165-vs-190 path resolution (R-M11g). The count assert costs 30s and has now caught
+three distinct silent member-set errors.
+
+# CLOSED (2026-08-19): ensemble disagreement — the LAST untried segmentation axis
+
+`experiments/w27y_disagree.py`, pre-registered as §M12. `d_sd = sd_j(m_ij)` over the 190
+members on the `rankraw` view (all columns N(0,1) by construction, so no scale confound).
+It is a **second moment**, outside the linear span the combiner fits, so w16c §5's
+"already used at its fitted weight" objection does not apply to it.
+
+**1. ⚠ Ensemble disagreement here is NOT an uncertainty proxy — it is a proxy for |score|.**
+Within-decile stack AUC **rises monotonically** with `d_sd`, 10 of 10 deciles: 0.883349 at
+the least-disagreement decile to 0.999633 at the most. `|median rank|` rises with it
+(0.269 → 1.558). Rows every member puts at an extreme sit at ±3 on the rank-gauss scale and
+spread; rows in the dense middle are packed near 0. **The hard rows are the LOW-disagreement
+ones** — the opposite of the standard intuition. Pooled within-decile 0.954846 vs global
+0.970118, pair share 0.096.
+
+**2. It carries nothing about the label the stack does not already use.** Conditional AUC in
+200 thin slices of the stack score, against a within-slice label-permutation null (50 perms):
+`d_sd` z **−1.06**, `d_iqr` **−2.22**, `d_p8` **−1.23**; controls `uniform` **+1.78** and
+`d_sd` shuffled **+2.05**. ⚠ **The controls define the harness's noise floor: |z| < ~2.5 is
+zero here.** Ninth matched-control null on this stack.
+
+**3. Unfitted aggregates, for reference.** Global AUC: stack (fitted) 0.970118, **median rank
+0.968649**, 10–90 trimmed 0.968267, mean rank 0.967780. **The median beats the mean by
++869e-6** — the best zero-parameter aggregate if insurance is ever wanted. The fitted weights
+pay off where the problem is hard: the stack's margin over the median is **+2023e-6 in the
+bottom `d_sd` decile against +49e-6 in the top**, a 41× ratio.
+
+**With this the error-analysis line is closed on all seven axes**: data segments (errormap),
+generator rule cells, per-cell isotonic, cell-local LightGBM, `resid_boost2` in both modes,
+per-cell member weights, the ceiling-from-our-own-OOF tautology, row identity — and now
+ensemble dispersion. **Do not spend another slot on OOF error analysis in any framing.**
+
+# CLOSED (2026-08-19): the stacker's C, in both arms
+
+`experiments/w27s_lamstd.log` / `w27s_lamstd2.log`, paired 50/50, 3 splits.
+
+- **Standardised design (what ships): FLAT from C=0.03 to C=30.** Every cell within ±6e-6 of
+  C=1 and **4 of 6 sign-flip**. Nothing to tune; C=1.0 stays because the curve is flat.
+- **Unstandardised control: the optimum is real** — C=0.001 is **+12e-6 over C=1, consistent
+  3/3**, falling to −588e-6 by C=1e-6. Column sd there runs **1.813 to 27.575, median 4.764**,
+  so the ridge shrinks members in inverse proportion to the transform's arbitrary scale and a
+  tuned C partly undoes it.
+
+**Standardising at C=1 is equivalent to not standardising and tuning C.** The shipped
+configuration sits on the flat part. Closed.

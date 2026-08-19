@@ -14818,3 +14818,299 @@ the STOPPED pid's state directly, not the watchdog's log.**
 
 `w27_ad190stdcorr.csv` written. Next run sends row 1 (`w27_ad188stdcorr`, still never sent and
 still the thing that unblocks the final-selection dialog) and then row 2.
+
+---
+
+# 2026-08-19 — w27 slot 8 of 10 — ANGLE: error analysis / segment the OOF errors
+
+**AT CAP. 10/10 submissions already landed on the 08-19 UTC day** (verified against the
+API, not the prompt: `submissions -v | grep -c 2026-08-19` = 10). No submission this slot,
+and none was possible. The UTC day rolls at 00:00, ~5h20m after this slot opened.
+
+## 0. Headline — the slot found a reproducibility floor of ~4e-6 under every absolute CV number in this workspace
+
+It started as a routine gate check and it ends by changing how every contrast here has to
+be read. Skip to §3 if you read nothing else. In one line: **the cross-fitted CV level of
+a file is not reproducible across processes to better than ~4e-6, purely from BLAS thread
+count, and the deadline pick currently rests on a 1.33e-6 difference between two stored
+levels.** Paired same-process contrasts are unaffected and remain sound.
+
+## 1. §M11 landed — the gate FAILED, the finding SURVIVED, and the failure was the useful part
+
+`experiments/w27w_partition.log`, all four partitions {42,101,13,7} complete.
+
+**M11(b), THE GATE: PASS, and stronger than registered.**
+
+| seed | hybrid | rankraw | rescale | **h3** |
+|---|---|---|---|---|
+| 42 | +0.31 | +1.91 | +2.13 | **+1.43** |
+| 101 | +3.28 | +0.06 | +6.36 | **+2.37** |
+| 13 | +5.13 | +2.91 | +2.72 | **+3.82** |
+| 7 | +3.26 | +0.06 | +1.05 | **+0.90** |
+
+h3 delta mean **+2.13e-6**, sd 1.28e-6, se 0.64e-6, **positive in 4/4**. The registration
+asked for ≥3/4. So the 190-member pack beats the 188 on the deadline mix, and it does so on
+a paired contrast replicated over four independent stacker partitions — not on one
+cross-fit. **R-M10b applies as written; R-M11d does not fire.**
+
+**M11(c): HIT.** Off-seed mean minus seed 42 runs **+10.5 to +15.8e-6** across all eight
+arm×transform cells, registered at +5…+20e-6. §2 of slot 7's mechanism — seed 42 is the
+one partition where the stacker's validation fold is exactly one member fold, so every
+other partition reads high — replicates on a 190-member set having been measured on 159.
+**Never average the stack over fold seeds** stands, now on two member sets.
+
+**R-M11e: FAILED on 4 of 5 cells.** The seed-42 cells miss the shipped on-disk numbers:
+
+```
+arm 188 hybrid   got 0.9701032  want 0.9700993121   +3.9e-6   MISMATCH
+arm 188 rankraw  got 0.9700943  want 0.9700930487   +1.25e-6  MISMATCH
+arm 188 rescale  got 0.9700996  want 0.9700962686   +3.3e-6   MISMATCH
+arm 190 hybrid   got 0.9701035  want 0.970103       +0.5e-6   OK
+arm 190 rankraw  got 0.9700962  want 0.970095       +1.2e-6   MISMATCH
+```
+
+As registered that voids the run. **It does not, and §3 is why** — but the honest sequence
+matters: the gate fired, the run was treated as void, and the void was only lifted after a
+separate experiment proved the specific failure mode the gate was written to catch is not
+what happened. That is the gate working, not the gate being wrong.
+
+## 2. First, the gate's own hypothesis had to die — R-M11f is TRUE, proven on the matrix
+
+The registered worry was that the 188 arm, built by deleting two columns from the
+standardised 190 matrix, is not the same object as a genuine 188-member load. If so,
+M11(b)'s contrast is not the shipped one.
+
+`experiments/w27z_repro.py` builds both in **one process**, threads held fixed, and
+compares them **before any fit runs**:
+
+```
+R-M11f, checked on the MATRIX not the score: ZA == ZB -> True   max|ZA-ZB| = 0.000e+00
+```
+
+Bit-exact. And the fits agree to the last digit, iteration counts included:
+
+```
+shipped (w27h, on disk)            0.9700993121
+B: genuine 188 load, float32       0.9701025160   n_iter [76, 77, 84, 64, 86]
+A: 190 load subset to 188, f32     0.9701025160   n_iter [76, 77, 84, 64, 86]
+A again (in-process determinism)   0.9701025160   n_iter [76, 77, 84, 64, 86]
+```
+
+**M13(a) HIT: A − B = exactly 0.** R-M11f holds. The reason is now checkable rather than
+argued: every transform in `agent/stack.py` is strictly per-column — `logit` elementwise,
+`rankraw` loops `j`, `hybrid`'s `bad` is a `.any(0)` column reduction and its restoring
+scale a per-column `.std(0)`, `rescale`'s `lo/hi` are per-column — and `--standardize`
+divides by a per-column std. Both build logs independently print `repaired 54`, so the two
+extra members do not even enter the `bad` mask. **Column-subsetting after transform and
+scaling is exact. Reuse it; it halves the cost of any paired member experiment.**
+
+So M11(b)'s two arms *are* the shipped pair, and the +2.13e-6 stands.
+
+## 3. ⚠⚠ THE FINDING: absolute cross-fitted CV has a ~4e-6 reproducibility floor, and it is BLAS thread count
+
+If the matrix is bit-identical and the in-process fit is bit-identical, where does the
++3.204e-6 gap to the shipped number come from? Three candidates, and the first two die:
+
+- **Not float32.** `A in float64  0.9701022386` — **−0.277e-6** from float32, n_iter
+  [82,87,87,77,60] against [76,77,84,64,86]. ⚠ **M13(c) is REFUTED and the refutation
+  matters**: `blend_lab.load_all`'s docstring warns that float32 lbfgs "terminates early
+  on gradient noise", citing 319 iterations against float64's 686. **At 188 standardised
+  columns that blowup does not happen** — both precisions converge in 60–90 iterations and
+  land 0.28e-6 apart. The docstring's warning is real for the *unstandardised* design it
+  was measured on and does not transfer to the standardised builds shipped since w23.
+- **Not in-process nondeterminism.** The same cell refitted twice in one process is
+  bit-identical, n_iter included.
+- **It is the thread count.** `experiments/w27z2_threads.py` — same code, same matrix, same
+  frozen folds, only `OMP/OPENBLAS/MKL_NUM_THREADS` varies:
+
+| threads | cross-fitted CV | vs the shipped 0.9700993121 | n_iter |
+|---|---|---|---|
+| 1 | 0.9701008546 | **+1.54e-6** | [76, 82, 78, 64, 77] |
+| 2 | 0.9701045331 | **+5.22e-6** | [74, 74, 73, 88, 81] |
+| 4 | 0.9701025160 | **+3.20e-6** | [76, 77, 84, 64, 86] |
+| 8 | 0.9701034079 | **+4.10e-6** | [76, 79, 84, 65, 70] |
+
+**Spread from thread count alone: 3.68e-6. Full range against the shipped build: 5.22e-6.**
+Threading changes the summation order in the gradient, lbfgs takes a different path, and it
+stops at `tol=1e-4` somewhere else. Not monotone in thread count, so it cannot be corrected
+for — it is noise, not a bias.
+
+**What this invalidates.** Ranking files by their **stored absolute CV** when those files
+were built in **separate runs**. That is exactly how the send queue and the deadline
+shortlist have been ordered:
+
+| file | stored CV | |
+|---|---|---|
+| `w27_ad190stdcorr` | 0.9701181344 | the "new CV leader" |
+| `w27_ad188stdcorr` | 0.9701168076 | |
+| **difference** | **+1.33e-6** | **inside a ±4e-6 floor** |
+
+⚠ **The 190-vs-188 ordering is NOT separable by those two numbers.** Slot 7 called
+`w27_ad190stdcorr` "the highest CV ever built here" on a +1.33e-6 margin; that claim is
+below the estimator's noise and should not be repeated in that form.
+
+**What this does NOT invalidate — and this is most of the workspace.** Every contrast
+measured *paired, in one process, on identical partitions* cancels the effect exactly:
+w27z's A − B is 0.000e-6 to the last digit. So:
+
+- **M11(b) is untouched** and is now the *only* sound reason to prefer the 190 pack: mean
+  +2.13e-6, se 0.64e-6, 4/4 partitions, all in-process. The conclusion is unchanged; its
+  justification has moved from an unsound basis to a sound one.
+- Slot 7's `h3 > ens4` at +4.50e-6, paired sd 0.92e-6, 6/6 partitions — **paired, survives.**
+- Slot 7's paired-contrast error-bar table — **survives**, and the floor explains why the
+  table's "<1e-6 to clear" rule only ever worked for same-matrix contrasts.
+- w26i's per-member value, w21a's correction arms, `subset_lab`, every 50/50 instrument —
+  **all paired, all survive.**
+
+**The standing rule, now in RESEARCH:** *quote a cross-fitted CV level to 6 dp at most, and
+never resolve two separately-built files by a difference under ~5e-6. If two files need
+separating, refit both in one process on identical partitions and report the paired delta.*
+
+Cheap mitigation for anything built from here: **pin `OMP_NUM_THREADS` in the build scripts.**
+It does not make old and new numbers comparable, but it stops the floor growing.
+
+## 4. §M12 — the slot's ANGLE, honoured with a stated deviation, and it closes the last open segmentation axis
+
+The angle asks to segment the best model's OOF errors for structure a feature could capture.
+**Every segmentation of the DATA is already closed here with matched controls** — errormap's
+`daily_band`/`n_missing`/`other_screen_band`, the generator rule cells A–G, per-cell isotonic
+(real −118e-6 vs control −124e-6), cell-local LightGBM (real−ctrl negative 9/9),
+`resid_boost2` in both modes (negative 8/8), per-cell member weights (w16c §5) — the
+ceiling-from-our-own-OOF route is a proven tautology, and row identity is arithmetically
+impossible (0 duplicate groups in 691,369 rows). Re-running any of that would have been the
+waste the brief warns about.
+
+Grepping JOURNAL+RESEARCH for `disagree|member sd|member variance|trimmed|median-of-members`
+returns only CV-vs-LB disagreement. **The ensemble's own internal dispersion has never been
+used here.** Registered as §M12 before `experiments/w27y_disagree.py` was written. It is not
+covered by the closed nulls because `d_sd = sd_j(m_ij)` is a **second moment** and is outside
+the linear span `{m_j}` the combiner already fits — which is precisely the "already used at
+its fitted weight" objection that killed w16c §5. Measured on the `rankraw` view, where all
+190 columns have identical N(0,1) marginals by construction so `d_sd` is pure ranking
+disagreement with no scale confound.
+
+Both R-M12e gates pass: pooled OOF AUC of `w27_ad190stdcorr` reproduces **0.9701181344 to
+1.6e-11**, member count 190.
+
+**M12(a) — REFUTED, and the refutation is the useful part.** I registered that within-decile
+AUC would FALL with disagreement. It **rises monotonically, 10 of 10 deciles**:
+
+| d_sd decile | n | base | within AUC | mean abs median rank |
+|---|---|---|---|---|
+| 0 (least disagreement) | 69,137 | 0.8186 | **0.883349** | 0.269 |
+| 4 | 69,137 | 0.5936 | 0.955128 | 0.664 |
+| 9 (most disagreement) | 69,137 | 0.8748 | **0.999633** | 1.558 |
+
+`|median rank|` rises monotonically alongside it. **On a rank-gauss member field, ensemble
+disagreement is a proxy for |distance from the middle of the ranking|, i.e. for the stack's
+own confidence — not for uncertainty.** Rows every member puts at the extreme sit at ±3 and
+spread; rows in the dense middle are packed near 0. So the standard "disagreement = hard
+row" intuition is **inverted here**: the hard rows are the *low*-disagreement ones.
+⚠ Anyone reaching for ensemble variance as an uncertainty proxy on rank-normalised members
+is measuring |score|. Pooled within-decile 0.954846 vs global 0.970118, pair share 0.096 —
+90.4% of the AUC mass is cross-decile, same shape as every other segmentation here.
+
+**M12(b), THE GATE — HIT, null confirmed.** Conditional AUC of the dispersion statistics
+within 200 thin slices of the stack score, against a within-slice label-permutation null,
+50 permutations:
+
+| vector | cond AUC | null | z |
+|---|---|---|---|
+| `d_sd` | 0.498251 | 0.499898 ± 0.001556 | **−1.06** |
+| `d_iqr` | 0.496980 | 0.500226 ± 0.001465 | **−2.22** |
+| `d_p8` | 0.498185 | 0.499768 ± 0.001287 | **−1.23** |
+| CTRL uniform | 0.502345 | 0.499934 ± 0.001357 | +1.78 |
+| CTRL `d_sd` shuffled | 0.503202 | 0.500121 ± 0.001506 | +2.05 |
+
+Registered (−1, +2); every real arm is z ≤ 0 while both controls came in *positive*.
+⚠ **Read the controls as the harness's noise floor: |z| < ~2.5 is zero here**, which is why
+`d_iqr`'s −2.22 is not a finding either. **Ensemble disagreement carries nothing about the
+label the stack does not already use.** Ninth matched-control null on this stack.
+
+**M12(c) — HIT, with a bonus.** Registered: unfitted aggregates lose globally by ≥300e-6.
+
+| aggregate | global | bottom d_sd decile | top decile |
+|---|---|---|---|
+| stack (fitted) | 0.970118 | 0.883349 | 0.999633 |
+| median rank | 0.968649 (−1469e-6) | 0.881326 | 0.999584 |
+| 10–90 trimmed | 0.968267 (−1851e-6) | 0.881189 | 0.999560 |
+| mean rank | 0.967780 (−2338e-6) | 0.881005 | 0.999535 |
+
+Among unfitted aggregates the **median beats the mean by +869e-6** — worth knowing if a
+zero-parameter insurance file is ever wanted. And the fitted weights earn their keep exactly
+where the problem is hard: the stack's margin over the median is **+2023e-6 in the bottom
+d_sd decile against +49e-6 in the top**, a 41× ratio.
+
+**R-M12d held: readout only, nothing built, nothing proposed.** §M12 closes the last
+untried segmentation axis. **The error-analysis line as a whole is now closed** — data
+segments, generator cells, residual boosting, per-cell weights, the ceiling, row identity,
+and now ensemble dispersion. Do not spend another slot on it; cite this entry.
+
+## 5. §M9 closed — the stacker-C question is answered in both arms
+
+`experiments/w27s_lamstd.log` (arm 2), `w27s_lamstd2.log` (arm 3). Paired 50/50, 3 splits.
+
+**Arm 3, standardised design, C from 0.03 to 30 — FLAT.** Every cell within ±6e-6 of C=1
+and **4 of 6 SIGN FLIP** (C=30 −2e-6, C=10 −6e-6, C=3 +2e-6, C=0.3 −3e-6, C=0.1 +5e-6,
+C=0.03 −2e-6). **There is nothing to tune. C=1.0 stays, and it stays because the curve is
+flat, not because it won.**
+
+**Arm 2, unstandardised, is the control that explains why.** There the optimum is real:
+C=0.001 is **+12e-6 over C=1, consistent 3/3**, and it falls away hard below that (C=1e-6
+is −588e-6). Column sd on that design runs **1.813 to 27.575, median 4.764** — so on the
+unstandardised matrix the ridge shrinks members in inverse proportion to whatever scale the
+transform happened to give them, and a tuned C partly undoes it. **Standardising with C=1 and
+leaving C alone is equivalent to not standardising and tuning C.** Every build since w23 is
+standardised, so the shipped configuration is on the flat part of the curve. Closed.
+
+## 6. ⚠ `blend_lab.HONEST_DROP` is NOT the shipped drop list — a silent +2 members
+
+`w27y`'s first launch loaded **192 members** where the shipped pack is 190. `HONEST_DROP`
+holds four names (`golem_a, golem_f, lgbm_tuned_lat, lgbm_tuned_lat_frac`); every shipped
+188/190 build drops **six**, adding `lat_ctraw_r400, lat_encdrop_r400`'s siblings
+`lat_ctraw_r400` and `lat_ctfixte_r400`. Importing `HONEST_DROP` to reproduce a shipped pack
+silently gets two extra members, no error and a plausible-looking run.
+
+**This is R-M11g's hazard through a third door** — after slot 6's live `--extra-dir` and slot
+7's silent 165-vs-190 path resolution. The count assert caught it in 30s, before the
+transforms were paid for. Generalised:
+
+> **R-M13e (standing): assert the member COUNT before any fit, and never take the drop list
+> from a module constant. `HONEST_DROP` is a historical artefact, not the shipped set.**
+
+## 7. Final-selection status — re-read live this slot, unchanged and still human-blocked
+
+`check_selection.py` runs clean. **NOTHING IS SELECTED.** Auto-pick tiers have moved since
+the w16-era numbers still quoted in its own warning text:
+
+- auto-slot 1: public **0.97118**, 1-way — `w21_ad187corr_ens4`
+- auto-slot 2: public **0.97117**, 2-way — `w21_ad187corr`, `w22_ad187corr_rankraw`
+
+All three are ens4-side files chosen by the public slice. The CV pick is h3-side and
+**neither CV-preferred file has been submitted at all**. Auto-selection here is the Rogii
+failure run by Kaggle on our behalf. No agent on this box can click it — no browser, no
+display. It has now survived six slots unmade.
+
+## 8. Next run, in order
+
+1. **SEND `submissions/w27_ad188stdcorr.csv` FIRST.** Four slots old as an instruction and
+   still never sent. The final-selection dialog lists submitted entries only, so nothing can
+   be ticked until it lands. Then `w27_ad190stdcorr.csv`.
+2. **Then §7 of the slot-7 entry's queue, rows 3–10.** All ten validated in `w27x_validate.log`.
+   Send all ten; the brief's economics make an unused slot pure waste.
+3. ⚠ **Re-word the deadline shortlist per §3.** `w27_ad190stdcorr` is NOT separable from
+   `w27_ad188stdcorr` by their stored CVs (+1.33e-6, floor ~4e-6). It is preferred on
+   **M11(b)'s paired 4/4, +2.13e-6 ± 0.64** — cite that, not the stored levels.
+4. **Pin `OMP_NUM_THREADS` in every build script** so the floor stops growing.
+5. Do **NOT** re-open: error analysis / OOF segmentation in any framing (§4 — now closed on
+   all seven axes); the stacker C (§5); averaging the stack over fold seeds (§1, M11(c) is
+   the second member set to confirm it); the original dataset; the 25e-5 gap to first.
+6. ⚠ Never quote the ship bar **0.9701181879** — stale, unstandardised. The standardised bar
+   is **0.9701325557**, and the live `w26i_value` prereg note still has the wrong one.
+
+**Files added:** `experiments/w27y_disagree.py` + `.log`, `experiments/w27z_repro.py` + `.log`,
+`experiments/w27z2_threads.py` + `.log`.
+**Modified:** `experiments/w27_prereg_slot6.txt` (+§M12, +§M13, both before their code),
+`RESEARCH.md`.
+
+**No submission — at cap, 10/10 for the 08-19 UTC day.**

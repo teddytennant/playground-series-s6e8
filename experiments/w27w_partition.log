@@ -1,0 +1,70 @@
+=== w27t finished, starting the M11 partition replication ===
+190 members, dtype float32
+  hybrid: repaired 54 of 190 members
+  transform hybrid      21s
+  transform rankraw     58s
+  transform rescale     23s
+190 members, 188-arm keeps 188, loaded in 110s
+  seed  42 arm 190 hybrid   0.9701035 (77s)
+  seed  42 arm 190 rankraw  0.9700962 (83s)
+  seed  42 arm 190 rescale  0.9701018 (48s)
+  seed  42 arm 190 h3       0.9701147
+  seed  42 arm 188 hybrid   0.9701032 (69s)
+  seed  42 arm 188 rankraw  0.9700943 (94s)
+  seed  42 arm 188 rescale  0.9700996 (45s)
+  seed  42 arm 188 h3       0.9701132
+  seed 101 arm 190 hybrid   0.9701237 (26s)
+  seed 101 arm 190 rankraw  0.9701111 (28s)
+  seed 101 arm 190 rescale  0.9701180 (29s)
+  seed 101 arm 190 h3       0.9701309
+  seed 101 arm 188 hybrid   0.9701204 (30s)
+  seed 101 arm 188 rankraw  0.9701110 (34s)
+  seed 101 arm 188 rescale  0.9701116 (32s)
+  seed 101 arm 188 h3       0.9701286
+  seed  13 arm 190 hybrid   0.9701206 (27s)
+  seed  13 arm 190 rankraw  0.9701138 (37s)
+  seed  13 arm 190 rescale  0.9701136 (31s)
+  seed  13 arm 190 h3       0.9701298
+  seed  13 arm 188 hybrid   0.9701155 (29s)
+  seed  13 arm 188 rankraw  0.9701109 (31s)
+  seed  13 arm 188 rescale  0.9701109 (31s)
+  seed  13 arm 188 h3       0.9701259
+  seed   7 arm 190 hybrid   0.9701136 (28s)
+  seed   7 arm 190 rankraw  0.9701065 (30s)
+  seed   7 arm 190 rescale  0.9701089 (29s)
+  seed   7 arm 190 h3       0.9701228
+  seed   7 arm 188 hybrid   0.9701103 (25s)
+  seed   7 arm 188 rankraw  0.9701065 (32s)
+  seed   7 arm 188 rescale  0.9701079 (27s)
+  seed   7 arm 188 h3       0.9701219
+
+== R-M11e gate: seed-42 cells vs the shipped on-disk numbers ==
+  arm 188 hybrid   got 0.9701032  want 0.9700993121  *** MISMATCH ***
+  arm 188 rankraw  got 0.9700943  want 0.9700930487  *** MISMATCH ***
+  arm 188 rescale  got 0.9700996  want 0.9700962686  *** MISMATCH ***
+  arm 190 hybrid   got 0.9701035  want 0.970103  OK
+  arm 190 rankraw  got 0.9700962  want 0.970095  *** MISMATCH ***
+  *** GATE FAILS on [(188, 'hybrid'), (188, 'rankraw'), (188, 'rescale'), (190, 'rankraw')]: every number below is VOID ***
+
+== M11(b) THE GATE: paired 190 - 188 delta on identical partitions (e-6) ==
+   seed     hybrid    rankraw    rescale         h3
+     42      +0.31      +1.91      +2.13      +1.43
+    101      +3.28      +0.06      +6.36      +2.37
+     13      +5.13      +2.91      +2.72      +3.82
+      7      +3.26      +0.06      +1.05      +0.90
+
+  h3 delta: mean +2.13e-6  sd 1.28e-6  se 0.64e-6  positive in 4/4
+  M11(b) requires positive in >=3/4: PASS -- R-M10b applies as written
+
+== M11(c) off-seed mean minus seed 42 (w14c's mechanism, new member set) ==
+  arm 188 hybrid     +12.23e-6
+  arm 188 rankraw    +15.15e-6
+  arm 188 rescale    +10.50e-6
+  arm 188 h3         +12.24e-6
+  arm 190 hybrid     +15.82e-6
+  arm 190 rankraw    +14.25e-6
+  arm 190 rescale    +11.74e-6
+  arm 190 h3         +13.17e-6
+
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w27w_partition.json
+=== w27w done ===
