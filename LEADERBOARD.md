@@ -1227,3 +1227,28 @@ Unchanged at 0.97118 since 08-17 — the ten sends on 08-19 were all queue-drain
 at P < 1e-3 and none moved it, exactly as predicted. **We are 17th of 2,323; gold is top 14.**
 The 0.97118 tier is six teams deep, so one reporting step is worth roughly six places here.
 Leader has been static at 0.97134 since 08-18 06:52 while ranks 2-16 filled in beneath it.
+
+## 2026-08-19 20:35 UTC (w29, slot 10)
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97134 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| 4 | Don Mani | 0.97125 |
+| 5 | cstdy | 0.97125 |
+| 6–8 | Utkarsh, Keanan, Szymon Kłapiński | 0.97124 |
+| 9 | Mikhail Naumov | 0.97123 |
+| 10–11 | Changye Li, Leo | 0.97122 |
+| 12–13 | william950615, Charles Backman | 0.97121 |
+| 14–15 | thisray, Mahog | 0.97120 |
+| 16 | delai50 | 0.97119 |
+| **17** | **Teddy Tennant** | **0.97118** |
+| 17= | Mursal Gorchuyev, Malhar Ujawane | 0.97118 |
+
+Us at **0.97118, 17th**, 16 teams above and a 3-way tie at our score. The field moved again
+in the ~75 minutes since slot 9's read: **Optimistix 0.97126 at 19:32** is new, and 0.97124
+is now a three-way tie where it was thinner. Gold is top 14 — we are three places out, and
+the gap to first is **16e-6**, which the CV→LB model says needs a CV of 0.9701307114 against
+the 0.9701183 best on disk. Slot 10 spent the day proving that the cheap way to find that
+12.6e-6 does not exist (see JOURNAL w29 §2).
