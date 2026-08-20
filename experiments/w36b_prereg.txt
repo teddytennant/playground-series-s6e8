@@ -60,3 +60,52 @@ That threshold is fixed here, before the build.
 
 The correction step (w21a) SHIPS THE PRE-REGISTERED 5-ARM, not the argmax over arms. Same rule
 as w34; scheme-selection optimism there was +2.54e-6 and the argmax beat the 5-arm by 0.2e-6.
+
+
+ADDENDUM, written 2026-08-20 16:50 UTC — the rule fired, and it CONFLICTS with the house rule
+==============================================================================================
+The rule above fired ARM 199: gate 4.402e-05 (inside [3.6e-5, 4.6e-5]), `both` positive in
+4 of 5 reps. The build is running as w36_ad199std.
+
+⚠⚠ THE INSTRUMENT'S OWN VERDICT DISAGREES, AND THE INSTRUMENT IS RIGHT.
+
+  ravi_xgb1c   +9.37e-6/member  t +3.30  [SIGN FLIPS]   -> NULL
+  ravi_lgbm1c  +8.87e-6/member  t +3.28  [SIGN FLIPS]   -> NULL
+  both         +5.19e-6/member  t +3.04  [SIGN FLIPS]   -> DISBELIEVE (mean > 10e-6, §E5)
+
+Rep 3 came in at -1e-6 for all three arms while reps 0/1/2/4 were +6 to +16e-6. w26i's standing
+criterion, stated in its own docstring and inherited from w20d's `nn` group, is that a delta
+whose SIGN FLIPS across reps is a null WHATEVER ITS MEAN. That is 5/5, not 4/5.
+
+**My rule (b) was drafted at 4/5 and is therefore WEAKER THAN THE HOUSE RULE.** That is a
+drafting error in the pre-registration above, not a finding.
+
+WHAT IS BEING DONE ABOUT IT, and why not the obvious thing
+----------------------------------------------------------
+The obvious thing is to kill the 199 build and restart it at 197. **That is refused.** The rule
+was fixed before the number existed (git 2d1eff1), the number arrived, the rule fired. Changing
+the pack now because the result is not the one I would have preferred is post-hoc pack
+selection — the exact failure the pre-registration file exists to prevent, arriving through the
+back door of "but the stricter rule was the right one". The cost of letting it stand is small:
+the ravi pair is a NULL, not a measured negative, so it dilutes rather than damages.
+
+Instead the conflict is converted into a measurement. ARM 197 (ram pair only, no ravi) is
+queued as `w36g_run.sh` behind the ram paired instrument. The 199-vs-197 difference IS the
+ravi pair's value on the shipping instrument, which is a better answer than either rule.
+
+SELECTION RULE FOR THE TWO ARMS — registered NOW, before either number exists
+-----------------------------------------------------------------------------
+  * ARM 199 (`w36_ad199stdcorr`) is the PRIMARY candidate: it is what the pre-registered rule
+    selected. WANTED moves to it iff its corrected CV clears **0.9701288** (the current leader
+    0.9701247949 plus the ~4e-6 rebuild reproducibility floor).
+  * ARM 197 (`w36_ad197stdcorr`) is a CONTROL, not a candidate. If 197 lands ABOVE 199, that is
+    evidence the ravi pair is negative on the shipping instrument and is REPORTED AS SUCH.
+    WANTED moves to 197 only if 197 clears 0.9701288 **and** 199 does not.
+  * If neither clears 0.9701288, WANTED stays on `w34_ad195stdcorr` and the whole four-member
+    import is written up as a null. That outcome is expected often enough that it is named here.
+  * Both arms ship the PRE-REGISTERED 5-ARM correction, never the argmax over arms (w34 rule).
+
+FOR EVERY FUTURE PRE-REGISTRATION IN THIS WORKSPACE
+---------------------------------------------------
+Sign-stability gates are **all reps, not a majority**. Do not re-derive a weaker threshold;
+quote w26i's criterion verbatim.

@@ -1,0 +1,65 @@
+waiting for w34a_run.sh to exit...
+w34a_run.sh clear at Thu Aug 20 03:55:54 PM UTC 2026
+########## w34c_value  Thu Aug 20 03:55:54 PM UTC 2026 ##########
+189 loaded = 187 pack + 2 new ['ravi_xgb1c', 'ravi_lgbm1c']
+  base165 for the gate: 165 members
+  ravi_xgb1c       solo 0.964201  maxcorr 0.993001 vs bei_xgb_identity_digit_raw12  [ok]
+  ravi_lgbm1c      solo 0.964173  maxcorr 0.992461 vs bei_xgb_identity_digit_raw12  [ok]
+  hybrid: repaired 54 of 189 members
+transform hybrid in 9s
+  rep 0 base165          n_mem 165 AUC 0.970104 (100s)
+  rep 0 gate_cat4        n_mem 169 AUC 0.970147 (94s)
+  rep 0 pack             n_mem 187 AUC 0.970161 (86s)
+  rep 0 ravi_xgb1c       n_mem 188 AUC 0.970170 (78s)
+  rep 0 ravi_lgbm1c      n_mem 188 AUC 0.970170 (79s)
+  rep 0 both             n_mem 189 AUC 0.970175 (91s)
+  rep 1 base165          n_mem 165 AUC 0.970291 (85s)
+  rep 1 gate_cat4        n_mem 169 AUC 0.970333 (91s)
+  rep 1 pack             n_mem 187 AUC 0.970330 (100s)
+  rep 1 ravi_xgb1c       n_mem 188 AUC 0.970340 (86s)
+  rep 1 ravi_lgbm1c      n_mem 188 AUC 0.970341 (98s)
+  rep 1 both             n_mem 189 AUC 0.970336 (104s)
+  rep 2 base165          n_mem 165 AUC 0.970418 (105s)
+  rep 2 gate_cat4        n_mem 169 AUC 0.970457 (86s)
+  rep 2 pack             n_mem 187 AUC 0.970465 (88s)
+  rep 2 ravi_xgb1c       n_mem 188 AUC 0.970478 (85s)
+  rep 2 ravi_lgbm1c      n_mem 188 AUC 0.970477 (89s)
+  rep 2 both             n_mem 189 AUC 0.970480 (84s)
+  rep 3 base165          n_mem 165 AUC 0.969806 (96s)
+  rep 3 gate_cat4        n_mem 169 AUC 0.969859 (97s)
+  rep 3 pack             n_mem 187 AUC 0.969874 (80s)
+  rep 3 ravi_xgb1c       n_mem 188 AUC 0.969873 (84s)
+  rep 3 ravi_lgbm1c      n_mem 188 AUC 0.969873 (69s)
+  rep 3 both             n_mem 189 AUC 0.969873 (78s)
+  rep 4 base165          n_mem 165 AUC 0.969752 (94s)
+  rep 4 gate_cat4        n_mem 169 AUC 0.969796 (108s)
+  rep 4 pack             n_mem 187 AUC 0.969803 (84s)
+  rep 4 ravi_xgb1c       n_mem 188 AUC 0.969819 (105s)
+  rep 4 ravi_lgbm1c      n_mem 188 AUC 0.969817 (84s)
+  rep 4 both             n_mem 189 AUC 0.969820 (95s)
+
+held-out AUC per 50/50 split
+ rep  base165  gate_cat4     pack  ravi_xgb1c  ravi_lgbm1c     both
+   0 0.970104   0.970147 0.970161    0.970170     0.970170 0.970175
+   1 0.970291   0.970333 0.970330    0.970340     0.970341 0.970336
+   2 0.970418   0.970457 0.970465    0.970478     0.970477 0.970480
+   3 0.969806   0.969859 0.969874    0.969873     0.969873 0.969873
+   4 0.969752   0.969796 0.969803    0.969819     0.969817 0.969820
+
+REPRODUCTION GATE (prereg R-E2) -- w20d's cat4 row was +0.000041
+  here +0.000044 +/- 0.000005 over 5 reps  -> PASS
+
+PAIRED vs the pack (same rows with and without the member)
+  ravi_xgb1c       n 1  +0.000009 +/- 0.000006  per member +9.37e-06  t +3.30  [SIGN FLIPS]
+  ravi_lgbm1c      n 1  +0.000009 +/- 0.000006  per member +8.87e-06  t +3.28  [SIGN FLIPS]
+  both             n 2  +0.000010 +/- 0.000008  per member +5.19e-06  t +3.04  [SIGN FLIPS]
+
+PREREG §E3 said: each member 0 to +4e-6 (ctr2) / 0 to +3e-6 (natlat),
+the pair together +1 to +7e-6 on the combiner, modal +2.5e-6.
+Anything above +10e-6 is disbelieved on sight and re-run on fresh reps.
+  ravi_xgb1c       NULL
+  ravi_lgbm1c      NULL
+  both             DISBELIEVE, re-run on fresh reps (§E5)
+
+wrote w34c_value.csv / .json
+########## w34c done  Thu Aug 20 04:41:27 PM UTC 2026 ##########

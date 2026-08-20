@@ -1,0 +1,17 @@
+waiting for w35a requeue to finish...
+w35a clear at Thu Aug 20 03:35:31 AM UTC 2026
+########## w35b_value  Thu Aug 20 03:35:31 AM UTC 2026 ##########
+189 loaded = 187 pack + 2 new ['ravi_xgb1c', 'ravi_lgbm1c']
+  base165 for the gate: 165 members
+  ravi_xgb1c       solo 0.964201  maxcorr 0.993001 vs bei_xgb_identity_digit_raw12  [ok]
+  ravi_lgbm1c      solo 0.964173  maxcorr 0.992461 vs bei_xgb_identity_digit_raw12  [ok]
+  hybrid: repaired 54 of 189 members
+transform hybrid in 9s
+  rep 0 base165          n_mem 165 AUC 0.970104 (102s)
+  rep 0 gate_cat4        n_mem 169 AUC 0.970147 (100s)
+  rep 0 pack             n_mem 187 AUC 0.970161 (98s)
+  rep 0 ravi_xgb1c       n_mem 188 AUC 0.970170 (91s)
+  rep 0 ravi_lgbm1c      n_mem 188 AUC 0.970170 (102s)
+  rep 0 both             n_mem 189 AUC 0.970175 (111s)
+experiments/w35b_run.sh: line 26: 3704550 Killed                     nice -n 15 .venv/bin/python experiments/w26i_value.py --new-dir "$PWD/data/ext_members11" --new-names ravi_xgb1c,ravi_lgbm1c --reps 5 --out w35b_value
+########## w35b done  Thu Aug 20 03:55:54 PM UTC 2026 ##########
