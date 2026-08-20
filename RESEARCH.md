@@ -8131,3 +8131,42 @@ fix is ordering:
 
 `w26g_send.py --go --n 10` should therefore be `--n 2` early and `--n 8` late, unless the day
 is already known to be a pure-drain day.
+
+## ⚠ `grep` OVER `/proc/*/cmdline` GIVES FALSE NEGATIVES — enumerate per-pid with `tr`
+
+RESEARCH already says `ps` is non-functional in this sandbox and to read `/proc/*/cmdline`
+instead. That is right but incomplete: **`grep -l <pat> /proc/[0-9]*/cmdline` returns "no
+match" for processes that are demonstrably running.** On 08-20 it reported 0 live
+`w21a_ad187corr` processes twice in a row while three were running normally and still writing
+to their logs — a wait-loop built on it exited immediately and the run nearly re-launched
+three 2-hour jobs on top of three healthy ones. `cmdline` is NUL-separated, so grep treats it
+as binary, and the behaviour is not reliable here.
+
+The form that works:
+
+```bash
+for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" in
+  *pattern*) echo "LIVE $(basename $d): $c";; esac; done
+```
+
+Also: **`pgrep` is not installed here** (`pgrep: command not found`), like `setsid`, `ps` and
+`free`. Do not build a wait-loop on any of them.
+
+⚠ And do not conclude "the job died" from a silent log — check the process list *with the form
+above* and check the log's mtime. Long arms here print nothing for 10+ minutes at a stretch.
+
+## ✅ `w21a_ad187corr.py` NOW CHECKPOINTS PER (ARM, FOLD) — w30, 2026-08-20
+
+It wrote nothing until it finished, which is the shape that lost `w25d` twice. A full run is
+**45 `ascend()` calls over ~2h** (5 arms × 5 folds + 4 controls × 5 folds), so a kill at 90
+minutes cost all of it. `ascend()` is deterministic in `(y, br, c, assign, itr)`, so caching
+its output is exact, not approximate; everything downstream is seconds of arithmetic and is
+recomputed every run.
+
+- Checkpoint: `experiments/w21a_ckpt_<TAG>.json`, keyed on `W21A_TAG`, written temp +
+  `os.replace` after **every fold**, so a kill during a write cannot leave a truncated file.
+- Resume is automatic and prints `RESUMING from … N cached (arm, fold) weight fits`.
+- ⚠ The permutation controls re-draw `pa = permuted(assigns[name], rng)` on **every** arm
+  before the cache check, so the `rng` stream advances identically on a resumed run and the
+  cached control weights still match their permutation. Do not "optimise" that call inside
+  the cache branch — it would silently decorrelate the controls from their weights.

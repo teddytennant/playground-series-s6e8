@@ -71,6 +71,41 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # the same pack, which is w16q's move one pack later. Defaults reproduce the h3 run exactly.
 BASE = os.environ.get("W21A_BASE", "w20_ad187_h3")   # 187-member h3 mix, CV 0.9701008150
 TAG = os.environ.get("W21A_TAG", "w21_ad187corr")
+
+# ---------------------------------------------------------------------------
+# PER-FOLD CHECKPOINTING (w30, 2026-08-20). This script writes NOTHING until it finishes,
+# which makes it exactly the shape RESEARCH §"BACKGROUND JOBS DO NOT SURVIVE THE END OF A
+# RUN'S SESSION" warns about -- `w25d` was killed that way twice with four completed reps
+# printed to its log and nothing on disk. A full run here is 45 `ascend()` calls over ~2h,
+# so a kill at 90 minutes costs all of it. Nothing has actually been lost to this yet; the
+# checkpoint is here so it cannot be. The expensive object is `ascend()` --
+# one call per (arm, fold), 25 of them plus 20 controls -- and it is deterministic in
+# (y, br, c, assign, itr), so caching it is exact rather than approximate. Anything
+# downstream of the weights is seconds of arithmetic and is recomputed every run.
+# Written temp-then-os.replace so a kill DURING a write cannot leave a truncated file
+# that the resume path then trusts.
+CKPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"w21a_ckpt_{TAG}.json")
+
+
+def _ck_load():
+    try:
+        with open(CKPT) as fh:
+            return json.load(fh)
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def _ck_save(d):
+    tmp = CKPT + ".tmp"
+    with open(tmp, "w") as fh:
+        json.dump(d, fh)
+    os.replace(tmp, CKPT)
+
+
+CK = _ck_load()
+if CK:
+    print(f"RESUMING from {os.path.basename(CKPT)}: "
+          f"{sum(len(v) for v in CK.values())} cached (arm, fold) weight fits", flush=True)
 REF = "blend159av_h3"        # the base w16i corrected
 N_TEST = 296_302
 CTRL_SEED = 20260817
@@ -107,9 +142,15 @@ def main():
     fold_w, per_fold, oofs = {}, {}, {}
     for name in names:
         fold_w[name] = []
-        for itr, _ in folds:
+        cached = CK.setdefault(name, [])
+        for fi, (itr, _) in enumerate(folds):
+            if fi < len(cached):
+                fold_w[name].append({k: float(v) for k, v in cached[fi].items()})
+                continue
             fold_w[name].append(ascend(y, br, c, assigns[name], itr))
-            print(f"    fitted {name} fold {len(fold_w[name])-1} "
+            cached.append({str(k): float(v) for k, v in fold_w[name][-1].items()})
+            _ck_save(CK)
+            print(f"    fitted {name} fold {fi} "
                   f"{ {k: round(v,4) for k, v in fold_w[name][-1].items()} }", flush=True)
         z = br.copy()
         d = []
@@ -131,8 +172,14 @@ def main():
             continue
         pa = permuted(assigns[name], rng)
         d = []
-        for itr, iva in folds:
-            w = ascend(y, br, c, pa, itr)
+        ccached = CK.setdefault(f"__ctrl_{name}", [])
+        for fi, (itr, iva) in enumerate(folds):
+            if fi < len(ccached):
+                w = {k: float(v) for k, v in ccached[fi].items()}
+            else:
+                w = ascend(y, br, c, pa, itr)
+                ccached.append({str(k): float(v) for k, v in w.items()})
+                _ck_save(CK)
             d.append(fast_auc(y[iva], apply_w(br, c, pa, w, iva)) - fast_auc(y[iva], br[iva]))
         ctrl[name] = np.array(d)
         print(f"  CTRL permuted {name:<7} xfit {ctrl[name].mean()*1e6:+7.3f}e-6  "
