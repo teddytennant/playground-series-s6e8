@@ -16724,3 +16724,70 @@ unlogged w35 slot:** `w35b_run.sh`, `w35b_value.*`, `w35c_vet.py/.csv/.json`.
 build since the rule picks the name at run time), `RESEARCH.md`, `LEADERBOARD.md`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**
+
+---
+
+# 2026-08-20 — w36 ADDENDUM, written after the ARM 199 build landed (17:06 UTC)
+
+**⚠⚠ NEW CV LEADER: `w36_ad199stdcorr`, CV 0.9701400060. That is +15.21e-6 over
+`w34_ad195stdcorr` — the largest single-slot CV gain on record in this workspace, 2.3× the
+om_ftt promotion and 3.8× the ~4e-6 rebuild reproducibility floor.**
+
+`experiments/w36b_run.sh` is `w34a_run.sh` VERBATIM with `ext_members11,ext_members12` added to
+`--extra-dirs`, so `submissions/w34_ad195std*.csv` on disk is a **matched control** and the
+delta is attributable to the four added members as a group.
+
+| object | w34 (195) | **w36 (199)** | Δ |
+|---|---|---|---|
+| stack_logit | 0.970044 | 0.970057 | +13e-6 |
+| stack_hybrid | 0.970111 | 0.970123 | +12e-6 |
+| stack_rankraw | 0.970098 | 0.970111 | +13e-6 |
+| stack_rescale | 0.970106 | 0.970122 | +16e-6 |
+| ens4 | 0.970118 | 0.970132 | +14e-6 |
+| h3 base | 0.9701205753 | **0.9701354276** | **+14.85e-6** |
+| **stdcorr (5-arm, shipping)** | 0.9701247949 | **0.9701400060** | **+15.21e-6** |
+
+**4/4 on the transform stacks, no cancellation** — the same shape that made the om_ftt reading
+trustworthy, and the opposite of w29's cancelling null.
+
+**The correction behaved better than it ever has.** Five arms all positive (glob +1.08, a_only
++3.25, rule +5.15, mask +2.43, decile +2.62 e-6); permuted controls subtract cleanly (rule
++5.52e-6 real-minus-control); and the leave-one-fold-out nested check picked `rule` in **5/5**
+folds for a **scheme-selection optimism of +0.000e-6** — against +2.54e-6 in w34. The
+pre-registered 5-arm was shipped, **not** the argmax (4-arm drop-mask, 0.9701401891, +0.18e-6
+higher). File validated: 296,302 rows, all distinct, range [3.375e-06, 1.000], **not
+rank-identical to anything already on disk**.
+
+## WANTED HAS MOVED, on the rule registered before the number existed
+
+    WANTED = {"w36_ad199stdcorr.csv", "w23_ad187stdcorr.csv"}
+
+The bar in `w36b_prereg.txt` was **0.9701288**; the object landed at 0.9701400060, clearing it by
++11.2e-6. Second pick unchanged — `w23_ad187stdcorr` is the pack hedge on the 187 pack and the
+only one of the two with a real LB print (0.97116).
+
+⚠⚠ **`w36_ad199stdcorr.csv` IS NOT SELECTABLE UNTIL IT IS SENT.** Built at cap.
+`w36e_requeue.sh` re-priced the queue this slot so the 08-21 day's **first** slot sends it.
+**This now displaces `w34_ad195stdcorr` at the head of the queue** — which is itself still
+unsent, so slots 1 and 2 of the 08-21 day should send the new leader and then the old one.
+
+## ⚠ WHAT THIS DOES **NOT** YET SAY, and the control that will say it
+
++14.85e-6 from four members is far above what the paired instrument predicted for any of them.
+The ravi pair measured as a **sign-flipping NULL** (§2 of the main entry) and the ram pair was
+still unmeasured when the build started. So the group delta is real and the **attribution is
+not**. Three readings are pending and all three are already queued:
+
+1. `w36a_value.csv` — the ram pair on the paired 50/50 instrument.
+2. `w36g_build.log` — **ARM 197, the same build with the ravi pair removed.** The 199−197
+   difference is the ravi pair's value on the *shipping* instrument.
+3. Whether +14.85e-6 survives at all: it is 3.7× the rebuild floor, so it is not a rebuild
+   artefact, but no member-addition here has ever been worth this much and the honest posture
+   is that **a large delta is the case for more measurement, not less**.
+
+⚠ **ARM 197 IS A CONTROL, NOT A CANDIDATE.** If it lands above ARM 199 that is evidence the
+ravi pair is negative — it does **not** promote 197. The rule is in `w36b_prereg.txt` and was
+written before either number existed. Do not re-derive it from the numbers.
+
+**Next run reads, in order:** the cap; then `w36b_build.log` (done, above); then
+`w36a_value.csv` and `w36g_build.log` against the prereg bar; then sends the queue head.

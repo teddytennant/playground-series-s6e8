@@ -235,7 +235,16 @@ COMP = "playground-series-s6e8"
 # 08-20 UTC day. It is pinned to the head of the send queue by the `priority` column added
 # in w28, so the 08-21 day's FIRST slot sends it. Do not let it sit unsent — that mistake
 # has already cost this file four slots once.
-WANTED = {"w34_ad195stdcorr.csv", "w23_ad187stdcorr.csv"}
+# w36 slot 6. Moved from w34_ad195stdcorr on the rule pre-registered in
+# experiments/w36b_prereg.txt BEFORE the number existed: WANTED moves iff the new corrected
+# object clears 0.9701288 = the old leader 0.9701247949 plus the ~4e-6 rebuild floor.
+#   w36_ad199stdcorr  CV 0.9701400060   -> clears by +11.2e-6, beats the old leader by +15.21e-6
+# That is 3.8x the rebuild floor and 2.3x the om_ftt promotion that moved this slot last time.
+# The h3 base moved +14.85e-6 against its MATCHED 195-member control on disk, 4/4 across the
+# transform stacks with no cancellation, and scheme-selection optimism came in at +0.000e-6
+# with 5/5 nested stability. The second pick is UNCHANGED: w23_ad187stdcorr is the pack hedge,
+# identical construction on the 187 pack, and the only one of the two with a real LB print.
+WANTED = {"w36_ad199stdcorr.csv", "w23_ad187stdcorr.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"

@@ -1,0 +1,4 @@
+waiting for w34c_value to exit...
+w34c clear at Thu Aug 20 04:41:50 PM UTC 2026
+PREREG RULE -> ARM 199   [199 gate=4.402e-05 ok_a=True both_positive=4/5 ok_b=True]
+=== w36_ad199std  extra-dirs ext_members3,ext_members4,ext_members6,ext_members7pin,ext_members8,ext_members10,ext_members11,ext_members12  Thu Aug 20 04:42:05 PM UTC 2026 ===
