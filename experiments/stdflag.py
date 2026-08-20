@@ -84,6 +84,13 @@ CORR_MAP = {
     "w27_ad188stdcorr": "h3",           # w27 slot 6, same construction on the 188 pack
     "w27_ad190stdcorr": "h3",           # w27 slot 7, same construction on the 190 pack
     "w29_ad194stdcorr": "h3",           # w29 slot 10, same construction on the 194 pack
+    # w30 slot 1: the same 5-arm correction on the NON-h3 bases of the 194 pack. These are the
+    # first corrected files whose base is genuinely not h3, so their family is NOT "h3" -- the
+    # correction is applied to the transform named in the suffix and that is the family it
+    # belongs to. Registered in the same commit as the build, per the standing rule.
+    "w29_ad194stdcorr_ens4": "ens4",
+    "w29_ad194stdcorr_rankraw": "rankraw",
+    "w29_ad194stdcorr_rescale": "rescale",
 }
 
 

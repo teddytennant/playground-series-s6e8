@@ -28,7 +28,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SUB = os.path.join(ROOT, "submissions")
 
 # (corrected file, the h3 base it was built from). From the build scripts, not the names.
-PAIRS = [("w29_ad194stdcorr", "w29_ad194std_h3"),
+# ⚠ THIS LIST IS HAND-MAINTAINED and that is the same "a new file silently escapes the check"
+# shape as w28's CORR_MAP bug. Every corrected build must be added here IN THE SAME COMMIT as
+# the build. w30 added the three non-h3 bases of the 194 pack.
+PAIRS = [("w29_ad194stdcorr_ens4", "w29_ad194std"),
+         ("w29_ad194stdcorr_rankraw", "w29_ad194std_rankraw"),
+         ("w29_ad194stdcorr_rescale", "w29_ad194std_rescale"),
+         ("w29_ad194stdcorr", "w29_ad194std_h3"),
          ("w27_ad190stdcorr", "w27_ad190std_h3"),
          ("w27_ad188stdcorr", "w27_ad188std_h3"),
          ("w23_ad187stdcorr", "w23_ad187std_h3")]
