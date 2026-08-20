@@ -9053,3 +9053,81 @@ w34 §4's rule survived another test — *high solo AUC in a foreign member is e
 **Still-open supply after this sweep: none that passes a gate.** The route is not "closed for
 want of a method" as w32 put it — it is closed for want of supply, and this sweep is the
 evidence, because it covered 3× the surface any earlier one did.
+
+---
+
+# w39 (2026-08-20) — three durable facts from the consolidation slot
+
+## ⚠⚠ `experiments/*.py` WRITE ON IMPORT. `w26d_queueprice` cost the send order twice
+
+`import w26d_queueprice`, done only to reuse `predict()`, executes the module top to bottom
+including its `to_csv`, and rewrote `w26d_queueprice.csv` **without** `send_rank`/`msg`/`why`.
+Those columns ARE the next send day — `w37d_order.py` writes them, `w26g_send.py` reads them.
+Nothing printed. The second loss is worse because it looks correct: **running the script as
+intended** rebuilds the queue from `w23b_sendqueue.csv` alone and drops every row that script
+cannot regenerate (the seven `w37_cal_*` files, registered by `w37c_prereg.py`), collapsing a
+13-file band to 1 row.
+
+Fixed w39, three guards, all verified live: the write is behind `__main__`; the carried columns
+are merged back on `file`; and the write **aborts with exit 3** naming every row it would drop,
+`[RANKED]`-flagged. `--force` overrides — and if you use it, re-run `w37d_order.py` at once.
+
+**General rule for this workspace: assume any `experiments/*.py` writes when imported. Import
+inside `contextlib.redirect_stdout` and diff the md5 of anything it might touch.**
+
+## ⚠⚠ THE FINAL-SELECTION CLICK IS NO LONGER "40× THE RESEARCH PROGRAMME" — repriced w39
+
+The 2026-08-13 entry above is correct for the board state it was written in and **stale now**.
+The write path is still closed (re-verified w39: no `brave`/`brave-browser`/`google-chrome` on
+PATH, no browser profile with a `Cookies` file, no CDP on 9222, no `brave` MCP tools, no `curl`
+on the box; `check_selection.py` control 91 successful / **SELECTED 0 rows**). What changed is
+the *cost* of the default.
+
+`experiments/w39b_autoselect.py`, 20,000 reps, sent files at their observed public score and the
+13 queued files drawn from w30b. Private is the **best of the selected**, so the worse pick costs
+only a slot and the exposure is entirely in the better pick:
+
+| | E[CV of best auto-pick] | worst of 20,000 | P(>10e-6 below) | P(leader selected) |
+|---|---|---|---|---|
+| limit 2, idio sd 5.23e-6 | −0.24e-6 | −15.21e-6 | 0.0003 | 0.966 |
+| limit 2, marg sd 7.76e-6 | −0.58e-6 | −16.88e-6 | 0.0023 | 0.917 |
+| limit 1, idio | −2.19e-6 | −18.07e-6 | 0.094 | 0.840 |
+| limit 1, marg | −3.57e-6 | −18.07e-6 | 0.147 | 0.724 |
+
+**Expected cost of never clicking: 0.24–3.57e-6**, against the −88e-6 the w13 audit priced, and
+under the ~4e-6 rebuild floor in three of four cells. Worth doing if a browser is up; not worth
+another slot of agent time.
+
+Two things that make the number readable, both worth keeping:
+
+- **The idiosyncratic sd is the right one, not the marginal.** The public slice is FIXED, so its
+  common component is absorbed by the fitted intercept and only the file-specific part is live.
+  w17a's paired reading (within-family rms(dLB−dCV) 7.4e-6 vs marginal 7.76e-6) implies ρ 0.545,
+  hence sd_idio = RESID·√(1−ρ) = 5.23e-6.
+- **The limit is NOT in the API.** `POST api.kaggle.com/v1/competitions.CompetitionApiService/
+  GetCompetition` with `{"competition_name": ...}` returns `deadline`, `maxDailySubmissions 10`,
+  `maxTeamSize 3`, `teamCount` — and nothing about selection. 2 is Kaggle's standing Playground
+  default; run limit 1 as the sensitivity rather than assuming it away. ⚠ Use the kaggle tool's
+  own interpreter for these calls — `.venv` has no `requests` and its `urllib` fails SSL
+  verification on this box: `/home/nixos/.local/share/uv/tools/kaggle/bin/python`.
+
+**The live consequence, and the reason this is not just bookkeeping: an UNSENT file cannot be
+selected at all.** Every number above is conditional on the CV leader going out. Until it does,
+the best auto-pick is `w29_ad194stdcorr` at −21.7e-6 with no distribution about it.
+
+## ⚠ THE BRIEF'S "AN EXTRA SUBMISSION CAN NEVER HURT" IS FALSE WHILE NOTHING IS SELECTED
+
+True for public RANK (the board shows best-of-all). False for the FINAL score: the default picks
+on public score, so a file that prints high while sitting far below the CV leader **displaces**
+the CV pick out of the selected set.
+
+The diagnostic is the family gap, not the CV alone. Across the 78 scored files at CV ≥ 0.97
+(`w39c_gapaudit.py`), mean LB−CV by family: **logit +1121e-6**, rescale +1034, ens4 +1027,
+h3 +1025, rankraw +1016, w/wh3 +1001–1003, hybrid +997. Residual sd by family: **hybrid 13.68e-6
+(worst), rankraw 9.39, ens4 7.22, rescale 6.16, h3 4.19, w 1.74, logit 2.70.**
+
+So a `logit` sibling is priced ~96e-6 of LB above an h3 sibling at the same CV. `w36_ad199std_logit`
+sat at −82.9e-6 of CV yet priced 0.97119 — the `blend158_logit` shape exactly. Dequeued w39
+(`w39d_logithazard.py`, `w39e_swap.py`); the worst of 20,000 auto-selections went −82.90e-6 →
+−18.07e-6. **Rule: never queue a `logit`-family file while nothing is selected.** Every other
+family is within ~40e-6 of gap and does not create this hazard.

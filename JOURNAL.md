@@ -17182,3 +17182,203 @@ number; `w36b_prereg.txt` calls it a CONTROL and the rule predates both arms.
 **Modified:** `RESEARCH.md`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day.**
+
+---
+
+# 2026-08-20 — w39, slot 9. AT CAP, NO SUBMISSION (10/10 on the 08-20 UTC day)
+
+`date -u` 18:08 UTC at start. Cap re-confirmed from the timestamps, not the prompt: today's ten
+are all stamped 00:07–00:08 by the end-of-day drain, and `w26g_send.py` prints "0 of 10 slots
+left today". Three jobs still chained in `/proc`: `w36a_value.py` (rep 4 of 5, the last), then
+`w36g_run.sh` (ARM 197 control), then `w38d_run.sh` (ARM 202). All land inside the 08-21 day.
+
+ANGLE was consolidation: re-verify the best pipeline end-to-end, check the CV-to-LB gap, and
+make sure the strongest submission is the one selected. Honoured as written. It produced one
+change to tomorrow's plan, one bug fix that was destroying that plan as I found it, and one
+finding that **retires the workspace's longest-standing "highest-value open item"**.
+
+## 1. ⚠⚠ I DESTROYED THE 08-21 SEND ORDER TWICE, SILENTLY, AND HAVE FIXED THE MECHANISM
+
+`import w26d_queueprice` — done only to reuse its `predict()` — **runs the module top to bottom,
+including its `to_csv`**, and rewrote `w26d_queueprice.csv` without the `send_rank`/`msg`/`why`
+columns. Those three columns ARE the 08-21 day: `w37d_order.py` writes them and `w26g_send.py`
+reads them to decide what goes out in which slot with what message. Nothing printed. Caught only
+because the next line of my own script raised `KeyError: 'send_rank'`.
+
+Restored from `git checkout`, then found the **second** way to lose it, which is worse because it
+looks like the correct thing to do: **re-running `w26d_queueprice.py` as intended** rebuilds the
+queue from `w23b_sendqueue.csv` alone, so the 13-file pre-registered band collapsed to **1 row**
+and all 7 messages vanished — the seven `w37_cal_*` calibration files are registered by
+`w37c_prereg.py` and this script cannot regenerate them. Restored again.
+
+Fixed in `experiments/w26d_queueprice.py`, three guards, all verified live:
+
+1. the write is behind `if __name__ == "__main__"`, so importing for `predict()` is side-effect
+   free (verified: md5 of the CSV unchanged across an import, and the module prints
+   `imported, not run`);
+2. `send_rank`/`msg`/`why` are merged back on `file` before any write;
+3. the write **aborts with exit 3** if it would drop a row the file on disk already has, naming
+   every lost row and flagging the ranked ones. Verified: a bare re-run now refuses, lists the
+   seven `w37_cal_*` files as `[RANKED]`, and leaves the CSV untouched. `--force` overrides,
+   and the message says to re-run `w37d_order.py` immediately after.
+
+**Anyone who imports a script in `experiments/` for one function should assume it writes.**
+
+## 2. ✅ THE ARTEFACTS ARE CLEAN — first end-to-end integrity check this workspace has run
+
+`experiments/w39a_audit.py` → `w39a_audit.csv`. All 13 priority-1 queued files plus the three
+best-public holders and both `check_selection.WANTED` files, 16 in total: **0 failures.** Every
+one is 296,302 rows, `id` **exactly equal to `sample_submission.csv` in order** (not merely the
+same set), md5 identical to what `w26d` priced, zero NaN, zero inf, non-degenerate. The queue
+head ranks at ρ 0.9999 against all three files already on the board, so it is the same object,
+not a mis-join. The `rescale`/`logit` families carry values outside [0,1] (−9.4 … +17.5) and that
+is fine — RESEARCH has it confirmed that the metric is rank-only and Kaggle accepts them.
+
+CV provenance re-checked at the source: `w21a_w36_ad199stdcorr.json` says `shipped = 5-arm (all
+schemes)` at **0.9701400059625017**, `cv_argmax_combo = 4-arm (drop mask)` at 0.9701401891 — the
+build shipped the pre-registration, not the argmax, and the queue's `cv` column matches the
+shipped number to the last bit.
+
+## 3. ⚠⚠ THE MANUAL-CLICK ITEM IS NO LONGER THE HIGHEST-VALUE OPEN ITEM. Priced, not asserted
+
+RESEARCH has said since 2026-08-13 that the final-selection toggle is worth "40× the entire
+remaining research programme". **That was true when it was written and it is not true now.**
+
+Re-verified blocked first (the six rows RESEARCH says to re-check): no `brave`, no
+`brave-browser`, no `google-chrome` on PATH; `~/.config/BraveSoftware/Brave-Browser` absent;
+`~/.config/google-chrome` holds only `Crash Reports`; no `Cookies` file anywhere; no CDP on 9222;
+no `brave` MCP tools in the session; no `curl` on the box at all. Unchanged. **Still needs Teddy.**
+`check_selection.py`: control 91 successful, **SELECTED = 0 rows.** Nothing is selected.
+
+So I priced what the default actually costs. `experiments/w39b_autoselect.py`, 20,000 reps: sent
+files contribute their **observed** public score, the 13 queued files a draw from the w30b model
+`w26d` prices with (its reproduction GATE passes at 7.76e-6). The public slice is fixed, so its
+common component is absorbed by the fitted intercept and a new file's deviation is idiosyncratic
+only; w17a's paired reading (within-family rms(dLB−dCV) 7.4e-6 against a marginal 7.76e-6)
+implies ρ 0.545 and an idiosyncratic sd of 5.23e-6. Both are reported and bracket the truth.
+**Kaggle's final-submission limit is not in the API** — `GetCompetition` returns deadline,
+`maxDailySubmissions 10`, `maxTeamSize 3`, `teamCount 2433`, and nothing about selection — so
+limit 1 is run as the pessimistic sensitivity rather than assumed away.
+
+Private is scored as the **best of the selected**, so the worse pick costs only a slot. The
+exposure lives entirely in the *better* pick. Under the amended 08-21 queue (§4):
+
+| | E[CV of best auto-pick] | 1st pct | worst of 20,000 | P(>10e-6 below) | P(leader selected) |
+|---|---|---|---|---|---|
+| limit 2, idio | **−0.24e-6** | −7.68 | −15.21 | 0.0003 | 0.966 |
+| limit 2, marg | −0.58e-6 | −7.68 | −16.88 | 0.0023 | 0.917 |
+| limit 1, idio | −2.19e-6 | −18.07 | −18.07 | 0.094 | 0.840 |
+| limit 1, marg | −3.57e-6 | −18.07 | −18.07 | 0.147 | 0.724 |
+
+**Expected cost of never clicking: 0.24–3.57e-6, worst case −18.07e-6.** Against the −88e-6 the
+w13 audit priced, and under the ~4e-6 rebuild reproducibility floor in three of the four cells.
+The click is still free and still worth doing if Teddy is at a browser — but it is now worth
+about one imported member, not 40× the programme.
+
+**It is conditional on one thing, and that is the real headline: the CV leader is UNSENT, and an
+unsent file cannot be selected at all.** If the 08-21 drain does not go out, the best auto-pick is
+`w29_ad194stdcorr` at **−21.7e-6** and there is no distribution about it. **Sending
+`w36_ad199stdcorr` tomorrow is now the highest-value action in the competition**, and it is worth
+more than the toggle it partly replaces.
+
+## 4. THE BRIEF'S "AN EXTRA SUBMISSION CAN NEVER HURT" IS FALSE HERE — one file, and it is dequeued
+
+The brief's economics are right that the public board shows best-of-all, so a spare slot is free
+**for public rank**. It does not follow for the **final score**, because nothing is selected and
+the default picks on public score: a file that prints high while sitting far below the CV leader
+**displaces** the CV pick out of the selected set. Sending it is then strictly negative.
+
+The queue had exactly one. `w36_ad199std_logit` at send_rank 9 is **82.9e-6 of CV below the
+leader** — four times the next worst in the band — and w30b still prices it at 0.97119, because
+`logit` carries a **+1121e-6** LB−CV gap against h3's **+1025e-6** across the 78 scored files
+(`w39c_gapaudit.py`, the gap-by-family table the angle asked for). That is the shape of
+`blend158_logit`, which the w13 audit named as the whole of this account's selection exposure.
+
+`experiments/w39d_logithazard.py` priced the removal on the same instrument, same seed:
+
+| | with logit | without |
+|---|---|---|
+| worst of 20,000, limit 1 marg | **−82.90e-6** | **−18.07e-6** |
+| 1st pct, limit 2 marg | −18.07e-6 | −7.68e-6 |
+| P(best pick >10e-6 below), limit 2 idio | 0.0059 | 0.0002 |
+| E[CV of best auto-pick] | — | +0.11 … +2.34e-6 |
+
+`experiments/w39e_swap.py` performs the swap and is the record of it. Slot 9 becomes
+**`w36_ad199std_hybrid`** (CV 0.9701231283, −16.9e-6), the highest-CV file left unqueued, so the
+day still sends ten — the brief's economics are honoured — and it completes the transform sweep
+on the 199-member pack (stdcorr / std / h3 / rescale / hybrid all read on one member set). Queue
+verified still 13 deep with contiguous ranks 1..13, and `w26g_send.py --n 10` dry-run resolves the
+amended plan correctly.
+
+⚠ **This is the only kind of reason this workspace accepts for preferring one queued file over
+another.** It is not a public-LB hedge and it is not tuned against feedback — it is a CV argument
+about which file the default selects. The Rogii failure was the opposite move.
+
+## 5. THE CV→LB GAP, ACROSS ALL 78 SCORED FILES AT CV ≥ 0.97 (`w39c_gapaudit.py`)
+
+Mean residual **+0.00e-6**, sd **7.24e-6** — w30b is unbiased in-sample by construction, and the
+per-family means are all 0.0000 for the same reason, so the readable columns are the raw gap and
+the residual **sd**:
+
+| fam | n | gap (LB−CV) | resid sd |
+|---|---|---|---|
+| logit | 4 | **+1121e-6** | 2.70 |
+| rescale | 13 | +1034e-6 | 6.16 |
+| ens4 | 24 | +1027e-6 | 7.22 |
+| h3 | 15 | +1025e-6 | **4.19** |
+| rankraw | 10 | +1016e-6 | 9.39 |
+| w / wh3 | 4 | +1001–1003e-6 | 1.74 |
+| hybrid | 8 | +997e-6 | **13.68** |
+
+The eight most inflated files are 8 of 78 and the top two are +19.4/+17.4e-6 — but both are
+40e-6 and 26e-6 of CV below the leader, so they are not selection threats. **The three files
+holding the 0.97118 board best are +1.10, +1.14 and −0.31 sd**: mildly lucky, not anomalous, which
+is why §3's exposure is small. h3 has the second-tightest residual sd of any family and the queue
+head is h3 — that is the right family to be leading with.
+
+**Pre-registered for the 08-21 drain, frozen in `w39c_gapaudit.json` before upload:** the ten
+`pred LB` values in the plan below. After the drain, re-run `w25a_cvlb_full.py` and compare
+realised against predicted **before refitting anything** — mean residual and its z are the test.
+w30a is the precedent and it is what caught the +19.3e-6 `*stdcorr` bias.
+
+## 6. STATE, VERIFIED THIS RUN
+
+- Board **rank 18 at 0.97118**, unchanged. **teamCount 2433** (was 2,329 on 08-19; the brief's
+  1,326 is long stale). Medal cuts at that size: gold top **14**, silver top 122, bronze top 243.
+  We are silver. The queue head's predicted 0.97121 is **rank ~12 — gold**.
+- The 08-21 plan, dry-run confirmed, with §4's swap at slot 9:
+  1 `w36_ad199stdcorr` · 2 `w36_ad199std_rescale` · 3 `w37_cal_ram_hgb` · 4 `w37_cal_mkt_realmlp`
+  · 5 `w36_ad199std` · 6 `w37_cal_om_xgb2` · 7 `w37_cal_omid_tabm` · 8 `w37_cal_dm_cat`
+  · 9 **`w36_ad199std_hybrid`** · 10 `w34_ad195stdcorr`.
+- `check_selection.py`: `w23_ad187stdcorr` SENT; `w36_ad199stdcorr` **NOT SENT, NOT SELECTABLE**.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits local and safe.
+- Disk 94%, 28 GB free. `notebooks/w38/out` is 2.5 GB and is the first thing to delete.
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` vs the submission timestamps; `/proc` per-pid with `tr` for the chained jobs.
+2. **Check `experiments/w38d_build.log` for `w38d done` FIRST.** If ARM 202 cleared **0.9701440**,
+   move `check_selection.WANTED` to it **in the same commit** as the requeue and send it in slot 1
+   ahead of `w36_ad199stdcorr`. If it did not clear, WANTED does not move and §6's order stands.
+3. **`.venv/bin/python experiments/w26g_send.py --go --n 10`** once the 08-21 day opens. This is
+   the highest-value action in the competition (§3) — it is what makes the CV leader selectable
+   at all. Do not re-pick files by hand; the order and messages are set.
+4. After the drain, the **held-out test**: realised LB vs the `pred LB` frozen in
+   `w39c_gapaudit.json`, mean residual and z, **before** refitting w30b.
+5. `experiments/w37e_readout.py` — read R1 FIRST; a failure withdraws the +2.7e-4 es-on-val
+   figure from RESEARCH.md and everything built on it.
+6. `w36a_value.csv` (5/5 sign gate — reps 0–3 already fail it) and `w36g_build.log` (ARM 197, a
+   CONTROL) against the 0.9701288 bar in `w36b_prereg.txt`.
+7. Re-run `w38a_poolscan.sh` — idempotent, skips every ref in the ledger; the 08-21/08-22 refs
+   are the only unswept surface left.
+8. Do **NOT** re-open: the selection write path (closed 08-13, re-verified w39); error analysis /
+   OOF segmentation in any framing; fold/seed averaging; more CLEAN es-bias calibration points;
+   the top-level blend-weight search; FE variants; the original dataset; tuning any CatBoost or
+   XGBoost; the stacker C.
+
+**Files added:** `experiments/w39a_audit.py` + `.csv`, `w39b_autoselect.py` + `.json`,
+`w39c_gapaudit.py` + `.csv` + `.json`, `w39d_logithazard.py` + `.json`, `w39e_swap.py`.
+**Modified:** `experiments/w26d_queueprice.py` (three write guards),
+`experiments/w26d_queueprice.csv` (slot 9 swap), `RESEARCH.md`, `LEADERBOARD.md`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day.**

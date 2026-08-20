@@ -1416,3 +1416,24 @@ at all. `Krasnov Daniil`'s `s6e8-top-1-public-0-97099` likewise. **A high public
 member exactly nothing here**; of the four board-adjacent authors imported across w34–w36
 (`donmarch14`, `omidbaghchehsaraei`, `tamerlanomralinov`, `redamountassir`), the only one whose
 OOF cleared every gate is `redamountassir` — who is not on the visible board at all.
+
+## 2026-08-20, w39 slot 9 — field size re-read, and what the queue head is worth in places
+
+**teamCount 2433**, read straight from `GetCompetition` rather than from the board page (was
+2,329 on 08-19; the brief's 1,326 is long stale and should not be quoted again). Medal cuts at
+that size: **gold top 14**, silver top 122, bronze top 243.
+
+| | score | rank |
+|---|---|---|
+| us, today | 0.97118 | **18 — silver** |
+| queue head `w36_ad199stdcorr`, predicted | **0.97121** | **~12 — gold** |
+| first (MILANFX) | 0.97134 | 1 |
+
+Rank thresholds read off the live top page: 0.97119 → 17, 0.97120 → 14, 0.97121 → 12,
+0.97122 → 11. So the top of the board is dense enough that **one reporting step is 2–3 places**,
+and the single unsent CV leader is the difference between silver and gold on the public slice.
+
+That makes tomorrow's slot 1 the whole of the day. It is also, per `w39b_autoselect.py`, what
+makes the CV leader *selectable at all* — nothing is selected on this account, Kaggle then
+auto-picks on public score, and an unsent file cannot be picked. Sending it is worth more than
+the manual selection toggle it partly substitutes for.

@@ -187,8 +187,56 @@ print("  Every file this workspace builds is standardised, and the ones worth bu
 print("  ALSO corrected -- read the std+corr column. `gap` is what a NEW build must add to")
 print("  the CV leader to be an even-money shot at the board; negative means already there.")
 
-q.to_csv(os.path.join(HERE, "w26d_queueprice.csv"), index=False)
-json.dump(dict(n=len(q), resid_sd=RESID, best_lb=BEST_LB, p_best_single=float(pbest),
-               p_any_of_ten=float(p_any), pred_lb_best=float(q.pred_lb.iloc[0])),
-          open(os.path.join(HERE, "w26d_queueprice.json"), "w"), indent=1)
-print("\nwrote experiments/w26d_queueprice.{csv,json}")
+# ⚠⚠ GUARDS ADDED w39 (2026-08-20). READ BEFORE RUNNING THIS FILE.
+#
+# `w26d_queueprice.csv` is not just this script's output any more. `w37d_order.py` adds
+# `send_rank` / `msg` / `why` to it, and `w26g_send.py` reads those to decide WHAT goes out in
+# WHICH slot with WHICH message. It also carries rows this script cannot regenerate: the
+# `w37_cal_*` calibration files are registered by `w37c_prereg.py`, not by `w23b_sendqueue.csv`.
+#
+# Both ways of losing that were demonstrated live in w39, silently, with no error:
+#   1. `import w26d_queueprice` (done only to reuse `predict()`) ran the write at import time
+#      and dropped all three columns.
+#   2. Re-running the script as intended rebuilt `priority` from `w23b_sendqueue.csv` alone,
+#      cutting the 13-file pre-registered send order down to 1 row and dropping all 7 messages.
+#
+# So: the write happens only under `__main__` (import is now side-effect free), the carried
+# columns are merged back, and the write ABORTS if it would drop a row or a set `send_rank`
+# that the file on disk already has. To deliberately re-price from scratch, pass --force, and
+# re-run `w37d_order.py` immediately afterwards to rebuild the order.
+_CARRY = ["send_rank", "msg", "why"]
+_dst = os.path.join(HERE, "w26d_queueprice.csv")
+
+
+def _write(force=False):
+    global q
+    lost_rows, lost_rank = [], []
+    if os.path.exists(_dst):
+        prev = pd.read_csv(_dst)
+        keep = [c for c in _CARRY if c in prev.columns]
+        if keep:
+            q = q.merge(prev[["file"] + keep], on="file", how="left")
+        lost_rows = sorted(set(prev.file) - set(q.file))
+        if "send_rank" in prev.columns:
+            ranked = prev[prev.send_rank.notna()]
+            lost_rank = sorted(set(ranked.file) & set(lost_rows))
+    if (lost_rows or lost_rank) and not force:
+        print(f"\n*** REFUSING TO WRITE {os.path.basename(_dst)} ***")
+        print(f"    {len(lost_rows)} row(s) on disk are not in the rebuilt queue and would be")
+        print(f"    dropped, {len(lost_rank)} of them carrying a set send_rank:")
+        for f in lost_rows:
+            print(f"      {'[RANKED] ' if f in lost_rank else '          '}{f}")
+        print("    Nothing was written. Re-run with --force ONLY if you will then re-run")
+        print("    experiments/w37d_order.py to rebuild the send order it just destroyed.")
+        sys.exit(3)
+    q.to_csv(_dst, index=False)
+    json.dump(dict(n=len(q), resid_sd=RESID, best_lb=BEST_LB, p_best_single=float(pbest),
+                   p_any_of_ten=float(p_any), pred_lb_best=float(q.pred_lb.iloc[0])),
+              open(os.path.join(HERE, "w26d_queueprice.json"), "w"), indent=1)
+    print("\nwrote experiments/w26d_queueprice.{csv,json}")
+
+
+if __name__ == "__main__":
+    _write(force="--force" in sys.argv)
+else:
+    print("\nimported, not run: w26d_queueprice.csv left untouched")
