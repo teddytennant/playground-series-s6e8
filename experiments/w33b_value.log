@@ -1,0 +1,18 @@
+189 loaded = 187 pack + 2 new ['om_cat', 'om_ftt']
+  base165 for the gate: 165 members
+  om_cat           solo 0.967150  maxcorr 0.993538 vs bolt_cat_nested_te  [ok]
+  om_ftt           solo 0.966568  maxcorr 0.984545 vs pub_tabm  [ok]
+  hybrid: repaired 54 of 189 members
+transform hybrid in 48s
+  rep 0 base165          n_mem 165 AUC 0.970100 (166s)
+  rep 0 gate_cat4        n_mem 169 AUC 0.970147 (150s)
+  rep 0 pack             n_mem 187 AUC 0.970158 (160s)
+  rep 0 om_cat           n_mem 188 AUC 0.970156 (129s)
+  rep 0 om_ftt           n_mem 188 AUC 0.970167 (143s)
+  rep 0 both             n_mem 189 AUC 0.970165 (145s)
+  rep 1 base165          n_mem 165 AUC 0.970291 (110s)
+  rep 1 gate_cat4        n_mem 169 AUC 0.970331 (120s)
+  rep 1 pack             n_mem 187 AUC 0.970333 (330s)
+  rep 1 om_cat           n_mem 188 AUC 0.970330 (404s)
+  rep 1 om_ftt           n_mem 188 AUC 0.970339 (459s)
+  rep 1 both             n_mem 189 AUC 0.970340 (397s)

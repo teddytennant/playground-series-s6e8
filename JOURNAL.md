@@ -16184,3 +16184,43 @@ on the remote. I did not thrash on it further.
 > **w33 addendum (§7 count).** After this slot's own commit `7a84c74`, `git log
 > origin/main..HEAD` is **5** commits, not 4. Push re-attempted at the end of the slot and
 > failed identically (`gh: command not found` → `could not read Username`). Unchanged blocker.
+
+## w33 §4 RESOLVED (2 of 5 reps) — `om_ftt` is worth ~+7.5e-6 and `om_cat` is a small negative
+
+`experiments/w33b_value.{log,csv}`. The run was still going when §4 was written; two reps have
+now landed and the sign is stable in every arm, which is this workspace's own read criterion
+("a delta whose SIGN FLIPS across reps is a null whatever its mean").
+
+**⚠ Read the gate first, per prereg R-E2.** `gate_cat4 − base165` = **+4.7e-5 (rep0),
++4.0e-5 (rep1)**, mean **+4.35e-5** against the required w20d value **+4.1e-5**. The
+instrument reproduces, so these rows are comparable to everything in RESEARCH.
+
+| arm | n | rep0 | rep1 | Δ vs pack rep0 | Δ rep1 | **mean Δ** |
+|---|---|---|---|---|---|---|
+| `pack` | 187 | 0.970158 | 0.970333 | — | — | — |
+| `+om_cat` | 188 | 0.970156 | 0.970330 | −2e-6 | −3e-6 | **−2.5e-6** |
+| `+om_ftt` | 188 | 0.970167 | 0.970339 | **+9e-6** | **+6e-6** | **+7.5e-6** |
+| `both` | 189 | 0.970165 | 0.970340 | +7e-6 | +7e-6 | **+7.0e-6** |
+
+**`om_ftt` — the FT-Transformer, solo 0.966568, maxcorr 0.9845 — is worth ~+7.5e-6 on its own.**
+For scale: the entire 22-member adarsh import was +2.1e-6 *per member*, and w32a prices the
+**gold line at +10.4e-6**. One honest foreign member is ~70% of the gold gap. That is the
+largest per-member value this workspace has measured since the adarsh import, and it lands
+exactly where RESEARCH 6323 said to look — not a better GBDT, but **a pipeline we do not hold**.
+
+`om_cat` is a small consistent negative (−2.5e-6) and should NOT go in: at maxcorr 0.9935
+against `bolt_cat_nested_te` it is the ninth CatBoost of its kind in the pack, and w32's
+"do not spend another slot on CatBoost" (RESEARCH 7069) is confirmed again from the other side.
+The `both` arm at +7.0e-6 is just `om_ftt` minus `om_cat`'s drag, so **ship `om_ftt` alone.**
+
+⚠ **Caveats, stated rather than buried.** Two reps, not five — the run continues and the next
+slot should re-read `w33b_value.csv` for the full table before building on this. The paired
+50/50 instrument measures value into a 187-member *hybrid* combiner; it is not the same object
+as the shipping h3/ens4 cross-fitted build, and RESEARCH's own record is that paired-delta
+magnitudes do not transfer one-for-one to the frozen-fold CV. **+7.5e-6 is a reason to build
+and measure, not a number to add to 0.9701182875 on paper.**
+
+**NEXT RUN, revised item 2:** rebuild the shipping stack with `ext_members10` (om_ftt only —
+consider `--drop om_cat` or move it to the quarantine dir) and get its cross-fitted CV on the
+frozen folds head-to-head with 0.9701182875. If it clears, that is the day's lead candidate and
+the first genuine CV improvement in a week. Send it early, not at 00:08.
