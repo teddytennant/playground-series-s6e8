@@ -16475,3 +16475,252 @@ already-held member could have walked straight through. Fixed with `assert len(b
 `experiments/check_selection.py` (WANTED moved), `RESEARCH.md`, `LEADERBOARD.md`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**
+
+---
+
+# 2026-08-20 — w36, slot 6 of 10. ANGLE: blending / OOF weight search. AT CAP, no submission.
+
+**Cap check first, per w30 §9.1.** `date -u` = 2026-08-20 15:58. The API shows ten submissions
+stamped 2026-08-20 00:07–00:08, drained by w30. **Genuinely at cap.** No submission attempted.
+
+**HEADLINE: the handed angle is a measured null and it paid anyway — searching the top-level
+blend weights costs ~1e-6 and the price of searching, +0.45e-6 per free parameter, independently
+corroborates w34's pre-registration discipline. Separately: a prior slot's work was recovered
+unlogged, four new clean members are in, and my own pre-registered rule turned out to be weaker
+than the house rule — recorded rather than quietly fixed.**
+
+## 0. ⚠ A WHOLE SLOT'S WORK WAS ON DISK WITH NO JOURNAL ENTRY — read `experiments/` before believing the journal
+
+`tail JOURNAL.md` ends at w34. But `experiments/w35a_requeue.log`, `w35b_run.sh`,
+`w35b_value.*`, `w35c_vet.py/.csv/.json` all exist, **and w35's background chain was still
+running when this slot started** — `w35c_write.log` was written at 15:59 UTC, one minute into
+this run. w35 vetted seven candidates, found two clean, and died before it could write itself
+down. Its work is now committed and credited.
+
+**Standing instruction: `ls -t experiments/ | head -20` and check `/proc` for live jobs before
+concluding what the last slot did.** The journal is append-only and therefore trustworthy about
+what it contains, and silent about a slot that ran out of context before its last write.
+
+Two of that chain's jobs were **the same measurement running twice** (`w34c_run.sh` and
+`w35b_run.sh`, both `w26i_value.py` on the ravi pair, 5 reps). w35b was **OOM-Killed at rep 0**;
+32 GB does not hold two 189-member design matrices. Everything this slot launched is explicitly
+serialised on a `while ! grep -q '<prev> done'` guard for that reason.
+
+## 1. THE ANGLE: transform-weight search is a null, and this is the SECOND time it was retired
+
+`experiments/w36d_wsearch.py`. The one weight vector in this pipeline never fitted is the last
+one: `make_h3.py` is an **equal** rank-average of hybrid/rankraw/rescale with `logit` dropped,
+its own docstring calling it "the one blend decision here with zero fitted parameters", decided
+at 156 members on 08-11. Weights refitted **inside the frozen folds** (fold k's weights from the
+other four), on `w34_ad195std`:
+
+| top-level blend | equal | fitted IN-SAMPLE | fitted **CROSS-FITTED** | Δ vs equal | **optimism** |
+|---|---|---|---|---|---|
+| h3 (3 params) | 0.9701205753 | 0.9701208766 | 0.9701196117 | **−0.96e-6** | **+1.27e-6** |
+| all4 (4 params) | 0.9701181652 | 0.9701213202 | 0.9701195043 | +1.34e-6 | **+1.82e-6** |
+
+**Equal weights win.** Fitted all4 pushes `logit` from 0.25 to 0.081 — the search *rediscovers*
+"drop logit" — and still lands 0.97e-6 below the zero-parameter h3.
+
+⚠ **THIS IS A REPRODUCTION AND I DID NOT CHECK FIRST.** `experiments/transform_weights.py`
+retired this on 08-13 with a 1,771-point simplex grid at 159 members, in the same words:
+"the simplex search does not beat `h3`, it *rediscovers* `h3`". `submissions/` already held
+`blend159av_w`, `blend156w2`, `blend159av_wh3`. **Grep `submissions/` for an existing family
+suffix before building an instrument.** The re-run is not worthless — same conclusion 36 members
+later with a different optimiser, so the angle is now closed twice — but it should have been
+cheaper. The two new files were renamed to the **established** `_wh3` / `_w` suffixes, because
+`stdflag.family_suffix` silently drops an unknown suffix into `ens4` and would have mislabelled
+them in the LB pricer (this is w26e's bug, one step from being reintroduced).
+
+### ⚠⚠ THE NUMBER WORTH MORE THAN THE BLEND: +0.45e-6 of optimism PER FREE PARAMETER
+
+3 params → +1.27e-6 claimed-but-not-real; 4 params → +1.82e-6. Extrapolated to the 5-arm
+correction: 5 × 0.45 = **+2.3e-6**. w34 measured that object's scheme-selection optimism at
+**+2.54e-6**, on a different object by a different method. **Two independent estimates of the
+same quantity agreeing to 10% is the strongest evidence in this workspace that the
+pre-registration discipline is priced correctly and not superstition.** Any future top-level
+search over k arms must beat the equal-weight baseline by more than ~0.45k e-6 to be worth
+anything, and its in-sample print will overstate it by exactly that much.
+
+## 2. ⚠⚠ MY PRE-REGISTERED RULE WAS WEAKER THAN THE HOUSE RULE. I let it stand and said so.
+
+`experiments/w36b_prereg.txt`, committed at **2d1eff1 before `w34c_value.csv` existed**, fixed
+the pack for the one build that fits before the 08-21 send day: ram pair always; ravi pair iff
+(a) the cat4 gate returns +4.1e-5 ± tolerance and (b) `both` is positive **in ≥4 of 5 reps**.
+The script evaluates the rule itself, so no human read sits between the number and the pack.
+
+It fired **ARM 199**: gate +4.402e-5 PASS, `both` positive 4/5.
+
+**The instrument's own verdict disagrees.** rep 3 came in at −1e-6 on all three arms while
+0/1/2/4 were +6 to +16e-6:
+
+    ravi_xgb1c   +9.37e-6/member  t +3.30  [SIGN FLIPS]  -> NULL
+    ravi_lgbm1c  +8.87e-6/member  t +3.28  [SIGN FLIPS]  -> NULL
+    both         +5.19e-6/member  t +3.04  [SIGN FLIPS]  -> DISBELIEVE (§E5)
+
+w26i's standing criterion — its own docstring, inherited from w20d's `nn` group — is that a
+delta whose sign flips is a null **whatever its mean**. That is 5/5. **My (b) at 4/5 is a
+drafting error.** Note the trap: t = +3.30 looks decisive and is computed on 5 paired reps whose
+spread is dominated by split noise; the sign test is the criterion precisely because the t is not.
+
+**I did not kill the 199 build and restart at 197.** The rule was fixed before the number,
+the number arrived, the rule fired; changing the pack now because I prefer the stricter rule is
+post-hoc pack selection arriving through the back door. The cost is small — a NULL dilutes, it
+does not damage.
+
+Instead the conflict was converted into a measurement: **`w36g_run.sh` builds ARM 197 (ram pair
+only)** behind the queue. The 199−197 difference is the ravi pair's value on the *shipping*
+instrument, which beats arguing about which sign gate was right.
+
+### PRE-REGISTERED, in the addendum, before either arm's number exists
+
+- ARM 199 is the **primary** candidate; WANTED moves to `w36_ad199stdcorr` iff it clears
+  **0.9701288** = leader 0.9701247949 + the ~4e-6 rebuild floor.
+- ARM 197 is a **CONTROL, not a candidate**. If 197 lands above 199 that is evidence the ravi
+  pair is negative and is reported as such; WANTED moves to 197 only if 197 clears 0.9701288
+  **and** 199 does not.
+- If neither clears, the whole four-member import is a null and WANTED stays on
+  `w34_ad195stdcorr`. That outcome is named here because it is likely.
+- Both arms ship the pre-registered 5-arm correction, never the argmax (w34's rule).
+
+**Early partial, for the next run to check against:** `w36_ad199std_logit` 0.970057 vs the
+matched 195 control's 0.970044 (+13e-6); `_hybrid` 0.970123 vs 0.970111 (+12e-6). Encouraging
+and **not yet the number that decides anything** — the bar is on the corrected h3 object.
+
+## 3. FOUR CLEAN MEMBERS ARE IN, AND THE `kernels output` RE-CHECK PAID AGAIN
+
+w34 §3.1 found that `kaggle kernels output` and `kaggle datasets download` are different
+endpoints, and that every RESEARCH row filed "submission only, no OOF" had been judged on the
+dataset endpoint alone. **w36 ran the kernel endpoint on ten such refs. Four had OOF nobody
+here had seen. Three of the four are dead on a gate.**
+
+| ref | ships | verdict |
+|---|---|---|
+| `mohankrishnathalla/s6e8-realmlp-oof-saver` | `oof_realmlp.npy` + test + 5 per-fold subs | ✅ **CLEAN**, solo 0.958134 → `ext_members13/` |
+| `mohankrishnathalla/s6e8-tabm-oof-saver` | `oof_mlp.npy` + test | ⛔ es-on-val (`Early stop at epoch 85` ×5) |
+| `omidbaghchehsaraei/tabm-...` | `oof.csv` | ⛔ es-on-val (`Restoring best model` ×5) |
+| `ern711/...-spline-transformer` | 5-fold OOF + test | ⛔ **foreign partition** (`OUTER_SPLIT_SEED = 21`) |
+| six others incl. `szymonkapiski` (rank 9), `daniilkrasnovvv`, `anthonytherrien` | submission/log only | ⛔ confirmed on BOTH endpoints |
+
+⚠ **RESEARCH's own note that `mohankrishnathalla`'s two savers "both crashed, worth re-checking,
+the author is iterating" was right and paid.** Re-check a crashed saver.
+
+⚠ **All three new OOF files reproduce our frozen SKF5 per-fold AUCs to ~4e-6, the log printing
+floor.** Our partition is the public pool's default; a foreign one is the exception.
+
+⚠ **The es-on-val base rate is now 3 in 4 across three sweeps** (w33 5/7, w34 4/6, w36 3/4), and
+**for the third sweep running the highest-solo new member is the dirty one** — `omid_tabm`
+0.9675, above the pack median 0.9663, and it gets there by best-epoch selection on the scored
+fold.
+
+**`mkt_realmlp` was NOT put in the build.** It clears every honesty gate — `max_epochs=512
+reached` on all five folds, so early stopping never fired, a clearance by observed behaviour
+rather than by declaration — but at solo 0.958134 it misses w29's acceptance gate on strength
+(−0.0082 against the pack median, where the gate wants ±0.005), and it is a RealMLP, a class the
+pack already holds. Stored unmeasured in `ext_members13/`.
+
+**Method note:** `experiments/w36c_lightvet.py` runs gates 1–4 on one member with nothing loaded
+but `y`. **Run the cheap half of the gate first** — it killed 3 of 4 candidates for free while a
+build held the memory the maxcorr gate needs.
+
+## 4. ⚠⚠ AN HONEST PRICE FOR THE 13 QUARANTINED es-on-val MEMBERS — w34 §10 item 5, answered
+
+`experiments/w36f_esbias.py`. A pack refit cannot measure es-on-val damage because the refit is
+scored on the same inflated OOF. But **es-on-val inflates OOF and not TEST**, so for any member
+with a published LB, `offset = LB − AUC(their OOF, our folds)` is short by exactly the inflation.
+Fit the honest offset on gate-passing members; read each dirty member's shortfall. The offset is
+not a constant (AUC compresses towards 1), so a slope is fitted — and our own 91 submissions
+cannot supply it, spanning 2.5e-4 of CV against a 1e-5 LB grid, while the member-level points
+span 2.1e-3, or 200 grid steps.
+
+Honest line on the three clean points: `offset = 0.170545 − 0.17466 × oof_auc`, residual rms
+**5.35e-6** — tighter than the LB reporting grid.
+
+| member | our OOF | pub LB | offset | expected | shortfall |
+|---|---|---|---|---|---|
+| `ram_hgb` clean | 0.968026 | 0.96945 | 0.001424 | 0.001428 | +0.04e-4 |
+| `ram_lgb` clean | 0.968259 | 0.96965 | 0.001391 | 0.001387 | −0.04e-4 |
+| `w29_ad194stdcorr` ours | 0.970118 | 0.97118 | 0.001062 | 0.001062 | 0.00 |
+| **`zwr_realmlp` es-on-val** | 0.969128 | 0.97009 | 0.000962 | 0.001235 | **+2.73e-4** |
+| `tam_lkup` es-on-val+foreign | 0.968756 | 0.97041 | 0.001654 | 0.001300 | −3.54e-4 |
+
+⚠⚠ **THREE calibration points, two parameters, ONE residual degree of freedom. A sketch with a
+number on it, not a result.** What it nevertheless says:
+
+1. **es-on-val is worth roughly +2.7e-4 of fake OOF AUC**, 51× the residual floor. That is
+   exactly the distance between "comfortably above the pack median" and "at it", which **is the
+   mechanism behind the trap in §3**: deflate `omid_tabm`, `tam_lkup`, `dm_cat` by 2.7e-4 and
+   every one lands in the ordinary middle of the pack.
+2. **The instrument audits its own inputs.** `tam_lkup`'s shortfall came out NEGATIVE — the
+   signature of an LB that does not belong to that OOF (its title's 0.97041 is the notebook's
+   blend). A negative shortfall means "wrong LB", not "extra honest".
+3. **It is nearly free to make decisive.** Every clean import whose kernel title carries
+   `lb-0-XXXXX` adds a calibration point. **w33, w34 and w35 all had the LB in the ref string
+   and none of them wrote it down. Record the author's published LB in the vet table.**
+
+## 5. STANDINGS — rank 18, 0.97118. We lost a place without losing a point.
+
+Board at 15:59 UTC: MILANFX 0.97134 leads; **Changye Li 0.97130 is new to the top 3**; Szymon
+Kłapiński, Mikhail Naumov and Mitudru Dutta all improved in the last 13 h. Our 0.97118 has not
+moved since w32. **That is the cost of the 08-20 day being drained at 00:07 on ten files that
+were all below the best already-sent CV** — they tied it, none beat it. Gap to gold ≈ 3–4e-5 =
+**30–40e-6 = 3–4 reporting steps ≈ +10.4e-6 of CV**. Gap to first 160e-6 ≈ +85.8e-6 of CV, not
+reachable in 11 days. Play for gold.
+
+Of the four board-adjacent authors imported across w34–w36, **the only one whose OOF cleared
+every gate is `redamountassir`, who is not on the visible board at all.** A high public rank
+buys a member nothing.
+
+## 6. QUEUE AND SELECTION — verified, and the token will not block slot 1
+
+`w26d_queueprice.csv` head is `w34_ad195stdcorr.csv`, **priority 1, p_beat 0.456** — against the
+6.3e-4 the w30 drain faced. `check_selection.py`: `w23_ad187stdcorr` SENT, `w34_ad195stdcorr`
+**NOT SENT and therefore NOT SELECTABLE**. `w36e_requeue.sh` is chained behind the build so the
+08-21 queue can see everything created today.
+
+Kaggle `access_token_expiration = 2026-08-21T03:22:29 UTC`. **The 08-21 day opens at 00:00 with
+the token valid, so slot 1 is not at risk.** The w34 §7 dead window (SDK sign error: the CLI
+401s for 30 min *after* expiry while believing the token good) opens **03:22–03:52 UTC**; a run
+in it is not blocked, refresh with `refresh_access_token()`.
+
+## 7. ⛔ BLOCKERS UNCHANGED — both still need Teddy
+
+- **`git push` still fails**, now 14 commits deep. `origin` is HTTPS, the credential helper
+  shells out to `gh`, `gh` is not installed; no `ssh`, no `nix`, no `~/.git-credentials`, no
+  `GH_TOKEN`. Work is committed and safe locally. Not thrashed on.
+- **The final-selection click.** Nothing is selected; Kaggle would auto-pick by best PUBLIC
+  score, which is the Rogii failure run by Kaggle. WANTED is `{w34_ad195stdcorr.csv,
+  w23_ad187stdcorr.csv}`, chosen on CV.
+
+## 8. NEXT RUN, IN ORDER
+
+1. **`date -u` vs the submission timestamps before believing any cap claim**, then
+   `ls -t experiments/ | head -20` and check `/proc` for live jobs (§0).
+2. **SEND `w34_ad195stdcorr` FIRST.** CV leader by +6.51e-6, pinned at priority 1, and **not
+   selectable until it lands**. Then run `check_selection.py`.
+3. **Read `experiments/w36b_build.log` and `w36g_build.log` against the bar registered in
+   `w36b_prereg.txt`: 0.9701288.** ARM 197 is a CONTROL. Do not promote it for merely landing
+   higher than 199 — read the addendum's rule, it is explicit.
+4. **Read `experiments/w36a_value.csv`** (ram pair, paired 50/50). Check the cat4 gate returned
+   ~+4.1e-5 first. **Apply the 5/5 sign gate, not 4/5** (§2).
+5. Free-slot sends available beyond the queue: `w34_ad195std_wh3.csv`, `w34_ad195std_w.csv`
+   (validated: 296,302 rows, all distinct, no NaN, rank-rho 0.99996/0.99993 vs the leader).
+   Neither is a deadline candidate — both are below equal-weight h3 on CV.
+6. **Keep running the `kernels output` re-check** — 2 for 2 across w34/w36. And **write each
+   author's published LB into the vet table** (§4.3); five calibration points make the es-bias
+   instrument decisive.
+7. ⛔ Do **NOT** re-open: top-level blend-weight search (§1, now closed twice); feature
+   engineering / FE-variant members; the original dataset; tuning any CatBoost or XGBoost;
+   cheap new model classes; `w29g`-shaped screens; the stacker C; fold-seed averaging; the
+   fold-leakage explanation of the family term.
+
+**Files added:** `experiments/w36a_run.sh`, `w36b_prereg.txt` (+ addendum), `w36b_run.sh`,
+`w36c_lightvet.py/.csv`, `w36d_wsearch.py/.log/.json/.csv`, `w36e_requeue.sh`,
+`w36f_esbias.py/.csv/.json`, `w36g_run.sh`; `data/ext_members13/` (1 clean),
+`ext_members13es/` (2 quarantined); `notebooks/w36/out/` (10 kernel outputs);
+`submissions/w34_ad195std_wh3.csv`, `w34_ad195std_w.csv`. **Recovered and committed from the
+unlogged w35 slot:** `w35b_run.sh`, `w35b_value.*`, `w35c_vet.py/.csv/.json`.
+**Modified:** `experiments/stdflag.py` (CORR_MAP += both w36 build names, registered BEFORE the
+build since the rule picks the name at run time), `RESEARCH.md`, `LEADERBOARD.md`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**
