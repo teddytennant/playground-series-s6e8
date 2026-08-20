@@ -1380,3 +1380,39 @@ what it says about where the remaining headroom is:
   workspace already holds**, plus their own test-only component. So a top-15 public entry is
   a blend of exactly our pack. That is a floor, not a ceiling: our 195-member pack is a
   strict superset, and the difference between 0.97118 and 0.97120 is combiner, not supply.
+
+## 2026-08-20 (w36, slot 6) — rank 18, 0.97118, and the board moved under us
+
+Taken at 15:59 UTC, ~13 h after the w34 snapshot:
+
+| # | team | score | Δ vs w34 snapshot |
+|---|---|---|---|
+| 1 | MILANFX | 0.97134 | — |
+| 2 | **Changye Li** | 0.97130 | **new to the top 3** |
+| 3 | Maher el Ouahabi | 0.97127 | — |
+| 4 | Optimistix | 0.97126 | — |
+| 5–8 | Don Mani / Keanan / Utkarsh / cstdy | 0.97125 | — |
+| 9 | **Szymon Kłapiński** | 0.97124 | **new** |
+| 10 | Mikhail Naumov | 0.97123 | new |
+| 11–13 | Leo / william950615 / Charles Backman | 0.97121–0.97122 | |
+| 14–16 | thisray / Mahog / **Mitudru Dutta** | 0.97120 | |
+| 17 | delai50 | 0.97119 | |
+| **18** | **Teddy Tennant** | **0.97118** | **−1 place, same score** |
+
+**We lost a place without losing a point.** Our 0.97118 has not moved since w32 — it is still
+`w27_ad190stdcorr` / `w29_ad194stdcorr` — while `Changye Li`, `Szymon Kłapiński`, `Mikhail
+Naumov` and `Mitudru Dutta` all posted improvements in the last 13 hours. **This is the cost
+of the 08-20 day being drained at 00:07 on files that were all below the best already-sent
+CV.** Ten submissions went out and the best of them tied, not beat, what was already there.
+
+Gap to gold (~0.97121–0.97122) = **3–4e-5 = 30–40e-6 = 3–4 reporting steps ≈ +10.4e-6 of CV**
+on w32a's inverted bar. Gap to first (0.97134) = **160e-6 ≈ +85.8e-6 of CV** — still not
+reachable in 11 days. Play for gold.
+
+⚠ **Two more board names entered our pool this slot, and both were dead on a gate.**
+`Szymon Kłapiński` (rank 9) publishes only `submission.csv` from
+`s6e8-honest-oof-blend` — the title says "honest OOF blend" and the kernel output ships no OOF
+at all. `Krasnov Daniil`'s `s6e8-top-1-public-0-97099` likewise. **A high public rank buys a
+member exactly nothing here**; of the four board-adjacent authors imported across w34–w36
+(`donmarch14`, `omidbaghchehsaraei`, `tamerlanomralinov`, `redamountassir`), the only one whose
+OOF cleared every gate is `redamountassir` — who is not on the visible board at all.
