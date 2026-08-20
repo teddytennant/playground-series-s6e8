@@ -8767,12 +8767,22 @@ error means the CLI 401s for 30 minutes *after* expiry while believing the token
 **2026-08-21 03:22–03:52 UTC**. A run in that window is not blocked — refresh with
 `KaggleCredentials.load(client=KaggleClient(env=KaggleEnv.PROD)).refresh_access_token()`.
 
-## 2026-08-20 (w36) — the top-level blend weights are BEST LEFT EQUAL, and the price of searching them
+## 2026-08-20 (w36) — transform-weight search RE-RETIRED at 195 members, and priced
 
-`experiments/w36d_wsearch.py`. The one weight vector in this pipeline that had never been
-fitted: `make_h3.py` is an **equal** rank-average of hybrid/rankraw/rescale with `logit`
-dropped, and that decision was made at **156 members on 2026-08-11**. The pack is now 195, so
-the justifying measurement was 39 members stale. Re-run on `w34_ad195std`:
+⚠ **THIS IS A REPRODUCTION, NOT A DISCOVERY, AND w36 DID NOT CHECK FIRST.** The workspace
+already retired transform-weight search on 2026-08-13 with `experiments/transform_weights.py`
+(a 1,771-point simplex grid on the 159av pack): the search "does not beat `h3`, it
+*rediscovers* `h3`", `blend159av_w` cross-fits to 0.970048 against `blend159av_h3`'s 0.970049,
+and the `wh3`/`w`/`w2` families all read LB 0.97105 like everything else in the top cluster.
+w36d rebuilt that instrument from scratch because the handed angle named it and the earlier
+result was not indexed under a searchable heading. **Before building an instrument, grep
+`submissions/` for an existing family suffix** — `_w`, `_w2`, `_wh3` were all sitting there.
+
+What the re-run legitimately adds: the same conclusion **36 members later** with a different
+optimiser (Nelder-Mead, not a grid), and the optimism decomposition below, which is new.
+
+`make_h3.py` is an **equal** rank-average of hybrid/rankraw/rescale with `logit` dropped, and
+that decision was made at **156 members on 2026-08-11**. Re-run on `w34_ad195std`:
 
 | top-level blend | equal weights | fitted IN-SAMPLE | fitted **CROSS-FITTED** | Δ xfit vs equal | **optimism** |
 |---|---|---|---|---|---|
@@ -8785,10 +8795,10 @@ search would have claimed.
 
 **Three durable conclusions.**
 
-1. ⛔ **Do not fit the top-level blend weights.** Equal weights beat the honestly-fitted ones on
-   h3 by 0.96e-6. Over near-collinear transform stacks (test rho ~0.999) there is nothing to
-   find, and searching costs more than it returns. The angle is a MEASURED null now, not an
-   asserted one.
+1. ⛔ **Do not fit the top-level blend weights. This is now settled twice, 36 members apart.**
+   Equal weights beat the honestly-fitted ones on h3 by 0.96e-6 at 195 members, and by 1e-6 at
+   159. Over near-collinear transform stacks (test rho ~0.999) there is nothing to find, and
+   searching costs more than it returns. Do not re-open this a third time.
 2. **The drop-logit decision survives at 195 members.** Fitted all4 pushes `logit` to weight
    0.081 (from 0.25) and gains +1.34e-6 over equal-all4 — i.e. the search rediscovers "drop
    logit" on its own — but still lands 0.97e-6 BELOW the zero-parameter equal-weight h3.

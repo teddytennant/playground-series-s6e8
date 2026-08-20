@@ -53,6 +53,8 @@ from common import SUB, TARGET, get_folds, load_raw  # noqa: E402
 
 ALL4 = ("logit", "hybrid", "rankraw", "rescale")
 H3 = ("hybrid", "rankraw", "rescale")
+# output suffixes are the ESTABLISHED family labels (`_wh3`, `_w`), not new ones: stdflag's
+# suffix rule already classifies those and a novel suffix would silently fall through to `ens4`.
 
 
 def rk(v):
@@ -107,7 +109,7 @@ def main():
         print(f"  {k:8s} solo cross-fitted AUC {roc_auc_score(y, O[k]):.9f}")
 
     rows = []
-    for tag, keys in (("h3", H3), ("all4", ALL4)):
+    for tag, keys in (("wh3", H3), ("w", ALL4)):
         R = np.column_stack([O[k] for k in keys])
         RT = np.column_stack([T[k] for k in keys])
         n = len(keys)
