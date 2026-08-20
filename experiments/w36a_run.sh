@@ -22,9 +22,9 @@
 # identical w34c job; 32 GB does not hold two copies of a 189-member design matrix.
 cd "$(dirname "$0")/.."
 
-echo "waiting for the w36b BUILD to exit (it holds the memory)..."
-while ! grep -q "w36b done" experiments/w36b_build.log 2>/dev/null; do sleep 60; done
-echo "w36b clear at $(date -u)"
+echo "waiting for w36b BUILD + w36e requeue to exit (they hold the memory)..."
+while ! grep -q "w36e done" experiments/w36e_requeue.log 2>/dev/null; do sleep 60; done
+echo "w36e clear at $(date -u)"
 sleep 20
 
 echo "########## w36a_value  $(date -u) ##########"

@@ -95,6 +95,13 @@ CORR_MAP = {
     # construction as w29_ad194stdcorr, one member wider.
     "w34_ad195stdcorr": "h3",           # 194 + om_ftt
     "w34_ad196stdcorr": "h3",           # 194 + om_ftt + om_cat
+    # w36 slot 6: same 5-arm correction on the h3 base of the four-clean-member pack. BOTH
+    # names are registered because which one exists is decided at run time by the rule
+    # pre-registered in w36b_prereg.txt -- 199 if the ravi pair clears its sign gate, else
+    # 197. Registered BEFORE the build so the standing "same commit as the build" rule cannot
+    # be missed by a run that only sees one of the two names on disk.
+    "w36_ad199stdcorr": "h3",           # 195 + ravi_xgb1c + ravi_lgbm1c + ram_hgb + ram_lgb
+    "w36_ad197stdcorr": "h3",           # 195 + ram_hgb + ram_lgb
 }
 
 
