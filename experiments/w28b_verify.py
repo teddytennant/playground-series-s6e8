@@ -44,16 +44,20 @@ import stdflag  # noqa: E402
 from stdflag import family, is_std   # noqa: E402
 
 
-# w26e's refit, to match `stdflag.family`'s corrected `*corr` labels. See w28a.
-M = json.load(open(os.path.join(HERE, "w26e_famfix.json")))
-C, RESID = M["coefs_new"], M["resid_sd_new"]
+# w30b's refit, to match `stdflag.family`'s corrected `*corr` labels AND to carry the c_avg
+# correction term (w30). This file used to load `w26e_famfix.json` and the `mu` assert below
+# FIRED once w25a's table grew past that fit's 60 rows -- which is the assert doing its job:
+# the model file and the centring source must be the same vintage or every prediction here is
+# silently mis-centred. If it fires again, refit rather than widening the tolerance.
+M = json.load(open(os.path.join(HERE, "w30b_corrterm.json")))
+C, RESID = M["coefs"], M["resid_sd_new"]
 MU = pd.read_csv(os.path.join(HERE, "w25a_cvlb_full.csv")).query("cv >= 0.97").cv.mean()
 assert abs(MU - M["mu"]) < 1e-12, "centring drifted from the fitted model"
 
 
-def predict(cv, fam, std):
+def predict(cv, fam, std, corr=False):
     lb6 = C["const"] + C["cv_e6"] * (cv - MU) * 1e6 + C.get(f"fam[{fam}]", 0.0)
-    return (lb6 + (C["standardised"] if std else 0.0)) * 1e-6
+    return (lb6 + (C["std"] if std else 0.0) + (C["corr"] if corr else 0.0)) * 1e-6
 
 
 # --- what is already sent, live by NAME and by MD5 ------------------------------------
@@ -97,11 +101,11 @@ for c in sorted(cands, key=lambda d: (-d["cv"] if np.isfinite(d["cv"]) else 1)):
     fin = bool(np.isfinite(v).all())
     prob = bool(v.min() >= 0.0 and v.max() <= 1.0)
     valid = cols_ok and n_ok and id_ok and dup == 0 and nan == 0 and fin
-    fam, std = family(stem), is_std(stem)
+    fam, std, corr = family(stem), is_std(stem), "corr" in stem
     cv = c["cv"]
-    pred = predict(cv, fam, std) if np.isfinite(cv) else np.nan
+    pred = predict(cv, fam, std, corr) if np.isfinite(cv) else np.nan
     p = 1.0 - norm.cdf((BEST_LB + STEP / 2 - pred) / (RESID * 1e-6)) if np.isfinite(pred) else np.nan
-    rows.append(dict(stem=stem, cv=cv, fam=fam, std=std, pred_lb=pred, p_beat=p,
+    rows.append(dict(stem=stem, cv=cv, fam=fam, std=std, corr=corr, pred_lb=pred, p_beat=p,
                      valid=valid, rows=len(d), dup=dup, nan=nan, prob_scale=prob,
                      vmin=float(v.min()), vmax=float(v.max())))
 

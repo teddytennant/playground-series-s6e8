@@ -8170,3 +8170,46 @@ recomputed every run.
   before the cache check, so the `rng` stream advances identically on a resumed run and the
   cached control weights still match their permutation. Do not "optimise" that call inside
   the cache branch — it would silently decorrelate the controls from their weights.
+
+## ✅ c_avg ON THE NON-h3 BASES OF THE 194 PACK — base-invariance survives, mildly shrunk (w30)
+
+Three new readings, pre-registered at +4..+8e-6 (point +6.0) before any fit:
+
+| base | base CV | ship CV | correction |
+|---|---|---|---|
+| `w29_ad194std` (ens4) | 0.9701116199 | **0.9701159503** | +4.330e-6 ✅ |
+| `w29_ad194std_rankraw` | 0.9700930067 | 0.9701005596 | +7.553e-6 ✅ |
+| `w29_ad194std_rescale` | 0.9700978809 | 0.9701012580 | +3.377e-6 ❌ 0.6e-6 low |
+
+**Eight readings now.** +6.494 (159 h3), +6.4 (159 ens4), +6.066 (187 h3), +6.044 (187 ens4),
++5.72 (187 std h3) — mean **+6.15**, spread 0.8e-6 — then +4.33 / +7.55 / +3.38 on the 194
+pack, mean **+5.09**, spread 4.2e-6. The centre moved ~1e-6 and the spread widened 5×. Read
+that as "the correction still transfers across base and transform, but the 194 pack has
+absorbed a little of it and the per-base value is no longer predictable to 1e-6" — **not** as
+a falsification of transform-invariance, and not as licence to quote +6.0 for a new base.
+
+The `drop mask` 4-arm combination had the higher CV in **3 of 3** builds and was **not**
+shipped in any of them; the pre-registered 5-arm average was, per w16i. Every arm cleared its
+own size-matched permuted-membership control.
+
+`w28c_coupling.py` ratios: **0.992 / 1.022 / 1.072**, all near 1, so each CSV is coupled to its
+own OOF vector.
+
+## The send queue as of 2026-08-20 — one genuinely live file for the first time in a week
+
+| | 08-20 morning | after w30 |
+|---|---|---|
+| best single unsent, P(beat 0.97118) | 1.7e-3 | **0.323** (`w29_ad194stdcorr_ens4`) |
+| P(≥1 of the top ten) | 1.1e-2 | **0.404** |
+
+`w29_ad194stdcorr_ens4` sits 2.3e-6 *below* the CV leader but collects the ens4 family term
+(+13.7e-6) and the corr term, predicting 0.97118 outright. ⚠ `w29_ad194stdcorr_rescale` prices
+at P=0.100 and it is the **least trustworthy row in the table** — rescale is the family whose
+offset came in 3-of-3 low on the held-out batch. Send it; do not believe it.
+
+⚠ **`w28b_verify.py` and `w26d_queueprice.py` must load the SAME model vintage as
+`w25a_cvlb_full.csv`.** w28b's `assert abs(MU - M["mu"]) < 1e-12` fired on 08-20 because it
+still loaded `w26e_famfix.json` (60 rows) against a table that had grown to 78. That assert is
+correct and load-bearing: a stale model file against a fresh centring source silently
+mis-centres every prediction. **Refit, never widen the tolerance.** Both now load
+`w30b_corrterm.json`.

@@ -15659,3 +15659,89 @@ registration that **rankraw and rescale are NOT expected to be competitive**, an
 unconditionally, sub-combination argmaxes printed and not shipped.
 
 Results in §7 below.
+
+## 7. RESULT: two of three corrections land inside the registered band, and one file is live
+
+| base | base CV | ship CV | correction | registered +4..+8e-6 |
+|---|---|---|---|---|
+| `w29_ad194std` (ens4) | 0.9701116199 | **0.9701159503** | **+4.330e-6** | ✅ |
+| `w29_ad194std_rankraw` | 0.9700930067 | 0.9701005596 | **+7.553e-6** | ✅ |
+| `w29_ad194std_rescale` | 0.9700978809 | 0.9701012580 | +3.377e-6 | ❌ 0.6e-6 low |
+
+**c_avg's base-invariance survives, mildly shrunk.** Eight readings now: +6.494 (159 h3),
++6.4 (159 ens4), +6.066 (187 h3), +6.044 (187 ens4), +5.72 (187 std h3) — mean **+6.15** — and
+now +4.33 / +7.55 / +3.38 on the 194 pack, mean **+5.09**. Spread widened, centre moved ~1e-6.
+No arm was shipped on argmax: all three took the pre-registered 5-arm average although the
+`drop mask` 4-arm combination had the higher CV in **3 of 3** cases (the reason w16i exists).
+Every arm cleared its own size-matched permuted-membership control.
+
+**Every candidate validated.** `w28b_verify.py`: **0 invalid** of 33 unsent. `w28c_coupling.py`
+puts the three new pairs at ratio **0.992 / 1.022 / 1.072** — csv↔OOF coupling confirmed, so
+none of them is a CSV written by a different run than its own OOF vector.
+
+### `w29_ad194stdcorr_ens4` is the first genuinely live file this workspace has had in a week
+
+| | this morning | now |
+|---|---|---|
+| best single unsent file, P(beat 0.97118) | 1.7e-3 | **0.323** |
+| P(at least one of ten) | 1.1e-2 | **0.404** |
+
+It sits 2.3e-6 under the CV leader but collects the ens4 family term (+13.7e-6) *and* the corr
+term, and its predicted LB is 0.97118 outright. **It is the top of tomorrow's send order.**
+
+⚠ `w29_ad194stdcorr_rescale` prices at P=0.100 and that number is the **least trustworthy in
+the table** — rescale is the family whose offset came in 3-of-3 low on today's held-out batch.
+Send it, do not believe it.
+
+⛔ **`WANTED` DOES NOT MOVE, exactly as registered in §M15(c) before the builds ran.** The new
+ens4 file is 2.3e-6 *below* the CV leader, so there is no CV argument for it at all, and the
+public-slice argument is the one thing this workspace has pre-committed not to act on.
+`WANTED` stays `{w27_ad190stdcorr.csv, w23_ad187stdcorr.csv}` — **both now sent and
+selectable**, which is this slot's most durable result.
+
+## 8. FIXED IN PASSING
+
+- **`w21a_ad187corr.py` now checkpoints per (arm, fold).** A full run is 45 deterministic
+  `ascend()` calls over ~2h and it wrote nothing until the end — the shape that lost `w25d`
+  twice. Cache is `w21a_ckpt_<TAG>.json`, temp + `os.replace`. ⚠ The controls re-draw
+  `permuted(...)` before the cache check so the `rng` stream advances identically on resume.
+- **`w28b_verify.py`'s centring assert FIRED and it was right.** It loaded `w26e_famfix.json`
+  while `w25a_cvlb_full.csv` had grown past that fit's 60 rows. That is a mis-centred model,
+  not a tolerance problem; it now loads `w30b_corrterm.json` and carries the corr term.
+- `stdflag.CORR_MAP` and `w28c_coupling.PAIRS` both gained the three new files **in the same
+  commit as the build**. Both are hand-maintained and both have silently missed a file before.
+  ⚠ These are the first corrected files whose base is genuinely **not** h3, so they map to
+  `ens4`/`rankraw`/`rescale`, not to `h3` — the old "every `*corr` file is an h3 mix" comment
+  no longer covers all of them.
+- ⚠ **`grep` over `/proc/*/cmdline` gives FALSE NEGATIVES here.** It reported 0 live builds
+  twice while three were running and writing; a wait-loop built on it exited instantly and
+  this run nearly relaunched three 2-hour jobs on top of three healthy ones. `pgrep` is also
+  not installed. Use `tr '\0' ' ' < $d/cmdline` per-pid. Recorded in RESEARCH.
+
+## 9. NEXT RUN, IN ORDER
+
+1. **The UTC day rolls at 00:00. Check `date -u` against the submission timestamps** — this
+   run was handed "10 submissions today" for a day that had already ended.
+2. **`w23b_sendqueue.py` → `w26d_queueprice.py` → `w26g_send.py --go`, but `--n 2` FIRST and
+   the rest LATE.** §5. Send `w29_ad194stdcorr_ens4` (P=0.323) and `w27_ad188stdcorr` early;
+   hold the other eight until the end of the UTC day so the day's builds can still go out.
+3. **Then `check_selection.py`, and note both `WANTED` files are now sent.** The only
+   remaining blocker on final selection is a human with a browser; the API has no endpoint.
+4. **The corr term needs a second held-out reading and tomorrow supplies it free.** The
+   registered test: `w29_ad194stdcorr_ens4` is predicted at 0.97118 *with* the term and
+   0.97117 without. A 0.97119 print would also be a new account best. Whatever it prints,
+   re-run `w30b_corrterm.py` — the weak confound check (drop today's twins, +7.57, t +1.59)
+   is exactly the one a new independent corrected file resolves.
+5. Do **NOT** re-open: the original dataset (measured −58e-6 at 1×); cheap new model classes
+   (w29 §2); `w29g`-shaped marginal-value screens; error analysis / OOF segmentation; the
+   stacker C; fold-seed averaging; feature-set variants of the lattice pipeline.
+6. The one member route §2 of w29 does *not* rule out is a **strong** decorrelated member —
+   `orig_binm`'s profile at solo 0.965+. Nothing on disk is one; it is a project, not a slot.
+
+**Files added:** `experiments/w30_prereg_slot1.txt`, `w30a_oos10.py`, `w30b_corrterm.py`,
+their `.csv`/`.json` outputs, `w30c_corr_{ens4,rankraw,rescale}.log`, and three
+`submissions/w29_ad194stdcorr_{ens4,rankraw,rescale}.csv` with their OOF vectors.
+**Modified:** `w26d_queueprice.py`, `w28b_verify.py`, `w28c_coupling.py`, `w21a_ad187corr.py`,
+`stdflag.py`, `RESEARCH.md`, `LEADERBOARD.md`.
+
+**Sent 10 of 10 for the 08-20 UTC day.**
