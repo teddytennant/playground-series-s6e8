@@ -64,24 +64,45 @@ MU = _fit.cv.mean()
 # for two days while the pricer kept the wrong labels. It matters most exactly where the
 # decision is: the queue's top two files are BOTH `*corr`, so under the suffix rule each was
 # collecting the +13.9e-6 `ens4` term on top of an h3 base.
-M = json.load(open(os.path.join(HERE, "w26e_famfix.json")))
-C, RESID = M["coefs_new"], M["resid_sd_new"]
+# ⚠ THE MODEL IS w30b, NOT w26e (changed w30, 2026-08-20). The 08-20 ten-file drain was the
+# first genuinely HELD-OUT test this predictor has ever had -- ten files priced before upload
+# under a fit containing none of them (w30a). It came back unbiased overall (mean residual
+# +1.67e-6, z +0.60) but with the two `*stdcorr` files +19.3e-6 high, z +3.08. w30b refits with
+# a c_avg-CORRECTION indicator, which w26e had no term for, and gets +12.61e-6 (se 4.07,
+# t +3.10) with the residual sd falling 8.23 -> 7.76e-6 -- BELOW the 8.70e-6 slice+grid noise
+# floor, i.e. the CV->LB relation is now fully accounted for. Family coefficients barely move,
+# so this is not the h3 term in disguise: the six corrected files span h3, ens4 AND rankraw.
+# ⚠ CAVEAT, the reason to read the corr term as ~+10e-6 rather than +12.6: it survives a
+# quadratic-CV guard (+9.92, t +2.12) and the top-CV band (+15.71, t +3.37) but NOT the drop of
+# today's two near-twins (+7.57, t +1.59). Positive in all four cuts, significant in three.
+M = json.load(open(os.path.join(HERE, "w30b_corrterm.json")))
+C, RESID = M["coefs"], M["resid_sd_new"]
 BEST_LB = 0.97118          # account best, w21_ad187corr_ens4
 STEP = 1e-5                # the LB reports to 5 decimals
 
 
-def predict(cv, fam, standardised):
-    """Predicted public LB, in absolute AUC. `standardised` is the combiner-scaling flag."""
+def is_corr(stem):
+    """Carries the c_avg / scheme-average correction. Every such build in this workspace has
+    `corr` in its stem and nothing else does; stdflag.CORR_MAP enforces registration."""
+    return "corr" in stem
+
+
+def predict(cv, fam, standardised, corrected=False):
+    """Predicted public LB, in absolute AUC. `standardised` is the combiner-scaling flag,
+    `corrected` the c_avg-correction flag (w30b)."""
     lb6 = C["const"] + C["cv_e6"] * (cv - MU) * 1e6 + C.get(f"fam[{fam}]", 0.0)
     if standardised:
-        lb6 += C["standardised"]
+        lb6 += C["std"]
+    if corrected:
+        lb6 += C["corr"]
     return lb6 * 1e-6
 
 
 # GATE. Re-predict the 60 files the model was fitted on and require its residual sd back.
 _fit["fam"] = _fit.stem.map(family)
 _fit["std"] = _fit.stem.map(is_std)
-_r6 = (_fit.lb.values - np.array([predict(r.cv, r.fam, r.std)
+_fit["corr"] = _fit.stem.map(is_corr)
+_r6 = (_fit.lb.values - np.array([predict(r.cv, r.fam, r.std, r.corr)
                                   for r in _fit.itertuples()])) * 1e6
 # w25f divides the residual sum of squares by its DOF (n - p), not by n. Using np.std's
 # default ddof=0 here read 7.68e-6 against its 8.41e-6 and failed this gate on the first
@@ -91,7 +112,7 @@ _dof = len(_fit) - len(C)
 _rsd = float(np.sqrt((_r6 ** 2).sum() / _dof))
 print(f"GATE: refitted-sample residual sd {_rsd:.2f}e-6 (dof {_dof}) vs w25f's "
       f"{RESID:.2f}e-6 -- {'PASS' if abs(_rsd - RESID) < 0.5 else 'FAIL'}")
-assert abs(_rsd - RESID) < 0.5, "predict() does not reproduce w25f; nothing below is readable"
+assert abs(_rsd - RESID) < 0.5, "predict() does not reproduce w30b; nothing below is readable"
 
 
 q = pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
@@ -100,7 +121,8 @@ q["stem"] = q.file.str.replace(".csv", "", regex=False)
 stdflag.require_corr_registered(q.stem)   # a new *corr file must be classified BY HAND
 q["fam"] = q.stem.map(family)
 q["std"] = q.stem.map(is_std)          # see is_std: a whitelist here was a BUG
-q["pred_lb"] = [predict(r.cv, r.fam, r.std) for r in q.itertuples()]
+q["corr"] = q.stem.map(is_corr)
+q["pred_lb"] = [predict(r.cv, r.fam, r.std, r.corr) for r in q.itertuples()]
 
 # P(beat the account best). The file must print STRICTLY above 0.97118, and the LB rounds to
 # 1e-5, so the target on the underlying scale is BEST_LB + STEP/2.
@@ -148,15 +170,22 @@ print(f"\npredicted LB of the best unsent file: {q.pred_lb.iloc[0]:.5f}   "
 # real bar for the standardised ens4 files we actually build is 0.9701252, +10.1e-6 ABOVE the
 # leader. Both are printed now so the assumption can never be dropped again.
 need = (BEST_LB + STEP / 2) * 1e6
+# The CV leader is read LIVE off the queue, never quoted -- it was hard-coded at 0.9701150809
+# (the w23 leader) for three waves after two better files existed, so every "vs leader" figure
+# printed here between w27 and w29 was stale by 3.0e-6.
+LEADER = float(max(q.cv.max(), _fit.cv.max()))
 print(f"\nCV needed for an even-money shot at {BEST_LB:.5f}, BY FAMILY AND BY SCALING")
-print(f"  {'family':>6s}  {'unstandardised':>16s}  {'standardised':>16s}   "
-      f"{'vs CV leader (std)':>19s}")
+print(f"  (leader {LEADER:.10f})")
+print(f"  {'family':>7s}  {'unstd':>16s}  {'std':>16s}  {'std+corr':>16s}   {'gap':>10s}")
 for fam in ("h3", "ens4", "hybrid", "rankraw", "rescale", "logit"):
     base = (need - C["const"] - C.get(f"fam[{fam}]", 0.0)) / C["cv_e6"] * 1e-6 + MU
-    std = base - C["standardised"] / C["cv_e6"] * 1e-6
-    print(f"  {fam:>6s}  {base:16.10f}  {std:16.10f}   "
-          f"{(std - 0.9701150809)*1e6:+15.1f}e-6")
-print("  Every file this workspace builds is standardised. Read the RIGHT-HAND column.")
+    std = base - C["std"] / C["cv_e6"] * 1e-6
+    stdc = std - C["corr"] / C["cv_e6"] * 1e-6
+    print(f"  {fam:>7s}  {base:16.10f}  {std:16.10f}  {stdc:16.10f}   "
+          f"{(stdc - LEADER)*1e6:+8.1f}e-6")
+print("  Every file this workspace builds is standardised, and the ones worth building are")
+print("  ALSO corrected -- read the std+corr column. `gap` is what a NEW build must add to")
+print("  the CV leader to be an even-money shot at the board; negative means already there.")
 
 q.to_csv(os.path.join(HERE, "w26d_queueprice.csv"), index=False)
 json.dump(dict(n=len(q), resid_sd=RESID, best_lb=BEST_LB, p_best_single=float(pbest),

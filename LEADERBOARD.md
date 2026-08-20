@@ -1252,3 +1252,28 @@ is now a three-way tie where it was thinner. Gold is top 14 — we are three pla
 the gap to first is **16e-6**, which the CV→LB model says needs a CV of 0.9701307114 against
 the 0.9701183 best on disk. Slot 10 spent the day proving that the cheap way to find that
 12.6e-6 does not exist (see JOURNAL w29 §2).
+
+## 2026-08-20 00:20 UTC — 0.97118, ~rank 17 of ~1,326
+
+Account best is now **0.97118**, held by three files: `w21_ad187corr_ens4` (08-17) and, as of
+today, `w27_ad190stdcorr` and `w29_ad194stdcorr`. All three are c_avg-**corrected**; that is
+not a coincidence, see RESEARCH §w30.
+
+| # | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97134 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| 4-5 | Don Mani, cstdy | 0.97125 |
+| 6-8 | Utkarsh, Keanan, Szymon Kłapiński | 0.97124 |
+| … | | |
+| ~16 | delai50 | 0.97119 |
+| **~17** | **Teddy Tennant** | **0.97118** |
+
+The whole top 17 spans **16e-6** — 1.6 reporting steps. One step (+1e-5) is worth roughly
+2–3 places at this density; reaching 0.97120 would be ~14th. MILANFX has held #1 since 08-18
+and is 16e-6 clear, which is a real gap, not a slice draw.
+
+The board is dense enough that the *pricing* of a submission matters more than building a
+better object: the same ten files re-priced with the w30 correction term went from
+P(beat 0.97118)=1.7e-3 to 4.8e-2 for the best single file.

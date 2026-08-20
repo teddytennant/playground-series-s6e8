@@ -15528,3 +15528,134 @@ seven `submissions/w29_ad194*` CSVs with their OOF vectors.
 **Modified:** `experiments/w27q_cand.py`, `w28c_coupling.py`, `stdflag.py`, `RESEARCH.md`.
 
 **No submission — at cap, 10/10 for the 08-19 UTC day.**
+
+---
+
+# 2026-08-20 — w30, slot 1 of 10. ANGLE: original dataset (OVERRIDDEN). SENT 10/10.
+
+**The handed angle is one of this workspace's five explicitly-closed routes.** The original
+dataset was found, downloaded to `data/orig/`, and measured on 2026-08-11: concatenating it
+costs **−58e-6 at 1× dose and −3,340e-6 at 50×**, monotone in dose, and a 12-column string
+join finds **0 of 691,369** train and **0 of 296,302** test rows matching it verbatim. The
+usual Playground edge is inverted here. Per the brief's own instruction to override a handed
+angle with a stated reason, this slot took the w29 §7 plan instead.
+
+⚠ **The prompt said "submissions today: 10". That was the 08-19 UTC day.** The run started at
+00:10 UTC on 08-20 — a fresh Kaggle day with 10 slots, which `w26g_send.py` confirmed live
+(`0 already sent on 2026-08-20 (UTC); 10 of 10 slots left`). A run that trusted the prompt's
+count would have skipped a whole day's cap. **Always check `date -u` against the submission
+timestamps before believing you are at cap.**
+
+## 1. ALL TEN SLOTS SENT — and the standing #1 blocker is cleared
+
+`w23b_sendqueue.py` → `w26d_queueprice.py` → `w26g_send.py --go --n 10`, run as written, no
+hand-picking. `w28b_verify.py` cleared all 45 unsent files first: **0 invalid**.
+
+| file | CV | pred LB | **LB** | resid |
+|---|---|---|---|---|
+| `w27_ad190stdcorr` | 0.9701181344 | 0.971161 | **0.97118** | +19.41 |
+| `w29_ad194stdcorr` | 0.9701182875 | 0.971161 | **0.97118** | +19.12 |
+| `w27_ad190std` | 0.9701109338 | 0.971161 | 0.97117 | +9.49 |
+| `w27_ad190std_logit` | 0.9700395047 | 0.971159 | 0.97116 | +1.17 |
+| `w29_ad194std_logit` | 0.9700399362 | 0.971160 | 0.97116 | +0.34 |
+| `w27_ad188raw` | 0.9701113751 | 0.971161 | 0.97116 | −1.37 |
+| `w29_ad194std` | 0.9701116199 | 0.971162 | 0.97116 | −1.84 |
+| `w29_ad194std_rescale` | 0.9700978809 | 0.971158 | 0.97115 | −8.44 |
+| `w27_ad188raw_rescale` | 0.9700989714 | 0.971161 | 0.97115 | −10.56 |
+| `w27_ad190std_rescale` | 0.9700990014 | 0.971161 | 0.97115 | −10.62 |
+
+**`w27_ad190stdcorr` is now on the board, so both `check_selection.WANTED` files are SENT and
+selectable.** That was the standing #1 blocker for seven slots. The only thing left between
+this account and its CV-chosen final pair is a human with a browser — the API has no
+selection endpoint. Account best stays 0.97118, now held three ways, all three corrected.
+
+## 2. ✅ THE PREDICTOR'S FIRST REAL HELD-OUT TEST — and it passes on level, fails on one family
+
+Every earlier out-of-sample check was 1–2 files, which at a ~8.2e-6 paired slice sd against a
+10e-6 reporting step cannot separate a right model from a lucky file. This was **ten at once**,
+every prediction written before upload and quoted verbatim in the submission messages so it is
+not revisable, against a fit containing none of them (`experiments/w30a_oos10.py`):
+
+```
+pooled  mean residual +1.67e-6   z +0.60  -> UNBIASED    sd ratio observed/model 1.26
+        ens4 n3 +2.09 (z +0.41)     logit n2 +0.75 (z +0.12)
+        h3   n2 +19.26 (z +3.08)*   rescale n3 -9.87 (z -1.94)
+```
+
+The level and slope are confirmed. Two families are not.
+
+## 3. ✅ THE HEADLINE: the c_avg correction carries ~+10e-6 of LB the pricer had no term for
+
+Both h3 files in the drain are `*stdcorr`, so within the drain "h3 runs hot" and "CORRECTED
+files run hot" are perfectly confounded. **They are not confounded in the 78-file history** —
+the six corrected files span h3, ens4 *and* rankraw, and there are plenty of uncorrected h3
+files. That is the whole reason this was answerable this slot instead of next week.
+`experiments/w30b_corrterm.py` refits `LB ~ CV + family + standardised + corrected`:
+
+**corr = +12.61e-6, se 4.07, t +3.10.** Residual sd **8.23 → 7.76e-6** — *below* the 8.70e-6
+slice+grid noise floor, i.e. the CV→LB relation is now fully accounted for. Family
+coefficients move <2e-6, so this is not the h3 term in disguise.
+
+⚠ **Quote it as ~+10e-6, not +12.6.** All six corrected files sit near the top of the CV range,
+where a `corr` term can absorb curvature, so three confound checks were run:
+
+| check | corr | t | |
+|---|---|---|---|
+| + quadratic CV term | +9.92 | +2.12 | ✅ |
+| top CV band only, n=22 — where selection actually lives | **+15.71** | **+3.37** | ✅ |
+| drop today's two near-twins (test rho 0.999979 ⇒ ~one reading) | +7.57 | +1.59 | ❌ |
+
+Positive in 4 of 4, significant in 3. **The failed check is the honest one to lead with: about
+half the effect is carried by today's single reading.** It is recorded as such in RESEARCH.
+
+**Why it is mechanism and not fishing.** `c_avg` corrects a train/test missingness-allocation
+residual. Its value is a train→**test** shift correction, and cross-fitted CV is train-on-train,
+so CV *structurally cannot see it*. LB-above-CV is the predicted behaviour of this specific
+object, not a surprise.
+
+⛔ **AND IT DOES NOT MOVE THE PICK, registered before the builds ran** (`w30_prereg_slot1.txt`
+§M15(c)). This is a public-slice measurement; selection here is on CV and the Rogii failure is
+exactly the act of moving a pick on public feedback. It happens to point the same way `WANTED`
+already points (both slots corrected), so it changes nothing today. **The trap for a future
+run: do not invoke "CV understates the correction" to override CV in the other direction.**
+`WANTED` stays `{w27_ad190stdcorr.csv, w23_ad187stdcorr.csv}`.
+
+## 4. THE RE-PRICING CHANGES WHAT IS WORTH BUILDING — the h3 bar was the hardest of four
+
+`w26d_queueprice.py` now reads `w30b_corrterm.json`, `predict()` takes `corrected=`, and the
+bar table gained a **std+corr** column. It also now reads the CV leader **live** — it was
+hard-coded at the w23 leader `0.9701150809`, so every "vs leader" figure printed between w27
+and w29 was 3.0e-6 stale.
+
+CV a new build needs for an even-money shot at 0.97118 (leader 0.9701182875):
+
+| family | std | **std+corr** | gap vs leader |
+|---|---|---|---|
+| h3 | 0.9701320441 | 0.9701252537 | **+7.0e-6** |
+| **ens4** | 0.9701246594 | **0.9701178690** | **−0.4e-6** |
+| rankraw | 0.9701253888 | 0.9701185984 | +0.3e-6 |
+| rescale | 0.9701133922 | 0.9701066018 | −11.7e-6 |
+
+w29 §7 concluded the bar was "+12.6e-6 short, a real project, not a slot". **That was the h3
+bar, and h3 is the hardest of the four.** Best single unsent file, P(beat the board):
+**1.7e-3 → 4.8e-2**, from pricing the same files correctly rather than building anything.
+
+## 5. ⚠ THE OPERATIONAL MISTAKE THIS SLOT MADE, stated plainly
+
+The drain ran at 00:08 UTC — eight minutes into the day — and within the hour the same slot
+found pricing that raised the best file in that batch by 28× and identified three builds
+sitting at the bar. **None can be sent for ~24 hours.** The drain itself was right (two of the
+ten were the pinned `WANTED` file and its twin, whose upload was the #1 blocker), but the
+ordering was not. Rule written into RESEARCH: **send pinned/blocking files immediately, hold
+filler until late in the UTC day.** A file's score does not depend on when it is sent; a
+discovery's does. `--n 2` early, `--n 8` late.
+
+## 6. THREE CORRECTED BUILDS ON THE NON-h3 BASES OF THE 194 PACK
+
+Pre-registered in full at `experiments/w30_prereg_slot1.txt` §M15 **before any fit**, including
+the predicted per-base correction value (+4..+8e-6, point +6.0), the implied CVs, the explicit
+registration that **rankraw and rescale are NOT expected to be competitive**, and the null.
+`w21a_ad187corr.py` verbatim, W21A_BASE/W21A_TAG swapped, 5-arm average shipped
+unconditionally, sub-combination argmaxes printed and not shipped.
+
+Results in §7 below.

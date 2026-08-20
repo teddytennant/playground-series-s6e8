@@ -8017,3 +8017,117 @@ costs nothing) — but they are not a CV improvement and must not be described a
 - `experiments/w27q_cand.py` now takes `--pack-extra` and `--expect` so a candidate can be
   profiled against the 190- or 194-member pack; the 188 default is unchanged so its own stored
   numbers stay reproducible. Output npz is named per `--cand-dir` for anything but the default.
+
+---
+
+# w30 (2026-08-20, slot 1) — the CV→LB model gets its first real held-out test, and gains a term
+
+## ✅ The 10-file held-out test: the predictor is UNBIASED, and that is now established
+
+Every earlier out-of-sample check of the CV→LB predictor was 1–2 files. At a paired slice sd
+of ~8.2e-6 against a 10e-6 reporting step, one file cannot separate "the model is right" from
+"that file drew well", so the §7814 "survives out of sample — 8 files" claim was 8 files read
+one or two at a time. The 08-20 drain sent **ten at once**, every prediction written by
+`w26d_queueprice.py` *before* upload and quoted verbatim in the submission messages (so it is
+not revisable), against a fit containing none of them. `experiments/w30a_oos10.py`:
+
+```
+pooled: mean residual +1.67e-6   sd 11.09   model sd 8.35 (+grid -> 8.83)
+        z of the mean +0.60  -> UNBIASED     sd ratio observed/model 1.26
+by family:  ens4 n3 +2.09 (z +0.41)   logit n2 +0.75 (z +0.12)
+            h3   n2 +19.26 (z +3.08)*  rescale n3 -9.87 (z -1.94)
+```
+
+**The level and slope of the CV→LB relation are confirmed.** What failed was one family.
+
+## ✅ THE c_avg CORRECTION CARRIES ~+10e-6 OF LB THAT CV DOES NOT SEE (`w30b_corrterm.py`)
+
+Both h3 files in the drain were `*stdcorr`, so "h3 runs hot" and "CORRECTED files run hot"
+are perfectly confounded *within the drain*. They are **not** confounded in the 78-file
+history — the six corrected files span h3, ens4 **and** rankraw, and there are plenty of
+uncorrected h3 files. Refitting `LB ~ CV + family + standardised + corrected`:
+
+| | coef | se | t |
+|---|---|---|---|
+| **corr** | **+12.61e-6** | 4.07 | **+3.10** |
+| std | −23.09 | 3.61 | −6.39 |
+
+Residual sd **8.23 → 7.76e-6**, i.e. *below* the 8.70e-6 slice+grid noise floor — the CV→LB
+relation is now fully accounted for. Family coefficients move by <2e-6, so this is not the
+h3 term wearing a hat.
+
+⚠ **Read it as ~+10e-6, not +12.6.** Three confound checks, since all six corrected files sit
+near the top of the CV range where a `corr` term can absorb curvature:
+
+| check | corr | t |
+|---|---|---|
+| + quadratic CV term | +9.92 | +2.12 ✅ |
+| restricted to the top CV band (n=22, where selection lives) | **+15.71** | **+3.37** ✅ |
+| dropping the 08-20 near-twins (rho 0.999979 → ~one reading) | +7.57 | +1.59 ❌ |
+
+Positive in 4 of 4 cuts, significant in 3. The weak check is the honest one to quote: about
+half the effect is carried by the 08-20 reading.
+
+### ⚠ WHY THIS IS PLAUSIBLE RATHER THAN A FISHING RESULT, and the trap in it
+
+`c_avg` corrects a **train/test missingness-allocation residual** (§"The +1.0e-3 CV→LB gap is
+88% a train/test missingness-allocation shift"). Its value is a train→**test** shift
+correction, and cross-fitted CV is train-on-train, so **CV structurally cannot see it.** A
+correction whose whole point is a distribution shift showing up as LB-above-CV is the
+predicted behaviour, not a surprise.
+
+⛔ **The trap: this is a PUBLIC-SLICE measurement and it must not move a pick.** It happens to
+point the same way `WANTED` already points (both slots are corrected files), so it changes
+nothing today. Do not let a future run invoke the "CV understates the correction" argument to
+override CV in the other direction — that is the Rogii failure with a mechanism attached.
+
+## ✅ The pricer now carries the term — and the picture is completely different
+
+`w26d_queueprice.py` reads `w30b_corrterm.json` (was `w26e_famfix.json`), `predict()` takes a
+`corrected=` flag, and the even-money bar table gained a **std+corr** column. The CV leader in
+that table is now read live off the queue — it had been hard-coded at the w23 leader
+`0.9701150809` for three waves, so every "vs leader" figure printed between w27 and w29 was
+3.0e-6 stale.
+
+**CV a NEW build needs for an even-money shot at the 0.97118 board best** (leader 0.9701182875):
+
+| family | std | **std+corr** | gap vs leader |
+|---|---|---|---|
+| h3 | 0.9701320441 | 0.9701252537 | +7.0e-6 |
+| **ens4** | 0.9701246594 | **0.9701178690** | **−0.4e-6** |
+| rankraw | 0.9701253888 | 0.9701185984 | +0.3e-6 |
+| rescale | 0.9701133922 | 0.9701066018 | −11.7e-6 |
+
+The h3 bar this workspace has been quoting (+7 to +15.6e-6 above anything on disk, "a real
+project, not a slot") **is the hardest of the four.** The corrected ens4 and rankraw builds
+on the 194-member pack did not exist, cost one command each, and sit at the bar.
+
+Queue P(beat the board best) for the best single unsent file: **1.7e-3 → 4.8e-2**, purely
+from pricing the same files correctly.
+
+## The rescale family offset was inflated, as w25c itself warned
+
+`fam[rescale]` was fitted at +37.2e-6 off **n=3** in-sample files and w25c flagged it as "the
+one most likely to be an artefact". Three held-out rescale files came in **3 of 3 low**, mean
+−9.87e-6. Now refitted on n=6 at +34.6e-6 and still the largest family term — treat any
+rescale prediction as the least trustworthy row in the table.
+
+## ⚠ OPERATIONAL: DRAIN THE QUEUE AT THE END OF THE UTC DAY, NOT THE START
+
+This slot ran at 00:08 UTC, i.e. eight minutes into a fresh Kaggle day, and spent all ten
+slots immediately on the queue as the w29 §7 plan instructed. Within the same hour the same
+slot found the `corr` term, which re-priced the best file in that batch from P=1.7e-3 to
+4.8e-2, and identified three corrected builds sitting *at* the even-money bar. **None of them
+can be sent for ~24 hours.**
+
+The fix is not "don't drain" — the drain was correct and two of the ten were the pinned
+`WANTED` file and its twin, whose upload was the standing #1 blocker on final selection. The
+fix is ordering:
+
+1. **Send anything PINNED or blocking immediately.** Selectability is worth more than timing.
+2. **Hold the filler until late in the UTC day.** Filler has no deadline; a build discovered
+   at 04:00 does. Draining at 00:08 converts every later discovery into a 24-hour delay for
+   zero gain, because a file's score does not depend on when it is sent.
+
+`w26g_send.py --go --n 10` should therefore be `--n 2` early and `--n 8` late, unless the day
+is already known to be a pure-drain day.

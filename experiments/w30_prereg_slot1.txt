@@ -1,0 +1,55 @@
+w30 PRE-REGISTRATION — 2026-08-20, slot 1 of 10 (08-20 UTC day)
+Written BEFORE any fit in section M15. Nothing below is revisable after a number prints.
+================================================================================
+
+M15. THE c_avg CORRECTION ON THE NON-h3 BASES OF THE 194-MEMBER PACK
+--------------------------------------------------------------------
+WHY. w30b found a c_avg-correction LB term of +12.61e-6 (se 4.07, t +3.10) that the pricer
+had no parameter for, taking its residual sd to 7.76e-6 -- below the 8.70e-6 slice+grid
+noise floor. Re-priced, the even-money CV bar for a std+corr build is:
+    ens4     0.9701178690   =  -0.4e-6 vs the CV leader 0.9701182875
+    rankraw  0.9701185984   =  +0.3e-6
+    rescale  0.9701066018   = -11.7e-6
+    h3       0.9701252537   =  +7.0e-6   <- the only base already built, and the hard one
+Three corrected builds on the 194 pack DO NOT EXIST. They are the cheapest remaining
+candidates that the model says are near even money, and they need no new members.
+
+WHAT WILL BE BUILT. `w21a_ad187corr.py` verbatim -- the 5-arm scheme-average correction,
+all five arms refit from scratch -- with only W21A_BASE/W21A_TAG swapped, three times:
+    W21A_BASE=w29_ad194std          -> w29_ad194stdcorr_ens4
+    W21A_BASE=w29_ad194std_rankraw  -> w29_ad194stdcorr_rankraw
+    W21A_BASE=w29_ad194std_rescale  -> w29_ad194stdcorr_rescale
+The 5-arm average SHIPS UNCONDITIONALLY. Sub-combination argmaxes are printed and NOT
+shipped, for the reason w16i exists.
+
+REGISTERED PREDICTION on the correction's CV value, per base. The correction has bought
++6.494e-6 (159 h3), +6.4e-6 (159 ens4), +6.066e-6 (187 h3), +6.044e-6 (187 ens4) and
++5.72e-6 (187 std h3) -- five readings inside 0.8e-6 of each other, across two packs and
+two transforms. So: **+4 to +8e-6 on each of the three bases, point estimate +6.0e-6.**
+  - A reading OUTSIDE that band on any base falsifies "c_avg's value is invariant to base",
+    which is the standing claim from w16q/w21 and the reason this is worth one run rather
+    than a search.
+  - Registered in advance: the implied CVs are ens4 ~0.9701176, rankraw ~0.9701012,
+    rescale ~0.9701039. ONLY the ens4 build is predicted to land near its own even-money
+    bar (~2e-6 short of it). rankraw lands ~17e-6 short and rescale ~3e-6 short.
+    The rankraw and rescale builds are therefore registered as NOT expected to be
+    competitive; they are built because they cost one command each and complete the
+    base-invariance table at the 194-member pack.
+
+NULL M15(b). If all three corrections come in inside +4..+8e-6 AND the corr LB term is
+real, then w29_ad194stdcorr_ens4 is a ~45-50% shot at the board best on its first send,
+against the 1.7e-3 the whole ten-file queue was priced at this morning. If instead the
+corrections come in near zero on the non-h3 bases, c_avg is h3-specific, w16q's
+transform-invariance result does not extend to the 194 pack, and the route closes.
+
+M15(c). WHAT THIS DOES NOT DO. It does NOT move `check_selection.WANTED`. The +12.61e-6
+corr term is a PUBLIC-SLICE measurement and selection here is on CV, always has been, and
+the Rogii failure is exactly the act of moving a pick on public feedback. WANTED stays
+{w27_ad190stdcorr.csv, w23_ad187stdcorr.csv}. Registered before the builds run so it
+cannot be rationalised after them.
+  ⚠ There IS a non-public-slice argument for the corrected family and it is worth stating
+  because it will be tempting later: c_avg corrects a train/test missingness-allocation
+  residual, so its value is a train->TEST shift correction, and cross-fitted CV -- which is
+  train-on-train -- structurally cannot see it. That would make CV UNDERSTATE the corrected
+  files. It happens to point the same way WANTED already points, so it changes nothing
+  today; it must not be used later to justify overriding CV in the other direction.
