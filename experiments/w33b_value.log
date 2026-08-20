@@ -16,3 +16,46 @@ transform hybrid in 48s
   rep 1 om_cat           n_mem 188 AUC 0.970330 (404s)
   rep 1 om_ftt           n_mem 188 AUC 0.970339 (459s)
   rep 1 both             n_mem 189 AUC 0.970340 (397s)
+  rep 2 base165          n_mem 165 AUC 0.970416 (186s)
+  rep 2 gate_cat4        n_mem 169 AUC 0.970458 (168s)
+  rep 2 pack             n_mem 187 AUC 0.970464 (175s)
+  rep 2 om_cat           n_mem 188 AUC 0.970465 (170s)
+  rep 2 om_ftt           n_mem 188 AUC 0.970470 (181s)
+  rep 2 both             n_mem 189 AUC 0.970467 (172s)
+  rep 3 base165          n_mem 165 AUC 0.969807 (174s)
+  rep 3 gate_cat4        n_mem 169 AUC 0.969859 (149s)
+  rep 3 pack             n_mem 187 AUC 0.969873 (132s)
+  rep 3 om_cat           n_mem 188 AUC 0.969870 (149s)
+  rep 3 om_ftt           n_mem 188 AUC 0.969876 (162s)
+  rep 3 both             n_mem 189 AUC 0.969873 (114s)
+  rep 4 base165          n_mem 165 AUC 0.969752 (54s)
+  rep 4 gate_cat4        n_mem 169 AUC 0.969796 (53s)
+  rep 4 pack             n_mem 187 AUC 0.969804 (69s)
+  rep 4 om_cat           n_mem 188 AUC 0.969805 (57s)
+  rep 4 om_ftt           n_mem 188 AUC 0.969814 (68s)
+  rep 4 both             n_mem 189 AUC 0.969810 (64s)
+
+held-out AUC per 50/50 split
+ rep  base165  gate_cat4     pack   om_cat   om_ftt     both
+   0 0.970100   0.970147 0.970158 0.970156 0.970167 0.970165
+   1 0.970291   0.970331 0.970333 0.970330 0.970339 0.970340
+   2 0.970416   0.970458 0.970464 0.970465 0.970470 0.970467
+   3 0.969807   0.969859 0.969873 0.969870 0.969876 0.969873
+   4 0.969752   0.969796 0.969804 0.969805 0.969814 0.969810
+
+REPRODUCTION GATE (prereg R-E2) -- w20d's cat4 row was +0.000041
+  here +0.000045 +/- 0.000005 over 5 reps  -> PASS
+
+PAIRED vs the pack (same rows with and without the member)
+  om_cat           n 1  -0.000001 +/- 0.000002  per member -1.29e-06  t -1.26  [SIGN FLIPS]
+  om_ftt           n 1  +0.000007 +/- 0.000003  per member +6.86e-06  t +5.57  [consistent]
+  both             n 2  +0.000005 +/- 0.000003  per member +2.27e-06  t +3.41  [SIGN FLIPS]
+
+PREREG §E3 said: each member 0 to +4e-6 (ctr2) / 0 to +3e-6 (natlat),
+the pair together +1 to +7e-6 on the combiner, modal +2.5e-6.
+Anything above +10e-6 is disbelieved on sight and re-run on fresh reps.
+  om_cat           NULL
+  om_ftt           clears the null
+  both             NULL
+
+wrote w33b_value.csv / .json

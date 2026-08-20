@@ -91,6 +91,10 @@ CORR_MAP = {
     "w29_ad194stdcorr_ens4": "ens4",
     "w29_ad194stdcorr_rankraw": "rankraw",
     "w29_ad194stdcorr_rescale": "rescale",
+    # w34 slot 5: the same 5-arm correction on the h3 base of the om_ftt packs. Same
+    # construction as w29_ad194stdcorr, one member wider.
+    "w34_ad195stdcorr": "h3",           # 194 + om_ftt
+    "w34_ad196stdcorr": "h3",           # 194 + om_ftt + om_cat
 }
 
 

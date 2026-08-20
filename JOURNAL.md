@@ -16224,3 +16224,254 @@ and measure, not a number to add to 0.9701182875 on paper.**
 consider `--drop om_cat` or move it to the quarantine dir) and get its cross-fitted CV on the
 frozen folds head-to-head with 0.9701182875. If it clears, that is the day's lead candidate and
 the first genuine CV improvement in a week. Send it early, not at 00:08.
+
+---
+
+# 2026-08-20 — w34, slot 5 of 10. ANGLE: feature engineering (OVERRIDDEN). AT CAP, no submission.
+
+**Cap check first, per w30 §9.1.** `date -u` = 2026-08-20 02:37. The API shows ten
+submissions stamped 2026-08-20 00:07–00:08, drained by w30. **Genuinely at cap; the prompt's
+"10 today" is right for once.** No submission attempted and none should have been.
+
+**HEADLINE: a new CV leader, +6.51e-6, the first genuine CV improvement in a week — and the
+supply route that produced it paid a second time in the same slot.**
+
+## 0. The handed angle is closed, and the arithmetic says so
+
+Feature engineering — interactions, in-fold target/count encodings, categorical treatment —
+is not an open route here, and the reason is a multiplier, not a preference:
+
+- Target + frequency encoding at full resolution is **already in the pipeline** and is the
+  single biggest win on record (+0.0023 CV). Interactions/ratios were measured at +0.0005 and
+  are largely superseded by it; pairwise TE (−0.0004, −0.0001), multi-resolution TE (−0.0003)
+  and monotone constraints (−0.0003) are all measured negatives.
+- w29 §7 item 5 explicitly closes **feature-set variants of the lattice pipeline** (w27q/w27r).
+- The binding number: **solo→stack pass-through here is 1.4%**, and RESEARCH 805 prices tuning
+  any GBDT into this stack at ~4e-7. A new FE-variant member would have to be worth **+0.0007
+  solo** to yield +1e-5 into the stack — larger than every FE delta ever measured in this
+  workspace except the TE win that is already in.
+
+Overridden under the brief's own clause. What I did instead is w33 §8 item 2 (build the om_ftt
+stack) and item 4 (re-run the level-2-as-bibliography scan), and both paid.
+
+## 1. ⚠⚠ THE NEW CV LEADER — `w34_ad195stdcorr`, CV 0.9701247949
+
+`experiments/w34a_run.sh` = `w29c_run.sh` VERBATIM with `ext_members10` added to
+`--extra-dirs` and `om_cat` dropped, so `submissions/w29_ad194std*.csv` on disk are a matched
+control and the delta is attributable to **one member**: `om_ftt`, the FT-Transformer w33
+imported from `omidbaghchehsaraei`.
+
+| object | w29 (194) | **w34 (195, +om_ftt)** | Δ |
+|---|---|---|---|
+| stack_logit | 0.9700399 | 0.9700440 | +4e-6 |
+| stack_hybrid | 0.9701060 | 0.9701110 | +5e-6 |
+| stack_rankraw | 0.9700930 | 0.9700980 | +5e-6 |
+| stack_rescale | 0.9700980 | 0.9701060 | +8e-6 |
+| ens4 (all four) | 0.9701116199 | 0.9701180 | +6e-6 |
+| h3 base | 0.9701140064 | **0.9701205753** | **+6.57e-6** |
+| **stdcorr (5-arm, shipping)** | 0.9701182875 | **0.9701247949** | **+6.51e-6** |
+
+**All four transform stacks move the same way — 4/4, no cancellation.** That matters because
+w29's own member-addition null was a *cancellation*: rankraw negative in 4/4 while hybrid and
+rescale were positive, so its h3 flat reading hid an effect that the rank transform was
+deleting. Nothing of that shape appears here.
+
+The correction step reproduced its usual structure and **did not ship the argmax**: five arms
+all positive (glob +0.54, a_only +3.08, rule +4.40, mask +1.92, decile +2.71 e-6), scheme-
+selection optimism measured at +2.54e-6, argmax was the 4-arm drop-mask at 0.9701250014, and
+the pre-registered 5-arm at 0.9701247949 is what was written. File validated: 296,302 distinct
+values, range [3.4e-06, 1.000], **not rank-identical to anything already on disk**.
+
+### Three independent instruments agree, in the order they were run
+
+1. **w26i paired 50/50, run in w33 BEFORE any build** — `om_ftt` +7.5e-6, sign stable 2/2 reps,
+   with the `cat4` reproduction gate returning +4.35e-5 against w20d's required +4.1e-5.
+2. **The h3 base against its matched 194 control** — +6.57e-6.
+3. **The corrected shipping object** — +6.51e-6.
+
+⚠ This is the first time in this workspace that a paired-instrument prediction has been
+confirmed by a cross-fitted frozen-fold build at nearly the same magnitude. RESEARCH's
+standing warning is that paired deltas do not transfer one-for-one, and it should stay — 7.5
+vs 6.5 is a 13% shrink, not a match — but the direction and the order of magnitude both held.
+
+## 2. `check_selection.WANTED` HAS MOVED — the first change to the leader slot since w23
+
+    WANTED = {"w34_ad195stdcorr.csv", "w23_ad187stdcorr.csv"}
+
+w29 built a file at +0.15e-6 on the leader and correctly refused to move: 0.15e-6 is 4% of the
+~4e-6 rebuild reproducibility floor. The 190-over-188 promotion was made on 4/4 at +2.13e-6.
+**+6.51e-6 is 1.6x the floor and 3x that promotion's margin**, corroborated by three
+instruments and 4/4 on the transforms. Refusing to move on this evidence would be a different
+error from the one w29 avoided, not the same one.
+
+The **second pick is unchanged**: `w23_ad187stdcorr` stays the pack hedge — identical
+construction on the 187 pack without any member additions, and it has a real LB print
+(0.97116) where no w27/w29/w34 file does. Pairing the two newest twins was declined again on
+w29's ground: test rho ~0.99998, so there is no diversification in it.
+
+⚠⚠ **`w34_ad195stdcorr.csv` IS NOT SELECTABLE UNTIL IT IS SENT.** It was built at cap. The
+w28 `priority` column pins WANTED to the head of the send queue and `w34d_requeue.sh` rebuilt
+that queue this slot, so the 08-21 day's **first** slot sends it. `check_selection.py`'s own
+comment records the slot-1 pick sitting unsent for four slots while three journal entries said
+"send it first". Do not repeat that.
+
+### ⚠ PRE-REGISTERED, written while ARM 2 was still fitting
+
+`w34_ad196stdcorr` (the same pack **plus** `om_cat`) is a **sign check on om_cat, not a
+candidate**. The paired instrument priced om_cat at −2.5e-6 with a stable sign in 2/2 reps
+before either build started, and at maxcorr 0.9935 against `bolt_cat_nested_te` it is the
+ninth CatBoost of its kind in the pack. **If ARM 2 lands marginally above ARM 1 anyway, WANTED
+does not move to it** — that would be a ~2e-6 difference between near-twins against a prior
+measurement that says negative, i.e. exactly the argmax-chasing this workspace has a
+pre-registration file to prevent. Registered here before the number exists.
+
+## 3. THE BIBLIOGRAPHY ROUTE PAID AGAIN — and this time it indexed the whole public pool
+
+w33's technique: a level-2 stacker names every base model it loads, so read it as a
+bibliography. Applied to `ravi20076/playgrounds6e8-public-l2stack-v1`, whose loads point at
+**`ravi20076/playgrounds6e8-datacollation-v1`** — a notebook that exists for no purpose other
+than to enumerate the public base-model pool. One `kernels pull -m` on it named six kernels
+and the exact artefact each publishes, and produced **more candidates than the last three
+dataset scans combined**.
+
+**The pattern to hunt is an author with a `*-datacollation-*` / `*-imports-*` / `*-l2stack-*`
+series** — systematic Kagglers split their pipeline across kernels and the collation kernel is
+a machine-readable index of everyone else's OOF.
+
+### ⚠⚠ Two corrections to this workspace's own pool ledger
+
+1. **`tamerlanomralinov` was filed as "submission only, no OOF". True of its DATASET, false of
+   its KERNEL OUTPUT**, which ships six `.npy`. **`kaggle kernels output` and `kaggle datasets
+   download` are different endpoints returning different files** — a ref excluded on one has
+   NOT been excluded on the other. Every "submission only" row in RESEARCH needs re-checking.
+2. **`donmarch14/s6e8-catboost` and `/s6e8-lgbm` publish `oof_preds.csv` with `id`,
+   `addicted_label` AND `oof_pred`, and had never been opened** — 23 and 21 votes, on the
+   front page since 08-04, skipped because every scan was looking for *libraries* and these
+   are titled as plain single-model baselines. Their author is **rank 4 on the public LB**.
+
+## 4. THE w34 LEDGER — 9 candidates, 2 clean (`experiments/w34b_vet.py`)
+
+Same seven gates as w33a. **Gate 4 — per-fold AUC under our frozen SKF5 vs the author's own
+printed per-fold numbers, in order — lands harder than it ever has:**
+
+| member | solo AUC | gate-4 maxdiff | maxcorr | disposition |
+|---|---|---|---|---|
+| `ravi_xgb1c` | 0.964201 | **4.5e-09** | 0.99278 | ✅ clean → `ext_members11/` |
+| `ravi_lgbm1c` | 0.964173 | **2.8e-09** | 0.99224 | ✅ clean → `ext_members11/` |
+| `ravi_cb1c` | 0.963944 | 4.7e-09 | 0.99346 | ⛔ es-on-val → `ext_members11es/` |
+| `ravi_realmlp1c` | 0.964668 | 5.0e-09 | 0.98979 | ⛔ es-on-val (patience 15) |
+| `dm_cat` | 0.966700 | 4.4e-07 | 0.99726 | ⛔ es-on-val (`best iteration:`) |
+| `dm_lgb` | 0.966392 | 5.0e-07 | 0.99652 | ⛔ es-on-val (`Best Iter =`) |
+| `tam_lkup` | 0.968756 | — | — | ⛔ **N_FOLDS = 3, foreign partition** |
+| `tam_cat` | 0.968006 | — | — | ⛔ same, + es-on-val |
+| `tam_lgb` | 0.968077 | — | — | ⛔ same, + es-on-val |
+| `mhamza0810/…-0-96947` | — | — | — | ⛔ the `.npy` were not retained in the output, only the log |
+
+**`ravi20076`'s four reproduce their printed per-fold AUCs to 4e-9 — nine decimal places.**
+That is not "compatible folds": it is the same partition, the same fold *labelling* and the
+same row indexing, confirmed to the float32 storage floor. `donmarch14`'s 4e-7 is simply its
+log's 6-decimal printing floor. Gate 2 also passed at **0 label mismatches** on both
+`donmarch14` members, which is stronger still — AUC reproduction proves the rows are in *some*
+consistent order, an exact label match proves the indexing is ours.
+
+⚠ **The `tam_*` three are w33 §3's trap all over again.** They carry the three highest solo
+AUCs of the nine (0.9680–0.9688, *above* the pack median) — and they are the only three that
+are both foreign-partition and selected on the scored fold. **High solo AUC in a foreign
+member is evidence of optimism, not of quality.**
+
+## 5. ⚠ CatBoost `use_best_model` DEFAULTS TO TRUE — a silent es-on-val no grep will find
+
+`ravi20076/training.py` line 115 passes `eval_set=[(Xdev, ydev)]` to **every** model, and the
+v1 `fit_params` carry only `verbose: 0` — no `early_stopping_rounds`, no callback. For
+**XGBoost 2.x and the LightGBM sklearn wrapper that is pure logging and selects nothing**, so
+`ravi_xgb1c` and `ravi_lgbm1c` are honest. **CatBoost is the exception: supplying an eval set
+turns `use_best_model` on by default**, and no `use_best_model=False` appears anywhere.
+
+Same file, same line, three models, and exactly one has an optimistic OOF. **Grepping for
+`early_stopping_rounds` is not sufficient to clear a member: for CatBoost the presence of an
+`eval_set` IS the finding unless `use_best_model=False` is explicit.**
+
+**The es-on-val base rate in the public pool is roughly 2 in 3** — w33: 5 of 7; w34: 4 of 6.
+Assume a foreign member early-stops on the fold it reports until its source proves otherwise.
+
+## 6. WHAT THE TWO CLEAN MEMBERS ARE PROBABLY WORTH — measuring, not claiming
+
+`experiments/w34c_run.sh` is queued behind the builds and runs the same paired 50/50
+instrument that priced om_ftt. **No number is quoted here — it had not finished when this
+entry was written, and R-N5 forbids a partial table.**
+
+⚠ **Registered expectation, so the next slot reads the table against something written
+first.** These are **not** the om_ftt profile. om_ftt paid because it is a *pipeline class the
+pack did not hold* (FT-Transformer, maxcorr 0.9845). These two are an XGBoost and a LightGBM
+at solo 0.9642 — **below** the pack median 0.966 — at maxcorr ~0.992 against a pack whose
+median is 0.9946. They clear w29's acceptance gate (decorrelated AND within 0.005 of the pack
+median solo) but only just. **The honest prior is 0 to +2e-6 each, i.e. probably a null.** They
+are measured anyway because they are honest, free, and measurement is the only thing that
+separates "another GBDT" from "the one that mattered".
+
+## 7. ⚠⚠ OPERATIONAL — the Kaggle CLI has a 30-MINUTE DEAD WINDOW after the token expires
+
+Mid-slot every `kaggle` call began returning `Authentication required to call the Kaggle API`
+while calls two minutes earlier had worked. **Not an expired credential, not a rate limit — a
+sign error in the SDK**, at `kagglesdk/kaggle_creds.py`:
+
+```python
+return not self._access_token_expiration or self._access_token_expiration < datetime.now(
+    timezone.utc) - timedelta(minutes=30)          # MINUS. Should be PLUS, to refresh EARLY.
+```
+
+The intent is a 30-minute margin *before* expiry; subtracting puts it *after*. So for **30
+minutes after the token actually expires** the CLI believes it is valid, sends it, and Kaggle
+401s. Our token expired 02:39:05 and the failures began at 02:40. Fixed in seconds by calling
+`refresh_access_token()` directly, which ignores the broken predicate — new expiry 14:41:49,
+CLI recovered immediately. Full diagnosis and the copy-paste fix are in RESEARCH.
+
+**The access token lasts 12 hours, so this window can open twice a day and will eventually
+open in the middle of a send day.** A run that reads "Authentication required" as a dead
+credential would report itself blocked and skip a whole submission day for nothing. That is
+the same failure shape as the other two blockers here: the error message names the wrong cause.
+
+## 8. ⚠ A maxcorr gate must load `ext_members` + `ext_members2` explicitly
+
+`blend_lab.load_all` **prepends** those two dirs to whatever `--extra-dirs` names, so w34b's
+first run scored gate 7 against a **92-member subset of the 195-member pack** and an
+already-held member could have walked straight through. Fixed with `assert len(bn) == 195`.
+**Any instrument claiming to compare against "the pack" must assert its member count.**
+
+## 9. ⛔ BLOCKERS UNCHANGED — both still need Teddy
+
+- **`git push` still fails**, 7 commits deep before this slot's own. `origin` is HTTPS, the
+  credential helper shells out to `gh`, and `gh` is not installed; no `ssh` binary, no `nix`,
+  no `~/.git-credentials`, no `GH_TOKEN`. Work is committed and safe locally. Not thrashed on.
+- **The final-selection click.** `check_selection.py` reports nothing selected, and Kaggle's
+  auto-pick takes the best PUBLIC scores — the Rogii failure run by Kaggle. WANTED is now
+  `{w34_ad195stdcorr.csv, w23_ad187stdcorr.csv}`, chosen on CV.
+
+## 10. NEXT RUN, IN ORDER
+
+1. **`date -u` vs the submission timestamps before believing any cap claim.** The 08-21 UTC
+   day opens at 00:00 with 10 fresh slots.
+2. **SEND `w34_ad195stdcorr` FIRST.** It is the CV leader by +6.51e-6, it is pinned to the
+   head of the rebuilt queue, and it is **not selectable until it lands**. Then run
+   `check_selection.py`. Send the rest of the day's slots late (w30 §5, still unlearned).
+3. **Read `experiments/w34c_value.csv` and the ARM 2 result in `w34a_ad195.log`.** Check the
+   `cat4` gate returned ~+4.1e-5 before believing any row. If `ravi_xgb1c`/`ravi_lgbm1c` are
+   positive, rebuild with `--extra-dirs …,ext_members10,ext_members11`; if they are the null
+   §6 predicts, say so and do not build.
+4. **Run the bibliography scan again — it is now 2 for 2.** For every stacker on the vote
+   list, read what it *loads*, then `kaggle kernels output` (not `datasets download`) on each
+   base ref. `omidbaghchehsaraei` and `ravi20076` are exhausted; the rest are not.
+5. **The nine quarantined es-on-val members** (`ext_members10es/`, `ext_members11es/`) are not
+   dead. The honest way to use them is an instrument immune to their bias, not a pack refit.
+6. ⛔ Do **NOT** re-open: feature engineering / FE-variant members (§0); the original dataset;
+   tuning any CatBoost or XGBoost; cheap new model classes; `w29g`-shaped screens; the stacker
+   C; fold-seed averaging; the fold-leakage explanation of the family term.
+
+**Files added:** `experiments/w34a_run.sh`, `w34b_vet.py`, `w34b_vet.{csv,json}`,
+`w34c_run.sh`, `w34d_requeue.sh` and their logs; `data/ext_members11/` (2 clean),
+`data/ext_members11es/` (4 quarantined); `submissions/w34_ad195*.csv` + OOF vectors;
+`notebooks/w34/` (sources, kernel outputs, bibliography). **Modified:** `experiments/stdflag.py`
+(CORR_MAP += the two w34 stems, same commit as the build, per the standing rule),
+`experiments/check_selection.py` (WANTED moved), `RESEARCH.md`, `LEADERBOARD.md`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**

@@ -1,0 +1,10 @@
+member,source,g1_shape_ids,g2_label_mismatch,oof_auc,log_auc,g3_auc_ok,g5_credible,g4_maxdiff,g4_ok,foreign_partition,es_on_val,hard_gates,maxcorr,nearest
+dm_cat,donmarch14/s6e8-catboost,True,0.0,0.96670012544794,0.9667,True,True,4.404270056435067e-07,True,,CatBoost od_type + `best iteration: N` printed per fold; eval_set is the scored fold,True,0.997262122528547,digit_cat
+dm_lgb,donmarch14/s6e8-lgbm,True,0.0,0.9663919918385531,,True,True,4.976793316346928e-07,True,,`Fold k: auc | Best Iter = N` -- LightGBM early stopping on valid_0 = the scored fold,True,0.9965235347458782,digit_lgbm
+ravi_cb1c,ravi20076/playgrounds6e8-public-baseline-v1:CB1C,True,,0.9639441018700132,,True,True,4.730121738738546e-09,True,,"CatBoost use_best_model defaults True with eval_set=[(Xdev,ydev)]; no explicit False in source",True,0.993463687044732,pub_cat
+ravi_lgbm1c,ravi20076/playgrounds6e8-public-baseline-v1:LGBM1C,True,,0.9641730989593497,,True,True,2.7521107615058327e-09,True,,,True,0.9922423527111065,bei_xgb_identity_digit_raw12
+ravi_realmlp1c,ravi20076/playgrounds6e8-public-baseline-v2:REALMLP1C,True,,0.9646676404795624,,True,True,4.975191369993581e-09,True,,"CFG early_stopping=True with additive patience 15, on the scored fold",True,0.9897891274558466,pub_cat
+ravi_xgb1c,ravi20076/playgrounds6e8-public-baseline-v1:XGB1C,True,,0.9642014816182081,,True,True,4.472798686983026e-09,True,,,True,0.9927758440584227,bei_xgb_identity_digit_raw12
+tam_cat,tamerlanomralinov/...:catboost,True,,0.9680064694604968,,True,True,,False,"notebook sets N_FOLDS = 3, not our SKF5",use_best_model / od_type on the scored fold,False,,
+tam_lgb,tamerlanomralinov/...:lightgbm,True,,0.9680774400800094,,True,True,,False,"notebook sets N_FOLDS = 3, not our SKF5",early stopping on the scored fold,False,,
+tam_lkup,tamerlanomralinov/...:lookup_transformer,True,,0.9687564508559878,,True,True,,False,"notebook sets N_FOLDS = 3, not our SKF5",`fold_k ep_n valAUC=.. best=..` keeps the best epoch by val AUC,False,,

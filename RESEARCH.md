@@ -8565,3 +8565,147 @@ Commits are safe locally and stack up: `git log --oneline origin/main..HEAD` was
 end of w32. **Do not thrash on this** — commit as usual, check that count, and report it.
 Fixing it needs Teddy: install+auth `gh`, add a PAT to `~/.git-credentials`, or switch the
 remote to SSH. Same class of blocker as the final-selection click.
+
+---
+
+# ⚠⚠ OPERATIONAL: the Kaggle CLI has a 30-MINUTE DEAD WINDOW after the token expires
+
+**Found w34, 2026-08-20 02:41 UTC, mid-slot.** Every `kaggle` call started returning
+
+    Authentication required to call the Kaggle API.
+    First, you will need a Kaggle account...
+
+while calls two minutes earlier had worked. **This is NOT an expired credential and it is
+NOT a rate limit.** It is a sign error in the SDK, at
+`~/.local/share/uv/tools/kaggle/lib/python3.12/site-packages/kagglesdk/kaggle_creds.py`:
+
+```python
+def access_token_has_expired(self) -> bool:
+    return not self._access_token_expiration or self._access_token_expiration < datetime.now(
+        timezone.utc
+    ) - timedelta(minutes=30)          # <-- MINUS. Should be PLUS, to refresh EARLY.
+```
+
+The intent is a 30-minute safety margin *before* expiry; subtracting instead of adding puts
+the margin *after* it. So for **30 minutes after the access token actually expires**, the
+CLI believes it is still valid, sends it, and Kaggle 401s. The refresh token is fine and the
+window closes on its own — but a run that reads "Authentication required" as a dead
+credential will report itself blocked and skip a submission day for nothing.
+
+**Diagnose in one command** (the expiry is stored in plaintext next to the token):
+
+```bash
+.venv/bin/python -c "import json;print(json.load(open('/home/nixos/.kaggle/credentials.json'))['access_token_expiration'])"
+date -u
+```
+
+If `now` is within 30 minutes *after* that timestamp, this is the bug. **Fix it in seconds**
+— `refresh_access_token()` uses the refresh token directly and ignores the broken predicate:
+
+```bash
+cp ~/.kaggle/credentials.json ~/.kaggle/credentials.json.bak     # it is the only credential
+/home/nixos/.local/share/uv/tools/kaggle/bin/python -c "
+from kagglesdk import KaggleClient
+from kagglesdk.kaggle_creds import KaggleCredentials
+with KaggleClient() as k:
+    KaggleCredentials.load(client=k).refresh_access_token()
+print('refreshed')"
+```
+
+Verified working: token expiring 02:39:05 was refreshed at 02:41:49 to 14:41:49 and the CLI
+recovered immediately. **The access token lasts 12 hours**, so this window can open twice a
+day and WILL eventually open in the middle of a send day. `kaggle auth login` is the other
+route and it needs a browser, i.e. it needs Teddy — do not reach for it first.
+
+⚠ Note what this shares with the two standing blockers: the failure message names the wrong
+cause. "Authentication required" reads as *your credential is gone*, and the correct
+response is *wait 30 minutes or call one function*.
+
+# THE BIBLIOGRAPHY ROUTE, PART 2 — a DataCollation notebook is a curated pool index
+
+w33 established that a level-2 stacker names every base model it loads, so it can be read as
+a bibliography of importable level-1 members. w34 extends this and finds the strongest form
+of it on file:
+
+> `ravi20076/playgrounds6e8-public-l2stack-v1` loads from
+> **`ravi20076/playgrounds6e8-datacollation-v1`**, and that notebook exists for no other
+> purpose than to enumerate the public base-model pool. It names six kernels and the exact
+> artefact each publishes. One `kaggle kernels pull -m` on it produced more candidates than
+> the last three dataset scans combined.
+
+**The pattern to look for is an author with a `*-datacollation-*` / `*-imports-*` /
+`*-l2stack-*` series.** They are systematic Kagglers who split their pipeline across kernels,
+and the collation kernel is a machine-readable index of everyone else's OOF.
+
+## ⚠⚠ TWO CORRECTIONS TO THIS FILE'S OWN POOL LEDGER
+
+1. **`tamerlanomralinov` was filed as "submission only, no OOF". That was true of its
+   DATASET and false of its KERNEL OUTPUT**, which ships `oof_{lookup_transformer,catboost,
+   lightgbm}.npy` plus the three test vectors. **`kaggle kernels output <ref>` and
+   `kaggle datasets download` are different endpoints returning different files, and a
+   ref excluded on one has NOT been excluded on the other.** Re-check any "submission only"
+   row in this file against `kernels output` before believing it.
+2. **`donmarch14/s6e8-catboost` and `donmarch14/s6e8-lgbm` (23 and 21 votes, on the
+   front page since 08-04) publish `oof_preds.csv` with `id`, `addicted_label` AND
+   `oof_pred`, and were never opened here** — because they are titled as plain single-model
+   baselines and every scan on file was looking for libraries. The author (`Don Mani`) is
+   **rank 4 on the public LB**. A notebook does not have to look like a library to be one.
+
+## The w34 ledger — 9 candidates, 2 clean (`experiments/w34b_vet.py`)
+
+Same seven gates as w33a. Gate 4 (per-fold AUC under our frozen SKF5 vs the author's own
+printed per-fold numbers, in order) lands harder here than it ever has:
+
+| member | source | solo AUC | gate-4 maxdiff | disposition |
+|---|---|---|---|---|
+| `ravi_xgb1c` | ravi20076 baseline-v1:XGB1C | 0.964201 | **4.5e-09** | ✅ clean → `ext_members11/` |
+| `ravi_lgbm1c` | ravi20076 baseline-v1:LGBM1C | 0.964173 | **2.8e-09** | ✅ clean → `ext_members11/` |
+| `ravi_cb1c` | ravi20076 baseline-v1:CB1C | 0.963944 | 4.7e-09 | ⛔ es-on-val → `ext_members11es/` |
+| `ravi_realmlp1c` | ravi20076 baseline-v2 | 0.964668 | 5.0e-09 | ⛔ es-on-val (patience 15) |
+| `dm_cat` | donmarch14/s6e8-catboost | 0.966700 | 4.4e-07 | ⛔ es-on-val (`best iteration:`) |
+| `dm_lgb` | donmarch14/s6e8-lgbm | 0.966392 | 5.0e-07 | ⛔ es-on-val (`Best Iter =`) |
+| `tam_lkup` | lookup transformer | 0.968756 | — | ⛔ **N_FOLDS = 3, foreign partition** |
+| `tam_cat` | tamerlanomralinov catboost | 0.968006 | — | ⛔ same, + es-on-val |
+| `tam_lgb` | tamerlanomralinov lightgbm | 0.968077 | — | ⛔ same, + es-on-val |
+| `mhamza0810/...-cv-0-96947` | — | — | — | ⛔ the `.npy` were not retained in the kernel output, only the log |
+
+**`ravi20076`'s four members reproduce their printed per-fold AUCs to 4e-9** — nine decimal
+places. That is not "compatible folds", it is the same partition, the same fold *labelling*
+and the same row indexing, confirmed to the float32 storage floor. `donmarch14`'s 4e-7 is
+simply its log's 6-decimal printing floor. Gate 4 is the strongest instrument in this
+workspace and it should be the first thing run on any new candidate.
+
+⚠ **The `tam_*` three are the exact trap w33 §3 described, again.** They carry the highest
+solo AUCs of the nine (0.9680–0.9688, better than the pack median) — and they are the only
+three produced under a foreign partition AND selected on the scored fold. High solo AUC in a
+foreign member is evidence of *optimism*, not of quality.
+
+## ⚠ CatBoost `use_best_model` DEFAULTS TO TRUE — a silent es-on-val no grep will find
+
+`ravi20076`'s `training.py` passes `eval_set=[(Xdev, ydev)]` to **every** model and its
+`fit_params` carry only `verbose: 0` — no `early_stopping_rounds`, no callback. For
+**XGBoost 2.x and the LightGBM sklearn wrapper that is pure logging and selects nothing**, so
+`ravi_xgb1c` and `ravi_lgbm1c` are honest. **CatBoost is the exception: supplying an eval set
+turns `use_best_model` on by default**, and the notebook never sets it False. Same code, same
+line, three models, and only one of them has an optimistic OOF.
+
+**Rule: grepping for `early_stopping_rounds` is not sufficient to clear a member. For
+CatBoost, the presence of an `eval_set` IS the finding unless `use_best_model=False` appears
+explicitly.** `ravi_cb1c` is quarantined on exactly this and nothing else.
+
+## ⚠ The es-on-val base rate in the public pool is roughly 2 in 3
+
+w33: 5 of 7 new members. w34: 4 of 6 hard-gate passers. **Assume a foreign member early-stops
+on the fold it reports until its source proves otherwise** — the burden is on the member.
+This is why `data/ext_members*es/` exists as a separate quarantine tree, on no build's
+`--extra-dirs` list: the bias runs the same direction as the selection criterion, so it buys
+CV the leaderboard will not pay. That is the Rogii failure with an import step in front.
+
+## ⚠ A maxcorr gate must load `ext_members` + `ext_members2` explicitly
+
+`blend_lab.load_all` **prepends** `data/ext_members` and `data/ext_members2` to whatever
+`--extra-dirs` names, so a gate that passes only the `--extra-dirs` list scores against a
+**92-member subset of the 195-member pack**. w34b's first run did exactly that, and an
+already-held member could have walked straight through gate 7. Fixed with an
+`assert len(bn) == 195`. **Any instrument that claims to compare against "the pack" must
+assert its member count**, which is the same discipline `w32c_famholdout.py` already applies.

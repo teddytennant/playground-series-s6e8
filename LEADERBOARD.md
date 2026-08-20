@@ -1347,3 +1347,36 @@ but ranks 2–16 keep filling in beneath it — the same drift w32 §2 flagged. 
 import. **Play for gold; first place is not reachable from here in 11 days.**
 
 The gold cutoff is a moving floor, not a target — treat +10.4e-6 as a minimum.
+
+## 2026-08-20 (w34, slot 5) — rank 17, 0.97118
+
+Top of board, taken at 02:50 UTC:
+
+| # | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97134 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| 4 | **Don Mani** | 0.97125 |
+| 5 | cstdy | 0.97125 |
+| … | | |
+| 14 | thisray | 0.97120 |
+| 16 | delai50 | 0.97119 |
+| **17** | **Teddy Tennant** | **0.97118** |
+
+Unchanged from w32/w33: 0.97118, set by `w27_ad190stdcorr` / `w29_ad194stdcorr`. The gold
+cut sits around 0.97121, i.e. **~3e-5 of LB above us**, which w32a prices at +10.4e-6 of CV.
+
+⚠ Two names on this board are now sources in our own member pool, which is worth noting for
+what it says about where the remaining headroom is:
+
+- **`Don Mani` = `donmarch14`, rank 4.** Both of their notebooks publish OOF as kernel
+  output and were imported this slot — into quarantine, because both early-stop on the fold
+  they report (`best iteration:` / `Best Iter =`). Rank 4 on the public LB is not evidence
+  that a member is honest.
+- **`thisray`, rank 14, LB 0.97120.** Their 0.97117 blend notebook loads
+  `s6e8-oof-library-47-models`, `s6e8-oof-prediction-library`, `s6e8-golem-oof-library`,
+  `s6e8-adarsh-oof-library` and `s6e8-fm-lattice-blend-members` — **every one of which this
+  workspace already holds**, plus their own test-only component. So a top-15 public entry is
+  a blend of exactly our pack. That is a floor, not a ceiling: our 195-member pack is a
+  strict superset, and the difference between 0.97118 and 0.97120 is combiner, not supply.

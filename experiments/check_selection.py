@@ -194,7 +194,48 @@ COMP = "playground-series-s6e8"
 # (24 rows, built before any of these files existed) so the sender could not see them. Fixed
 # in w28 by re-running `w23b_sendqueue.py` and by adding a `priority` column that pins
 # whatever is in WANTED to the head of the queue. Slot 2 IS selectable now.
-WANTED = {"w27_ad190stdcorr.csv", "w23_ad187stdcorr.csv"}
+#
+# ⚠⚠ MOVED 2026-08-20 by w34 (slot 5) — the first change to the CV-leader slot since w23,
+# and the first CV improvement here in a week. `w27_ad190stdcorr` (0.9701181344) is replaced
+# by `w34_ad195stdcorr` (0.9701247949), the same construction — standardised h3 base, 5-arm
+# c_avg scheme average — on the 194-member pack PLUS `om_ftt`, the FT-Transformer imported
+# from `omidbaghchehsaraei` in w33.
+#
+# WHY THIS CLEARS THE BAR THAT w29 DID NOT. w29 built `w29_ad194stdcorr` at +0.15e-6 on the
+# leader and correctly refused to move WANTED: 0.15e-6 is 4% of the ~4e-6 rebuild
+# reproducibility floor, and taking the argmax because it is the argmax is the failure this
+# file exists to prevent. The 190-over-188 promotion was made on M11(b)'s 4/4 at +2.13e-6.
+# This is +6.51e-6 — 1.6x the reproducibility floor and 3x the margin that promoted the 190
+# — and it is corroborated by three INDEPENDENT instruments that were run in this order:
+#
+#   1. w26i paired 50/50, run BEFORE any build   om_ftt  +7.5e-6, sign stable 2/2 reps
+#   2. the h3 base, 195 vs the matched 194        +6.57e-6  (0.9701205753 vs 0.9701140064)
+#   3. the corrected 5-arm shipping object        +6.51e-6  (0.9701247949 vs 0.9701182875)
+#
+# and by all FOUR transform stacks moving the same way against their matched w29 controls
+# (logit +4e-6, hybrid +5e-6, rankraw +5e-6, rescale +8e-6 — 4/4, no cancellation). w29's
+# own rankraw-negative pattern, which made its h3 null a cancellation rather than an effect,
+# does not appear here.
+#
+# ⚠ PRE-REGISTERED, written while ARM 2 was still fitting: `w34_ad196stdcorr` (the same pack
+# plus `om_cat`) is a SIGN CHECK on om_cat, NOT a candidate for this slot. The paired
+# instrument priced om_cat at -2.5e-6 with a stable sign in 2/2 reps before either build
+# started, and at maxcorr 0.9935 against `bolt_cat_nested_te` it is the ninth CatBoost of
+# its kind in the pack. If ARM 2 lands marginally ABOVE ARM 1 anyway, that is a ~2e-6
+# difference between near-twins against a prior measurement that says negative, and taking
+# it would be exactly the argmax-chasing this file forbids. WANTED does not move to it.
+#
+# The second pick is UNCHANGED. `w23_ad187stdcorr` remains the pack hedge — identical
+# construction on the 187 pack without any of the member additions, and it has a real
+# leaderboard print (0.97116) where none of the w27/w29/w34 files do. Pairing the two
+# newest twins was declined again for the reason w29 gave: their test rho is ~0.99998, so
+# there is no diversification in it.
+#
+# ⚠⚠ `w34_ad195stdcorr.csv` IS NOT SELECTABLE UNTIL IT IS SENT. It was built at cap on the
+# 08-20 UTC day. It is pinned to the head of the send queue by the `priority` column added
+# in w28, so the 08-21 day's FIRST slot sends it. Do not let it sit unsent — that mistake
+# has already cost this file four slots once.
+WANTED = {"w34_ad195stdcorr.csv", "w23_ad187stdcorr.csv"}
 
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"
