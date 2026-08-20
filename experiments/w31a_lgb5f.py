@@ -62,7 +62,8 @@ SCALES = [1.0, 4.0 / 3.0]
 
 # gate (a)/(b) targets, from w26l_r400.log and oof/summary_lgbm_fixed_lat.json
 GATE_R400 = {1.0: 0.9654813306, 4.0 / 3.0: 0.9657751945}
-GATE_R2000_S1 = 0.9677108350
+GATE_R2000_S1 = 0.9677106709      # w26k_run.log, the 2000-round refit of the control
+GATE_R2000_S43 = 0.9682861183     # ditto, s=4/3 -- the known constant §N5(b2)
 
 
 def save_atomic(path, **arrs):
@@ -200,6 +201,10 @@ def report():
         print(f"  N2(b) GATE control@2000 s=1.0: {got:.10f} vs lgbm_fixed_lat "
               f"{GATE_R2000_S1:.10f} -> {(got-GATE_R2000_S1)*1e6:+.2f}e-6  "
               f"{'PASS' if abs(got-GATE_R2000_S1) < 20e-6 else 'FAIL'}")
+        g43 = cv[("control", 2000, 4 / 3)]
+        print(f"  N5(b2) GATE control@2000 s=4/3: {g43:.10f} vs w26k {GATE_R2000_S43:.10f} "
+              f"-> {(g43-GATE_R2000_S43)*1e6:+.2f}e-6  "
+              f"{'PASS' if abs(g43-GATE_R2000_S43) < 20e-6 else 'FAIL'}")
         print(f"        rounds 400->2000 on the control @1.0: "
               f"{(cv[('control',2000,1.0)]-cv[('control',400,1.0)])*1e6:+.1f}e-6")
     if ("leaves255_dinf", 2000, 4 / 3) in cv:
@@ -207,6 +212,12 @@ def report():
         print(f"  N2(c) HEADLINE d_2000 = leaves255_dinf - control, both @4/3 @2000 = "
               f"{d:+.2f}e-6   (fold-0 @400 was +1466.40e-6, i.e. {100*d/1466.4:+.1f}% of it; "
               f"registered point +150, range -100..+500)")
+    if ("leaves255_dinf", 2000, 1.0) in cv:
+        dl = (cv[("leaves255_dinf", 2000, 4 / 3)] - cv[("leaves255_dinf", 2000, 1.0)]) * 1e6
+        dc = (cv[("control", 2000, 4 / 3)] - cv[("control", 2000, 1.0)]) * 1e6
+        print(f"  N5(g) d_c on leaves255_dinf @2000 = {dl:+.2f}e-6, ratio to the control's "
+              f"{dc:+.1f}e-6 is {dl/dc:.2f}x   (registered +600..+1100e-6, point +800, ratio "
+              f"compressing from 2.09x toward ~1.4x)")
     if ("control", 2000, 1.0) in cv:
         b10 = max((cv[(t, 2000, 1.0)], t) for t, _ in GRID if (t, 2000, 1.0) in cv)
         b43 = max((cv[(t, 2000, 4 / 3)], t) for t, _ in GRID if (t, 2000, 4 / 3) in cv)

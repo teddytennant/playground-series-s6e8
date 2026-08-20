@@ -8273,3 +8273,34 @@ every later stage/scale/member-export question is free from here — no refit. A
 re-run resumes. ⚠ It writes `w31a_<tag>_{oof,test}.npy` in `experiments/`, **not** in `oof/`
 (w26m's warning: `load_members` scans `oof/` and every reproduction gate here is stated
 against a fixed member COUNT).
+
+## ⛔ GREP FOR THE QUANTITY BEFORE REGISTERING A PRIOR ABOUT IT (w31, 2026-08-20)
+
+`w31_prereg_slot2.txt` §N2(e) registered the control's CT gain at 2000 rounds as "0.5×–1.5× of
+the 400-round +293.86e-6", i.e. +147..+441e-6. **The pooled answer was already on disk and in
+this file:** `w26k_run.log` has all five folds at 2000 rounds — s=1.0 `0.9677106709`, s=4/3
+`0.9682861183`, **d_c +575.45e-6** — and RESEARCH line ~6613 already stated the trend
+"+117e-6 at 100 rounds → +294e-6 at 400 → ~600e-6 at 2000". A registered band that EXCLUDES an
+already-measured value is not a prior, and the prereg was amended to void it (§N5) rather than
+scored against it.
+
+**The rule: before writing a prior, `grep` the `experiments/*.log` and RESEARCH for the exact
+quantity.** A pre-registration whose answer is already in the workspace is a re-discovery
+dressed as a test, and it inflates the apparent hit rate of every other prior in the same file.
+Same failure family as the three matched-null misses: the instrument was fine, the claim was
+not matched to what was already known.
+
+Useful side effect, since the constant is known: the 2000-round control leg of any new run is a
+**free third harness gate**, not a measurement. Pooled targets to reproduce —
+
+| quantity | value | source |
+|---|---|---|
+| control @400 @1.0 | 0.9654813306 | w26l_r400 |
+| control @400 @4/3 | 0.9657751945 | w26l_r400 |
+| control @2000 @1.0 | 0.9677106709 | w26k (stored member CV 0.9677108350, −0.16e-6) |
+| control @2000 @4/3 | 0.9682861183 | w26k — exported as member `lat_ctfix2000`, solo 0.968286 |
+
+⚠ And the CTshare mechanism covariate moves with rounds on the SAME config: the control is
+**1.0% at 400 rounds and 3.0–3.1% at 2000**. So "config X has a bigger d_c" read off a
+400-round table is partly "config X is further along the effective-capacity path", which is the
+same convergence confound that makes the w27g table unreadable at the operating point.
