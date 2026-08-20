@@ -16180,3 +16180,7 @@ on the remote. I did not thrash on it further.
 `notebooks/w33_{factualexplorer,nikita7364777,omidbaghchehsaraei,stephentarter,omid_base}/`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**
+
+> **w33 addendum (§7 count).** After this slot's own commit `7a84c74`, `git log
+> origin/main..HEAD` is **5** commits, not 4. Push re-attempted at the end of the slot and
+> failed identically (`gh: command not found` → `could not read Username`). Unchanged blocker.

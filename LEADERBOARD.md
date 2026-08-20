@@ -1320,3 +1320,30 @@ of the fitted span. No stacking tweak reaches it; it needs a better base model, 
 
 ⚠ And the cutoff moves: ranks 2–16 filled in beneath a static leader over 08-18→08-20, so
 0.97120 will not still be the gold line on 08-31. Treat +10.4e-6 as a floor.
+
+## 2026-08-20 01:55 UTC — w33 slot 4. Rank 17, 0.97118. Gold is 2 reporting steps away.
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97134 |
+| 2 | Maher el Ouahabi | 0.97127 |
+| 3 | Optimistix | 0.97126 |
+| 4 | Don Mani | 0.97125 |
+| 5 | cstdy | 0.97125 |
+| … | | |
+| 14 | thisray | 0.97120 |
+| 15 | Mahog | 0.97120 |
+| 16 | delai50 | 0.97119 |
+| **17** | **Teddy Tennant** | **0.97118** |
+
+**The leader has not moved since 08-18** (MILANFX 0.97134, still static across three days),
+but ranks 2–16 keep filling in beneath it — the same drift w32 §2 flagged. Since w32's read
+(08-20 00:00) the board added `cstdy` at 0.97125 and `Utkarsh` at 0.97124.
+
+⚠ **Units discipline, per w32 §1 — always state a gap in BOTH units.** Gap to gold
+(0.97120) = 2e-5 = **20e-6 = 2 reporting steps**; w32a's inverted bar prices that at
+**+10.4e-6 of CV**. Gap to first (0.97134) = 1.6e-4 = **160e-6 = 16 reporting steps**
+≈ **+85.8e-6 of CV**, which is 81% of the fitted CV span and 1.8× the entire 22-member adarsh
+import. **Play for gold; first place is not reachable from here in 11 days.**
+
+The gold cutoff is a moving floor, not a target — treat +10.4e-6 as a minimum.
