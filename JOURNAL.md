@@ -15991,3 +15991,192 @@ same stack until someone fixes the credential.
 **This needs Teddy, like the selection click** — either `gh` installed and authed, a PAT in
 `~/.git-credentials`, or the remote switched to SSH. A future run should **not** thrash on it:
 commit as normal, check `git log origin/main..HEAD`, and say so.
+
+---
+
+# 2026-08-20 — w33, slot 4 of 10. ANGLE: XGBoost third leg (OVERRIDDEN). AT CAP, no submission.
+
+**Cap check first, per w30 §9.1.** `date -u` = 2026-08-20 01:26. The API shows ten submissions
+stamped 2026-08-20 00:07–00:08, drained by w30. **Genuinely at cap; the prompt's "10 today" is
+right.** No submission attempted and none should have been.
+
+**The handed angle is closed in RESEARCH 715–725** and overridden under the brief's own clause:
+XGBoost is *not* a missing leg here — `latr1_xgb` is already **the best GBDT of any family** in
+the pack, which also holds `xgb_lat`, `xgb_latcat` (×3 seeds), `xgb_cat_lattice`, `xgb_raw_nan`
+and the whole `bolt_xgb_*` family, and solo→stack pass-through is **1.4%**. Tuning a sixth
+XGBoost is the CatBoost mistake w32 already refused. What I did instead is the item w32 §7.4
+ranked top of the gold path — re-run the pool scan — and it turned out to be worth the slot.
+
+## 1. ⚠⚠ HEADLINE: w32 §5 IS REFUTED. THE POOL IS NOT EXHAUSTED — IT WAS NEVER FULLY SCANNED
+
+w32 §5 concluded "the last importable material is still adarsh1077's 22 members from 08-15 …
+blocked on **supply**, not on method", and w32 §2 priced gold at **+10.4e-6** with foreign
+members historically worth +2.1e-6 each — "roughly five more foreign members is a medal".
+
+The supply claim was wrong, and the reason is a **method gap in the scan, now fixed**:
+
+> Every pool re-enumeration this workspace has ever run walked Kaggle **datasets** plus the
+> first page of `kernels list`. `omidbaghchehsaraei` publishes **twelve separate single-model
+> S6E8 notebooks**, each writing `oof.csv` + `submission.csv` as *kernel output*. They are not
+> a library and they are not a dataset, so no scan on file could see them.
+
+They were found by pulling the stacker notebooks at the top of the vote list and reading what
+they **load**: both `omidbaghchehsaraei/hill-climbing-ensemble` and
+`stephentarter/…-model-ensembling-stacking` glob base-model OOF from their own authors' other
+kernels. **A level-2 notebook is a bibliography of importable level-1 members.** That is the
+durable technique and it is now in RESEARCH.
+
+## 2. THE LEDGER — 12 candidates, 7 new, and only 2 of those are honest
+
+`experiments/w33a_vet.py`, seven gates. Gates 1–4 are hard (a failure is not written).
+
+| gate | what | result |
+|---|---|---|
+| 1 shape/id order | 691,369 + 296,302, ids contiguous | 12/12 |
+| 2 **label identity** | their `oof.csv` ships `addicted_label`; must equal OUR `y` elementwise | **12/12, zero mismatches** |
+| 3 published-AUC | vs the "ROC-AUC SCORE" in their kernel log, tol 5e-5 | 12/12 |
+| 4 **fold gate** | per-fold AUC under our frozen SKF5 vs their five printed per-fold AUCs, **in order** | **12/12 at maxdiff ~4e-6** |
+| 5 credibility | OOF < 0.9720 | 12/12 |
+| 6 **es-on-val** | read off each notebook's source | **5 of 7 new members FAIL** |
+| 7 already-held | maxcorr ≈ 1.000 vs the pack | 4 dropped |
+
+Gate 4 is the strong one and it lands about as cleanly as it can: **maxdiff ~4e-6 is the
+5-decimal printing floor of their logs.** Their partition, their fold *labelling* and their row
+indexing are all ours. Gate 2 is stronger still than the usual AUC-reproduction check — AUC
+reproduction only proves the rows are in *some* consistent order; an exact label match proves
+the indexing is ours.
+
+**Dispositions of the 12:**
+
+- **4 ALREADY HELD** — `realmlp`, `resnet`, `tabm`, `tabnet` come back at rank-maxcorr
+  **1.00000** against `pub_rmlp`, `pub_resnet`, `pub_tabm`, `pub_tabnet`. szymonkapiski's
+  74-model library (built 08-04) had already re-published four of this author's notebooks.
+  Spot-checked against the stored arrays: `tabnet` is **bit-exact**, the other three agree to
+  **3e-08** on test, i.e. the library stored a float32 round-trip of the same vector.
+  ⚠ Importing them would have double-counted members the combiner already has.
+- **1 INTERNAL DUP** — `xgb` is **byte-identical to `flamlxgb` on both oof and test**. Same
+  shape as the `bolt_xgb_d7_alt1`/`alt2` precedent at RESEARCH 1361.
+- **7 genuinely new**: `cat`, `cnn`, `flamllgb`, `flamlxgb`, `ftt`, `tabtrans`, `xgb2`.
+
+## 3. ⚠⚠ THE TRAP, AND IT IS THE MOST IMPORTANT THING IN THIS ENTRY
+
+On the numbers the vetter prints first, two of the new members look like the best find in this
+workspace's history:
+
+| member | solo AUC | maxcorr vs pack | nearest |
+|---|---|---|---|
+| `cnn` | 0.967706 | **0.95695** | tabm_x12 |
+| `tabtrans` | 0.967469 | **0.96852** | tabm_deeper |
+| `xgb2` | **0.968733** | 0.99446 | ad_gxgbcs4 |
+
+Pack median maxcorr is 0.9946 and the **prior record for a strong member was 0.9746**. RESEARCH
+states flatly that high solo *and* low maxcorr never co-occur here — "a member is decorrelated
+from that span precisely to the extent that it is **worse**". `cnn` at solo 0.9677 with maxcorr
+0.957 would break that law outright, and `xgb2` at 0.968733 essentially ties the best single
+member ever held (0.96881).
+
+**They break it because their OOF is optimistic.** Reading each fit in the author's own source:
+
+- `cnn` — tracks `best_val_auc` on `X_va/y_va` and keeps `best_weights`: the **checkpoint is
+  selected on the very fold that becomes the OOF**.
+- `tabtrans` — identical, on the EMA copy (`best_ema_weights`).
+- `xgb2` — `XGBClassifier(early_stopping_rounds=200)`, `eval_set=[(X_tr,y_tr),(X_va,y_va)]`.
+- `flamllgb` / `flamlxgb` — `automl.fit(X_val=X_val, y_val=y_val)`. **FLAML selects
+  hyperparameters** on the scored fold. That is strictly worse than early stopping.
+- **`cat` and `ftt` are clean** — fixed iteration count / fixed epoch schedule, no `eval_set`,
+  no val-based checkpointing.
+
+This is exactly the `golem_a`/`golem_f` defect already sitting in `agent/stack.py:DEFAULT_DROP`.
+And note **the optimism produces both symptoms at once**: it inflates the solo AUC, and because
+the inflation is idiosyncratic per-fold noise it *also* reads as decorrelation. **A member that
+looks unusually strong AND unusually decorrelated is the signature of a leaky OOF, not of a
+lucky find.** Writing that down is the point — it is the cheapest possible way for this account
+to repeat Rogii, because the bias runs the same direction as the selection criterion: it buys
+CV that the leaderboard will not pay.
+
+⛔ **The five optimistic members are therefore imported to `data/ext_members10es/`, which is NOT
+on any build's `extra_dirs` list.** The two clean ones go to `data/ext_members10/`. Measured out
+rather than assumed out — they stay available and separable — but they cannot silently enter a
+pack. Naive-importing all seven was the obvious move an hour ago and it would have been a
+straightforward self-inflicted wound.
+
+## 4. WHAT THE HONEST PAIR IS WORTH — RUNNING, NOT REPORTED
+
+`w26i_value.py --new-dir data/ext_members10 --new-names om_cat,om_ftt --reps 5` is on the
+machine now (189 loaded = 187 pack + 2 new; the `cat4` reproduction gate must return w20d's
++0.000041 or no row is comparable to RESEARCH). **No result is quoted here — it had not
+finished when this entry was written, and w31's R-N5 rule against reporting a partial table
+applies to this run too.** Priors, so the next run reads the table against something written
+before it: `om_cat` maxcorr 0.9934 and `om_ftt` 0.9844, both ordinary on that axis, so the
+honest expectation is the usual **+1 to +3e-6 each**, not the +2.1e-6-per-member headline the
+adarsh import produced from 22 members at once.
+
+**So gold is not bought yet.** The correct statement of the find is: supply is **re-opened**
+(the scan technique was wrong, not the pool), two clean members are in hand, and the five
+strongest-looking ones are quarantined for cause.
+
+## 5. OTHER SOURCES SCANNED THIS SLOT — all excluded, with grounds
+
+| ref | what it ships | disposition |
+|---|---|---|
+| `factualexplorer/baseline-lgbm-xgb-cb…` | `preds.npz`: `y` + oof/test for lgb, xgb, cat | ⛔ **`StratifiedKFold(10)`** — a foreign partition — **and** all three early-stop on the val fold. Both biases inflate CV only. |
+| `stephentarter/*` (5 base notebooks) | `submission.csv` only | ⛔ no OOF, not honestly weightable |
+| `omidbaghchehsaraei/hill-climbing-ensemble` | `oof.csv` = the hill-climb output | ⛔ level-2, weights fit on the full OOF — the `najiama` case |
+| `nikita7364777/rank-gauss-logit-rank-blending` | `oof_rankgauss_lr.npy` | ⛔ level-2 LR **over the pack we already hold** (its audit CSV names `a`,`b`,`c`,`d`,`altview`,`catnative`,`deepfm_*`) |
+| `amanatar`, `lavanyabacche`, `tamerlanomralinov` | submission only | ⛔ no OOF |
+
+## 6. OPERATIONAL
+
+- ⚠ **A `grep -o` over a kernel log ate two gates and nearly cost the slot.** The overall-AUC
+  line reads `ROC-AUC SCORE (WITH TE & FREQ): 0.96751` — the escaped `&` **carries
+  digits**, so a `[^0-9]{0,40}` run never reaches the number and ten of twelve members scored
+  `log_auc = NaN` → FAIL. Separately `cnn` and `tabtrans` print each fold line **twice**, and
+  the obvious fix (collapse consecutive repeats) is *also* wrong because `flamlxgb`, `xgb` and
+  `ftt` each have two adjacent folds that genuinely print the same 5-decimal value. Both are
+  fixed structurally in `w33a_vet.py` with the reasoning inline. **Rule: when a gate returns
+  NaN, suspect the parser before the data.** The first run of this vetter reported 1/12 passing.
+- ⚠ `pgrep`, `which`, `ssh`, `gh` and `nix` are **all absent** from this box. `until !
+  pgrep …` fails open, exactly the class of bug w32 §6 warned about. Use
+  `until ! grep -lq NAME /proc/[0-9]*/cmdline`.
+- **w31a is still running and is NOT reported here.** Its control leg is done on all 5 folds
+  (10 checkpoints in `cache/lgb5fckpt/`); `leaves255_dinf` and `lr0.05` are still fitting and
+  have emitted no log line. R-N5 forbids a partial table.
+
+## 7. ⛔ BLOCKER UNCHANGED — `git push` STILL FAILS, now 4 commits deep
+
+w32 §8 diagnosed the credential helper shelling out to a `gh` that is not installed. I checked
+the two escape routes and **both are closed**: there is no `ssh` binary on this box at all (so
+the `~/.ssh/id_ed25519` that exists cannot be used, and whether it is registered on GitHub is
+untestable from here), and there is no `nix` in PATH to fetch one. No `~/.git-credentials`, no
+`GH_TOKEN`/`GITHUB_TOKEN`. **This needs Teddy.** Work is committed and safe locally; it is not
+on the remote. I did not thrash on it further.
+
+## 8. NEXT RUN, IN ORDER
+
+1. **`date -u` vs the submission timestamps before believing any cap claim.** The 08-21 UTC day
+   opens at 00:00 with 10 fresh slots.
+2. **Read `experiments/w33b_value.csv` / `.log` FIRST** — the `om_cat`/`om_ftt` marginal value.
+   Check the `cat4` gate returned +0.000041 before believing any row. If the pair is positive,
+   rebuild the shipping stack with them (`--extra-dirs …,ext_members10`) and that build is the
+   day's lead candidate; its CV goes head-to-head with 0.9701182875 on the frozen folds.
+3. **Send `--n 2` EARLY, `--n 8` LATE** (w30 §5, still unlearned in practice). Queue is priced;
+   head is `w29_ad194stdcorr_ens4` (P=0.323).
+4. **Run the level-2-as-bibliography scan again — it is now the proven supply route.** For every
+   stacker notebook on the vote list, read what it *loads*, then `kaggle kernels list --user
+   <author>` and pull the base models. `omidbaghchehsaraei` is exhausted; the other authors on
+   the first 30 rows are not.
+5. **The es-on-val five are quarantined, not dead.** If a future slot wants them, the honest way
+   is to measure them with an instrument immune to their bias — not to drop them into the pack.
+6. ⛔ Do **NOT** re-open: the original dataset; tuning any CatBoost **or XGBoost** (RESEARCH
+   715–725, 7069); cheap new model classes; `w29g`-shaped screens; the stacker C; fold-seed
+   averaging; the fold-leakage explanation of the family term (w32 §4b, χ² 4.0 vs 122.1).
+7. ⚠ The final-selection click is STILL the standing blocker and **still needs Teddy in a
+   browser**. `check_selection.py` reports nothing selected; Kaggle's auto-pick takes the best
+   PUBLIC scores, which is the Rogii failure run by Kaggle. `WANTED` stays
+   `{w27_ad190stdcorr.csv, w23_ad187stdcorr.csv}`, chosen on CV.
+
+**Files added:** `experiments/w33a_vet.py`, `w33a_vet.{csv,json,log}`,
+`data/ext_members10/` (2 clean members), `data/ext_members10es/` (5 quarantined),
+`notebooks/w33_{factualexplorer,nikita7364777,omidbaghchehsaraei,stephentarter,omid_base}/`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**

@@ -667,6 +667,92 @@ author who prints per-fold AUCs can be gated this way in 30 seconds.
 Outcome: maxcorr 0.9662 (the workspace record) but solo 8e-3 below the pack, and the stack
 did not move. See "the independent pipeline escape clause" above. Parked in `oof_rejected/`.
 
+### ⚠ THE SCAN WAS WRONG FOR THREE WEEKS — level-2 notebooks are a bibliography (w33, 08-20)
+
+Every pool re-enumeration before w33 walked Kaggle **datasets** plus the first page of
+`kernels list`, and w32 §5 concluded on that basis that supply was exhausted. It was not.
+`omidbaghchehsaraei` publishes **twelve separate single-model S6E8 notebooks**, each writing
+`oof.csv` + `submission.csv` as *kernel output*. Not a library, not a dataset — invisible to
+every scan on file.
+
+**The technique that found them, and the one to run every week from now on:**
+
+1. Pull the highly-voted **stacker / hill-climb / blend** notebooks.
+2. Read what they **load**, not what they emit. A level-2 notebook names its level-1 inputs —
+   `omidbaghchehsaraei/hill-climbing-ensemble` and `stephentarter/…-model-ensembling-stacking`
+   both glob base-model OOF from their own authors' other kernels.
+3. `kaggle kernels list --user <author> --page-size 40`, then
+   `kaggle kernels output <ref> -p <dir>` on every base model.
+
+A level-2 notebook is worthless to import (its weights are fit on the full OOF — the `najiama`
+case) and simultaneously the best **index** of importable level-1 members available.
+
+### The omidbaghchehsaraei ledger — 12 candidates, 2 importable (w33, 08-20)
+
+Vetter: `experiments/w33a_vet.py` (7 gates, table in `w33a_vet.csv`). All 12 pass the hard
+gates 1–4, including the **fold gate at maxdiff ~4e-6, the 5-decimal printing floor of their
+logs** — their partition, fold labelling and row indexing are all ours
+(`StratifiedKFold(5, shuffle=True, random_state=42)`).
+
+⚠ **Their `oof.csv` ships `addicted_label` next to the prediction.** Checking it equals our `y`
+elementwise is a STRONGER alignment gate than published-AUC reproduction, which only proves the
+rows are in *some* consistent order. Use it whenever an author ships their labels.
+
+| member | solo | maxcorr | disposition |
+|---|---|---|---|
+| `cat` | 0.967150 | 0.9935 | ✅ **clean** → `data/ext_members10/om_cat` |
+| `ftt` | 0.966568 | 0.9845 | ✅ **clean** → `data/ext_members10/om_ftt` |
+| `cnn` | 0.967706 | **0.9570** | ⛔ es-on-val → `ext_members10es/` |
+| `tabtrans` | 0.967469 | **0.9685** | ⛔ es-on-val → `ext_members10es/` |
+| `xgb2` | **0.968733** | 0.9945 | ⛔ es-on-val → `ext_members10es/` |
+| `flamllgb` / `flamlxgb` | 0.9663 / 0.9680 | 0.9874 / 0.9944 | ⛔ FLAML picks **hyperparameters** on the scored fold |
+| `realmlp`,`resnet`,`tabm`,`tabnet` | — | **1.00000** | ⛔ ALREADY HELD as `pub_rmlp`/`pub_resnet`/`pub_tabm`/`pub_tabnet` (szymonkapiski re-published them 08-04; `tabnet` bit-exact, others agree to 3e-08 = a float32 round-trip) |
+| `xgb` | 0.967980 | — | ⛔ **byte-identical to `flamlxgb`** on both oof and test (cf. `bolt_xgb_d7_alt1`/`alt2`, line 1361) |
+
+### ⚠⚠ A MEMBER THAT IS BOTH UNUSUALLY STRONG AND UNUSUALLY DECORRELATED IS A LEAKY OOF
+
+This is the single most transferable thing w33 learned. `cnn` (solo 0.9677, maxcorr **0.957**)
+and `tabtrans` (0.9675, **0.969**) would both have broken this workspace's own stated law —
+pack median maxcorr 0.9946, prior record for a *strong* member 0.9746, and "a member is
+decorrelated from that span precisely to the extent that it is **worse**".
+
+They break it because their OOF is optimistic. Both keep the checkpoint that maximises AUC **on
+the very fold that becomes the OOF** (`best_val_auc` → `best_weights` / `best_ema_weights`).
+That single defect produces **both** symptoms at once: it inflates solo AUC, and because the
+inflation is idiosyncratic per-fold noise it *also* reads as decorrelation.
+
+⛔ **The bias runs the same direction as the selection criterion** — it buys CV the leaderboard
+will not pay — so it is the cheapest available way to repeat the Rogii failure. Always read the
+author's fit loop for `eval_set` / `use_best_model` / `patience`-on-the-scored-fold **before**
+believing a maxcorr. Quarantine, do not delete: `ext_members10es/` is on no build's
+`extra_dirs`, so those five are measurable but cannot silently enter a pack.
+
+### Sources scanned and excluded 2026-08-20 (w33)
+
+- `factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned` — ships `preds.npz` with `y`
+  plus oof/test for lgb/xgb/cat, which looks ideal. ⛔ **`StratifiedKFold(10)`** (a foreign
+  partition, so its OOF on our training half encodes our validation-half labels) **and** all
+  three early-stop on the val fold. Both biases inflate CV only.
+- `stephentarter/*` — 5 base notebooks, `submission.csv` only, no OOF.
+- `nikita7364777/rank-gauss-logit-rank-blending` — level-2 LR over the pack we already hold.
+- `omidbaghchehsaraei/hill-climbing-ensemble`, `amanatar`, `lavanyabacche`, `tamerlanomralinov`
+  — level-2 or submission-only.
+
+### ⚠ Parsing kernel logs: two traps that both returned a clean-looking wrong answer
+
+Kernel logs are JSON streams. Both of these made `w33a_vet.py` report **1 of 12 passing** on its
+first run, with no error:
+
+1. The overall line reads `ROC-AUC SCORE (WITH TE \u0026 FREQ): 0.96751`. **The escaped `&`
+   carries digits**, so `ROC-AUC SCORE[^0-9]{0,40}(0\.\d+)` never reaches the number and the
+   gate returns NaN. Stop at the colon instead: `ROC-AUC SCORE[^:]*:\s*(0\.\d+)`.
+2. `cnn` and `tabtrans` print each per-fold line **twice**. Collapsing *consecutive* repeats is
+   the obvious fix and is also wrong — `flamlxgb`, `xgb` and `ftt` each have two adjacent folds
+   that genuinely print the same 5-decimal value, so blind collapsing eats one and leaves four.
+   Detect the doubling structurally: `len==10 and folds[::2]==folds[1::2]`.
+
+**Rule: when a gate returns NaN or an implausible mass failure, suspect the parser before the data.**
+
 ### Enumerating the pool — the CLI list endpoints are unreliable
 
 As of 2026-08-10 the Kaggle CLI's RPC endpoints return `400` for **all** list operations

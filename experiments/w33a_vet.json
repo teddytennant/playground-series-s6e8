@@ -1,0 +1,23 @@
+{
+ "n_pass": 7,
+ "clean": [
+  "cat",
+  "ftt"
+ ],
+ "es_on_val": [
+  "cnn",
+  "flamllgb",
+  "flamlxgb",
+  "tabtrans",
+  "xgb2"
+ ],
+ "already_held": [
+  "realmlp",
+  "resnet",
+  "tabm",
+  "tabnet"
+ ],
+ "dup": {
+  "xgb": "flamlxgb"
+ }
+}

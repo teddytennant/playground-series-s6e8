@@ -1,0 +1,68 @@
+  [dup] xgb is byte-identical to flamlxgb on BOTH oof and test -- dropped
+
+maxcorr against the 192-member pack (rank corr on OOF):
+  cat       maxcorr 0.99336  nearest bolt_foldsafe_te_cat
+  cnn       maxcorr 0.95695  nearest tabm_x12
+  flamllgb  maxcorr 0.98736  nearest naji04
+  flamlxgb  maxcorr 0.99443  nearest bolt_foldsafe_te_xgb_10f
+  ftt       maxcorr 0.98440  nearest pub_tabm
+  realmlp   maxcorr 1.00000  nearest pub_rmlp
+  resnet    maxcorr 1.00000  nearest pub_resnet
+  tabm      maxcorr 1.00000  nearest pub_tabm
+  tabnet    maxcorr 1.00000  nearest pub_tabnet
+  tabtrans  maxcorr 0.96852  nearest tabm_deeper
+  xgb2      maxcorr 0.99446  nearest ad_gxgbcs4
+  [held] realmlp is already in the pack as its maxcorr partner -- dropped
+  [held] resnet is already in the pack as its maxcorr partner -- dropped
+  [held] tabm is already in the pack as its maxcorr partner -- dropped
+  [held] tabnet is already in the pack as its maxcorr partner -- dropped
+  member      verdict  solo_auc  log_auc   g3_auc_diff  g1_ids  g2_label_mismatch  g4_maxdiff  g5_credible  maxcorr  es_on_val
+     cat         PASS  0.967150  0.96715 -8.668139e-08    True                  0    0.000005         True 0.993363      False
+     cnn         PASS  0.967706  0.96771 -4.366504e-06    True                  0    0.000003         True 0.956948       True
+flamllgb         PASS  0.966341  0.96634  7.222811e-07    True                  0    0.000005         True 0.987361       True
+flamlxgb         PASS  0.967980  0.96798  8.167600e-08    True                  0    0.000005         True 0.994430       True
+     ftt         PASS  0.966568  0.96657 -1.889443e-06    True                  0    0.000004         True 0.984398      False
+ realmlp ALREADY_HELD  0.968436  0.96844 -3.547497e-06    True                  0    0.000004         True 1.000000      False
+  resnet ALREADY_HELD  0.966102  0.96610  2.362798e-06    True                  0    0.000004         True 1.000000      False
+    tabm ALREADY_HELD  0.967508  0.96751 -2.280058e-06    True                  0    0.000004         True 1.000000       True
+  tabnet ALREADY_HELD  0.967559  0.96756 -5.051413e-07    True                  0    0.000005         True 1.000000      False
+tabtrans         PASS  0.967469  0.96747 -1.078785e-06    True                  0    0.000005         True 0.968518       True
+     xgb          DUP  0.967980  0.96798  8.167600e-08    True                  0    0.000005         True      NaN       True
+    xgb2         PASS  0.968733  0.96873  3.169966e-06    True                  0    0.000004         True 0.994460       True
+
+per-fold, ours vs theirs (gate 4):
+  cat       ours   0.96645 0.96730 0.96751 0.96765 0.96686
+            theirs 0.96645 0.96730 0.96751 0.96765 0.96686   maxdiff 4.84e-06
+  cnn       ours   0.96704 0.96788 0.96785 0.96840 0.96748
+            theirs 0.96704 0.96788 0.96785 0.96840 0.96748   maxdiff 2.78e-06
+  flamllgb  ours   0.96588 0.96623 0.96666 0.96687 0.96605
+            theirs 0.96588 0.96623 0.96666 0.96687 0.96605   maxdiff 4.57e-06
+  flamlxgb  ours   0.96727 0.96802 0.96802 0.96864 0.96794
+            theirs 0.96727 0.96802 0.96802 0.96864 0.96794   maxdiff 4.93e-06
+  ftt       ours   0.96633 0.96742 0.96716 0.96716 0.96625
+            theirs 0.96633 0.96742 0.96716 0.96716 0.96625   maxdiff 3.80e-06
+  realmlp   ours   0.96775 0.96849 0.96872 0.96902 0.96824
+            theirs 0.96775 0.96849 0.96872 0.96902 0.96824   maxdiff 4.26e-06
+  resnet    ours   0.96529 0.96621 0.96640 0.96689 0.96596
+            theirs 0.96529 0.96621 0.96640 0.96689 0.96596   maxdiff 4.20e-06
+  tabm      ours   0.96673 0.96778 0.96772 0.96840 0.96732
+            theirs 0.96673 0.96778 0.96772 0.96840 0.96732   maxdiff 4.49e-06
+  tabnet    ours   0.96692 0.96746 0.96790 0.96831 0.96737
+            theirs 0.96692 0.96746 0.96790 0.96831 0.96737   maxdiff 4.66e-06
+  tabtrans  ours   0.96704 0.96792 0.96775 0.96830 0.96745
+            theirs 0.96704 0.96792 0.96775 0.96830 0.96745   maxdiff 4.81e-06
+  xgb       ours   0.96727 0.96802 0.96802 0.96864 0.96794
+            theirs 0.96727 0.96802 0.96802 0.96864 0.96794   maxdiff 4.93e-06
+  xgb2      ours   0.96808 0.96890 0.96888 0.96935 0.96847
+            theirs 0.96808 0.96890 0.96888 0.96935 0.96847   maxdiff 3.65e-06
+
+7 of 12 pass all four hard gates
+
+7 new members pass the hard gates: 2 clean ['cat', 'ftt'], 5 early-stopped-on-val ['cnn', 'flamllgb', 'flamlxgb', 'tabtrans', 'xgb2']
+  [es_on_val] cnn: best_val_auc on X_va/y_va keeps best_weights -- checkpoint selected on the scored fold
+  [es_on_val] flamllgb: automl.fit(X_val=X_val, y_val=y_val) -- FLAML selects HYPERPARAMETERS on the scored fold
+  [es_on_val] flamlxgb: automl.fit(X_val=X_val, y_val=y_val) -- same, and `xgb` is a byte-identical copy
+  [es_on_val] tabtrans: best_val_auc on X_va/y_va keeps best_ema_weights -- same, on the EMA copy
+  [es_on_val] xgb2: XGBClassifier(early_stopping_rounds=200), eval_set=[(X_tr,y_tr),(X_va,y_va)]
+wrote 4 arrays to /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/data/ext_members10
+wrote 10 arrays to /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/data/ext_members10es
