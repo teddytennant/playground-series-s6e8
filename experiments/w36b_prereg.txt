@@ -1,0 +1,62 @@
+w36 PRE-REGISTRATION — written 2026-08-20 ~16:10 UTC, BEFORE the w34c 5-rep table existed
+=========================================================================================
+(w34c_value was at "rep 0 pack" when this was written; the file it will produce,
+experiments/w34c_value.csv, did not yet exist. Verify with `git log` on this file.)
+
+WHAT IS BEING DECIDED
+---------------------
+Exactly one stack build fits before the 08-21 00:00 UTC send day opens (w34a took ~6.5 h per
+arm and it is 16:10 now). The question is which pack that build gets.
+
+FOUR CLEAN members are available that the 195-member w34 pack does not hold. All four passed
+the same seven honest gates (w34b/w35c), all four reproduce their author's printed per-fold
+AUCs under our frozen SKF5, and none early-stops on the scored fold:
+
+  ravi_xgb1c   solo 0.964201  maxcorr 0.99278   ext_members11   (below-median solo, decorrelated)
+  ravi_lgbm1c  solo 0.964173  maxcorr 0.99224   ext_members11   (below-median solo, decorrelated)
+  ram_hgb      solo 0.968026  maxcorr 0.99474   ext_members12   (above-median solo, median corr)
+  ram_lgb      solo 0.968259  maxcorr 0.99506   ext_members12   (above-median solo, median corr)
+
+pack median solo 0.966319. `ram_hgb` is a sklearn HistGradientBoosting, an implementation the
+pack does not hold; `ram_lgb` is a LightGBM, which it holds nine times over.
+
+THE RULE, fixed here so it cannot be fitted to the number
+---------------------------------------------------------
+ARM 1 is built with ram_hgb + ram_lgb ALWAYS (they are honest, free, and the only measurement
+that could veto them — their own paired instrument — cannot finish before the build must start).
+
+ravi_xgb1c + ravi_lgbm1c are included IF AND ONLY IF, in experiments/w34c_value.csv:
+  (a) the cat4 reproduction gate returns gate_cat4 - base165 in [+3.6e-5, +4.6e-5], i.e.
+      w20d's +4.1e-5 to within the usual tolerance — otherwise NO row is comparable and the
+      pair is excluded on the ground that it is unmeasured, not on the ground that it is bad;
+  AND
+  (b) `both` - `pack` is POSITIVE in at least 4 of the 5 reps. Sign stability, not the mean:
+      w20d's `nn` group is the worked example of a positive mean over a flipping sign.
+
+If (a) and (b) hold  -> ARM 1 = 199 members  (tag w36_ad199std)
+Otherwise            -> ARM 1 = 197 members  (tag w36_ad197std)
+
+The script implements this rule itself and prints which branch it took. No human read of the
+table intervenes between the number and the pack.
+
+REGISTERED EXPECTATION for the shipping object
+----------------------------------------------
+Bar to beat: w34_ad195stdcorr, CV 0.9701247949 (the current leader, still unsent).
+Matched control on disk: submissions/w34_ad195std*.csv — this script is w34a_run.sh VERBATIM
+with the --extra-dirs list extended and nothing else touched, so the delta is attributable to
+the added members as a GROUP.
+
+Honest prior: solo->stack pass-through here is ~1.4% and RESEARCH 805 prices another GBDT into
+this stack at ~4e-7. Two LightGBMs and an XGBoost into a pack that already holds nine of each
+should be near-null; `ram_hgb` carries whatever this is worth, on the absent-implementation
+argument that is the only thing that has ever explained a large member delta here (om_ftt,
++6.5e-6, an FT-Transformer at maxcorr 0.9845). Registered central expectation: **+2 to +8e-6
+on the h3 base for the group**, i.e. a real but sub-om_ftt move, with a genuine chance of a
+null. A negative would not be surprising and would be reported as such.
+
+The rebuild reproducibility floor is ~4e-6 (w29). **WANTED does not move to the new file unless
+it beats 0.9701247949 by more than 4e-6**, i.e. unless the corrected object clears 0.9701288.
+That threshold is fixed here, before the build.
+
+The correction step (w21a) SHIPS THE PRE-REGISTERED 5-ARM, not the argmax over arms. Same rule
+as w34; scheme-selection optimism there was +2.54e-6 and the argmax beat the 5-arm by 0.2e-6.
