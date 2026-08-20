@@ -8817,3 +8817,58 @@ Artefacts: `submissions/w34_ad195std_h3w.csv`, `w34_ad195std_all4w.csv` (test si
 full-data weights; the stored OOF is the cross-fitted one). Neither is a deadline candidate —
 both are below the equal-weight h3 on CV — but both are real, distinct files and therefore
 legitimate free-slot sends under the brief's economics.
+
+## 2026-08-20 (w36) — how to price an es-on-val member WITHOUT refitting the pack
+
+`experiments/w36f_esbias.py`. Answers w34 §10 item 5. Thirteen members sit in
+`data/ext_members*es/` because they early-stop or best-epoch on the fold their OOF reports.
+Refitting the pack with them in cannot measure the damage, because the refit is scored on the
+same inflated OOF.
+
+**The mechanism gives the instrument.** es-on-val inflates a member's **OOF**; it does not
+inflate its **test** predictions. So for any member with a published public-LB score,
+
+    offset = LB(their test predictions) − AUC(their OOF, on OUR frozen folds)
+
+is smaller, by exactly the inflation, than an honest member of the same true strength. Fit the
+honest offset on gate-passing members; read each dirty member's shortfall.
+
+The offset is **not a constant** — AUC compresses towards 1, so weaker models have larger
+offsets — hence a fitted line, not a mean. Our own 91 submissions cannot supply the slope:
+they span 2.5e-4 of CV against a 1e-5 LB grid. The member-level points span 2.1e-3, or 200
+grid steps, which is what makes them usable at all.
+
+**The honest line, on the three clean points:**  `offset = 0.170545 − 0.17466 × oof_auc`
+
+| member | our-fold OOF | published LB | offset | expected | **shortfall** |
+|---|---|---|---|---|---|
+| `ram_hgb` (clean) | 0.968026 | 0.96945 | 0.001424 | 0.001428 | +0.04e-4 |
+| `ram_lgb` (clean) | 0.968259 | 0.96965 | 0.001391 | 0.001387 | −0.04e-4 |
+| `w29_ad194stdcorr` (ours, clean by construction) | 0.970118 | 0.97118 | 0.001062 | 0.001062 | 0.00 |
+| **`zwr_realmlp` (es-on-val)** | 0.969128 | 0.97009 | 0.000962 | 0.001235 | **+2.73e-4** |
+| `tam_lkup` (es-on-val + foreign) | 0.968756 | 0.97041 | 0.001654 | 0.001300 | −3.54e-4 |
+
+⚠⚠ **POWER: three calibration points, two parameters, ONE residual degree of freedom.** The
+residual rms is 5.35e-6 — tighter than the 1e-5 LB reporting grid, which is either a very good
+line or luck at 1 dof, and cannot be told apart yet. **Treat every number here as a sketch.**
+
+**What it nevertheless says, and it is worth acting on.**
+
+1. **es-on-val is worth roughly +2.7e-4 of fake OOF AUC** — 51× the residual floor. On this
+   pack that is the whole distance between "comfortably above the pack median solo" and "at
+   it". It directly explains w34 §4 / w36's repeated finding that **the highest-solo new member
+   in every sweep is the dirty one**: `omid_tabm` 0.9675, `tam_lkup` 0.9688, `dm_cat` 0.9667.
+   Deflate each by 2.7e-4 and every one of them lands in the ordinary middle of the pack.
+2. **The quarantine is priced, not just principled.** Keeping these 13 out costs whatever their
+   honest marginal value is; letting them in buys ~2.7e-4 of member-level CV that the LB will
+   not pay, multiplied by whatever weight the stacker gives them.
+3. **The instrument audits its own inputs.** `tam_lkup`'s shortfall came out NEGATIVE (−3.5e-4,
+   i.e. its LB is *better* than the line allows), which is the signature of a mis-attributed
+   LB — its kernel title's 0.97041 is almost certainly the notebook's blend, not that member.
+   A negative shortfall means "your LB does not belong to this OOF", not "this member is extra
+   honest".
+
+**HOW TO MAKE THIS DECISIVE, and it is nearly free.** Every future clean import whose kernel
+title carries `lb-0-XXXXX` adds a calibration point. Four or five would give real degrees of
+freedom. **When vetting a candidate, record the author's published LB in the vet table** — w33,
+w34 and w35 all had it available in the ref string and none of them wrote it down.

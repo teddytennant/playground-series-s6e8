@@ -1,0 +1,6 @@
+member,oof,lb,clean,lb_source,offset,offset_expected,shortfall
+ram_hgb,0.9680258266,0.96945,True,kernel title `s6e8-histgradientboosting-lb-0-96945`,0.0014241734000000061,0.0014277163401241744,3.5429401241682257e-06
+ram_lgb,0.9682590393,0.96965,True,kernel title `s6e8-lgbm-lb-0-96965`,0.001390960699999999,0.0013869733551792607,-3.98734482073837e-06
+w29_ad194stdcorr,0.9701182875,0.97118,True,"our own submission 55634054 -- clean by construction, cross-fitted on the frozen folds",0.0010617125000000893,0.0010621569046967705,4.4440469668116656e-07
+zwr_realmlp,0.969127739,0.97009,False,kernel title `s6e8-public-lb-0-97009-single-model-realmlp`,0.0009622609999999643,0.0012352088123445681,0.00027294781234460386
+tam_lkup,0.968756,0.97041,False,"kernel title `...-lookup-transformer-insights-lb-0-97041` -- ⚠ the title's LB may be the notebook's BLEND, not this member alone, AND the member is foreign-partition (3 folds). Reported, not used.",0.0016540000000000443,0.0013001527732885432,-0.00035384722671150115

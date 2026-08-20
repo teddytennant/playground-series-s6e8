@@ -1,0 +1,60 @@
+{
+ "beta": [
+  0.17054484280641044,
+  -0.17470311413103187
+ ],
+ "dof": 1,
+ "rms": 5.352461020628039e-06,
+ "rows": [
+  {
+   "member": "ram_hgb",
+   "oof": 0.9680258266,
+   "lb": 0.96945,
+   "clean": true,
+   "lb_source": "kernel title `s6e8-histgradientboosting-lb-0-96945`",
+   "offset": 0.0014241734000000061,
+   "offset_expected": 0.0014277163401241744,
+   "shortfall": 3.5429401241682257e-06
+  },
+  {
+   "member": "ram_lgb",
+   "oof": 0.9682590393,
+   "lb": 0.96965,
+   "clean": true,
+   "lb_source": "kernel title `s6e8-lgbm-lb-0-96965`",
+   "offset": 0.001390960699999999,
+   "offset_expected": 0.0013869733551792607,
+   "shortfall": -3.98734482073837e-06
+  },
+  {
+   "member": "w29_ad194stdcorr",
+   "oof": 0.9701182875,
+   "lb": 0.97118,
+   "clean": true,
+   "lb_source": "our own submission 55634054 -- clean by construction, cross-fitted on the frozen folds",
+   "offset": 0.0010617125000000893,
+   "offset_expected": 0.0010621569046967705,
+   "shortfall": 4.4440469668116656e-07
+  },
+  {
+   "member": "zwr_realmlp",
+   "oof": 0.969127739,
+   "lb": 0.97009,
+   "clean": false,
+   "lb_source": "kernel title `s6e8-public-lb-0-97009-single-model-realmlp`",
+   "offset": 0.0009622609999999643,
+   "offset_expected": 0.0012352088123445681,
+   "shortfall": 0.00027294781234460386
+  },
+  {
+   "member": "tam_lkup",
+   "oof": 0.968756,
+   "lb": 0.97041,
+   "clean": false,
+   "lb_source": "kernel title `...-lookup-transformer-insights-lb-0-97041` -- \u26a0 the title's LB may be the notebook's BLEND, not this member alone, AND the member is foreign-partition (3 folds). Reported, not used.",
+   "offset": 0.0016540000000000443,
+   "offset_expected": 0.0013001527732885432,
+   "shortfall": -0.00035384722671150115
+  }
+ ]
+}
