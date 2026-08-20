@@ -1,0 +1,71 @@
+kernel,stream,solo_auc,maxcorr,nearest,has_test,g2_label,verdict
+tamerlanomralinov_s6e8-lookup-transformer-insights-lb-0-97041,lightgbm,0.968077,0.995064,lexb_lgb02,True,n/a,DUP
+danushkumarv_smartphone-addiction-gbm-rank-blend-nb01,lgb,0.963954,0.995438,bei_identity_digit_raw12,True,n/a,DUP
+lavanyabacche_predicting-smartphone-addiction-catboost-fe,v12_blend,0.963993,0.995608,pub_ryota,True,n/a,DUP
+tamerlanomralinov_s6e8-lookup-transformer-insights-lb-0-97041,catboost,0.968006,0.995931,bolt_cat_dual_view,True,n/a,DUP
+evgendvorkin_s6e8-single-lgb,s,0.966528,0.99599,pub_evg,True,n/a,DUP
+danushkumarv_smartphone-addiction-gbm-rank-blend-nb01,xgb,0.964466,0.996567,bei_xgb_identity_digit_raw12,True,n/a,DUP
+dnyaneshbharambe_addiction-lgb-xgb-cat-ensemble,cb,0.96614,0.99663,pub_cat,True,n/a,DUP
+danushkumarv_smartphone-addiction-gbm-rank-blend-nb01,cb,0.962709,0.996639,cat_raw,True,n/a,DUP
+zhenruiweng_s6e8-public-lb-0-97009-single-model-realmlp,pred,0.969128,0.997597,bei_realmlp_seed01_fixed4,True,OK,DUP
+dnyaneshbharambe_addiction-lgb-xgb-cat-ensemble,lgb,0.963673,0.997977,pub_donlgbm,True,n/a,DUP
+zhukovoleksiy_ps6e8-eda-feature-engineering-pipeline,lexb_cat_base,0.967987,1.0,lexb_cat_base,True,n/a,DUP
+zhukovoleksiy_ps6e8-eda-feature-engineering-pipeline,lexb_lgb02,0.96837,1.0,lexb_lgb02,True,n/a,DUP
+zhukovoleksiy_ps6e8-eda-feature-engineering-pipeline,lexb_xgb_base,0.967914,1.0,lexb_xgb_base,True,n/a,DUP
+yunsuxiaozi_agent-in-pss6e8-cv-0-9623,ictions_true_label,1.0,0.820151,rmlp_lat3,False,LABEL MISMATCH,LABEL MISMATCH
+lopure_hdviz-pca-parallel-with-linear-svm,linear_svm_gpu_linear_oof_pred,0.911345,0.905158,logreg,False,n/a,NO TEST VECTOR
+lopure_hdviz-pca-parallel-with-linear-svm,rbf_svm_gpu_rbf_oof_pred,0.922167,0.911553,realmlp,False,n/a,NO TEST VECTOR
+lopure_hdviz-pca-parallel-with-linear-svm,poly_svm_gpu_poly_oof_pred,0.928795,0.918432,realmlp,False,n/a,NO TEST VECTOR
+stephentarter_ps-s06e08-model-ensembling-stacking,ensemble_oof_probs_prob_0,0.035216,0.919264,bei_xgb_identity_digit_raw12,False,OK,NO TEST VECTOR
+stephentarter_ps-s06e08-model-ensembling-stacking,ensemble_oof_probs_prob_1,0.964784,0.919264,bei_xgb_identity_digit_raw12,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_flaml-lgbm-for-predicting-smartphone-addiction,pred,0.966341,0.945099,lexb_cat_base,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_flaml-xgboost-for-predicting-smartphone-addiction,pred,0.96798,0.9625,bolt_xgb_dd_d4,False,OK,NO TEST VECTOR
+anthonytherrien_s6e8-lgbm-xgb-catboost-stack,blend,0.965631,0.972308,bolt_xgb_raw_bag,False,OK,NO TEST VECTOR
+stephentarter_ps-s06e08-catboost,cb_oof_probs_prob_0,0.035467,0.982063,golem_e,False,OK,NO TEST VECTOR
+stephentarter_ps-s06e08-catboost,cb_oof_probs_prob_1,0.964533,0.982063,golem_e,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_cnn-for-predicting-smartphone-addiction,pred,0.967706,0.984266,bei_realmlp_seed01_fixed4,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_xgboost-v2-for-predicting-smartphone-addiction,pred,0.968733,0.985606,ad_gxgbd4,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_tabtransformer-predicting-smartphone-addiction,pred,0.967469,0.986077,bei_realmlp_seed01_fixed4,False,OK,NO TEST VECTOR
+lucifer19_smartaddict-oof-signal-forge,ictions_oof_lgb_context,0.956349,0.989731,bolt_lgb_raw_d4,False,OK,NO TEST VECTOR
+ravi20076_playgrounds6e8-public-baseline-v1,preds_mlv1_1_cb1c,0.963944,0.993064,pub_cat,False,n/a,NO TEST VECTOR
+omidbaghchehsaraei_xgboost-for-predicting-smartphone-addiction,pred,0.966815,0.993086,naji04,False,OK,NO TEST VECTOR
+lucifer19_smartaddict-oof-signal-forge,ictions_oof_final,0.964011,0.993206,pub_ryota,False,OK,NO TEST VECTOR
+lucifer19_smartaddict-oof-signal-forge,ictions_oof_xgb_anchor,0.964011,0.993206,pub_ryota,False,OK,NO TEST VECTOR
+lucifer19_smartaddict-oof-signal-forge,ictions_oof_lgb_full,0.961674,0.993252,pub_ryota,False,OK,NO TEST VECTOR
+lucifer19_behaviorpulse-high-signal-boosting,ictions_hgb_anchor_fallback,0.963384,0.993787,bei_raw12,False,OK,NO TEST VECTOR
+anthonytherrien_s6e8-lgbm-xgb-catboost-stack,model_2,0.965215,0.994017,pub_ryota,False,OK,NO TEST VECTOR
+anthonytherrien_s6e8-lgbm-xgb-catboost-stack,model_4,0.965186,0.994283,pub_ryota,False,OK,NO TEST VECTOR
+anthonytherrien_s6e8-lgbm-xgb-catboost-stack,model_5,0.965277,0.994876,bolt_xgb_raw_bag,False,OK,NO TEST VECTOR
+anthonytherrien_s6e8-lgbm-xgb-catboost-stack,model_3,0.965251,0.994881,bolt_xgb_raw_bag,False,OK,NO TEST VECTOR
+stephentarter_ps-s06e08-lightgbm,lgb_oof_probs_prob_0,0.035686,0.9949,bei_xgb_identity_digit_raw12,False,OK,NO TEST VECTOR
+stephentarter_ps-s06e08-lightgbm,lgb_oof_probs_prob_1,0.964314,0.9949,bei_xgb_identity_digit_raw12,False,OK,NO TEST VECTOR
+stephentarter_ps-s06e08-xgboost,xgb_oof_probs_prob_0,0.035591,0.995077,bei_xgb_identity_digit_raw12,False,OK,NO TEST VECTOR
+stephentarter_ps-s06e08-xgboost,xgb_oof_probs_prob_1,0.964409,0.995077,bei_xgb_identity_digit_raw12,False,OK,NO TEST VECTOR
+anthonytherrien_s6e8-lgbm-xgb-catboost-stack,model_0,0.965238,0.99512,pub_ryota,False,OK,NO TEST VECTOR
+anthonytherrien_s6e8-lgbm-xgb-catboost-stack,model_1,0.965289,0.995152,pubfe_xgb,False,OK,NO TEST VECTOR
+lucifer19_behaviorpulse-high-signal-boosting,ictions_selected_prediction,0.963648,0.995459,bei_raw12,False,OK,NO TEST VECTOR
+cdeotte_simple-xgb-starter,ictions_oof_pred,0.964812,0.995571,pubfe_xgb,False,OK,NO TEST VECTOR
+lucifer19_behaviorpulse-high-signal-boosting,ictions_lightgbm_anchor_fallback,0.963407,0.995611,bei_raw12,False,OK,NO TEST VECTOR
+dnyaneshbharambe_addiction-lgb-xgb-cat-ensemble,blend,0.966256,0.996092,pub_cat,False,n/a,NO TEST VECTOR
+zhenruiweng_realmlp-for-predicting-smartphone-addiction,s_oof_pred,0.968138,0.99845,bei_realmlp_seed01_fixed4,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_catboost-for-predicting-smartphone-addiction,pred,0.96715,1.0,om_cat,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_ft-transformer-for-predicting-smartphone-addiction,pred,0.966568,1.0,om_ftt,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_realmlp-for-predicting-smartphone-addiction,pred,0.968436,1.0,pub_rmlp,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_resnet-for-predicting-smartphone-addiction,pred,0.966102,1.0,pub_resnet,False,OK,NO TEST VECTOR
+omidbaghchehsaraei_tabnet-for-predicting-smartphone-addiction,pred,0.967559,1.0,pub_tabnet,False,OK,NO TEST VECTOR
+ravi20076_playgrounds6e8-public-baseline-v1,preds_mlv1_1_lgbm1c,0.964173,1.0,ravi_lgbm1c,False,n/a,NO TEST VECTOR
+ravi20076_playgrounds6e8-public-baseline-v1,preds_mlv1_1_xgb1c,0.964201,1.0,ravi_xgb1c,False,n/a,NO TEST VECTOR
+vladstud716373618_baseline-5-fold-cv-catboost-deep-fe,pred,0.499966,0.002022,bolt_fttransformer,True,OK,WEAK
+kava1_predicting-smartphone-addiction-lightgbm-fe,s_resnet_myself_95687,0.956873,0.975105,xgb,True,n/a,WEAK
+abdullahsafwan333_s6e8-realmlp-sap,pred,0.943847,0.978206,realmlp15,True,OK,WEAK
+beicicc_s6e8-strict-realmlp-residual-audit,realmlp_residual_passing_c04_meta56_realmlp,0.969552,0.963708,lattri_xgb,True,OK,ok
+beicicc_s6e8-strict-realmlp-residual-audit,realmlp_residual_passing_c04_meta57_lattice_realmlp,0.969561,0.963788,ad_gxgbcs4,True,OK,ok
+lavanyabacche_predicting-smartphone-addiction-catboost-fe,v12_rank,0.963989,0.97016,bolt_xgb_raw_bag,True,n/a,ok
+tamerlanomralinov_s6e8-lookup-transformer-insights-lb-0-97041,lookup_transformer,0.968756,0.976615,bolt_lookup_v2_s42,True,n/a,ok
+abdullahsafwan333_s6e8-xgboost-sap,pred,0.966875,0.981987,digit_xgb,True,OK,ok
+ravi20076_playgrounds6e8-public-baseline-v2,preds_mlv2_1_realmlp1c,0.964668,0.988888,ravi_lgbm1c,True,n/a,ok
+abdullahsafwan333_s6e8-catboost-sap,pred,0.966438,0.990898,pub_evg,True,OK,ok
+abdullahsafwan333_s6e8-lightgbm-sap,pred,0.967056,0.993054,pub_evg,True,OK,ok
+mohankrishnathalla_s6e8-xgb-tuner-oof-saver,xgb_v3,0.965882,0.993401,mkt_xgb,True,n/a,ok
+dnyaneshbharambe_addiction-lgb-xgb-cat-ensemble,xgb,0.963688,0.993475,pub_donlgbm,True,n/a,ok
+kodaifukuda0311_s6e8-xgb-the-power-of-exact-value-te-fe,xgb,0.968404,0.994018,ram_lgb,True,n/a,ok

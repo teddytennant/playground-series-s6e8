@@ -8973,3 +8973,83 @@ Both columns are optional and blank for every pre-w37 queue row, so nothing else
 not condition on the leader having already been sent that day. Near-rank-identical siblings of a
 sent leader therefore show 0.79–0.98 while their *incremental* value is close to zero. Do not
 spend a whole day's slots on one build's transform siblings on the strength of that column.
+
+---
+
+## ✅✅ 2026-08-20 (w38) — THE POOL WAS NEVER EXHAUSTED. The kernel endpoint had only been run over 80 of 461 refs
+
+RESEARCH's standing line since w32 was "the last importable material is `adarsh1077`'s 22
+members from 08-15", and w36 added the caveat that `kaggle kernels output` is a different
+endpoint from `kaggle datasets download`. **Nobody ever ran the kernel endpoint over the whole
+pool.** w38 did: `experiments/w38a_poolscan.sh` enumerated **461 unique kernel refs** across
+`--sort-by voteCount|dateRun|scoreDescending` × 3 pages each, filtered to the 244 with either
+≥3 votes or a model/OOF keyword in the title, and ran `kernels output` on every one.
+
+**Result: 74 of 244 ship a non-submission artefact. One is a new clean member source.**
+
+### ⚠ HOW TO RUN THIS AGAIN, and the two things that will bite
+
+1. **AutoML kernels dump multi-GB model trees.** 173 refs pulled **17 GB** onto a box with 16 GB
+   free before the guard existed. `w38a_poolscan.sh` now prunes `AutogluonModels`, `AutoML_*`,
+   `catboost_info`, `cache`, `TrainingSummary`, `AutoViz_Plots` immediately after each pull;
+   17 GB became 2.5 GB. **Never run a bulk `kernels output` sweep without that prune.**
+2. **OOF can live in a SUBDIRECTORY.** `stephentarter` ships `predictions/*_oof_probs.csv`; a
+   top-level `listdir` misses it entirely. `w38b_vet.py` walks with `os.walk`, and the candidate
+   `find` uses `-maxdepth 3`.
+3. Parquet too — `ravi20076` ships `OOF_Preds_MLV*.parquet`.
+
+### ✅ THE FIND: `zhukovoleksiy/ps6e8-eda-feature-engineering-pipeline` — 3 clean members
+
+An author **no earlier sweep in this workspace had ever opened**. `data/ext_members14/`:
+
+| member | solo | maxcorr | nearest held |
+|---|---|---|---|
+| `lexb_lgb02` | **0.968370** | 0.99543 | `ram_lgb` |
+| `lexb_cat_base` | 0.967987 | 0.99317 | `bolt_foldsafe_te_cat` |
+| `lexb_xgb_base` | 0.967914 | **0.97907** | `ad_gxgbd4` |
+
+Pack median solo 0.966319 — **all three are above it**, the profile w35c identified as the only
+one that has ever paid, and `lexb_xgb_base` is the most decorrelated import since `om_ftt`
+(0.9845, +6.5e-6).
+
+⚠⚠ **THE ES CLEARANCE IS BY ABSENCE OF THE MECHANISM — a stronger clearance than any before it.**
+The author's `train_cv_lattice` fits with a bare `m.fit(X_tr, y_tr)`. **No `eval_set` is
+constructed anywhere on that code path**, so early stopping cannot fire, cannot be defaulted
+into (CatBoost's `use_best_model` needs an eval set), and there is no log line to misread. The
+sibling `_fit_one` helper *does* take `early_stopping_rounds` — it belongs to `train_cv`, which
+is **commented out** in the shipped notebook. Every previous clearance here rested on grepping a
+log for whether a mechanism fired. **Prefer this test: grep for `eval_set` on the path that
+produced the artefact, not for `early_stopping` anywhere in the file.**
+
+Gate 4 (`experiments/w38c_lexvet.py`): 15 of 15 per-fold cells reproduce the author's printed
+AUCs to 4–5e-6 (the log's 5-dp printing floor); overall AUCs reproduce to **0.0 and 1.1e-16**;
+`sd_ratio` 1.001–1.003 against our own honest control's 1.0018. And the test side is proven too
+— `test_lexB_lgb02.npy` equals the author's `submission_lgb02.csv` in **test.csv id order to
+1.1e-16**, which is more than most imports here ever got.
+
+### ⛔ THE OTHER 71 CANDIDATES — every one dead on a gate. `experiments/w38/dispositions.csv`
+
+The es-on-val base rate held: **3 of the 4 highest-solo candidates in this sweep are dirty**, and
+w34 §4's rule survived another test — *high solo AUC in a foreign member is evidence of optimism*:
+
+- `kodaifukuda0311` solo **0.968404** — `eval_set=[(train), (valid)]`, and **XGBoost early-stops
+  on the LAST eval set**, so a two-element eval_set that *ends* with the validation fold is
+  es-on-val. ⚠ This is a form no `grep early_stopping_rounds` alone would classify. Also
+  seed-averaged over `SEEDS=[42,202,2026,777,4946]`, so the OOF mixes five partitions.
+- `beicicc/s6e8-strict-realmlp-residual-audit` solo **0.969561, maxcorr 0.9638** — the most
+  tempting number in the sweep, and a **level-2 meta**: the author's own
+  `realmlp_residual_candidate_summary.csv` files it `family=c04_postprocessed_meta`, and their
+  `manifest.json` states outright *"the lattice source used outer-validation labels for early
+  stopping"*. ⚠ **A solo above ~0.9690 at maxcorr below ~0.97 is the signature of a level-2
+  object, not of a good member.** Check the author's own manifest before anything else.
+- `abdullahsafwan333` — all four `*-sap` notebooks are **`N_SPLITS = 7`**. One author, four dead
+  candidates, one grep.
+- `lucifer19/smartaddict-oof-signal-forge` — `eval_set=[(X.iloc[va_idx], y[va_idx])]` with
+  `early_stopping_rounds=220` on every model, plus `SEED = 20260807` folds.
+- `mohankrishnathalla`'s two remaining tuner savers ship **no OOF at all** (params json / log
+  only); the third, `s6e8-xgb-tuner-oof-saver`, is the `_v3` output w15e already measured at
+  maxcorr 0.998518 to `mkt_xgb`.
+
+**Still-open supply after this sweep: none that passes a gate.** The route is not "closed for
+want of a method" as w32 put it — it is closed for want of supply, and this sweep is the
+evidence, because it covered 3× the surface any earlier one did.

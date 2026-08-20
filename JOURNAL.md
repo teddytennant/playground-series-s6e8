@@ -16986,3 +16986,199 @@ chained behind this job and is the reading that decides it. Do not promote 197 o
 `experiments/w26d_queueprice.csv` (7 rows + explicit order for 13), `RESEARCH.md`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day.**
+
+---
+
+# 2026-08-20 — w38, slot 8. AT CAP, NO SUBMISSION (10/10 on the 08-20 UTC day)
+
+`date -u` 17:26 UTC at start. Cap confirmed against the submission timestamps rather than the
+prompt's claim: `kaggle competitions submissions -v | cut -d, -f3 | uniq -c` gives **exactly 10
+on each of 08-16, 08-17, 08-18, 08-19 and 08-20**, and today's ten are all stamped 00:07–00:08
+by the w30-style end-of-day drain. Three jobs live in `/proc` (enumerated per-pid with `tr`,
+never grepped — RESEARCH's w30/w32 note): `w36a_value.py` (ram pair), `w36g_run.sh` (ARM 197
+control) chained behind it, and now `w38d_run.sh` chained behind that.
+
+## 0. THE ASSIGNED ANGLE IS A CLOSED LINE. Deviating, with the citation
+
+ANGLE was "error analysis: segment the out-of-fold errors and look for structure a feature could
+capture". **w27 slot 8 §4 closed the error-analysis line as a whole**, and I re-read the evidence
+rather than the summary before discarding it. That entry closed, each against a matched control:
+errormap's `daily_band`/`n_missing`/`other_screen_band`; the generator rule cells A–G; per-cell
+isotonic (real −118e-6 vs control −124e-6); cell-local LightGBM (real−ctrl negative 9/9);
+`resid_boost2` in both modes (negative 8/8); per-cell member weights; the ceiling-from-our-own-
+OOF route (a proven tautology); row identity (arithmetically impossible, 0 duplicate groups in
+691,369 rows); and finally ensemble dispersion, where the M12(b) gate came back z ≤ 0 on every
+real arm while both controls came in *positive*. Its closing line — "do not spend another slot
+on it; cite this entry" — is cited. Honoured the journal over the angle, as the brief allows.
+
+## 1. ⚠⚠ THE SUPPLY LINE WAS NOT EXHAUSTED. IT HAD ONLY BEEN CHECKED ON 80 OF 461 REFS
+
+RESEARCH has said since w32 that "the last importable material is `adarsh1077`'s 22 members from
+08-15", and priced the gap that leaves: at +2.1e-6 of CV per foreign member, ~5 more members is
+the +10.4e-6 that w32a calls gold and **the cheapest path to a medal on the board**. w36 then
+found that `kaggle kernels output` and `kaggle datasets download` are different endpoints, and
+re-checked *ten* refs on the new one — 4 of 10 shipped OOF nobody had seen.
+
+**Nobody ever ran that endpoint over the pool.** So I did.
+
+`experiments/w38a_poolscan.sh` — 461 unique kernel refs enumerated across
+`--sort-by voteCount|dateRun|scoreDescending` × 3 pages, filtered to the 244 carrying ≥3 votes or
+a model/OOF keyword, `kernels output` on every one, classified **by artefact rather than by
+title** (any non-submission file ≥1 MB is a candidate). 74 of 244 came back with something.
+
+⚠ **It nearly filled the disk.** AutoML kernels ship their whole model tree: 173 refs pulled
+**17 GB** onto a box with 16 GB free. The script now prunes `AutogluonModels`/`AutoML_*`/
+`catboost_info`/`cache`/`TrainingSummary`/`AutoViz_Plots` the moment each pull lands — 17 GB
+became 2.5 GB. Anyone re-running a bulk sweep here needs that guard.
+
+Two blind spots the sweep also fixed, both of which would have hidden real members: OOF can sit
+in a **subdirectory** (`stephentarter/predictions/*_oof_probs.csv`), and it can be **parquet**
+(`ravi20076/OOF_Preds_MLV*.parquet`). `w38b_vet.py` walks with `os.walk` and reads both.
+
+## 2. ✅ THE FIND — three clean members from an author no sweep here had ever opened
+
+`zhukovoleksiy/ps6e8-eda-feature-engineering-pipeline` → `data/ext_members14/`:
+
+| member | solo | maxcorr | nearest held |
+|---|---|---|---|
+| `lexb_lgb02` | **0.968370** | 0.99543 | `ram_lgb` |
+| `lexb_cat_base` | 0.967987 | 0.99317 | `bolt_foldsafe_te_cat` |
+| `lexb_xgb_base` | 0.967914 | **0.97907** | `ad_gxgbd4` |
+
+Pack median solo 0.966319. **All three are above it** — the profile w35c named as the only one
+that has ever paid — and `lexb_xgb_base` is the most decorrelated import since `om_ftt` (0.9845,
+which was worth +6.5e-6).
+
+⚠⚠ **The es-on-val clearance is stronger than any this workspace has issued.** It is by ABSENCE
+OF THE MECHANISM, not by reading a log. The author's `train_cv_lattice` fits every model with a
+bare `m.fit(X_tr, y_tr)`; **no `eval_set` is constructed anywhere on that code path**, so early
+stopping cannot fire, cannot be defaulted into (CatBoost's `use_best_model` requires an eval
+set), and there is no log line to misread. The sibling `_fit_one` helper does take
+`early_stopping_rounds` — it belongs to `train_cv`, which is **commented out** in the shipped
+notebook. The lesson generalises and is now in RESEARCH: **grep for `eval_set` on the path that
+produced the artefact, not for `early_stopping` anywhere in the file.**
+
+Gate 4 (`experiments/w38c_lexvet.py`), the load-bearing one: **15 of 15 per-fold cells reproduce
+the author's printed AUCs to 4–5e-6**, the log's own 5-dp printing floor; the overall AUCs
+reproduce to **0.0 and 1.1e-16** against the shipped `manifest.csv`; `sd_ratio` 1.001–1.003
+against our honest control's 1.0018. The manifest declares `StratifiedKFold(5, shuffle=True,
+random_state=42)` and the measurement agrees. **And the test side is proven too** —
+`test_lexB_lgb02.npy` equals the author's own `submission_lgb02.csv` in test.csv id order to
+1.1e-16, so the row indexing is established on both splits.
+
+## 3. ⛔ THE OTHER 71 CANDIDATES ARE ALL DEAD, and three of the kills are new mechanisms
+
+`experiments/w38/dispositions.csv` carries the full table. w34 §4's rule — *high solo AUC in a
+foreign member is evidence of optimism, not of quality* — survived another test: **three of the
+four highest-solo candidates in the sweep are dirty.**
+
+**3.1 `kodaifukuda0311/s6e8-xgb-the-power-of-exact-value-te-fe`, solo 0.968404 — a form of
+es-on-val no keyword grep classifies.** Its fit is `eval_set=[(X_train, y_train), (X_valid,
+y_valid)]`, which reads as a training-curve print. **XGBoost early-stops on the LAST eval set**,
+so a two-element list that *ends* with the validation fold is es-on-val exactly. It is also
+seed-averaged over `SEEDS=[42, 202, 2026, 777, 4946]`, so its OOF mixes five partitions.
+
+**3.2 `beicicc/s6e8-strict-realmlp-residual-audit`, solo 0.969561 at maxcorr 0.9638 — the most
+tempting number in the sweep, and a level-2 object.** The author's own
+`realmlp_residual_candidate_summary.csv` files both streams `family=c04_postprocessed_meta`, and
+their `manifest.json` says outright *"the lattice source used outer-validation labels for early
+stopping"*. ⚠ Generalised in RESEARCH: **a solo above ~0.9690 at maxcorr below ~0.97 is the
+signature of a level-2 stack, not of a good member** — no honest single model here reaches it.
+Read the author's manifest before anything else.
+
+**3.3 `abdullahsafwan333` — four candidates, one grep.** All four `*-sap` notebooks are
+`N_SPLITS = 7`. Foreign partition, dead, including a 0.98199-maxcorr XGBoost that would otherwise
+have looked worth a build.
+
+Also killed: `lucifer19/smartaddict-oof-signal-forge` (`eval_set=[(X.iloc[va_idx], ...)]`,
+`early_stopping_rounds=220`, `SEED=20260807` folds); `tamerlanomralinov` (N_FOLDS=3, already on
+record); `mkt xgb_v3` (w15e's 0.998518 dup); `ravi20076`'s v2 realmlp1c (already quarantined);
+`lavanyabacche v12_rank` (the author's own rank blend); and both remaining `mohankrishnathalla`
+tuner savers, which ship **no OOF at all**.
+
+**The supply route is now closed on evidence rather than on assumption.** w32 said it was
+"closed for want of supply, not for want of a method"; that claim rested on 80 refs. It now rests
+on 461, and it survives.
+
+## 4. ARM 202 — BUILT UNDER A PRE-REGISTRATION COMMITTED BEFORE IT STARTED (git d063408)
+
+`experiments/w38d_prereg.txt`, then `experiments/w38d_run.sh`. The script is `w36b_run.sh` with
+`ext_members14` appended to `--extra-dirs` and **nothing else changed**, so
+`submissions/w36_ad199std*.csv` on disk is a matched control and the delta is attributable to the
+three members as a group. Member count verified at **exactly 202** with the real loader before
+the build was queued.
+
+**No free parameter in the pack.** `lexb_lgb02` sits at maxcorr 0.99543, just above the 0.995
+line `w38b_vet.py` used to auto-file duplicates, and it is included anyway — RESEARCH's own
+heading is ⛔⛔ *DECORRELATION DOES NOT PRICE A MEMBER*, so reaching for that retired instrument
+now, to drop the strongest of the three, would be pack selection dressed as a gate. All three or
+none; all three.
+
+**Bar, fixed before the number exists: 0.9701440** — the leader `w36_ad199stdcorr` at
+0.9701400060 plus the ~4e-6 rebuild reproducibility floor. Registered central expectation
+**+2 to +12e-6 on the h3 base**, with a genuine chance of a null and a real chance of a negative.
+The honest basis for that range is uncomfortable and is stated as such in the prereg: w36's
+four-member group returned +14.85e-6 while its own paired instrument prices every one of those
+members at a sign-flipping null, so the only comparable event says a group can move the stack by
+more than the sum of its measured parts **and nobody here knows why**.
+
+⚠ **Ordering: the build waits for `w36g done`, not for `w36a`.** ARM 197 is a registered control
+that was queued before these members were found, and it is not being pushed behind a candidate
+that arrived later — that is the same move the w36 addendum refused when it declined to kill the
+199 build. Both land inside the 08-21 send day.
+
+## 5. w36a PARTIAL — reps 0–2, and the ram pair is a SIGN-FLIPPING NULL like the ravi pair
+
+| rep | pack | ram_hgb | ram_lgb | both |
+|---|---|---|---|---|
+| 0 | 0.9701606750 | **−4.40e-6** | **−2.36e-6** | **−6.35e-6** |
+| 1 | 0.9703300944 | −0.08e-6 | +2.35e-6 | +2.13e-6 |
+| 2 | 0.9704645635 | +2.00e-6 | −0.49e-6 | −0.52e-6 |
+
+Every arm has flipped sign at least once in three reps, so all three already fail w26i's house
+criterion — **5/5, not 4/5**, per the rule the w36 addendum told every future run to quote
+verbatim. Two reps remain and cannot rescue a sign gate that has already failed.
+
+**This sharpens the w36 attribution puzzle rather than settling it.** If the ram pair is a
+sign-flipping null *and* the ravi pair is a sign-flipping null, then the **+14.85e-6** ARM 199
+gained over ARM 195 is not attributable to any of its four members individually. ARM 197 is the
+reading that prices the ravi half of that on the shipping instrument. Do not promote 197 on its
+number; `w36b_prereg.txt` calls it a CONTROL and the rule predates both arms.
+
+## 6. STATE, VERIFIED THIS RUN
+
+- Queue head for 08-21 remains `w36_ad199stdcorr.csv` (CV leader, **unsent = not selectable**),
+  with the full ten-slot order and per-row messages already set by `w37d_order.py`. Untouched
+  this run. **If ARM 202 clears 0.9701440 it goes to the head and the day opens 202 → 199.**
+- `check_selection.py`: `w23_ad187stdcorr` SENT; `w36_ad199stdcorr` NOT SENT, NOT SELECTABLE.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local and safe.
+- Board unchanged at rank 18, 0.97118.
+- Disk: 94% full after the sweep prune, 29 GB free. `notebooks/w38/out` is 2.5 GB and is the
+  first thing to delete if a build needs room.
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` vs the submission timestamps; `/proc` per-pid with `tr` for the three chained jobs.
+2. **`.venv/bin/python experiments/w26g_send.py --go --n 10`** if the 08-21 day has opened — but
+   FIRST check `experiments/w38d_build.log` for `w38d done`. If ARM 202 cleared **0.9701440**,
+   move `check_selection.WANTED` to it **in the same commit** as the requeue, re-price it to the
+   head, and send it in slot 1 ahead of `w36_ad199stdcorr`. If it did not clear, WANTED does not
+   move and the w37d order stands exactly as written.
+3. `experiments/w37e_readout.py` — read R1 FIRST; a failure there withdraws the +2.7e-4 es-on-val
+   figure from RESEARCH.md and everything built on it.
+4. `w36a_value.csv` (5/5 sign gate — reps 0–2 already fail it) and `w36g_build.log` (ARM 197, a
+   CONTROL) against the 0.9701288 bar in `w36b_prereg.txt`.
+5. Re-run `w38a_poolscan.sh` — it is idempotent, skips every ref already in the ledger, and only
+   pays for what is newly published. The 08-21/08-22 refs are the only unswept surface left.
+6. Do **NOT** re-open: error analysis / OOF segmentation in any framing (§0, and w27 slot 8 §4
+   closed it against matched controls); fold/seed averaging; more CLEAN es-bias calibration
+   points; the top-level blend-weight search; FE variants; the original dataset; tuning any
+   CatBoost or XGBoost; the stacker C.
+
+**Files added:** `experiments/w38a_poolscan.sh` + `.log`, `experiments/w38b_vet.py` + `.csv` +
+`.log`, `experiments/w38c_lexvet.py` + `.csv`, `experiments/w38d_prereg.txt`,
+`experiments/w38d_run.sh`, `experiments/w38/{all_refs,unseen,scan_targets}.txt`,
+`experiments/w38/{all_meta,ledger,dispositions}.csv`, `data/ext_members14/` (3 members).
+**Modified:** `RESEARCH.md`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day.**

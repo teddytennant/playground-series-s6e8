@@ -1,0 +1,23 @@
+kernel_ref,stream,solo_auc,maxcorr,gate_failed,evidence
+zhukovoleksiy/ps6e8-eda-feature-engineering-pipeline,lexb_lgb02,0.968370,0.99543,NONE - IMPORTED,"train_cv_lattice fits with a bare m.fit(X_tr,y_tr); no eval_set on that path. manifest SKF(5,shuffle,42). 5/5 fold cells reproduce to 4e-6."
+zhukovoleksiy/ps6e8-eda-feature-engineering-pipeline,lexb_cat_base,0.967987,0.99317,NONE - IMPORTED,same
+zhukovoleksiy/ps6e8-eda-feature-engineering-pipeline,lexb_xgb_base,0.967914,0.97907,NONE - IMPORTED,same
+kodaifukuda0311/s6e8-xgb-the-power-of-exact-value-te-fe,xgb,0.968404,0.99402,6 ES-ON-VAL + 4 FOREIGN,"eval_set=[(train),(valid)] and xgboost early-stops on the LAST eval set; also seed-averaged over SEEDS=[42,202,2026,777,4946] so the OOF mixes five partitions."
+beicicc/s6e8-strict-realmlp-residual-audit,c04_meta56_realmlp,0.969552,0.96371,LEVEL-2 META,"the author's own candidate_summary files it family=c04_postprocessed_meta; a stack of members, not a member."
+beicicc/s6e8-strict-realmlp-residual-audit,c04_meta57_lattice_realmlp,0.969561,0.96379,LEVEL-2 META + ES-ON-VAL,"same family, and the author's own manifest.json says 'the lattice source used outer-validation labels for early stopping'."
+abdullahsafwan333/s6e8-xgboost-sap,pred,0.966875,0.98199,4 FOREIGN PARTITION,N_SPLITS = 7
+abdullahsafwan333/s6e8-lightgbm-sap,pred,0.967056,0.99305,4 FOREIGN PARTITION,N_SPLITS = 7
+abdullahsafwan333/s6e8-catboost-sap,pred,0.966438,0.99090,4 FOREIGN PARTITION,N_SPLITS = 7
+abdullahsafwan333/s6e8-realmlp-sap,pred,0.943847,0.97821,6 ES-ON-VAL,"best_auc/best_state restore on X_valid, patience=18"
+lucifer19/smartaddict-oof-signal-forge,oof_final + 3 members,0.964011,-,6 ES-ON-VAL,"every model fits with eval_set=[(X.iloc[va_idx],y[va_idx])] and early_stopping_rounds=220"
+lucifer19/behaviorpulse-high-signal-boosting,2 streams,0.963648,0.99546,NO TEST VECTOR,oof only
+tamerlanomralinov/s6e8-lookup-transformer-insights-lb-0-97041,3 streams,0.968756,0.97662,4 FOREIGN PARTITION,"N_FOLDS=3, already on record at RESEARCH 8667"
+mohankrishnathalla/s6e8-xgb-tuner-oof-saver,xgb_v3,0.965882,0.99340,7 ALREADY HELD,"the _v3 tuner output; w15e measured maxcorr 0.998518 to mkt_xgb"
+mohankrishnathalla/s6e8-catboost-tuner-oof-saver,-,-,-,NO OOF,params json + log only
+mohankrishnathalla/s6e8-lgb-dart-tuner-oof-saver,-,-,-,NO OOF,log only
+ravi20076/playgrounds6e8-public-baseline-v2,preds_mlv2_1_realmlp1c,0.964668,0.98889,7 ALREADY HELD,"= ravi_realmlp1c, already quarantined in ext_members11es"
+lavanyabacche/predicting-smartphone-addiction-catboost-fe,v12_rank,0.963989,0.97016,LEVEL-2 RANK BLEND,"'v12_rank' is the author's own rank blend"
+dnyaneshbharambe/addiction-lgb-xgb-cat-ensemble,xgb,0.963688,0.99347,not pursued,"below pack median AND maxcorr 0.993 -- no profile that has ever paid here"
+anthonytherrien/s6e8-lgbm-xgb-catboost-stack,model_0..5,~0.9652,~0.9950,NO TEST VECTOR,oof.csv only
+stephentarter/ps-s06e08-{lightgbm|catboost|xgboost},*_oof_probs,~0.9644,~0.9949,NO TEST VECTOR,predictions/ ships oof only
+sergeyqt2024/lr-lgbm-oof-only,-,-,-,NO OOF,"titled 'OOF only'; ships submission.csv + log"
