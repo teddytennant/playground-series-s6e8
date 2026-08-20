@@ -8466,3 +8466,16 @@ the 4-stack one.
 a wait.** Wait on the artefact the job writes (`until grep -q "rep4" the.log`), which is what
 you actually care about and cannot false-negative. Keep the per-pid `tr` form for *reporting*
 what is alive; do not build control flow on either.
+
+## ⚠ `git push` is blocked on this box (found w32, 2026-08-20; failing since at least w31)
+
+`origin` is HTTPS and the credential helper shells out to `gh`, which **is not installed**.
+No `~/.git-credentials`, no `GH_TOKEN`/`GITHUB_TOKEN`, no global `credential.helper`.
+
+    gh auth git-credential get: line 1: gh: command not found
+    fatal: could not read Username for 'https://github.com'
+
+Commits are safe locally and stack up: `git log --oneline origin/main..HEAD` was **3** at the
+end of w32. **Do not thrash on this** — commit as usual, check that count, and report it.
+Fixing it needs Teddy: install+auth `gh`, add a PAT to `~/.git-credentials`, or switch the
+remote to SSH. Same class of blocker as the final-selection click.

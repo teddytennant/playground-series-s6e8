@@ -15970,3 +15970,24 @@ and note it is *unfalsified*, not *supported*: this experiment could never have 
 `w26d_queueprice.{csv,json}`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**
+
+## 8. ⚠⚠ BLOCKER: `git push` FAILS — three commits are local-only, and it is not new
+
+```
+gh auth git-credential get: line 1: gh: command not found
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+The remote `https://github.com/teddytennant/playground-series-s6e8.git` is configured with a
+credential helper that shells out to `gh`, and **`gh` is not installed on this box.** There is
+no `~/.git-credentials`, no `GH_TOKEN`/`GITHUB_TOKEN` in the environment, and no global
+`credential.helper`.
+
+**`git log origin/main..HEAD` is 3 commits deep**, so this did not start today — w31 (slot 2)
+committed `4873af1` and `709bdfa` and they never left the box either. The work is committed
+and safe locally; it is simply not on the remote, and every future slot will pile onto the
+same stack until someone fixes the credential.
+
+**This needs Teddy, like the selection click** — either `gh` installed and authed, a PAT in
+`~/.git-credentials`, or the remote switched to SSH. A future run should **not** thrash on it:
+commit as normal, check `git log origin/main..HEAD`, and say so.
