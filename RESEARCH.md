@@ -8709,3 +8709,60 @@ CV the leaderboard will not pay. That is the Rogii failure with an import step i
 already-held member could have walked straight through gate 7. Fixed with an
 `assert len(bn) == 195`. **Any instrument that claims to compare against "the pack" must
 assert its member count**, which is the same discipline `w32c_famholdout.py` already applies.
+
+---
+
+## 2026-08-20 (w36) — the `kernels output` re-check of ten "submission only" refs
+
+w34 §3.1 found that `kaggle kernels output <ref>` and `kaggle datasets download <ref>` are
+**different endpoints returning different files**, and that every row in this file filed as
+"submission only, no OOF" had been decided on the dataset endpoint alone. w36 ran the kernel
+endpoint on ten such refs. **Four had OOF that no earlier scan had seen. Three of the four are
+absent function classes, and three of the four are dead on a gate.**
+
+| ref | what `kernels output` actually ships | verdict |
+|---|---|---|
+| `mohankrishnathalla/s6e8-realmlp-oof-saver` | `oof_realmlp.npy`, `test_realmlp.npy`, 5 per-fold submissions | ✅ **CLEAN**, solo 0.958134 → `ext_members13/` |
+| `mohankrishnathalla/s6e8-tabm-oof-saver` | `oof_mlp.npy`, `test_mlp.npy` | ⛔ es-on-val (`Early stop at epoch 85` ×5) → `ext_members13es/` |
+| `omidbaghchehsaraei/tabm-for-predicting-smartphone-addiction` | `oof.csv` (id, oof_pred, label) | ⛔ es-on-val (`New best epoch!` → `Restoring best model` ×5) → `ext_members13es/` |
+| `ern711/contextualized-deep-univariate-spline-transformer` | `nonlinear_context_5fold_oof.csv` + test preds | ⛔ **foreign partition** (`OUTER_SPLIT_SEED = 21`), *and* a `best_epoch` column per fold |
+| `anthonytherrien/...-nn-residual-network`, `hamidrana/...-ann`, `szymonkapiski/s6e8-honest-oof-blend`, `daniilkrasnovvv/s6e8-top-1-public-0-97099`, `vh10935cse20/mobile-addiction-lgbm`, `nawfeelrahman1124444/realmlp-0-97014` | `submission.csv` + log only (the last two: log only) | ⛔ confirmed submission-only on BOTH endpoints |
+
+**RESEARCH's own standing note that `mohankrishnathalla`'s two savers "both crashed, worth
+re-checking, the author is iterating" was right and paid.** Both now run. Re-check a crashed
+saver; authors fix them.
+
+### ⚠ The two numbers that came out of this, and they point opposite ways
+
+1. **All three new OOF files reproduce our frozen SKF5 per-fold AUCs to ~4e-6** — the log
+   printing floor. Our partition is what the public pool uses by default; a foreign partition
+   is the exception (`ern711`, `factualexplorer`, `tamerlanomralinov`), not the rule.
+2. **The es-on-val base rate is now 3 in 4 across three sweeps** (w33 5/7, w34 4/6, w36 3/4).
+   And once again **the highest-solo new member is the dirty one**: `omid_tabm` at 0.967508
+   is +0.0012 over the pack median, and it gets there by `Restoring best model` on the scored
+   fold. w34 §4's rule holds without exception so far: **high solo AUC in a foreign member is
+   evidence of optimism, not of quality.**
+
+### The one clean member and why it was NOT put in the w36 build
+
+`mkt_realmlp` — RealMLP, `Trainer.fit stopped: max_epochs=512 reached` on **all five** folds,
+so early stopping never fired and the clearance is by observed behaviour, not by declaration.
+Solo 0.958134. It fails **w29's acceptance gate on strength**: the gate wants a member within
+0.005 of the pack median solo (0.966319) and this is −0.0082. It is also a RealMLP, a class the
+pack already holds through `beicicc/s6e8-fixed4-realmlp-two-seed-artifacts`. Stored unmeasured
+in `ext_members13/`; its maxcorr and paired value are the cheapest open measurement left.
+
+### Method note — the cheap half of the gate needs no pack
+
+`experiments/w36c_lightvet.py` runs gates 1–4 (shape, label match, solo AUC, per-fold
+reproduction under our folds) on a single member with nothing loaded but `y`. maxcorr is the
+only expensive gate. **Run the cheap half first**: it killed 3 of 4 candidates here for free,
+while a build was holding the memory the maxcorr gate needs.
+
+### Kaggle access token expiry, checked this run
+
+`access_token_expiration = 2026-08-21T03:22:29 UTC`. The 08-21 send day opens at 00:00 UTC with
+the token still valid, so **slot 1 is not at risk**. The w34 §7 dead window (the SDK's sign
+error means the CLI 401s for 30 minutes *after* expiry while believing the token is good) opens
+**2026-08-21 03:22–03:52 UTC**. A run in that window is not blocked — refresh with
+`KaggleCredentials.load(client=KaggleClient(env=KaggleEnv.PROD)).refresh_access_token()`.

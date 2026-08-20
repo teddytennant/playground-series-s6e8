@@ -1,0 +1,8 @@
+member,source,g1_shape_ids,g2_label_mismatch,oof_auc,log_auc,g3_auc_ok,g5_credible,g4_maxdiff,g4_ok,foreign_partition,es_on_val,hard_gates,maxcorr,nearest,pack_median_solo
+dkv_cb,danushkumarv/...-rank-blend-nb01:cb,True,,0.9627085344216801,,True,True,3.115683435694905e-07,True,,`use_best_model=True` explicit; `best_iter` printed per fold,True,0.9970060517304151,cat_raw,0.9663186575016067
+dkv_lgb,danushkumarv/...-rank-blend-nb01:lgb,True,,0.9639537086775002,,True,True,3.535284565092667e-07,True,,`early_stopping_rounds=150` on the scored fold; `best_iter` printed per fold,True,0.9964192264259166,bei_identity_digit_raw12,0.9663186575016067
+dkv_xgb,danushkumarv/...-rank-blend-nb01:xgb,True,,0.9644659266392541,,True,True,3.1818289036866787e-07,True,,`early_stopping_rounds=150` on the scored fold; `best_iter` printed per fold,True,0.996908487225876,bei_xgb_identity_digit_raw12,0.9663186575016067
+kava_cat,kava1/...-lightgbm-fe:catboost_0,True,,0.9637552596060746,,True,True,2.728416861330629e-07,True,,"CatBoost `use_best_model=True` explicit, with early_stopping_rounds, on the scored fold",True,0.9893412127732697,bolt_cat_unique,0.9663186575016067
+ram_hgb,redamountassir/s6e8-histgradientboosting-lb-0-96945,True,,0.9680258266201603,0.968026,True,True,4.5435628648338167e-07,True,,,True,0.9947435562275454,bolt_lgb_missing_global,0.9663186575016067
+ram_lgb,redamountassir/s6e8-lgbm-lb-0-96965,True,,0.9682590393147879,0.968259,True,True,4.869122876005605e-07,True,,,True,0.9950646971277038,bolt_lgb_missing_global,0.9663186575016067
+zwr_realmlp,zhenruiweng/...-single-model-realmlp,True,,0.9691277389781154,,True,True,,False,,keeps the best EPOCH by val AUC on the scored fold (`-> best AUC: .. (epoch k)`),False,,,

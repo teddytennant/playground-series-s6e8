@@ -1,0 +1,4 @@
+member,solo_auc,log_overall,g4_maxdiff,g4_ok,es_on_val
+mkt_mlp,0.9414220911448385,0.94142,4.5512788550139405e-06,True,"`Early stop at epoch 85` on every fold, and a per-fold checkpoint is saved"
+mkt_realmlp,0.9581337349072739,0.95813,3.897756137072328e-06,True,
+omid_tabm,0.9675077199415221,0.96751,4.491583227461682e-06,True,`New best epoch!` then `Restoring best model` per fold -- explicit best-epoch selection
