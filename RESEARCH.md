@@ -7387,7 +7387,7 @@ cheap-class-first: slot 4's first launch of `w27o` ran class-major and put 5.5 h
 *control* in front of every genuinely new cell. Under `nice -n 15` on a load-40 box the job
 was getting **43% of one core**, so nice-value and box load multiply the ordering mistake.
 
-## The within-LightGBM CTshare → d_c relation (w27g, 4 of 14 configs)
+## The within-LightGBM CTshare → d_c relation (w27g, ALL 14 configs — completed 2026-08-19)
 
 | config | CTshare | d_c |
 |---|---|---|
@@ -7396,7 +7396,10 @@ was getting **43% of one core**, so nice-value and box load multiply the orderin
 | leaves127_d9 | 1.3% | +401.11e-6 |
 | leaves255_dinf | 2.6% | +678.83e-6 |
 
-Monotone over a 3.3x range of CTshare, **within** LightGBM. Still not readable **across**
+Monotone over a 3.3x range of CTshare, **within** LightGBM. Over all 14 configs the rank
+correlation is **spearman +0.464 (p=0.095, n=14)** — registered POSITIVE, modal +0.5 at
+§K2(b), so it lands on its registered mode. The four capacity configs above carry the range;
+the nine regularisation knobs all sit at CTshare 0.8–1.1% and add scatter, not range. Still not readable **across**
 libraries (§M3(c): it predicts +386e-6 for xgb against an observed +291, and +798e-6 for cat
 against +525). **Never quote a cross-library CTshare slope.**
 
@@ -8213,3 +8216,60 @@ still loaded `w26e_famfix.json` (60 rows) against a table that had grown to 78. 
 correct and load-bearing: a stale model file against a fresh centring source silently
 mis-centres every prediction. **Refit, never widen the tolerance.** Both now load
 `w30b_corrterm.json`.
+
+## ✅ `w27g_tunect` FINISHED — the 14-config fold-0 table, and the confound in it (2026-08-19/20)
+
+The tuning×CT-correction sweep registered at `w26_prereg.txt` §K completed (7,369 s, 14
+configs, fold 0, 400 rounds, seed 42). All four readouts, verbatim from
+`experiments/w27g_tunect.log`:
+
+| readout | registered | observed | |
+|---|---|---|---|
+| K2(a) d_c > 0 for every config | yes | **YES, 14/14** | ✅ |
+| K2(b) spearman(CTshare, d_c) | positive, modal +0.5 | **+0.464** (p 0.095) | ✅ |
+| K2(c) argmax moves toward capacity | P(differ) 0.4 | @1.0 `lr0.05`, @4/3 `leaves255_dinf` — **DIFFER** | ✅ |
+| K2(d) best(4/3) − best(1.0) − 293.86e-6 | 0 to +80e-6, modal +15 | **+146.75e-6** | ❌ over |
+
+Fold-0 AUC, every d_c against that config's own s=1.0 number (R-K2):
+
+| config | @1.0 | @4/3 | d_c | vs ctl@4/3 |
+|---|---|---|---|---|
+| control (`lgbm_fixed_lat`) | 0.964779 | 0.965104 | +324.99e-6 | — |
+| leaves31_d6 | 0.964129 | 0.964426 | +297.11e-6 | −677.78e-6 |
+| leaves127_d9 | 0.965424 | 0.965825 | +401.11e-6 | +720.98e-6 |
+| **leaves255_dinf** | 0.965891 | **0.966570** | +678.83e-6 | **+1466.40e-6** |
+| mcs40 / mcs800 | 0.964793 / 0.964761 | 0.965115 / 0.965065 | +322 / +305e-6 | +10.9 / −38.5e-6 |
+| l2_5 / l2_300 | 0.965329 / 0.964219 | 0.965581 / 0.964577 | +251 / +358e-6 | +476.8 / −526.5e-6 |
+| colsample0.4 / 0.9 | 0.964796 / 0.964648 | 0.965119 / 0.965033 | +323 / +385e-6 | +14.8 / −71.0e-6 |
+| bynode0.7 / pathsmooth20 | 0.964820 / 0.964807 | 0.965107 / 0.965139 | +287 / +332e-6 | +3.4 / +35.0e-6 |
+| **lr0.05** | **0.966130** | 0.966535 | +405.41e-6 | +1431.20e-6 |
+| cap_corner | 0.966024 | 0.966364 | +340.85e-6 | +1260.67e-6 |
+
+⚠⚠ **EVERY NUMBER IN THAT TABLE IS 400 ROUNDS, AND THE OPERATING POINT IS 2000.** The control
+config *is* `lgbm_fixed_lat`, shipped at 2000 rounds for CV **0.9677108350**; the same config
+at 400 rounds pools to **0.9654813306** (w26l_r400). **Rounds 400 → 2000 are worth
++2229.5e-6** — 1.5× the entire 14-config fold-0 spread and 15× K2(d)'s headline. At fixed
+rounds `num_leaves` and `learning_rate` are speed-of-convergence knobs as much as capacity
+knobs, and the two argmaxes are exactly the two configs that reading predicts (`lr0.05` = 2×
+the step, `leaves255_dinf` = 4× the leaves). **Do not quote the +1466e-6 as a config
+advantage.** The 5-fold, 2000-round, staged re-run that settles it is `w31a_lgb5f.py`,
+registered at `w31_prereg_slot2.txt` §N.
+
+**GENERAL RULE, and this workspace has now been caught by the matched-null problem four
+times.** A hyperparameter table is only readable at the round count it will be shipped at.
+Any future screen here fits once at the operating point and reads earlier round counts off
+`num_iteration=`, which is free — the same "one fit, many arms" trick §G3 gives for the CT
+scale, on the rounds axis.
+
+## `w31a_lgb5f.py` — one fit, three free axes (rounds × CT scale × fold)
+
+    .venv/bin/python experiments/w31a_lgb5f.py --fold k --rounds 2000 --jobs 3   # per fold
+    ./experiments/w31a_run.sh                    # all 5 folds at once, 15 of 16 threads
+    .venv/bin/python experiments/w31a_lgb5f.py --report                          # pooled
+
+Checkpoints per (config, fold) in `cache/lgb5fckpt/`: the booster as `.txt` **and** the full
+prediction cube as `.npz` (`oof` (n_valid, 4 stages, 2 scales), `test` (296302, 4, 2)). So
+every later stage/scale/member-export question is free from here — no refit. An identical
+re-run resumes. ⚠ It writes `w31a_<tag>_{oof,test}.npy` in `experiments/`, **not** in `oof/`
+(w26m's warning: `load_members` scans `oof/` and every reproduction gate here is stated
+against a fixed member COUNT).

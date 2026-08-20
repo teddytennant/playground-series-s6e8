@@ -8,3 +8,35 @@
 [tunect] mcs40            1.0 0.964793  4/3 0.965115  d_c  +322.01e-6  CTshare   1.0%  (5196s)
 [tunect] mcs800           1.0 0.964761  4/3 0.965065  d_c  +304.64e-6  CTshare   0.9%  (5674s)
 [tunect] l2_5             1.0 0.965329  4/3 0.965581  d_c  +251.38e-6  CTshare   1.1%  (6214s)
+[tunect] l2_300           1.0 0.964219  4/3 0.964577  d_c  +358.45e-6  CTshare   0.9%  (6504s)
+[tunect] colsample0.4     1.0 0.964796  4/3 0.965119  d_c  +322.68e-6  CTshare   1.1%  (6591s)
+[tunect] colsample0.9     1.0 0.964648  4/3 0.965033  d_c  +384.68e-6  CTshare   1.0%  (6748s)
+[tunect] bynode0.7        1.0 0.964820  4/3 0.965107  d_c  +287.07e-6  CTshare   1.1%  (6888s)
+[tunect] pathsmooth20     1.0 0.964807  4/3 0.965139  d_c  +331.67e-6  CTshare   1.0%  (7049s)
+[tunect] lr0.05           1.0 0.966130  4/3 0.966535  d_c  +405.41e-6  CTshare   1.5%  (7187s)
+[tunect] cap_corner       1.0 0.966024  4/3 0.966364  d_c  +340.85e-6  CTshare   1.8%  (7369s)
+
+[tunect] FOLD 0 TABLE (400 rounds). Every d_c is against that config's OWN s=1.0 number (R-K2).
+  config              AUC@1.0    AUC@4/3         d_c  vs ctl@1.0  vs ctl@4/3  CTshare
+  control            0.964779   0.965104   +324.99e-6     +0.00e-6     +0.00e-6     1.0%
+  leaves31_d6        0.964129   0.964426   +297.11e-6   -649.91e-6   -677.78e-6     0.8%
+  leaves127_d9       0.965424   0.965825   +401.11e-6   +644.86e-6   +720.98e-6     1.3%
+  leaves255_dinf     0.965891   0.966570   +678.83e-6  +1112.56e-6  +1466.40e-6     2.6%
+  mcs40              0.964793   0.965115   +322.01e-6    +13.91e-6    +10.93e-6     1.0%
+  mcs800             0.964761   0.965065   +304.64e-6    -18.15e-6    -38.50e-6     0.9%
+  l2_5               0.965329   0.965581   +251.38e-6   +550.38e-6   +476.77e-6     1.1%
+  l2_300             0.964219   0.964577   +358.45e-6   -559.96e-6   -526.50e-6     0.9%
+  colsample0.4       0.964796   0.965119   +322.68e-6    +17.12e-6    +14.81e-6     1.1%
+  colsample0.9       0.964648   0.965033   +384.68e-6   -130.64e-6    -70.95e-6     1.0%
+  bynode0.7          0.964820   0.965107   +287.07e-6    +41.35e-6     +3.43e-6     1.1%
+  pathsmooth20       0.964807   0.965139   +331.67e-6    +28.31e-6    +35.00e-6     1.0%
+  lr0.05             0.966130   0.966535   +405.41e-6  +1350.78e-6  +1431.20e-6     1.5%
+  cap_corner         0.966024   0.966364   +340.85e-6  +1244.80e-6  +1260.67e-6     1.8%
+
+  K2(a)  d_c > 0 for all configs?  YES
+  K2(b)  spearman(CT_ gain share, d_c) = +0.464  (p=0.095, n=14) -- registered POSITIVE, modal +0.5
+  K2(c)  argmax @1.0 = lr0.05   argmax @4/3 = leaves255_dinf   DIFFER
+  K2(d)  HEADLINE best(4/3) - best(1.0) - 293.86e-6 = +146.75e-6  -- registered 0 to +80e-6, modal +15e-6
+
+  R-K1/R-K3: fold-0 screen. Nothing here is exported, blended or shipped; if the headline clears +80e-6 the follow-on is a 5-fold re-run of leaves255_dinf against the control.
+  saved w27g_tunect.json  (7369s)

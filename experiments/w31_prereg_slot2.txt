@@ -1,0 +1,122 @@
+================================================================================
+§N  w31 slot 2 (2026-08-20 UTC) -- IS THE w27g TUNING TABLE AN ARTEFACT OF
+    UNDERTRAINING?  The registered 5-fold follow-on to §K, plus the rounds axis.
+    Written BEFORE experiments/w31a_lgb5f.py was started. Its log did not exist at
+    the time of writing; cache/lgb5fckpt/ did not exist.
+================================================================================
+
+N0. WHY THIS AND NOT ANOTHER SWEEP
+-----------------------------------
+The handed angle is "LightGBM: tune it properly against the fixed folds -- learning rate,
+leaves, regularisation, categorical handling", for the THIRD time (w26 slot 4, w27 slot 2,
+now). It was refused twice as a priced null (day-1: +500e-6 on fold 0 -> +30e-6 on full OOF)
+and taken the second time as the CT-skew INTERACTION question, registered at §K.
+
+**§K finished, and it fired its own escape clause.** From w27g_tunect.log, fold 0, 400 rounds:
+
+    K2(a)  d_c > 0 for all 14 configs                                        PASS
+    K2(b)  spearman(CT_ gain share, d_c) = +0.464 (p=0.095, n=14)            PASS (modal +0.5)
+    K2(c)  argmax @1.0 = lr0.05   argmax @4/3 = leaves255_dinf   DIFFER      PASS
+    K2(d)  HEADLINE  best(4/3) - best(1.0) - 293.86e-6 = +146.75e-6          registered 0..+80
+
+R-K3, verbatim: "If the headline clears +80e-6, the follow-on is a 5-fold re-run of that one
+config against the control, not a member export." +146.75 clears +80. This slot is that
+re-run. It is not a new sweep; the search is over and the grid is frozen at three configs.
+
+N0b. THE CONFOUND §K DID NOT CONTROL, AND WHY IT IS THE HEADLINE HERE
+----------------------------------------------------------------------
+Every number in the §K table was fitted at **400 rounds**. The control config IS
+`lgbm_fixed_lat`, whose shipped member is fitted at **2000 rounds** for a stored CV of
+**0.9677108350**. The 5-fold pooled control at 400 rounds (w26l_r400) is **0.9654813306**.
+
+    rounds 400 -> 2000 is worth +2229.5e-6.
+
+That is 1.5x the entire fold-0 spread of the 14-config table and 15x its headline. At fixed
+rounds, `num_leaves`, `learning_rate` and `min_child_samples` are not only capacity knobs --
+they are **speed-of-convergence knobs**, and a table read 2230e-6 below its own operating
+point rewards whichever config gets there fastest, not whichever ends up highest. The two
+fold-0 argmaxes are exactly the two configs that would be predicted on that reading alone:
+`lr0.05` (2x the step) and `leaves255_dinf` (4x the leaves).
+
+So the §K follow-on is run **at the operating point, 2000 rounds**, and staged so the rounds
+axis is measured rather than assumed. This is free: boosting is sequential, so one 2000-round
+fit yields every earlier round count via `num_iteration=`, exactly as §G3's serve-side
+equivalence yields both CT arms off one booster. Two free axes, one fit.
+
+N1. DESIGN
+-----------
+5 folds (the frozen StratifiedKFold(5, shuffle, seed 42)), 3 configs, 2000 rounds, seed 42,
+the cached 184-column lattice matrices -- the same cache, folds and seed as w26l/w27g.
+
+    configs   control (= lgbm_fixed_lat)
+              leaves255_dinf   (num_leaves=255, max_depth=-1)   <- the R-K3 config
+              lr0.05           (learning_rate=0.05)             <- fold-0 argmax @ s=1.0
+    stages    400, 800, 1400, 2000        scored off one booster via num_iteration
+    scales    s = 1.0 (status quo), s = 4/3 (the registered CT correction)
+
+15 fits. Every cell is scored on identical rows, identical folds, identical trees; the only
+things varying are the three registered axes. Pooled OOF over all 691,369 rows is the ONLY
+currency (R-N1). Boosters and full OOF/test prediction cubes are checkpointed per (fold,
+config), so every later stage/scale question is free from here.
+
+N2. REGISTERED PRIORS, written before any fit
+----------------------------------------------
+(a) HARNESS GATE 1, free and exact. The first 400 trees of a 2000-round fit are the same
+    trees a 400-round fit produces. So control @ stage 400 must reproduce w26l_r400's pooled
+    numbers: **s=1.0 -> 0.9654813306, s=4/3 -> 0.9657751945**. Registered |delta| < 20e-6,
+    expectation exact. A miss means the bagging RNG stream depends on n_estimators, which
+    would invalidate the whole staged design and must be reported as such.
+(b) HARNESS GATE 2, free and exact. control @ stage 2000 @ s=1.0 must reproduce
+    `oof/summary_lgbm_fixed_lat.json`'s **0.9677108350**. Registered |delta| < 20e-6.
+    Caveat carried from w26k: LightGBM's histogram reduction is not guaranteed bit-identical
+    across thread counts; w27g nevertheless reproduced w26l's fold-0 control to 6 decimals at
+    a different thread count, so exact is the expectation, not the hope.
+(c) **THE HEADLINE.**  d_2000 = [leaves255_dinf @4/3 @2000] - [control @4/3 @2000], pooled.
+    At 400 rounds on fold 0 this gap was **+1466.40e-6**. Registered: it SHRINKS BY AT LEAST
+    80%, i.e. **point +150e-6, range -100 to +500e-6**, and P(leaves255_dinf still ahead at
+    2000 rounds) = **0.6**. If most of the fold-0 gap survives to 2000 rounds, N0b is wrong
+    and the workspace has been shipping an under-capacity LightGBM for three weeks.
+(d) The §K headline, recomputed at the operating point:
+    best(4/3)@2000 - best(1.0)@2000 - [the 2000-round control's own d_c].  Registered
+    **0 to +80e-6, modal +15e-6** -- the SAME band §K registered, because the argument for it
+    (day-1's base rate) was never about round count.
+(e) d_c, the CT correction, on the control: +293.86e-6 at 400 rounds (w26l, pooled). At 2000
+    rounds registered **still positive, 0.5x to 1.5x of it**. Direction of the rounds trend:
+    registered INCREASING -- more trees put more thresholds on the CT_ block, so more of them
+    are displaced by the same 33%. A decreasing d_c is the more interesting outcome and would
+    say the correction's value is largest exactly where the shipped member is not.
+(f) K2(c) at the operating point: registered that the argmax under s=4/3 is STILL at least as
+    much capacity as the argmax under s=1.0. P(the two argmaxes differ at 2000 rounds) = 0.35
+    -- lower than §K's 0.4, because the convergence confound that manufactured the fold-0
+    split is removed.
+
+N3. WHAT WOULD FALSIFY WHAT
+----------------------------
+  - gate (a) or (b) misses by >20e-6      -> the staged design is invalid; report and STOP.
+                                             No config claim may be made off a failed harness.
+  - d_2000 <= 0                           -> §K's table was an undertraining artefact, full
+                                             stop, and R-K3's config does not exist. That is a
+                                             clean result and closes the LightGBM angle for
+                                             good, on evidence rather than on a priced null.
+  - d_2000 keeps >=20% of +1466e-6        -> N0b is WRONG. The shipped lattice LightGBM is
+                                             under-capacity and every member built on the
+                                             control config is leaving >1000e-6 on the table.
+  - d_c <= 0 at 2000 rounds               -> against §G's mechanism at the operating point,
+                                             which is where it has never been tested.
+
+N4. RULES, BINDING
+-------------------
+R-N1  Pooled OOF over all 691,369 rows is the only currency. No per-fold argmax, no per-fold
+      claim, no quoting a partial table (the w27g slot-2 mistake, avoided there too).
+R-N2  Every per-config claim is against THAT CONFIG'S OWN s=1.0 number at THAT SAME STAGE.
+      Judging a corrected config at one stage against the control at another would credit the
+      CT fix, the tuning and the round count at once. Carried from R-K2.
+R-N3  A member export needs the pooled 5-fold number to beat the control at the SAME stage
+      and the SAME scale, and it goes to data/ext_membersN/, NEVER to oof/ (w26m's warning:
+      load_members scans oof/ by default and every reproduction gate here is stated against a
+      fixed member COUNT).
+R-N4  **This slot is at cap: 10/10 sent for the 08-20 UTC day at 00:07-00:08.** Nothing here
+      is submitted today whatever it prints, and nothing here moves check_selection.WANTED,
+      which stays {w27_ad190stdcorr.csv, w23_ad187stdcorr.csv} and is selected on CV.
+R-N5  If the run has not finished when the slot ends, the table is NOT reported. Per-(fold,
+      config) checkpoints make it resumable by re-running the identical command.
