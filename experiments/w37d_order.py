@@ -35,8 +35,13 @@ ORDER = [
                               "('Restoring best model' per fold) -- largest expected shortfall."),
  ("w37_cal_dm_cat.csv",       "R3 dirty reading 3/5. CatBoost od_type -- a DIFFERENT mechanism, "
                               "which is what the between-member sd is made of."),
- ("w36_ad199std_logit.csv",   "Third sibling, p_beat 0.850. `logit` is the known-weak transform; "
-                              "sent for the CV->LB pair, not because it is expected to lead."),
+ ("w36_ad199std_hybrid.csv",  "DEQUEUED w36_ad199std_logit and promoted this in its place (w39 "
+                              "§4). `logit` carries a +1121e-6 LB-CV gap -- the largest of any "
+                              "family over the 78 scored files -- while sitting 82.9e-6 of CV "
+                              "below the leader, so on the DEFAULT auto-selection (nothing is "
+                              "selected, and the default picks on public score) it displaces the "
+                              "CV pick. `hybrid` is the highest-CV file left unqueued "
+                              "(0.9701231283) and completes the transform sweep on the 199 pack."),
  ("w34_ad195stdcorr.csv",     "Previous CV leader, still unsent. Journal w36 §8.2 asked for it; "
                               "the 199 build displaced it from the head but not from the day."),
  # --- 08-22 and after, in this order ---
@@ -66,7 +71,14 @@ for i, (f, why) in enumerate(ORDER, 1):
     q.loc[m, "why"] = why
 
 q = q.sort_values(["priority", "send_rank", "pred_lb"], ascending=[False, True, False])
-q.to_csv(W + "experiments/w26d_queueprice.csv", index=False)
+
+# w40: the write is behind __main__. This script rebuilds send_rank/why from ORDER above and
+# blanks anything ORDER omits, so an `import w37d_order` to reuse a name used to silently
+# rewrite the send plan. Same defect w39 §1 fixed in w26d_queueprice.py, same fix.
+if __name__ != "__main__":
+    print("w37d_order imported, not run -- the queue CSV was NOT written.")
+else:
+    q.to_csv(W + "experiments/w26d_queueprice.csv", index=False)
 
 print(f"{'#':>3} {'file':30s} {'pred_lb':>9} {'p_beat':>8}  why")
 for r in q[q.priority == 1].itertuples():

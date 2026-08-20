@@ -17382,3 +17382,243 @@ w30a is the precedent and it is what caught the +19.3e-6 `*stdcorr` bias.
 `experiments/w26d_queueprice.csv` (slot 9 swap), `RESEARCH.md`, `LEADERBOARD.md`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day.**
+
+---
+
+# 2026-08-20 — w40, slot 10. AT CAP, NO SUBMISSION (10/10 on the 08-20 UTC day)
+
+`date -u` 18:24 UTC at start. Cap confirmed from the API, not the prompt: 91 submissions on
+record, ten of them stamped 2026-08-20, and `w26g_send.py` prints "0 of 10 slots left today".
+
+**The ANGLE as issued is stale and I did not follow it.** It asks to "confirm the metric, build
+the fixed-fold CV harness, and get one honest GBDT baseline scored" — day-one work, finished
+thirty-nine slots ago. The metric is AUC, the folds are frozen
+(`StratifiedKFold(5, shuffle=True, random_state=42)` in `agent/common.py`), and the account has
+91 scored submissions and a 199-member stack. Re-doing any of it would destroy nothing but would
+produce nothing. I took the standing next-run list in w39 §7 instead.
+
+## 0. ⚠ FIRST: `ps` AND `pgrep` DO NOT EXIST ON THIS BOX, AND THEY FAIL SILENTLY
+
+`ps aux | grep python` returned nothing and exit 0. `pgrep -af python` returned nothing. I
+concluded the three chained jobs had died, and I was wrong — all three were alive. There is no
+procps here; `ps` is not found, the shell prints its error to stderr inside the pipeline, and
+`grep` exits 0 on empty input, so the whole thing looks like a clean "no such process".
+
+**Scan `/proc` directly. It is the only reliable check on this machine:**
+
+```
+for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" in *python*) echo "$d :: $c";; esac; done
+```
+
+Also: `ls -la` prints **EDT (UTC-4)**, `date -u` prints UTC. Every log line in this workspace is
+UTC. Comparing an `ls` mtime against a log timestamp reads as a 4-hour-old file that is in fact
+current — which is the second reason I thought the chain was dead.
+
+## 1. THE MACHINE IS SHARED, AND IT IS WHY THE MEASUREMENTS SLOWED 3×
+
+`/proc` also turned up 15 processes with `cwd=/home/nixos/all-my-repos/ai/kaggle-agents/
+workspace/kaggriculture` — a **different competition's agent**, running `gaten.py ... -w 14`
+under `timeout 5400` since 17:33 UTC. 16 cores, load average 29.7.
+
+That is the whole explanation for something the w36a log makes look like a bug: its per-fit time
+goes 85s, 86s, 85s for reps 0–2 and then **206–289s** for reps 3–4. Nothing changed in the
+measurement; a neighbour took 14 of 16 cores. Not my process and it self-terminates, so I left
+it alone, but **any future run timing a build against a historical number must check `/proc` for
+a neighbour first.** A 3× slowdown looked, for a moment, like a hung job worth killing.
+
+## 2. ✅ THE ram PAIR IS A NULL — 5/5, and the w36 attribution puzzle is now fully open
+
+`w36a_value.py` finished all five reps at 18:28 UTC. Reproduction gate PASSES (mean 4.40e-5 vs
+the published 4.1e-5). Paired, same rows with and without the member:
+
+| arm | per-member | t | 5/5 sign gate |
+|---|---|---|---|
+| ram_hgb | −5.23e-7 | −0.49 | **SIGN FLIPS** |
+| ram_lgb | +3.65e-7 | +0.34 | **SIGN FLIPS** |
+| both | −4.76e-7 | −0.66 | **SIGN FLIPS** |
+
+All three fail w26i's house 5/5 criterion. The prereg's §E3 expectation (+1 to +7e-6 for the
+pair, modal +2.5e-6) is **not met**; the verdict is NULL and is recorded as such.
+
+**This closes the w36 §2 dispute in the direction the house criterion pointed, and it makes the
+w36 attribution puzzle worse, not better.** ARM 199 beat ARM 195 by **+14.85e-6** on four added
+members. w37 §5 says the ravi pair is a sign-flipping null. This run says the ram pair is a
+sign-flipping null. So the +14.85e-6 is not attributable to either half, and a group of members
+can apparently move this stack by far more than the sum of its measured parts. Nobody here
+understands the mechanism, and every arm built since has been sized against that ignorance
+rather than against the per-member prior. ARM 197 (building now) prices the ravi half on the
+shipping instrument and is the last reading available on it.
+
+## 3. ⚠ FIXED A SECOND COPY OF THE BUG w39 §1 SPENT A SECTION ON
+
+`w37d_order.py` — the file that IS the 08-21 send order — had exactly the defect w39 found and
+fixed in `w26d_queueprice.py`, and w39 did not check for a second copy:
+
+1. it writes `w26d_queueprice.csv` at **module top level**, so `import w37d_order` to reuse a
+   name silently rewrites the send plan;
+2. its `ORDER` list still had **`w36_ad199std_logit.csv` at slot 9** — the file w39 §4 dequeued
+   for being a selection hazard. `w39e_swap.py` edited the CSV and never touched the script that
+   regenerates it. Re-running `w37d_order.py` — the correct, documented thing to do — would have
+   silently reverted the swap and put the logit file back in tomorrow's day.
+
+Both fixed. The write is behind `if __name__ == "__main__"` (verified: an import now prints
+`w37d_order imported, not run` and the CSV md5 is unchanged), and slot 9 is
+`w36_ad199std_hybrid.csv` carrying w39's full reason. The script now **reproduces the queue
+exactly**: re-running it changes one field, the slot-9 `why` text, and nothing else.
+
+⚠ A correction to my own working note during this: I first reported that the re-run had dropped
+`msg` on 5 of 13 ranked rows and blanked the pricer's tail. That was a NaN-comparison artefact
+(`nan != nan` in my diff), not a real change. The plan was never damaged. The NaN-safe diff is
+the one quoted above. **The general lesson stands and is why w39's guard exists:** any script in
+`experiments/` may write on import, and a source list can silently disagree with the artefact it
+generated.
+
+`w26g_send.py --n 10` re-verified after the fix — the 08-21 plan resolves unchanged, ten files,
+`w36_ad199stdcorr.csv` at the head.
+
+## 4. THE ARM 202 PROMOTION IS NO LONGER A JUDGMENT CALL — `w40b_promote.py`
+
+The w38d rule is already registered ("WANTED does not move unless the corrected object clears
+**0.9701440**"), but *applying* it was left to whichever run wakes at 00:00 UTC, from a blank
+context, with ten submissions to fire and the queue head at stake. That run had to locate the
+number, locate the bar, and not talk itself into a promotion on a near-miss.
+
+`w40b_promote.py` (committed before `w38d_build.log` says `w38d done`) reads the verdict out
+mechanically: it requires the build's own `w38d done`, takes `combos[shipped]["cv"]` — the
+**pre-registered arm, never `cv_argmax_combo`** — applies the bar, runs the w39a artefact audit
+(296,302 rows, id order identical to `sample_submission.csv`, finite, non-degenerate), and only
+then prints PROMOTE and, under `--go`, makes both edits in one commit. It refuses on anything it
+cannot check.
+
+Smoke-tested on a **real** build rather than left to run first at 00:00: pointed at ARM 199 it
+correctly extracts the shipped 5-arm (not the argmax 4-arm), reports −3.99e-6 against the bar
+and refuses; with the bar lowered it passes all five artefact checks and prints the promote
+path. Both branches exercised, nothing written.
+
+## 5. ✅✅ THE PUBLIC POOL WAS NOT EXHAUSTED — 218 refs had never been opened
+
+RESEARCH has treated the member pool as swept. It was not. Re-listing the competition today
+(three sort orders × three pages) returns **461 unique refs**; the w38 ledger had dispositions
+for **245**. w38a scanned a *prioritised* subset and the remainder was never revisited — and 21
+refs were never in `all_meta` at all. Some of the never-opened are refs this workspace already
+imported through the **dataset** endpoint, which w34 3.1 established is a *different endpoint*:
+a dataset disposition does not mean the kernel output was ever read.
+
+`w40a_poolscan2.sh` (disk-guarded, votes-ordered so an abort still leaves the best scanned) ran
+all 218. **53 CANDIDATEs.** The ledger now covers all 461. Among the finds: `donmarch14`
+lgbm+catboost OOF pairs, two `ern711` spline transformers with 5-fold OOF, `nikita7364777`
+rank-gauss, `mohankrishnathalla` RealMLP, `beicicc` seed-diversity residual — and one that is
+much bigger than the rest.
+
+## 6. ✅✅✅ THE BIGGEST FIND SINCE THE PACK WAS BUILT — and the partition is *proven*, not declared
+
+`yadoy666/94-verified-oof-gpu-accelerated-meta-stack` ships `union94_oof_matrix.npy`
+**(691369, 94)** and `union94_test_matrix.npy` **(296302, 94)** with a names file. Both row
+counts are ours exactly.
+
+**The load-bearing gate passed by measurement, and by a stronger test than any previous import
+got.** w38c had to reproduce per-fold AUCs against numbers transcribed by hand from a log and
+match to that log's 5-dp printing floor. Here, `w40c_union94_vet.py` finds **22 of the 94
+correlate at ρ = 1.00000** with vectors this workspace already holds — `realmlp_seed01_fixed4`,
+`screen_relations`, `fmplr`, `fmnum`, `fmdeep`, `lookup_fixed24(_seed1042)`,
+`identity_digit_enhanced103`, and their `pub_tabm` against our `omid_tabm`. **Exact rank
+identity on 691,369 rows is not something a foreign partition or a different row order can
+produce.** w34 3.1's gate is passed, at zero cost, on 22 independent witnesses.
+
+Solo AUC max 0.968815, median 0.966040, min 0.918800; per-fold sd ~4e-4 throughout. Nothing
+implausible — no es-on-val/foreign-partition blowup signature anywhere in the 94.
+
+**22 of the 94 have maxcorr < 0.99 against everything we hold; 9 of those are above the pack
+median solo.** Two of them are remarkable: `rmlp_lat` at maxcorr **0.9615** and `rmlp_lat3` at
+**0.9661**, both above median solo. The most decorrelated import this workspace had previously
+seen was `om_ftt` at 0.9845.
+
+⚠ **And the maxcorr number is a SCREEN, not currency.** RESEARCH's own heading is "⛔⛔
+DECORRELATION DOES NOT PRICE A MEMBER" and it still stands. 0.9615 is recorded because it is
+unusual, not because it is an argument that it will pay.
+
+## 7. ARM 211 — PRE-REGISTERED, BUILT ON A RULE WITH NO FREE PARAMETER, AND FENCED OFF FROM WANTED
+
+`w40d_prereg.txt` was written before any 211-member build existed. Pack rule:
+
+    maxcorr < 0.99  AND  solo > 0.966319
+
+Both constants pre-date this run — 0.99 is the line `w38b_vet.py` already used to auto-file
+duplicates, 0.966319 is the pack median quoted in `w38d_prereg.txt`. Nothing is hand-picked, and
+`w40e_import.py` **asserts** the rule still yields the nine names the prereg lists, so threshold
+drift cannot pass silently. It selects: `naji05`, `naji03`, `lookup`, `tabm_deeper`, `pub_rmlp`,
+`tabm_imp`, `pub_tabnet`, `rmlp_lat3`, `rmlp_lat` → `data/ext_members15/` under a `y94_` prefix
+(their bare names collide with ours). `naji03`/`naji05` are near-certain seed siblings and both
+are kept, because dropping one would be a hand choice the rule does not license.
+
+Registered expectation **+3 to +20e-6** on the h3 base — wide, because nine members at once is
+the largest group ever added here and §2 says group deltas are not predictable from parts.
+Anything **above +40e-6 is disbelieved on sight**. A negative is reported as such.
+
+⛔ **THE CLAUSE THAT MATTERS, fixed before the number exists: ARM 211 IS NOT ELIGIBLE FOR
+`check_selection.WANTED`, WHATEVER ITS CV.** This is an *aggregator* — its own log says
+"Loading 82 base prediction pairs ... 12 additional" — so the streams are other people's and
+their es-on-val status is **unknown**. Every previous import cleared es-on-val by reading a log
+for whether it fired (w34, w36) or by the mechanism being absent at source (w38c); neither is
+available for a pool. Early stopping on validation inflates a member's OOF and *not* its test
+vector, so it inflates a stack's **CV and not its LB** — exactly the failure mode the seven
+`w37_cal_*` sends exist to price, and exactly what would make a CV gain here fictitious.
+ARM 211 may be built, priced, queued and **sent** — a send is free and its LB reading is what
+discriminates a real gain from an artefact — but it does not become a deadline pick on CV alone.
+This is deliberately stricter than ARM 202's rule, because ARM 202's members were read at source.
+
+`w40f_run.sh` is chained behind w38d and **ABORTS** if ARM 202 never prints `w38d done` — an arm
+without its matched control measures nothing.
+
+## 8. STATE, VERIFIED THIS RUN
+
+- Board **rank 18 at 0.97118**, unchanged. Leader MILANFX 0.97134. **The gold cut (top 14 of
+  2,433) is at 0.97120** — thisray at rank 14. The unsent queue head is priced at 0.971212.
+- Chain live in `/proc`, all three land far inside the 08-21 day: **w36g** (ARM 197 control, in
+  its w21a correction stage) → **w38d** (ARM 202) → **w40f** (ARM 211, added this run).
+- 08-21 send plan re-verified after the §3 fix, unchanged, ten files:
+  1 `w36_ad199stdcorr` · 2 `w36_ad199std_rescale` · 3 `w37_cal_ram_hgb` · 4 `w37_cal_mkt_realmlp`
+  · 5 `w36_ad199std` · 6 `w37_cal_om_xgb2` · 7 `w37_cal_omid_tabm` · 8 `w37_cal_dm_cat`
+  · 9 `w36_ad199std_hybrid` · 10 `w34_ad195stdcorr`.
+- `check_selection.py`: `w23_ad187stdcorr` SENT; `w36_ad199stdcorr` **NOT SENT, NOT SELECTABLE**.
+- The seven `w37_cal_*` files have **not landed** — they are slots 3,4,6,7,8 of tomorrow — so
+  `w37e_readout.py` has nothing to read yet. Confirmed, not assumed.
+- kaggle CLI is at `~/.local/bin/kaggle` and needs `KAGGLE_CONFIG_DIR=/home/nixos/.kaggle`. It
+  is **not** in `.venv/bin`. Verified working this run (91 submissions pulled).
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local and safe.
+- Disk **95%, 24 GB free** — 6 GB went to the w40 scan. `notebooks/w40/out` (~6 GB) and
+  `notebooks/w38/out` (4 GB) are the first things to delete if a build needs room.
+
+## 9. NEXT RUN, IN ORDER
+
+1. `date -u`, then the **`/proc` scan from §0** — not `ps`, not `pgrep`, they lie here. Check for
+   a `kaggriculture` neighbour before trusting any timing.
+2. **`.venv/bin/python experiments/w40b_promote.py`** — it applies the ARM 202 rule for you and
+   writes nothing. If it prints PROMOTE, re-run with `--go`, then `w37d_order.py`, then commit
+   `check_selection.py` + `w37d_order.py` + the queue CSV **together**. If it prints NOT
+   PROMOTED, the w39 §6 order stands exactly as written and nothing moves.
+3. **`.venv/bin/python experiments/w26g_send.py --go --n 10`** once the 08-21 day opens. This is
+   the highest-value action in the competition (w39 §3): the CV leader is unsent, and an unsent
+   file cannot be selected at all. Do not re-pick by hand; order and messages are set.
+4. After the drain, the **held-out test**: realised LB against the `pred LB` frozen in
+   `w39c_gapaudit.json`, mean residual and z, **before** refitting w30b.
+5. `experiments/w37e_readout.py` — read **R1 FIRST**; a failure withdraws the +2.7e-4 es-on-val
+   figure from RESEARCH.md and everything built on it. Only meaningful after the drain lands.
+6. `w40f_build.log` (ARM 211) against its **w40d_prereg** expectation, and remember the ⛔ clause
+   — it can be queued and sent, it cannot become WANTED on CV. `w36g_build.log` (ARM 197, a
+   CONTROL) against the 0.9701288 bar in `w36b_prereg.txt`.
+7. **The 53 CANDIDATEs in `experiments/w40/ledger2.csv` are the live surface now** — only the
+   `yadoy666` one has been mined. `ern711`'s two spline transformers and `nikita7364777`'s
+   rank-gauss are the most structurally different from anything in the pack.
+8. Do **NOT** re-open: error analysis / OOF segmentation in any framing; fold/seed averaging;
+   more CLEAN es-bias calibration points; the top-level blend-weight search; FE variants; the
+   original dataset; tuning any CatBoost or XGBoost; the stacker C; the selection write path.
+
+**Files added:** `experiments/w40a_poolscan2.sh` + `.log`/`.out`, `w40b_promote.py`,
+`w40c_union94_vet.py` + `.csv` + `.log`, `w40d_prereg.txt`, `w40e_import.py`, `w40f_run.sh`,
+`experiments/w40/{raw_list,scan_targets2}.txt` + `{all_meta_now,new_refs_meta,todo_meta,ledger2}.csv`,
+`data/ext_members15/` (9 members).
+**Modified:** `experiments/w37d_order.py` (import guard + slot-9 swap), `RESEARCH.md`,
+`LEADERBOARD.md`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day.**

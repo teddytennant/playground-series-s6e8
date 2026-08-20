@@ -1437,3 +1437,24 @@ That makes tomorrow's slot 1 the whole of the day. It is also, per `w39b_autosel
 makes the CV leader *selectable at all* — nothing is selected on this account, Kaggle then
 auto-picks on public score, and an unsent file cannot be picked. Sending it is worth more than
 the manual selection toggle it partly substitutes for.
+
+## 2026-08-20 18:45 UTC (w40)
+
+Rank **18** at **0.97118**, unchanged for the third consecutive read. **teamCount 2,433.**
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97134 |
+| 2 | Changye Li | 0.97130 |
+| 3 | Maher el Ouahabi | 0.97127 |
+| 14 | thisray | **0.97120  ← gold cut (top 14)** |
+| 17 | delai50 | 0.97119 |
+| **18** | **Teddy Tennant** | **0.97118** |
+
+**The gold cut is 2e-5 away.** Medal cuts at 2,433 teams: gold top 14, silver top 122, bronze
+top 243 — we are comfortably silver and two ticks off gold. The unsent CV leader
+`w36_ad199stdcorr` is priced by w30b at **0.971212**, which would be rank ~12. It goes out in
+slot 1 of the 08-21 drain.
+
+Movement is still concentrated at the top and daily: eight of the top twenty re-scored on 08-20.
+The board is not stalling, so holding 0.97118 will drift downward in rank without new sends.

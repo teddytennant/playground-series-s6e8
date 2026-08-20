@@ -1,0 +1,92 @@
+w40 PRE-REGISTRATION — written 2026-08-20 ~18:50 UTC, BEFORE any 211-member build exists
+========================================================================================
+(experiments/w40d_build.log does not exist when this is written, and w38d's ARM 202 build —
+the matched control — has not printed `w38d done` either. Verify with `git log` on this file
+against the mtime of both logs.)
+
+WHERE THE MEMBERS COME FROM
+---------------------------
+`yadoy666/94-verified-oof-gpu-accelerated-meta-stack`, surfaced by the w40a sweep. It ships
+union94_oof_matrix.npy (691369, 94), union94_test_matrix.npy (296302, 94) and a names file.
+Both row counts are ours exactly; its log prints folds=[138274 x4, 138273].
+
+THE PARTITION IS PROVEN, AND BY A STRONGER TEST THAN w38c GOT
+--------------------------------------------------------------
+w38c had to reproduce per-fold AUCs against numbers transcribed by hand from a log, and match
+to that log's 5-dp printing floor. Here, 22 of the 94 streams correlate at rho = 1.00000 with
+vectors this workspace ALREADY holds — realmlp_seed01_fixed4, screen_relations, fmplr, fmnum,
+fmdeep, lookup_fixed24(_seed1042), identity_digit_enhanced103, pub_tabm vs our omid_tabm, and
+more. Exact rank identity on 691,369 rows is not something a foreign partition or a different
+row order can produce. w34 3.1's load-bearing gate is therefore PASSED, by measurement, at
+zero cost. See experiments/w40c_union94_vet.csv.
+
+⚠⚠ WHAT IS *NOT* CLEARED, AND THE CONSEQUENCE
+----------------------------------------------
+This is an AGGREGATOR. Its own log says "Loading 82 base prediction pairs ... 12 additional",
+so the 94 streams are other people's, and the es-on-val status of each is UNKNOWN. Every
+previous import here cleared es-on-val either by reading a log for whether it fired (w34, w36)
+or by the mechanism being absent from the source (w38c). Neither is available for a pool.
+
+Early-stopping-on-validation inflates a member's OOF without inflating its test vector. It
+therefore inflates a stack's CV and NOT its LB — which is precisely the failure mode the seven
+`w37_cal_*` sends queued for 08-21 exist to price, and precisely the mode that would make a CV
+gain here fictitious. So, fixed here, before any number exists:
+
+  ⛔ ARM 211 IS NOT ELIGIBLE FOR check_selection.WANTED, WHATEVER ITS CV.
+     It may be built, priced, queued and SENT — a send is free and its LB reading is exactly
+     what discriminates a real gain from an es-on-val artefact — but it does not become a
+     deadline pick on a CV number alone. Promotion requires the es status of the nine added
+     streams to be established first, on the w37 readout instrument or by source-reading.
+
+  This is deliberately stricter than the rule ARM 202 gets. ARM 202's members were read at
+  source and cleared by absence of the mechanism. These nine were not.
+
+THE PACK — the rule, stated before the members were ranked into it
+-------------------------------------------------------------------
+ARM 211 = ARM 202's --extra-dirs plus ext_members15, where ext_members15 is every stream with
+
+      maxcorr < 0.99  AND  solo > 0.966319
+
+against everything we already hold. BOTH constants pre-date this run: 0.99 is the line
+w38b_vet.py already used to auto-file duplicates, and 0.966319 is the pack median solo quoted
+in w38d_prereg.txt. Neither is fitted here, and no stream is hand-picked. The rule selects
+nine:
+
+  naji05       0.968815  maxcorr 0.98407     tabm_imp    0.968098  maxcorr 0.98742
+  naji03       0.968814  maxcorr 0.98415     pub_tabnet  0.967559  maxcorr 0.98621
+  lookup       0.968526  maxcorr 0.98451     rmlp_lat3   0.966928  maxcorr 0.96610
+  tabm_deeper  0.968460  maxcorr 0.99000     rmlp_lat    0.966781  maxcorr 0.96147
+  pub_rmlp     0.968436  maxcorr 0.98923
+
+⚠ The maxcorr column is a SCREEN here and nothing else. RESEARCH's own heading is "⛔⛔
+DECORRELATION DOES NOT PRICE A MEMBER" and that stands: `rmlp_lat` at 0.9615 is the most
+decorrelated above-median stream this workspace has ever measured, and that fact is NOT an
+argument that it will pay. It is recorded because it is unusual, not because it is currency.
+
+naji03 and naji05 are near-identical to each other (both 0.96881, both ~0.984 vs om_flamlxgb)
+and are almost certainly seed siblings. Both are kept, because dropping one would be a hand
+choice and the rule above has none.
+
+REGISTERED EXPECTATION
+----------------------
+Matched control: ARM 202, built immediately before this on the same machine, same script
+shape, one `--extra-dirs` entry different. The 211-202 delta is attributable to the nine added
+streams AS A GROUP.
+
+Honest prior: RESEARCH prices a further GBDT into this stack at ~4e-7 and the solo->stack
+pass-through at ~1.4%. Against that, w36's four-member group returned +14.85e-6 while w36a
+(this run, 5/5 reps) and w37 §5 both say that group delta is NOT attributable to either of its
+constituent pairs — so a group can move this stack by more than the sum of its measured parts
+and nobody here understands why. Nine streams is the largest group ever added at once.
+Registered central expectation: **+3 to +20e-6 on the h3 base**, wide because the group size is
+unprecedented, with a genuine chance of a null and a real chance of a negative. A negative is
+reported as such. Anything above +40e-6 is DISBELIEVED ON SIGHT and treated as the es-on-val
+signature rather than a gain, per the clause above.
+
+Bar for the QUEUE HEAD (not for WANTED, which is closed to it): it must clear whatever ARM 202
+lands at, plus the ~4e-6 rebuild reproducibility floor (w29).
+
+ORDERING
+--------
+Chained behind w38d. If w38d does not print `w38d done`, this build ABORTS rather than
+silently retargeting its control — an arm without its matched control measures nothing.

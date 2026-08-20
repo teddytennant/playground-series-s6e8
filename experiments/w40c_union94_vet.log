@@ -1,0 +1,116 @@
+y (691369,) base rate 0.709424;  5 folds [138274, 138274, 138274, 138274, 138273]
+160 of our own oof vectors on disk for the duplicate check
+160 of them are (691369,) and usable
+
+  a                                  solo 0.964792  foldsd 5.32e-04  maxcorr 1.00000 vs golem_a
+  altview                            solo 0.964734  foldsd 5.98e-04  maxcorr 0.99586 vs golem_a
+  cat                                solo 0.962280  foldsd 5.37e-04  maxcorr 0.99376 vs bolt_cat_cpu5
+  cat_tuned                          solo 0.961631  foldsd 5.35e-04  maxcorr 0.99122 vs golem_d
+  d                                  solo 0.962601  foldsd 8.25e-04  maxcorr 1.00000 vs golem_d
+  digit_cat                          solo 0.966663  foldsd 5.26e-04  maxcorr 0.99726 vs dm_cat
+  digit_lgbm                         solo 0.965910  foldsd 5.25e-04  maxcorr 0.99652 vs dm_lgb
+  digit_xgb                          solo 0.966318  foldsd 4.65e-04  maxcorr 0.99599 vs dm_lgb
+  e                                  solo 0.964863  foldsd 5.16e-04  maxcorr 1.00000 vs golem_e
+  et                                 solo 0.941123  foldsd 7.33e-04  maxcorr 0.98759 vs golem_b
+  f                                  solo 0.964048  foldsd 5.37e-04  maxcorr 1.00000 vs golem_f
+  hgb                                solo 0.963856  foldsd 6.87e-04  maxcorr 0.99487 vs bei_structural
+  imp_cat                            solo 0.966917  foldsd 4.77e-04  maxcorr 0.99622 vs dm_cat
+  imp_lgbm                           solo 0.966319  foldsd 5.09e-04  maxcorr 0.99573 vs dm_lgb
+  imp_lgbm_tuned                     solo 0.966745  foldsd 4.58e-04  maxcorr 0.99503 vs dm_lgb
+  imp_xgb                            solo 0.966615  foldsd 4.54e-04  maxcorr 0.99515 vs dm_lgb
+  imp_xgb_tuned                      solo 0.966674  foldsd 4.32e-04  maxcorr 0.99518 vs dm_lgb
+  knn                                solo 0.932195  foldsd 6.16e-04  maxcorr 0.97727 vs golem_b
+  lat_cat                            solo 0.967007  foldsd 4.34e-04  maxcorr 0.99457 vs ad_gcatlr02
+  lat_lgbm                           solo 0.967400  foldsd 4.09e-04  maxcorr 0.99538 vs lat_ctraw2000
+  lat_lgbm_s5                        solo 0.967402  foldsd 4.60e-04  maxcorr 0.99496 vs lgbm_fixed_lat
+  lat_xgb                            solo 0.967486  foldsd 4.21e-04  maxcorr 0.99569 vs xgb_latcat_avg3
+  latmax_lgbm                        solo 0.967680  foldsd 4.35e-04  maxcorr 0.99587 vs lat_ctfix2000
+  latr1_lgbm                         solo 0.967624  foldsd 4.47e-04  maxcorr 0.99572 vs lat_ctfix2000
+  latr1_xgb                          solo 0.967801  foldsd 4.26e-04  maxcorr 0.99560 vs lat_ctfix2000
+  lattri_lgbm                        solo 0.967675  foldsd 4.45e-04  maxcorr 0.99633 vs lat_ctfix2000
+  lattri_xgb                         solo 0.967756  foldsd 4.34e-04  maxcorr 0.99630 vs xgb_latcat_avg3
+  latwide_cat                        solo 0.967180  foldsd 5.23e-04  maxcorr 0.99496 vs cat_lat
+  latwide_lgbm                       solo 0.967631  foldsd 4.30e-04  maxcorr 0.99619 vs lat_ctfix2000
+  latwide_xgb                        solo 0.967688  foldsd 4.52e-04  maxcorr 0.99626 vs xgb_latcat_avg3
+  lgbm                               solo 0.964494  foldsd 5.96e-04  maxcorr 0.99582 vs golem_f
+  lgbm_tuned                         solo 0.965546  foldsd 5.51e-04  maxcorr 0.99489 vs bolt_lgb_driver_recon
+  logreg                             solo 0.918800  foldsd 7.17e-04  maxcorr 0.94616 vs ad_gnn_note
+  lookup                             solo 0.968526  foldsd 4.27e-04  maxcorr 0.98451 vs bei_lookup_fixed24
+  mlp                                solo 0.940040  foldsd 6.88e-04  maxcorr 0.99439 vs golem_b
+  naji01                             solo 0.963674  foldsd 5.01e-04  maxcorr 0.99202 vs ravi_lgbm1c
+  naji02                             solo 0.968619  foldsd 4.46e-04  maxcorr 0.99265 vs om_flamlxgb
+  naji03                             solo 0.968814  foldsd 4.40e-04  maxcorr 0.98415 vs om_flamlxgb
+  naji04                             solo 0.968722  foldsd 4.53e-04  maxcorr 0.99405 vs om_flamlxgb
+  naji05                             solo 0.968815  foldsd 4.39e-04  maxcorr 0.98407 vs om_flamlxgb
+  nn2                                solo 0.942360  foldsd 8.26e-04  maxcorr 0.98823 vs golem_b
+  pub_cat                            solo 0.966239  foldsd 5.26e-04  maxcorr 0.99672 vs dm_cat
+  pub_donlgbm                        solo 0.963151  foldsd 4.70e-04  maxcorr 0.99037 vs ravi_lgbm1c
+  pub_evg                            solo 0.965874  foldsd 5.27e-04  maxcorr 0.99488 vs dm_lgb
+  pub_resnet                         solo 0.966102  foldsd 5.27e-04  maxcorr 0.98299 vs om_cat
+  pub_rmlp                           solo 0.968436  foldsd 4.34e-04  maxcorr 0.98923 vs om_flamlxgb
+  pub_ryota                          solo 0.963702  foldsd 5.77e-04  maxcorr 0.99675 vs golem_f
+  pub_tabm                           solo 0.967508  foldsd 5.50e-04  maxcorr 1.00000 vs omid_tabm
+  pub_tabnet                         solo 0.967559  foldsd 4.76e-04  maxcorr 0.98621 vs om_cat
+  pubfe_cat                          solo 0.960270  foldsd 6.11e-04  maxcorr 0.98905 vs bolt_cat_unique
+  pubfe_lgb                          solo 0.964855  foldsd 5.54e-04  maxcorr 0.99557 vs golem_f
+  pubfe_xgb                          solo 0.965251  foldsd 5.25e-04  maxcorr 0.99492 vs golem_e
+  pubmk_cat                          solo 0.963832  foldsd 5.38e-04  maxcorr 0.99494 vs bolt_cat_cpu5
+  pubmk_nn                           solo 0.940854  foldsd 6.64e-04  maxcorr 0.99436 vs golem_b
+  realmlp                            solo 0.938031  foldsd 6.65e-04  maxcorr 0.97224 vs golem_b
+  realmlp15                          solo 0.940854  foldsd 5.98e-04  maxcorr 0.97559 vs golem_b
+  rf                                 solo 0.943298  foldsd 7.56e-04  maxcorr 0.98127 vs lat_encdrop_r400
+  rmlp_lat                           solo 0.966781  foldsd 4.72e-04  maxcorr 0.96146 vs bolt_realmlp_lattice
+  rmlp_lat3                          solo 0.966928  foldsd 4.38e-04  maxcorr 0.96610 vs bolt_realmlp_lattice
+  tabm_bounds                        solo 0.968369  foldsd 4.35e-04  maxcorr 0.99167 vs om_xgb2
+  tabm_deep                          solo 0.968299  foldsd 4.57e-04  maxcorr 0.99130 vs om_xgb2
+  tabm_deeper                        solo 0.968460  foldsd 3.64e-04  maxcorr 0.98999 vs om_xgb2
+  tabm_div                           solo 0.966155  foldsd 4.51e-04  maxcorr 0.99112 vs ad_glgbcs3
+  tabm_imp                           solo 0.968098  foldsd 4.30e-04  maxcorr 0.98742 vs om_xgb2
+  tabm_seed3                         solo 0.968673  foldsd 3.93e-04  maxcorr 0.99202 vs om_xgb2
+  tabm_wide                          solo 0.968371  foldsd 3.79e-04  maxcorr 0.99264 vs om_xgb2
+  tabm_x12                           solo 0.968487  foldsd 3.42e-04  maxcorr 0.99167 vs om_xgb2
+  view_bounds_cat                    solo 0.963078  foldsd 4.94e-04  maxcorr 0.99055 vs bolt_cat_cpu5
+  view_bounds_lgbm                   solo 0.964693  foldsd 5.62e-04  maxcorr 0.99216 vs golem_a
+  view_nolattice_lgbm                solo 0.964250  foldsd 5.68e-04  maxcorr 0.99310 vs golem_a
+  view_rank_cat                      solo 0.961428  foldsd 4.53e-04  maxcorr 0.98768 vs golem_d
+  view_rank_lgbm                     solo 0.962970  foldsd 5.58e-04  maxcorr 0.99037 vs dkv_lgb
+  view_resid_cat                     solo 0.954582  foldsd 5.79e-04  maxcorr 0.97576 vs lat_encdrop_r400
+  view_resid_lgbm                    solo 0.955459  foldsd 6.22e-04  maxcorr 0.98185 vs golem_f
+  view_resid_xgb                     solo 0.955194  foldsd 6.29e-04  maxcorr 0.98024 vs golem_f
+  xgb                                solo 0.964334  foldsd 5.45e-04  maxcorr 0.99540 vs golem_e
+  xgb_tuned                          solo 0.965584  foldsd 4.81e-04  maxcorr 0.99514 vs golem_e
+  fmplr                              solo 0.967392  foldsd 4.33e-04  maxcorr 1.00000 vs fmplr
+  fmnum                              solo 0.967133  foldsd 4.14e-04  maxcorr 1.00000 vs fmnum
+  fmdeep                             solo 0.966656  foldsd 4.29e-04  maxcorr 1.00000 vs fmdeep
+  fmwide                             solo 0.964930  foldsd 3.86e-04  maxcorr 1.00000 vs fmwide
+  fmpure                             solo 0.964549  foldsd 3.49e-04  maxcorr 1.00000 vs fmpure
+  lookup_fixed24                     solo 0.966051  foldsd 4.05e-04  maxcorr 1.00000 vs bei_lookup_fixed24
+  xgb_identity_digit_raw12           solo 0.963404  foldsd 4.97e-04  maxcorr 1.00000 vs bei_xgb_identity_digit_raw12
+  xgb_screen_relations_baseline103   solo 0.965849  foldsd 5.47e-04  maxcorr 1.00000 vs bei_xgb_identity_digit_enhanced103
+  xgb_screen_relations_treatment110  solo 0.966029  foldsd 5.34e-04  maxcorr 1.00000 vs bei_xgb_screen_relations_treatment110
+  realmlp_seed01_fixed4              solo 0.968258  foldsd 4.03e-04  maxcorr 1.00000 vs bei_realmlp_seed01_fixed4
+  baseline                           solo 0.967298  foldsd 4.52e-04  maxcorr 1.00000 vs bei_exact_value_catboost_fixed4000
+  screen_relations                   solo 0.967734  foldsd 4.49e-04  maxcorr 1.00000 vs bei_screen_relations
+  identity_digit_enhanced103         solo 0.965746  foldsd 5.10e-04  maxcorr 1.00000 vs bei_identity_digit_enhanced103
+  identity_digit_raw12               solo 0.963394  foldsd 5.19e-04  maxcorr 1.00000 vs bei_identity_digit_raw12
+  raw12                              solo 0.962511  foldsd 5.81e-04  maxcorr 1.00000 vs bei_raw12
+  structural                         solo 0.963724  foldsd 5.48e-04  maxcorr 1.00000 vs bei_structural
+  lookup_fixed24_seed1042            solo 0.966058  foldsd 2.59e-04  maxcorr 1.00000 vs bei_lookup_fixed24_seed1042
+
+wrote experiments/w40c_union94_vet.csv
+
+solo AUC: max 0.968815  median 0.966040  min 0.918800
+members with maxcorr < 0.99 against everything we hold: 22 of 94
+     member     solo  fold_sd  fold_min  fold_max  maxcorr            nearest
+     naji05 0.968815 0.000439  0.968136  0.969439 0.984066        om_flamlxgb
+     naji03 0.968814 0.000440  0.968137  0.969440 0.984148        om_flamlxgb
+     naji04 0.968722 0.000453  0.968039  0.969364 0.994049        om_flamlxgb
+ tabm_seed3 0.968673 0.000393  0.968050  0.969204 0.992017            om_xgb2
+     naji02 0.968619 0.000446  0.967933  0.969232 0.992645        om_flamlxgb
+     lookup 0.968526 0.000427  0.967865  0.969135 0.984514 bei_lookup_fixed24
+   tabm_x12 0.968487 0.000342  0.968076  0.968938 0.991665            om_xgb2
+tabm_deeper 0.968460 0.000364  0.967957  0.969050 0.989995            om_xgb2
+   pub_rmlp 0.968436 0.000434  0.967746  0.969022 0.989227        om_flamlxgb
+  tabm_wide 0.968371 0.000379  0.967918  0.968995 0.992639            om_xgb2
+tabm_bounds 0.968369 0.000435  0.967768  0.969032 0.991672            om_xgb2
+  tabm_deep 0.968299 0.000457  0.967672  0.968996 0.991303            om_xgb2

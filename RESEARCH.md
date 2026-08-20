@@ -9131,3 +9131,64 @@ sat at −82.9e-6 of CV yet priced 0.97119 — the `blend158_logit` shape exactl
 (`w39d_logithazard.py`, `w39e_swap.py`); the worst of 20,000 auto-selections went −82.90e-6 →
 −18.07e-6. **Rule: never queue a `logit`-family file while nothing is selected.** Every other
 family is within ~40e-6 of gap and does not create this hazard.
+
+## Machine facts that cost a run to learn (w40, 2026-08-20)
+
+- **`ps` and `pgrep` DO NOT EXIST on this box, and they fail silently.** `ps aux | grep python`
+  returns nothing and exit 0 — there is no procps, the not-found error goes to stderr inside the
+  pipeline, and `grep` exits 0 on empty input. It is indistinguishable from "no such process".
+  w40 concluded three live jobs were dead on this evidence. **Scan `/proc` instead:**
+  `for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" in *python*) echo "$d :: $c";; esac; done`
+  `readlink /proc/<pid>/cwd` tells you which competition workspace a job belongs to.
+- **`ls` prints EDT (UTC-4); every log line here is UTC.** An `ls -la` mtime compared against a
+  log timestamp reads as 4 hours stale when it is current.
+- **The box is SHARED with other competitions' agents.** w40 found 15 processes from
+  `workspace/kaggriculture` holding 14 of 16 cores (load 29.7). It is the entire explanation for
+  `w36a_value.log` going 85s/fit on reps 0–2 and 206–289s on reps 3–4. **Check `/proc` for a
+  neighbour before timing any build against a historical number**, and do not kill it.
+- **kaggle CLI is `~/.local/bin/kaggle`, NOT `.venv/bin/kaggle`**, and needs
+  `KAGGLE_CONFIG_DIR=/home/nixos/.kaggle`. Always pass `--page-size 500` to
+  `competitions submissions`; the account is past the CLI's silent default truncation.
+
+## The public member pool was NOT exhausted (w40)
+
+Re-listing the competition (three sort orders × three pages) returns **461 unique refs**; the
+w38 ledger had dispositions for **245**. `w38a_poolscan.sh` ran a *prioritised* subset and the
+remainder was never revisited. `w40a_poolscan2.sh` ran the other **218** → **53 CANDIDATEs**,
+ledger in `experiments/w40/ledger2.csv`. The ledger now covers all 461.
+
+⚠ A **dataset**-endpoint disposition is NOT a kernel-endpoint disposition (w34 3.1). Several
+refs already imported via datasets turned out to publish OOF artefacts through
+`kaggle kernels output` that had never been read.
+
+## ρ = 1.00000 against a member we already hold is the cheapest partition proof there is (w40)
+
+`w38c` had to reproduce per-fold AUCs against numbers hand-transcribed from a kernel log, and
+match to that log's 5-dp printing floor. For any source shipping several streams, there is a
+far stronger and free test: **rank-correlate every stream against everything already on disk.**
+Exact identity (ρ = 1.00000) on 691,369 rows against a vector we built ourselves cannot happen
+under a foreign partition or a different row order. `yadoy666/94-verified-oof-gpu-accelerated-
+meta-stack` supplied **22 such witnesses** out of 94. Use this first on any multi-stream import.
+
+⚠ It proves the PARTITION and the ROW ORDER. It proves **nothing about es-on-val**, which is a
+per-stream property of how each was fitted.
+
+## An AGGREGATOR's streams cannot be es-cleared, and the consequence is a hard rule (w40)
+
+Every import here cleared es-on-val either by reading a log for whether it fired (w34, w36) or
+by the mechanism being absent from the source (w38c). Neither is available for a notebook that
+merely *loads* other people's prediction pairs. Early stopping on validation inflates a member's
+OOF and not its test vector → it inflates a stack's **CV and not its LB**.
+
+**Rule adopted in `w40d_prereg.txt`:** an arm containing un-es-cleared streams may be built,
+priced, queued and **sent**, but is **NOT ELIGIBLE for `check_selection.WANTED` on CV alone**.
+Its LB reading is the discriminator; its CV is not. This is stricter than the rule source-read
+imports get, and deliberately so.
+
+## Two scripts in experiments/ regenerate the send plan, and BOTH used to write on import
+
+`w26d_queueprice.py` (guarded w39) and `w37d_order.py` (guarded w40). `w37d_order.py`
+additionally had an `ORDER` list that disagreed with the CSV it generates — `w39e_swap.py`
+edited the artefact and not the source, so a documented re-run would have silently reverted the
+slot-9 dequeue. **When you edit a generated artefact, edit the generator in the same commit, and
+then re-run the generator to prove they agree.**
