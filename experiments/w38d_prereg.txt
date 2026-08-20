@@ -1,0 +1,79 @@
+w38 PRE-REGISTRATION — written 2026-08-20 ~18:05 UTC, BEFORE any 202-member build exists
+=========================================================================================
+(experiments/w38d_build.log does not exist when this is written, and w36g_run.sh — the ARM 197
+control this build queues behind — has not started its own build either. Verify with `git log`
+on this file against the mtime of w38d_build.log.)
+
+WHAT IS BEING ADDED, AND WHY IT IS NOT THE USUAL "ANOTHER GBDT"
+---------------------------------------------------------------
+Three members from `zhukovoleksiy/ps6e8-eda-feature-engineering-pipeline`, an author no earlier
+sweep in this workspace has ever opened. All three cleared w34b's seven gates in
+experiments/w38c_lexvet.py:
+
+  lexb_lgb02     solo 0.968370   maxcorr 0.99543   (nearest ram_lgb)
+  lexb_cat_base  solo 0.967987   maxcorr 0.99317   (nearest bolt_foldsafe_te_cat)
+  lexb_xgb_base  solo 0.967914   maxcorr 0.97907   (nearest ad_gxgbd4)
+
+pack median solo 0.966319 — **all three are ABOVE it**, which is the profile w35c flagged as
+the only one that has ever paid here, and `lexb_xgb_base`'s 0.979 maxcorr is the most
+decorrelated import since `om_ftt` (0.9845, +6.5e-6).
+
+⚠ THE ES-ON-VAL CLEARANCE IS BY ABSENCE OF THE MECHANISM, NOT BY READING A LOG.
+The author's `train_cv_lattice` fits every model with a bare `m.fit(X_tr, y_tr)`. No `eval_set`
+is constructed anywhere on that code path, so early stopping cannot fire, cannot be defaulted
+into (CatBoost's `use_best_model` needs an eval set), and there is no log line to misread. The
+sibling `_fit_one` helper DOES take `early_stopping_rounds`, but it belongs to `train_cv`, which
+is commented out in the shipped notebook. Every previous clearance here rested on grepping a log
+for whether a mechanism fired; this one rests on the mechanism not being wired up.
+
+Partition: the shipped `oof/manifest.csv` declares StratifiedKFold(5, shuffle=True,
+random_state=42) and the measurement agrees — 15 of 15 per-fold cells reproduce the author's
+printed AUCs to 4-5e-6 (the log's 5-dp printing floor) and the overall AUCs reproduce to 0 and
+1.1e-16. The test vectors match the author's own submission.csv in test.csv id order to 1.1e-16,
+so the row indexing is proven on BOTH splits, which is more than most imports here got.
+
+THE PACK — no free parameter, and that is deliberate
+-----------------------------------------------------
+ARM 202 = ARM 199's --extra-dirs plus ext_members14, i.e. all three members, no selection.
+
+`lexb_lgb02` sits at maxcorr 0.99543, above the 0.995 line w38b_vet.py used to auto-file
+duplicates. It is included anyway, and the reason is registered here rather than argued later:
+RESEARCH's own heading is "⛔⛔ DECORRELATION DOES NOT PRICE A MEMBER" — the maxcorr number was
+retired as a currency, so using it now to drop the strongest of the three would be reaching for
+a retired instrument to make a pack choice. Including all three is the only option with nothing
+fitted in it. If a future run wants the pair-without-lgb02 arm, that is a separate control.
+
+REGISTERED EXPECTATION
+----------------------
+Bar to beat: `w36_ad199stdcorr`, corrected CV **0.9701400060** — the current leader, built this
+morning, still unsent. Matched control on disk: submissions/w36_ad199std*.csv. This script is
+w36b_run.sh with ext_members14 appended to --extra-dirs and NOTHING else changed, so the delta
+is attributable to the three added members AS A GROUP.
+
+Honest prior. RESEARCH prices a further GBDT into this stack at ~4e-7 and the solo->stack
+pass-through at ~1.4%; against that, w36's four-member group returned +14.85e-6 on the h3 base,
+far above what any of its members priced at individually, and w37 §5 plus this run's w36a reps
+0-2 say that group delta is NOT attributable to the ram or ravi pairs (both sign-flipping
+nulls). So the honest reading of the only comparable event is that a group of members can move
+the stack by more than the sum of their measured individual values, and that nobody here
+understands why. Registered central expectation: **+2 to +12e-6 on the h3 base**, with a
+genuine chance of a null and a real chance of a negative. A negative is reported as such.
+
+Rebuild reproducibility floor ~4e-6 (w29). **WANTED does not move to the new file unless the
+corrected object clears 0.9701440** (leader 0.9701400060 + the 4e-6 floor). Fixed here, before
+the build.
+
+The correction step (w21a) SHIPS THE PRE-REGISTERED 5-ARM, never the argmax over arms. Same
+rule as w34 and w36; scheme-selection optimism at w36 was +0.000e-6 on a 5/5 leave-one-fold-out
+check, and the argmax beat the 5-arm by +0.18e-6.
+
+ORDERING, and why the control keeps its place
+----------------------------------------------
+This build waits for `w36g done`. ARM 197 is a pre-registered CONTROL that was queued before
+the zhukovoleksiy members were found, and it is not being displaced by a candidate that arrived
+later — reordering a registered control behind a file I would prefer to see sooner is the same
+class of move the w36 addendum refused. Both land inside the 08-21 send day either way.
+
+⚠ ARM 202 IS NOT SELECTABLE UNTIL IT IS SENT, and it will be built at cap. If it clears the
+bar it goes to the HEAD of the 08-21 queue, displacing `w36_ad199stdcorr` — which is itself
+still unsent, so the day's first two slots become 202 then 199.
