@@ -8766,3 +8766,44 @@ the token still valid, so **slot 1 is not at risk**. The w34 §7 dead window (th
 error means the CLI 401s for 30 minutes *after* expiry while believing the token is good) opens
 **2026-08-21 03:22–03:52 UTC**. A run in that window is not blocked — refresh with
 `KaggleCredentials.load(client=KaggleClient(env=KaggleEnv.PROD)).refresh_access_token()`.
+
+## 2026-08-20 (w36) — the top-level blend weights are BEST LEFT EQUAL, and the price of searching them
+
+`experiments/w36d_wsearch.py`. The one weight vector in this pipeline that had never been
+fitted: `make_h3.py` is an **equal** rank-average of hybrid/rankraw/rescale with `logit`
+dropped, and that decision was made at **156 members on 2026-08-11**. The pack is now 195, so
+the justifying measurement was 39 members stale. Re-run on `w34_ad195std`:
+
+| top-level blend | equal weights | fitted IN-SAMPLE | fitted **CROSS-FITTED** | Δ xfit vs equal | **optimism** |
+|---|---|---|---|---|---|
+| h3 = hybrid+rankraw+rescale | 0.9701205753 | 0.9701208766 | 0.9701196117 | **−0.96e-6** | **+1.27e-6** |
+| all4 = h3 + logit | 0.9701181652 | 0.9701213202 | 0.9701195043 | +1.34e-6 | **+1.82e-6** |
+
+Weights are fitted INSIDE the frozen folds (fold k's weights come from the other four folds),
+so the cross-fitted column is honest at the weight level; the in-sample column is what a naive
+search would have claimed.
+
+**Three durable conclusions.**
+
+1. ⛔ **Do not fit the top-level blend weights.** Equal weights beat the honestly-fitted ones on
+   h3 by 0.96e-6. Over near-collinear transform stacks (test rho ~0.999) there is nothing to
+   find, and searching costs more than it returns. The angle is a MEASURED null now, not an
+   asserted one.
+2. **The drop-logit decision survives at 195 members.** Fitted all4 pushes `logit` to weight
+   0.081 (from 0.25) and gains +1.34e-6 over equal-all4 — i.e. the search rediscovers "drop
+   logit" on its own — but still lands 0.97e-6 BELOW the zero-parameter equal-weight h3.
+3. ⚠⚠ **THE PRICE OF A TOP-LEVEL SEARCH IS ~+0.45e-6 PER FREE PARAMETER, MEASURED.** 3 params
+   → +1.27e-6 of optimism; 4 params → +1.82e-6. **This independently corroborates w34's
+   scheme-selection optimism of +2.54e-6 for the 5-arm correction** (5 params × 0.45 = 2.3e-6,
+   measured on a completely different object by a completely different method). Two independent
+   estimates of the same quantity agreeing is the strongest evidence in this file that the
+   pre-registration discipline is priced correctly and not superstition.
+
+**Use this number.** Any future top-level search over k arms/weights must beat the equal-weight
+baseline by more than ~0.45k e-6 before it is worth anything, and the in-sample number it
+prints will overstate it by exactly that much.
+
+Artefacts: `submissions/w34_ad195std_h3w.csv`, `w34_ad195std_all4w.csv` (test side uses the
+full-data weights; the stored OOF is the cross-fitted one). Neither is a deadline candidate —
+both are below the equal-weight h3 on CV — but both are real, distinct files and therefore
+legitimate free-slot sends under the brief's economics.

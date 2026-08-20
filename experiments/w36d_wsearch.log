@@ -1,0 +1,22 @@
+  logit    solo cross-fitted AUC 0.970044344
+  hybrid   solo cross-fitted AUC 0.970110833
+  rankraw  solo cross-fitted AUC 0.970097812
+  rescale  solo cross-fitted AUC 0.970105564
+
+--- h3 (hybrid, rankraw, rescale) ---
+  equal weights          CV 0.9701205753   w = [0.3333 0.3333 0.3333]
+  fitted, IN-SAMPLE      CV 0.9701208766   w = [0.4434 0.2924 0.2642]   (++0.301e-6, NOT honest)
+  fitted, CROSS-FITTED   CV 0.9701196117   (-0.964e-6 vs equal)
+  per-fold w  mean [0.4357 0.2891 0.2752]  sd [0.03586 0.05685 0.02868]
+  ** selection optimism of this search = +1.265e-6 **
+  wrote w34_ad195std_h3w.csv (test uses full-data w; OOF stored is the xfit one)
+
+--- all4 (logit, hybrid, rankraw, rescale) ---
+  equal weights          CV 0.9701181652   w = [0.25 0.25 0.25 0.25]
+  fitted, IN-SAMPLE      CV 0.9701213202   w = [0.0787 0.3972 0.3162 0.2079]   (++3.155e-6, NOT honest)
+  fitted, CROSS-FITTED   CV 0.9701195043   (+1.339e-6 vs equal)
+  per-fold w  mean [0.0806 0.3904 0.3175 0.2115]  sd [0.03146 0.05158 0.05677 0.04243]
+  ** selection optimism of this search = +1.816e-6 **
+  wrote w34_ad195std_all4w.csv (test uses full-data w; OOF stored is the xfit one)
+
+wrote w36d_wsearch.json
