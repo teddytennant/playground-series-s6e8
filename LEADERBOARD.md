@@ -1277,3 +1277,46 @@ and is 16e-6 clear, which is a real gap, not a slice draw.
 The board is dense enough that the *pricing* of a submission matters more than building a
 better object: the same ten files re-priced with the w30 correction term went from
 P(beat 0.97118)=1.7e-3 to 4.8e-2 for the best single file.
+
+## 2026-08-20 01:15 UTC (w32, slot 3) — ⚠ CORRECTION: the gap to first is **16 reporting steps, not 1.6**
+
+Board unchanged from the 00:20 read: **0.97118, rank 17 of ~2,300**, leader MILANFX 0.97134
+(static since 08-18 06:52). `experiments/w32_lb_top.csv` is the live top-60.
+
+**Two sentences in the entries above are wrong and one of them has been repeated three times.**
+
+> "the gap to first is **16e-6**, which the CV→LB model says needs a CV of 0.9701307114"
+> "The whole top 17 spans **16e-6** — **1.6 reporting steps**"
+
+    0.97134 − 0.97118 = 0.00016 = 160e-6 = SIXTEEN reporting steps.
+
+The two figures in the first sentence were never consistent with each other either: at the
+w30b slope **1.856**, a CV of 0.9701307114 (+12.4e-6 on the CV leader) buys +23e-6 of LB, i.e.
+it is the bar for ~**0.97120**, the gold cutoff — not for first place.
+
+**Nothing downstream broke.** `w26d_queueprice.py` prices against the account's own 0.97118
+and is self-consistent; no build or send decision was ever made off the mis-stated gap. What
+it distorted is the strategic framing, and "we are 1.6 steps off the lead" and "we are 16
+steps off the lead" are different competitions.
+
+### The corrected bar table (`experiments/w32a_goldbar.py`, gated against w30b)
+
+Slope dLB/dCV = **1.856 ± 0.054** ⇒ one reporting step = **5.39e-6 of CV**.
+CV is for the cheapest family (ens4, std+corr) and `gap` is versus the CV leader 0.9701182875.
+
+| target LB | rank today | dLB | CV needed | gap vs leader |
+|---|---|---|---|---|
+| 0.97119 | 16 | +10e-6 | 0.9701232560 | **+5.0e-6** |
+| **0.97120** | **14 — GOLD** | +20e-6 | 0.9701286430 | **+10.4e-6** |
+| 0.97121 | 12 | +30e-6 | 0.9701340299 | +15.7e-6 |
+| 0.97125 | 4 | +70e-6 | 0.9701555778 | +37.3e-6 |
+| 0.97134 | 1 | +160e-6 | 0.9702040606 | **+85.8e-6** |
+
+**Gold is reachable and first place is not.** +10.4e-6 of CV is two c_avg corrections, or one
+good new member family — 10% of the fitted CV span, interpolative. +85.8e-6 is **1.8× the
+entire 22-member adarsh import**, the single biggest jump in this workspace's history, and 81%
+of the fitted span. No stacking tweak reaches it; it needs a better base model, and there are
+11 days left. **Play for gold, not for the lead.**
+
+⚠ And the cutoff moves: ranks 2–16 filled in beneath a static leader over 08-18→08-20, so
+0.97120 will not still be the gold line on 08-31. Treat +10.4e-6 as a floor.

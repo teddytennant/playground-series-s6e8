@@ -8304,3 +8304,165 @@ Useful side effect, since the constant is known: the 2000-round control leg of a
 **1.0% at 400 rounds and 3.0–3.1% at 2000**. So "config X has a bigger d_c" read off a
 400-round table is partly "config X is further along the effective-capacity path", which is the
 same convergence confound that makes the w27g table unreadable at the operating point.
+
+# w32 slot 3 (2026-08-20) — the medal bar in CV, and whether the family term is real
+
+## ⚠⚠ A UNITS ERROR THAT SURVIVED THREE ENTRIES: 0.97134 − 0.97118 is SIXTEEN steps
+
+`LEADERBOARD.md` said "the gap to first is 16e-6" in the w29 and w30 entries and added "1.6
+reporting steps". **0.00016 = 160e-6 = 16 reporting steps.** The companion figure in the same
+sentence ("needs a CV of 0.9701307114") is the bar for ~0.97120, the gold cutoff, not for
+first; the two were never consistent with each other.
+
+Nothing downstream depended on it — `w26d_queueprice.py` targets the account's own 0.97118 and
+is self-consistent — but it made "one more good build and we lead" look true when it is not.
+
+**Rule: never write a leaderboard gap in `e-6` without dividing by 1e-5 and stating the number
+of reporting steps in the same sentence.** The two units are 10× apart and this workspace
+quotes CV in e-6 all day, which is exactly why the slip is easy.
+
+## THE BAR TABLE, inverted against the BOARD rather than against our own best
+
+`experiments/w32a_goldbar.py`. Same w30b model `w26d` uses, same gate (residual sd must come
+back at 7.76e-6), plus a second gate that `invert()` is the exact inverse of `predict()` on 12
+(family, std, corr) cells. Writes `w32a_goldbar.json`.
+
+    slope dLB/dCV = 1.8563 +/- 0.0537   =>  one reporting step = 5.39e-6 of CV
+    residual sd 7.76e-6 of LB           =   4.18e-6 of CV
+
+| target LB | rank | CV needed (ens4, std+corr) | gap vs CV leader 0.9701182875 |
+|---|---|---|---|
+| 0.97119 | 16 | 0.9701232560 | +5.0e-6 |
+| **0.97120 — gold** | **14** | 0.9701286430 | **+10.4e-6** |
+| 0.97121 | 12 | 0.9701340299 | +15.7e-6 |
+| 0.97134 — first | 1 | 0.9702040606 | **+85.8e-6** |
+
+**Gold is 10% of the fitted CV span past the leader — interpolative and reachable. First is
+81% of it, and 1.8× the entire adarsh import.** Use this table, not the account-best table in
+`w26d`, when deciding whether a *build* is worth a run. `w26d`'s table answers a different
+question (is this queue file worth believing) and its target is 0.97118.
+
+## THE FAMILY TERM IS THE BIGGEST OPEN QUESTION IN THE MODEL, and it is NOT actionable
+
+`experiments/w32b_famrank.py` ranks the 78 scored files two ways: by raw CV (what
+`check_selection.WANTED` is chosen on) and by the w30b **fitted** value (CV + family + std +
+corr, i.e. the model's estimate of true test AUC with the slice draw removed).
+
+    CV top-2     : w29_ad194stdcorr, w27_ad190stdcorr        (both h3, standardised)
+    fitted top-2 : w21_ad187corr_ens4, w21_ad187corr         (both UNstandardised)
+    AGREE: False        spearman over all 78 = +0.844
+
+The re-ranking is driven by terms that **cannot be public-slice draws** — the slice floor is
+8.70e-6, so a term measured on n files has a draw sd of ~8.7/sqrt(n), and logit's +147.1e-6 on
+n=4 is 34 of those:
+
+| family | n | coef e-6 of LB | se | t | = e-6 of CV |
+|---|---|---|---|---|---|
+| logit | 4 | **+147.14** | 5.51 | +26.7 | +79.3 |
+| rescale | 13 | **+34.62** | 3.20 | +10.8 | +18.7 |
+| ens4 | 24 | +13.71 | 2.68 | +5.1 | +7.4 |
+| rankraw | 10 | +12.35 | 3.30 | +3.8 | +6.7 |
+| hybrid | 8 | +4.00 | 3.67 | +1.1 | +2.2 |
+| h3 | 15 | 0 (base) | — | — | 0 |
+| std | — | **−23.09** | 3.61 | −6.4 | −12.4 |
+
+If those are train→**test** properties they apply to the private half too, and selecting on
+raw CV is then ranking on a biased quantity. That is a large enough claim to need its own
+test, and w32b pre-registered one rather than acting on it.
+
+### ✅ THE TEST RAN, AND THE CRITERION FAILED — `WANTED` does not move
+
+`experiments/w32c_famholdout.py`. The identifying question is whether the family term is
+**combiner overfitting to the shared folds** — the members' OOF vectors and the combiner's CV
+come off the SAME frozen SKF5, so a transform whose fit exploits that leak harder gets CV it
+has not earned. That is testable entirely on TRAIN rows, with no leaderboard involved: fit each
+transform stack on 80% and score the held-out 20%.
+
+**3 of the 4 stacks were already on disk and cost zero new compute.** `w25d_hold_*.npz` holds
+both arms × 5 reps of held-out decision functions over the same 187-member pack; w32c imports
+`splits_for` from `w25d_stdholdout` so the splits are the identical objects, not re-derived.
+The fourth (`logit`) was fitted this slot on those same splits and pack — 5 reps, ~400s — so
+the table below covers all five non-base families.
+
+Predicted discrepancy = family term / slope. Observed = (hold_f − hold_h3) − (xfit_f − xfit_h3):
+
+| family | observed | se | predicted | ratio | z vs H0 | z vs H1 |
+|---|---|---|---|---|---|---|
+| hybrid | +4.1 | 2.9 | +2.2 | 1.90 | +1.43 | +0.68 |
+| rankraw | +3.0 | 4.3 | +6.7 | 0.45 | +0.69 | −0.84 |
+| rescale | −2.3 | 2.7 | +18.7 | −0.13 | −0.86 | **−7.66** |
+| **logit** | **−7.6** | **11.9** | **+79.3** | **−0.10** | −0.64 | **−7.30** |
+| ens4 | −1.9 | 3.1 | +7.4 | −0.26 | −0.61 | −2.98 |
+
+Sign agreement **2/5**; sign **and** ≥half magnitude **1/5** — and the two that agree are the
+two *smallest* predictions, which is what a true discrepancy of zero looks like. Stated as a
+model comparison rather than a tally:
+
+    H0  observed discrepancy = 0        chi2(5) =   4.0   <- textbook fit, expected 5
+    H1  observed = predicted (leakage)  chi2(5) = 122.1   <- rejected, 30x worse
+
+**Every family's observed discrepancy is within ±1.5 sd of ZERO**, including logit, whose
++147e-6 LB term predicts +79.3e-6 here and delivers −7.6 ± 11.9. The registered criterion is
+**NOT MET** and the null is not merely un-rejected, it is the hypothesis that fits.
+
+**⛔ CONCLUSION: the shared-fold-leakage explanation of the family term is REFUTED, the
+mechanism is still unidentified, and the fitted ranking must NOT be used for selection.**
+`check_selection.WANTED` stays `{w27_ad190stdcorr.csv, w23_ad187stdcorr.csv}`, chosen on CV.
+
+⚠ **What this does NOT rule out, and it is the live hypothesis.** The holdout uses TRAIN rows
+only, so it can see fold leakage and is blind to a **train→test distribution shift** that the
+transforms are differentially robust to. If that is the mechanism, the family term is real for
+the private slice and the holdout would show exactly what it shows: nothing. This workspace
+already holds one confirmed object of that shape — the `c_avg` correction is a train/test
+missingness-allocation shift correction worth ~+10e-6 of LB that cross-fitted CV *structurally
+cannot see* (w30 §3). The family terms may be the same animal.
+
+**To identify it you need a test-side instrument, not a train-side one.** The obvious one:
+compute each transform stack's prediction on TEST and compare its distributional agreement
+with train under the same covariate shift `c_avg` corrects. Nobody has done it. Until someone
+does, CV governs selection — and note that the burden is asymmetric on purpose: acting on the
+fitted ranking requires a positive identification, while doing nothing requires none.
+
+## Operational notes
+
+- `w32c_famholdout.py --report` is free and re-runnable; `--kind logit` fits the fourth stack
+  on the same splits/pack (~20 min) and completes the table. It asserts `len(names) == 187`,
+  because every `XFIT` constant in it is that pack and a different member count would silently
+  compare two different objects.
+- ⚠ **Machine was at load average 59 on 16 cores** during this slot (w31's 5 fold processes ×
+  3 threads, plus an unrelated repo's 16-way screen). Anything launched here must be `nice`d
+  with `OMP_NUM_THREADS` pinned low, or it will both crawl and slow the pre-registered run.
+
+## Pool re-enumeration, 2026-08-20 (w32 slot 3) — NOTHING NEW IS IMPORTABLE
+
+`kaggle datasets list -s s6e8 --sort-by hottest --page-size 40`, checked against the w20
+ledger. Two refs published *after* that ledger was written and were not in it:
+
+| ref | published | size | disposition |
+|---|---|---|---|
+| `thisray/s6e8-our-component` | 08-18 | one 7.64 MB CSV | **excluded — test predictions only, no OOF.** 296,302 rows; the author is rank ~14 (0.97120), which is why it was worth opening. |
+| `anthonytherrien/predicting-smartphone-addiction-vault` | 08-17 | `submission.csv` + `submission (1).csv` | **excluded — submissions only, no OOF.** The `" (1)"` is the browser-download artefact flagged elsewhere in this file, i.e. one of the two is a re-upload of someone else's copy. |
+
+Every other ref on the first 20 rows is already dispositioned in the ledger above
+(`szymonkapiski`, `boltuzamaki`, `dariushafshar`, `raykkretzschmar`, `mohankrishnathalla`,
+`beicicc`, `adarsh1077` imported or excluded; `najiama` permanently excluded for fitting blend
+weights on the full OOF).
+
+**So the last importable material is still `adarsh1077`'s 22 members from 08-15.** That
+matters more than it used to: at +2.1e-6 of CV per foreign member (the adarsh import's
++47e-6 / 22), roughly **five** more foreign members would be the +10.4e-6 that w32a prices as
+gold — the cheapest path to a medal on the board, and it is currently closed for want of
+supply, not for want of a method. Re-run this scan every slot; it is one API call.
+
+## ⚠ The `/proc/*/cmdline` false negative bit again, in the run that documented it
+
+w30 §8 recorded that `grep` over `/proc/*/cmdline` reports 0 live processes while jobs are
+running, and prescribed `tr '\0' ' ' < $d/cmdline` per-pid. **This slot then wrote a wait-loop
+whose exit condition was `! grep -q w32c /proc/*/cmdline`, and it fired instantly** while the
+job was on rep 1 of 5 — the report that followed silently read a 3-stack table as if it were
+the 4-stack one.
+
+**Rule, stronger than the w30 wording: never make a `/proc` scan the TERMINATION condition of
+a wait.** Wait on the artefact the job writes (`until grep -q "rep4" the.log`), which is what
+you actually care about and cannot false-negative. Keep the per-pid `tr` form for *reporting*
+what is alive; do not build control flow on either.

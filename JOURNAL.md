@@ -15745,3 +15745,228 @@ their `.csv`/`.json` outputs, `w30c_corr_{ens4,rankraw,rescale}.log`, and three
 `stdflag.py`, `RESEARCH.md`, `LEADERBOARD.md`.
 
 **Sent 10 of 10 for the 08-20 UTC day.**
+
+---
+
+# 2026-08-20 — w32, slot 3 of 10. ANGLE: CatBoost (OVERRIDDEN). AT CAP, no submission.
+
+**Cap check first, per w30 §9.1.** `date -u` = 2026-08-20 01:03. Submissions per UTC day from
+the API: `10 2026-08-16 / 10 08-17 / 10 08-18 / 10 08-19 / 10 08-20`. The 08-20 day was drained
+at 00:07–00:08 by w30. **Genuinely at cap — the prompt's "10 today" is right this time.**
+No submission was attempted and none should have been.
+
+**The handed angle is explicitly closed in RESEARCH (line 7069):** the CatBoost lineage is 29
+of 188 members and sits *exactly at the pack median* on both solo AUC (0.966463) and maxcorr
+(0.99581) — "not more decorrelated, not stronger, not weaker… Do not spend another slot tuning
+a CatBoost." Overridden under the brief's own clause, reason stated. What is NOT closed and is
+picked up in §5 below is the adjacent finding that the value was never in CatBoost, it was in
+*pipelines we do not hold*.
+
+Also: 15 of 16 threads were already busy with w31's pre-registered 5-fold LightGBM run
+(load average **59**). This slot was therefore deliberately cheap-compute: analysis on data
+already on disk, plus one ~5-minute fit.
+
+## 1. ⚠⚠ THE HEADLINE IS A UNITS ERROR, AND IT HAS BEEN IN LEADERBOARD.md THREE TIMES
+
+> "the gap to first is **16e-6**, which the CV→LB model says needs a CV of 0.9701307114"
+> "The whole top 17 spans 16e-6 — **1.6 reporting steps**"
+
+    0.97134 − 0.97118 = 0.00016 = 160e-6 = SIXTEEN reporting steps.
+
+The two figures in the first sentence were never consistent with each other either: at the
+w30b slope **1.856**, a CV of 0.9701307114 is +12.4e-6 on the leader and buys +23e-6 of LB —
+that is the bar for ~0.97120, the **gold cutoff**, not for first place.
+
+**Nothing downstream broke and no build or send decision was made on it.** `w26d_queueprice`
+targets the account's own 0.97118 and is internally consistent throughout. What the error
+distorted is the strategic frame, and "we are 1.6 steps off the lead" and "we are 16 steps off
+the lead" are different competitions. Rule now in RESEARCH: **never write a leaderboard gap in
+`e-6` without also stating it in reporting steps** — this workspace quotes CV in e-6 all day
+and the two units are 10× apart.
+
+## 2. ✅ THE BAR TABLE, INVERTED AGAINST THE BOARD — gold is reachable, first place is not
+
+`experiments/w32a_goldbar.py`, same w30b model as the pricer, two gates (predict() must
+reproduce its 7.76e-6 residual sd; invert() must be the exact inverse of predict() on 12
+(family, std, corr) cells — both PASS).
+
+    slope dLB/dCV = 1.8563 ± 0.0537   ⇒  one reporting step = 5.39e-6 of CV
+
+| target LB | rank today | CV needed (ens4 std+corr) | gap vs CV leader 0.9701182875 |
+|---|---|---|---|
+| 0.97119 | 16 | 0.9701232560 | +5.0e-6 |
+| **0.97120 — GOLD** | **14** | 0.9701286430 | **+10.4e-6** |
+| 0.97121 | 12 | 0.9701340299 | +15.7e-6 |
+| 0.97134 — first | 1 | 0.9702040606 | **+85.8e-6** |
+
+**+10.4e-6 is 10% of the fitted CV span past the leader — interpolative, and about two c_avg
+corrections or one good member family. +85.8e-6 is 81% of the span and 1.8× the entire
+22-member adarsh import, the biggest single jump in this workspace's history.** With 11 days
+left: **play for gold, not for the lead.** ⚠ And the cutoff moves — ranks 2–16 filled in
+beneath a static leader over 08-18→08-20, so treat +10.4e-6 as a floor, not a target.
+
+## 3. THE FAMILY TERM: the model re-ranks the account's files, and it is NOT actionable
+
+`experiments/w32b_famrank.py`. Ranking the 78 scored files by the w30b **fitted** value
+(CV + family + std + corr — the model's estimate of true test AUC with the slice draw removed)
+disagrees with ranking them by raw CV, which is what `check_selection.WANTED` is chosen on:
+
+    CV top-2     : w29_ad194stdcorr, w27_ad190stdcorr      (h3, standardised)
+    fitted top-2 : w21_ad187corr_ens4, w21_ad187corr       (UNstandardised)
+    AGREE: False     spearman over all 78 = +0.844
+
+The terms driving it **cannot be public-slice draws** — the slice floor is 8.70e-6, so a term
+on n files has a draw sd of ~8.7/√n, and logit's **+147.1e-6 on n=4 is 34 of those**
+(rescale +34.6 on n=13, ens4 +13.7 on n=24, std −23.1). If they are train→**test** properties
+they hold on the private half too, and selecting on raw CV is then ranking on a biased
+quantity. That is a big enough claim that w32b **pre-registered an identifying test instead of
+acting on it**, and stated the criterion before running it.
+
+## 4. ✅ THE TEST RAN AND THE CRITERION FAILED — `WANTED` DOES NOT MOVE
+
+`experiments/w32c_famholdout.py`. The candidate mechanism is **combiner overfitting to the
+shared folds**: the members' OOF vectors and the combiner's CV come off the SAME frozen SKF5,
+so a transform whose fit exploits that leak harder collects CV it has not earned. That is
+testable entirely on TRAIN rows with no leaderboard involved — fit each transform stack on 80%,
+score the held-out 20%.
+
+**3 of the 4 stacks cost ZERO new compute.** `w25d_hold_{hybrid,rankraw,rescale}.npz` already
+hold both arms × 5 reps over the same 187-member pack; w32c *imports* `splits_for` from
+`w25d_stdholdout` so the splits are the identical objects rather than re-derived.
+
+Predicted discrepancy = family term / slope; observed = (hold_f − hold_h3) − (xfit_f − xfit_h3):
+
+| family | observed | se | predicted | ratio | sign |
+|---|---|---|---|---|---|
+| hybrid | +4.1 | 2.9 | +2.2 | 1.90 | OK |
+| rankraw | +3.0 | 4.3 | +6.7 | 0.45 | OK |
+| **rescale** | **−2.3** | **2.7** | **+18.7** | **−0.13** | ❌ |
+
+Sign 2/3; sign **and** ≥half magnitude **1/3**. The registered criterion is **NOT MET**, and it
+fails hardest on `rescale` — the largest of the three terms, and 7.7 se from its prediction.
+
+⛔ **The shared-fold-leakage explanation is refuted, the mechanism is unidentified, and the
+fitted ranking must not be used for selection. `WANTED` stays
+`{w27_ad190stdcorr.csv, w23_ad187stdcorr.csv}`, chosen on CV.** The burden is asymmetric on
+purpose: acting on the fitted ranking needs a positive identification, doing nothing needs none.
+
+⚠ **What this does NOT rule out, and it is now the live hypothesis.** The holdout uses TRAIN
+rows only. It can see fold leakage; it is blind to a **train→test distribution shift** that the
+transforms are differentially robust to. If that is the mechanism, the family term is real for
+the private slice and this experiment would show exactly what it shows — nothing. This
+workspace already holds one confirmed object of that exact shape: `c_avg` is a train/test
+missingness-allocation shift correction worth ~+10e-6 of LB that cross-fitted CV *structurally
+cannot see* (w30 §3). **Identifying it needs a test-side instrument, not a train-side one.**
+
+## 5. POOL RE-ENUMERATED — nothing new is importable, and that is the gold blocker
+
+RESEARCH's own instruction is "re-enumerate every run; it costs one API call", and the ledger
+was last written in w20 (08-17). Two refs published after it and were not in it. Both are
+**excluded on the same ground — test predictions only, no OOF**, so neither is importable
+under this workspace's gates:
+
+| ref | published | what | why worth opening |
+|---|---|---|---|
+| `thisray/s6e8-our-component` | 08-18 | one 7.64 MB CSV, 296,302 rows | the author is rank ~14 (0.97120), i.e. sitting on the gold line |
+| `anthonytherrien/…-vault` | 08-17 | `submission.csv` + `submission (1).csv` | the `" (1)"` is the browser-download artefact — one is a re-upload of someone else's file |
+
+Everything else on the first 20 rows is already dispositioned (`szymonkapiski`, `boltuzamaki`,
+`dariushafshar`, `raykkretzschmar`, `mohankrishnathalla`, `beicicc`, `adarsh1077` imported or
+excluded; `najiama` permanently excluded for fitting blend weights on the full OOF).
+
+**So the last importable material is still adarsh1077's 22 members from 08-15 — and §2 makes
+that the most interesting fact of the slot.** The adarsh import bought +47e-6 of CV for 22
+foreign members = **+2.1e-6 each**. Gold needs +10.4e-6. **Roughly five more foreign members
+is a medal.** That is far and away the cheapest path on the board, it is measured rather than
+hoped, and it is currently blocked on *supply*, not on method. This is also the honest reading
+of the handed CatBoost angle: RESEARCH 6323 already concluded the operational rule is not
+"prefer CatBoost" but **"prefer a pipeline you do not hold"** — the four foreign CatBoosts were
+worth 10.3e-6 each because they came from a pipeline we don't have, not because of the library.
+
+## 6. OPERATIONAL
+
+- ⚠ **The `/proc/*/cmdline` false negative bit the very run that re-documented it.** w30 §8
+  prescribed the per-pid `tr '\0' ' '` form. This slot then wrote a wait-loop whose *exit*
+  condition was `! grep -q w32c /proc/*/cmdline` — it fired instantly while the job was on rep
+  1 of 5, and the report that followed silently read a 3-stack table as the 4-stack one.
+  **Stronger rule now in RESEARCH: never make a `/proc` scan the TERMINATION condition of a
+  wait.** Wait on the artefact the job writes (`until grep -q "rep4" the.log`). Keep the `tr`
+  form for *reporting* what is alive; build no control flow on either.
+- **Tomorrow's queue is refreshed and priced** (`w23b_sendqueue.py` → `w26d_queueprice.py`,
+  both re-run clean this slot; 35 unsent files with stored OOF vectors, 0 pinned since both
+  `WANTED` files are now sent). Head of the queue:
+
+  | file | fam | CV | pred LB | P(beat 0.97118) |
+  |---|---|---|---|---|
+  | `w29_ad194stdcorr_ens4` | ens4 | 0.9701160 | 0.971181 | **0.323** |
+  | `w29_ad194stdcorr_rescale` | rescale | 0.9701013 | 0.971175 | 0.100 ⚠ least trustworthy |
+  | `w27_ad188stdcorr` | h3 | 0.9701168 | 0.971169 | 0.022 |
+
+- **w31's pre-registered run is healthy and NOT reported here** (its own R-N5 forbids reporting
+  a partial table). The control config has finished on all five folds; `leaves255_dinf` and
+  `lr0.05` are still fitting, 10 checkpoints in `cache/lgb5fckpt/`. Machine hit load average
+  **59 on 16 cores** this slot — anything launched alongside it must be `nice`d with
+  `OMP_NUM_THREADS` pinned low.
+
+## 4b. ✅ THE LOGIT ARM LANDED AND MAKES §4 DECISIVE — χ² 4.0 vs 122.1
+
+The fourth stack was fitted this slot on the same splits and pack (5 reps, 402s), so the test
+now covers **all five** non-base families. `logit` is the one that matters: it carries the
+largest family term in the model (+147.1e-6 of LB, t +26.7), which predicts a **+79.3e-6**
+discrepancy here — seven times the next largest, and unmissable against a ~12e-6 se.
+
+| family | observed | se | predicted | ratio | z vs H0 | z vs H1 |
+|---|---|---|---|---|---|---|
+| hybrid | +4.1 | 2.9 | +2.2 | 1.90 | +1.43 | +0.68 |
+| rankraw | +3.0 | 4.3 | +6.7 | 0.45 | +0.69 | −0.84 |
+| rescale | −2.3 | 2.7 | +18.7 | −0.13 | −0.86 | **−7.66** |
+| **logit** | **−7.6** | **11.9** | **+79.3** | **−0.10** | −0.64 | **−7.30** |
+| ens4 | −1.9 | 3.1 | +7.4 | −0.26 | −0.61 | −2.98 |
+
+Sign 2/5, sign+half-magnitude 1/5 — **and the two that agree are the two smallest predictions**,
+which is exactly what a true discrepancy of zero looks like. So state it as a model comparison
+rather than a tally:
+
+    H0  observed discrepancy = 0        χ²(5) =   4.0    ← textbook fit, expected 5
+    H1  observed = predicted (leakage)  χ²(5) = 122.1    ← rejected, 30× worse
+
+**Every family's observed discrepancy is within ±1.5 sd of zero.** The null is not merely
+un-rejected here, it is the hypothesis that fits. ⛔ **The shared-fold-leakage explanation of
+the CV→LB family term is dead, and `WANTED` stays `{w27_ad190stdcorr.csv,
+w23_ad187stdcorr.csv}` on CV.** The live hypothesis is now the train→test shift one in §4 —
+and note it is *unfalsified*, not *supported*: this experiment could never have tested it.
+
+## 7. NEXT RUN, IN ORDER
+
+1. **`date -u` vs the submission timestamps before believing any cap claim.** The 08-21 UTC day
+   opens at 00:00 with 10 fresh slots.
+2. **Send `--n 2` EARLY, `--n 8` LATE** (w30 §5, still unlearned in practice — w30 itself
+   drained at 00:08 and then found pricing within the hour that it could not use for 24h).
+   Early: `w29_ad194stdcorr_ens4` (P=0.323, the first genuinely live file in a week) and
+   `w27_ad188stdcorr`. Queue is already refreshed and priced; just run
+   `w23b_sendqueue.py` → `w26d_queueprice.py` → `w26g_send.py --go --n 2`.
+3. **Read w31's table when it finishes** — its R-N5 forbids reporting a partial one, and this
+   slot did not. Control leg is done on all 5 folds; `leaves255_dinf` and `lr0.05` still fitting.
+4. **Re-run the pool scan (§5). It is one API call and it is now the top of the gold path:**
+   ~5 more foreign members ≈ +10.4e-6 ≈ a medal, and the constraint is supply, not method.
+5. **The open question is now test-side, not train-side** (§4/§4b). If the family term is a
+   train→test shift, the instrument is a *test-side* one — compare each transform stack's test
+   prediction distribution against train under the same covariate shift `c_avg` corrects.
+   Nobody has built that. It is the only thing that could legitimately move the pick.
+6. ⛔ Do **NOT** re-open: the original dataset (−58e-6 at 1×); tuning any CatBoost (RESEARCH
+   7069 — median on both axes); cheap new model classes (w29 §2); `w29g`-shaped marginal-value
+   screens; error analysis / OOF segmentation; the stacker C; fold-seed averaging; feature-set
+   variants of the lattice pipeline; **and now the fold-leakage explanation of the family term
+   (§4b, χ² 4.0 vs 122.1).**
+7. ⚠ The final-selection click is STILL the standing blocker and **still needs Teddy in a
+   browser** — no browser MCP was available this session, and RESEARCH 1755–1784 confirms this
+   box holds no authenticated Kaggle session. `check_selection.py` reports *nothing selected*;
+   Kaggle's auto-pick would take the best PUBLIC scores, which is the Rogii failure run by
+   Kaggle. Both `WANTED` files are sent and selectable. Cost of not clicking: +0.8 to +3.3e-6.
+
+**Files added:** `experiments/w32a_goldbar.py`, `w32b_famrank.py`, `w32c_famholdout.py`, their
+`.json` outputs, `w32c_hold_logit.npz`, `w32c_arms_logit.csv`, `w32c_logit.log`,
+`w32_lb_top.csv`. **Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `experiments/w23b_sendqueue.csv`,
+`w26d_queueprice.{csv,json}`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day, drained by w30 at 00:07–00:08.**

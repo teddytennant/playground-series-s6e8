@@ -1,0 +1,17 @@
+{
+ "n": 78,
+ "top_cv": [
+  "w29_ad194stdcorr",
+  "w27_ad190stdcorr"
+ ],
+ "top_fit": [
+  "w21_ad187corr_ens4",
+  "w21_ad187corr"
+ ],
+ "agree": false,
+ "spearman": 0.8443581734720974,
+ "wanted": [
+  "w23_ad187stdcorr.csv",
+  "w27_ad190stdcorr.csv"
+ ]
+}

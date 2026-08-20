@@ -1,0 +1,7 @@
+187 members, logit Z (691369, 187), 123s
+  rep0 std auc 0.9703005169    50.7s
+  rep1 std auc 0.9697616881    54.1s
+  rep2 std auc 0.9702721283    50.1s
+  rep3 std auc 0.9698050868    53.7s
+  rep4 std auc 0.9700400631    41.9s
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w32c_hold_logit.npz + /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w32c_arms_logit.csv  402s
