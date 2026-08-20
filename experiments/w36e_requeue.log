@@ -1,0 +1,156 @@
+waiting for the w36b build to exit...
+w36b clear at Thu Aug 20 05:06:51 PM UTC 2026
+########## w28b_verify  Thu Aug 20 05:06:51 PM UTC 2026 ##########
+live: 91 submissions, 91 distinct filenames
+test rows: 296,302
+
+unsent CSVs on disk: 63   with a stored OOF: 61
+
+=== UNSENT CANDIDATES, best CV first ===
+                    stem     fam  std           cv pred_lb   p_beat  valid   rows  dup  nan  prob_scale       vmin      vmax
+        w36_ad199stdcorr      h3 True 0.9701400060 0.97121 1.00e+00   True 296302    0    0        True   0.000003  1.000000
+         w36_ad199std_h3      h3 True 0.9701354276 0.97119 7.91e-01   True 296302    0    0        True   0.000004  0.999930
+            w36_ad199std    ens4 True 0.9701323250 0.97120 9.67e-01   True 296302    0    0        True   0.000003  0.999946
+        w34_ad195stdcorr      h3 True 0.9701247949 0.97118 4.56e-01   True 296302    0    0        True   0.000003  1.000000
+     w36_ad199std_hybrid  hybrid True 0.9701231283 0.97117 5.29e-02   True 296302    0    0       False  -9.381071 13.960903
+    w36_ad199std_rescale rescale True 0.9701219373 0.97120 9.80e-01   True 296302    0    0       False  -8.808782 10.742885
+         w34_ad195std_h3      h3 True 0.9701205753 0.97116 3.03e-03   True 296302    0    0        True   0.000006  0.999962
+         w34_ad196std_h3      h3 True 0.9701199173 0.97116 1.85e-03   True 296302    0    0        True   0.000005  0.999963
+        w34_ad195std_wh3     wh3 True 0.9701196117 0.97116 1.97e-04   True 296302    0    0        True   0.000005  0.999963
+          w34_ad195std_w       w True 0.9701195043 0.97116 1.13e-03   True 296302    0    0        True   0.000005  0.999964
+            w34_ad196std    ens4 True 0.9701185506 0.97117 7.19e-02   True 296302    0    0        True   0.000004  0.999972
+            w34_ad195std    ens4 True 0.9701181649 0.97117 6.01e-02   True 296302    0    0        True   0.000005  0.999971
+        w27_ad188stdcorr      h3 True 0.9701168076 0.97117 2.16e-02   True 296302    0    0        True   0.000003  1.000000
+   w29_ad194stdcorr_ens4    ens4 True 0.9701159503 0.97118 3.23e-01   True 296302    0    0        True   0.000003  1.000000
+         w29_ad194std_h3      h3 True 0.9701140064 0.97115 7.91e-06   True 296302    0    0        True   0.000005  0.999958
+         w27_ad188raw_h3      h3 True 0.9701136019 0.97115 5.08e-06   True 296302    0    0        True   0.000007  0.999930
+         w27_ad190std_h3      h3 True 0.9701133391 0.97115 3.79e-06   True 296302    0    0        True   0.000005  0.999942
+    w36_ad199std_rankraw rankraw True 0.9701111922 0.97116 3.40e-04   True 296302    0    0       False -17.679580 17.805708
+     w34_ad195std_hybrid  hybrid True 0.9701108333 0.97115 2.56e-06   True 296302    0    0       False  -9.399043 13.809340
+     w34_ad196std_hybrid  hybrid True 0.9701091250 0.97115 3.36e-07   True 296302    0    0       False  -9.456413 13.910707
+     w29_ad194std_hybrid  hybrid True 0.9701056245 0.97114 3.18e-09   True 296302    0    0       False  -9.566768 14.130770
+    w34_ad195std_rescale rescale True 0.9701055639 0.97117 3.05e-02   True 296302    0    0       False  -8.961568 11.038485
+    w34_ad196std_rescale rescale True 0.9701039146 0.97117 1.17e-02   True 296302    0    0       False  -8.929166 10.937980
+     w27_ad190std_hybrid  hybrid True 0.9701027989 0.97113 4.49e-11   True 296302    0    0       False  -9.416854 14.011172
+w29_ad194stdcorr_rescale rescale True 0.9701012580 0.97118 1.00e-01   True 296302    0    0        True   0.000003  1.000000
+w29_ad194stdcorr_rankraw rankraw True 0.9701005596 0.97115 7.90e-06   True 296302    0    0        True   0.000003  1.000000
+     w27_ad188raw_hybrid  hybrid True 0.9701001700 0.97113 5.71e-13   True 296302    0    0       False  -9.483947 13.922930
+     w27_ad188std_hybrid  hybrid True 0.9700993121 0.97113 1.26e-13   True 296302    0    0       False  -9.457288 13.919789
+    w34_ad196std_rankraw rankraw True 0.9700979783 0.97113 2.69e-11   True 296302    0    0       False -17.573902 17.910330
+    w34_ad195std_rankraw rankraw True 0.9700978116 0.97113 2.06e-11   True 296302    0    0       False -17.540241 17.943016
+
+INVALID candidate files: 0
+
+=== SEND ORDER for the next UTC day (top 10 unsent by CV) ===
+   1. w36_ad199stdcorr             cv 0.9701400060  fam h3       std True  pred 0.97121  P(>0.97118) 1.00e+00  valid True
+   2. w36_ad199std_h3              cv 0.9701354276  fam h3       std True  pred 0.97119  P(>0.97118) 7.91e-01  valid True
+   3. w36_ad199std                 cv 0.9701323250  fam ens4     std True  pred 0.97120  P(>0.97118) 9.67e-01  valid True
+   4. w34_ad195stdcorr             cv 0.9701247949  fam h3       std True  pred 0.97118  P(>0.97118) 4.56e-01  valid True
+   5. w36_ad199std_hybrid          cv 0.9701231283  fam hybrid   std True  pred 0.97117  P(>0.97118) 5.29e-02  valid True
+   6. w36_ad199std_rescale         cv 0.9701219373  fam rescale  std True  pred 0.97120  P(>0.97118) 9.80e-01  valid True
+   7. w34_ad195std_h3              cv 0.9701205753  fam h3       std True  pred 0.97116  P(>0.97118) 3.03e-03  valid True
+   8. w34_ad196std_h3              cv 0.9701199173  fam h3       std True  pred 0.97116  P(>0.97118) 1.85e-03  valid True
+   9. w34_ad195std_wh3             cv 0.9701196117  fam wh3      std True  pred 0.97116  P(>0.97118) 1.97e-04  valid True
+  10. w34_ad195std_w               cv 0.9701195043  fam w        std True  pred 0.97116  P(>0.97118) 1.13e-03  valid True
+
+  P(at least one of these ten beats 0.97118) = 1.000e+00   (independence assumed -> OVERSTATED)
+
+wrote experiments/w28b_unsent.csv
+########## requeue  Thu Aug 20 05:07:03 PM UTC 2026 ##########
+91 submissions on record, 91 distinct filenames
+
+4 candidate(s) are byte-identical to another file and would score identically -- excluded from the queue:
+  w16m_widegrid.csv                  == w16i_schemeavg.csv
+  w23_ad187std_hybrid.csv            == w23_ad187std_h3_hybrid.csv
+  w23_ad187std_rankraw.csv           == w23_ad187std_h3_rankraw.csv
+  w23_ad187std_rescale.csv           == w23_ad187std_h3_rescale.csv
+
+best CV among ALREADY-SENT files: 0.9701182875
+
+SEND QUEUE -- 59 unsent valid files, ranked on cross-fitted OOF CV
+                     file  sent           cv   rows                              md5
+     w36_ad199stdcorr.csv False 0.9701400060 296302 8d8e748f025c2ba1a6909ac13c3eed0f
+      w36_ad199std_h3.csv False 0.9701354276 296302 13160446aa1a3a0980e6d30777d1a67e
+         w36_ad199std.csv False 0.9701323250 296302 7a489744444f49cb8580fe11134e44a4
+     w34_ad195stdcorr.csv False 0.9701247949 296302 f82fb6952fda7462b532d94d168087a6
+  w36_ad199std_hybrid.csv False 0.9701231283 296302 603d2c63cbf51fbdb5ee7224bef69672
+ w36_ad199std_rescale.csv False 0.9701219373 296302 00aca68a9da061bc76962bc1d33b65db
+      w34_ad195std_h3.csv False 0.9701205753 296302 5d2a2881b66e699f95fa0aee627aa6cf
+      w34_ad196std_h3.csv False 0.9701199173 296302 08d8413f31aaa3fa2e3d5a8063771fc6
+     w34_ad195std_wh3.csv False 0.9701196117 296302 c561daad597a4666177bcfdf28255053
+       w34_ad195std_w.csv False 0.9701195043 296302 e128eeb5c34a9e7d6f47785c0f1802f7
+         w34_ad196std.csv False 0.9701185506 296302 e5f0f1bbcd8f57a86e57f23037a2e2b8
+         w34_ad195std.csv False 0.9701181649 296302 b6c3667e2d0cfc9c0969dc82c4c59119
+     w27_ad188stdcorr.csv False 0.9701168076 296302 6cc0706b46506babf028a74ac97c81f1
+w29_ad194stdcorr_ens4.csv False 0.9701159503 296302 871ff501285629006def946072d0cac4
+      w29_ad194std_h3.csv False 0.9701140064 296302 77fe0afdd2a6b1944cfe47c15140c8f3
+      w27_ad188raw_h3.csv False 0.9701136019 296302 115dfe34a06d8edd4033464df2eed89a
+      w27_ad190std_h3.csv False 0.9701133391 296302 4a6850b1384b8390a2327f9d5825308e
+ w36_ad199std_rankraw.csv False 0.9701111922 296302 a22f85cbf0eed95bf8d0be6cbcbb4079
+  w34_ad195std_hybrid.csv False 0.9701108333 296302 52c0a2cc3d049feb3707c9d322f523cc
+  w34_ad196std_hybrid.csv False 0.9701091250 296302 e1ffad7addd3e1f57d845ea37c796f27
+
+2 unsent files carry NO stored OOF vector and therefore cannot be ranked or defended on CV:
+  w15f_antistudent_cv.csv, w16d_membercell.csv
+
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w23b_sendqueue.csv
+GATE: refitted-sample residual sd 7.76e-6 (dof 67) vs w25f's 7.76e-6 -- PASS
+PINNED to the head of the queue (check_selection.WANTED, unsent): ['w36_ad199stdcorr.csv']
+57 unsent files with a stored OOF vector, priced under w25f (resid sd 7.76e-6, centred at mu=0.9700571395)
+
+TOP 12 BY PREDICTED PUBLIC LB
+file                             fam      std               cv   pred LB  P(>best)
+w36_ad199stdcorr.csv             h3       True  0.9701400060   0.97121  1.00e+00
+w36_ad199std_rescale.csv         rescale  True  0.9701219373   0.97120  9.80e-01
+w36_ad199std.csv                 ens4     True  0.9701323250   0.97120  9.67e-01
+w36_ad199std_logit.csv           logit    True  0.9700571066   0.97119  8.50e-01
+w36_ad199std_h3.csv              h3       True  0.9701354276   0.97119  7.91e-01
+w34_ad195stdcorr.csv             h3       True  0.9701247949   0.97118  4.56e-01
+w29_ad194stdcorr_ens4.csv        ens4     True  0.9701159503   0.97118  3.23e-01
+w34_ad196std_logit.csv           logit    True  0.9700495032   0.97118  2.16e-01
+w29_ad194stdcorr_rescale.csv     rescale  True  0.9701012580   0.97118  1.00e-01
+w34_ad196std.csv                 ens4     True  0.9701185506   0.97117  7.19e-02
+w34_ad195std.csv                 ens4     True  0.9701181649   0.97117  6.01e-02
+w36_ad199std_hybrid.csv          hybrid   True  0.9701231283   0.97117  5.29e-02
+
+best single file          P(beat 0.97118) = 9.998e-01
+best TEN sent together    P(at least one)  = 1.000e+00   (independence assumed -> an OVERSTATEMENT)
+
+predicted LB of the best unsent file: 0.97121   = +32.4e-6 vs the account best (+3.2 reporting steps)
+
+CV needed for an even-money shot at 0.97118, BY FAMILY AND BY SCALING
+  (leader 0.9701400060)
+   family             unstd               std          std+corr          gap
+       h3      0.9701196039      0.9701320441      0.9701252537      -14.8e-6
+     ens4      0.9701122192      0.9701246594      0.9701178690      -22.1e-6
+   hybrid      0.9701174474      0.9701298876      0.9701230972      -16.9e-6
+  rankraw      0.9701129486      0.9701253888      0.9701185984      -21.4e-6
+  rescale      0.9701009520      0.9701133922      0.9701066018      -33.4e-6
+    logit      0.9700403423      0.9700527825      0.9700459922      -94.0e-6
+  Every file this workspace builds is standardised, and the ones worth building are
+  ALSO corrected -- read the std+corr column. `gap` is what a NEW build must add to
+  the CV leader to be an even-money shot at the board; negative means already there.
+
+wrote experiments/w26d_queueprice.{csv,json}
+########## selection  Thu Aug 20 05:07:17 PM UTC 2026 ##########
+control: 91 successful submissions visible
+  ⚠ PAGINATION (w17 slot 2, 2026-08-17). This request now asks for page_size 200.
+  It asked for 50 until this slot, and the account passed 50 submissions on 08-17,
+  so the count above was silently a PAGE LENGTH and the tier computation below was
+  reading a truncated list. The CLI path (`kaggle competitions submissions -v`) has
+  the same default and hid stack_pub74_logit and stack_pub88_mine_logit from every
+  API-reading script here. Both score 0.97081, so no tier ever moved — but COUNT the
+  number above against `kaggle competitions submissions -v --page-size 200 | wc -l`
+  before quoting it, and do not trust any list you did not ask a page size for.
+
+WANTED, and whether Kaggle can even offer it:
+  SENT      w23_ad187stdcorr.csv
+  NOT SENT  w36_ad199stdcorr.csv
+  ⚠ 1 WANTED file(s) have never been submitted and are therefore
+    NOT SELECTABLE. They are pinned to the head of experiments/w26d_queueprice.csv
+    and `w26g_send.py` will send them first; nothing else can fix this.
+
+*** NOTHING IS SELECTED for playground-series-s6e8. ***
+Kaggle will then auto-select by best PUBLIC score. The two tiers it would
+draw from, computed live rather than quoted from a stale journal entry:
+########## w36e done  Thu Aug 20 05:07:18 PM UTC 2026 ##########

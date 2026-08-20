@@ -1,0 +1,161 @@
+=== ARM 1: w34_ad195std = 194 + om_ftt (om_cat dropped) ===
+195 members, dtype float32
+  transform logit       34s
+  hybrid: repaired 54 of 195 members
+  transform hybrid     107s
+  transform rankraw    135s
+  transform rescale     36s
+loaded in 339s
+  cross-fitted stack_logit    0.970044
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad195std_logit.csv  rows=296,302  cross-fitted CV 0.970044
+  cross-fitted stack_hybrid   0.970111
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad195std_hybrid.csv  rows=296,302  cross-fitted CV 0.970111
+  cross-fitted stack_rankraw  0.970098
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad195std_rankraw.csv  rows=296,302  cross-fitted CV 0.970098
+  cross-fitted stack_rescale  0.970106
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad195std_rescale.csv  rows=296,302  cross-fitted CV 0.970106
+
+cross-fitted rank-ensemble of 4 transform stacks: 0.970118
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad195std.csv  rows=296,302  cross-fitted CV 0.970118
+
+total 1037s
+  hybrid   oof AUC 0.970111
+  rankraw  oof AUC 0.970098
+  rescale  oof AUC 0.970106
+
+w34_ad195std_h3: cross-fitted CV 0.970121   (w34_ad195std all-four: 0.970118)
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad195std_h3.csv  rows=296,302
+base w34_ad195std_h3 OOF AUC 0.9701205753   (w16i's base blend159av_h3 0.9700491721, delta +71.40e-6)
+  scheme glob    1 levels  sizes [691369]
+  scheme a_only  2 levels  sizes [613715, 77654]
+  scheme rule    7 levels  sizes [175446, 154634, 102202, 93255, 77654, 47438, 40740]
+  scheme mask    5 levels  sizes [269185, 180459, 120697, 67328, 53700]
+  scheme decile  8 levels  sizes [86422, 86421, 86421, 86421, 86421, 86421, 86421, 86421]
+    fitted glob fold 0 {'0': np.float64(0.001)}
+    fitted glob fold 1 {'0': np.float64(0.0005)}
+    fitted glob fold 2 {'0': np.float64(0.001)}
+    fitted glob fold 3 {'0': np.float64(0.0015)}
+    fitted glob fold 4 {'0': np.float64(0.001)}
+  arm glob    xfit  +0.543e-6  se 4.266  t +0.13  4/5  CV 0.9701212888
+    fitted a_only fold 0 {'A': np.float64(0.007), 'rest': np.float64(0.0005)}
+    fitted a_only fold 1 {'A': np.float64(0.008), 'rest': np.float64(0.0005)}
+    fitted a_only fold 2 {'A': np.float64(0.007), 'rest': np.float64(0.001)}
+    fitted a_only fold 3 {'A': np.float64(0.0055), 'rest': np.float64(0.001)}
+    fitted a_only fold 4 {'A': np.float64(0.007), 'rest': np.float64(0.0005)}
+  arm a_only  xfit  +3.084e-6  se 1.897  t +1.63  4/5  CV 0.9701237852
+    fitted rule fold 0 {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+    fitted rule fold 1 {'A social>4': np.float64(0.0085), 'B soc<=4 daily>8': np.float64(0.002), 'BAND 6<daily<=8': np.float64(0.0015), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+    fitted rule fold 2 {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.001), 'F socialNA': np.float64(0.0), 'G both NA': np.float64(0.0)}
+    fitted rule fold 3 {'A social>4': np.float64(0.0055), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.002), 'D soc<=4 daily<=6': np.float64(0.0005), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.001), 'G both NA': np.float64(0.0)}
+    fitted rule fold 4 {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.002), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0015), 'F socialNA': np.float64(0.001), 'G both NA': np.float64(0.0)}
+  arm rule    xfit  +4.403e-6  se 2.826  t +1.56  4/5  CV 0.9701251588
+    fitted mask fold 0 {'m0': np.float64(0.0015), 'm1': np.float64(0.001), 'm2': np.float64(0.0005), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 1 {'m0': np.float64(0.001), 'm1': np.float64(0.001), 'm2': np.float64(0.0005), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 2 {'m0': np.float64(0.0015), 'm1': np.float64(0.001), 'm2': np.float64(0.001), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 3 {'m0': np.float64(0.002), 'm1': np.float64(0.0015), 'm2': np.float64(0.0015), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 4 {'m0': np.float64(0.001), 'm1': np.float64(0.0015), 'm2': np.float64(0.001), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+  arm mask    xfit  +1.918e-6  se 5.276  t +0.36  4/5  CV 0.9701226860
+    fitted decile fold 0 {'q0': np.float64(0.0015), 'q1': np.float64(0.0005), 'q2': np.float64(0.0005), 'q3': np.float64(0.001), 'q4': np.float64(0.0055), 'q5': np.float64(0.007), 'q6': np.float64(0.019), 'q7': np.float64(0.0)}
+    fitted decile fold 1 {'q0': np.float64(0.0005), 'q1': np.float64(0.0), 'q2': np.float64(0.001), 'q3': np.float64(0.001), 'q4': np.float64(0.004), 'q5': np.float64(0.0075), 'q6': np.float64(0.011), 'q7': np.float64(0.0)}
+    fitted decile fold 2 {'q0': np.float64(0.0015), 'q1': np.float64(0.0005), 'q2': np.float64(0.0005), 'q3': np.float64(0.0015), 'q4': np.float64(0.006), 'q5': np.float64(0.007), 'q6': np.float64(0.0155), 'q7': np.float64(0.0)}
+    fitted decile fold 3 {'q0': np.float64(0.0015), 'q1': np.float64(0.0005), 'q2': np.float64(0.001), 'q3': np.float64(0.002), 'q4': np.float64(0.006), 'q5': np.float64(0.013), 'q6': np.float64(0.016), 'q7': np.float64(0.0)}
+    fitted decile fold 4 {'q0': np.float64(0.0), 'q1': np.float64(0.0), 'q2': np.float64(0.001), 'q3': np.float64(0.0015), 'q4': np.float64(0.0065), 'q5': np.float64(0.008), 'q6': np.float64(0.0125), 'q7': np.float64(0.0)}
+  arm decile  xfit  +2.711e-6  se 4.003  t +0.68  4/5  CV 0.9701233916
+
+  CTRL permuted a_only  xfit  -0.265e-6  -> real minus control  +3.348e-6
+  CTRL permuted rule    xfit  -0.862e-6  -> real minus control  +5.265e-6
+  CTRL permuted mask    xfit  +0.891e-6  -> real minus control  +1.027e-6
+  CTRL permuted decile  xfit  +1.378e-6  -> real minus control  +1.332e-6
+
+=== leave-one-fold-out over the FIVE schemes (187 base) ===
+  naive argmax arm = rule  xfit +4.403e-6
+  nested picks     = ['rule', 'rule', 'rule', 'mask', 'rule']
+  nested delta     = +1.864e-6  se 5.291
+  SCHEME-SELECTION OPTIMISM = +2.539e-6   stability 4/5
+
+=== averaged objects (no selection inside them) ===
+  3-arm (glob+a_only+rule)     CV 0.9701245305  xfit  +3.836e-6  se 2.998  t +1.28  4/5
+  5-arm (all schemes)          CV 0.9701247949  xfit  +4.086e-6  se 3.569  t +1.14  4/5
+  4-arm (drop decile)          CV 0.9701244300  xfit  +3.714e-6  se 3.536  t +1.05  4/5
+  4-arm (drop mask)            CV 0.9701250014  xfit  +4.278e-6  se 3.232  t +1.32  4/5
+
+  highest cross-fitted CV: 4-arm (drop mask)  0.9701250014
+  ** NOT SHIPPING THE ARGMAX. ** Shipping the pre-registered 5-arm (all schemes) (CV 0.9701247949).
+  full-data weights glob    {'0': np.float64(0.001)}
+  full-data weights a_only  {'A': np.float64(0.007), 'rest': np.float64(0.001)}
+  full-data weights rule    {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.0015), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+  full-data weights mask    {'m0': np.float64(0.0015), 'm1': np.float64(0.001), 'm2': np.float64(0.001), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+  full-data weights decile  {'q0': np.float64(0.001), 'q1': np.float64(0.0), 'q2': np.float64(0.001), 'q3': np.float64(0.0015), 'q4': np.float64(0.0055), 'q5': np.float64(0.009), 'q6': np.float64(0.015), 'q7': np.float64(0.0)}
+
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad195stdcorr.csv  rows 296,302  range [3.375e-06, 1.000]  distinct 296,302
+  rank-identical to an existing submission file? no
+    spearman vs w34_ad195std_h3        0.9999749  rows differing 295,533
+    spearman vs w16i_schemeavg         0.9996224  rows differing 296,223
+    spearman vs blend159av_h3          0.9995905  rows differing 296,229
+    spearman vs w16q_ens4avg           0.9995092  rows differing 296,221
+
+=== deadline-pick arithmetic (decided in the journal, not here) ===
+  w34_ad195stdcorr       CV 0.9701247949
+  w34_ad195std_h3        CV 0.9701205753   (+4.220e-6)
+  w16i_schemeavg         CV 0.9700556663   (+69.129e-6)
+
+wrote experiments/w21a_w34_ad195stdcorr.json
+=== ARM 2: w34_ad196std = 194 + om_ftt + om_cat ===
+196 members, dtype float32
+  transform logit        2s
+  hybrid: repaired 54 of 196 members
+  transform hybrid       9s
+  transform rankraw     25s
+  transform rescale      6s
+loaded in 45s
+  cross-fitted stack_logit    0.970050
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad196std_logit.csv  rows=296,302  cross-fitted CV 0.970050
+  cross-fitted stack_hybrid   0.970109
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad196std_hybrid.csv  rows=296,302  cross-fitted CV 0.970109
+  cross-fitted stack_rankraw  0.970098
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad196std_rankraw.csv  rows=296,302  cross-fitted CV 0.970098
+  cross-fitted stack_rescale  0.970104
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad196std_rescale.csv  rows=296,302  cross-fitted CV 0.970104
+
+cross-fitted rank-ensemble of 4 transform stacks: 0.970119
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad196std.csv  rows=296,302  cross-fitted CV 0.970119
+
+total 199s
+  hybrid   oof AUC 0.970109
+  rankraw  oof AUC 0.970098
+  rescale  oof AUC 0.970104
+
+w34_ad196std_h3: cross-fitted CV 0.970120   (w34_ad196std all-four: 0.970119)
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w34_ad196std_h3.csv  rows=296,302
+base w34_ad196std_h3 OOF AUC 0.9701199173   (w16i's base blend159av_h3 0.9700491721, delta +70.75e-6)
+  scheme glob    1 levels  sizes [691369]
+  scheme a_only  2 levels  sizes [613715, 77654]
+  scheme rule    7 levels  sizes [175446, 154634, 102202, 93255, 77654, 47438, 40740]
+  scheme mask    5 levels  sizes [269185, 180459, 120697, 67328, 53700]
+  scheme decile  8 levels  sizes [86422, 86421, 86421, 86421, 86421, 86421, 86421, 86421]
+    fitted glob fold 0 {'0': np.float64(0.0005)}
+    fitted glob fold 1 {'0': np.float64(0.0005)}
+    fitted glob fold 2 {'0': np.float64(0.001)}
+    fitted glob fold 3 {'0': np.float64(0.0015)}
+    fitted glob fold 4 {'0': np.float64(0.001)}
+  arm glob    xfit  +0.204e-6  se 4.026  t +0.05  4/5  CV 0.9701201838
+    fitted a_only fold 0 {'A': np.float64(0.007), 'rest': np.float64(0.0005)}
+    fitted a_only fold 1 {'A': np.float64(0.008), 'rest': np.float64(0.0005)}
+    fitted a_only fold 2 {'A': np.float64(0.0075), 'rest': np.float64(0.0005)}
+    fitted a_only fold 3 {'A': np.float64(0.0055), 'rest': np.float64(0.001)}
+    fitted a_only fold 4 {'A': np.float64(0.0075), 'rest': np.float64(0.0005)}
+  arm a_only  xfit  +2.946e-6  se 1.800  t +1.64  4/5  CV 0.9701228822
+    fitted rule fold 0 {'A social>4': np.float64(0.007), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+    fitted rule fold 1 {'A social>4': np.float64(0.0085), 'B soc<=4 daily>8': np.float64(0.002), 'BAND 6<daily<=8': np.float64(0.0015), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.0005), 'G both NA': np.float64(0.0)}
+    fitted rule fold 2 {'A social>4': np.float64(0.0075), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.001), 'F socialNA': np.float64(0.0), 'G both NA': np.float64(0.0)}
+    fitted rule fold 3 {'A social>4': np.float64(0.0055), 'B soc<=4 daily>8': np.float64(0.0025), 'BAND 6<daily<=8': np.float64(0.002), 'D soc<=4 daily<=6': np.float64(0.0005), 'E soc<=4 dailyNA': np.float64(0.0005), 'F socialNA': np.float64(0.001), 'G both NA': np.float64(0.0)}
+    fitted rule fold 4 {'A social>4': np.float64(0.0075), 'B soc<=4 daily>8': np.float64(0.002), 'BAND 6<daily<=8': np.float64(0.001), 'D soc<=4 daily<=6': np.float64(0.0), 'E soc<=4 dailyNA': np.float64(0.0015), 'F socialNA': np.float64(0.001), 'G both NA': np.float64(0.0)}
+  arm rule    xfit  +4.284e-6  se 2.778  t +1.54  4/5  CV 0.9701243455
+    fitted mask fold 0 {'m0': np.float64(0.0015), 'm1': np.float64(0.001), 'm2': np.float64(0.0005), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 1 {'m0': np.float64(0.001), 'm1': np.float64(0.001), 'm2': np.float64(0.0005), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 2 {'m0': np.float64(0.0015), 'm1': np.float64(0.001), 'm2': np.float64(0.0005), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 3 {'m0': np.float64(0.002), 'm1': np.float64(0.0015), 'm2': np.float64(0.0015), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+    fitted mask fold 4 {'m0': np.float64(0.001), 'm1': np.float64(0.0015), 'm2': np.float64(0.001), 'm3': np.float64(0.0), 'm4': np.float64(0.0)}
+  arm mask    xfit  +1.718e-6  se 5.154  t +0.33  4/5  CV 0.9701218018
+    fitted decile fold 0 {'q0': np.float64(0.0015), 'q1': np.float64(0.0), 'q2': np.float64(0.0005), 'q3': np.float64(0.001), 'q4': np.float64(0.0055), 'q5': np.float64(0.006), 'q6': np.float64(0.0195), 'q7': np.float64(0.0)}
+=== w34a done. Bars: w29_ad194std_h3 0.9701140064 / w29_ad194stdcorr 0.9701182875 ===

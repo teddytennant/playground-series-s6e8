@@ -1,0 +1,135 @@
+waiting for w34a_run.sh to exit...
+w34a_run.sh clear at Thu Aug 20 03:55:54 PM UTC 2026
+########## w28b_verify  Thu Aug 20 03:55:54 PM UTC 2026 ##########
+live: 91 submissions, 91 distinct filenames
+test rows: 296,302
+
+unsent CSVs on disk: 54   with a stored OOF: 52
+
+=== UNSENT CANDIDATES, best CV first ===
+                    stem     fam  std           cv pred_lb   p_beat  valid   rows  dup  nan  prob_scale       vmin      vmax
+        w34_ad195stdcorr      h3 True 0.9701247949 0.97118 4.56e-01   True 296302    0    0        True   0.000003  1.000000
+         w34_ad195std_h3      h3 True 0.9701205753 0.97116 3.03e-03   True 296302    0    0        True   0.000006  0.999962
+         w34_ad196std_h3      h3 True 0.9701199173 0.97116 1.85e-03   True 296302    0    0        True   0.000005  0.999963
+            w34_ad196std    ens4 True 0.9701185506 0.97117 7.19e-02   True 296302    0    0        True   0.000004  0.999972
+            w34_ad195std    ens4 True 0.9701181649 0.97117 6.01e-02   True 296302    0    0        True   0.000005  0.999971
+        w27_ad188stdcorr      h3 True 0.9701168076 0.97117 2.16e-02   True 296302    0    0        True   0.000003  1.000000
+   w29_ad194stdcorr_ens4    ens4 True 0.9701159503 0.97118 3.23e-01   True 296302    0    0        True   0.000003  1.000000
+         w29_ad194std_h3      h3 True 0.9701140064 0.97115 7.91e-06   True 296302    0    0        True   0.000005  0.999958
+         w27_ad188raw_h3      h3 True 0.9701136019 0.97115 5.08e-06   True 296302    0    0        True   0.000007  0.999930
+         w27_ad190std_h3      h3 True 0.9701133391 0.97115 3.79e-06   True 296302    0    0        True   0.000005  0.999942
+     w34_ad195std_hybrid  hybrid True 0.9701108333 0.97115 2.56e-06   True 296302    0    0       False  -9.399043 13.809340
+     w34_ad196std_hybrid  hybrid True 0.9701091250 0.97115 3.36e-07   True 296302    0    0       False  -9.456413 13.910707
+     w29_ad194std_hybrid  hybrid True 0.9701056245 0.97114 3.18e-09   True 296302    0    0       False  -9.566768 14.130770
+    w34_ad195std_rescale rescale True 0.9701055639 0.97117 3.05e-02   True 296302    0    0       False  -8.961568 11.038485
+    w34_ad196std_rescale rescale True 0.9701039146 0.97117 1.17e-02   True 296302    0    0       False  -8.929166 10.937980
+     w27_ad190std_hybrid  hybrid True 0.9701027989 0.97113 4.49e-11   True 296302    0    0       False  -9.416854 14.011172
+w29_ad194stdcorr_rescale rescale True 0.9701012580 0.97118 1.00e-01   True 296302    0    0        True   0.000003  1.000000
+w29_ad194stdcorr_rankraw rankraw True 0.9701005596 0.97115 7.90e-06   True 296302    0    0        True   0.000003  1.000000
+     w27_ad188raw_hybrid  hybrid True 0.9701001700 0.97113 5.71e-13   True 296302    0    0       False  -9.483947 13.922930
+     w27_ad188std_hybrid  hybrid True 0.9700993121 0.97113 1.26e-13   True 296302    0    0       False  -9.457288 13.919789
+    w34_ad196std_rankraw rankraw True 0.9700979783 0.97113 2.69e-11   True 296302    0    0       False -17.573902 17.910330
+    w34_ad195std_rankraw rankraw True 0.9700978116 0.97113 2.06e-11   True 296302    0    0       False -17.540241 17.943016
+     w23_ad187std_hybrid  hybrid True 0.9700977970 0.97113 7.99e-15   True 296302    0    0       False  -9.307370 13.975583
+    w27_ad188raw_rankraw rankraw True 0.9700976054 0.97113 1.47e-11   True 296302    0    0       False -17.606163 17.970040
+    w27_ad188std_rescale rescale True 0.9700962686 0.97115 2.08e-05   True 296302    0    0       False  -8.960497 11.375361
+    w27_ad190std_rankraw rankraw True 0.9700951829 0.97113 2.43e-13   True 296302    0    0       False -17.578857 17.969840
+    w23_ad187std_rescale rescale True 0.9700937039 0.97115 1.23e-06   True 296302    0    0       False  -8.766556 10.890063
+    w27_ad188std_rankraw rankraw True 0.9700930487 0.97112 5.00e-15   True 296302    0    0       False -17.575737 17.894249
+    w29_ad194std_rankraw rankraw True 0.9700930067 0.97112 4.55e-15   True 296302    0    0       False -17.583519 17.922270
+    w23_ad187std_rankraw rankraw True 0.9700917912 0.97112 4.44e-16   True 296302    0    0       False -17.503748 18.051090
+
+INVALID candidate files: 0
+
+=== SEND ORDER for the next UTC day (top 10 unsent by CV) ===
+   1. w34_ad195stdcorr             cv 0.9701247949  fam h3       std True  pred 0.97118  P(>0.97118) 4.56e-01  valid True
+   2. w34_ad195std_h3              cv 0.9701205753  fam h3       std True  pred 0.97116  P(>0.97118) 3.03e-03  valid True
+   3. w34_ad196std_h3              cv 0.9701199173  fam h3       std True  pred 0.97116  P(>0.97118) 1.85e-03  valid True
+   4. w34_ad196std                 cv 0.9701185506  fam ens4     std True  pred 0.97117  P(>0.97118) 7.19e-02  valid True
+   5. w34_ad195std                 cv 0.9701181649  fam ens4     std True  pred 0.97117  P(>0.97118) 6.01e-02  valid True
+   6. w27_ad188stdcorr             cv 0.9701168076  fam h3       std True  pred 0.97117  P(>0.97118) 2.16e-02  valid True
+   7. w29_ad194stdcorr_ens4        cv 0.9701159503  fam ens4     std True  pred 0.97118  P(>0.97118) 3.23e-01  valid True
+   8. w29_ad194std_h3              cv 0.9701140064  fam h3       std True  pred 0.97115  P(>0.97118) 7.91e-06  valid True
+   9. w27_ad188raw_h3              cv 0.9701136019  fam h3       std True  pred 0.97115  P(>0.97118) 5.08e-06  valid True
+  10. w27_ad190std_h3              cv 0.9701133391  fam h3       std True  pred 0.97115  P(>0.97118) 3.79e-06  valid True
+
+  P(at least one of these ten beats 0.97118) = 6.874e-01   (independence assumed -> OVERSTATED)
+
+wrote experiments/w28b_unsent.csv
+########## requeue  Thu Aug 20 03:56:07 PM UTC 2026 ##########
+91 submissions on record, 91 distinct filenames
+
+4 candidate(s) are byte-identical to another file and would score identically -- excluded from the queue:
+  w16m_widegrid.csv                  == w16i_schemeavg.csv
+  w23_ad187std_hybrid.csv            == w23_ad187std_h3_hybrid.csv
+  w23_ad187std_rankraw.csv           == w23_ad187std_h3_rankraw.csv
+  w23_ad187std_rescale.csv           == w23_ad187std_h3_rescale.csv
+
+best CV among ALREADY-SENT files: 0.9701182875
+
+SEND QUEUE -- 50 unsent valid files, ranked on cross-fitted OOF CV
+                        file  sent           cv   rows                              md5
+        w34_ad195stdcorr.csv False 0.9701247949 296302 f82fb6952fda7462b532d94d168087a6
+         w34_ad195std_h3.csv False 0.9701205753 296302 5d2a2881b66e699f95fa0aee627aa6cf
+         w34_ad196std_h3.csv False 0.9701199173 296302 08d8413f31aaa3fa2e3d5a8063771fc6
+            w34_ad196std.csv False 0.9701185506 296302 e5f0f1bbcd8f57a86e57f23037a2e2b8
+            w34_ad195std.csv False 0.9701181649 296302 b6c3667e2d0cfc9c0969dc82c4c59119
+        w27_ad188stdcorr.csv False 0.9701168076 296302 6cc0706b46506babf028a74ac97c81f1
+   w29_ad194stdcorr_ens4.csv False 0.9701159503 296302 871ff501285629006def946072d0cac4
+         w29_ad194std_h3.csv False 0.9701140064 296302 77fe0afdd2a6b1944cfe47c15140c8f3
+         w27_ad188raw_h3.csv False 0.9701136019 296302 115dfe34a06d8edd4033464df2eed89a
+         w27_ad190std_h3.csv False 0.9701133391 296302 4a6850b1384b8390a2327f9d5825308e
+     w34_ad195std_hybrid.csv False 0.9701108333 296302 52c0a2cc3d049feb3707c9d322f523cc
+     w34_ad196std_hybrid.csv False 0.9701091250 296302 e1ffad7addd3e1f57d845ea37c796f27
+     w29_ad194std_hybrid.csv False 0.9701056245 296302 60b20e10c2018fcd577f988e9a05e74d
+    w34_ad195std_rescale.csv False 0.9701055639 296302 8f40756645518a06707bb7349b52ac75
+    w34_ad196std_rescale.csv False 0.9701039146 296302 2c6f66cab832918e936b40e885f8df89
+     w27_ad190std_hybrid.csv False 0.9701027989 296302 326a358dbbe44d422b194abc0f04b891
+w29_ad194stdcorr_rescale.csv False 0.9701012580 296302 fb3222f010c429fbe83dd18938de1842
+w29_ad194stdcorr_rankraw.csv False 0.9701005596 296302 15e61df064f6430390e46b5ea5b71c51
+     w27_ad188raw_hybrid.csv False 0.9701001700 296302 35a8aed63a8c24a951357270c31dba67
+     w27_ad188std_hybrid.csv False 0.9700993121 296302 c5fcc8dccbcf8ba0961247be3dd56228
+
+2 unsent files carry NO stored OOF vector and therefore cannot be ranked or defended on CV:
+  w15f_antistudent_cv.csv, w16d_membercell.csv
+
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w23b_sendqueue.csv
+GATE: refitted-sample residual sd 7.76e-6 (dof 67) vs w25f's 7.76e-6 -- PASS
+PINNED to the head of the queue (check_selection.WANTED, unsent): ['w34_ad195stdcorr.csv']
+48 unsent files with a stored OOF vector, priced under w25f (resid sd 7.76e-6, centred at mu=0.9700571395)
+
+TOP 12 BY PREDICTED PUBLIC LB
+file                             fam      std               cv   pred LB  P(>best)
+w34_ad195stdcorr.csv             h3       True  0.9701247949   0.97118  4.56e-01
+w29_ad194stdcorr_ens4.csv        ens4     True  0.9701159503   0.97118  3.23e-01
+w34_ad196std_logit.csv           logit    True  0.9700495032   0.97118  2.16e-01
+w29_ad194stdcorr_rescale.csv     rescale  True  0.9701012580   0.97118  1.00e-01
+w34_ad196std.csv                 ens4     True  0.9701185506   0.97117  7.19e-02
+w34_ad195std.csv                 ens4     True  0.9701181649   0.97117  6.01e-02
+w34_ad195std_rescale.csv         rescale  True  0.9701055639   0.97117  3.05e-02
+w34_ad195std_logit.csv           logit    True  0.9700443436   0.97117  2.17e-02
+w27_ad188stdcorr.csv             h3       True  0.9701168076   0.97117  2.16e-02
+w34_ad196std_rescale.csv         rescale  True  0.9701039146   0.97117  1.17e-02
+w34_ad195std_h3.csv              h3       True  0.9701205753   0.97116  3.03e-03
+w34_ad196std_h3.csv              h3       True  0.9701199173   0.97116  1.85e-03
+
+best single file          P(beat 0.97118) = 4.563e-01
+best TEN sent together    P(at least one)  = 7.924e-01   (independence assumed -> an OVERSTATEMENT)
+
+predicted LB of the best unsent file: 0.97118   = +4.1e-6 vs the account best (+0.4 reporting steps)
+
+CV needed for an even-money shot at 0.97118, BY FAMILY AND BY SCALING
+  (leader 0.9701247949)
+   family             unstd               std          std+corr          gap
+       h3      0.9701196039      0.9701320441      0.9701252537       +0.5e-6
+     ens4      0.9701122192      0.9701246594      0.9701178690       -6.9e-6
+   hybrid      0.9701174474      0.9701298876      0.9701230972       -1.7e-6
+  rankraw      0.9701129486      0.9701253888      0.9701185984       -6.2e-6
+  rescale      0.9701009520      0.9701133922      0.9701066018      -18.2e-6
+    logit      0.9700403423      0.9700527825      0.9700459922      -78.8e-6
+  Every file this workspace builds is standardised, and the ones worth building are
+  ALSO corrected -- read the std+corr column. `gap` is what a NEW build must add to
+  the CV leader to be an even-money shot at the board; negative means already there.
+
+wrote experiments/w26d_queueprice.{csv,json}
+########## w34d done  Thu Aug 20 03:56:23 PM UTC 2026 ##########

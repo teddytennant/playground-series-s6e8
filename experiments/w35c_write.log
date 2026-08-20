@@ -1,0 +1,39 @@
+7 candidates from the w35 kernel-output sweep
+
+  dkv_cb         auc 0.962709  g1 1  g2 None  g3 1  g4 3.12e-07  logfolds [0.96217 0.96244 0.96282 0.96358 0.96255]
+      ours    [0.96217 0.96244 0.96282 0.96358 0.96255]
+      es-on-val: `use_best_model=True` explicit; `best_iter` printed per fold
+  dkv_lgb        auc 0.963954  g1 1  g2 None  g3 1  g4 3.54e-07  logfolds [0.96311 0.96390 0.96422 0.96483 0.96372]
+      ours    [0.96311 0.96390 0.96422 0.96483 0.96372]
+      es-on-val: `early_stopping_rounds=150` on the scored fold; `best_iter` printed per fold
+  dkv_xgb        auc 0.964466  g1 1  g2 None  g3 1  g4 3.18e-07  logfolds [0.96376 0.96442 0.96458 0.96540 0.96419]
+      ours    [0.96376 0.96442 0.96458 0.96540 0.96419]
+      es-on-val: `early_stopping_rounds=150` on the scored fold; `best_iter` printed per fold
+  kava_cat       auc 0.963755  g1 1  g2 None  g3 1  g4 2.73e-07  logfolds [0.96295 0.96356 0.96399 0.96463 0.96365]
+      ours    [0.96295 0.96356 0.96399 0.96463 0.96365]
+      es-on-val: CatBoost `use_best_model=True` explicit, with early_stopping_rounds, on the scored fold
+  ram_hgb        auc 0.968026  g1 1  g2 None  g3 1  g4 4.54e-07  logfolds [0.96742 0.96816 0.96818 0.96854 0.96784]
+      ours    [0.96742 0.96816 0.96818 0.96854 0.96784]
+  ram_lgb        auc 0.968259  g1 1  g2 None  g3 1  g4 4.87e-07  logfolds [0.96757 0.96844 0.96842 0.96886 0.96801]
+      ours    [0.96757 0.96844 0.96842 0.96886 0.96801]
+  zwr_realmlp    auc 0.969128  g1 1  g2 None  g3 1  g4 --  logfolds [0.96829 0.96901 0.96892 0.96948 0.96855 0.96912 0.96890 0.96883 0.96892 0.96839 0.96863 0.96872 0.96906 0.96906 0.96903]
+      es-on-val: keeps the best EPOCH by val AUC on the scored fold (`-> best AUC: .. (epoch k)`)
+
+maxcorr against the 195-member pack (rank corr on OOF):
+  pack median solo AUC 0.966319
+  dkv_cb         maxcorr 0.99701  nearest cat_raw
+  dkv_lgb        maxcorr 0.99642  nearest bei_identity_digit_raw12
+  dkv_xgb        maxcorr 0.99691  nearest bei_xgb_identity_digit_raw12
+  kava_cat       maxcorr 0.98934  nearest bolt_cat_unique
+  ram_hgb        maxcorr 0.99474  nearest bolt_lgb_missing_global
+  ram_lgb        maxcorr 0.99506  nearest bolt_lgb_missing_global
+
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w35c_vet.csv
+
+6 pass the hard gates: 2 clean ['ram_hgb', 'ram_lgb'], 4 es-on-val ['dkv_cb', 'dkv_lgb', 'dkv_xgb', 'kava_cat']
+  wrote dkv_cb -> ext_members12es/
+  wrote dkv_lgb -> ext_members12es/
+  wrote dkv_xgb -> ext_members12es/
+  wrote kava_cat -> ext_members12es/
+  wrote ram_hgb -> ext_members12/
+  wrote ram_lgb -> ext_members12/
