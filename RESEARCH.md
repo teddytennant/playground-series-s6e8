@@ -8872,3 +8872,104 @@ line or luck at 1 dof, and cannot be told apart yet. **Treat every number here a
 title carries `lb-0-XXXXX` adds a calibration point. Four or five would give real degrees of
 freedom. **When vetting a candidate, record the author's published LB in the vet table** — w33,
 w34 and w35 all had it available in the ref string and none of them wrote it down.
+
+# w37 (2026-08-20) — TWO CORRECTIONS TO THE es-BIAS SECTION ABOVE, AND WHAT IT ACTUALLY NEEDS
+
+`experiments/w37a_power.py`. The section "how to price an es-on-val member WITHOUT refitting the
+pack" closes with "**four or five clean calibration points would give real degrees of freedom**".
+That plan was priced before a slot was spent on it and **it is not worth doing**. Three durable
+corrections:
+
+## ⚠⚠ 1. "Our own 91 submissions cannot supply the slope" is WRONG. They resolve it at 4.4 sigma.
+
+The claim was that our sends span 2.5e-4 of CV against a 1e-5 grid. The real span in
+`w25a_cvlb_full.csv` is **4.77e-4**, and four of the 91 rows carry an LB with **no CV recorded**
+(`w15e_antistudent`, `w15f_antistudent_avg`, `w16b_cellweight`, `w16f_armavg`) — drop them
+before any fit or `np.linalg.lstsq` raises `SVD did not converge`. The 87 usable points give
+
+    offset = 0.213200 − 0.218718 × oof_auc     slope se 0.0496   →  4.41 sigma, RESOLVED
+    residual sd 3.764e-05  (85 dof)
+
+against the clean 3-point line's `−0.174703`. **The two independent instruments agree to 0.89
+sigma.** The es-bias line therefore never rested on three points alone, and this is the
+validation w36f did not know it had. **Use the 87-point fit as the cross-check on any refit.**
+
+## ⚠⚠ 2. The per-reading sd is 3.76e-5, NOT the 5.35e-6 rms w36f reported.
+
+w36f's residual rms of 5.35e-6 was computed at **1 dof** and its own note said it was "either a
+very good line or luck". It was luck. The honest single-reading sd is **3.76e-05** — and that is
+the right figure for this instrument precisely *because* it contains model-class and transform-
+family spread, which is exactly what the line crosses when it compares a RealMLP to a HistGB to
+one of our stacks. **Any error bar quoted off 5.35e-6 is seven times too tight.**
+
+## ⚠⚠ 3. MORE CLEAN POINTS ARE NOT THE BOTTLENECK. The clean side is already decisive.
+
+| clean calibration set | se on `zwr_realmlp`'s shortfall | effect / se |
+|---|---|---|
+| current 3 points | 4.41e-05 | **6.2 σ** |
+| +1 clean send | 4.38e-05 | 6.2 σ |
+| +3 clean sends | 4.17e-05 | 6.6 σ |
+
+Three slots move 6.2 σ to 6.6 σ. **The +2.7e-4 es-on-val figure does not need more clean points
+to be believed.** Do not spend slots on that.
+
+## WHAT IT DOES NEED: the DIRTY side, and the SPREAD rather than the mean
+
+The +2.7e-4 rests on **one** usable reading. The only other candidate (`tam_lkup`) returned the
+wrong SIGN because its title's LB was the notebook's blend. So n = 1 — and the mean is not even
+the decisive quantity:
+
+**A quarantined member can only be rescued by deflating its OOF if the inflation is roughly
+COMMON across members.** If CatBoost `od_type` and RealMLP best-epoch-restore inflate by
+different amounts, no single deflation constant exists and all 15 stay out. That between-member
+sd needs n−1 dof and has never been measured.
+
+**THE INSTRUMENT, and this workspace had never used it: submit the member's own test vector.**
+All 15 quarantined members have `test_*.npy` on disk. One send returns an exact public score for
+exactly those predictions, which eliminates the attribution ambiguity at the source — the
+`tam_lkup` failure mode becomes impossible. Cost: a slot that scores 0.958–0.969 against our
+0.97118, which is free, because the public board shows **best-of-all-submissions**.
+
+### ⚠ THE ONE ENABLING CLEAN SEND — the exception to correction 3
+
+Correction 3 says clean points do not buy *dof*. They do buy **reach**. On the current three
+abscissae (0.9680, 0.9683, 0.9701) the line's se at the low-AUC quarantined members is:
+
+| member | oof | se now | se with `mkt_realmlp` added |
+|---|---|---|---|
+| `om_xgb2` | 0.968733 | 2.18e-05 | 2.15e-05 |
+| `dm_cat` | 0.966700 | 5.34e-05 | 1.90e-05 |
+| `ravi_realmlp1c` | 0.964668 | 9.84e-05 | 1.97e-05 |
+| `dkv_xgb` | 0.964466 | 1.03e-04 | 2.00e-05 |
+| `dkv_cb` | 0.962709 | 1.43e-04 | 2.33e-05 |
+| `mkt_mlp` | 0.941422 | **6.36e-04** | 1.01e-04 |
+
+**At 1.0–1.4e-4 the se is 37–53% of the effect being measured — the line simply cannot price
+those members.** One clean send at `mkt_realmlp`'s 0.958134 (imported w36, passes every honesty
+gate, parked unmeasured for being too weak at solo 0.9581) fixes 14 of the 15. **A weak clean
+member is worth importing for leverage even when it is worthless as a pack member.**
+
+### Power, for the design
+
+- se on the MEAN shortfall: the line error (~1.96e-05) is COMMON to all readings and does not
+  average down; only the per-reading 3.76e-05 does. n=1 → 4.24e-05; n=5 → 2.58e-05.
+- se on the SPREAD is what limits the design: at n=5 a between-member sd is only resolvable
+  above **~8.9e-05, i.e. 33% of the effect**. n=3 gives 41%. **n≥5 is the design minimum.**
+
+### Tooling this added to the send path (`experiments/w26g_send.py`)
+
+Both columns are optional and blank for every pre-w37 queue row, so nothing else changes:
+
+- **`send_rank`** — explicit ordering inside a priority band, sorted `(priority ↓, send_rank ↑,
+  pred_lb ↓)`. For files whose send ORDER carries information their predicted LB does not.
+- **`msg`** — per-row submission-message override. ⚠ **Without this a calibration send is
+  described as a "queue-drain" attempt, and a future run reading the submission history has no
+  way to tell a deliberate 0.958 measurement from a catastrophic regression.** Any low-scoring
+  send made on purpose MUST carry a message saying so.
+- the pin banner labels each priority-1 file as WANTED or not, instead of claiming all of them
+  are `check_selection.WANTED`.
+
+⚠ **`p_beat` in `w26d_queueprice.csv` is MARGINAL** — P(file beats the account best) — and does
+not condition on the leader having already been sent that day. Near-rank-identical siblings of a
+sent leader therefore show 0.79–0.98 while their *incremental* value is close to zero. Do not
+spend a whole day's slots on one build's transform siblings on the strength of that column.

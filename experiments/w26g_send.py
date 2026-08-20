@@ -123,10 +123,26 @@ def main():
     # submitted cannot be selected, and that outranks any public-LB ordering.
     if "priority" not in q.columns:
         q["priority"] = 0
-    q = q.sort_values(["priority", "pred_lb"], ascending=[False, False])
+    # `send_rank` (w37) overrides the pred_lb tiebreak inside a priority band. It exists for
+    # files whose send ORDER carries information that their predicted LB does not: the w37
+    # es-bias calibration sends are deliberately low-scoring member vectors, and the CLEAN
+    # anchor among them must land before the DIRTY readings it is there to make interpretable.
+    # Blank/absent = default behaviour, so every pre-w37 row is unaffected.
+    if "send_rank" not in q.columns:
+        q["send_rank"] = float("nan")
+    q["send_rank"] = pd.to_numeric(q["send_rank"], errors="coerce").fillna(1e9)
+    q = q.sort_values(["priority", "send_rank", "pred_lb"], ascending=[False, True, False])
     _pin = q[q.priority == 1].file.tolist()
     if _pin:
-        print(f"PINNED first (check_selection.WANTED, unsent): {', '.join(_pin)}")
+        # Priority 1 is no longer WANTED-only: w37 pins calibration sends into the same band.
+        # Label each one, so the plan never implies a measurement file is a deadline pick.
+        try:
+            from check_selection import WANTED as _W
+        except Exception:
+            _W = set()
+        print("PINNED first (priority 1):")
+        for f in _pin:
+            print(f"  {f:34s} {'check_selection.WANTED, unsent' if f in _W else 'pinned, NOT a deadline pick'}")
     # A dry run plans the full --n regardless of slots left, so a slot at the cap can still
     # SEE tomorrow's queue and check it is sane. Only a real send is clamped by `left`.
     cap = a.n if not a.go else min(a.n, max(left, 0))
@@ -175,6 +191,10 @@ def main():
         return 1
 
     for r in plan:
+        # A `msg` on the queue row replaces the queue-drain boilerplate. Without this, a w37
+        # calibration send would be described as a queue-drain attempt and a future run reading
+        # the submission history would misread its ~0.958 public score as a huge regression.
+        override = getattr(r, "msg", None)
         msg = (f"{a.tag} queue-drain {r.stem} — CV {r.cv:.10f}, family {r.fam}, "
                f"w26d predicted LB {r.pred_lb:.6f} with P(beats the 0.97118 account best) "
                f"{r.p_beat:.2e}. Sent because the brief's economics make an unused slot pure "
@@ -182,6 +202,8 @@ def main():
                f"below the best already-sent CV and w26d prices the whole queue at 6.3e-4 of "
                f"beating the board. Not a deadline candidate — selection is on CV and this "
                f"is {(0.9701150809 - r.cv)*1e6:.1f}e-6 below the best sent CV.")
+        if isinstance(override, str) and override.strip():
+            msg = override.strip()
         p = os.path.join(SUB, r.file)
         print(f"\n--> {r.file}", flush=True)
         out = subprocess.run(["kaggle", "competitions", "submit", "-c", COMP, "-f", p,

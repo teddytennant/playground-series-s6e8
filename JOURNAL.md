@@ -16791,3 +16791,198 @@ written before either number existed. Do not re-derive it from the numbers.
 
 **Next run reads, in order:** the cap; then `w36b_build.log` (done, above); then
 `w36a_value.csv` and `w36g_build.log` against the prereg bar; then sends the queue head.
+
+---
+
+# 2026-08-20 — w37, slot 7. AT CAP, NO SUBMISSION (10/10 on the 08-20 UTC day)
+
+`date -u` 17:10 UTC; the ten sends are timestamped 00:07–00:08 on 2026-08-20 by the w30 drain.
+Cap confirmed against the timestamps, not against the prompt's claim. Two jobs live in `/proc`:
+`w36a_value.py` (ram pair, started 17:08) and `w36g_run.sh` (ARM 197 control) chained behind it.
+
+## 0. THE ASSIGNED ANGLE IS A CLOSED LINE, AND THE CLOSURE IS SOUND
+
+ANGLE was "seed and fold diversity: same models across multiple seeds and fold splits,
+averaged". `RESEARCH.md:477` closes it, and I re-read the evidence rather than the summary
+before discarding it. It is **a structural null, not a weak effect**: `blend_lab.build()` takes
+the test prediction from a full fit on all 691,369 rows, so `h3` and `ens4` fit zero parameters
+above the stacks and have **exactly zero dependence on the stacker partition** — averaging over
+seeds cannot change the shipped file. On the CV side it is worse than useless: seed 42 is the
+only partition under which no member model contributed features to both sides of the stacker's
+split, and it sits **−6.9 sd** below the off-seed mean on `h3` and is the minimum on 6/6
+metrics. Averaging partitions would import ~+10e-6 of optimism into every headline. Honoured
+the journal over the angle, as the brief allows.
+
+## 1. ⚠⚠ I RAN THE POWER CALCULATION FOR w36 §8.6 AND IT SAYS **DO NOT DO IT**
+
+w36 closed with "**HOW TO MAKE THIS DECISIVE, and it is nearly free** — four or five clean
+calibration points would give real degrees of freedom". `experiments/w37a_power.py` prices that
+plan before a slot is spent on it. **Three corrections to w36, all of which cut against it:**
+
+**1.1 Our own submissions DO resolve the slope. w36f said they cannot.** RESEARCH's claim was
+that the 91 sends "span 2.5e-4 of CV against a 1e-5 LB grid" and so cannot supply the slope.
+The real span is **4.77e-4**, four rows carry an LB with no CV recorded, and the 87 usable
+points give
+
+    offset = 0.213200 − 0.218718 × oof      slope se 0.0496  →  4.41 sigma, RESOLVED
+
+against the clean 3-point line's −0.174703. **The two disagree by 0.89 sigma** — an independent
+instrument, on 85 dof, agreeing with the 1-dof line. That is a real validation w36f did not
+know it had, and it means the line was never resting on three points alone.
+
+**1.2 The honest per-reading sd is 3.76e-5, seven times w36f's quoted 5.35e-6.** w36 flagged
+its own rms as "either a very good line or luck at 1 dof, and cannot be told apart yet". It was
+luck. 3.76e-5 is the residual sd of 87 points, and it is the right number here precisely
+*because* it contains the model-class/family spread — which is exactly what the es-bias line
+crosses when it compares a RealMLP to a HistGB to our stack.
+
+**1.3 MORE CLEAN POINTS BUY ALMOST NOTHING. The clean side is already decisive.**
+
+| clean calibration set | se on zwr_realmlp's shortfall | effect / se |
+|---|---|---|
+| now (3 points) | 4.41e-05 | **6.2 σ** |
+| +1 clean send | 4.38e-05 | 6.2 σ |
+| +3 clean sends | 4.17e-05 | 6.6 σ |
+
+Spending three slots moves a 6.2 σ result to 6.6 σ. **w36 §8.6 would have burned four slots and
+a run on a question that was already answered.** Recorded as such; that item is closed.
+
+## 2. THE BOTTLENECK IS THE **DIRTY** SIDE, AND IT IS NOT THE MEAN — IT IS THE SPREAD
+
+"es-on-val is worth +2.7e-4" rests on **one** usable reading. The only other candidate,
+`tam_lkup`, came back with the wrong SIGN because its title's LB belonged to the notebook's
+blend, not to that member. So n=1, and the mean is not even the interesting quantity:
+
+**Deflating a quarantined member's OOF is only defensible if the inflation is roughly COMMON
+across members.** If a CatBoost `od_type` and a RealMLP best-epoch-restore inflate by different
+amounts, no single deflation constant is right and the quarantine of all 15 stands. That
+between-member sd needs n−1 dof and **has never existed**.
+
+**The instrument that fixes it, and it is one we have never used: submit the member's own test
+vector.** All 15 quarantined members have `test_*.npy` on disk. Sending one returns an exact
+public score for exactly those predictions, which removes the attribution ambiguity that killed
+`tam_lkup` at the source. Each send is one independent shortfall reading.
+
+⚠ **And there is exactly one enabling send.** On the current 3 clean points the line's se at the
+low-AUC quarantined members is **1.0–1.4e-4 — 37–53% of the effect being measured, i.e. the
+line cannot price them at all.** Adding one clean point at `mkt_realmlp`'s 0.958134 (w36 imported
+it, cleared every honesty gate, and parked it unmeasured for being too weak) drops that to
+**~2e-5 for 14 of the 15**. One slot converts five uninterpretable readings into interpretable
+ones. That, not "more clean points for dof", is what the clean side was actually short of.
+
+## 3. BUILT AND VALIDATED — seven calibration files, pre-registered before any was sent
+
+`experiments/w37b_calfiles.py` → `submissions/w37_cal_*.csv`. Each is one member's raw test
+vector. All seven: 296,302 rows, `[id, addicted_label]`, all finite, **md5-checked against every
+one of the 91 files already sent — none is a duplicate**, and every OOF AUC reproduces the vet
+table to 1e-9 before the file is written.
+
+`experiments/w37c_prereg.py` fixes the predictions. H0 (honest, sits on the line) and H1
+(inflated by w36f's +2.729e-4) are **27 reporting steps apart** against a per-reading sd of 3.8
+steps, so **each dirty send discriminates them alone at ~7.3 σ**:
+
+| # | member | role | oof | H0 honest | H1 es-biased |
+|---|---|---|---|---|---|
+| 1 | `mkt_realmlp` | **CLEAN ANCHOR** | 0.958134 | 0.961290 | — |
+| 2 | `om_xgb2` | DIRTY | 0.968733 | 0.970037 | 0.969764 |
+| 3 | `omid_tabm` | DIRTY | 0.967508 | 0.969026 | 0.968753 |
+| 4 | `dm_cat` | DIRTY | 0.966700 | 0.968359 | 0.968086 |
+| 5 | `ravi_realmlp1c` | DIRTY | 0.964668 | 0.966682 | 0.966409 |
+| 6 | `dkv_xgb` | DIRTY | 0.964466 | 0.966516 | 0.966243 |
+| 7 | `ram_hgb` | **CLEAN AUDIT** | 0.968026 | 0.969454 | — |
+
+The five dirty members were chosen for **mechanism diversity, not strength** — XGB early stop,
+NN best-epoch restore, CatBoost `od_type`, RealMLP additive patience, and
+`early_stopping_rounds=150` as the mildest form. The spread across mechanisms *is* the quantity
+R3 measures.
+
+**⚠ `ram_hgb` is an audit of the line's own foundation.** Its title LB 0.96945 is one of the
+three points the line is fitted on. If our own send of that exact vector does not return 0.96945
+±1 step, then the `tam_lkup` failure has been caught on a **fitted** point and R1 withdraws the
++2.7e-4 figure from RESEARCH.md pending a refit on self-submitted points only.
+
+**Pre-registered outcome that costs nothing and is named because it is at least as likely:** if
+the between-member sd exceeds 33% of the mean, the bias is member-specific, no deflation is
+right, **the quarantine stands and the line closes.**
+
+`experiments/w37e_readout.py` was written and committed **before any score exists** and applies
+R1/R2/R3 itself. w36 §2 is the reason: a slot there drafted a 4-of-5 sign gate that fired and
+then disagreed with the workspace's own 5-of-5 standing criterion, and the only thing that kept
+that from being resolved post-hoc in favour of the preferred answer was that the rule was fixed
+first. Smoke-tested (correctly reports "0 of 7 landed").
+
+## 4. THE 08-21 ORDER IS SET BY HAND, WITH A REASON PER SLOT
+
+`experiments/w37d_order.py`. **The pricer's `p_beat` is MARGINAL** — P(file beats the 0.97118
+account best) — and does not condition on the leader having landed an hour earlier. The five
+`w36_ad199std*` siblings are near rank-identical to the leader and to each other, so their
+0.79–0.98 badly overstates their incremental value; sending all five is close to sending one
+file five times. Two tooling changes to `w26g_send.py`, both no-ops for every pre-w37 row:
+
+- **`send_rank`** — explicit order inside a priority band, for files whose send order carries
+  information their predicted LB does not.
+- **`msg`** — per-row message override. Without it a calibration send would be described as a
+  "queue-drain" attempt and **a future run reading the history would misread a 0.958 public
+  score as a catastrophic regression.** Each message now says outright that it is a measurement,
+  not an attempt on the board, and names the member's early-stopping mechanism.
+- the pin banner no longer claims everything at priority 1 is `check_selection.WANTED`; it
+  labels each file, so a measurement file can never read as a deadline pick.
+
+Verified by dry run — the plan is exactly:
+
+    1 w36_ad199stdcorr        CV LEADER + WANTED; unsent = NOT SELECTABLE
+    2 w36_ad199std_rescale    best sibling, p_beat 0.980
+    3 w37_cal_ram_hgb         R1 audit — read FIRST, can withdraw a RESEARCH claim
+    4 w37_cal_mkt_realmlp     R2 anchor — the enabling send
+    5 w36_ad199std            second sibling, p_beat 0.967
+    6 w37_cal_om_xgb2         R3 dirty 1/5
+    7 w37_cal_omid_tabm       R3 dirty 2/5
+    8 w37_cal_dm_cat          R3 dirty 3/5
+    9 w36_ad199std_logit      third sibling, p_beat 0.850
+   10 w34_ad195stdcorr        previous CV leader, still unsent (w36 §8.2)
+   -- 08-22: cal_ravi_realmlp1c, cal_dkv_xgb (R3 4/5, 5/5), w36_ad199std_h3
+
+Four board files and six measurements; R3 reaches its designed n=5 on 08-22.
+
+## 5. ⚠ PARTIAL FROM `w36a_value` — rep 0 has the ram pair NEGATIVE ON ALL THREE ARMS
+
+    rep 0  pack 0.970161 | ram_hgb 0.970156 | ram_lgb 0.970158 | both 0.970154
+
+One rep of five, and the paired instrument's whole point is that a single rep is noise — but it
+sharpens the attribution puzzle in the w36 addendum rather than settling it. **If the ram pair
+is a null-to-negative and the ravi pair is a sign-flipping null, the +14.85e-6 that ARM 199
+gained over ARM 195 is not attributable to any of the four members individually.** ARM 197 is
+chained behind this job and is the reading that decides it. Do not promote 197 on the number;
+`w36b_prereg.txt` calls it a CONTROL and the rule was written before either arm existed.
+
+## 6. STATE, VERIFIED THIS RUN
+
+- Queue head `w36_ad199stdcorr.csv`, priority 1, **p_beat 0.9998** — against the 6.3e-4 the w30
+  drain faced. The queue has genuinely live files for the first time.
+- `check_selection.py`: `w23_ad187stdcorr` SENT; `w36_ad199stdcorr` **NOT SENT, NOT SELECTABLE**.
+  Nothing is selected; Kaggle would auto-pick by best public score (the Rogii failure).
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). 14+ commits local and safe. Unchanged.
+- Board unchanged at rank 18, 0.97118.
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` vs the submission timestamps; `/proc` per-pid for live jobs (`ps` does not exist
+   on this box and `grep /proc/*/cmdline` gives false negatives — enumerate with `tr`).
+2. **`.venv/bin/python experiments/w26g_send.py --go --n 10`.** The order and every message are
+   already set; do not re-pick files by hand.
+3. **`experiments/w37e_readout.py`.** Read R1 FIRST — a failure there withdraws the +2.7e-4
+   es-on-val figure from RESEARCH.md and everything built on it.
+4. `w36a_value.csv` (5/5 sign gate, **not** 4/5 — w36 §2) and `w36g_build.log` (ARM 197, a
+   CONTROL) against the 0.9701288 bar in `w36b_prereg.txt`.
+5. Keep the `kernels output` re-check running — 2 for 2 across w34/w36 — and record each
+   author's published LB in the vet table.
+6. ⛔ Do NOT re-open: fold/seed averaging (§0, and it is a *structural* null); more CLEAN
+   es-bias calibration points (§1.3, already decisive); top-level blend-weight search; FE
+   variants; the original dataset; tuning any CatBoost or XGBoost; the stacker C.
+
+**Files added:** `experiments/w37a_power.py`, `w37b_calfiles.py/.csv`, `w37c_prereg.py/.csv`,
+`w37d_order.py`, `w37e_readout.py`; `submissions/w37_cal_*.csv` (7).
+**Modified:** `experiments/w26g_send.py` (`send_rank`, `msg`, honest pin banner),
+`experiments/w26d_queueprice.csv` (7 rows + explicit order for 13), `RESEARCH.md`.
+
+**No submission — at cap, 10/10 for the 08-20 UTC day.**
