@@ -1,0 +1,104 @@
+w46 PRE-REGISTRATION -- written 2026-08-21 01:35 UTC, BEFORE w46a_sendhazard.py exists
+======================================================================================
+
+THE CLAIM BEING CHECKED, AND WHY IT IS NOT RE-LITIGATION
+--------------------------------------------------------
+JOURNAL w45 section 6 wrote, of tomorrow's ten-file queue drain:
+
+    "queue-drain now has NON-NEGATIVE expected value on the selection axis,
+     which it has never had before ... a high-CV file that lands in that tier
+     LOWERS the cost; one that lands below it changes nothing."
+
+That is a two-branch outcome tree.  It is missing the third branch and it is
+missing the sign condition on the first.  The full tree for sending a file x
+whose public score is not yet known is:
+
+    (i)   x rounds ABOVE the live top tier (>= 0.97119)
+              -> x becomes auto-slot 1 ALONE, under every tiebreak rule
+    (ii)  x rounds EQUAL to the live top tier (= 0.97118)
+              -> x JOINS the four-way tie, changing its composition
+    (iii) x rounds BELOW (<= 0.97117)
+              -> auto-slot 1 unchanged; auto-slot 2 may change
+
+w45 section 6 considered only the good half of (ii).  In (i) and in the bad half
+of (ii) the sign is set by x's CV, and the queue contains files whose CV is
+82-96e-6 BELOW the WANTED file.  This is not a re-pricing of the click -- the
+click's value is held fixed at w45a's number.  It prices a DIFFERENT and
+previously unpriced decision: WHICH ten of the 77 unsent files to send.
+
+The mechanism is not new; it is the w13 audit exposure, and w39 already acted on
+one instance of it (it pulled w36_ad199std_logit from a slot because logit
+carries a +1121e-6 LB-CV gap against h3's +1025e-6).  What is new is that w39
+fixed one file by hand and w45 section 6 then re-stated the general rule in the
+unsafe direction.  A future run following "an unused slot is pure waste, send
+everything" sends the logit files.
+
+SCREEN ALREADY RUN (descriptive, no pricing) -- w30b predictor over the 77
+-------------------------------------------------------------------------
+This is stated as ALREADY OBSERVED so that the predictions below are honest
+about what they were formed on.  Predicted public LB, and P(rounds >= 0.97119)
+under w30b's residual sd 7.76e-6:
+
+    w40_ad211std_logit    CV -82.2e-6 vs WANTED   pred 0.971194   P(>=19) 0.887
+    w38_ad202std_logit    CV -82.4e-6             pred 0.971194   P(>=19) 0.875
+    w36_ad199std_logit    CV -82.9e-6             pred 0.971193   P(>=19) 0.850
+    w34_ad196std_logit    CV -90.5e-6             pred 0.971179   P(>=19) 0.216
+    w29_ad194stdcorr_rescale CV -38.7e-6          pred 0.971175   P(>=19) 0.100
+    w40_ad211std_rescale  CV -19.0e-6             pred 0.971199   P(>=19) 0.965
+    w38_ad202stdcorr      CV  -2.4e-6             pred 0.971222   P(>=19) 1.000
+    w40_ad211stdcorr      CV  -2.5e-6             pred 0.971221   P(>=19) 1.000
+
+REGISTERED PREDICTIONS
+----------------------
+P1. The three ad199/ad202/ad211 `std_logit` files each carry an expected
+    SELECTION cost of sending, delta E[cost], of at least +60e-6 -- i.e. each is
+    individually worse than the entire current unclicked-click cost (+21.74e-6
+    uniform) and worse than our whole 2e-5 distance to the gold cut.  Sign
+    POSITIVE (harmful) with high confidence; magnitude 60-95e-6.
+
+P2. w45 section 6's "non-negative" is FALSE as a general statement.  At least
+    five of the 77 unsent files price at delta E[cost] > +5e-6.
+
+P3. w45 section 6's own named top two (w38_ad202stdcorr, w40_ad211stdcorr) are
+    NOT harmful -- but they are NOT free either.  Both price in the band
+    -8e-6 < delta < +4e-6, i.e. small and of EITHER sign, because the branch
+    where they land at 0.97119 replaces a tie whose best member is the WANTED
+    file itself.  Specifically: under the LATEST-FIRST tiebreak branch, where
+    w45a already showed the cost is +0.00e-6 because w36_ad199stdcorr is the
+    newest member of the tie, sending ANY file can only make things worse or
+    leave them equal.  Registered: delta E[cost] under latest-first is >= 0 for
+    ALL 77 files, strictly > 0 for at least 40 of them.
+
+P4. Under the UNIFORM tiebreak the ten files named in w45 section 6 are
+    collectively beneficial: sending all ten lowers E[cost] from +21.74e-6 to
+    below +12e-6.  So section 6's conclusion survives for the files it actually
+    named, even though the rule it stated does not.
+
+P5. The ranking that matters is NOT CV.  At least one file outside w45 section
+    6's CV-ranked top ten prices better on delta E[cost] than at least one file
+    inside it.
+
+GATES (the run is void if these fail)
+-------------------------------------
+G1. Re-derive both live tiers from the live board and require them to match
+    w45's prereg exactly; exit 2 if they moved.  Same gate as w45a.
+G2. M must be w*I to < 1e-6 (w18a P6), on the ENLARGED file set including the
+    candidate.  If adding a candidate breaks the scalar map the reading is void.
+G3. Reproduce w45a's four published costs (+0.00 / +23.71 / +23.88 / +39.38e-6)
+    to < 0.05e-6 with the candidate machinery switched off.  If the enlarged
+    solver does not reproduce the published number, nothing below is readable.
+
+COVERAGE, STATED SO IT IS NOT MISTAKEN FOR COMPLETE
+---------------------------------------------------
+Only files with P(rounds >= 0.97118) > 0.01 under w30b are priced; the rest
+cannot reach either live tier and their delta is 0 by construction.  The count
+priced and the count skipped are both printed.
+
+DECISION RULE, FIXED NOW
+------------------------
+Tomorrow's ten sends are chosen by ascending delta E[cost] under the UNIFORM
+tiebreak, subject to a hard veto: NO file with delta > +2e-6 under uniform is
+sent, even if that leaves fewer than ten and even though the brief calls an
+unused slot pure waste.  The brief's economics assume a submission cannot hurt;
+on this account, while nothing is selected, that assumption is false, and the
+brief itself says the private score is not to be chased on public rank.
