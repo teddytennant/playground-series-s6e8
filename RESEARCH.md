@@ -4,6 +4,99 @@ Durable facts. Anything learned once goes here so no later run pays for it twice
 
 ---
 
+# 🔴 THE CV→LB PREDICTOR — READ THIS BEFORE QUOTING ANY PREDICTED LB (w47, 2026-08-21)
+
+**Import `experiments/w46c_predlb.py`. Never re-inline w30b.** `w26d_queueprice.py` still
+inlines w30b and is wrong by −30e-6 on every ad≥195 file.
+
+### The numbers to quote
+
+| quantity | value | source |
+|---|---|---|
+| fitted CV range of the 78-file w30b sample | **0.9700125 … 0.9701183** | `w47a_extrap.py` |
+| **held-out residual sd (leave-one-out, n=77)** | **8.36e-6** | `w47a_extrap.py` §D |
+| in-sample dof-corrected sd (`resid_sd_new`) | 7.76e-6 — **understates by 8%** | `w30b_corrterm.json` |
+| day-level variance component | **1.38e-6 — negligible** | `w47a_extrap.py` §G |
+| era shift for ad≥195 | −29.82e-6, se 4.37, **n=5** | `w46c_predlb.py` |
+
+⚠ **Do not quote the expanding-window sd (11.69e-6 pooled, day-mean sd 6.32e-6) as the
+predictive sd.** It is inflated by estimation error from training sets as small as n=20.
+Leave-one-out at n=77 is the right analogue for a prediction made from a fit on 78.
+
+### ⛔ A check that does NOT work, and was used once as if it did
+
+w46 §2 dismissed extrapolation with *"in-sample residual by CV quintile is FLAT"*. **That
+check is arithmetic, not evidence.** w30b is OLS with a constant and a CV term, so
+`sum(r)=0` and `sum(r·cv)=0` are its normal equations — the flat profile is guaranteed
+whatever the truth is. `w47a_extrap.py` §A demonstrates it on synthetic data that is
+*known* to saturate: the quintile profile reads flat while the same fit is badly biased at
+the real held-out design points. **Never use in-sample residuals to test extrapolation.**
+
+### What the era finding actually survived (w47a — all four attacks failed)
+
+| attack | result |
+|---|---|
+| **E1** extrapolation above support | **REJECTED.** Bias vs extrapolation distance is **+0.40e-6 per e-6** — the predictor runs *low*, not high, when extrapolating up in CV. Predicts +5.4e-6 at the five files' actual distance; they came in −29.8e-6. |
+| **E2** generic prospective optimism | **REJECTED.** Expanding-window day-ahead bias over eight days: **+0.73e-6** (day-mean sd 6.32). |
+| **E3** understated precision | confirmed but trivial: LOO sd 8.36 vs 7.76e-6, z −8.6 → **−8.0**. |
+| **G** day-clustering | **REJECTED.** Day component 1.38e-6; clustered t = **−8.9**, i.e. unchanged. |
+
+**So the −29.82e-6 shift is real.** w46 reached the right conclusion by invalid reasoning;
+w47a supplies the evidence it lacked.
+
+### ⚠ The one live alternative: ERA or CV-REGION? (unresolved until 08-22)
+
+Every ad≥195 file ever **sent** also sits **above** the fitted CV max, so these two are
+observationally identical so far:
+- **ERA** — past ~ad194 an imported member raises CV but not LB (w44 §6 from the CV side).
+- **CV-REGION** — the CV→LB relation **saturates above cv 0.970118**, whatever the era.
+
+They differ enormously for pricing: under CV-REGION the **19 in-support ad≥195 queue
+files are under-priced by 29.8e-6** and `w46c.new_era` is the wrong gate.
+**`experiments/w47b_prereg.txt` settles it on 08-22** — see the send list below.
+
+---
+
+# 📤 THE 08-22 SEND LIST — AMENDED (w47b supersedes w46d)
+
+Registered in `experiments/w47b_prereg.txt`, committed **before the send window opens**.
+Send in this order (best CV **last** — latest-first tiebreak, w46b §5, free):
+
+| # | kind | file | CV | w30b says | w46c says |
+|---|---|---|---|---|---|
+| 1 | PROBE | `w40_ad211std_rankraw` | 0.9701044022 | 0.971146 | 0.971116 |
+| 2 | PROBE | `w38_ad202std_rankraw` | 0.9701067554 | 0.971150 | 0.971121 |
+| 3 | PROBE | `w34_ad196std_hybrid` | 0.9701091250 | 0.971146 | 0.971117 |
+| 4 | PROBE | `w34_ad195std_hybrid` | 0.9701108333 | 0.971150 | 0.971120 |
+| 5 | PROBE | `w36_ad197std_hybrid` | 0.9701124257 | 0.971153 | 0.971123 |
+| 6 | DRAIN | `w36_ad199std_h3` | 0.9701354276 | 0.971191 | 0.971161 |
+| 7 | DRAIN | `w38_ad202std` | 0.9701305726 | 0.971196 | 0.971166 |
+| 8 | DRAIN | `w40_ad211std` | 0.9701309541 | 0.971197 | 0.971167 |
+| 9 | DRAIN | `w40_ad211stdcorr` | 0.9701374733 | 0.971221 | 0.971192 |
+| 10 | DRAIN | `w38_ad202stdcorr` | 0.9701375891 | 0.971222 | 0.971192 |
+
+**The five PROBES are the point.** They are ad≥195 files sitting 5.9–13.9e-6 **inside** the
+fitted CV support, so they separate ERA from CV-REGION — 8.0 sems apart at n=5. Both w46 §2
+and `w47_prereg.txt` claimed no such file existed; **thirteen do**, and `w47b_probe.py`
+lists them. All ten verified locally: 296,302 rows, no NaNs, CV reproduces from the OOF
+vector exactly.
+
+⛔ **VETO, unchanged and binding:** never send `w29_ad194stdcorr_ens4`,
+`w29_ad194stdcorr_rescale`, `w36_ad199std_logit`, `w38_ad202std_logit`,
+`w40_ad211std_logit` while nothing is selected. Also **not** eligible as probes (they fail
+the non-circular w30b screen at P 0.0175–0.5565): `w34_ad195std`, `w36_ad197std_rescale`,
+`w34_ad195std_rescale`, `w34_ad196std_rescale`, `w36_ad199std_rankraw`.
+
+Dropped from w46d's ten and **returned to the queue** for 08-23+, not discarded:
+`w36_ad197stdcorr`, `w40_ad211std_h3`, `w38_ad202std_h3`, `w40_ad211std_rescale`,
+`w38_ad202std_rescale`.
+
+⚠ `rankraw` and `hybrid` files carry values outside [0,1] (−17.4 … +18.1). **Kaggle accepts
+this** — AUC only ranks, and `w36_ad199std_hybrid` (0.97114) and `blend150fx_rankraw`
+(0.97102) already scored fine. Confirmed from history, not assumed.
+
+---
+
 # 🔴 ACT ON THIS FIRST — THE FINAL-SELECTION CLICK (re-priced 2026-08-21, w45)
 
 **Competition closes 2026-08-31 23:59 UTC. Nothing is selected**

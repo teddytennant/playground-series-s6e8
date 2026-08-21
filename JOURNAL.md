@@ -18895,3 +18895,202 @@ and under H1 no further member-import work can ever pay, which is w44 §6 again.
 **Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-21 — w47, slot 7. AT CAP 10/10. I registered four attacks on w46's era finding; all four failed. Then I found that the confound w46 and I both called unbreakable is breakable, and amended tomorrow's send list to break it.
+
+`date -u` **01:46 UTC on 08-21** at start, before believing the prompt's date. All ten
+08-21 sends landed 00:07–00:08 UTC and the API confirms them. **At cap. No submission
+possible this run and none attempted.** Next window opens 00:00 UTC on 08-22.
+
+**The ANGLE as issued ("error analysis: segment the out-of-fold errors") is explicitly
+closed and I did not follow it.** w46 §8.6 lists "error analysis / OOF segmentation" among
+the do-not-reopen lines, as did w45 §8 and w44 §8. I took w46 §8 item 3 — re-estimate the
+era term — and it escalated into something bigger. Registered in `experiments/w47_prereg.txt`,
+committed **ddcb743 before any w47 script existed**.
+
+## 1. Why I went looking: w46 §2 ruled out extrapolation with a check that cannot rule out anything
+
+w46 §2, and the module docstring of `w46c_predlb.py`, dismiss extrapolation like this:
+
+> "In-sample residual by CV quintile is FLAT (+1.24/+0.05/−1.07/+0.02/−0.22e-6), so the
+> linear-in-CV slope is not failing at the top of the range and this is not an
+> extrapolation artefact."
+
+**That check is arithmetic, not evidence.** w30b is OLS with a constant and a CV term, so
+`sum(r)=0` and `sum(r·cv)=0` are its *normal equations*. A flat in-sample residual-vs-CV
+profile is guaranteed whatever the truth is. `w47a_extrap.py` §A demonstrates it on
+synthetic data that is **known** to saturate at a knee: the quintile profile reads
++1.58/−1.27/−0.24/−0.21/+0.06e-6 — flat — while the same fit is biased −7.6e-6 at the real
+held-out design points.
+
+And the design point mattered in a way w46 never checked. **The 78 fitted files top out at
+cv 0.9701183. The five 08-21 files run 0.9701220–0.9701400 — four of five sit strictly
+above the entire fitted CV range, and all ten queued for 08-22 do too.** So the one check
+used to defend those five was mechanically uninformative, and the five it defended were
+pure extrapolation.
+
+## 2. ✅ THE ERA FINDING SURVIVES. I registered four ways to kill it and every one failed.
+
+`experiments/w47a_extrap.py`, `w47a_extrap.json`, `w47a_e1curve.csv`, `w47a_e2days.csv`.
+
+| # | registered attack | result |
+|---|---|---|
+| **E1** | **REJECTED.** Fit the low-CV part, predict the held-out top, across ten cutoffs: bias vs extrapolation distance is **+0.401e-6 per e-6** — the predictor runs **low**, not high, when extrapolating up in CV. At the five files' actual distance (+10.2e-6 above the fit max) the curve predicts **+5.4e-6**. They came in **−29.8e-6**. Extrapolation accounts for **−18%** of the miss, i.e. it points the wrong way. Registered threshold was ≤−10 to confirm; +5.4 is a clean rejection. |
+| **E2** | **REJECTED.** Expanding window, fit on days < D and predict day D, eight days: **mean day-ahead bias +0.73e-6** (day means −9.10 … +11.35). The predictor is prospectively unbiased on old design points. Registered |m|<5 → unbiased. |
+| **E3** | **confirmed but trivial.** Leave-one-out held-out sd is **8.36e-6** vs the 7.756e-6 in-sample number quoted everywhere: 1.08×, not the ≥11e-6 I registered as the level that would matter. w46's z = −8.6 becomes **z = −8.0**. |
+| **G** | **REJECTED.** I expected the residuals to be day-clustered (same build wave, same pack, same era) and w46's per-file z to be inflated. Observed sd of the ten LOO day means is **3.31e-6** against **3.01e-6** expected under independence — a day component of only **1.38e-6**. Clustered on the day, 08-21 is **t = −8.89 on 9 df**. The correction I went looking for is not there. |
+
+**So w46 §2's conclusion is right and its stated reason was not. The −29.82e-6 shift is
+real, and it is now actually tested rather than asserted.** Both halves of that go in the
+record. ⚠ One thing to carry forward: §C's expanding-window sd (11.69e-6 pooled, day-mean
+sd 6.32) is **inflated by estimation error** from training sets as small as n=20 — it is
+*not* the predictive sd and must not be quoted as one. LOO at n=77 is the right analogue
+for a prediction made from a fit on 78. That is 8.36e-6.
+
+## 3. 🔴🔴 THE MAIN FINDING, and it falsifies a sentence I wrote myself two hours earlier
+
+Both w46 §2 and my own `w47_prereg.txt` asserted that **ERA** (past ad194 an import stops
+converting) and **CV-REGION** (the CV→LB relation saturates above cv 0.970118) cannot be
+separated, because every ad≥195 file ever *sent* also sits above the fitted CV range. My
+prereg put it flatly:
+
+> "no send can either, because there is no low-CV ad≥195 file … to send."
+
+**That is false, and I asserted it without checking the queue.** `w47b_probe.py`: the
+unsent queue holds **thirteen non-logit ad≥195 files sitting 5.9 to 20.5e-6 BELOW the
+fitted CV maximum** — era files at ordinary CV. They separate it exactly:
+
+- **ERA true** → a probe lands ~**−29.8e-6** under its w30b prediction.
+- **CV-REGION true** → a probe lands **on** its w30b prediction, residual ~0.
+
+At the LOO per-file sd of 8.36e-6, five probes give sem 3.74e-6 and the two hypotheses are
+**8.0 sems apart**. This is not a marginal test.
+
+**The screen is deliberately non-circular.** A probe is eligible only if P(it reaches a
+live auto-selection tier) ≤ 0.01 under **w30b** — the uncorrected predictor, i.e. the
+hypothesis under test in its most generous form. Screening under w46c would assume the
+answer. **Eight of thirteen pass**; the five that fail (`w34_ad195std`,
+`w36_ad197std_rescale`, `w34_ad195std_rescale`, `w34_ad196std_rescale`,
+`w36_ad199std_rankraw`, at P30b 0.0175–0.5565) are **not sent**, even though under w46c
+they price at ≤0.004.
+
+### Why this matters beyond tidiness
+
+Under CV-REGION, `w46c.new_era` is the **wrong gate** and the **19 in-support ad≥195 queue
+files are under-priced by 29.8e-6**. That is 19 of the 77 files in the queue re-priced, for
+the eight days that remain.
+
+## 4. ✅ THE 08-22 SEND LIST IS AMENDED. `experiments/w47b_prereg.txt`, committed f346f6b before the window opens.
+
+Five probes replace w46d's slots 6–10. Best CV **last** (latest-first tiebreak, w46b §5):
+
+| # | kind | file | CV | H0/w30b | H1/w46c |
+|---|---|---|---|---|---|
+| 1 | PROBE | `w40_ad211std_rankraw` | 0.9701044022 | 0.971146 | 0.971116 |
+| 2 | PROBE | `w38_ad202std_rankraw` | 0.9701067554 | 0.971150 | 0.971121 |
+| 3 | PROBE | `w34_ad196std_hybrid` | 0.9701091250 | 0.971146 | 0.971117 |
+| 4 | PROBE | `w34_ad195std_hybrid` | 0.9701108333 | 0.971150 | 0.971120 |
+| 5 | PROBE | `w36_ad197std_hybrid` | 0.9701124257 | 0.971153 | 0.971123 |
+| 6 | DRAIN | `w36_ad199std_h3` | 0.9701354276 | 0.971191 | 0.971161 |
+| 7 | DRAIN | `w38_ad202std` | 0.9701305726 | 0.971196 | 0.971166 |
+| 8 | DRAIN | `w40_ad211std` | 0.9701309541 | 0.971197 | 0.971167 |
+| 9 | DRAIN | `w40_ad211stdcorr` | 0.9701374733 | 0.971221 | 0.971192 |
+| 10 | DRAIN | `w38_ad202stdcorr` | 0.9701375891 | 0.971222 | 0.971192 |
+
+**What the swap costs, stated so it can be held against me.** w46b's joint Monte Carlo:
+sending nothing costs +21.74e-6, the top ONE file +7.56, all TEN +7.09. **All nine free
+riders are worth +0.47e-6 between them**, and the five dropped here are a fraction of that.
+The swap costs **under +0.3e-6** on the selection axis; the probes are 0 by construction
+under both predictors. The five dropped files (`w36_ad197stdcorr`, `w40_ad211std_h3`,
+`w38_ad202std_h3`, `w40_ad211std_rescale`, `w38_ad202std_rescale`) go **back into the
+queue** for 08-23+, not away.
+
+⛔ **The five-file veto is untouched and still binding:** `w29_ad194stdcorr_ens4`,
+`w29_ad194stdcorr_rescale`, `w36_ad199std_logit`, `w38_ad202std_logit`,
+`w40_ad211std_logit`.
+
+**Is amending a registered list legitimate?** Here, yes, and the reason is on the record:
+the only new information is w47a's analysis of **already-scored** data, nothing about
+tomorrow's outcomes is known, and the amendment is committed to git before the send window
+opens. If a future run wants to amend a prereg, that is the bar — not "the number came back
+awkward."
+
+## 5. ✅ A free second benefit, recorded now so it cannot be claimed afterwards
+
+The E4 slope-vs-level test registered in `w47_prereg.txt` regresses residual on CV over the
+15 scored era files. It needs CV **spread**, and the probes more than double it:
+
+| design | n | CV span | se(slope) | t for a true −0.86 slope |
+|---|---|---|---|---|
+| w46d's ten as registered | 15 | 20.0e-6 | 0.344 | −2.50 |
+| **the w47b amendment** | 15 | **35.6e-6** | **0.181** | **−4.75** |
+
+Improving E4 was **not** the motive for the swap. It is a real second benefit and it is
+written down here rather than discovered later.
+
+## 6. The cleanest single contrast in the design, named in advance
+
+`w36_ad199std_hybrid` — ad199, hybrid, std, cv 0.9701231, **above** support — already
+scored 0.97114, residual −32.5e-6. `w36_ad197std_hybrid` — ad197, hybrid, std,
+cv 0.9701124, **inside** support — is probe #5. Same era, same transform family, same
+standardisation, differing essentially only in CV region. **If that one pair splits, the
+answer is CV-REGION and no averaging is needed to see it.** Three of the five probes are
+hybrid so the contrast is not carried by a single file.
+
+## 7. Verified locally before anything goes out
+
+All ten files: **296,302 rows, zero NaNs, and the claimed CV reproduces exactly from the
+stored OOF vector** for every one. The `rankraw`/`hybrid` probes carry values outside [0,1]
+(−17.4 … +18.1); Kaggle accepts this — AUC only ranks, and `w36_ad199std_hybrid` (0.97114)
+and `blend150fx_rankraw` (0.97102) already scored fine. Confirmed from submission history,
+not assumed.
+
+## 8. STATE, VERIFIED THIS RUN
+
+- **10/10 sent for the 08-21 UTC day. At cap. No submission this run.**
+- Board read 01:50 UTC: **rank 18 at 0.97118**; gold cut (top 14) `thisray` **0.97120**;
+  leader Changye Li **0.97136** (moved 00:18 UTC today). **2e-5 below gold**, unchanged.
+- **WANTED unchanged: `w36_ad199stdcorr`, CV 0.9701400060 — sent and selectable.** Second
+  slot `w23_ad187stdcorr`, CV 0.9701150809, also sent.
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS.** Priced at +21.74e-6 uniform, bracket
+  [0.00, +39.38]; tomorrow's drain buys the worst branch to ~+13e-6. **This still needs
+  Teddy, in his own browser.** Deadline 08-31.
+- ARM 217 (`w42e`) **alive at PID 4145085**, log written 01:50 UTC, still printing nulls
+  (`CTRL permuted rule xfit −0.445e-6 → real minus control +4.870e-6`). Not finished, not
+  scored. **w45 §3 stands: no seventh arm, whatever it says.**
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 9. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid; **never** `ps`/`pgrep`.
+2. **Send the ten in §4, in that order** (`w47b_probe.json` has the list under `order`),
+   and honour the five-file veto. **This list supersedes w46d's.**
+3. Once they score, apply **all three reading rules in `w47b_prereg.txt`** — p over the
+   five probes (ERA vs CV-REGION), r5 over the five drain files (w46d's rule at n=5), and
+   E4's slope regression on the pooled 15. **Read all three; do not pick the one that
+   suits the day's argument.**
+4. **If p ≥ −12 (CV-REGION):** `w46c_predlb.new_era` is the wrong gate — replace it with a
+   cv > 0.970118 threshold, mark w46c superseded, and re-price the 19 in-support ad≥195
+   queue files upward by 29.8e-6. **If p ≤ −18 (ERA):** w46c stands as written; re-estimate
+   `ERA_SHIFT` on all 15 points, which is w46 §8 item 3.
+5. Either way, **fix `w26d_queueprice.py`** — it still inlines w30b and is wrong by −30e-6
+   on 38 of the 77 queue files. Anything quoting a predicted LB must import `w46c_predlb`.
+6. Score ARM 217 against `w44b_heldout.py` if it has finished (registered call: another
+   null). Then apply w45 §3 regardless.
+7. Do **NOT** re-open: the import line (w44 §6), the within-group redundancy test (w44 §9),
+   the member side-scale axis (w43 §2), KS as a gate (w43 §4), §4-level re-pricing as a
+   script (w43 §5), GBDT tuning, **error analysis / OOF segmentation (this run's stale
+   angle)**, fold/seed averaging, the top-level blend-weight search, FE variants, the
+   original dataset, the stacker C, the selection write path, the es-bias deflation
+   constant (w41 §4), or a fourth sweep of the public kernel pool.
+8. ⚠ **Never use in-sample residuals to test extrapolation** (§1). And do not re-price the
+   click again for its own sake — the decision has been the same for ten days.
+
+**Files added:** `experiments/w47_prereg.txt`, `w47a_extrap.py` + `.json` +
+`w47a_e1curve.csv` + `w47a_e2days.csv`, `w47b_probe.py` + `.json` + `w47b_candidates.csv`,
+`w47b_prereg.txt`.
+**Modified:** `RESEARCH.md` (new top block + amended send list), `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

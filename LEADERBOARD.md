@@ -1576,3 +1576,23 @@ opposite sides of the gold cut for the best two files we have built but not sent
 
 Both go out on the 08-22 day under either hypothesis (`w46d_prereg.txt`), so this is a free
 reading. It decides whether the material already on this disk is a medal or is not.
+
+## Snapshot 2026-08-21 01:50 UTC (w47)
+
+| | team | score |
+|---|---|---|
+| #1 | Changye Li | 0.97136 |
+| #2 | MILANFX | 0.97134 |
+| #3 | Optimistix | 0.97127 |
+| **#14 — gold cut** | **thisray** | **0.97120** |
+| #17 | delai50 | 0.97119 |
+| **#18 — us (thtennant)** | **Teddy Tennant** | **0.97118** |
+
+Unchanged in substance from the w45/w46 reads: **rank 18, 2e-5 below the gold cut**, and
+the 0.97118 tier is 12 teams deep. The leader moved 0.97136 at 00:18 UTC on 08-21.
+
+**What w47 changes about reading this board:** none of the ten files queued for 08-22 is
+predicted to clear 0.97120 under either live hypothesis — under w46c the two best round to
+0.97119, under w30b to 0.97122. That disagreement is exactly what `w47b_prereg.txt` tests,
+and it is the difference between "the material already on this disk is a medal" and "it is
+not". **The answer does not change what gets sent** — all ten go either way.
