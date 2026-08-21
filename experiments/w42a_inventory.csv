@@ -1,0 +1,186 @@
+ref,file,kind,rows,shape,cols,mb
+georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new,georgymamarin_s6e8-why-gaming-hours-helps-but-adds-nothing-new/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.751886
+georgymamarin/s6e8-why-gaming-hours-helps-but-adds-nothing-new,georgymamarin_s6e8-why-gaming-hours-helps-but-adds-nothing-new/oof.npy,npy,691369,"(691369,)",,5.53108
+donmarch14/s6e8-lgbm,donmarch14_s6e8-lgbm/lgbm_test_preds.csv,csv,296302,"(296302, 2)",id|test_pred,5.215205
+donmarch14/s6e8-lgbm,donmarch14_s6e8-lgbm/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,5.21521
+donmarch14/s6e8-lgbm,donmarch14_s6e8-lgbm/lgb_test.npy,npy,296302,"(296302,)",,1.185336
+donmarch14/s6e8-lgbm,donmarch14_s6e8-lgbm/lgb_oof.npy,npy,691369,"(691369,)",,2.765604
+donmarch14/s6e8-lgbm,donmarch14_s6e8-lgbm/lgbm_oof.csv,csv,691369,"(691369, 3)",id|addicted_label|oof_pred,13.439172
+donmarch14/s6e8-catboost,donmarch14_s6e8-catboost/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,5.22063
+donmarch14/s6e8-catboost,donmarch14_s6e8-catboost/oof_preds.csv,csv,691369,"(691369, 3)",id|addicted_label|oof_pred,13.45348
+donmarch14/s6e8-catboost,donmarch14_s6e8-catboost/test_preds.csv,csv,296302,"(296302, 2)",id|test_pred,5.220625
+ravi20076/playgrounds6e8-public-l2stack-v1,ravi20076_playgrounds6e8-public-l2stack-v1/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,4.99872
+ravi20076/playgrounds6e8-public-l2stack-v1,ravi20076_playgrounds6e8-public-l2stack-v1/Mdl_Preds_L2StackV1_1.parquet,parquet,296302,"(296302, 1)",L2Stack1R,1.44659
+ravi20076/playgrounds6e8-public-l2stack-v1,ravi20076_playgrounds6e8-public-l2stack-v1/OOF_Preds_L2StackV1_1.parquet,parquet,691369,"(691369, 1)",L2Stack1R,3.272148
+ern711/contextualized-deep-univariate-spline-transformer,ern711_contextualized-deep-univariate-spline-transformer/nonlinear_context_5fold_test_predictions.csv,csv,296302,"(296302, 8)",id|fold_0|fold_1|fold_2|fold_3|fold_4|mean_prediction|prediction_std,24.627192
+ern711/contextualized-deep-univariate-spline-transformer,ern711_contextualized-deep-univariate-spline-transformer/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,5.216651
+ern711/contextualized-deep-univariate-spline-transformer,ern711_contextualized-deep-univariate-spline-transformer/submission_additive.csv,csv,296302,"(296302, 2)",id|addicted_label,5.220927
+ern711/contextualized-deep-univariate-spline-transformer,ern711_contextualized-deep-univariate-spline-transformer/nonlinear_context_5fold_oof.csv,csv,691369,"(691369, 4)",id|addicted_label|oof_prediction|oof_additive,34.075878
+omidbaghchehsaraei/tabm-for-predicting-smartphone-addiction,omidbaghchehsaraei_tabm-for-predicting-smartphone-addiction/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.774256
+omidbaghchehsaraei/tabm-for-predicting-smartphone-addiction,omidbaghchehsaraei_tabm-for-predicting-smartphone-addiction/oof.csv,csv,691369,"(691369, 3)",id|oof_pred|addicted_label,18.560414
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783457
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/preds.npz[y],npz,691369,"(691369,)",,29.236794
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/preds.npz[oof_lgb],npz,691369,"(691369,)",,29.236794
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/preds.npz[oof_xgb],npz,691369,"(691369,)",,29.236794
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/preds.npz[oof_cat],npz,691369,"(691369,)",,29.236794
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/preds.npz[test_lgb],npz,296302,"(296302,)",,29.236794
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/preds.npz[test_xgb],npz,296302,"(296302,)",,29.236794
+factualexplorer/baseline-lgbm-xgb-cb-rank-averaged-oof-tuned,factualexplorer_baseline-lgbm-xgb-cb-rank-averaged-oof-tuned/preds.npz[test_cat],npz,296302,"(296302,)",,29.236794
+ern711/multi-level-deep-univariate-spline-transformer,ern711_multi-level-deep-univariate-spline-transformer/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,5.219249
+ern711/multi-level-deep-univariate-spline-transformer,ern711_multi-level-deep-univariate-spline-transformer/multilevel_output_heads_oof.csv,csv,691369,"(691369, 4)",id|addicted_label|oof_prediction|oof_additive,34.046211
+ern711/multi-level-deep-univariate-spline-transformer,ern711_multi-level-deep-univariate-spline-transformer/multilevel_output_heads_test_predictions.csv,csv,296302,"(296302, 2)",id|cv_mean_prediction,5.219253
+ravi20076/playgrounds6e8-datacollation-v1,ravi20076_playgrounds6e8-datacollation-v1/OOF_Preds_PublicV1_1.parquet,parquet,691369,"(691369, 18)",addicted_label|fold_nb|PUBLICM0|PUBLICM1|PUBLICM2|PUBLICM3|PUBLICM4|PUBLICM5|PUBLICM6|PUBLICM7|PUBLICM8|PUBLICM9|PUBLICM10|PUBLICM11,66.987794
+ravi20076/playgrounds6e8-datacollation-v1,ravi20076_playgrounds6e8-datacollation-v1/Mdl_Preds_PublicV1_1.parquet,parquet,296302,"(296302, 16)",PUBLICM0|PUBLICM1|PUBLICM2|PUBLICM3|PUBLICM4|PUBLICM5|PUBLICM6|PUBLICM7|PUBLICM8|PUBLICM9|PUBLICM10|PUBLICM11|PUBLICM12|PUBLICM13,31.881808
+nikita7364777/rank-gauss-logit-rank-blending,nikita7364777_rank-gauss-logit-rank-blending/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783805
+nikita7364777/rank-gauss-logit-rank-blending,nikita7364777_rank-gauss-logit-rank-blending/oof_rankgauss_lr.npy,npy,691369,"(691369,)",,5.53108
+nikita7364777/rank-gauss-logit-rank-blending,nikita7364777_rank-gauss-logit-rank-blending/test_rankgauss_lr.npy,npy,296302,"(296302,)",,2.370544
+nikita7364777/rank-gauss-logit-rank-blending,nikita7364777_rank-gauss-logit-rank-blending/submission_rankdata.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783805
+christopherarzate/predicting-smartphone-addiction,christopherarzate_predicting-smartphone-addiction/testsubmission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.729341
+christopherarzate/predicting-smartphone-addiction,christopherarzate_predicting-smartphone-addiction/test_submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.728755
+echloeprice/phone-addict,echloeprice_phone-addict/oof_C_prob_optuna.csv,csv,691369,"(691369, 2)",id|prediction_column,17.977627
+echloeprice/phone-addict,echloeprice_phone-addict/oof_A_prob_simple.csv,csv,691369,"(691369, 2)",id|prediction_column,17.978515
+echloeprice/phone-addict,echloeprice_phone-addict/submission_D_rank_optuna.csv,csv,296302,"(296302, 2)",id|addicted_label,7.784185
+echloeprice/phone-addict,echloeprice_phone-addict/oof_B_rank_simple.csv,csv,691369,"(691369, 2)",id|prediction_column,18.050923
+echloeprice/phone-addict,echloeprice_phone-addict/oof_D_rank_optuna.csv,csv,691369,"(691369, 2)",id|prediction_column,18.050886
+echloeprice/phone-addict,echloeprice_phone-addict/submission_C_prob_optuna.csv,csv,296302,"(296302, 2)",id|addicted_label,7.753309
+echloeprice/phone-addict,echloeprice_phone-addict/submission_A_prob_simple.csv,csv,296302,"(296302, 2)",id|addicted_label,7.753205
+echloeprice/phone-addict,echloeprice_phone-addict/submission_B_rank_simple.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783198
+destroyer123787/predicting-smartphone-addiction,destroyer123787_predicting-smartphone-addiction/oof_predictions.csv,csv,691369,"(691369, 6)",id|addicted_label|oof_xgb|oof_lgb|oof_cat|oof_blend,59.231265
+destroyer123787/predicting-smartphone-addiction,destroyer123787_predicting-smartphone-addiction/test_predictions.csv,csv,296302,"(296302, 5)",id|test_xgb|test_lgb|test_cat|test_blend,24.840642
+destroyer123787/predicting-smartphone-addiction,destroyer123787_predicting-smartphone-addiction/submission_ensemble.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783533
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/submission_realmlp_fold1.csv,csv,296302,"(296302, 2)",id|addicted_label,7.743368
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/submission_realmlp.csv,csv,296302,"(296302, 2)",id|addicted_label,7.738434
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/oof_realmlp.npy,npy,691369,"(691369,)",,5.53108
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/test_realmlp.npy,npy,296302,"(296302,)",,2.370544
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/submission_realmlp_fold2.csv,csv,296302,"(296302, 2)",id|addicted_label,7.740588
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/submission_realmlp_fold5.csv,csv,296302,"(296302, 2)",id|addicted_label,7.738434
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/submission_realmlp_fold4.csv,csv,296302,"(296302, 2)",id|addicted_label,7.738469
+mohankrishnathalla/s6e8-realmlp-oof-saver,mohankrishnathalla_s6e8-realmlp-oof-saver/submission_realmlp_fold3.csv,csv,296302,"(296302, 2)",id|addicted_label,7.739054
+shashwat1729/s6e8-lookup-pair-transformer,shashwat1729_s6e8-lookup-pair-transformer/oof_lookup_pair.npy,npy,691369,"(691369,)",,5.53108
+shashwat1729/s6e8-lookup-pair-transformer,shashwat1729_s6e8-lookup-pair-transformer/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.759146
+shashwat1729/s6e8-lookup-pair-transformer,shashwat1729_s6e8-lookup-pair-transformer/test_lookup_pair.npy,npy,296302,"(296302,)",,2.370544
+beicicc/s6e8-seed-diversity-residual-audit,beicicc_s6e8-seed-diversity-residual-audit/submission_seed2_residual_10pct.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783408
+beicicc/s6e8-seed-diversity-residual-audit,beicicc_s6e8-seed-diversity-residual-audit/seed2_residual_oof_predictions.csv,csv,691369,"(691369, 5)",id|addicted_label|c04_anchor|seed2_lattice|c04_seed2_global_0p1,40.093012
+beicicc/s6e8-seed-diversity-residual-audit,beicicc_s6e8-seed-diversity-residual-audit/seed2_residual_test_predictions.csv,csv,296302,"(296302, 4)",id|c04_anchor|seed2_lattice|c04_seed2_global_0p1,16.638468
+gauravduttaiiitb/ex1-s6e8-flaml-micro-f1,gauravduttaiiitb_ex1-s6e8-flaml-micro-f1/micro_f1.csv,csv,296302,"(296302, 2)",id|addicted_label,7.765828
+mayank787/addiction-to-mobile,mayank787_addiction-to-mobile/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.738339
+mayank787/addiction-to-mobile,mayank787_addiction-to-mobile/submission_tuned_v2.csv,csv,296302,"(296302, 2)",id|addicted_label,7.752141
+funguscakehead/da-thig,funguscakehead_da-thig/combined_superpool_lr_compare_rankgauss_preblends_excluded.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783828
+funguscakehead/da-thig,funguscakehead_da-thig/combined_superpool_lr_compare_rankgauss_full.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783753
+funguscakehead/da-thig,funguscakehead_da-thig/combined_superpool_lr_compare_meta_test.parquet,parquet,296302,"(296302, 5)",id|your_logit_lr|rankgauss_full|three_arm_regime_lr|rankgauss_preblends_excluded,11.428288
+funguscakehead/da-thig,funguscakehead_da-thig/combined_superpool_lr_compare_your_logit_lr.csv,csv,296302,"(296302, 2)",id|addicted_label,7.771144
+funguscakehead/da-thig,funguscakehead_da-thig/combined_superpool_lr_compare_three_arm_regime_lr.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783805
+funguscakehead/da-thig,funguscakehead_da-thig/combined_superpool_lr_compare_meta_oof.parquet,parquet,691369,"(691369, 5)",id|your_logit_lr|rankgauss_full|three_arm_regime_lr|rankgauss_preblends_excluded,21.666068
+gauravduttaiiitb/ex996-s6e8-flaml-roc-auc-weighted,gauravduttaiiitb_ex996-s6e8-flaml-roc-auc-weighted/roc_auc_weighted.csv,csv,296302,"(296302, 2)",id|addicted_label,7.766029
+gauravduttaiiitb/ex999-s6e8-flaml-roc-auc-weighted,gauravduttaiiitb_ex999-s6e8-flaml-roc-auc-weighted/roc_auc_weighted.csv,csv,296302,"(296302, 2)",id|addicted_label,7.768339
+gauravduttaiiitb/ex451-s6e8-flaml-roc-auc-weighted,gauravduttaiiitb_ex451-s6e8-flaml-roc-auc-weighted/roc_auc_weighted.csv,csv,296302,"(296302, 2)",id|addicted_label,7.767042
+gauravduttaiiitb/ex351-s6e8-flaml-roc-auc-weighted,gauravduttaiiitb_ex351-s6e8-flaml-roc-auc-weighted/roc_auc_weighted.csv,csv,296302,"(296302, 2)",id|addicted_label,7.766338
+gauravduttaiiitb/ex51-s6e8-flaml-ap,gauravduttaiiitb_ex51-s6e8-flaml-ap/ap.csv,csv,296302,"(296302, 2)",id|addicted_label,7.766662
+gauravduttaiiitb/ex51-s6e8-flaml-accuracy,gauravduttaiiitb_ex51-s6e8-flaml-accuracy/accuracy.csv,csv,296302,"(296302, 2)",id|addicted_label,7.777672
+gauravduttaiiitb/ex51-s6e8-flaml-roc-auc-weighted,gauravduttaiiitb_ex51-s6e8-flaml-roc-auc-weighted/roc_auc_weighted.csv,csv,296302,"(296302, 2)",id|addicted_label,7.76701
+gauravduttaiiitb/ex151-s6e8-flaml-roc-auc,gauravduttaiiitb_ex151-s6e8-flaml-roc-auc/roc_auc.csv,csv,296302,"(296302, 2)",id|addicted_label,7.767462
+wesleyhuan/s6e8-multi-model-compare,wesleyhuan_s6e8-multi-model-compare/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783296
+wesleyhuan/s6e8-multi-model-compare,wesleyhuan_s6e8-multi-model-compare/oof_preds.csv,csv,691369,"(691369, 5)",oof_xgb|oof_lgb|oof_cat|oof_blend|y,54.514406
+gauravduttaiiitb/ex51-s6e8-flaml-f1,gauravduttaiiitb_ex51-s6e8-flaml-f1/f1.csv,csv,296302,"(296302, 2)",id|addicted_label,7.768549
+gauravduttaiiitb/ex51-s6e8-flaml-roc-auc,gauravduttaiiitb_ex51-s6e8-flaml-roc-auc/roc_auc.csv,csv,296302,"(296302, 2)",id|addicted_label,7.767293
+gauravduttaiiitb/ex66-s6e8-flaml-roc-auc,gauravduttaiiitb_ex66-s6e8-flaml-roc-auc/roc_auc.csv,csv,296302,"(296302, 2)",id|addicted_label,7.765031
+gauravduttaiiitb/ex72-fe-s6e8-flaml-roc-auc,gauravduttaiiitb_ex72-fe-s6e8-flaml-roc-auc/roc_auc.csv,csv,296302,"(296302, 2)",id|addicted_label,7.767601
+gauravduttaiiitb/ex69-s6e8-flaml-roc-auc,gauravduttaiiitb_ex69-s6e8-flaml-roc-auc/roc_auc.csv,csv,296302,"(296302, 2)",id|addicted_label,7.767536
+gauravduttaiiitb/ex69-s6e8-flaml-micro-f1,gauravduttaiiitb_ex69-s6e8-flaml-micro-f1/micro_f1.csv,csv,296302,"(296302, 2)",id|addicted_label,7.766748
+shashwat1729/s6e8-screen-blind-gbm,shashwat1729_s6e8-screen-blind-gbm/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.703297
+shashwat1729/s6e8-screen-blind-gbm,shashwat1729_s6e8-screen-blind-gbm/test_screen_blind.npy,npy,296302,"(296302,)",,2.370544
+shashwat1729/s6e8-screen-blind-gbm,shashwat1729_s6e8-screen-blind-gbm/oof_screen_blind.npy,npy,691369,"(691369,)",,5.53108
+harwindersingh766/ps-s6e8-xgboost-te-lb-0-96548,harwindersingh766_ps-s6e8-xgboost-te-lb-0-96548/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.759513
+harwindersingh766/ps-s6e8-xgboost-te-lb-0-96548,harwindersingh766_ps-s6e8-xgboost-te-lb-0-96548/submission_xgb.csv,csv,296302,"(296302, 2)",id|addicted_label,7.760057
+harwindersingh766/ps-s6e8-xgboost-te-lb-0-96548,harwindersingh766_ps-s6e8-xgboost-te-lb-0-96548/test_xgb.npy,npy,296302,"(296302,)",,2.370544
+harwindersingh766/ps-s6e8-xgboost-te-lb-0-96548,harwindersingh766_ps-s6e8-xgboost-te-lb-0-96548/oof_xgb_sb.npy,npy,691369,"(691369,)",,5.53108
+harwindersingh766/ps-s6e8-xgboost-te-lb-0-96548,harwindersingh766_ps-s6e8-xgboost-te-lb-0-96548/test_xgb_sb.npy,npy,296302,"(296302,)",,2.370544
+harwindersingh766/ps-s6e8-xgboost-te-lb-0-96548,harwindersingh766_ps-s6e8-xgboost-te-lb-0-96548/oof_xgb.npy,npy,691369,"(691369,)",,5.53108
+dranilkumardubey/nova-sap,dranilkumardubey_nova-sap/oof_predictions.csv,csv,691369,"(691369, 5)",catboost|lightgbm|xgboost|blend|addicted_label,54.465717
+dranilkumardubey/nova-sap,dranilkumardubey_nova-sap/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.784013
+dranilkumardubey/nova-sap,dranilkumardubey_nova-sap/nova_sap_uncertainty.csv,csv,296302,"(296302, 2)",prediction|seed_uncertainty,12.195762
+magurodataanalysis/s6e8-linear-vs-trees,magurodataanalysis_s6e8-linear-vs-trees/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.766068
+magurodataanalysis/s6e8-linear-vs-trees,magurodataanalysis_s6e8-linear-vs-trees/submission_self_contained.csv,csv,296302,"(296302, 2)",id|addicted_label,7.766068
+magurodataanalysis/s6e8-linear-vs-trees,magurodataanalysis_s6e8-linear-vs-trees/oof.csv,csv,691369,"(691369, 2)",id|oof_pred,18.008548
+rafanikitas/s6e8-gbdt-ensemble,rafanikitas_s6e8-gbdt-ensemble/oof_predictions.csv,csv,691369,"(691369, 6)",lightgbm|catboost|xgboost|tabm|id|addicted_label,53.133306
+rafanikitas/s6e8-gbdt-ensemble,rafanikitas_s6e8-gbdt-ensemble/submission_stack_lgbm.csv,csv,296302,"(296302, 2)",id|addicted_label,7.767923
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_85_knn_15.csv,csv,296302,"(296302, 2)",id|addicted_label,7.782168
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/knn_raw.npy,npy,296302,"(296302,)",,2.370544
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.782064
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_logit_n20_85_knn_15.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783634
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_80_knn_20.csv,csv,296302,"(296302, 2)",id|addicted_label,7.781013
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_88_knn_12.csv,csv,296302,"(296302, 2)",id|addicted_label,7.781904
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_95_najiknn_5.csv,csv,296302,"(296302, 2)",id|addicted_label,7.78318
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_90_knn_10.csv,csv,296302,"(296302, 2)",id|addicted_label,7.782064
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_logit_n20_95_knn_5.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783729
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_93_knn_7.csv,csv,296302,"(296302, 2)",id|addicted_label,7.782313
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_95_knn_5.csv,csv,296302,"(296302, 2)",id|addicted_label,7.782778
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_90_najiknn_10.csv,csv,296302,"(296302, 2)",id|addicted_label,7.78269
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20.csv,csv,296302,"(296302, 2)",id|addicted_label,7.665679
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_logit_n20_90_knn_10.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783604
+untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output,untouchableforest_s6e8-knn-diversifier-v3-raw-knn-output/submission_n20r_85_najiknn_15.csv,csv,296302,"(296302, 2)",id|addicted_label,7.782678
+hboyang/s6e8-150-member-fusion,hboyang_s6e8-150-member-fusion/submission_mix.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783805
+hboyang/s6e8-150-member-fusion,hboyang_s6e8-150-member-fusion/oof_mix.npy,npy,691369,"(691369,)",,5.53108
+hboyang/s6e8-150-member-fusion,hboyang_s6e8-150-member-fusion/submission_nested.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783805
+hboyang/s6e8-150-member-fusion,hboyang_s6e8-150-member-fusion/oof_nested.npy,npy,691369,"(691369,)",,5.53108
+hboyang/s6e8-150-member-fusion,hboyang_s6e8-150-member-fusion/test_nested.npy,npy,296302,"(296302,)",,2.370544
+hboyang/s6e8-150-member-fusion,hboyang_s6e8-150-member-fusion/test_mix.npy,npy,296302,"(296302,)",,2.370544
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783757
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/preds.npz[y],npz,691369,"(691369,)",,29.236794
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/preds.npz[oof_lgb],npz,691369,"(691369,)",,29.236794
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/preds.npz[oof_xgb],npz,691369,"(691369,)",,29.236794
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/preds.npz[oof_cat],npz,691369,"(691369,)",,29.236794
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/preds.npz[test_lgb],npz,296302,"(296302,)",,29.236794
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/preds.npz[test_xgb],npz,296302,"(296302,)",,29.236794
+shinak0502/notebook48ddac235f,shinak0502_notebook48ddac235f/preds.npz[test_cat],npz,296302,"(296302,)",,29.236794
+stephentarter/ps-s06e08-histgradientboosting,stephentarter_ps-s06e08-histgradientboosting/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.76007
+stephentarter/ps-s06e08-histgradientboosting,stephentarter_ps-s06e08-histgradientboosting/predictions/hgb_test_probs.csv,csv,296302,"(296302, 3)",id|prob_0|prob_1,13.820178
+stephentarter/ps-s06e08-histgradientboosting,stephentarter_ps-s06e08-histgradientboosting/predictions/hgb_oof_probs.csv,csv,691369,"(691369, 4)",id|target|prob_0|prob_1,33.509257
+yaminh/smartphone-addiction-prediction-strong-eda-cv-eble,yaminh_smartphone-addiction-prediction-strong-eda-cv-eble/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783805
+yaminh/smartphone-addiction-prediction-strong-eda-cv-eble,yaminh_smartphone-addiction-prediction-strong-eda-cv-eble/test_base_models.csv,csv,296302,"(296302, 4)",id|lgbm_te|xgb_te|catboost,19.141988
+yaminh/smartphone-addiction-prediction-strong-eda-cv-eble,yaminh_smartphone-addiction-prediction-strong-eda-cv-eble/oof_base_models.csv,csv,691369,"(691369, 5)",id|addicted_label|lgbm_te|xgb_te|catboost,45.93106
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.76323
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/fmdeep_oof_logits.npy,npy,691369,"(691369,)",,5.53108
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/submission_catboost_gpu_5fold.csv,csv,296302,"(296302, 2)",id|addicted_label,7.75837
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/xgboost_test_predictions.npy,npy,296302,"(296302,)",,2.370544
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/fmdeep_test_logits.npy,npy,296302,"(296302,)",,2.370544
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/fmdeep_ensemble_test_predictions.npy,npy,296302,"(296302,)",,2.370544
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/submission_fmdeep_ensemble_candidate.csv,csv,296302,"(296302, 2)",id|addicted_label,7.765444
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/fmdeep_oof_predictions.npy,npy,691369,"(691369,)",,5.53108
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/final_fmdeep_ensemble_test.npy,npy,296302,"(296302,)",,2.370544
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/submission_xgboost_gpu_5fold.csv,csv,296302,"(296302, 2)",id|addicted_label,7.763827
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/catboost_test_predictions.npy,npy,296302,"(296302,)",,2.370544
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/fmdeep_test_predictions.npy,npy,296302,"(296302,)",,2.370544
+yadoy666/predicting-smartphone-addiction,yadoy666_predicting-smartphone-addiction/submission_catboost_xgboost_ensemble.csv,csv,296302,"(296302, 2)",id|addicted_label,7.761856
+ayushmuley/notebookc9fa246ba4,ayushmuley_notebookc9fa246ba4/subxgb.csv,csv,296302,"(296302, 2)",id|addicted_label,2.666736
+ayushmuley/notebookc9fa246ba4,ayushmuley_notebookc9fa246ba4/subrf.csv,csv,296302,"(296302, 2)",id|addicted_label,2.666736
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/submission_mlp_fold4.csv,csv,296302,"(296302, 2)",id|addicted_label,7.749496
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/oof_mlp.npy,npy,691369,"(691369,)",,5.53108
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/submission_mlp.csv,csv,296302,"(296302, 2)",id|addicted_label,7.750977
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/submission_mlp_fold1.csv,csv,296302,"(296302, 2)",id|addicted_label,7.757812
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/test_mlp.npy,npy,296302,"(296302,)",,2.370544
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/submission_mlp_fold5.csv,csv,296302,"(296302, 2)",id|addicted_label,7.750977
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/submission_mlp_fold3.csv,csv,296302,"(296302, 2)",id|addicted_label,7.745982
+mohankrishnathalla/s6e8-tabm-oof-saver,mohankrishnathalla_s6e8-tabm-oof-saver/submission_mlp_fold2.csv,csv,296302,"(296302, 2)",id|addicted_label,7.750108
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.760701
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_xgb_seed42.npy,npy,691369,"(691369,)",,5.53108
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_lgbm_v1_seed42.npy,npy,691369,"(691369,)",,5.53108
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_matrix.npy,npy,296302,"(296302, 6)",,14.222624
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_lgbm_v3_seed42.npy,npy,691369,"(691369,)",,5.53108
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_predictions_all_models.csv,csv,296302,"(296302, 7)",lgbm_v1_seed42|lgbm_v2_seed42|lgbm_v3_seed42|xgb_seed42|xgb_seed2026|xgb_seed777|id,36.185329
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_matrix.npy,npy,691369,"(691369, 6)",,33.18584
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_xgb_seed42.npy,npy,296302,"(296302,)",,2.370544
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_lgbm_v2_seed42.npy,npy,691369,"(691369,)",,5.53108
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_lgbm_v3_seed42.npy,npy,296302,"(296302,)",,2.370544
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_xgb_seed2026.npy,npy,691369,"(691369,)",,5.53108
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_xgb_seed777.npy,npy,296302,"(296302,)",,2.370544
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_xgb_seed777.npy,npy,691369,"(691369,)",,5.53108
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_lgbm_v1_seed42.npy,npy,296302,"(296302,)",,2.370544
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_lgbm_v2_seed42.npy,npy,296302,"(296302,)",,2.370544
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/oof_predictions_all_models.csv,csv,691369,"(691369, 8)",lgbm_v1_seed42|lgbm_v2_seed42|lgbm_v3_seed42|xgb_seed42|xgb_seed2026|xgb_seed777|id|addicted_label,85.675789
+rv1922/smartphone-addiction,rv1922_smartphone-addiction/model_outputs/test_xgb_seed2026.npy,npy,296302,"(296302,)",,2.370544
+gauravduttaiiitb/ex51-s6e8-flaml-log-loss,gauravduttaiiitb_ex51-s6e8-flaml-log-loss/log_loss.csv,csv,296302,"(296302, 2)",id|addicted_label,7.768877
+shashwat1729/s6e8-knn-target-gbm,shashwat1729_s6e8-knn-target-gbm/submission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.762827
+shashwat1729/s6e8-knn-target-gbm,shashwat1729_s6e8-knn-target-gbm/test_knn_gbm.npy,npy,296302,"(296302,)",,2.370544
+shashwat1729/s6e8-knn-target-gbm,shashwat1729_s6e8-knn-target-gbm/oof_knn_gbm.npy,npy,691369,"(691369,)",,5.53108
+babulkumar07/notebook212f18c3fb,babulkumar07_notebook212f18c3fb/susubmission.csv,csv,296302,"(296302, 2)",id|addicted_label,7.783788

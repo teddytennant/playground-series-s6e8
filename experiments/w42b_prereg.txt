@@ -1,0 +1,81 @@
+w42 PRE-REGISTRATION — written 2026-08-21 ~00:35 UTC, BEFORE any solo AUC or correlation
+exists for a single one of these vectors
+=========================================================================================
+Provable: experiments/w42c_vet.py and w42c_vet.csv do not exist when this is committed.
+w42a_inventory.py has run, so the FILE LISTING is known; no NUMBER derived from any of
+these vectors is. The rule below is therefore fixed against the numbers it will select on.
+
+WHAT THIS OPENS
+---------------
+The w40a sweep classified 218 refs and left 53 CANDIDATEs. Exactly ONE was mined —
+`yadoy666/94-verified-oof-gpu-accelerated-meta-stack` -> ext_members15 -> ARM 211. The other
+52 have sat unread since 08-20. w42a walked all of them and found 51 refs carrying at least
+one artefact at our exact row counts (691369 / 296302). That is the largest unmined surface
+left in this competition, and it is nine days from the deadline.
+
+THE RULE — the w40d rule, VERBATIM, not re-derived and not re-tuned
+--------------------------------------------------------------------
+A candidate is any (oof, test) pair from these dirs that can be matched WITHOUT a judgement
+call: same column name on both sides, or the file-name convention oof_X.npy / test_X.npy, or
+a single unambiguous vector on each side. A pair needing me to guess which test column goes
+with which OOF column is NOT a candidate and is recorded as UNPAIRABLE.
+
+ext_members16 = every candidate stream with
+
+      maxcorr < 0.99  AND  solo > 0.966319
+
+against everything we already hold. Both constants are LIFTED UNCHANGED from w40d_prereg.txt
+(0.99 = the w38b duplicate line; 0.966319 = the pack median solo from w38d_prereg.txt). They
+are not re-fitted to this pool, no stream is hand-picked, and I do not get to look at the
+ranking and then move a threshold. If the rule selects zero streams, ARM 16x is not built and
+that is a legitimate outcome.
+
+⚠ maxcorr is a SCREEN, not a price. RESEARCH's "⛔⛔ DECORRELATION DOES NOT PRICE A MEMBER"
+stands and is not weakened by this pool being new.
+
+⛔⛔ THE es-on-val CLAUSE — INHERITED FROM ARM 211 AND, IF ANYTHING, STRICTER HERE
+---------------------------------------------------------------------------------
+w41 §4 closed the es-bias line with a negative result: the inflation is MEMBER-SPECIFIC
+(n=3, sd 3.70e-4 across members) and the single +2.729e-4 constant is withdrawn. So there is
+no deflation term available to correct a suspect member, and the only defence left is
+provenance. These are 50 separate authors' notebooks whose es status is unknown per member.
+
+  ⛔ NO ARM BUILT ON ext_members16 IS ELIGIBLE FOR check_selection.WANTED ON CV ALONE.
+     It may be built, priced, queued and SENT — a send is free under this brief and its LB
+     reading is what discriminates a real gain from an es-on-val artefact — but it does not
+     become a deadline pick on a CV number. Promotion requires per-member es status read out
+     of the source notebook's own log.
+
+Each candidate's .log IS on disk, so this is readable work, not an impossibility. It is
+simply not done yet, and the arm does not get the benefit of the doubt until it is.
+
+REGISTERED EXPECTATION
+----------------------
+Matched control: whatever ARM the w41a chain leaves as the current best base (ARM 202 if
+w38d lands, else ARM 197). The delta is attributable to the added group AS A GROUP.
+
+Honest prior, and it is LOWER than w40d's: RESEARCH prices a further GBDT into this stack at
+~4e-7, and w41 §5 has since measured the CV->LB slope FLATTENING at the top of our range
+(+21.7e-6 of CV bought exactly zero public LB). Most of this pool is baseline LGBM/XGB/CB —
+the most redundant possible material against a 199-member pack. Registered central
+expectation: **+0 to +10e-6**, with a real chance of an exact null and a genuine chance of a
+negative. Anything above +40e-6 is DISBELIEVED ON SIGHT as the es-on-val signature, exactly
+as in w40d.
+
+WHAT WOULD MAKE THIS WORTH MORE THAN THE PRIOR
+-----------------------------------------------
+Not the GBDT bulk. The specific streams that are structurally absent from a 199-member pack
+built almost entirely of GBDTs and NN tabular models:
+  - rank-gauss + logistic regression (nikita7364777) — a LINEAR model on a rank transform
+  - deep univariate SPLINE transformers (ern711, two variants) — additive-in-splines
+  - a screen-time-BLIND GBM (shashwat1729) — trained with the dominant feature removed
+  - KNN-target features (shashwat1729)
+These are named here, before the numbers, so that a later run cannot claim the interesting
+result was the one it was looking for. They still have to pass the same rule as everything
+else; being interesting does not exempt them.
+
+⛔ NOT IMPORTABLE, and recorded so a later run does not re-hope: 
+`untouchableforest/s6e8-knn-diversifier-v3-raw-knn-output` ships knn_raw.npy at TEST length
+only, with NO OOF vector. A pure-KNN stream is the most structurally novel thing in the whole
+pool and it cannot be stacked without an OOF. Regenerating it locally is a separate build,
+not an import, and is not attempted under this prereg.
