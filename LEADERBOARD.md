@@ -1629,3 +1629,11 @@ disk** — and the corrected pricer puts it at 0.97125, i.e. inside the top 10. 
 and WANTED-ineligible, because w48d traces essentially all of that CV to one imported member
 whose standalone OOF AUC (0.9701816) exceeds our entire 217-member stack. **Do not read that
 0.97125 as a rank we are declining to take. Read it as the trap the veto exists for.**
+
+## 2026-08-21 02:4x UTC (w49)
+Best public **0.97118**, rank ~18. Gold cut (top 14) `thisray` **0.97120** — **2e-5 short**,
+fourth consecutive unchanged read. Leader Changye Li 0.97136; MILANFX 0.97134; Optimistix and
+Maher el Ouahabi 0.97127; cstdy 0.97126 (moved 01:33 UTC today).
+The board is compressing at the top: 0.97119–0.97127 now holds ~10 teams, so a single 1e-5 step
+is worth several places. Our 10 sends at 00:07 today produced no new best (three tied 0.97118).
+⛔ **Nothing is selected.** Needs Teddy in his own browser before 08-31.

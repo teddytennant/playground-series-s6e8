@@ -27,10 +27,33 @@ and destroyed the day's experiment in one keystroke.
 .venv/bin/python experiments/w26g_send.py --go --n 10   # only after the dry run matches
 ```
 
-`w48e_order.py` reads the registered order out of `w47b_probe.json`, asserts none of it is
-vetoed, and verifies all ten end-to-end (296,302 rows, no NaN, md5 matches, CV reproduces from
-the stored OOF vector) **before** writing. To register a different day, edit `ORDER`/`WHY` in
-it — do not hand-edit the CSV.
+`w48e_order.py` asserts none of the day's order is vetoed and verifies all ten end-to-end
+(296,302 rows, no NaN, md5 matches, CV reproduces from the stored OOF vector) **before** writing.
+
+### ⛔ THE ORDER IS KEYED BY UTC SEND DATE (w49). ADD A DAY, NEVER EDIT ONE.
+
+w48 fixed the stale list's *contents* but left the shape that caused it: one hardcoded `ORDER`
+with nothing tying it to the day it was written for. w48's own handover then said to overwrite
+that variable with the 08-23 ten — while the 08-22 window had not opened — which would have
+re-created the identical bug.
+
+```python
+ORDERS = {"2026-08-22": [...w47b's ten...], "2026-08-23": ORDER_0823}
+```
+
+`w48e_order.py` takes `--day` (default: **today UTC**) and **exits 2 on an unregistered day**
+rather than silently running another day's list. To register a new day, **ADD A KEY to
+`ORDERS`/`WHYS`. Never edit another day's list, and never hand-edit the CSV.**
+
+⚠ **A calibration file must never be priced by `QP.predict`.** That line is fitted on
+cross-fitted stacks; applied to a raw member it announced `w48_cal_hboyang_mix` at
+`pred 0.97129, P(beat account best) 1.00`. Cal rows take their builder's own registered
+prediction, `p_beat` blank, `fam = member` (`CAL_ROWS` in `w48e_order.py`). w37e's R2 killed the
+linear form off-range at 6.3σ precisely so this would not be done.
+
+⚠ **A cal file whose prediction is ABOVE the account best is sent FIRST, not last.** Nothing is
+selected, so Kaggle auto-selects on best public score, and w46b §5's latest-first tiebreak means
+the last file sent wins a public tie. Sent first, it loses every tie to the stacks behind it.
 
 ### ⛔ THE VETO NOW LIVES IN CODE, NOT IN PROSE
 
@@ -65,6 +88,24 @@ stack is not a base model. ARM 217's CV is not comparable to ad187..ad211's, and
 
 ✅ **ext_members16 entered the pack ONLY at ARM 217.** Every pack ad187..ad211, including the
 WANTED file's ad199, is clean of `hboyang_mix`.
+
+### 🔴 WHAT THE VECTOR ACTUALLY IS (w49b) — and the corrected gap is 708e-6, not 886e-6
+
+`oof_hboyang_mix` is **per-fold rank-normalised**: 138,274 tie-groups of exactly five, values at
+exactly `(5j+2.5)/691369` (the `(rankdata(average)−0.5)/n` signature), and **every group of five
+holds exactly one row from each of our five folds** — 20,000/20,000, against a 3.8% chance rate.
+**`test_hboyang_mix` is globally ranked instead** (296,302/296,302 distinct). The two partitions
+were not produced by the same procedure.
+
+⛔ **That is NOT the explanation for the outlier, and it was pre-registered as a test that
+failed.** `w49c_perfoldrank.py` applied the same transform to the 12 strongest raw members:
+median lift **L = 6.8e-6** (registered threshold was ≥400e-6 to convict). Apples-to-apples with
+every control transformed the same way the best control is 0.96947325, so the residual gap is
+**+708.3e-6**, not w48d's raw-vs-ranked +885.9e-6. **Quote 708e-6.** w48d's suspicion stands and
+the 08-23 send is still the test that settles it.
+
+⚠ Train has **no exact feature duplicates** (691,369 rows → 691,369 distinct on NUM+CAT), so
+duplicate-group leakage tests are unavailable in this competition. Checked w49.
 
 ### The one clean test, pre-registered for the 08-23 list (`w48d_arm217.json`)
 

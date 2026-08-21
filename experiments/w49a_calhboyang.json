@@ -1,0 +1,17 @@
+{
+ "stem": "w48_cal_hboyang_mix",
+ "member": "hboyang_mix",
+ "oof_auc": 0.970181553604739,
+ "md5": "c033f225f09b501448c04b3cc4f11d95",
+ "rows": 296302,
+ "n_distinct": 296302,
+ "pred_lb": 0.9712298944175404,
+ "band": [
+  0.9711975834065615,
+  0.9712522654518098
+ ],
+ "rule": {
+  "honest_at_or_above": 0.97116,
+  "inflated_at_or_below": 0.9708
+ }
+}

@@ -19314,3 +19314,203 @@ corr files registered), `experiments/w23b_sendqueue.csv` + `w26d_queueprice.csv`
 `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-21 — w49, slot 9. AT CAP 10/10. Built the ARM 217 test that w48 assigned, made the send list impossible to run on the wrong day, and found out what `hboyang_mix` actually is.
+
+`date -u` **02:30 UTC on 08-21** at start, before believing the prompt's date (the prompt says
+08-20 and slot 9; the API says ten sends landed at 00:07–00:08 UTC on 08-21). **At cap. No
+submission possible this run and none attempted.** Next window 00:00 UTC on 08-22.
+
+⚠ **The ANGLE as issued — "Foundation: confirm the metric, build the fixed-fold CV harness, get
+one honest GBDT baseline scored"** — is 48 runs stale. The metric is AUC (RESEARCH.md), the
+frozen folds are `SKF5 seed 42` in `agent/common.py`, and GBDT tuning is on w48 §8's do-not-reopen
+list. I followed w48 §8's ordered handover instead, which is what that list exists for.
+
+## 0. A false start, recorded because it cost real tokens
+
+I opened by checking whether the five `w37_cal_*` es-bias readings that scored at 00:07 today
+had been read against `w37c_prereg.py`'s R1–R5, since w48's entry never mentions them. **They
+had been** — journal §4 of the w41 entry: R1 PASSES, R2 FAILS at 6.3σ, R3 withdraws the +2.7e-4
+constant. `w37e_readout.csv` was already on disk with the `lb` column filled. **The lesson is
+cheap and worth keeping: grep `experiments/` for a `*_readout*` artefact before concluding an
+experiment is unread.** The absence of a mention in the LAST entry is not evidence of absence.
+
+## 1. ✅ ASSIGNED AND DONE — `w48_cal_hboyang_mix.csv` exists (w48 §8 item 5)
+
+`w49a_calhboyang.py`. Built from `data/ext_members16/test_hboyang_mix.npy`, 296,302 rows, no
+NaN, md5 `c033f225f09b501448c04b3cc4f11d95`. The OOF side is verified before the file is
+written: standalone AUC **0.9701815536**, reproducing w48d's reading to <5e-10, so this is
+provably the same vector w48d convicted. `oof_w48_cal_hboyang_mix.npy` is saved alongside so
+w48e's end-to-end verifier can reproduce a CV for it — for a raw member that CV *is* the
+standalone OOF AUC, i.e. the quantity under test, so it must travel with the file.
+
+**w48d's registered rule is carried unchanged and NOT re-derived:** predicted 0.97123, band
+[0.97120, 0.97125]; ≥0.97116 HONEST; ≤0.97080 INFLATED. Not a deadline candidate under any
+outcome.
+
+## 2. 🔴 THE FIX THAT MATTERS MOST — a send list can no longer be run on the wrong day
+
+w48's headline defect was the sender executing a **36-hour-stale** list. w48 fixed the *contents*
+by writing `w48e_order.ORDER`, but left the shape that caused it: **one hardcoded list, with
+nothing tying it to the day it was written for.** w48 §8 item 5 then told me to overwrite that
+same variable with the 08-23 ten — which would have armed the sender with the 08-23 list while
+**the 08-22 window has not opened yet.** Following the handover literally would have re-created
+the exact bug it was written to close.
+
+`w48e_order.py` is now **keyed by UTC send date**:
+
+```
+ORDERS = {"2026-08-22": [...w47b's registered ten...], "2026-08-23": ORDER_0823}
+```
+
+It takes `--day` (default: today UTC) and **refuses with exit 2 on an unregistered day** rather
+than silently running another day's list. Verified all three ways this run:
+
+- `--day 2026-08-22` → w47b's registered ten, same order, same prices. **Unchanged.**
+- `--day 2026-08-23` → the new ten, all verifying end-to-end.
+- `--day 2026-08-21` (today) → **⛔ refuses.** No list is registered for today, and that is now
+  a loud failure instead of a silent re-send.
+
+✅ **`w26g_send.py --n 10` still plans exactly the 08-22 ten.** I wrote nothing to
+`w26d_queueprice.csv` this run, deliberately: the 08-22 window opens first, and the ritual's
+`--write` step will now pick 08-22 by date on its own.
+
+## 3. ⚠ A DANGEROUS NUMBER THE ORDER WRITER WAS PRINTING, and the ordering it forced
+
+Injecting the calibration row exposed that `w48e` priced it through `QP.predict` — the cv→LB
+line fitted on **cross-fitted stacks** — and printed:
+
+```
+w48_cal_hboyang_mix   pred 0.97129   P(beat account best) 1.00
+```
+
+That announces a **single imported member vector as certain to beat the account best**, and
+w37e's R2 killed the linear form off-range at 6.3σ precisely so this would not be done. Cal
+rows now take the builder's own registered prediction, `p_beat` is blanked, and `fam` is
+`member`. They can no longer sort or be promoted on a probability of beating anyone.
+
+**And it changed the send order.** The registered prediction 0.97123 is **above** this account's
+0.97118 best, and **nothing is selected**, so Kaggle auto-selects on best public score. Under
+w46b §5's latest-first tiebreak the *last* file sent wins a public tie — so sending a raw member
+last would hand it every tie against our own stacks. It goes **FIRST**, losing every tie to the
+nine stacks behind it, which also guarantees the experiment happens if the day is cut short
+(w37c R5). Both arguments point the same way.
+
+⚠ Note the hazard is **self-limiting and worth stating**: it only bites in the HONEST branch
+(lb ≥ 0.97116). In the INFLATED branch the file scores ≤0.97080, far below 0.97118, and cannot
+be auto-selected at all.
+
+## 4. THE 08-23 TEN, REGISTERED (`w48e_order.ORDER_0823`)
+
+Slot 1 the ARM 217 test; slots 2–10 the nine best remaining by CV, ascending so **best CV is
+last**. This **includes all five files w47b dropped** from the 08-22 ten — "they go back in the
+queue for 08-23 or later, not away", honoured.
+
+```
+ 1 w48_cal_hboyang_mix   oof 0.9701815536  pred 0.97123   THE ARM 217 TEST
+ 2 w38_ad202std_rescale  cv  0.9701200354      3 w34_ad195std_h3      cv 0.9701205753
+ 4 w40_ad211std_rescale  cv  0.9701209816      5 w36_ad197std         cv 0.9701210589
+ 6 w38_ad202std_hybrid   cv  0.9701232618      7 w36_ad197std_h3      cv 0.9701244431
+ 8 w36_ad197stdcorr      cv  0.9701286299      9 w38_ad202std_h3      cv 0.9701330214
+10 w40_ad211std_h3       cv  0.9701331846
+```
+
+All ten verified: 296,302 rows, no NaN, md5 matches the queue, CV reproduces from the stored
+OOF vector. No vetoed file among them (the veto is 12 files and is asserted in code).
+
+## 5. 🔴🔴 WHAT `hboyang_mix` ACTUALLY IS — the mechanism, found from the file itself
+
+w48 convicted this member on **outlier magnitude alone** and was explicit that the direct
+leakage diagnostic did **not** convict. So I characterised the artefact before sending it
+(`w49b_hboyang.py`, prereg committed before running). The structure is not statistical, it is
+mechanical:
+
+- The OOF has **276,547 distinct values over 691,369 rows**; the TEST vector has **296,302 over
+  296,302 — fully distinct.**
+- Tie sizes are **exactly 4 and exactly 1, nothing else**: 138,274 groups of 4 and 138,273
+  singletons, in a **perfectly alternating 4,1,4,1,…** pattern.
+- The values sit at exactly **(5j + 2.5)/691369** — the signature of `(rankdata(average) − 0.5)/n`
+  over **138,274 tie-groups of five** (the 4/1 split is float64 rounding of one group of 5;
+  691,369 = 5·138,273 + 4, which is why exactly one group has 4).
+- **Every group of five contains exactly one row from each of our five folds** — 20,000 of
+  20,000 groups checked, against a chance rate of 5!/5⁵ = **3.8%**.
+
+**The vector is per-fold rank-normalised**: each fold's predictions ranked separately, then
+concatenated. **The test vector is globally ranked instead.** The two partitions were not
+produced by the same procedure — a real, documented asymmetry that no amount of outlier
+argument would have found.
+
+## 6. ⛔ AND MY EXPLANATION FOR IT WAS WRONG — recorded as a miss
+
+I pre-registered (`w49c_perfoldrank.py`, **committed before it was run**) that this normalisation
+was the artefact: per-fold ranking removes cross-fold scale mismatch, a free gain the test set
+cannot receive. Registered rule: median lift **L ≥ 400e-6 → normalisation artefact**;
+**L ≤ 100e-6 → not the explanation**.
+
+**L = 6.8e-6** over the 12 strongest raw members (min −1.0, max +259.2). **The transform is
+nearly free. My hypothesis is dead.** Apples-to-apples, with every control given the same
+treatment:
+
+| comparison | gap |
+|---|---|
+| w48d's, raw-vs-ranked (best control 0.96929565) | +885.9e-6 |
+| **corrected, ranked-vs-ranked (best control 0.96947325)** | **+708.3e-6** |
+
+So the normalisation explains **178e-6 of 886e-6 — about a fifth — and the outlier survives at
++708e-6.** ✅ **w48d's suspicion stands, and the 08-23 send remains the right test.** The one
+thing I would not have known otherwise: the honest comparison figure is **708e-6, not 886e-6**,
+and any future quote should use it.
+
+⚠ Also a real defect in my own w49b: the T3 "81.86% of label variance explained between groups"
+is **meaningless** — with 138,273 singleton groups, each singleton explains its own label by
+construction. Bad metric, stated rather than quietly dropped.
+⚠ Incidental: `ravi200_publicm12` (+259e-6) and `ravi200_l2stack1r` (+154e-6) are the only
+controls with a large lift — the same two files w48 named as the OOF-vs-test agreement outliers.
+Noted, not pursued.
+
+## 7. BOARD AND STATE, 02:4x UTC
+
+- Best public **0.97118**, rank ~18. Gold cut (top 14) `thisray` **0.97120**; leader Changye Li
+  **0.97136**. **2e-5 below gold**, fourth consecutive unchanged read.
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS** (`check_selection.py` exits 1). WANTED
+  `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr` — both sent and selectable. **This needs Teddy, in
+  his own browser.** Deadline 08-31. This is the single largest unmanaged risk on the account.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+- Train has **no exact feature duplicates** (691,369 rows → 691,369 distinct on NUM+CAT), so
+  duplicate-group leakage tests are unavailable here. Checked this run, recorded so no one
+  re-checks.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid; **never** `ps`/`pgrep`.
+2. **If the 08-22 window is open:** run the ritual in RESEARCH.md — `w23b_sendqueue.py`,
+   `w48e_order.py` (it now picks the day itself), `--write`, then `w26g_send.py --n 10` **dry**,
+   and only `--go` once the dry run matches the registered ten.
+3. Once the 08-22 ten score, apply **all three reading rules in `w47b_prereg.txt`** — p over the
+   five probes (ERA vs CV-REGION), r5 over the five drain files, E4's slope regression on the
+   pooled 15. **Read all three; do not pick the one that suits the day's argument.**
+4. **If p ≥ −12 (CV-REGION):** replace `w46c.new_era` with a `cv > 0.970118` threshold, mark
+   w46c superseded, re-price the 19 in-support ad≥195 queue files up by 29.8e-6.
+   **If p ≤ −18 (ERA):** w46c stands; re-estimate `ERA_SHIFT` on all 15 points.
+5. The **08-23 list is already registered** in `w48e_order.ORDER_0823` and its file is built. Do
+   not rewrite it; if a day beyond 08-23 is needed, ADD a key, never edit another day's.
+6. Do **NOT** re-open: the import line, the within-group redundancy test (w44 §9), the member
+   side-scale axis (w43 §2), KS as a gate (w43 §4), §4-level re-pricing as a script (w43 §5),
+   GBDT tuning, error analysis / OOF segmentation, fold/seed averaging, the top-level blend-weight
+   search, FE variants, the original dataset, the stacker C, the selection write path, the es-bias
+   deflation constant (w41 §4), a fourth sweep of the public kernel pool, the era shift (six
+   attacks, w48 §5), the logit veto (w48 §6), **the w37 es-bias readout (§0 — it is READ)**, or
+   **per-fold rank normalisation as an explanation for hboyang (§6 — measured at 6.8e-6)**.
+7. ⚠ **Never use in-sample residuals to test extrapolation** (w47 §1). ⚠ **Never lower the
+   `cv >= 0.97` floor** (w48 §5). ⚠ **A send list that is only in a prereg is not a send list**
+   (w48 §1). ⚠ **A send list not keyed to its day is a bug waiting to fire** (§2).
+
+**Files added:** `experiments/w49a_calhboyang.py` + `.json`, `w49b_hboyang.py` + `.json`,
+`w49c_perfoldrank.py` + `.json`, `submissions/w48_cal_hboyang_mix.csv` +
+`oof_w48_cal_hboyang_mix.npy`.
+**Modified:** `experiments/w48e_order.py` (day-keyed; cal rows unpriced by the stack line),
+`RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

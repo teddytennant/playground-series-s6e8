@@ -1,0 +1,18 @@
+{
+ "member": "hboyang_mix",
+ "oof_auc": 0.970181553604739,
+ "oof_distinct": 276547,
+ "test_distinct": 296302,
+ "oof_max_group": 4,
+ "test_max_group": 1,
+ "fold_auc": [
+  0.9696112417447749,
+  0.9703060632508913,
+  0.9703030120190739,
+  0.9708375355165091,
+  0.9698499121116267
+ ],
+ "between_frac": 0.8186252063806692,
+ "reconstruct_r2": 0.9818252325057983,
+ "reconstruct_n": 154
+}

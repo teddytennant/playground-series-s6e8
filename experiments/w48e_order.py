@@ -82,10 +82,54 @@ VETO = {
     "w42_ad217std_rescale":   "w48d: ARM 217, as above.",
 }
 
-# ------------------------------------------------------------------- THE REGISTERED 08-22 TEN
+# ------------------------------------------------------------------- THE REGISTERED DAYS
+# ⚠ w48 found the sender executing a THIRTY-SIX HOUR STALE list. A single hardcoded ORDER is
+# how that happened: nothing tied the list to the day it was written for. ORDERS is keyed by
+# the UTC send date and the writer refuses to run for a day that is not registered, so a list
+# can never be executed on the wrong day and a missing list fails loudly instead of silently
+# re-sending yesterday's.
 REG = json.load(open(os.path.join(HERE, "w47b_probe.json")))
-ORDER = list(REG["order"])
-WHY = {
+
+# ---- 08-23: the ARM 217 test, plus the nine highest-CV files left in the queue ----------
+# Slot 1 is `w48_cal_hboyang_mix`, registered in w48d and built by w49a. Slots 2-10 are the
+# nine best remaining by CV, which INCLUDES all five files w47b dropped from the 08-22 ten
+# ("they go back in the queue for 08-23 or later, not away" -- honoured here).
+#
+# ⚠ WHY THE CALIBRATION FILE GOES FIRST AND NOT LAST. Its registered prediction is 0.97123,
+# ABOVE this account's 0.97118 best, and NOTHING IS SELECTED, so Kaggle would auto-select on
+# best public score. Under w46b §5's latest-first tiebreak the LAST file sent wins a public
+# tie -- so sending a raw single-member vector last would hand it every tie against our own
+# stacks. Sent FIRST, it loses every tie to the nine stacks that follow it. Sending it first
+# also guarantees the experiment happens if the day is cut short (w37c R5's rule).
+ORDER_0823 = [
+    "w48_cal_hboyang_mix",
+    "w38_ad202std_rescale", "w34_ad195std_h3", "w40_ad211std_rescale", "w36_ad197std",
+    "w38_ad202std_hybrid", "w36_ad197std_h3", "w36_ad197stdcorr", "w38_ad202std_h3",
+    "w40_ad211std_h3",
+]
+WHY_0823 = {
+    "w48_cal_hboyang_mix":  "THE ARM 217 TEST, registered in w48d_arm217.json before this file "
+                            "existed. Raw test vector of imported member `hboyang_mix`, whose "
+                            "standalone OOF AUC on our frozen folds is 0.9701816 -- +886e-6 "
+                            "clear of the best of the other 176 members and ABOVE our whole "
+                            "217-member stack. Predicted LB 0.97123, band [0.97120, 0.97125]. "
+                            ">=0.97116 HONEST; <=0.97080 INFLATED, drop the member. Priced off "
+                            "the 34 NEAREST anchors, not the w36f line, because w37e's R2 "
+                            "killed the linear form at 6.3σ. NOT a deadline candidate.",
+    "w38_ad202std_rescale": "DRAIN. One of the five w47b dropped from the 08-22 ten; back in "
+                            "the queue as promised.",
+    "w34_ad195std_h3":      "DRAIN. ad195, h3.",
+    "w40_ad211std_rescale": "DRAIN. One of w47b's five dropped files.",
+    "w36_ad197std":         "DRAIN. ad197, ens4.",
+    "w38_ad202std_hybrid":  "DRAIN. ad202, hybrid.",
+    "w36_ad197std_h3":      "DRAIN. ad197, h3.",
+    "w36_ad197stdcorr":     "DRAIN. One of w47b's five dropped files; corrected h3 on ad197.",
+    "w38_ad202std_h3":      "DRAIN. One of w47b's five dropped files.",
+    "w40_ad211std_h3":      "DRAIN, best CV of the nine and therefore LAST -- latest-first "
+                            "tiebreak (w46b §5). One of w47b's five dropped files.",
+}
+
+WHY_0822 = {
     "w40_ad211std_rankraw": "PROBE 1/5. ad211, INSIDE the fitted CV support. ERA predicts it "
                             "lands ~-29.8e-6 under w30b; CV-REGION predicts ~0. Screened free "
                             "under the GENEROUS uncorrected w30b so the test is not circular.",
@@ -107,9 +151,32 @@ WHY = {
                             "file, the later timestamp wins the tier, free.",
 }
 
+ORDERS = {"2026-08-22": list(REG["order"]), "2026-08-23": ORDER_0823}
+WHYS   = {"2026-08-22": WHY_0822,           "2026-08-23": WHY_0823}
+
+# calibration files have no entry in w23b_sendqueue (no stack CV to rank on) and must be
+# injected, exactly as w37c_prereg.py did for the w37 batch. stem -> (builder json, note).
+CAL_ROWS = {"w48_cal_hboyang_mix": "w49a_calhboyang.json"}
+
+DAY = None
+for i, a in enumerate(sys.argv):
+    if a == "--day":
+        DAY = sys.argv[i + 1]
+if DAY is None:
+    from datetime import datetime, timezone
+    DAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
 print("=" * 90)
-print("w48e  THE REGISTERED 08-22 TEN -> the artefact w26g_send.py actually reads")
+print(f"w48e  THE REGISTERED TEN FOR {DAY} (UTC) -> the artefact w26g_send.py actually reads")
 print("=" * 90)
+
+if DAY not in ORDERS:
+    print(f"\n  ⛔ NO LIST IS REGISTERED FOR {DAY}. Registered days: "
+          f"{', '.join(sorted(ORDERS))}.")
+    print("     Refusing to write. Add the day to ORDERS/WHYS -- do NOT re-run another day's "
+          "list,\n     which is exactly the w48 defect this keying exists to prevent.")
+    sys.exit(2)
+ORDER, WHY = ORDERS[DAY], WHYS[DAY]
 
 bad = sorted(set(ORDER) & set(VETO))
 assert not bad, f"⛔ the registered order contains VETOED files: {bad}"
@@ -177,6 +244,20 @@ if os.path.exists(DST):
     if len(extra):
         print(f"  carried {len(extra)} row(s) w23b cannot regenerate: {', '.join(extra.stem)}")
         q = pd.concat([q, extra], ignore_index=True)
+# inject registered calibration files (no stack CV, so w23b never lists them)
+for stem, jf in CAL_ROWS.items():
+    if stem in q.stem.values or stem in LIVE_SENT:
+        continue
+    jp = os.path.join(HERE, jf)
+    if not os.path.exists(jp):
+        print(f"  ⚠ {stem}: {jf} missing -- not injected. Run its builder first.")
+        continue
+    m = json.load(open(jp))
+    q = pd.concat([q, pd.DataFrame([dict(file=f"{stem}.csv", sent=False, cv=m["oof_auc"],
+                                         rows=m["rows"], md5=m["md5"], stem=stem)])],
+                  ignore_index=True)
+    print(f"  injected calibration row {stem} (standalone OOF AUC {m['oof_auc']:.10f})")
+
 q = q.reset_index(drop=True)
 q["fam"] = q.stem.map(family)
 q["std"] = q.stem.map(is_std)
@@ -193,6 +274,19 @@ q["p_beat"] = np.nan
 q.loc[_has, "p_beat"] = 1.0 - _norm.cdf(
     (QP.BEST_LB + QP.STEP / 2 - q.loc[_has, "pred_lb"])
     / np.array([QP.resid_sd(s) for s in q.loc[_has, "stem"]]))
+# ⚠ A CALIBRATION FILE MUST NOT CARRY A STACK PRICE. QP.predict is the cv->LB line fitted on
+# CROSS-FITTED STACKS; applied to a raw member vector it produced `pred 0.97129, P(beat) 1.00`
+# for w48_cal_hboyang_mix -- i.e. it announced that a single imported member is CERTAIN to beat
+# the account best. w37e's R2 killed the linear form off-range at 6.3σ precisely so this would
+# not be done. Overwrite with the builder's own registered prediction, and blank p_beat: these
+# files are measurements and must never sort or be promoted on a probability of beating anyone.
+for stem, jf in CAL_ROWS.items():
+    m = q.stem == stem
+    if m.any() and os.path.exists(os.path.join(HERE, jf)):
+        q.loc[m, "pred_lb"] = json.load(open(os.path.join(HERE, jf)))["pred_lb"]
+        q.loc[m, "p_beat"] = np.nan
+        q.loc[m, "fam"] = "member"
+
 q["vetoed"] = q.stem.isin(VETO)
 print(f"  {int((~_has).sum())} row(s) carry no CV and are left unranked: "
       f"{', '.join(q[~_has].stem)}")
@@ -257,8 +351,9 @@ q = q.sort_values(["priority", "send_rank", "pred_lb"], ascending=[False, True, 
 
 print(f"\n  {'#':>3} {'file':28s} {'cv':>13s} {'pred':>8s} {'P':>9s}  kind")
 for r in q[q.priority == 1].itertuples():
-    kind = "PROBE" if int(r.send_rank) <= 5 else "DRAIN"
-    print(f"  {int(r.send_rank):3d} {r.file:28s} {r.cv:.10f} {r.pred_lb:8.5f} {r.p_beat:9.2e}  {kind}")
+    kind = WHY[r.stem].split(".")[0].split(",")[0].strip()[:34]
+    pb = "     --  " if not np.isfinite(r.p_beat) else f"{r.p_beat:9.2e}"
+    print(f"  {int(r.send_rank):3d} {r.file:28s} {r.cv:.10f} {r.pred_lb:8.5f} {pb}  {kind}")
 
 if "--write" in sys.argv:
     q.drop(columns=["vetoed"]).to_csv(DST, index=False)
