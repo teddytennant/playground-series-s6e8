@@ -2,6 +2,81 @@
 
 Durable facts. Anything learned once goes here so no later run pays for it twice.
 
+---
+
+# 🔴 ACT ON THIS FIRST — THE FINAL-SELECTION CLICK (re-priced 2026-08-21, w45)
+
+**Competition closes 2026-08-31 23:59 UTC. Nothing is selected**
+(`.venv/bin/python experiments/check_selection.py` exits 1). There is **no API write
+method** for selection — closed and re-verified, see "the authenticated API has no
+selection write method" below. **This needs Teddy, in his own browser.**
+
+### What to click
+
+https://www.kaggle.com/competitions/playground-series-s6e8/submissions → select:
+
+| slot | file | cross-fitted CV | public |
+|---|---|---|---|
+| **1st choice** | **`w36_ad199stdcorr.csv`** | **0.9701400060** | 0.97118 |
+| **2nd choice** | **`w23_ad187stdcorr.csv`** | 0.9701150809 | 0.97116 |
+
+Both are **already sent** — this is a click, not a submission. Verify with
+`check_selection.py` (exit 0 = done). Selection is changeable any time before the
+deadline, so clicking early costs nothing.
+
+### What it is worth — and this number went UP by 4x on 2026-08-21
+
+⚠ **Every figure published before 2026-08-21 (+0.8 to +5.7e-6, from w15i/w16s/w16u/w16w/
+w17d/w17g/w18a/w19c) prices a board configuration that NO LONGER EXISTS.** Those all
+assume auto-slot 1 is held by `w16e_aonly` / `w16q_ens4avg` / `w16t_cellens4`. Those three
+score 0.97108 and are in **neither** live tier. Do not quote them.
+
+Live tiers (`check_selection.py`, 2026-08-21 01:12 UTC) and the re-price
+(`experiments/w45a_tierprice.py` → `w45a_tierprice.json`, all five pre-registered
+predictions in `w45_prereg.txt` CONFIRMED):
+
+| auto-slot 1 (public 0.97118) | CV | vs the pick | cost of NOT clicking |
+|---|---|---|---|
+| **`w36_ad199stdcorr`** | 0.9701400060 | — **this IS the pick** | **+0.00e-6** |
+| `w29_ad194stdcorr` | 0.9701182875 | −21.7e-6 | **+23.71e-6** |
+| `w27_ad190stdcorr` | 0.9701181344 | −21.9e-6 | **+23.88e-6** |
+| `w21_ad187corr_ens4` | 0.9701039331 | −36.1e-6 | **+39.38e-6** |
+
+- **limit 1, uniform tiebreak: +21.74e-6. limit 2 (Kaggle's documented default): +15.77e-6.**
+- **The honest bracket is the TIEBREAK, which is undocumented and unreadable:**
+  **latest-first → +0.00e-6** (we get the pick free; `w36_ad199stdcorr` is the newest of the
+  four), **earliest-first → +35.15e-6** (`w21_ad187corr_ens4` + `w21_ad187corr`).
+  We cannot tell which. Clicking makes the question moot, which is the entire argument.
+
+### Why the click stopped being a knife-edge bet
+
+The old contrast was **dLB +30e-6 against dCV −5.3e-6**: an auto-pick that led hugely on
+public and slightly on CV, so the conditioning could attribute nearly all the lead to slice
+noise, and the click priced cheap and knife-edge — w19c found the sign **flipped** at
+tau = 1.72e-6. The live tie members are **exactly level on public (dLB = 0, same rounded
+score) and 21.7–36.1e-6 behind on CV.** There is no public lead left to shrink away, so the
+CV deficit passes through nearly intact (gamma = −0.0918, so cost ≈ 1.09 × |dCV|).
+
+Consequences, all measured in `w45a_tierprice.json`:
+- **The tau sign-flip is dead.** Swept tau ∈ [0, 5]e-6: the cheapest non-pick branch goes
+  +23.71 → +21.11e-6 and **nothing changes sign anywhere.** w19c's mechanism was the 30e-6
+  public lead and that lead is gone.
+- **It is mean-dominated, not variance-dominated.** The conservative and optimistic
+  non-additivity residuals (w17d corr 0.9924 vs 0.9971) give **identical costs to 2 d.p.**
+  The result no longer depends on the one assumed quantity in the model.
+- `P(the auto file beats BOTH wanted files privately)` = **0.083 / 0.082 / 0.015**. Not a
+  coin flip, and more decisive than w18a's 0.043/0.031/0.058, not less.
+
+### Why this is now the largest number on the table
+
+At the local board density (~2.5 places per 1e-5) the earliest-first branch is **~9 board
+places**. We sit at **rank 18, public 0.97118, with the gold cut at 0.97120 — 2e-5 away.**
+**In the bad tiebreak branch the unclicked toggle is larger than our entire distance to
+gold.** With the member-import line closed (JOURNAL w44 §6), there is nothing else of this
+size left, and unlike the modelling work it is free and certain.
+
+---
+
 ## Competition basics
 
 | | |
@@ -3483,7 +3558,14 @@ must build a multi-member version of `w15g_cvgap.py`.
 
 # w15i — durable facts for RESEARCH.md
 
-## ⚠ THE DEADLINE RECOMMENDATION, PRICED — this is the section to act on
+## ⛔ SUPERSEDED 2026-08-21 by the block at the TOP of this file — DO NOT ACT ON THIS ONE
+
+> The table below names `blend159av_h3` / `blend160origm_h3`. **Those stopped being WANTED
+> long ago** — they are CV 0.97005 against the current pick's 0.97014, i.e. clicking them
+> would be **95e-6 worse** than clicking the right pair. Retained only for the E[max]
+> argument, which is still correct and still applies; the FILES are wrong.
+
+### (historical) THE DEADLINE RECOMMENDATION, PRICED
 
 Competition closes **2026-08-31 23:59 UTC**. `check_selection.py` exits **1**: nothing is
 selected. If that is still true at the deadline Kaggle auto-selects on best **public** score.
