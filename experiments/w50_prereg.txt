@@ -1,0 +1,89 @@
+w50 PRE-REGISTRATION -- ARM 216: what fraction of ARM 217's +41.71e-6 is `hboyang_mix` alone?
+Written 2026-08-21 ~03:0x UTC, COMMITTED BEFORE THE BUILD STARTS. No ad216 AUC exists on disk.
+
+================================================================================
+1. THE GAP THIS CLOSES
+================================================================================
+ARM 217 = ARM 211 + the six members of ext_members16, added AS A GROUP. It returned
++41.71e-6 (h3 base 0.9701331846 -> 0.9701748950), falsifying w44b's registered "another
+null" at z = +12.5.
+
+w48d and w49 then established that ONE of those six, `hboyang_mix`, is a 708e-6 outlier
+in standalone OOF AUC (0.9701816) -- a single imported vector that alone out-AUCs the
+whole 217-member cross-fitted stack (0.9701749). All seven ARM 217 files were vetoed on
+that basis and a calibration read was registered for the 08-23 send.
+
+**Nobody has measured which of the six actually carries the +41.71e-6.** The group delta
+is compatible with "one suspect vector does all of it" and with "six ordinary members each
+contribute ~7e-6", and those two worlds imply opposite actions. This build separates them.
+
+================================================================================
+2. THE DESIGN -- one member removed, nothing else changed
+================================================================================
+`w50a_run.sh` is `w42e_run.sh` with `hboyang_mix` appended to --drop and the name changed.
+Same members, same --standardize, same --extra-dirs, same --drop set otherwise, same
+make_h3 and w21a chain. ARM 217 on disk is therefore a matched control differing by
+EXACTLY ONE COLUMN, and ARM 211 on disk is a matched control differing by exactly the
+other five.
+
+  d_hboyang = ARM217_h3 - ARM216_h3     <- the suspect vector's marginal contribution
+  d_five    = ARM216_h3 - ARM211_h3     <- the other five, as a group
+  d_hboyang + d_five = +41.71e-6 by construction (an arithmetic check, not a result)
+
+================================================================================
+3. THE REGISTERED CALL -- I predict hboyang_mix carries essentially all of it
+================================================================================
+  REGISTERED POINT PREDICTION:  d_five = +1.6e-6,  ARM 216 h3 base = 0.9701348
+  REGISTERED CALL:              d_five <= +10e-6   (i.e. the DROP branch of Sec. 4)
+
+Mechanism, stated so the call is falsifiable rather than vague:
+  * w44a's per-member law, re-fitted with ARM 211 in, is +0.325e-6/member (se 0.528).
+    Five ordinary members -> +1.63e-6, 95% CI [-3.55, +6.81]e-6.
+  * The other five are NOT outliers on the axis that matters. Across all 177 member OOF
+    vectors on disk the standalone-AUC distribution is median 0.96649, p99 0.96923, and
+    the best of the 176 non-hboyang members is 0.96930. The other five sit in that
+    ordinary body; only hboyang_mix is 708e-6 clear of it (w49c, ranked-vs-ranked).
+  * A ridge stacker handed a column that alone out-AUCs the stack will load on it heavily.
+    A +41.71e-6 jump concentrated in one column is the expected shape; a jump spread
+    evenly over six ordinary columns would be a 21x violation of the per-member law that
+    held across six consecutive import events.
+
+  If instead d_five >= +20e-6, my call is WRONG and the import line was closed too early
+  for reasons that have nothing to do with hboyang_mix. I would rather find that out now,
+  with ten days left, than after the 08-23 read.
+
+================================================================================
+4. DECISION RULES -- fixed before the number exists
+================================================================================
+R1. d_five <= +10e-6  => DROP branch. `hboyang_mix` carries ARM 217. The ext_members16
+    import adds nothing beyond one suspect vector, the seven-file veto is correctly
+    placed, and the 08-23 calibration read decides ARM 217's fate on its own. Do NOT
+    build an ARM 216 transform family. ARM 216 stays on disk as the ready-made clean
+    fallback (see R4).
+
+R2. d_five >= +20e-6  => SIGNAL branch. The other five carry real, non-suspect signal and
+    ARM 216 is the highest clean CV ever built here. Build the full transform family
+    (std, h3, stdcorr, hybrid, rescale) and register it as a day key in w48e_order.ORDERS
+    for 08-24 or later. ADD A KEY; never edit 08-22 or 08-23.
+
+R3. +10e-6 < d_five < +20e-6 => report the number, change nothing, no family build.
+
+R4. UNCONDITIONAL, and the reason this build is worth running under EITHER branch:
+    if the 08-23 read comes back INFLATED (lb <= 0.97080), the registered action is
+    "drop hboyang_mix" -- and the stack you would then want is exactly ARM 216. Building
+    it now puts the fallback on disk before the read instead of 42 minutes after it, with
+    the deadline on 08-31.
+
+================================================================================
+5. WHAT THIS BUILD IS NOT
+================================================================================
+* NOT a reopening of the import line (w44 Sec.6, w48 Sec.3, w45 Sec.3). It imports
+  nothing. It REMOVES a column from a pack already on disk and attributes a delta that
+  has already been measured. No new member, no new arm, no seventh arm.
+* NOT WANTED-eligible, whatever d_five turns out to be. w42b's ineligibility clause is
+  about the es-on-val status of the imported authors' notebooks being unread, and five of
+  the six remain unread after hboyang_mix is dropped. Removing one member does not
+  discharge that clause. If ARM 216 files are ever sent they are sent as queue drains and
+  reads, not as deadline picks.
+* NOT a change to the 08-22 or 08-23 send lists. Both are registered and both were
+  re-verified this run.
