@@ -1,0 +1,26 @@
+{
+  "n_scored": 101,
+  "best_public": 0.97118,
+  "tier1": [
+    "w21_ad187corr_ens4",
+    "w27_ad190stdcorr",
+    "w29_ad194stdcorr",
+    "w36_ad199stdcorr"
+  ],
+  "newest_of_tier1": "w36_ad199stdcorr",
+  "newest_is_wanted": true,
+  "band": [
+    0.9712,
+    0.97125
+  ],
+  "band_steps": [
+    0.9712,
+    0.97121,
+    0.97122,
+    0.97123,
+    0.97124,
+    0.97125
+  ],
+  "steps_where_send_order_binds": 0,
+  "mitigation_is_noop": true
+}
