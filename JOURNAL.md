@@ -18423,3 +18423,10 @@ h3-base CV against a nested pack and does not depend on any mechanism. **The lin
 closed. What changed is that the reason is now honestly marked UNEXPLAINED** rather than
 attributed to a redundancy story that the data refuses. Do not repeat the within-group
 correlation test; it has been run and it answered no.
+
+## 10. Correction to §7 (same run)
+
+§7 says "Board **rank 21** at 0.97118" — that is w43's number carried over stale. The live
+board read at 01:06 UTC this run is **rank 18** at 0.97118 (see LEADERBOARD.md), up three on
+churn beneath us with no change of ours. The score, the gold cut (0.97120, `thisray` at #14)
+and the leader (Changye Li 0.97136) are as stated. **We are 2e-5 below gold.**
