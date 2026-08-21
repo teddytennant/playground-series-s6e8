@@ -1,0 +1,120 @@
+w51 PRE-REGISTRATION -- discharging (or confirming) w42b's es-on-val clause on ext_members16
+Written 2026-08-21 ~03:5x UTC, COMMITTED BEFORE ANY SOURCE LOG IS OPENED.
+
+================================================================================
+1. WHY THIS RUNS NOW
+================================================================================
+`w50a_run.sh` finished 03:35 UTC and put `w50_ad216stdcorr` on disk at cross-fitted CV
+**0.9701500880** -- the highest CV ever built in this workspace, **+10.1e-6 above the
+WANTED file** `w36_ad199stdcorr` (0.9701400060). It is unusable as a deadline pick for
+exactly one reason, and that reason is a piece of UNREAD EVIDENCE, not a measurement:
+
+  w42b_prereg Sec."THE es-on-val CLAUSE":
+    "NO ARM BUILT ON ext_members16 IS ELIGIBLE FOR check_selection.WANTED ON CV ALONE.
+     Promotion requires per-member es status read out of the source notebook's own log.
+     Each candidate's .log IS on disk, so this is readable work, not an impossibility.
+     It is simply not done yet, and the arm does not get the benefit of the doubt until
+     it is."
+
+w50_prereg Sec.5 carried the clause forward unchanged and was right to: dropping
+`hboyang_mix` does not read anybody's log. This run does the reading. It is the ONE
+action that can convert a +10.1e-6 CV lead into a legitimate deadline pick, and it costs
+no submission slot -- which is the whole point on a day that is already at cap 10/10.
+
+⛔ THIS IS NOT A REOPENING OF THE IMPORT LINE (w44 Sec.6, w45 Sec.3, w48 Sec.3). It
+imports nothing, builds nothing, and screens nobody in. It reads provenance on five
+vectors ALREADY on disk and can only ever REMOVE the benefit of the doubt or grant it.
+
+================================================================================
+2. THE FIVE MEMBERS UNDER TEST -- named before anything is opened
+================================================================================
+ARM 216 = ARM 211 + ext_members16 MINUS `hboyang_mix`. The five that remain:
+
+    ern711_contextual     notebooks/w40/out/ern711_contextualized-deep-univariate-spline-transformer
+    ern711_multilevel     notebooks/w40/out/ern711_multi-level-deep-univariate-spline-transformer
+    ravi200_l2stack1r     notebooks/w40/out/ravi20076_playgrounds6e8-public-l2stack-v1
+    ravi200_publicm12     (ravi20076 public baseline family -- exact source resolved at read time)
+    ravi200_publicm13     (ravi20076 public baseline family -- exact source resolved at read time)
+
+`hboyang_mix` is NOT under test here. Its fate is already registered to the 08-23
+calibration read (w48d_arm217.json) and nothing in this run may pre-empt that.
+
+================================================================================
+3. GATE A -- es-on-val, per member. The clause's own question.
+================================================================================
+The artefact: the author chooses the stopping point using the SAME rows whose predictions
+they then publish as out-of-fold. That inflates the published OOF and does not transfer to
+test, so a stacker fitted on our frozen folds over-weights the column.
+
+Verdict per member, decided ONLY on what the author's own log/source shows:
+
+  PASS  -- no early stopping at all (a fixed n_estimators / max_epochs is reached on
+           every fold), OR early stopping performed on an INNER split that provably
+           excludes the rows published as that fold's OOF.
+  FAIL  -- the stopping point is selected on the scored fold. Signatures, any one of
+           which is sufficient: `eval_set`/`validation_data`/`eval_metric` carrying the
+           held-out fold together with `early_stopping_rounds`, `use_best_model=True`,
+           CatBoost `od_type`/`od_wait`, a Keras/Torch `EarlyStopping` callback, or log
+           lines of the form "best iteration", "Restoring best model", "New best epoch".
+  UNREADABLE -- the log does not show the fit loop and the source is not on disk.
+
+⚠ UNREADABLE IS NOT PASS. w42b says the arm does not get the benefit of the doubt, and an
+absence of evidence is exactly the state the clause was written to refuse to reward.
+
+================================================================================
+4. GATE B -- level-of-model. A gate w42b did NOT write, registered here because I can
+   already see one member's directory name and must not pretend otherwise.
+================================================================================
+⚠ DISCLOSURE, so this gate cannot be read as post-hoc: before writing this file I listed
+`notebooks/w40/out/` and saw the directory names `hboyang_s6e8-150-member-fusion` and
+`ravi20076_playgrounds6e8-public-l2stack-v1`. I have opened NO log and NO result.json.
+The names alone are what motivate Gate B; the verdicts below are not yet known.
+
+A level-2 stack imported as a level-1 member is a DIFFERENT hazard from es-on-val and the
+clause does not cover it. Its OOF was produced by a stacker already fitted on other
+models' OOF columns; if that fitting used a fold partition that is not nested inside the
+one whose predictions it publishes, the column arrives pre-fitted to the very rows our
+combiner scores on. RESEARCH already flags this shape for `sixmember_*` ("those are
+level-2 stack outputs and the author discloses..."), so the precedent is ours, not new.
+
+  PASS  -- the member is a level-1 model, OR a level-2 object whose own OOF is provably
+           nested (the author states, or the log shows, an outer/inner split).
+  FAIL  -- a level-2 stack or multi-model fusion whose published OOF is fitted on the
+           rows it publishes.
+  UNREADABLE -- as Gate A, and it counts as FAIL for promotion purposes.
+
+================================================================================
+5. DECISION RULES -- fixed before any log is opened
+================================================================================
+R1. ALL FIVE PASS BOTH GATES  => the es-on-val clause is DISCHARGED for ARM 216 and only
+    for ARM 216. `w50_ad216stdcorr` (CV 0.9701500880) becomes eligible to be argued as a
+    deadline pick on CV, and w51 writes the argument into the journal. The seven-file
+    ad216 VETO added to `w48e_order.py` this run is retired IN THE SAME EDIT, with the
+    reason recorded. ARM 217 is NOT promoted by this -- `hboyang_mix` is untested here.
+
+R2. ANY MEMBER FAILS EITHER GATE => the clause STANDS for ARM 216. The veto stays. Name
+    the failing member and the exact log line. ARM 216 remains a queue drain and a read,
+    never a deadline pick, and `w36_ad199stdcorr` remains WANTED.
+
+R3. If a member FAILS, the natural follow-on is ARM 216 MINUS that member -- but building
+    it is NOT authorised by this prereg and must be registered separately. Recording the
+    option is not the same as taking it.
+
+R4. UNCONDITIONAL: whatever the verdicts, write the per-member es status into RESEARCH.md
+    as a table. This clause has now blocked three arms across w42, w48 and w50, and the
+    reading has been deferred every time. It gets done once and stays done.
+
+================================================================================
+6. WHAT WOULD MAKE ME WRONG, STATED NOW
+================================================================================
+I expect at least one FAIL, and I expect it on the ravi200 side rather than ern711 --
+w49 Sec.6 already recorded `ravi200_publicm12` (+259e-6) and `ravi200_l2stack1r` (+154e-6)
+as the two largest per-fold-rank lifts of the twelve strongest members it transformed,
+i.e. the two whose OOF and test partitions behave least alike. ern711's two are spline
+transformers, a function class w42b named as structurally absent from our pack and
+therefore the ones I would most LIKE to keep -- which is exactly why the rule is written
+down before I look.
+
+If instead all five PASS, ARM 216 becomes the deadline pick on a +10.1e-6 CV margin and I
+will have been wrong in the direction that helps. That is a real possible outcome of this
+design, not a formality.
