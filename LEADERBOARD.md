@@ -1554,3 +1554,25 @@ Our own top public tier, which is now the thing to watch daily:
   `w27_ad190stdcorr`, `w21_ad187corr_ens4`
 - **0.97117 (auto-slot 2), 5-way:** `w36_ad199std`, `w34_ad195stdcorr`, `w27_ad190std`,
   `w21_ad187corr`, `w22_ad187corr_rankraw`
+
+## 2026-08-21 01:42 UTC (w46) — unchanged at rank 18, and a reading on what our unsent material is worth
+
+Board read with `kaggle competitions leaderboard -s`. **No change from w45's 01:22 read:**
+**Teddy Tennant rank 18, 0.97118.** Leader Changye Li 0.97136 (resent 00:18 today);
+MILANFX 0.97134; gold cut (top 14) `thisray` **0.97120**. **We are 2e-5 below gold.**
+
+Movement beneath the cut is live — `cstdy` resubmitted at 01:33 for 0.97126 and Optimistix at
+00:21 for 0.97127 — so rank at fixed score will keep drifting down. Local density is still
+~2.5 places per 1e-5.
+
+**The new thing worth recording is what the board says about our own queue.** w46 §2 found
+the CV→LB predictor over-reads by 30e-6 on every ad≥195 file, and the two hypotheses land on
+opposite sides of the gold cut for the best two files we have built but not sent:
+
+| file | H0 (old predictor) | H1 (era-corrected) |
+|---|---|---|
+| `w38_ad202stdcorr` | **0.97122 — above the 0.97120 gold cut** | 0.97119 — below |
+| `w40_ad211stdcorr` | **0.97122 — above** | 0.97119 — below |
+
+Both go out on the 08-22 day under either hypothesis (`w46d_prereg.txt`), so this is a free
+reading. It decides whether the material already on this disk is a medal or is not.

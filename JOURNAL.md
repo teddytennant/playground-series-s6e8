@@ -18653,3 +18653,245 @@ argument for skipping the click.
 **Modified:** `RESEARCH.md` (new top block + superseded marker), `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-21 — w46, slot 6. AT CAP 10/10. The pricer that this workspace runs on is broken by −30e-6, and every file in the queue is inside the broken regime.
+
+`date -u` **01:28 UTC on 08-21** at start. All ten 08-21 sends landed 00:07–00:08 UTC.
+**At cap. No submission possible this run, and none attempted.** Clock checked before
+believing the prompt.
+
+**The ANGLE as issued ("seed and fold diversity ... averaged") is explicitly closed and I did
+not follow it.** w45 §8.5 lists "fold/seed averaging" among the do-not-reopen lines, as did
+w44 §8.6 and w43 §7.6. I took w45 §8's standing list in order instead — and item 3 on it
+(the ten-file drain) turned out to rest on a broken instrument, which is what this run is
+about.
+
+## 1. ✅ CHAIN ALIVE. ARM 217 still building, and printing nulls as registered.
+
+`/proc` scan on ppid/sid, never `ps`/`pgrep`. **w42e / ARM 217 alive at PID 4145085**, log
+written 01:39:45 UTC, currently fitting the `decile` scheme. Partial reads visible so far:
+`arm mask xfit +1.573e-6 se 5.720 t +0.27 4/5`. That is inside w44's registered call of
+"another null" but it is a PARTIAL read of one scheme and **I am not scoring it against
+`w44b_heldout.py` on that basis** — the arm is not finished. **w45 §3 stands regardless: no
+seventh arm gets built, whatever 217 says.**
+
+## 2. 🔴🔴🔴 THE MAIN FINDING. w30b — the CV→LB predictor behind w26d, w45 §6 and every queue decision on this disk — is **−29.82e-6 biased** on every file now in the queue.
+
+`experiments/w46c_predlb.py`, `w46c_cvlb_live.csv`.
+
+w30b was fitted on 78 scored files through 08-20. The five files first scored on **08-21**
+are therefore the first clean held-out test since w30a. **Every one came in below prediction:**
+
+| file | predicted | actual | residual |
+|---|---|---|---|
+| `w36_ad199std_rescale` | 0.971201 | 0.97116 | **−40.9e-6** |
+| `w36_ad199std_hybrid` | 0.971172 | 0.97114 | **−32.5e-6** |
+| `w36_ad199stdcorr` | 0.971212 | 0.97118 | **−32.4e-6** |
+| `w36_ad199std` | 0.971199 | 0.97117 | **−29.2e-6** |
+| `w34_ad195stdcorr` | 0.971184 | 0.97117 | **−14.1e-6** |
+| | | **mean** | **−29.82e-6, sd 9.76** |
+
+Against a claimed residual sd of 7.76e-6 over n=5 that is **z = −8.6**. Not a draw.
+
+### The sharpest way to say it, and it is in the permanent public record
+
+w26d's own report on `w36_ad199stdcorr`, written into the **Kaggle submission log** at
+00:07:06 UTC today and readable by anyone: *"predicted LB 0.971212 with P(beats the 0.97118
+account best) **1.00e+00**"*. **It scored 0.97118.** A probability published as 1.00, for an
+event that did not happen. Six of today's ten descriptions carry a predicted LB; all six are
+~30e-6 high.
+
+### It is NOT model form and it is NOT drift — two checks that close off the easy excuses
+
+- **In-sample residual by CV quintile is FLAT**: +1.24 / +0.05 / −1.07 / +0.02 / −0.22e-6.
+  So the linear-in-CV slope is not failing at the top of its range; this is **not** an
+  extrapolation artefact, which was my first guess and is wrong.
+- **By day first sent, ten days run −5.73 .. +3.44e-6 with no trend**, then 08-21 steps to
+  −29.82. A **step, not a slope**.
+
+### The diagnosis, and it is a fact this workspace already owned without noticing
+
+The break falls exactly between the **ad194 wave** (08-20, residual **+0.13e-6**) and the
+**ad195/ad199 wave** (08-21, **−29.82e-6**) — which is precisely where **w44 §6 independently
+closed the member-import line on a flat dose-response.** Those are the same fact from two
+sides: past ~ad194 an imported member still raises cross-fitted CV but no longer raises true
+test performance, so **CV runs ahead of LB and a predictor linear in CV over-reads.** w44 §6
+closed the line as "stop building". **It also invalidated the pricer, and that second
+consequence went unrecorded for a run and a half.**
+
+### ⚠ The scope is total, which is why this matters more than any number below it
+
+**38 of the 77 unsent files are ad≥195** — and they are the entire top of the CV table.
+Every file w45 §6 named, and every file this run recommends, is inside the broken regime.
+
+### The correction, and its honest weakness
+
+`w46c_predlb.py` applies a single era level term for ad≥195: **−29.82e-6, se 4.37**, with the
+predictive sd widened **7.76 → 10.70e-6** to carry the uncertainty in that term. Import it;
+do not re-inline w30b. ⚠ **n=5, and all five were sent on one day, so ERA AND DAY ARE FULLY
+CONFOUNDED.** §6 below turns tomorrow's drain into the replication test that fixes that.
+
+## 3. Why I went looking: w45 §6 stated the send rule in the unsafe direction
+
+Pre-registered in `experiments/w46_prereg.txt`, committed **f5a587a before any script existed**.
+
+w45 §6 wrote that queue-drain "has **non-negative** expected value on the selection axis …
+a high-CV file that lands in that tier lowers the cost; one that lands below it changes
+nothing." That is a **two-branch tree and the real one has three.** It omits the branch where
+a file lands **above** the tier and becomes the sole auto-pick, and it omits the sign
+condition: while nothing is selected, Kaggle picks on **public**, so a file we send can
+**displace** the pick, and the queue holds files whose CV is 82–96e-6 below the WANTED file.
+The mechanism is the w13 audit exposure; **w39 already fixed one instance of it by hand**
+(it pulled `w36_ad199std_logit` from a slot over logit's +1121e-6 LB-CV gap) and w45 §6 then
+restated the general rule unsafely. A future run following "an unused slot is pure waste,
+send everything" sends the logit files.
+
+## 4. ⚠⚠ MY OWN P1 AND P2 ARE FALSIFIED — by the correction I found halfway through
+
+I registered that the three `*std_logit` files each price at **≥ +60e-6** of expected
+selection cost (P1) and that ≥5 files exceed +5e-6 (P2). Under **w30b** the first run gave
+exactly that — **+61.1 / +62.1 / +62.6e-6**, and P1 and P2 both read CONFIRMED. That run is
+preserved as `w46a_sendhazard.UNCORRECTED.{csv,json}` **precisely because it is wrong**.
+
+Under **w46c** the same files price at **+3.02 / +3.51 / +3.80e-6**. **P1 FALSIFIED. P2
+FALSIFIED (0 files, not 5).** The hazard I registered was ~20× overstated and was an artefact
+of the broken predictor, not a property of the files.
+
+**What survives, and it is the part that decides anything:** the three logit files are still
+among the **five worst** of the seventeen priced, and they still fail the pre-registered veto
+(> +2e-6 uniform; **+12.3 to +14.8e-6 under latest-first**). *The decision is unchanged and
+the magnitude was wrong by 20×.* Both halves of that sentence go in the record.
+
+- **P3 PARTIAL.** P3b — *latest-first delta ≥ 0 for every priced file* — **CONFIRMED**,
+  min +0.356e-6. That is the clean half and it is a real result: **under the latest-first
+  tiebreak, sending anything that can reach a tier can only hurt.** P3a and P3c failed;
+  **P3c failed on my own registration error** — I wrote "at least 40 of them" when only 34
+  files (17 after correction) can reach a tier at all, so the threshold was unreachable when
+  I wrote it. That is a bad prereg, not a finding.
+- **P4 CONFIRMED but by arithmetic that is wrong** — see §5.
+- **P5 CONFIRMED under both predictors**: CV order is **not** delta order. The corrected
+  safest-ten pulls in `w40_ad211std_rescale` and `w38_ad202std_rescale`, which w45 §6's
+  CV ranking excluded.
+
+## 5. ✅ FIXED: w46a's own P4 arithmetic was impossible, and the joint replaces it
+
+`w46b_jointdrain.py`. P4 summed nine per-file deltas to −94.89e-6 and drove the cost of not
+clicking to **−73e-6 — impossible**, since the cost floor is cost(best available pick),
+about +2.6e-6. **The sum is not the joint:** nine files each likely to clear the tier each
+remove *the same* +21.74e-6 baseline, and adding the deltas counts that removal nine times.
+200k-draw Monte Carlo, per-file predictive sd from w46c, residuals shared across files
+(w30b's residual sits below the simulated slice+grid floor, so it is essentially pure slice
+draw, and these files correlate 0.99+ — the common branch is the near-truth, the independent
+branch is printed as the other bracket end and is **not** the answer):
+
+| send set | uniform | latest-first | earliest-first | **worst branch** |
+|---|---|---|---|---|
+| **nothing** | +21.74 | +0.00 | +39.38 | **+39.38** |
+| the ten, best-CV first | +7.09 | +3.28 | +12.99 | **+12.99** |
+| the ten, reversed | +7.12 | +3.16 | +13.14 | **+13.14** |
+| **top ONE only** | +7.56 | +3.16 | +12.98 | **+12.98** |
+
+Three things the sum could not say:
+
+1. **SATURATION IS ESSENTIALLY TOTAL.** One file gets **+14.18e-6 of the +14.65e-6** the
+   whole ten get. **The other nine are worth +0.47e-6 between them on this axis.** The drain
+   is one file plus nine free riders; do not let a future run bill it as ten decisions.
+2. **The real value is bracket collapse, not the mean.** w45a named the undocumented tiebreak
+   as "the honest bracket … unreadable". Sending the ten takes the **worst branch from
+   +39.38e-6 to +12.99e-6** — it buys down the branch we cannot read.
+3. **SEND ORDER is a lever but not a useful one.** Under latest-first the newest submission
+   wins the tie, so sending best-CV **last** is worth +0.12e-6 — but it moves earliest-first
+   the other way and **the worst branch is +12.99 vs +13.14 either way.** Do it (it is free)
+   and do not dress it up as a decision.
+
+⚠ **And all of it is worth zero if Teddy clicks: the click sets every branch to 0.** The
+drain is a hedge against the click not happening and the click still dominates it ~3:1 on the
+worst branch. **Do not let the hedge become the argument for skipping the click.**
+
+## 6. ✅ TOMORROW'S TEN, and it is now a real experiment
+
+`experiments/w46d_prereg.txt`, committed **before any of the ten is sent**. Send order,
+corrected pricing, and the two hypotheses — which are **three reporting steps apart on eight
+of the ten**:
+
+| # | file | dE[cost] | H0 (w30b) says | H1 (w46c) says |
+|---|---|---|---|---|
+| 1 | `w38_ad202stdcorr` | **−14.19** | 0.97122 | **0.97119** |
+| 2 | `w40_ad211stdcorr` | **−13.99** | 0.97122 | **0.97119** |
+| 3 | `w40_ad211std` | −0.92 | 0.97120 | 0.97117 |
+| 4 | `w38_ad202std` | −0.79 | 0.97120 | 0.97117 |
+| 5 | `w36_ad199std_h3` | −0.52 | 0.97119 | 0.97116 |
+| 6 | `w36_ad197stdcorr` | −0.28 | 0.97119 | 0.97116 |
+| 7 | `w40_ad211std_h3` | −0.19 | 0.97119 | 0.97116 |
+| 8 | `w38_ad202std_h3` | −0.18 | 0.97119 | 0.97116 |
+| 9 | `w40_ad211std_rescale` | −0.05 | 0.97120 | 0.97117 |
+| 10 | `w38_ad202std_rescale` | +0.05 | 0.97120 | 0.97117 |
+
+⛔ **VETO, binding on the sender: do NOT send `w29_ad194stdcorr_ens4`,
+`w29_ad194stdcorr_rescale`, `w36_ad199std_logit`, `w38_ad202std_logit`,
+`w40_ad211std_logit`** while nothing is selected. Each is > +2e-6 uniform and +12 to
++21e-6 latest-first. **The brief's "an unused slot is pure waste" assumes a submission cannot
+hurt. On this account, while auto-selection is live, that assumption is false, and these five
+are the files where it is false.** A minimax ranking over the three tiebreak branches agrees
+with the uniform ranking on 9 of 10, so the list is not an artefact of the objective.
+
+**The reading rule is fixed in the prereg and I will not get to choose it later:**
+r = mean(actual − H0) over the ten; **r ≤ −20 → H1 confirmed; r ≥ −10 → H1 rejected, revert
+to w30b and mark w46c superseded; in between → report undecided.** Also reported excluding
+the two `*stdcorr` files, since w26d's notes already flag the `corr` term as the least stable
+coefficient in the fit.
+
+**What is genuinely at stake:** under H0 the top two round to **0.97122 — above the gold cut**.
+Under H1 they round to 0.97119 and we stay outside it. The two hypotheses disagree about
+whether the material already built and sitting unsent on this disk is a medal or is not.
+⚠ But **nothing is being gambled**: all ten are sent under either hypothesis, since w46a
+prices all ten at ≤ +0.05e-6. What the answer changes is **what the next build is worth** —
+and under H1 no further member-import work can ever pay, which is w44 §6 again.
+
+## 7. STATE, VERIFIED THIS RUN
+
+- **10/10 sent for the 08-21 UTC day. At cap. No submission this run.**
+- Board read 01:42 UTC: **rank 18 at 0.97118**; gold cut (top 14) `thisray` **0.97120**;
+  leader Changye Li **0.97136**. **2e-5 below gold.** Unchanged from w45.
+- **WANTED unchanged: `w36_ad199stdcorr`, CV 0.9701400060 — SENT and available to select.**
+  Second slot `w23_ad187stdcorr`, CV 0.9701150809, also sent.
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS.** w45 §4 priced it at +21.74e-6 uniform,
+  bracket [0.00, +39.38]. **§5 above shows tomorrow's drain buys the worst branch down to
+  +12.99e-6 — so the click's value falls, but only to ~+13e-6 in the worst branch, and only
+  if the drain happens.** **This still needs Teddy, in his own browser.** Deadline 08-31.
+- ARM 217 alive and printing nulls; not scored, not finished.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid; **never** `ps`/`pgrep`.
+2. **Send the ten in §6, in that order, and honour the five-file veto.** Then, once they
+   score, **apply `w46d_prereg.txt`'s reading rule to the era shift.** That is the single
+   most informative reading available anywhere in this workspace right now.
+3. **Re-estimate `ERA_SHIFT` in `w46c_predlb.py` on all 15 points** if H1 confirms — the
+   current term rests on 5 rows from one day and the confound is the known weakness.
+4. Score ARM 217 against `w44b_heldout.py` when it finishes (predicted h3 base
+   0.9701351395, point delta +1.95e-6, CI [−4.25, +8.16], registered call: another null).
+   **Then apply w45 §3: no seventh arm, whatever it says.**
+5. ⚠ **Anything that quotes a predicted LB must import `w46c_predlb`.** `w26d_queueprice.py`
+   still inlines w30b and is now **known wrong by −30e-6 on 38 of the 77 queue files**; it
+   was not rewritten this run because tomorrow's ten may reject H1 and revert it. If H1
+   confirms, fixing w26d is the first job.
+6. Do **NOT** re-open: the import line (w44 §6 — and §2 above is a *second* independent
+   confirmation of it, from the LB side), the within-group redundancy test (w44 §9), the
+   member side-scale axis (w43 §2), KS as a gate (w43 §4), §4-level re-pricing as a script
+   (w43 §5), GBDT tuning, error analysis / OOF segmentation, **fold/seed averaging (this
+   run's stale angle)**, the top-level blend-weight search, FE variants, the original
+   dataset, the stacker C, the selection write path (no API method, closed twice), the
+   es-bias deflation constant (w41 §4), or a third sweep of the public kernel pool (w42 §5).
+7. ⚠ And do not re-price the click an eighth time for its own sake. §5 changed what the
+   drain does to it; it did not change the decision, which has been the same for nine days.
+
+**Files added:** `experiments/w46_prereg.txt`, `w46d_prereg.txt`, `w46a_sendhazard.py` +
+`.csv`/`.json` + `.UNCORRECTED.csv`/`.json`, `w46b_jointdrain.py` + `.json` +
+`.UNCORRECTED.json`, `w46c_predlb.py`, `w46c_cvlb_live.csv`.
+**Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

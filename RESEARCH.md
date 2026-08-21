@@ -77,6 +77,84 @@ size left, and unlike the modelling work it is free and certain.
 
 ---
 
+# 🔴 SECOND THING TO READ — **THE CV→LB PREDICTOR IS BROKEN** on every file in the queue (w46, 2026-08-21)
+
+⛔ **DO NOT quote a predicted LB from `w26d_queueprice.py`, `w30b_corrterm.json`, or anything
+that inlines them, for a file whose stem contains `ad195` or higher.** It reads **≈30e-6 too
+high**. Import **`experiments/w46c_predlb.py`** instead — `predict_lb`, `pred_sd`,
+`scenario_probs` — which applies the correction and widens the predictive sd.
+
+### The evidence
+
+w30b was fitted on 78 files scored through 08-20. The five files first scored on **08-21**
+were the first clean held-out test since w30a. **All five came in below prediction:**
+
+| file | predicted | actual | residual |
+|---|---|---|---|
+| `w36_ad199std_rescale` | 0.971201 | 0.97116 | −40.9e-6 |
+| `w36_ad199std_hybrid` | 0.971172 | 0.97114 | −32.5e-6 |
+| `w36_ad199stdcorr` | 0.971212 | 0.97118 | −32.4e-6 |
+| `w36_ad199std` | 0.971199 | 0.97117 | −29.2e-6 |
+| `w34_ad195stdcorr` | 0.971184 | 0.97117 | −14.1e-6 |
+| | | **mean −29.82e-6** | sd 9.76, **z = −8.6** |
+
+**It is in the permanent public record.** w26d's report on `w36_ad199stdcorr`, in the Kaggle
+submission log at 00:07:06 UTC on 08-21: *"predicted LB 0.971212 with P(beats the 0.97118
+account best) **1.00e+00**"*. It scored **0.97118**. Six of that day's ten descriptions quote
+a predicted LB and all six are ~30e-6 high.
+
+### It is not model form and it is not drift
+
+- In-sample residual **by CV quintile is flat** (+1.24/+0.05/−1.07/+0.02/−0.22e-6) — so the
+  linear-in-CV slope is fine and this is **not** an extrapolation artefact.
+- **By day, ten days run −5.73..+3.44e-6 with no trend**, then 08-21 steps to −29.82. A step.
+
+### The diagnosis — it is JOURNAL w44 §6 seen from the other side
+
+The break sits exactly between the **ad194 wave** (08-20, residual **+0.13e-6**) and the
+**ad195/ad199 wave** (08-21, **−29.82e-6**) — the same place w44 §6 closed the member-import
+line on a flat dose-response. Past ~ad194 an imported member still raises cross-fitted CV but
+no longer raises true test performance, so **CV runs ahead of LB and a CV-linear predictor
+over-reads.** w44 §6 said "stop building"; it *also* invalidated the pricer. **This is a
+second, independent confirmation of the flat import curve, from the LB side.**
+
+### Scope, and the honest weakness
+
+**38 of the 77 unsent files are ad≥195, and they are the entire top of the CV table.**
+⚠ The correction rests on **n=5, all from one send-day**, so **era and day are fully
+confounded.** `experiments/w46d_prereg.txt` turns the next ten-file drain into the
+replication test, with the reading rule fixed in advance: r = mean(actual − w30b) over the
+ten; **r ≤ −20 → keep w46c; r ≥ −10 → revert to w30b and mark w46c superseded; between →
+undecided.** Do not pick the branch that suits the day's argument.
+
+---
+
+# 🔴 THIRD — ⛔ **A SUBMISSION CAN HURT THIS ACCOUNT. Five files are VETOED.** (w46)
+
+The brief says an unused slot is pure waste because a submission can only help public rank.
+**That is true for RANK and false for the FINAL SCORE while nothing is selected**, because
+Kaggle then auto-selects on best **public**, so a file we send can **displace** the auto-pick.
+The queue holds files 82–96e-6 below the WANTED file on CV that can still out-score it on
+public — the logit family carries a +1121e-6 LB-CV gap against h3's +1025e-6.
+
+⛔ **Do not send while `check_selection.py` exits 1:** `w29_ad194stdcorr_ens4`,
+`w29_ad194stdcorr_rescale`, `w36_ad199std_logit`, `w38_ad202std_logit`, `w40_ad211std_logit`.
+Each prices at > +2e-6 of expected selection cost under the uniform tiebreak and **+12 to
++21e-6 under latest-first** (`experiments/w46a_sendhazard.py` → `.csv`/`.json`).
+
+**The safe ten, in send order** (`w46d_prereg.txt`): `w38_ad202stdcorr`, `w40_ad211stdcorr`,
+`w40_ad211std`, `w38_ad202std`, `w36_ad199std_h3`, `w36_ad197stdcorr`, `w40_ad211std_h3`,
+`w38_ad202std_h3`, `w40_ad211std_rescale`, `w38_ad202std_rescale`.
+
+**What the drain is worth** (`w46b_jointdrain.py`, 200k draws): it takes the cost of not
+clicking from **+21.74e-6 to +7.09e-6** on the uniform tiebreak, and the **worst tiebreak
+branch from +39.38e-6 to +12.99e-6**. ⚠ **Saturation is near-total — one file
+(`w38_ad202stdcorr`) delivers +14.18e-6 of the +14.65e-6 the whole ten deliver; the other
+nine are worth +0.47e-6 between them.** And ⚠ **it is all worth zero if Teddy clicks: the
+click sets every branch to 0. The hedge is not an argument for skipping the click.**
+
+---
+
 ## Competition basics
 
 | | |
