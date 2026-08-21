@@ -18379,3 +18379,47 @@ modelling line closed, unambiguously **the largest single number still on the ta
 **Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+## 9. ❌ ADDENDUM, same run: I proposed a mechanism for §4 and MY PREDICTION WAS WRONG
+
+`w44d_withingroup.py`. Having found the line flat, I went after *why*, and the obvious
+candidate was a hole in the import gate. The w40d/w42b rule is
+`maxcorr < 0.99 AND solo > 0.966319`, where maxcorr is measured **against members already
+held**. It is computed one incoming stream at a time and is **structurally blind to how much
+the incoming streams duplicate each other.** ARM 211's nine members are all from ONE author
+(`y94`/yadoy666), so they plausibly share preprocessing, folds and feature code.
+
+**Written into the script's docstring before the numbers existed:** median within-group |rho|
+for `ext_members15` is *higher* than 0.99, and *higher* than for `ext_members16` (6 members,
+3 authors).
+
+**Both halves are false.**
+
+| group | n | authors | median within-rho | pairs >0.99 | n_eff | Δ h3 |
+|---|---|---|---|---|---|---|
+| ext_members11 | 2 | 1 | **0.99897** | 1/1 | 1.00 | **+10.98e-6** |
+| ext_members12 | 2 | 1 | 0.99716 | 1/1 | 1.00 | +3.87e-6 |
+| ext_members14 | 3 | 1 | 0.99311 | 3/3 | 1.01 | −2.41e-6 |
+| **ext_members15** | **9** | **1** | **0.97482** | **1/36 (3%)** | 1.05 | **+0.16e-6** |
+| ext_members16 | 6 | 3 | 0.94439 | 1/15 | 1.08 | pending |
+
+`ext_members15` is the **least** internally redundant group of the four (median 0.975 against
+0.993–0.999), not the most, and `ext_members16` is less redundant still. **The ordering runs
+the opposite way to the hypothesis:** the two groups that paid are the two that are most
+internally duplicated, and the group that paid nothing is the most internally diverse. That is
+near-certainly noise on four points — but it is emphatically not the proposed mechanism, and
+the hypothesis is dead either way.
+
+⚠ **The participation ratio is a dud instrument here and I am recording that so nobody
+re-spends it.** `n_eff` comes out **1.00–1.08 for every group regardless of n** — 9 members and
+2 members both score ~1. That is not a finding about these members; it is what a participation
+ratio always does when every predictor of the same target correlates 0.93+ with every other.
+It cannot discriminate, so it cannot explain anything. The right instrument would be the
+correlation of **residuals after projecting out the held pack**, which is a different and more
+expensive computation and was not run.
+
+**Net effect on §4–§6: none, and that matters.** §4's flat curve is a direct measurement of
+h3-base CV against a nested pack and does not depend on any mechanism. **The line is still
+closed. What changed is that the reason is now honestly marked UNEXPLAINED** rather than
+attributed to a redundancy story that the data refuses. Do not repeat the within-group
+correlation test; it has been run and it answered no.
