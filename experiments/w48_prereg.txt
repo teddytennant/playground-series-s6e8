@@ -1,0 +1,56 @@
+w48 PRE-REGISTRATION — the over-steep-slope alternative to the era shift
+written 2026-08-21 ~02:2x UTC, committed BEFORE w48c_slope.py exists.
+
+WHY. w48a part D found w30b's sample is cut by `h = t[t.cv >= 0.97]`. Nine scored files fall
+below that floor. Six of them (blend150fx_logit, blend150sx_logit, blend158_logit,
+blend159_logit, blend159av_logit, w14a_repro159av_logit) sit only 35-50e-6 below it — near
+support, not wild extrapolation — and w48b shows they land a MEAN +15.5e-6 ABOVE the w30b
+prediction.
+
+THE PROBLEM THAT CREATES. Residual is POSITIVE 97e-6 below the fit centroid and NEGATIVE
+(-29.8e-6) 71e-6 above it. A single over-steep slope produces exactly that pattern: too low
+below, too high above. If the fitted slope 1.8563 is too steep by ~0.2-0.4 e-6/e-6, the
+"-29.82e-6 ad>=195 era shift" is not an era effect at all — it is the same slope error read
+at the other end of the range, and w46c's correction, the 38-file re-pricing and the
+motivation for w47b's whole probe design are all built on an artefact.
+
+⚠ This is NOT ruled out by w47a. E1 fitted low-CV subsets of the cv>=0.97 sample and
+extrapolated up; every one of its ten cutoffs was inside [0.97, 0.9701183]. The six files
+here are OUTSIDE that window on the far side and were never available to E1.
+
+⚠ It is also not obviously true: all six are logit, so "slope too steep" and "fam[logit] is
+larger at low CV" are confounded in them, and there is no non-logit near-support control
+(the only other sub-floor file, stack_pub86_hybrid, sits 322e-6 out).
+
+TESTS, and the reading rule, both fixed here before any number is computed.
+
+ S1. REFIT with the floor at 0.9699 (adds the six, still excludes the three stack_pub files
+     at -320 to -360e-6). Report the slope.
+     - if the slope falls to <= 1.70 the over-steep story has support;
+     - if it stays >= 1.80 the six are absorbed by fam[logit] and the slope is not the issue.
+
+ S2. THE DECISIVE ONE. Under the S1 refit, recompute the mean residual of the five 2026-08-21
+     ad>=195 files.
+     - |mean| <= 10e-6  -> THE ERA SHIFT IS A SLOPE ARTEFACT. w46c must be withdrawn, the
+       38-file re-pricing reverted, and w47b's probes reinterpreted (they stay valid as a
+       test, but of a different thing).
+     - mean <= -20e-6   -> the era shift is INDEPENDENT of the slope and w46c stands.
+     - between          -> partial; report both and change nothing without a further read.
+
+ S3. QUADRATIC. Add a cv^2 term on the cv>=0.97 sample alone and recompute the same five
+     residuals. Same thresholds as S2. This asks whether curvature inside support explains
+     it without needing the below-floor files at all.
+
+ S4. CONTROL, so S2 cannot be trivially satisfied by throwing the fit away. Report the refit's
+     residual sd. If it exceeds 12e-6 the refit is worse than what it replaces and S2's
+     reading is downgraded to "cannot tell" whatever the number.
+
+REGISTERED CALL. I expect S1 to move the slope only a little (to ~1.75-1.85) because the six
+are near-twins carrying ~2 effective observations against 78, and I expect S2 to come back
+between -22 and -30e-6, i.e. the era shift survives. I am recording that guess so that if it
+is wrong the record shows I was wrong rather than that I had no view.
+
+WHAT DOES NOT CHANGE WHATEVER THIS SAYS. The 08-22 send list stays as w47b registered it.
+The five probes are inside the fitted CV support, so a slope error barely touches them and
+they discriminate ERA from CV-REGION either way; and under this new hypothesis they are more
+informative, not less. The five-file veto stays. Nothing here is a reason to send differently.
