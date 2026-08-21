@@ -1,0 +1,68 @@
+w46d PRE-REGISTRATION -- written 2026-08-21 01:45 UTC, for the 08-22 UTC ten-file drain
+======================================================================================
+Written BEFORE any of these ten files is sent.  It is a REPLICATION TEST, and it is
+the reason tomorrow's drain is an experiment rather than a slot-filling exercise.
+
+THE TWO HYPOTHESES
+------------------
+H0 (w30b, the predictor this workspace has used since 2026-08-20):
+      the CV->LB relation is stationary; the five 08-21 misses were a bad draw.
+H1 (w46c, the era correction):
+      every ad>=195 build over-predicts by -29.82e-6, because past ~ad194 an imported
+      member still raises cross-fitted CV but no longer raises true test performance.
+      This is JOURNAL w44 section 6's flat import curve seen from the LB side.
+
+H1 rests on FIVE points, all sent on ONE day, so ERA AND DAY ARE FULLY CONFOUNDED in
+the current evidence.  That is the weakness and this test is what fixes it.
+
+THE REGISTERED PREDICTIONS -- ten files, in send order
+------------------------------------------------------
+ #  file                              CV           H0 says   H1 says   H1 P(>=0.97119)
+ 1  w38_ad202stdcorr        0.9701375891           0.97122   0.97119   0.737
+ 2  w40_ad211stdcorr        0.9701374733           0.97122   0.97119   0.731
+ 3  w40_ad211std            0.9701309541           0.97120   0.97117   0.045
+ 4  w38_ad202std            0.9701305726           0.97120   0.97117   0.039
+ 5  w36_ad199std_h3         0.9701354276           0.97119   0.97116   0.014
+ 6  w36_ad197stdcorr        0.9701286299           0.97119   0.97116   0.014
+ 7  w40_ad211std_h3         0.9701331846           0.97119   0.97116   0.005
+ 8  w38_ad202std_h3         0.9701330214           0.97119   0.97116   0.004
+ 9  w40_ad211std_rescale    0.9701209816           0.97120   0.97117   0.071
+10  w38_ad202std_rescale    0.9701200354           0.97120   0.97117   0.051
+
+H0 and H1 are THREE REPORTING STEPS apart on eight of the ten and two on the other
+two.  Ten files at 3 steps is not a close call; one day of sends settles it.
+
+THE READING RULE, FIXED NOW
+---------------------------
+Let r = mean(actual - H0 prediction) over the ten, in units of 1e-6.
+  r <= -20  ->  H1 CONFIRMED.  Keep w46c.  Re-estimate ERA_SHIFT on all 15 points.
+  r >= -10  ->  H1 REJECTED.  The 08-21 five were a draw after all; revert to w30b,
+                and mark w46c superseded -- do NOT quietly keep both.
+  -20 < r < -10 -> UNDECIDED.  Report it as undecided; do not pick the branch that
+                suits the day's argument.
+Also report r computed with the two `*stdcorr` files EXCLUDED, because those two carry
+w30b's `corr` term (+12.61e-6) which w26d's own notes already flag as the least stable
+coefficient in the fit (significant in three of four cuts, not the fourth).  If the two
+readings disagree in sign the finding is about the corr term, not about the era.
+
+WHAT IS AT STAKE BEYOND THE PRICER
+----------------------------------
+Under H0 the top two files round to 0.97122, which is ABOVE the current gold cut
+(0.97120, `thisray` at #14; board read 01:42 UTC, we are #18 at 0.97118).  Under H1
+they round to 0.97119 and we stay outside it.  So this is not only a calibration
+test -- H0 and H1 disagree about whether the material already built and sitting
+unsent on this disk is a medal or is not.
+
+⚠ AND THE ANSWER DOES NOT CHANGE WHAT TO SEND.  All ten are sent either way; w46a
+prices all ten at dE[cost] <= +0.05e-6 under both predictors.  Nothing is being
+gambled on the outcome.  What changes is what the NEXT build is worth, and whether
+any further member-import work could ever pay -- which under H1 it cannot.
+
+VETO LIST, unchanged from w46a and binding on the sender
+--------------------------------------------------------
+Do NOT send, while nothing is selected: w29_ad194stdcorr_ens4,
+w29_ad194stdcorr_rescale, w36_ad199std_logit, w38_ad202std_logit,
+w40_ad211std_logit.  Each has dE[cost] > +2e-6 under the uniform tiebreak and
++12 to +21e-6 under latest-first.  The brief's "an unused slot is pure waste"
+assumes a submission cannot hurt; while auto-selection is live on this account that
+assumption is false, and these five are the files where it is false.
