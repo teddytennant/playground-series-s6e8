@@ -75,8 +75,26 @@ MU = _fit.cv.mean()
 # ⚠ CAVEAT, the reason to read the corr term as ~+10e-6 rather than +12.6: it survives a
 # quadratic-CV guard (+9.92, t +2.12) and the top-CV band (+15.71, t +3.37) but NOT the drop of
 # today's two near-twins (+7.57, t +1.59). Positive in all four cuts, significant in three.
+# ⚠ THE MODEL IS w46c, NOT w30b (changed w48, 2026-08-21). w30b is fitted on 78 files that are
+# ALL ad<=194. Five ad>=195 files first scored on 08-21 came in a mean -29.82e-6 BELOW its
+# prediction (z -8.0 at w47a's leave-one-out sd of 8.36e-6). This file kept the raw w30b copy
+# inline for two runs after that was known, and was therefore wrong by -30e-6 on 38 of the 77
+# queue files -- including the one it printed into the permanent Kaggle submission log at 00:07
+# UTC on 08-21 as "predicted LB 0.971212 with P(beats the account best) 1.00e+00". That file
+# scored 0.97118. A probability published as 1.00 for an event that did not happen.
+#
+# The era term has now survived SIX independent attacks: w47a's E1 (extrapolation above
+# support), E2 (prospective optimism), E3 (understated precision) and G (day clustering), plus
+# w48c's S1/S2 (an over-steep global slope -- refitting with the six sub-floor files moves the
+# slope only 1.856 -> 1.810 and the shift only -29.8 -> -27.8e-6) and S3 (curvature inside
+# support, which makes it BIGGER at -34.1e-6). It is not a model artefact.
+#
+# The correction lives in ONE place, w46c_predlb.py. Do not re-inline it here or anywhere.
+import w46c_predlb as W46  # noqa: E402
+
 M = json.load(open(os.path.join(HERE, "w30b_corrterm.json")))
 C, RESID = M["coefs"], M["resid_sd_new"]
+RESID_ERA = W46.SD_NEW     # 10.69e-6 -- carries the uncertainty in the era term itself
 BEST_LB = 0.97118          # account best, w21_ad187corr_ens4
 STEP = 1e-5                # the LB reports to 5 decimals
 
@@ -87,15 +105,28 @@ def is_corr(stem):
     return "corr" in stem
 
 
-def predict(cv, fam, standardised, corrected=False):
+def predict(cv, fam, standardised, corrected=False, stem=None):
     """Predicted public LB, in absolute AUC. `standardised` is the combiner-scaling flag,
-    `corrected` the c_avg-correction flag (w30b)."""
+    `corrected` the c_avg-correction flag (w30b).
+
+    ⚠ PASS `stem`. Without it this returns the RAW w30b prediction, which is known wrong by
+    -30e-6 for any ad>=195 build. The argument is optional only so the pre-w48 callers (w39b,
+    w39c, w39d) keep working unchanged; every file those three price is ad<=194, where raw and
+    corrected agree exactly. Any NEW caller must pass it."""
     lb6 = C["const"] + C["cv_e6"] * (cv - MU) * 1e6 + C.get(f"fam[{fam}]", 0.0)
     if standardised:
         lb6 += C["std"]
     if corrected:
         lb6 += C["corr"]
+    if stem is not None and W46.new_era(stem):
+        lb6 += W46.ERA_SHIFT
     return lb6 * 1e-6
+
+
+def resid_sd(stem=None):
+    """The predictive sd for `stem`, in absolute AUC. Wider in the new era because the era
+    level term is itself estimated from only ERA_N=5 points."""
+    return (RESID_ERA if (stem is not None and W46.new_era(stem)) else RESID) * 1e-6
 
 
 # GATE. Re-predict the 60 files the model was fitted on and require its residual sd back.
@@ -122,11 +153,13 @@ stdflag.require_corr_registered(q.stem)   # a new *corr file must be classified 
 q["fam"] = q.stem.map(family)
 q["std"] = q.stem.map(is_std)          # see is_std: a whitelist here was a BUG
 q["corr"] = q.stem.map(is_corr)
-q["pred_lb"] = [predict(r.cv, r.fam, r.std, r.corr) for r in q.itertuples()]
+q["pred_lb"] = [predict(r.cv, r.fam, r.std, r.corr, r.stem) for r in q.itertuples()]
+q["sd"] = [resid_sd(r.stem) for r in q.itertuples()]
+q["era"] = [W46.new_era(r.stem) for r in q.itertuples()]
 
 # P(beat the account best). The file must print STRICTLY above 0.97118, and the LB rounds to
 # 1e-5, so the target on the underlying scale is BEST_LB + STEP/2.
-q["p_beat"] = 1.0 - norm.cdf((BEST_LB + STEP / 2 - q.pred_lb) / (RESID * 1e-6))
+q["p_beat"] = 1.0 - norm.cdf((BEST_LB + STEP / 2 - q.pred_lb) / q.sd)
 
 # PRIORITY. The queue is ranked on predicted PUBLIC LB, which is the right order for chasing
 # public rank and the WRONG order for the one thing a submission is actually needed for here:
@@ -140,8 +173,9 @@ q = q.sort_values(["priority", "pred_lb"], ascending=[False, False])
 _pin = q[q.priority == 1].file.tolist()
 print(f"PINNED to the head of the queue (check_selection.WANTED, unsent): {_pin or 'none'}")
 
-print(f"{len(q)} unsent files with a stored OOF vector, priced under w25f "
-      f"(resid sd {RESID:.2f}e-6, centred at mu={MU:.10f})\n")
+print(f"{len(q)} unsent files with a stored OOF vector, priced under w46c "
+      f"(resid sd {RESID:.2f}e-6 pre-era / {RESID_ERA:.2f}e-6 for ad>={W46.ERA_MIN_AD}, "
+      f"centred at mu={MU:.10f})\n")
 print("TOP 12 BY PREDICTED PUBLIC LB")
 print(f"{'file':32s} {'fam':8s} {'std':5s} {'cv':>14s} {'pred LB':>9s} {'P(>best)':>9s}")
 for r in q.head(12).itertuples():

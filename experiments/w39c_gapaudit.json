@@ -129,9 +129,9 @@
   },
   {
    "send_rank": 9,
-   "file": "w36_ad199std_logit.csv",
-   "cv": 0.9700571065601006,
-   "pred_lb": 0.971193026828162
+   "file": "w36_ad199std_hybrid.csv",
+   "cv": 0.9701231283130562,
+   "pred_lb": 0.9711724525713624
   },
   {
    "send_rank": 10,

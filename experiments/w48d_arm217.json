@@ -1,0 +1,32 @@
+{
+ "arm211": 0.9701331846,
+ "arm217": 0.970174895,
+ "actual6": 41.7104000000057,
+ "per_member": 6.951733333334283,
+ "registered": [
+  1.95,
+  -4.25,
+  8.16
+ ],
+ "z": 12.549176167473618,
+ "falsified": true,
+ "outlier": {
+  "member": "hboyang_mix",
+  "dir": "data/ext_members16",
+  "auc": 0.970181553604739,
+  "gap_to_next_e6": 885.9007196480029,
+  "n_members": 177
+ },
+ "n_anchors": 88,
+ "gap_median_e6": 1048.2944175403964,
+ "hboyang_oof": 0.9701816,
+ "hboyang_pred": 0.9712298944175404,
+ "hboyang_band": [
+  0.9711975834065615,
+  0.9712522654518098
+ ],
+ "rule": {
+  "honest_at_or_above": 0.97116,
+  "inflated_at_or_below": 0.9708
+ }
+}

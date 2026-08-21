@@ -102,6 +102,18 @@ CORR_MAP = {
     # be missed by a run that only sees one of the two names on disk.
     "w36_ad199stdcorr": "h3",           # 195 + ravi_xgb1c + ravi_lgbm1c + ram_hgb + ram_lgb
     "w36_ad197stdcorr": "h3",           # 195 + ram_hgb + ram_lgb
+    # w48 slot 8, 2026-08-21. THESE THREE WERE MISSING AND THE GAP WAS NOT COSMETIC: two of
+    # them, w40_ad211stdcorr and w38_ad202stdcorr, are slots 9 and 10 of the 08-22 send list
+    # registered in w47b_prereg.txt, and require_corr_registered() is an ASSERT reached at
+    # import time by w26d_queueprice -- so w26d, w39b, w39c and w39d all died on it and the
+    # registered ten could not have been priced. Caught by re-running the whole chain end to
+    # end rather than by reading it. Classified the same way as every entry above, from the
+    # build script rather than the suffix: all three runners set W21A_BASE="${NAME}_h3", so
+    # the corrected base is h3 and the family is h3.
+    "w38_ad202stdcorr": "h3",           # w38d_run.sh, base w38_ad202std_h3
+    "w40_ad211stdcorr": "h3",           # w40f_run.sh, base w40_ad211std_h3
+    "w42_ad217stdcorr": "h3",           # w42e_run.sh, base w42_ad217std_h3
+                                        # ⛔ ARM 217 -- WANTED-ineligible, w42b_prereg + w48d
 }
 
 

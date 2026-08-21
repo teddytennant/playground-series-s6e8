@@ -19094,3 +19094,223 @@ not assumed.
 **Modified:** `RESEARCH.md` (new top block + amended send list), `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-21 — w48, slot 8. AT CAP 10/10. The angle was consolidation, so I dry-ran the whole chain instead of reading it — and found that tomorrow's registered ten could not have been sent.
+
+`date -u` **02:01 UTC on 08-21** at start, before believing the prompt's date (the prompt says
+08-20 and slot 8; the API says ten sends already landed at 00:07–00:08 UTC on 08-21). **At cap.
+No submission possible this run and none attempted.** Next window 00:00 UTC on 08-22.
+
+**The ANGLE as issued — "consolidation: no new ideas, re-verify the best pipeline end-to-end,
+check the CV-to-LB gap across every experiment, make sure the strongest submission is the one
+selected" — was the right angle and I followed it literally.** Every previous run has *read*
+the plan. This one *executed* it, and the two turned out to disagree.
+
+## 1. 🔴🔴 THE MAIN FINDING. The sender would not have sent the registered ten.
+
+`w26g_send.py` does not read JOURNAL.md, RESEARCH.md, `w47b_prereg.txt` or `w47b_probe.json`.
+It reads **one** file — `experiments/w26d_queueprice.csv` — and sends its `priority == 1` band
+in `send_rank` order. That file was last written **2026-08-20 14:30** by `w37d_order.py`, which
+encoded the **08-21** day. Nothing had written the 08-22 plan into it. Its dry run at 02:1x UTC
+planned:
+
+```
+ 1 w37_cal_ravi_realmlp1c   2 w37_cal_dkv_xgb          3 w36_ad199std_h3
+ 4 w36_ad199std_logit ⛔VETO 5 w29_ad194stdcorr_ens4 ⛔VETO
+ 6 w34_ad196std_logit       7 w29_ad194stdcorr_rescale ⛔VETO
+ 8 w34_ad196std             9 w34_ad195std            10 w34_ad195std_rescale
+```
+
+**Three vetoed files, and not one of the five probes.** A run that opened the window and typed
+the documented command would have breached the veto and destroyed the ERA/CV-REGION experiment
+in the same keystroke. w47 §9 item 2 says "send the ten in §4, in that order" — and there was
+no mechanism by which that could happen.
+
+Two root causes, both now fixed in code rather than described:
+
+1. **The veto existed only in prose.** Quoted in RESEARCH.md and re-asserted in four journal
+   entries; `grep -rn veto experiments/*.py` returned w46a's internal variable and nothing else.
+   A rule only a human re-reads is not a rule the tooling can honour.
+2. **The carried prices were w30b's**, so every ad≥195 row in the sender's input was 30e-6 high
+   — the exact defect w46c was written to fix and w47 §9 item 5 assigned.
+
+**Fixed:** `experiments/w48e_order.py` reads the registered order out of `w47b_probe.json`,
+hard-asserts it against a `VETO` dict, verifies all ten end-to-end (296,302 rows, no NaN, md5
+matches the queue, CV reproduces from the stored OOF vector), prices through the corrected
+`w26d_queueprice.predict(..., stem=...)`, and writes the CSV. **The sender's dry run now
+reproduces the registered ten exactly, in order.** Verified, not assumed — output in §7.
+
+## 2. ✅ The assigned fix: `w26d_queueprice.py` now imports w46c
+
+w47 §9 item 5. `predict()` takes an optional `stem` and applies `W46.ERA_SHIFT`; `resid_sd()`
+returns 10.69e-6 in the new era and 7.76e-6 outside it; `p_beat` uses the per-file sd. The
+signature stays backwards compatible because w39b/w39c/w39d all price ad≤194 files, where raw
+and corrected agree exactly — checked, all three still run.
+
+The correction is visible immediately: `w36_ad199stdcorr` went from **pred 0.97121, P(beat)
+1.00** to **pred 0.97118, P 0.41**. It scored **0.97118**.
+
+**And it also broke three scripts, which is how I found the next thing.** `stdflag`'s
+`require_corr_registered()` is an import-time assert and **three `*corr` files were never
+registered** — `w38_ad202stdcorr`, `w40_ad211stdcorr` (slots **9 and 10 of tomorrow's list**)
+and `w42_ad217stdcorr`. w26d, w39b, w39c and w39d all died on it, so the registered ten could
+not even have been *priced*. All three classified from their build scripts (every runner sets
+`W21A_BASE="${NAME}_h3"`, so family h3) and registered in `stdflag.CORR_MAP`.
+
+## 3. 🔴 ARM 217 finished at 02:03 UTC and falsified its own prereg by z +12.5 — and that is BAD news
+
+w47 §9 item 6. `w44b_heldout.py` registered **+1.95e-6, CI [−4.25, +8.16]**, "another null".
+Actual: ARM 211 h3 base 0.9701331846 → ARM 217 h3 base **0.9701748950** = **+41.71e-6 over six
+members, +6.95e-6/member**, against a fitted history of +0.90e-6/member over 22 members.
+**Recorded as a miss. I am not re-explaining the prereg.**
+
+**It does not reopen the import line — it does the opposite.** Scoring all **177** member OOF
+vectors on disk: median 0.96649, p90 0.96834, p99 0.96923, best-of-the-other-176 **0.96930**.
+One member, **`hboyang_mix` in `data/ext_members16`**, sits at **0.9701816** — **+886e-6 clear
+of the next best**, and **above our entire 217-member cross-fitted stack (0.9701749)**. A single
+public vector that alone out-AUCs a 217-member stack is not a base model. `w42b_prereg`'s
+⛔WANTED-ineligibility clause, written before the build, was right and now has a mechanism.
+
+✅ **ext_members16 entered the pack only at ARM 217. Every pack ad187..ad211 — including the
+WANTED file's ad199 — is clean of it.**
+
+⚠ I tried an OOF-vs-test agreement diagnostic to prove leakage directly and **it did not
+convict**: hboyang's gap (+0.0094) is ordinary, while `ravi200_publicm12` (+0.0488) and
+`ravi200_l2stack1r` (+0.0182) are the outliers on that axis. So the case against `hboyang_mix`
+is the outlier magnitude, not a leakage proof. **Stated as circumstantial, because it is.**
+
+**Pre-registered the one clean test** (`w48d_arm217.py`), for the **08-23** list, not 08-22:
+send `hboyang_mix`'s raw vector as a w37-style calibration read. Predicted **0.97123**, band
+[0.97120, 0.97125], from the `lb − oof` gap over **88** anchors. **≥0.97116 → honest** (and
+w45 §3 needs revisiting on the record); **≤0.97080 → inflated** (drop the member). ⚠ My first
+attempt fitted `lb ~ oof` on the five w37 members alone and got a ±791e-6 interval — an
+unfalsifiable rule. **Discarded and recorded as discarded.**
+
+**Why 08-23 and not 08-22:** the 08-22 ten are registered and the five probes are load-bearing;
+the 08-23 list is not written yet, so **no prereg has to be amended at all**. Taking the free
+option instead of the clever one.
+
+## 4. ✅ Provenance: 169/169 CVs reproduce, 83/83 LBs match live, and WANTED survives all three rankings
+
+`w48a_provenance.py`. A: **169 of 169** registered stems reproduce their CV exactly from the
+stored OOF vector on the frozen folds (0 mismatches beyond 5e-10). B: 135 stems appear in more
+than one of the four CV registries, **0 disagreements**. C: **83 of 83** `lb` values match
+Kaggle right now, 0 rows missing. D: 18 scored stems are absent from the fit table — 9 cut by
+the `cv >= 0.97` floor (§5) and 9 with no CV, which is correct for the 5 w37 raw-member sends.
+
+**The selection question, answered properly for the first time.** w30b's slope is 1.8563, so
+the −29.82e-6 era shift is **16.06e-6 of CV the ad≥195 files got for free** — and the WANTED
+rule has been comparing raw CV across the ad194/ad195 boundary since 08-21 without anyone
+checking. Re-derived three ways:
+
+| ranking | argmax | WANTED's margin |
+|---|---|---|
+| raw CV | `w36_ad199stdcorr` | +21.7e-6 |
+| **era-deflated CV** | **`w36_ad199stdcorr`** | **+5.7e-6 — survives, margin quartered** |
+| CV-REGION-capped | five-way tie at the cap, WANTED among them | 0.0 |
+
+✅ **WANTED unchanged. It was set before w46 found the era shift; it has now been tested
+against it.**
+
+## 5. ✅ Two more attacks on the era shift, both registered in advance, both failed
+
+`w48_prereg.txt`, committed **9a76f76 before `w48c_slope.py` existed**. §4D found w30b's sample
+is cut by `h = t[t.cv >= 0.97]`; six scored files sit only 35–50e-6 below that floor and land a
+mean **+15.5e-6 ABOVE** prediction. Positive below the range and negative above it is exactly
+what a **too-steep slope** produces — and w47a's E1 could not have caught it, because all ten of
+its cutoffs were inside [0.97, 0.9701183].
+
+| test | registered rule | result |
+|---|---|---|
+| **S1** refit at floor 0.9699 | ≤1.70 supports over-steep | slope **1.856 → 1.810**. **DOES NOT.** |
+| **S2** era residual under S1 | ≤−20e-6 → independent | **−27.77e-6, z −7.43. w46c STANDS.** |
+| **S3** quadratic inside support | same thresholds | **−34.06e-6** — curvature makes it *bigger* |
+| **S4** control on the refit's sd | >12e-6 downgrades S2 | 7.90 vs 7.76e-6, fit is sound |
+
+Registered call (slope 1.75–1.85, era −22 to −30) **correct on both legs**. The era shift has
+now survived **six** independent attacks. ⛔ And: **do not lower that CV floor** — with the
+three `stack_pub*` files included, `std` flips −23 → +34, `corr` +12.6 → +48.8, residual sd
+7.76 → 20.34e-6.
+
+## 6. ✅ The logit veto, audited — it holds, and I got my own reading rule wrong
+
+`w48b_logitveto.py`. `fam[logit] = +147.14e-6` is the largest family term by 4.2× and drives
+the five-file veto and w39's slot-9 swap. It is fitted on **four** files, because the CV floor
+is family-neutral in intent but not in effect: it cut **8 of 12** logit files and **1 of the
+other 75**. Holding the four-point term fixed and predicting the eight it never saw: the six
+**near-support** files land **+15.5e-6 high**, so the term is if anything **understated**,
+which makes the veto's concern worse rather than better. Under the S1 refit it rises to
+**+153.00e-6**. **The veto stands.**
+
+⚠ **My pre-registered reading rule pooled all eight and read "FAILS". That rule was wrong.**
+Two of the eight sit 340–360e-6 outside support and land +330 to +430e-6 high — as does the one
+cut *hybrid*, which is the linear form dying far outside its range, not a logit fact. The
+near/deep split is the correct read. Recorded as written rather than quietly replaced.
+⚠ The six near-support files are near-twins (cv 0.96995–0.96996): effective n ≈ 2, not 6.
+
+## 7. VERIFIED THIS RUN, END TO END
+
+```
+.venv/bin/python experiments/w26g_send.py --n 10        # DRY RUN, 02:3x UTC
+ 1. w40_ad211std_rankraw.csv   CV 0.9701044022  pred_lb 0.971116
+ 2. w38_ad202std_rankraw.csv   CV 0.9701067554  pred_lb 0.971121
+ 3. w34_ad196std_hybrid.csv    CV 0.9701091250  pred_lb 0.971117
+ 4. w34_ad195std_hybrid.csv    CV 0.9701108333  pred_lb 0.971120
+ 5. w36_ad197std_hybrid.csv    CV 0.9701124257  pred_lb 0.971123
+ 6. w36_ad199std_h3.csv        CV 0.9701354276  pred_lb 0.971161
+ 7. w38_ad202std.csv           CV 0.9701305726  pred_lb 0.971166
+ 8. w40_ad211std.csv           CV 0.9701309541  pred_lb 0.971167
+ 9. w40_ad211stdcorr.csv       CV 0.9701374733  pred_lb 0.971178
+10. w38_ad202stdcorr.csv       CV 0.9701375891  pred_lb 0.971178
+```
+**Exactly `w47b_prereg.txt`'s registered ten, in the registered order, priced under w46c.**
+
+- **10/10 sent for the 08-21 UTC day. At cap. No submission this run.**
+- Board 02:2x UTC: **rank 18 at 0.97118**; gold cut (top 14) `thisray` **0.97120**; leader
+  Changye Li **0.97136**. **2e-5 below gold**, third consecutive unchanged read.
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS** (`check_selection.py` exits 1, 0 selected of
+  101 scored). **WANTED `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr` — both sent and selectable.**
+  **This needs Teddy, in his own browser.** Deadline 08-31.
+- ARM 217 **finished** 02:03 UTC. Scored against its prereg (§3). ⛔ Vetoed, WANTED-ineligible.
+  **w45 §3 stands: no seventh arm.**
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+- ⚠ `w39d_logithazard.py` exits 1 (`KeyError: w36_ad199std_logit`) — it is a w39 one-off that
+  reads a `priority == 1` band that no longer contains that file. Its decision was executed on
+  08-21. Not on the critical path; left alone deliberately.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid; **never** `ps`/`pgrep`.
+2. **Before sending, run the four-step chain in RESEARCH.md's new top block and check the dry
+   run equals the registered ten.** `w48e_order.py --write` then `w26g_send.py --n 10`. **Do
+   not `--go` until the dry run matches.** This is now the standing pre-send ritual.
+3. Once the ten score, apply **all three reading rules in `w47b_prereg.txt`** — p over the five
+   probes (ERA vs CV-REGION), r5 over the five drain files, E4's slope regression on the pooled
+   15. **Read all three; do not pick the one that suits the day's argument.**
+4. **If p ≥ −12 (CV-REGION):** replace `w46c.new_era` with a `cv > 0.970118` threshold, mark
+   w46c superseded, re-price the 19 in-support ad≥195 queue files up by 29.8e-6.
+   **If p ≤ −18 (ERA):** w46c stands; re-estimate `ERA_SHIFT` on all 15 points.
+5. **Write the 08-23 ten into `w48e_order.ORDER`,** with `w48d`'s `hboyang_mix` calibration read
+   as one slot (build it as `w48_cal_hboyang_mix.csv` from `data/ext_members16/test_hboyang_mix.npy`
+   — it does not exist on disk yet) and apply `w48d_arm217.json`'s rule to it.
+6. Do **NOT** re-open: the import line (w44 §6 — §3 above is a third confirmation), the
+   within-group redundancy test (w44 §9), the member side-scale axis (w43 §2), KS as a gate
+   (w43 §4), §4-level re-pricing as a script (w43 §5), GBDT tuning, error analysis / OOF
+   segmentation, fold/seed averaging, the top-level blend-weight search, FE variants, the
+   original dataset, the stacker C, the selection write path, the es-bias deflation constant
+   (w41 §4), a fourth sweep of the public kernel pool, **the era shift (six attacks, §5)**, or
+   **the logit veto (§6)**.
+7. ⚠ **Never use in-sample residuals to test extrapolation** (w47 §1). ⚠ **Never lower the
+   `cv >= 0.97` floor** (§5). ⚠ **A send list that is only in a prereg is not a send list** (§1).
+
+**Files added:** `experiments/w48_prereg.txt`, `w48a_provenance.py` + `.json` +
+`w48a_cv_recomputed.csv` + `w48a_sent_ranked.csv` + `w48a_member_auc.csv`,
+`w48b_logitveto.py` + `.json`, `w48c_slope.py` + `.json`, `w48d_arm217.py` + `.json`,
+`w48e_order.py` + `w48e_sent.json`.
+**Modified:** `experiments/w26d_queueprice.py` (imports w46c), `experiments/stdflag.py` (three
+corr files registered), `experiments/w23b_sendqueue.csv` + `w26d_queueprice.csv` (regenerated),
+`RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

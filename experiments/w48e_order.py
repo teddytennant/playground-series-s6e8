@@ -1,0 +1,268 @@
+"""w48e -- write the REGISTERED 08-22 ten into the artefact the sender actually reads.
+
+⛔⛔ THE DEFECT THIS FIXES, found by dry-running the whole chain rather than reading it.
+
+`w26g_send.py` does not read JOURNAL.md, RESEARCH.md, w47b_prereg.txt or w47b_probe.json. It
+reads ONE file, `experiments/w26d_queueprice.csv`, and sends its priority-1 band in send_rank
+order. That file was last written on 2026-08-20 14:30 by `w37d_order.py`, which encoded the
+08-21 day. Nothing has written the 08-22 plan into it. So at 02:00 UTC on 08-21 the sender's
+dry run planned this ten:
+
+     1 w37_cal_ravi_realmlp1c   2 w37_cal_dkv_xgb        3 w36_ad199std_h3
+     4 w36_ad199std_logit  ⛔VETOED                      5 w29_ad194stdcorr_ens4  ⛔VETOED
+     6 w34_ad196std_logit       7 w29_ad194stdcorr_rescale ⛔VETOED
+     8 w34_ad196std             9 w34_ad195std          10 w34_ad195std_rescale
+
+THREE VETOED FILES, and not one of the five probes that w47b registered to settle ERA vs
+CV-REGION. A run that opened the window and typed the documented command would have breached
+the veto and destroyed the day's experiment in the same keystroke.
+
+TWO ROOT CAUSES, both fixed here rather than described:
+
+  1. THE VETO EXISTED ONLY IN PROSE. It is quoted in RESEARCH.md and re-asserted in four
+     journal entries, and it appears in NO executable file. `grep -rn veto experiments/*.py`
+     returns w46a's internal variable and nothing else. A rule that only a human re-reads is
+     not a rule the tooling can honour. `VETO` below is a hard assert.
+  2. THE PRICES WERE w30b's. The carried CSV predates w46c, so every ad>=195 row in it was
+     30e-6 high. Repriced here through `w26d_queueprice.predict(..., stem=...)`.
+
+⚠ AND ONE MORE FILE JOINS THE VETO, on this run's evidence. `w42_ad217std_logit` did not
+exist when the veto was written. Under the corrected pricer it is now the HIGHEST predicted
+LB in the entire 84-file queue at 0.97131 with P(beat account best) = 1.00, on a cross-fitted
+CV 44e-6 BELOW the leader -- it collects `fam[logit]` +147.14e-6 on top of an ad217 base whose
+CV w48d shows is inflated by an imported member (`hboyang_mix`, standalone OOF AUC 0.9701816,
++886e-6 clear of the best of the other 176). That is precisely the shape the veto exists to
+stop: a file that wins an auto-selection tier on public score while being a bad pick on CV.
+All six ARM 217 files are vetoed while nothing is selected -- w42b_prereg made them
+WANTED-ineligible before they were built, and a file that may not be chosen deliberately must
+not be reachable accidentally either.
+
+    .venv/bin/python experiments/w48e_order.py            # plan only, writes nothing
+    .venv/bin/python experiments/w48e_order.py --write    # write the queue CSV
+"""
+from __future__ import annotations
+
+import hashlib, json, os, sys
+import numpy as np
+import pandas as pd
+from sklearn.metrics import roc_auc_score
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(ROOT, "agent"))
+from common import SUB, TARGET                                  # noqa: E402
+import stdflag                                                  # noqa: E402
+from stdflag import family, is_std                              # noqa: E402
+import w26d_queueprice as QP                                    # noqa: E402  (import is side-effect free)
+import w46c_predlb as W46                                       # noqa: E402
+
+N_TEST = 296302
+DST = os.path.join(HERE, "w26d_queueprice.csv")
+
+# ---------------------------------------------------------------------------- THE VETO, IN CODE
+# Binding while `check_selection` reports nothing selected. Each entry carries the reason, so a
+# later run can retire one on evidence instead of on forgetting.
+VETO = {
+    "w29_ad194stdcorr_ens4":  "w39 §4 / w46a: reaches a live auto-selection tier on public "
+                              "score while sitting well below the CV leader.",
+    "w29_ad194stdcorr_rescale": "same, `rescale` carries +34.6e-6 of family term.",
+    "w36_ad199std_logit":     "`logit` carries fam +147.14e-6 -- the largest family term by "
+                              "4.2x -- on a CV 82.9e-6 below the leader.",
+    "w38_ad202std_logit":     "same construction on the 202 pack.",
+    "w40_ad211std_logit":     "same construction on the 211 pack.",
+    # added w48, 2026-08-21
+    "w42_ad217std_logit":     "w48e: highest predicted LB in the queue (0.97131, P 1.00) on a "
+                              "CV 44e-6 below the leader. Logit term on a contaminated base.",
+    "w42_ad217stdcorr":       "w48d: ARM 217. CV inflated by hboyang_mix; WANTED-ineligible "
+                              "by w42b_prereg. Not reachable by auto-selection either.",
+    "w42_ad217std":           "w48d: ARM 217, as above.",
+    "w42_ad217std_h3":        "w48d: ARM 217, as above.",
+    "w42_ad217std_hybrid":    "w48d: ARM 217, as above.",
+    "w42_ad217std_rankraw":   "w48d: ARM 217, as above.",
+    "w42_ad217std_rescale":   "w48d: ARM 217, as above.",
+}
+
+# ------------------------------------------------------------------- THE REGISTERED 08-22 TEN
+REG = json.load(open(os.path.join(HERE, "w47b_probe.json")))
+ORDER = list(REG["order"])
+WHY = {
+    "w40_ad211std_rankraw": "PROBE 1/5. ad211, INSIDE the fitted CV support. ERA predicts it "
+                            "lands ~-29.8e-6 under w30b; CV-REGION predicts ~0. Screened free "
+                            "under the GENEROUS uncorrected w30b so the test is not circular.",
+    "w38_ad202std_rankraw": "PROBE 2/5. Same test on the 202 pack, different transform.",
+    "w34_ad196std_hybrid":  "PROBE 3/5. ad196 -- the earliest era pack that has an in-support "
+                            "file, so the probe set is not carried by one wave.",
+    "w34_ad195std_hybrid":  "PROBE 4/5. ad195, the first pack of the era.",
+    "w36_ad197std_hybrid":  "PROBE 5/5 and the cleanest single contrast in the design (w47 §6): "
+                            "ad197/hybrid/std INSIDE support, against w36_ad199std_hybrid "
+                            "(ad199/hybrid/std, ABOVE support) which already scored 0.97114, "
+                            "residual -32.5e-6. If that one pair splits, the answer is "
+                            "CV-REGION and no averaging is needed to see it.",
+    "w36_ad199std_h3":      "DRAIN. Highest-CV unsent non-vetoed file (0.9701354276).",
+    "w38_ad202std":         "DRAIN. 202 pack, ens4 family.",
+    "w40_ad211std":         "DRAIN. 211 pack, ens4 family.",
+    "w40_ad211stdcorr":     "DRAIN. Corrected h3 on the 211 pack.",
+    "w38_ad202stdcorr":     "DRAIN, best CV of the ten and therefore LAST -- latest-first "
+                            "tiebreak (w46b §5): if it ties on public score with an earlier "
+                            "file, the later timestamp wins the tier, free.",
+}
+
+print("=" * 90)
+print("w48e  THE REGISTERED 08-22 TEN -> the artefact w26g_send.py actually reads")
+print("=" * 90)
+
+bad = sorted(set(ORDER) & set(VETO))
+assert not bad, f"⛔ the registered order contains VETOED files: {bad}"
+assert len(ORDER) == 10 and len(set(ORDER)) == 10, "the registered order is not ten distinct files"
+print(f"\n  veto check: {len(VETO)} files vetoed, none of them in the registered ten. OK")
+
+# ------------------------------------------------------------------ rebuild the queue, priced w46c
+q = pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
+q["stem"] = q.file.str.replace(".csv", "", regex=False)
+stdflag.require_corr_registered(q.stem)
+# carry the rows w23b cannot regenerate (the w37 calibration files are registered by
+# w37c_prereg.py and have no stored OOF vector, so w23b drops them from the ranked queue).
+def _live_sent():
+    """Filenames Kaggle has actually scored. Asked live -- a cached list is exactly how the
+    queue came to describe already-sent files as candidates. Falls back to the cache only if
+    the API call fails, and says so when it does."""
+    import subprocess
+    snip = r"""
+import json, os
+from kagglesdk import KaggleClient
+from kagglesdk.kaggle_env import KaggleEnv
+from kagglesdk.competitions.types.competition_api_service import ApiListSubmissionsRequest
+from kagglesdk.competitions.types.competition_enums import SubmissionGroup
+tok = json.load(open(os.path.expanduser(
+    os.environ.get("KAGGLE_CONFIG_DIR", "~/.kaggle") + "/credentials.json")))["access_token"]
+with KaggleClient(env=KaggleEnv.PROD, api_token=tok) as c:
+    r = ApiListSubmissionsRequest(); r.competition_name = "playground-series-s6e8"
+    r.group = SubmissionGroup.SUBMISSION_GROUP_SUCCESSFUL; r.page_size = 500
+    n = sorted({s.file_name for s in
+                c.competitions.competition_api_client.list_submissions(r).submissions})
+assert len(n) < 500, "page saturated"
+print(json.dumps(n))
+"""
+    cache = os.path.join(HERE, "w48e_sent.json")
+    try:
+        out = subprocess.run(["/home/nixos/.local/share/uv/tools/kaggle/bin/python", "-c", snip],
+                             capture_output=True, text=True, timeout=180)
+        names = json.loads(out.stdout)
+        json.dump(names, open(cache, "w"), indent=0)
+        return {f[:-4] if f.endswith(".csv") else f for f in names}
+    except Exception as e:
+        if os.path.exists(cache):
+            print(f"  ⚠ live submission list unavailable ({e!r}); falling back to the cache, "
+                  f"which may be stale.")
+            return {f[:-4] if f.endswith(".csv") else f
+                    for f in json.load(open(cache))}
+        print(f"  ⚠⚠ no live list and no cache ({e!r}) -- the sent filter is OFF this run.")
+        return set()
+
+
+LIVE_SENT = _live_sent()
+if os.path.exists(DST):
+    prev = pd.read_csv(DST)
+    extra = prev[~prev.file.isin(q.file)][["file", "cv", "rows", "md5"]].copy()
+    extra["stem"] = extra.file.str.replace(".csv", "", regex=False)
+    # ⚠ drop anything the carry would resurrect that has since been SENT. The previous CSV is
+    # a day and a half old; ten of its rows went out at 00:07 UTC today. w26g dedupes by
+    # filename anyway, but a queue that lists sent files as candidates is how the WANTED pin
+    # came to read "unsent" for a file that had already landed.
+    if LIVE_SENT:
+        n0 = len(extra); extra = extra[~extra.stem.isin(LIVE_SENT)]
+        if n0 - len(extra):
+            print(f"  dropped {n0-len(extra)} carried row(s) that are already scored on Kaggle")
+    extra["sent"] = False
+    if len(extra):
+        print(f"  carried {len(extra)} row(s) w23b cannot regenerate: {', '.join(extra.stem)}")
+        q = pd.concat([q, extra], ignore_index=True)
+q = q.reset_index(drop=True)
+q["fam"] = q.stem.map(family)
+q["std"] = q.stem.map(is_std)
+q["corr"] = q.stem.map(QP.is_corr)
+# ⚠ rows with no stored OOF vector have no CV and therefore no price. They are NOT dropped --
+# w37_cal_ravi_realmlp1c and w37_cal_dkv_xgb are legitimate unsent calibration files whose
+# whole point is that they are not ranked on CV. They keep priority 0 and sort last.
+_has = q.cv.notna()
+q["pred_lb"] = np.nan
+q.loc[_has, "pred_lb"] = [QP.predict(r.cv, r.fam, r.std, r.corr, r.stem)
+                          for r in q[_has].itertuples()]
+from scipy.stats import norm as _norm                            # noqa: E402
+q["p_beat"] = np.nan
+q.loc[_has, "p_beat"] = 1.0 - _norm.cdf(
+    (QP.BEST_LB + QP.STEP / 2 - q.loc[_has, "pred_lb"])
+    / np.array([QP.resid_sd(s) for s in q.loc[_has, "stem"]]))
+q["vetoed"] = q.stem.isin(VETO)
+print(f"  {int((~_has).sum())} row(s) carry no CV and are left unranked: "
+      f"{', '.join(q[~_has].stem)}")
+
+print(f"\n  queue {len(q)} unsent files, priced under w46c "
+      f"({QP.RESID:.2f}e-6 pre-era / {QP.RESID_ERA:.2f}e-6 for ad>={W46.ERA_MIN_AD})")
+v = q[q.vetoed].sort_values("pred_lb", ascending=False)
+print(f"\n  ⛔ VETOED and therefore NOT sendable, highest predicted LB first:")
+for r in v.itertuples():
+    print(f"     {r.stem:26s} cv {r.cv:.10f}  pred {r.pred_lb:.5f}  P(beat) {r.p_beat:.2e}")
+print(f"     -- the top of this list is ABOVE the top of the plan below. That is the point.")
+
+# ------------------------------------------------------------------ verify the ten, end to end
+print("\n  --- verifying the ten against the artefacts on disk ---")
+yv = pd.read_csv(os.path.join(ROOT, "data", "train.csv"), usecols=[TARGET])[TARGET].values
+idx = q.set_index("stem")
+ok = True
+for i, stem in enumerate(ORDER, 1):
+    f = os.path.join(SUB, f"{stem}.csv")
+    prob = []
+    if stem not in idx.index:
+        prob.append("NOT IN QUEUE")
+    if not os.path.exists(f):
+        prob.append("no CSV")
+    else:
+        d = pd.read_csv(f)
+        if len(d) != N_TEST:
+            prob.append(f"rows {len(d)}")
+        if d.isna().any().any():
+            prob.append("NaN")
+        m = hashlib.md5(open(f, "rb").read()).hexdigest()
+        if stem in idx.index and isinstance(idx.loc[stem, "md5"], str) and idx.loc[stem, "md5"] != m:
+            prob.append("md5 drift")
+    o = os.path.join(SUB, f"oof_{stem}.npy")
+    if not os.path.exists(o):
+        prob.append("no OOF")
+    elif stem in idx.index:
+        cv = float(roc_auc_score(yv, np.load(o).ravel()))
+        if abs(cv - idx.loc[stem, "cv"]) > 5e-10:
+            prob.append(f"CV {cv:.10f} != {idx.loc[stem,'cv']:.10f}")
+    r = idx.loc[stem] if stem in idx.index else None
+    print(f"  {i:2d}. {stem:24s} cv {r.cv:.10f}  pred {r.pred_lb:.5f}  "
+          f"{'OK' if not prob else '⛔ ' + '; '.join(prob)}")
+    ok &= not prob
+assert ok, "⛔ at least one registered file failed verification -- nothing written"
+print("\n  all ten: 296,302 rows, no NaN, md5 matches the queue, CV reproduces from the OOF "
+      "vector. OK")
+
+# ------------------------------------------------------------------ write
+for c in ("send_rank", "msg", "why"):
+    q[c] = np.nan
+q["why"] = q["why"].astype(object)
+q["priority"] = 0
+for i, stem in enumerate(ORDER, 1):
+    m = q.stem == stem
+    q.loc[m, "priority"] = 1
+    q.loc[m, "send_rank"] = i
+    q.loc[m, "why"] = WHY[stem]
+# a vetoed file must never be reachable: push it behind everything the pricer would offer.
+q.loc[q.vetoed, "priority"] = -1
+q = q.sort_values(["priority", "send_rank", "pred_lb"], ascending=[False, True, False])
+
+print(f"\n  {'#':>3} {'file':28s} {'cv':>13s} {'pred':>8s} {'P':>9s}  kind")
+for r in q[q.priority == 1].itertuples():
+    kind = "PROBE" if int(r.send_rank) <= 5 else "DRAIN"
+    print(f"  {int(r.send_rank):3d} {r.file:28s} {r.cv:.10f} {r.pred_lb:8.5f} {r.p_beat:9.2e}  {kind}")
+
+if "--write" in sys.argv:
+    q.drop(columns=["vetoed"]).to_csv(DST, index=False)
+    print(f"\n  wrote {os.path.basename(DST)} -- {len(q[q.priority==1])} ranked, "
+          f"{int((q.priority == -1).sum())} vetoed and pushed to the back.")
+else:
+    print("\n  PLAN ONLY. Nothing written. Re-run with --write.")

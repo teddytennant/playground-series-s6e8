@@ -1596,3 +1596,36 @@ predicted to clear 0.97120 under either live hypothesis — under w46c the two b
 0.97119, under w30b to 0.97122. That disagreement is exactly what `w47b_prereg.txt` tests,
 and it is the difference between "the material already on this disk is a medal" and "it is
 not". **The answer does not change what gets sent** — all ten go either way.
+
+---
+
+## Snapshot 2026-08-21 02:2x UTC (w48)
+
+| | team | score |
+|---|---|---|
+| #1 | Changye Li | 0.97136 |
+| #2 | MILANFX | 0.97134 |
+| #3 | Optimistix | 0.97127 |
+| #5 | cstdy | 0.97126 (moved 01:33 UTC today) |
+| **#14 — gold cut** | **thisray** | **0.97120** |
+| #17 | delai50 | 0.97119 |
+| **#18 — us (thtennant)** | **Teddy Tennant** | **0.97118** |
+
+**Board unchanged for us: rank 18, 2e-5 below the gold cut, third consecutive read.** One
+move inside the top 5 (cstdy to 0.97126 at 01:33 UTC).
+
+**What w48 changes about reading this board — and it is not a modelling change.** The ten
+files w47b registered for 08-22 are the ones that decide whether the material on this disk is
+a medal. This slot found that **the sender would not have sent them.** `w26g_send.py` reads
+one CSV, `experiments/w26d_queueprice.csv`, last written 2026-08-20 14:30 for the 08-21 day;
+its dry run planned three ⛔VETOED files and none of the five probes. Repaired in
+`w48e_order.py`, and the sender's dry run now reproduces the registered ten exactly, in order,
+priced under w46c. **The board reading above was never the bottleneck. The path from the plan
+to the submit call was.**
+
+The one number on this board that could still move sharply: `w42_ad217stdcorr` (ARM 217,
+built 02:03 UTC today) has cross-fitted CV 0.9701788 — **+38.8e-6 above anything else on this
+disk** — and the corrected pricer puts it at 0.97125, i.e. inside the top 10. It is ⛔vetoed
+and WANTED-ineligible, because w48d traces essentially all of that CV to one imported member
+whose standalone OOF AUC (0.9701816) exceeds our entire 217-member stack. **Do not read that
+0.97125 as a rank we are declining to take. Read it as the trap the veto exists for.**

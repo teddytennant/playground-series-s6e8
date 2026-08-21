@@ -4,6 +4,152 @@ Durable facts. Anything learned once goes here so no later run pays for it twice
 
 ---
 
+# 🔴🔴 THE PLAN IS NOT THE SENDER. READ THIS BEFORE ANY SEND DAY (w48, 2026-08-21)
+
+`w26g_send.py` **does not read JOURNAL.md, RESEARCH.md, or any `*_prereg.txt`.** It reads ONE
+file — `experiments/w26d_queueprice.csv` — and sends its `priority == 1` band in `send_rank`
+order. Writing a send list into a prereg and committing it does **nothing** to what goes out.
+
+On 2026-08-21 that CSV was 36 hours stale (written by `w37d_order.py` for the 08-21 day) and
+the sender's dry run planned **three ⛔VETOED files** and **none of w47b's five probes**. A run
+that opened the 00:00 UTC window and typed the documented command would have breached the veto
+and destroyed the day's experiment in one keystroke.
+
+### The rule that follows
+
+**Every send day, before the window opens, run the order writer and then dry-run the sender.**
+
+```
+.venv/bin/python experiments/w23b_sendqueue.py          # refresh unsent set from live Kaggle
+.venv/bin/python experiments/w48e_order.py              # plan only, verifies the ten
+.venv/bin/python experiments/w48e_order.py --write      # write the sender's CSV
+.venv/bin/python experiments/w26g_send.py --n 10        # DRY RUN — must equal the registered ten
+.venv/bin/python experiments/w26g_send.py --go --n 10   # only after the dry run matches
+```
+
+`w48e_order.py` reads the registered order out of `w47b_probe.json`, asserts none of it is
+vetoed, and verifies all ten end-to-end (296,302 rows, no NaN, md5 matches, CV reproduces from
+the stored OOF vector) **before** writing. To register a different day, edit `ORDER`/`WHY` in
+it — do not hand-edit the CSV.
+
+### ⛔ THE VETO NOW LIVES IN CODE, NOT IN PROSE
+
+It was quoted in four journal entries and appeared in **no executable file**. It is now
+`w48e_order.VETO`, a dict of stem -> reason, hard-asserted against the registered order and
+used to push every vetoed file to `priority = -1`. **12 files**, up from 5:
+
+`w29_ad194stdcorr_ens4`, `w29_ad194stdcorr_rescale`, `w36_ad199std_logit`,
+`w38_ad202std_logit`, `w40_ad211std_logit`, and **all seven ARM 217 files**
+(`w42_ad217std_logit`, `w42_ad217stdcorr`, `w42_ad217std`, `w42_ad217std_h3`,
+`w42_ad217std_hybrid`, `w42_ad217std_rankraw`, `w42_ad217std_rescale`).
+
+⚠ `w42_ad217std_logit` is now the **highest predicted LB in the whole 84-file queue** (0.97131,
+P(beat account best) = 1.00) on a CV 44e-6 *below* the leader. Anything that ranks the queue on
+predicted LB will put it first. That is exactly what the veto is for.
+
+---
+
+# 🔴 ARM 217 FALSIFIED ITS PREREGISTRATION — AND THAT IS BAD NEWS, NOT GOOD (w48d)
+
+`w44b_heldout.py` pre-registered ARM 217 at **+1.95e-6, 95% CI [−4.25, +8.16]**, "another
+null". Built 02:03 UTC 08-21. ARM 211 h3 base 0.9701331846 → ARM 217 h3 base **0.9701748950**:
+**+41.71e-6 over six members, +6.95e-6/member, z = +12.5.** The registered call is dead.
+
+**It does not reopen the import line.** Across all **177** member OOF vectors on disk the
+standalone-AUC distribution is median 0.96649, p90 0.96834, p99 0.96923, and the best of the
+other 176 is 0.96930. One member — **`hboyang_mix`, in `data/ext_members16`** — sits at
+**0.9701816**: **+886e-6 clear of the next best**, and **above our entire 217-member
+cross-fitted stack (0.9701749)**. A single public vector that alone out-AUCs a 217-member
+stack is not a base model. ARM 217's CV is not comparable to ad187..ad211's, and
+`w42b_prereg`'s WANTED-ineligibility clause — written before the build — was right.
+
+✅ **ext_members16 entered the pack ONLY at ARM 217.** Every pack ad187..ad211, including the
+WANTED file's ad199, is clean of `hboyang_mix`.
+
+### The one clean test, pre-registered for the 08-23 list (`w48d_arm217.json`)
+
+Send `hboyang_mix`'s raw test vector as a w37-style calibration read.
+Anchors: 88 objects (5 raw members + 83 stacks) with both an OOF AUC and an LB; the gap
+`lb − oof` is +1048e-6 median over the 34 nearest, 5–95% [1016, 1071].
+**Predicted LB 0.97123, band [0.97120, 0.97125].**
+- **lb ≥ 0.97116 → HONEST.** ARM 217's +41.7e-6 is real; w44's import line closed too early
+  and w45 §3 needs revisiting on the record.
+- **lb ≤ 0.97080 → INFLATED.** ARM 217's CV is an imported artefact; drop `hboyang_mix`.
+- in between → report it and change nothing.
+
+⚠ A first attempt fitted `lb ~ oof` on the five w37 members alone: slope 0.671, residual sd
+335e-6, 95% interval ±791e-6 at hboyang's design point. **Unfalsifiable — discarded.** Fit the
+GAP against all 88 anchors, not the level against 5.
+
+---
+
+# ✅ THE ERA SHIFT HAS NOW SURVIVED SIX ATTACKS (w47a ×4, w48c ×2)
+
+Beyond w47a's E1/E2/E3/G, `w48c_slope.py` tested the one alternative w47a could not reach —
+that the **fitted slope is simply too steep**, which would make residuals positive below the
+range and negative above it, exactly the observed pattern (+15.5e-6 on six sub-floor files,
+−29.8e-6 on the five era files).
+
+| test | result |
+|---|---|
+| **S1** refit with the CV floor at 0.9699 (adds the six sub-floor files) | slope **1.856 → 1.810**. Barely moves. |
+| **S2** era residual under that refit | **−27.77e-6, z −7.43.** Survives. **w46c stands.** |
+| **S3** quadratic in CV inside support | era residual **−34.06e-6** — curvature makes it *bigger*. |
+| **S4** control: refit residual sd | 7.90 vs 7.76e-6. The refit is sound, so S2 reads normally. |
+
+Registered call (slope 1.75–1.85, era −22 to −30e-6) was **correct on both legs**.
+
+⛔ **Do NOT lower the `cv >= 0.97` floor in `w30b_corrterm.py`.** With the three `stack_pub*`
+files (320–360e-6 below it) included, `std` flips −23 → +34, `corr` +12.6 → +48.8 and the
+residual sd goes 7.76 → 20.34e-6. The floor is load-bearing.
+
+---
+
+# ✅ THE LOGIT VETO SURVIVED ITS FIRST OUT-OF-SAMPLE TEST (w48b)
+
+`fam[logit] = +147.14e-6` is fitted on **four** files, because the `cv >= 0.97` floor is
+family-neutral in intent but not in effect — a logit file scores ~10e-6 less cross-fitted CV
+than its own h3 sibling, so the floor cut **8 of the 12** logit files and **1 of the other 75**.
+
+Holding the four-point term fixed and predicting the eight it never saw: the six **near-support**
+files (35–50e-6 below the floor) land **+15.5e-6 high** — i.e. `fam[logit]` is if anything
+**understated**, which makes the veto's concern *worse*, not better. Under the S1 refit the term
+rises to **+153.00e-6**. **The veto stands.**
+⚠ Those six are near-twins (cv 0.96995–0.96996, lb 0.97103–0.97106); effective n ≈ 2, not 6.
+⚠ The other two cut logit files sit 340–360e-6 out and land +330 to +430e-6 high — as does the
+one cut *hybrid*. That is the linear form dying far outside its range, not a logit fact.
+My pre-registered reading rule pooled all eight and read "FAILS"; **that rule was wrong** and
+the near/deep split is the correct read. Recorded as written rather than quietly replaced.
+
+---
+
+# ✅ PROVENANCE: EVERY NUMBER THE SELECTION RESTS ON RE-DERIVED FROM THE ARTEFACT (w48a)
+
+| check | result |
+|---|---|
+| **A** CV reproduces from the stored OOF vector on the frozen folds | **169 / 169 exact**, 0 mismatches beyond 5e-10 |
+| **B** the four CV registries agree with each other | 135 stems overlap, **0 disagreements** |
+| **C** the `lb` column matches Kaggle live | 83 / 83 exact, 0 rows missing |
+| **D** the fit sample is the whole sample | 18 scored stems absent — 9 by the `cv >= 0.97` floor (see w48b), 9 with no CV (4 pre-CV-era files + the 5 w37 raw-member sends, correctly excluded) |
+
+### The WANTED pick, re-derived three ways
+
+`w30b`'s slope is 1.8563 LB-e-6 per CV-e-6, so the −29.82e-6 era shift is **16.06e-6 of CV
+that every ad≥195 file got for free** — and the selection rule has been comparing raw CV
+across the ad194/ad195 boundary ever since.
+
+| ranking | argmax | WANTED's margin |
+|---|---|---|
+| raw CV (the rule as written) | `w36_ad199stdcorr` | +21.7e-6 over `w29_ad194stdcorr` |
+| **era-deflated CV** | **`w36_ad199stdcorr`** | **+5.7e-6** — survives, margin quartered |
+| CV-REGION-capped | five-way tie at the cap, WANTED among them | 0.0 |
+
+✅ **WANTED is unchanged: `w36_ad199stdcorr` (CV 0.9701400060), 2nd `w23_ad187stdcorr`.**
+This is the first time it has been checked against the era finding at all — it was set before
+w46 discovered it.
+
+---
+
 # 🔴 THE CV→LB PREDICTOR — READ THIS BEFORE QUOTING ANY PREDICTED LB (w47, 2026-08-21)
 
 **Import `experiments/w46c_predlb.py`. Never re-inline w30b.** `w26d_queueprice.py` still

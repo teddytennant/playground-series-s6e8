@@ -1,0 +1,37 @@
+{
+ "n_scored": 101,
+ "n_stems": 101,
+ "n_selected": 0,
+ "A_checked": 169,
+ "A_bad": 0,
+ "B_multi": 135,
+ "B_bad": 0,
+ "C_bad": 0,
+ "C_missing": 0,
+ "D_untabled": [
+  "blend150fx_logit",
+  "blend150sx_logit",
+  "blend158_logit",
+  "blend159_logit",
+  "blend159av_logit",
+  "stack_pub74_logit",
+  "stack_pub86_hybrid",
+  "stack_pub88_mine_logit",
+  "w14a_repro159av_logit",
+  "w15e_antistudent",
+  "w15f_antistudent_avg",
+  "w16b_cellweight",
+  "w16f_armavg",
+  "w37_cal_dm_cat",
+  "w37_cal_mkt_realmlp",
+  "w37_cal_om_xgb2",
+  "w37_cal_omid_tabm",
+  "w37_cal_ram_hgb"
+ ],
+ "deflate_cv_e6": 16.06164706660292,
+ "argmax": {
+  "cv": "w36_ad199stdcorr",
+  "cv_era": "w36_ad199stdcorr",
+  "cv_reg": "w34_ad195stdcorr"
+ }
+}
