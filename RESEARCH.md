@@ -9404,3 +9404,62 @@ corr(excess, shortfall) −0.060, which is LEVEL's prediction). Consequences:
   There is no queue to "re-price" — it is a quoting rule, not a computation. Do not build a
   script for it.
 - More CV at the top is **not** worthless. Building better arms remains worth the compute.
+
+## ⛔⛔ THE IMPORT LINE IS PRICED, AND IT IS FLAT (w44, 2026-08-21)
+
+The single most expensive thing this workspace did for ~20 slots was import more members into
+the stack. **It is now measured, and the marginal member is worth statistically nothing.**
+
+Every arm is a **strict nested superset** of the previous one — same `blend_lab.py
+--standardize --build`, same `--drop`, differing by exactly one `--extra-dirs` entry (verified
+from the `X=` lines of `w27t/w29c/w34a/w36b/w36g/w38d/w40f/w42e_run.sh`). That makes the arm
+sequence a controlled **dose-response experiment**: dose = members added, response = h3-base CV.
+
+Measure on the **h3 base**, never the w21a-corrected object — the correction adds a
+near-constant **+4.45e-6** (readings +4.19 / +4.58 / +4.57, sd 0.22) and only adds noise to a
+contrast. `experiments/w44a_memberlaw.py` and `w44b_heldout.py` rebuild the whole table from
+the logs; run them, do not re-derive.
+
+| event | dir | n | Δ h3 base | per member |
+|---|---|---|---|---|
+| 190→194 | ext_members8 | 4 | +0.67e-6 | +0.17 |
+| 194→196 | ext_members10 | 2 | +5.91e-6 | +2.96 |
+| 195→197 | ext_members12 | 2 | +3.87e-6 | +1.93 |
+| 197→199 | ext_members11 | 2 | +10.98e-6 | +5.49 |
+| 199→202 | ext_members14 | 3 | −2.41e-6 | −0.80 |
+| **202→211** | **ext_members15** | **9** | **+0.16e-6** | **+0.02** |
+
+**Origin slope +0.33e-6 per member, se 0.53, t +0.62.** Unweighted per-member mean +1.63e-6,
+se 0.96, t +1.70. Neither is distinguishable from zero.
+
+⚠ **196→195 is the one-off `om_cat` drop (+0.66e-6), not a member add.** w34a's `--drop` list
+lacks `om_cat`; every w36+ arm has it. That is why the counts read 196 then 195.
+
+### The three things to actually carry forward
+
+1. **The cumulative effect is real; no individual arm ever was.** 190→211 is **+19.85e-6 over
+   22 members (5.0 rebuild floors)**, but **not one single group event clears the 4e-6 floor**
+   except the ext_members11 pair (2.7 floors). Any per-arm read is noise.
+2. ⚠ **The `leader + 4e-6` WANTED bar is unsatisfiable for a small arm, by construction.**
+   Under the fitted law a 3-member dose has a point delta of +3e-6 — *below its own bar before
+   it is built*. ARM 202 was set up to fail. The bar is right as a noise floor; pointing 2- and
+   3-member doses at it was the error. Only ~9+ member arms were ever properly powered.
+3. **The one properly-powered arm returned nothing.** ARM 211 (+9, the largest dose ever) was
+   priced at +8.99e-6 with **P(clear floor) = 0.72** by a fit that provably excluded it. It
+   returned **+0.16e-6**. It sits inside the 95% CI [−8.15, +26.14] — so the law is *not*
+   falsified — but that interval width IS the finding: **a 9-member dose cannot be resolved
+   either.** Re-fit, that point carries 69% of the leverage and halves the slope.
+
+**Blunt version, no model needed: since ARM 199, 12 added members moved the stack −2.24e-6.**
+`w36_ad199stdcorr` (CV 0.9701400060) has survived three subsequent arms as the CV leader.
+
+### ⛔ The line is closed. Do not build a seventh arm.
+
+Fixed in `experiments/w44c_prereg.txt` §3 *before* ARM 217 existed. The supply is independently
+gone — w42 §5 mined the last 52 candidate dirs into six members and declared the public surface
+mined out, and **those six members are `ext_members16`, i.e. ARM 217 is already the scrapings.**
+A line with statistically zero marginal value and no remaining supply does not get another try.
+
+**Consequence for the endgame:** with the modelling line closed, the **selection toggle**
+(bounded ~−10e-6, needs Teddy in a browser) is unambiguously the largest number still on the
+table. Everything else is queue-drain for public rank, which is free but is not progress.

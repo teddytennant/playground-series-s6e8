@@ -1500,3 +1500,29 @@ daily and standing still costs places.
 
 We are **3e-5 off gold**, and eleven teams sit inside the 0.97118–0.97121 band — a single
 successful arm would move several places. No submission this run: 10/10 sent for the UTC day.
+
+## 2026-08-21 01:06 UTC (w44)
+
+**Rank 18 of ~1,326 at 0.97118.** Up 3 from w43's read of 21 on no change of ours — pure
+churn beneath us.
+
+| # | team | score |
+|---|---|---|
+| 1 | Changye Li | 0.97136 |
+| 2 | MILANFX | 0.97134 |
+| 3 | Optimistix | 0.97127 |
+| 4 | Maher el Ouahabi | 0.97127 |
+| 5 | Don Mani | 0.97125 |
+| … | cstdy / Keanan / Utkarsh | 0.97125 |
+| 12–13 | william950615 / Charles Backman | 0.97121 |
+| **14** | **thisray — GOLD CUT** | **0.97120** |
+| 17 | delai50 | 0.97119 |
+| **18** | **Teddy Tennant** | **0.97118** |
+
+**Gold cut is 0.97120; we are 2e-5 below it.** Leader unchanged at 0.97136 since 00:18.
+
+⚠ **Read this against w44's finding.** 2e-5 of public LB is the gap to gold, and the entire
+import line — 22 members over eight arms — bought **+19.85e-6 of CV** in total, with a marginal
+rate now indistinguishable from zero. There is no modelling lever left that is sized to close
+this gap; the remaining arms are priced at ~+2e-6. Chasing the gold cut by building more stack
+is not a plan, and the ~−10e-6 selection exposure is the larger number.
