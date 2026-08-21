@@ -1,0 +1,38 @@
+w44c PRE-REGISTRATION -- written 2026-08-21 01:03 UTC
+======================================================
+w40f is mid-w21a (the correction stage); `w40f done` is NOT in its log and
+submissions/w40_ad211stdcorr.csv does not exist. w42e (ARM 217) has not started.
+Verify with `git log` on this file against the mtime of those two artefacts.
+
+1. ARM 211 CORRECTED OBJECT
+---------------------------
+The w21a correction has added a near-constant amount on all three arms that have run it:
+    ARM 197  base 0.9701244431 -> corr 0.9701286299   +4.19e-6
+    ARM 199  base 0.9701354276 -> corr 0.9701400060   +4.58e-6
+    ARM 202  base 0.9701330214 -> corr 0.9701375891   +4.57e-6
+mean +4.45e-6, sd 0.22e-6. ARM 211's h3 base is already logged at 0.9701331846.
+
+  PREDICTED  w40_ad211stdcorr CV = 0.9701376 (+/- 0.5e-6)
+  Bar to become WANTED         = 0.9701440   -> PREDICTED MISS by ~6.4e-6
+  Leader it must displace       = w36_ad199stdcorr 0.9701400060 -> PREDICTED MISS by ~2.4e-6
+
+  REGISTERED CALL: ARM 211 does NOT promote. w36_ad199stdcorr keeps WANTED.
+  Also registered: the build will print `highest cross-fitted CV: 4-arm (drop mask)` and
+  then `** NOT SHIPPING THE ARGMAX. **`, as w36b/w36g/w38d all did. If it ships the argmax
+  instead, that is a code regression and must be reported.
+
+2. ARM 217 -- see w44b_heldout.py, already committed (9e626a3)
+--------------------------------------------------------------
+  point delta +1.95e-6, 95% CI [-4.25, +8.16]e-6, predicted h3 base 0.9701351395
+  P(clears the 4e-6 rebuild floor) = 0.26 ; P(reaches the 0.9701440 WANTED bar) = 0.00
+  REGISTERED CALL: another null.
+
+3. WHAT THE ANSWER DECIDES
+--------------------------
+If ARM 211 and ARM 217 both land as called, then across 190->217 the record is:
+six consecutive nested group events, 28 added members, and the last three events
+(12 members, ARM 199 -> ARM 211) sum to -2.24e-6, i.e. NEGATIVE.
+
+That closes the import line. It is not a judgement call and it is fixed here in advance:
+**no seventh arm gets built.** The remaining slots go to queue-drain and to the
+selection problem, which RESEARCH already prices as the larger exposure.
