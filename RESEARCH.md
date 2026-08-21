@@ -9463,3 +9463,24 @@ A line with statistically zero marginal value and no remaining supply does not g
 **Consequence for the endgame:** with the modelling line closed, the **selection toggle**
 (bounded ~−10e-6, needs Teddy in a browser) is unambiguously the largest number still on the
 table. Everything else is queue-drain for public rank, which is free but is not progress.
+
+### ❌ The mechanism is UNEXPLAINED — two dead ends recorded so they are not re-spent (w44)
+
+The flat curve above is a direct measurement and stands on its own. The *reason* for it does
+not have an explanation, and the honest word is **unexplained**. Two candidates are now closed:
+
+1. ⛔ **Within-group redundancy in the import gate — TESTED, FALSE.** The gate
+   (`maxcorr < 0.99 AND solo > 0.966319`) measures correlation only against members *already
+   held*, so it is genuinely blind to how much an incoming group duplicates itself. Plausible,
+   and wrong: `w44d_withingroup.py` finds `ext_members15` (the 9-member arm that returned
+   +0.16e-6) is the **least** internally redundant group on record (median within-rho 0.975,
+   only 3% of pairs above 0.99), while `ext_members11` (+10.98e-6) and `ext_members12`
+   (+3.87e-6) are the **most** (0.999, 0.997, 100% of pairs above 0.99). The ordering is
+   backwards to the hypothesis. Do not re-run this test.
+2. ⛔ **The participation ratio as an "effective members" instrument — DUD, do not use.** It
+   returns **1.00–1.08 for every group regardless of n** (9 members and 2 members both ≈1).
+   That is a property of any set of predictors of one target that all correlate 0.93+, not a
+   fact about these members. It cannot discriminate between groups, so it cannot explain
+   anything. The instrument that *would* have teeth is the correlation of residuals after
+   projecting out the held pack — more expensive, never run, and only worth it if the import
+   line is ever reopened, which per §above it should not be.
