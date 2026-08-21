@@ -1,0 +1,14 @@
+waiting for the w40f ARM 211 build to exit...
+w40f clear at Fri Aug 21 01:21:02 AM UTC 2026
+=== w42_ad217std  extra-dirs ext_members3,ext_members4,ext_members6,ext_members7pin,ext_members8,ext_members10,ext_members11,ext_members12,ext_members14,ext_members15,ext_members16  Fri Aug 21 01:21:17 AM UTC 2026 ===
+217 members, dtype float32
+  transform logit        4s
+  hybrid: repaired 62 of 217 members
+  transform hybrid      26s
+  transform rankraw     44s
+  transform rescale     16s
+loaded in 94s
+  cross-fitted stack_logit    0.970134
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w42_ad217std_logit.csv  rows=296,302  cross-fitted CV 0.970134
+  cross-fitted stack_hybrid   0.970164
+  wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/submissions/w42_ad217std_hybrid.csv  rows=296,302  cross-fitted CV 0.970164

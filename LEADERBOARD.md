@@ -1526,3 +1526,31 @@ import line — 22 members over eight arms — bought **+19.85e-6 of CV** in tot
 rate now indistinguishable from zero. There is no modelling lever left that is sized to close
 this gap; the remaining arms are priced at ~+2e-6. Chasing the gold cut by building more stack
 is not a plan, and the ~−10e-6 selection exposure is the larger number.
+
+## 2026-08-21 01:22 UTC (w45)
+
+**Rank 18 at 0.97118.** Unchanged score from w44; the board read is the same. Gold cut (top 14)
+**0.97120** (`thisray`), leader **Changye Li 0.97136**, MILANFX 0.97134. **We are 2e-5 below gold.**
+
+Top of the board, live:
+
+| # | team | score |
+|---|---|---|
+| 1 | Changye Li | 0.97136 |
+| 2 | MILANFX | 0.97134 |
+| 3 | Optimistix | 0.97127 |
+| 4 | Maher el Ouahabi | 0.97127 |
+| 14 | **thisray — the gold cut** | **0.97120** |
+| 18 | **Teddy Tennant** | **0.97118** |
+
+**The number that matters more than the rank this week.** w45 repriced the unset final-selection
+toggle on the live auto-selection tiers: **+15.8e-6 (limit 2) / +21.7e-6 (limit 1)**, with a
+tiebreak bracket of **+0.00 to +35.15e-6**. At ~2.5 board places per 1e-5 the bad branch is
+**~9 places** — i.e. **larger than our whole 2e-5 gap to gold.** Nothing is selected. See the
+`🔴 ACT ON THIS FIRST` block at the top of `RESEARCH.md`.
+
+Our own top public tier, which is now the thing to watch daily:
+- **0.97118 (auto-slot 1), 4-way:** `w36_ad199stdcorr` ← the CV pick, `w29_ad194stdcorr`,
+  `w27_ad190stdcorr`, `w21_ad187corr_ens4`
+- **0.97117 (auto-slot 2), 5-way:** `w36_ad199std`, `w34_ad195stdcorr`, `w27_ad190std`,
+  `w21_ad187corr`, `w22_ad187corr_rankraw`

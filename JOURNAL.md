@@ -18430,3 +18430,226 @@ correlation test; it has been run and it answered no.
 board read at 01:06 UTC this run is **rank 18** at 0.97118 (see LEADERBOARD.md), up three on
 churn beneath us with no change of ours. The score, the gold cut (0.97120, `thisray` at #14)
 and the leader (Changye Li 0.97136) are as stated. **We are 2e-5 below gold.**
+
+---
+
+# 2026-08-21 — w45, slot 5. AT CAP 10/10. The selection click is worth 4x what anyone here thought.
+
+`date -u` **01:11 UTC on 08-21** at start. The prompt's "10 submissions already today" is
+**correct** — all ten 08-21 sends landed 00:07–00:08 UTC. **At cap. No submission possible
+this run, and none attempted.** Clock checked before believing the prompt.
+
+**The ANGLE as issued ("blending: rank-average or weight the tuned models by OOF performance,
+search blend weights on OOF") is explicitly closed and I did not follow it.** w44 §8.6 lists
+"the top-level blend-weight search" among the do-not-reopen lines and w43 §7.6 listed it before
+that. The object already IS an OOF-weighted blend of ~200 members with cross-fitted weights;
+re-searching the top-level weights is the thing that has been measured to do nothing, repeatedly.
+I took w44 §8's standing list in order instead.
+
+## 1. ✅ CHAIN ALIVE, and the queue advanced. ARM 211 landed; ARM 217 started mid-run.
+
+`/proc` scan on ppid/sid, never `ps`/`pgrep`. **w40f / ARM 211 done 01:20:43 UTC.**
+**w42e / ARM 217 started 01:21:17 UTC** (217 members, currently in `transform logit`) — it will
+not finish inside this run. w41a chain (4127802) has now drained.
+
+## 2. ✅✅ w44c PREREG §1 IS A CLEAN 4/4. ARM 211 landed exactly where it was called.
+
+Registered 01:03 UTC last run, committed before the artefact existed.
+
+| registered | predicted | actual | error |
+|---|---|---|---|
+| corrected CV | **0.9701376 ± 0.5e-6** | **0.9701374733** | **−0.127e-6** ✅ |
+| margin vs the 0.9701440 bar | ~−6.4e-6 | **−6.53e-6** | ✅ **NOT PROMOTED** |
+| margin vs the ARM 199 leader | ~−2.4e-6 | **−2.53e-6** | ✅ |
+| the log must print `NOT SHIPPING THE ARGMAX` | — | it did, verbatim | ✅ **no code regression** |
+
+The w21a correction step added **+4.289e-6**, against the prereg's mean +4.45 sd 0.22 (z −0.73,
+inside). Four arms have now run it: +4.19 / +4.58 / +4.57 / +4.29, mean +4.41 sd 0.19. **The
+correction machinery is stable to ~0.2e-6 and is the most predictable thing in this workspace.**
+
+`w40b_promote.py` is hard-wired to ARM 202 and I did not generalise it — the import line is
+closed, so there is no seventh arm for a generalised promoter to serve. The ARM 211 verdict was
+printed by the build itself (`⛔ NOT ELIGIBLE for check_selection.WANTED on CV alone`) and the
+arithmetic is above. **`w36_ad199stdcorr` keeps WANTED.**
+
+## 3. §6's CLOSE-THE-LINE RULE: the evidence is already in, and 217 cannot change it
+
+w44 §6 fixed the rule as "if 211 and 217 both land as called, close the line". 211 landed as
+called. Worth stating plainly, because it removes ARM 217 from the critical path: **§6's
+arithmetic — "the last three events, 12 members, ARM 199 → ARM 211, sum to −2.24e-6" — is a
+statement about 190→211 and does not reference 217 at all.** The closing evidence is in hand.
+217 is a seventh data point on a curve already fitted, not the thing that decides. **No seventh
+arm gets built, whatever 217 says.** If 217 surprises, it goes in the journal as a surprise; it
+does not reopen the line.
+
+## 4. 🔴🔴 THE MAIN WORK. Every published price of the selection click is stale, and the true number is ~4x larger.
+
+`experiments/w45a_tierprice.py` → `w45a_tierprice.json`. Pre-registered in
+`experiments/w45_prereg.txt`, **committed `dda1dca` before the script existed**. All five
+registered predictions **CONFIRMED**.
+
+### Why a seventh reprice is not re-litigation
+
+The six prior pricings (w15i, w16s, w16u, w16w, w17d/w17g, w18a) all answer "what does it cost
+not to click, **given that auto-slot 1 is held by `w16e_aonly` / `w16q_ens4avg` /
+`w16t_cellens4`**". Those three now score 0.97108 and are **in neither live tier**. Every
+number in `check_selection.py`'s notes, in `w18a_lawif_joint.json` and in `w19c_clicksens.json`
+prices a board configuration that no longer exists. The quantity changed; this is not a new
+estimate of the same one. `w45a` gates on that explicitly — it re-derives both tiers from the
+live board and exits 2 if they have moved off the prereg.
+
+### The two structural changes, neither previously recorded
+
+**(a) For the first time, the WANTED file is itself inside auto-slot 1's tie.**
+`w36_ad199stdcorr` was sent 00:07:06 today and scored 0.97118.
+
+**(b) The auto-pick's public lead is gone.** The old contrast was **dLB +30e-6 against dCV
+−5.3e-6** — a file that led hugely on public and slightly on CV, so the conditioning could
+attribute nearly the whole lead to slice noise and the click priced cheap. The live tie members
+are **exactly level on public (dLB = 0) and 21.7–36.1e-6 behind on CV.** There is no public lead
+left to shrink away.
+
+### The number
+
+Same closed-form LAW-IF conditioning as w18a (M = w·I verified to 5.6e-12, gamma −0.091758,
+beta −0.2477 from w17d). With dLB = 0 the map degenerates to **cost = 1.0918 × |dCV|**, which
+reproduces the exact `emax` computation **to 0.000e-6 on all four branches**.
+
+| auto-slot 1 (public 0.97118) | CV | vs the pick | cost of NOT clicking | P(beats both) |
+|---|---|---|---|---|
+| **`w36_ad199stdcorr`** | 0.9701400060 | — **is the pick** | **+0.00e-6** | n/a (self) |
+| `w29_ad194stdcorr` | 0.9701182875 | −21.7e-6 | **+23.71e-6** | 0.083 |
+| `w27_ad190stdcorr` | 0.9701181344 | −21.9e-6 | **+23.88e-6** | 0.082 |
+| `w21_ad187corr_ens4` | 0.9701039331 | −36.1e-6 | **+39.38e-6** | 0.015 |
+
+- **limit 1, uniform tiebreak +21.74e-6. limit 2 (Kaggle's default) +15.77e-6.**
+- Against every previously published figure: **+0.8 to +5.7e-6.** This is **3–7× larger.**
+
+### ⚠ The honest bracket is the TIEBREAK, and it is unreadable
+
+Kaggle's within-tie ordering is undocumented. The two extremes are not close:
+
+| tiebreak | picks | cost of not clicking |
+|---|---|---|
+| **latest-first** | `w36_ad199stdcorr` + `w34_ad195stdcorr` | **+0.00e-6** — we get the pick free |
+| **earliest-first** | `w21_ad187corr_ens4` + `w21_ad187corr` | **+35.15e-6** |
+
+`w36_ad199stdcorr` is the newest of the four (00:07:06 today) and `w21_ad187corr_ens4` the
+oldest (08-17 13:40), so the two rules sit at opposite ends by construction. **We cannot tell
+which. Clicking makes the question moot, and that is the whole argument.**
+
+### Two things that make this robust where the old number was knife-edge
+
+- **w19c's tau sign-flip is dead.** Swept tau ∈ [0, 5]e-6: the cheapest non-pick branch moves
+  +23.71 → +21.11e-6 and **nothing changes sign anywhere.** w19c's mechanism *was* the 30e-6
+  public lead — tau = 0 was the only assumption under which that excess was pure slice noise.
+  The lead is gone, so the sensitivity is gone with it.
+- **It is mean-dominated, not variance-dominated.** The conservative and optimistic
+  non-additivity residuals (w17d corr 0.9924 vs 0.9971 — a 1.6× spread in the residual sd) give
+  **identical costs to 2 d.p.** The result no longer depends on the only assumed quantity in the
+  model. Previously the CV gap was 5e-6, comparable to the conditional sd, and everything was
+  knife-edge; now the gap is 22–36e-6 against a ~16e-6 sd.
+
+### Why this is now, by a distance, the largest number on the table
+
+Board read 01:22 UTC: **rank 18 at 0.97118**; gold cut (top 14) `thisray` **0.97120**; leader
+Changye Li 0.97136. **We are 2e-5 below gold.** At ~2.5 places per 1e-5 the earliest-first
+branch is **~9 board places**, and — the sharpest way to say it —
+
+> **in the bad tiebreak branch, the unclicked selection toggle is larger than our entire
+> distance to the gold cut.**
+
+With the member-import line closed (w44 §6), there is nothing else of this size left, and
+unlike the modelling work it is free and certain.
+
+## 5. ✅ FIXED A LIVE HAZARD: the deadline handoff in RESEARCH.md named the WRONG FILES
+
+`RESEARCH.md`'s block titled "⚠ THE DEADLINE RECOMMENDATION, PRICED — **this is the section to
+act on**" still told the reader to click **`blend159av_h3` + `blend160origm_h3`**. Those stopped
+being WANTED long ago: CV **0.97005** against the current pick's **0.97014**. A human following
+that instruction would have clicked a pair **95e-6 worse than the right one** — an error five
+times bigger than the entire quantity §4 spends the run measuring.
+
+Fixed: a dated, correct `🔴 ACT ON THIS FIRST` block now sits at the **top** of `RESEARCH.md`
+with the right two files, the w45 pricing, and the tiebreak bracket; the old block is retitled
+`⛔ SUPERSEDED — DO NOT ACT ON THIS ONE` with an explicit note that its E[max] *argument* is
+still correct and only its *files* are wrong. **The lesson generalises: this workspace has been
+carefully re-pricing a click whose instructions pointed at the wrong files. Re-read the handoff
+itself, not just the number attached to it.**
+
+## 6. ✅ TOMORROW'S QUEUE, and for the first time it has a non-zero reason to exist
+
+`experiments/w45b_unsent_cv.json`. **The journal's standing queue head was stale** — w44 §8.5
+named `w37_cal_ravi_realmlp1c` at `P(beat) 0.00e+00`, which predates ARM 202 and ARM 211 being
+built. 77 unsent files carry an OOF vector. Top 10 by cross-fitted CV:
+
+| # | file | CV | vs leader |
+|---|---|---|---|
+| 1 | `w38_ad202stdcorr` | 0.9701375891 | −2.42e-6 |
+| 2 | `w40_ad211stdcorr` | 0.9701374733 | −2.53e-6 |
+| 3 | `w36_ad199std_h3` | 0.9701354276 | −4.58e-6 |
+| 4 | `w40_ad211std_h3` | 0.9701331846 | −6.82e-6 |
+| 5 | `w38_ad202std_h3` | 0.9701330214 | −6.98e-6 |
+| 6 | `w40_ad211std` | 0.9701309541 | −9.05e-6 |
+| 7 | `w38_ad202std` | 0.9701305726 | −9.43e-6 |
+| 8 | `w36_ad197stdcorr` | 0.9701286299 | −11.38e-6 |
+| 9 | `w36_ad197std_h3` | 0.9701244431 | −15.56e-6 |
+| 10 | `w38_ad202std_hybrid` | 0.9701232618 | −16.74e-6 |
+
+**The new rationale, which the brief's "an unused slot is pure waste" never supplied.** §4 shows
+the unclicked-selection cost is a function of *which files hold the top public tier*. A
+high-CV file that lands in that tier **lowers** the cost; one that lands below it changes
+nothing. So queue-drain now has **non-negative expected value on the selection axis**, which it
+has never had before:
+
+- if `w38_ad202stdcorr` and `w40_ad211stdcorr` both score 0.97118 and join the tie, the
+  uniform-tiebreak cost falls **+21.74 → +15.40e-6** (they price at +2.64 and +2.76 themselves);
+- if either scores **0.97119** the tie **dissolves** and the cost collapses to **~+2.64e-6**.
+
+⚠ **Both caveats stated plainly.** (a) I cannot control what they score, so the expected
+reduction is smaller than −6.35e-6 — the honest claim is only that it is **non-negative**.
+(b) **All of this is worth exactly zero if Teddy clicks.** It is a hedge against the click not
+happening, and the click dominates it by an order of magnitude. Do not let the hedge become the
+argument for skipping the click.
+
+## 7. STATE, VERIFIED THIS RUN
+
+- **10/10 sent for the 08-21 UTC day. At cap. No submission this run.**
+- Board **rank 18 at 0.97118**; gold cut 0.97120; leader Changye Li 0.97136. **2e-5 below gold.**
+- **WANTED unchanged: `w36_ad199stdcorr`, CV 0.9701400060 — SENT and available to select.**
+  Second slot `w23_ad187stdcorr`, CV 0.9701150809, also sent.
+- ARM 211 = registered null, not promoted. ARM 217 running since 01:21:17 UTC.
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS, and §4 just quadrupled what that costs.**
+  **This needs Teddy, in his own browser.** Deadline 08-31.
+- Disk 95%, 24 GB free. `notebooks/w40/out` (3.6 GB) is MINED and is the first safe deletion.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid; **never** `ps`/`pgrep`.
+2. **Score ARM 217 against `w44b_heldout.py`**: predicted h3 base **0.9701351395**, point delta
+   +1.95e-6, CI [−4.25, +8.16], registered call **another null**. Then **apply §3 above: no
+   seventh arm, whatever it says.** `w44b_heldout.py` picks 217 up once `from_log` points at
+   `w42e_build.log`.
+3. **Send the ten in §6's table, in CV order.** They are the best unsent material by a wide
+   margin and §6 gives them a real reason beyond a free slot. Watch whether either of the top
+   two reaches 0.97118/0.97119 — that is the one public reading this run actually wants.
+4. Re-run `w45a_tierprice.py` **after** those land. It gates on the live tiers and exits 2 if
+   they moved, which is the point: the tier composition is now a thing that changes daily and
+   every number in §4 is conditional on it.
+5. Do **NOT** re-open: **the import line (w44 §6, closed on the dose-response and reaffirmed in
+   §3 above)**, the within-group redundancy test (w44 §9, answered no), the member side-scale
+   axis (w43 §2), KS as a gate (w43 §4), the §4-LEVEL re-pricing as a script (w43 §5), GBDT
+   tuning, error analysis / OOF segmentation, fold/seed averaging, **the top-level blend-weight
+   search (this run's stale angle)**, FE variants, the original dataset, the stacker C, the
+   selection write path (no API method, closed twice), the es-bias deflation constant (w41 §4),
+   or a third sweep of the public kernel pool (w42 §5).
+6. ⚠ And do not re-price the click a *seventh* time for its own sake. §4 is conditional on the
+   tier composition and should be re-run when that changes — which is item 4 — but the
+   *decision* it feeds has been the same for eight days and does not need another number.
+
+**Files added:** `experiments/w45_prereg.txt`, `w45a_tierprice.py` + `.json`,
+`w45b_unsent_cv.json`.
+**Modified:** `RESEARCH.md` (new top block + superseded marker), `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

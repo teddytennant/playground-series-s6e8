@@ -183,6 +183,10 @@ def main() -> None:
         return float(ew - ea)
 
     def pjoint(mu, cov, rsd, x):
+        # Degenerate when x IS one of the WANTED files: the contrast is the file against
+        # itself, so the event is not defined. Return None rather than a meaningless ~0.5.
+        if x in WANTED:
+            return None
         mus = np.array([(cv[x] - cv[k]) / U + float(uvec(x, k) @ mu) for k in WANTED])
         cc = np.empty((2, 2))
         for i, ki in enumerate(WANTED):
@@ -203,7 +207,8 @@ def main() -> None:
                      dcv=(cv[x] - cv["w36_ad199stdcorr"]) / U,
                      dlb=(LB[x] - LB["w36_ad199stdcorr"]) / U)
         tag = "   <-- IS the WANTED file" if x in WANTED else ""
-        print(f"  {x:22s} {l1[x]['dcv']:+8.1f} {l1[x]['dlb']:+6.1f} {c:+8.2f} {pj:19.3f}{tag}")
+        pjs_ = f"{pj:19.3f}" if pj is not None else f"{'n/a (self)':>19s}"
+        print(f"  {x:22s} {l1[x]['dcv']:+8.1f} {l1[x]['dlb']:+6.1f} {c:+8.2f} {pjs_}{tag}")
     avg = float(np.mean([l1[x]["cost"] for x in TIER1]))
     print(f"  uniform-tiebreak average over the four branches: {avg:+.2f}e-6")
 
