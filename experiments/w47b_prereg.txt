@@ -1,0 +1,112 @@
+w47b PRE-REGISTRATION -- written 2026-08-21 ~02:20 UTC.
+=======================================================
+An AMENDMENT to w46d_prereg.txt, written BEFORE any of the 08-22 files is sent and
+before anything about them is observed.  The only new information behind it is
+w47a's analysis of ALREADY-SCORED data.  Nothing about tomorrow's outcomes is known.
+That is what makes amending a registered list legitimate here, and the amendment is
+committed to git before the send window opens at 00:00 UTC on 08-22.
+
+WHAT CHANGED MY MIND (and it contradicts something I myself registered six hours ago)
+-------------------------------------------------------------------------------------
+w46 section 2 and w47_prereg both asserted that the ERA story (ad>=195 stops
+converting) and the CV-REGION story (the CV->LB relation saturates above cv 0.970118)
+cannot be separated, because every ad>=195 file ever sent also sits above the fitted
+CV range.  w47_prereg put it flatly: "no send can either, because there is no low-CV
+ad>=195 file ... to send."
+
+THAT IS FALSE.  The unsent queue holds THIRTEEN non-logit ad>=195 files sitting 5.9
+to 20.5e-6 BELOW the fitted CV maximum -- era files at ordinary CV.  I asserted the
+confound was unbreakable without checking the queue for the files that break it.
+w47b_probe.py lists them.  Eight are free to send under the screen below.
+
+THE AMENDED 08-22 TEN (replaces w46d's list; order is send order)
+------------------------------------------------------------------
+   1  PROBE  w40_ad211std_rankraw   cv 0.9701044022  -13.9e-6 inside support
+   2  PROBE  w38_ad202std_rankraw   cv 0.9701067554  -11.5e-6 inside support
+   3  PROBE  w34_ad196std_hybrid    cv 0.9701091250   -9.2e-6 inside support
+   4  PROBE  w34_ad195std_hybrid    cv 0.9701108333   -7.5e-6 inside support
+   5  PROBE  w36_ad197std_hybrid    cv 0.9701124257   -5.9e-6 inside support
+   6  DRAIN  w36_ad199std_h3        cv 0.9701354276
+   7  DRAIN  w38_ad202std           cv 0.9701305726
+   8  DRAIN  w40_ad211std           cv 0.9701309541
+   9  DRAIN  w40_ad211stdcorr       cv 0.9701374733
+  10  DRAIN  w38_ad202stdcorr       cv 0.9701375891
+Best CV LAST, per w46b section 5's latest-first tiebreak (free, worth +0.12e-6).
+
+DROPPED from w46d's ten, and they go back in the queue for 08-23 or later, not away:
+  w36_ad197stdcorr, w40_ad211std_h3, w38_ad202std_h3, w40_ad211std_rescale,
+  w38_ad202std_rescale.  Their dE[cost] are -0.28/-0.19/-0.18/-0.05/+0.05e-6.
+
+WHAT THE SWAP COSTS -- stated so it can be held against me
+-----------------------------------------------------------
+w46b's joint Monte Carlo: sending NOTHING costs +21.74e-6 (uniform tiebreak), the top
+ONE file costs +7.56, all TEN cost +7.09.  All nine free riders are therefore worth
++0.47e-6 BETWEEN THEM, and the five dropped here are a fraction of that.  The swap
+costs under +0.3e-6 on the selection axis and buys the only identification of the
+era/CV-region question that exists.
+
+THE PROBE SCREEN IS DELIBERATELY NON-CIRCULAR
+---------------------------------------------
+A probe is eligible only if P(it reaches a live auto-selection tier) <= 0.01 under
+w30b -- the UNCORRECTED predictor, i.e. the hypothesis under test in its most
+generous form.  Screening under w46c would assume the answer.  Eight of thirteen
+pass; the five that fail (w34_ad195std, w36_ad197std_rescale, w34_ad195std_rescale,
+w34_ad196std_rescale, w36_ad199std_rankraw, at P30b 0.0175 to 0.5565) are NOT sent,
+even though under w46c they price at <= 0.004.  The veto list of w46a/w46d
+(w29_ad194stdcorr_ens4, w29_ad194stdcorr_rescale, and the three *std_logit files)
+stands untouched.
+
+THE READING RULE, FIXED NOW
+---------------------------
+Let p = mean over the FIVE PROBES of (actual LB - w30b prediction), in units of 1e-6.
+Per-file held-out sd is 8.36e-6 (w47a leave-one-out, n=77), so sem = 3.74e-6 and the
+two hypotheses are 8.0 sems apart.
+    p <= -18  ->  ERA CONFIRMED.  The shift is about ad>=195, not about CV level.
+                  w46c stands exactly as written; `new_era` stays the gate.
+    p >= -12  ->  CV-REGION CONFIRMED.  The shift is about being above cv 0.970118,
+                  NOT about the adapter era.  Then w46c's gate is WRONG and must be
+                  replaced by a cv-threshold gate, which re-prices the 19 in-support
+                  ad>=195 queue files UPWARD by 29.8e-6.  w46c gets superseded, not
+                  quietly kept alongside.
+    in between -> MIXED.  Fit an era term and a cv-region term jointly on the pooled
+                  15 scored era files and report both; do not round it to one story.
+
+SECOND READING, carried over from w46d so that rule is not lost
+----------------------------------------------------------------
+Let r5 = mean over the five KEPT DRAIN files of (actual - w30b prediction).  w46d's
+thresholds are unchanged and still apply at n=5 (sem 3.74e-6):
+    r5 <= -20 -> H1 (the era correction) confirmed on the high-CV side;
+    r5 >= -10 -> H1 rejected there, revert to w30b;
+    in between -> undecided.
+Report r5 both including and excluding the two *stdcorr files, per w46d.
+
+THIRD READING: E4, slope vs level, from w47_prereg
+---------------------------------------------------
+Regress (actual - w30b prediction) on cv over all 15 scored era files (the five from
+08-21 plus tomorrow's ten).  Registered thresholds unchanged: slope <= -0.60 per e-6
+-> the miss is a bad CV slope and the fix is a re-estimated slope, not a dummy;
+within +/-0.40 -> a level shift and the dummy is the right form.
+This amendment nearly DOUBLES the power of that test: the registered ten spanned
+20.0e-6 of CV (se 0.344, t -2.50 against a true -0.86 slope); the amended ten spans
+35.6e-6 (se 0.181, t -4.75).  Improving E4 was not the motive for the swap but it is
+a real second benefit and it is recorded here, not claimed afterwards.
+
+THE CLEANEST SINGLE CONTRAST IN THE DESIGN, named in advance
+-------------------------------------------------------------
+w36_ad199std_hybrid (ad199, hybrid, std, cv 0.9701231, ABOVE support) already scored
+0.97114, residual -32.5e-6.  w36_ad197std_hybrid (ad197, hybrid, std, cv 0.9701124,
+INSIDE support) is probe #5.  Same era, same transform family, same standardisation;
+they differ essentially only in CV region.  If that one pair splits -- the first at
+-32e-6 and the second near 0 -- the answer is CV-REGION and no averaging is needed to
+see it.  Three of the five probes are hybrid precisely so this contrast is not
+carried by a single file.
+
+WHAT DOES NOT CHANGE
+--------------------
+1. The five-file veto stands.
+2. No seventh arm (w45 section 3), whatever ARM 217 prints.
+3. Final selection is on CV, not on any of this.  WANTED remains w36_ad199stdcorr
+   (CV 0.9701400060), second slot w23_ad187stdcorr (CV 0.9701150809).  None of the
+   ten sent tomorrow is a deadline candidate and none of this changes that.
+4. w44 section 6's operational conclusion -- stop importing members -- is unaffected.
+   Era and saturation both say CV gains at the top do not convert to LB.
