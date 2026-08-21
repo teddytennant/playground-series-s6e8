@@ -19514,3 +19514,200 @@ Noted, not pursued.
 `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-21 — w51, slot 10. AT CAP 10/10. Opened the five source logs the es-on-val clause has demanded since w42 — and every one of them convicts. Also picked up w50's unfinished run.
+
+`date -u` **03:27 UTC on 08-21** at start, before believing the prompt (the prompt says 08-20,
+slot 10; the API says ten sends landed 00:07–00:08 UTC on 08-21). **At cap. No submission
+possible and none attempted.** Next window 00:00 UTC on 08-22, ~20h out.
+
+⚠ **The ANGLE as issued — "find the original dataset and concatenate it"** — is closed three
+separate times and measured NEGATIVE here: **−58e-6 at 1×, −3,340e-6 at 50×**, monotone in
+dose (RESEARCH "The original dataset — CLOSED"), the source dataset is **deleted** from Kaggle
+along with its account (forum topic 731719), and w15d closed it a third time regionally. It is
+on w49 §6's do-not-reopen list. I followed the handover instead, which is what that list is for.
+
+## 0. ⛔ THE TOKEN WAS DEAD ON ARRIVAL, AND IT IS THE DOCUMENTED BUG
+
+First Kaggle call returned `Authentication required to call the Kaggle API.` Expiry was
+**03:22:29 UTC**; the clock read **03:27**. That is the 30-minute stale-predicate window
+RESEARCH documents twice. Fixed in one call (`KaggleCredentials.load(client=k).refresh_access_token()`,
+backup taken first) → new expiry **15:28:19 UTC**. ✅ The documented fix worked verbatim.
+**The access token is 12h, so this window WILL open again during a send day — the next one is
+15:28 UTC today.**
+
+## 1. 🔴 I INHERITED A RUN THAT NEVER WROTE ITS JOURNAL ENTRY
+
+The `/proc` scan found `.venv/bin/python experiments/w21a_ad187corr.py` still running, logging
+to **`experiments/w50a_build.log`**, parented to a detached `w50a_run.sh` — and `JOURNAL.md`
+had **no w50 entry**. w50 pre-registered ARM 216, committed `w50a`/`w50b`, launched the build,
+and ended before journaling. Its work is real and is credited below; only the write-up was
+missing. **The lesson is structural: a detached background build outlives the session that
+started it, so the `/proc` scan is not optional and `ls experiments/w<next>*` before assuming
+a number is free is now part of orienting.** I am w51 because w50a–w50c already existed.
+
+## 2. ✅ w50's RESULT, READ AGAINST ITS OWN PREREG (`w50_prereg.txt` R1–R4)
+
+The build finished 03:35 UTC. ARM 216 = ARM 217 minus `hboyang_mix`:
+
+    ARM 211 h3 base   0.9701331846
+    ARM 216 h3 base   0.9701459152      d_five    = +12.73e-6   (+2.55e-6/member, z 4.21)
+    ARM 217 h3 base   0.9701748950      d_hboyang = +28.98e-6   (69.5% of the total)
+
+**R3 IN-BETWEEN.** w50's registered call (`d_five ≤ +10e-6`) is **NOT confirmed** — the other
+five carry 30.5% of ARM 217's gain, not ~nothing. w50 was honest about this in its own JSON
+(`call_confirmed: false`).
+
+⚠ **`w50c_readout.json`'s `ad216_stdcorr_cv: 0.9701488291` is STALE** — w50c ran at 03:24, ten
+minutes before the correction chain finished, and captured the decile arm mid-run. **The
+shipped 5-arm value is `w50_ad216stdcorr` CV 0.9701500880.** Use that.
+
+## 3. 🔴🔴 TWO SAFETY FIXES THE FINISHED BUILD MADE URGENT, BOTH ON THE 08-22 CRITICAL PATH
+
+`blend_lab --build` emits the **whole transform family** as a side-effect, so seven ad216 files
+landed in `submissions/` and `w23b_sendqueue.py` globbed them straight in — I watched
+`w50_ad216stdcorr` come back at **queue rank 2 by CV**.
+
+1. **`stdflag.CORR_MAP` had no entry for `w50_ad216stdcorr`.** `require_corr_registered()` is an
+   assert reached **inside `w48e_order.py`**, i.e. on the send path. Tomorrow's ritual would
+   have **hard-failed at step 2 with the window open.** Registered as `h3` (its base is
+   `w50_ad216std_h3`, from `W21A_BASE` in `w50a_run.sh`).
+2. **All seven ad216 files added to `w48e_order.VETO`** (12 → 19). Both queue orderings reach
+   this family: CV ranking puts `stdcorr` near the top, predicted-LB ranking puts
+   `w50_ad216std_logit` **first** (fam[logit] +147e-6 on the highest base CV on disk). That is
+   precisely how `w42_ad217std_logit` got planned into a send list in w48.
+
+✅ **The 08-22 chain then dry-ran clean end to end** — `w23b_sendqueue.py`, `w48e_order.py
+--day 2026-08-22` (all ten verified: 296,302 rows, no NaN, md5 matches, CV reproduces from the
+stored OOF), and `w26g_send.py --n 10`, which plans **exactly w47b's registered ten in the
+registered order**. The sender's CSV already holds that list (w50 wrote it at 02:24). **Nothing
+needs writing tomorrow before `--go`; just re-run the dry run and confirm it still matches.**
+
+## 4. 🔴🔴 THE MAIN RESULT — the es-on-val clause is discharged, and it CONVICTS ALL FIVE
+
+`w50_ad216stdcorr` is CV **0.9701500880**, the highest ever built here, **+10.1e-6 above the
+WANTED file**. One thing blocked it from being a deadline pick, and that thing was **unread
+evidence**, not a measurement: w42b's clause, deferred by w42, w48 and w50 alike. With no
+submission slot to spend, reading it was the highest-value action available.
+
+`w51_prereg.txt` was **committed before any source was opened** — two gates (A: es-on-val;
+B: level-of-model, which w42b did not write and which I disclosed I was motivated to add after
+seeing two directory *names*), and rules R1–R4. `w51a_esread.py` re-extracts every quoted line
+and **asserts it is still present in its source file**, so the table cannot silently rot.
+
+| member | Gate A | Gate B | the line that decides it |
+|---|---|---|---|
+| `ern711_contextual` | ⛔ FAIL | pass | `Fold 0: early stopping.` → `FOLD 0 BEST \| E09 \| … FINAL 0.967637` → `OOF after fold 0: 0.967637` — the OOF **is** the argmax over ~16 per-epoch AUCs on the rows it publishes |
+| `ern711_multilevel` | ⛔ FAIL ×2 | pass | the same thing **nested**: base es → `E09`, then hypernetwork es → `Hyper E01 … Gain +0.000183`, printed as the headline |
+| `ravi200_publicm12` | ⛔ FAIL | pass | = **mhamza0810's XGB**: `n_estimators 20000` + `early_stopping_rounds=200` + `eval_set=[(x_val,y_val)]` whose `val_preds` become the OOF |
+| `ravi200_publicm13` | ⛔ FAIL | pass | = **tamerlanomralinov's lookup transformer**: `valAUC=… best=…` per epoch, `fold 0 done AUC=` the running best. Also **`folds 11`** |
+| `ravi200_l2stack1r` | ✅ pass | ⛔ FAIL | genuinely clean Ridge (`max_iter=100_000`, no es anywhere) — but **level-2 over the same 17 public columns the four rows above just failed** |
+
+**5 of 5 fail a gate → R2. The clause STANDS. ARM 216 is not WANTED-eligible, the ad216 veto
+stays, and `w36_ad199stdcorr` (CV 0.9701400060) remains the deadline pick.**
+
+### 4a. And the fold partition is BYTE-IDENTICAL to ours — that is the multiplier
+
+`OOF_Preds_PublicV1_1.parquet` ships `fold_nb`. Cross-tabbed against `agent/common.get_folds`
+it is **perfectly diagonal — same partition, same labels, not even permuted**:
+`StratifiedKFold(5, shuffle=True, random_state=42)`, which is ours and also `hboyang`'s.
+So when an author early-stops on their held-out fold *k*, the inflation lands on **exactly the
+rows our combiner scores as fold *k***. A different partition dilutes the artefact; an identical
+one delivers it intact. ⚠ RESEARCH's older "fold labels are permuted between authors" is true of
+*some* authors and **false of these** — check, never assume.
+
+### 4b. This retires w50's open question rather than leaving it at R3
+
+w50c read `d_five = +12.73e-6` as "report the number, change nothing". **The number now has a
+mechanism: it is four es-on-val columns landing on our own folds.** w44a's per-member law
+(+0.325e-6/member) was not beaten by better members; it was beaten by inflated ones. Nothing to
+build, and one fewer loose end.
+
+## 5. ⚠ WHERE I WAS WRONG, from my own §6
+
+I registered "I expect at least one FAIL, and I expect it on the **ravi200** side rather than
+ern711 — ern711's splines are the ones I would most LIKE to keep." **The direction was wrong.**
+ern711 failed hardest and most explicitly (two nested selections, printed by the author), while
+the ravi200 side is the one that *split* — `l2stack1r` is the only member in the set that passes
+Gate A on its own terms. I got "at least one FAIL" right and the attribution backwards, which is
+exactly the thing writing the prediction down beforehand is for.
+
+## 6. 🔵 WHAT `hboyang_mix` IS — context for the 08-23 read, and it must NOT pre-empt it
+
+`result.json`: **`member_count 149`**, `fold_definition StratifiedKFold(5, shuffle=True,
+random_state=42)`, `pooled_oof_auc_mix 0.9701816`, **`nested_pooled_oof_auc 0.9701846`**.
+
+So w49's unexplained +708e-6 standalone-AUC outlier has an ordinary explanation: **it is not a
+base model, it is a rival 150-column stack on our exact folds.** That also explains w49's
+20,000/20,000 fold-alignment finding without any leakage hypothesis. Two things worth having in
+hand before the read: the author's **own nested control scores 3.0e-6 HIGHER than the mix**, which
+leans HONEST; and **we imported `mix`, not `nested`** (`w42c_vet.csv` carries both — if anyone
+ever wants this vector, want the nested one).
+
+⛔ **`w48d_arm217.json` is unchanged and is the rule: ≥0.97116 HONEST, ≤0.97080 INFLATED.**
+Read the 08-23 score against that, not against this section. Recording a leaning is not moving
+a threshold, and the whole point of registering it in w48d was that it could not be moved later.
+
+## 7. BOARD AND STATE, 04:0x UTC
+
+- **Rank 18 at 0.97118.** Gold cut (top 14) `thisray` **0.97120** — **unchanged for five
+  consecutive reads**. Leaders MILANFX and Changye Li **0.97136**. **16 teams at ≥0.97120**, and
+  **seven teams tied with us on 0.97118** — one 1e-5 step clears all of them.
+- ⚠ **Our team name on the board is `Teddy Tennant`, not `thtennant`.** A rank scan that greps
+  the Kaggle username finds nothing and will report us as absent. Recorded so no run re-learns it.
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS** (`check_selection.py` exits 1). WANTED
+  `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr` — both sent and selectable. **Needs Teddy, in his
+  own browser.** Deadline 08-31.
+  ✅ **But w50b bounded it, and the bound is better than the journal has been claiming.** At
+  Kaggle's documented **limit 2**, `wanted_captured = 1` across the **entire** registered band
+  of the 08-23 cal read, in every branch and under both tiebreaks. The cal file would displace
+  `w29_ad194stdcorr` — a near-duplicate of the WANTED pick — never the WANTED pick itself, and
+  private is max-of-selected. w49's "send it FIRST" mitigation is a measured **no-op**
+  (`steps_where_send_order_binds: 0`), but the thing it feared costs the *second* slot at worst.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid (**never** `ps`/`pgrep`) — and
+   **`ls experiments/w<next>*` before claiming a run number**, per §1. If the Kaggle CLI says
+   `Authentication required`, check the expiry against the clock **before** believing it (§0);
+   the next 12h boundary is **15:28 UTC on 08-21**.
+2. **The 08-22 window is the priority.** The list is registered, the CSV is already written and
+   the whole chain dry-ran clean this run (§3). Re-run `w23b_sendqueue.py` → `w48e_order.py`
+   (it picks the day itself) → `w26g_send.py --n 10` **dry**, confirm it still equals w47b's ten,
+   then `--go`. **Do not `--write` unless the dry run has drifted.**
+3. Once the 08-22 ten score, apply **all three reading rules in `w47b_prereg.txt`** — p over the
+   five probes (ERA vs CV-REGION), r5 over the five drain files, E4's slope regression on the
+   pooled 15. **Read all three; do not pick the one that suits the day's argument.**
+4. **If p ≥ −12 (CV-REGION):** replace `w46c.new_era` with a `cv > 0.970118` threshold, mark w46c
+   superseded, re-price the 19 in-support ad≥195 queue files up by 29.8e-6.
+   **If p ≤ −18 (ERA):** w46c stands; re-estimate `ERA_SHIFT` on all 15 points.
+5. The **08-23 list is registered** in `w48e_order.ORDER_0823` and its file is built. Do not
+   rewrite it; if a day beyond 08-23 is needed, **ADD a key, never edit another day's.**
+6. Do **NOT** re-open: **the es-on-val status of ext_members16 (§4 — it is READ, all five
+   convict, with the evidence asserted in `w51a_esread.py`)**, **ARM 216 as a deadline pick (§4)**,
+   **`d_five` as signal (§4b)**, the import line, the within-group redundancy test (w44 §9), the
+   member side-scale axis (w43 §2), KS as a gate (w43 §4), §4-level re-pricing as a script
+   (w43 §5), GBDT tuning, error analysis / OOF segmentation, fold/seed averaging, the top-level
+   blend-weight search, FE variants, **the original dataset (closed three times, measured
+   NEGATIVE)**, the stacker C, the selection write path, the es-bias deflation constant (w41 §4),
+   a fourth sweep of the public kernel pool, the era shift (w48 §5), the logit veto (w48 §6), the
+   w37 es-bias readout (w49 §0), or per-fold rank normalisation as an explanation for hboyang
+   (w49 §6 — and §6 above now gives the real one).
+7. ⚠ **Never use in-sample residuals to test extrapolation** (w47 §1). ⚠ **Never lower the
+   `cv >= 0.97` floor** (w48 §5). ⚠ **A send list that is only in a prereg is not a send list**
+   (w48 §1). ⚠ **A send list not keyed to its day is a bug waiting to fire** (w49 §2).
+   ⚠ **`blend_lab --build` ships the whole family, and the queue globs `submissions/` — veto and
+   register a new pack's files IN THE SAME RUN THAT BUILDS IT** (§3).
+
+**Files added:** `experiments/w51_prereg.txt`, `w51a_esread.py` + `.json` + `.csv`,
+`notebooks/w51_hamza/`, `logs_w51_sendqueue.txt`, `logs_w51_sel.txt`.
+**Modified:** `experiments/stdflag.py` (`w50_ad216stdcorr` → h3), `experiments/w48e_order.py`
+(seven ad216 files vetoed, 12 → 19), `experiments/w23b_sendqueue.csv`, `RESEARCH.md`,
+`LEADERBOARD.md`, `JOURNAL.md`.
+**Credited to w50, which never wrote its own entry:** `w50_prereg.txt`, `w50a_run.sh`,
+`w50b_autoselect.*`, `w50c_readout.*`, and the ARM 216 build itself.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

@@ -1,0 +1,17 @@
+{
+  "a211": 0.9701331846,
+  "a216": 0.9701459152,
+  "a217": 0.970174895,
+  "d_five": 12.730600000065984,
+  "d_hboyang": 28.979799999939715,
+  "d_total": 41.7104000000057,
+  "share_hboyang": 0.6947859526625435,
+  "share_five": 0.3052140473374565,
+  "per_member_five": 2.5461200000131967,
+  "z_five_vs_law": 4.20666666669166,
+  "branch": "R3 IN-BETWEEN",
+  "action": "report the number, change nothing, NO family build.",
+  "call_confirmed": false,
+  "ad216_stdcorr_cv": 0.9701488291,
+  "wanted_eligible": false
+}

@@ -80,6 +80,32 @@ VETO = {
     "w42_ad217std_hybrid":    "w48d: ARM 217, as above.",
     "w42_ad217std_rankraw":   "w48d: ARM 217, as above.",
     "w42_ad217std_rescale":   "w48d: ARM 217, as above.",
+    # added w51, 2026-08-21. ARM 216 = ARM 217 minus `hboyang_mix`, built by w50a_run.sh and
+    # landed on disk 03:35 UTC. `blend_lab --build` emits the WHOLE transform family as a
+    # side-effect, so seven ad216 files now sit in submissions/ where w23b_sendqueue globs
+    # them, and NOTHING was stopping the queue writer from promoting them.
+    #
+    # ⛔ w50_prereg Sec.5, written before the build: "NOT WANTED-eligible, whatever d_five
+    # turns out to be. Five of the six imported members still have unread es-on-val status
+    # and dropping the sixth does not discharge that clause." d_five came back +12.73e-6
+    # (R3 IN-BETWEEN), so the clause stands unchanged.
+    #
+    # ⚠ AND THE ad216 FAMILY IS EXACTLY THE SHAPE THIS VETO EXISTS FOR. `w50_ad216stdcorr`
+    # is CV 0.9701500880 -- the HIGHEST CV ever built in this workspace, +10.1e-6 above the
+    # WANTED file -- so anything that ranks the queue on CV puts it near the top, and
+    # `w50_ad216std_logit` collects fam[logit] +147.14e-6 on top of that same base, so
+    # anything that ranks on predicted LB puts it FIRST. Both orderings reach it. That is
+    # precisely how `w42_ad217std_logit` got planned into a send list.
+    "w50_ad216stdcorr":       "w51: ARM 216. WANTED-ineligible by w50_prereg Sec.5. Highest "
+                              "CV on disk (0.9701500880) -- unreachable by accident until "
+                              "the es-on-val clause is discharged on evidence.",
+    "w50_ad216std":           "w51: ARM 216, as above.",
+    "w50_ad216std_h3":        "w51: ARM 216, as above.",
+    "w50_ad216std_hybrid":    "w51: ARM 216, as above.",
+    "w50_ad216std_rankraw":   "w51: ARM 216, as above.",
+    "w50_ad216std_rescale":   "w51: ARM 216, as above.",
+    "w50_ad216std_logit":     "w51: ARM 216 AND the logit family term on the highest base CV "
+                              "on disk. The single most dangerous file in submissions/.",
 }
 
 # ------------------------------------------------------------------- THE REGISTERED DAYS

@@ -114,6 +114,12 @@ CORR_MAP = {
     "w40_ad211stdcorr": "h3",           # w40f_run.sh, base w40_ad211std_h3
     "w42_ad217stdcorr": "h3",           # w42e_run.sh, base w42_ad217std_h3
                                         # ⛔ ARM 217 -- WANTED-ineligible, w42b_prereg + w48d
+    # w51: ARM 216 = ARM 217 minus `hboyang_mix` (w50a_run.sh). W21A_BASE was
+    # `w50_ad216std_h3`, so the corrected base is h3 and the family is h3.
+    # ⛔ ARM 216 INHERITS w42b's WANTED-INELIGIBILITY -- w50_prereg Sec.5 says so explicitly:
+    # five of the six ext_members16 authors still have unread es-on-val status and dropping
+    # the sixth does not discharge that clause.
+    "w50_ad216stdcorr": "h3",           # w50a_run.sh, base w50_ad216std_h3
 }
 
 

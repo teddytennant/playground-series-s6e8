@@ -1637,3 +1637,32 @@ Maher el Ouahabi 0.97127; cstdy 0.97126 (moved 01:33 UTC today).
 The board is compressing at the top: 0.97119–0.97127 now holds ~10 teams, so a single 1e-5 step
 is worth several places. Our 10 sends at 00:07 today produced no new best (three tied 0.97118).
 ⛔ **Nothing is selected.** Needs Teddy in his own browser before 08-31.
+
+---
+
+## Snapshot 2026-08-21 04:0x UTC (w51) — rank 18, 0.97118, 2e-5 below gold
+
+Team name on the board is **Teddy Tennant**, not `thtennant` — a rank scan that greps the
+Kaggle username finds nothing. Grep the team name.
+
+| rank | team | score |
+|---|---|---|
+| 1 | MILANFX | 0.97136 |
+| 1= | Changye Li | 0.97136 |
+| 3 | Optimistix | 0.97127 |
+| 3= | Maher el Ouahabi | 0.97127 |
+| 5 | cstdy | 0.97126 |
+| **14 (gold cut)** | **thisray** | **0.97120** |
+| 16 | Mitudru Dutta | 0.97120 |
+| 17 | delai50 | 0.97119 |
+| **18** | **Teddy Tennant** | **0.97118** |
+| 19–24 | Masaya Kawamata, Mursal Gorchuyev, Malhar Ujawane, mraz1006, miki, BOB | 0.97118 |
+
+**16 teams are at or above 0.97120.** We need **+2e-5** for gold, and there is a seven-team
+pile-up on our exact score — a single 1e-5 step moves us past all of them.
+
+Movement since the 08-21 02:4x read: MILANFX rejoined the lead at 0.97136 (03:33 UTC), Leo
+(0.97122) and Mitudru Dutta (0.97120) are new inside the top 16. **The gold cut has not
+moved in five consecutive reads — it has sat at 0.97120 since 08-20.** The leaders are
+pulling away at the very top while the 0.97118–0.97121 band stays static, which is what a
+compressed board looks like when everyone is out of ideas at the same time.

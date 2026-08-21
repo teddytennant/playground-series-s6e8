@@ -4,6 +4,83 @@ Durable facts. Anything learned once goes here so no later run pays for it twice
 
 ---
 
+# 🔴🔴 THE es-on-val CLAUSE IS DISCHARGED — AND IT CONVICTS. ext_members16 IS CONTAMINATED (w51)
+
+w42b wrote the clause in w42, w48 carried it, w50 carried it again, and nobody ever opened a
+log. w51 opened them. **All five non-`hboyang_mix` members of `ext_members16` fail a gate.**
+Rules fixed in `experiments/w51_prereg.txt` **before any source was read**; evidence re-extracted
+by `experiments/w51a_esread.py`, which **asserts each quoted line is still present in its source
+file** and fails loudly if a re-pull changes it.
+
+| member | source | Gate A (es-on-val) | Gate B (level) | the line that decides it |
+|---|---|---|---|---|
+| `ern711_contextual` | ern711/contextualized-deep-univariate-spline-transformer | ⛔ **FAIL** | pass | `Fold 0: early stopping.` → `FOLD 0 BEST \| E09 \| … FINAL 0.967637` → `OOF after fold 0: 0.967637`. The published OOF **is** the argmax over ~16 per-epoch AUCs taken on the rows it publishes. |
+| `ern711_multilevel` | ern711/multi-level-deep-univariate-spline-transformer | ⛔ **FAIL ×2** | pass | The same artefact **nested**: `base early stopping` → `BASE BEST \| E09`, then `hypernetwork early stopping` → `FOLD 0 HYPER BEST \| Base E09 0.967685 \| Hyper E01 0.967868 \| Gain +0.000183`. The author prints the selection gain as the headline. |
+| `ravi200_publicm12` | **mhamza0810/s6e8-single-model-fe-cv-0-96947** | ⛔ **FAIL** | pass | `n_estimators: 20000` + `early_stopping_rounds=200` + `eval_set=[(x_val, y_val)]`, and `x_val`'s `val_preds` go straight into the OOF. **20,000 candidate stopping points chosen on the scored fold** — the strongest form in the set. |
+| `ravi200_publicm13` | **tamerlanomralinov/s6e8-lookup-transformer-insights-lb-0-97041** | ⛔ **FAIL** | pass | `fold0 ep 11 valAUC=0.96784 best=0.96784` … `fold 0 done AUC=0.96784` — the reported fold AUC is the **running best on the validation fold**. Also `folds 11`. |
+| `ravi200_l2stack1r` | ravi20076/playgrounds6e8-public-l2stack-v1 | ✅ pass | ⛔ **FAIL** | Ridge, `max_iter=100_000`, **no** early stopping anywhere — genuinely clean *as a stacker*. But it is **level-2 over the same 17 public columns** the four rows above just failed. A clean stacker over contaminated columns publishes contaminated predictions. |
+
+### 🔴 AND THE FOLD PARTITION IS BYTE-IDENTICAL TO OURS. That is the multiplier.
+
+`OOF_Preds_PublicV1_1.parquet` ships a `fold_nb` column. Cross-tabulated against
+`agent/common.get_folds` it is **perfectly diagonal — same partition, same labels, not even
+permuted**: `StratifiedKFold(5, shuffle=True, random_state=42)`, the community default, which
+is also ours and also `hboyang`'s (`result.json: fold_definition`).
+
+⚠ **This is why the clause bites harder here than anywhere else in the workspace.** When an
+author early-stops on their held-out fold *k*, the inflation lands on **exactly the rows our
+combiner scores as fold *k***. A different partition would dilute the artefact across folds;
+an identical one delivers it intact. RESEARCH's older note that "fold *labels* are permuted
+between authors" is true of some authors and **false of ravi20076 and hboyang** — check, do
+not assume.
+
+### What this settles, and what it does NOT
+
+- ⛔ **ARM 216 is NOT WANTED-eligible.** `w50_ad216stdcorr` is CV **0.9701500880**, the highest
+  ever built here, **+10.1e-6 above the WANTED file** — and it is built on four es-on-val
+  members plus a level-2 stack over the same pool. **`w36_ad199stdcorr` (0.9701400060) remains
+  WANTED.** This is w51_prereg's R2 branch, taken on evidence.
+- ✅ **w50c's `d_five = +12.73e-6` now has a named mechanism.** w50 read it as R3
+  "report the number, change nothing"; the number is **not signal**, it is four es-on-val
+  columns landing on our own folds. w44a's per-member law (+0.325e-6/member) was not violated
+  by better members; it was violated by inflated ones.
+- ⛔ **It does NOT settle `hboyang_mix`** — not under test in w51, and the 08-23 calibration
+  read (`w48d_arm217.json`) decides it. **Nothing in w51 may be used to pre-empt that rule.**
+
+### ⛔ THE ad216 FAMILY IS VETOED IN CODE (`w48e_order.VETO`, now 19 files)
+
+`blend_lab --build` emits the **whole transform family** as a side-effect, so seven ad216 files
+landed in `submissions/` at 03:35 UTC and `w23b_sendqueue.py` globbed them straight into the
+queue — `w50_ad216stdcorr` came back at **queue rank 2 by CV**. Both orderings reach this
+family: CV ranking puts `stdcorr` near the top, and predicted-LB ranking puts
+`w50_ad216std_logit` first (fam[logit] +147e-6 on the highest base CV on disk). That is exactly
+how `w42_ad217std_logit` got planned into a send list. **Also registered
+`w50_ad216stdcorr` → `h3` in `stdflag.CORR_MAP`**, without which
+`require_corr_registered()` — reached inside `w48e_order.py`, on the critical send path —
+**would have hard-failed the 08-22 ritual.**
+
+### 🔵 `hboyang_mix` IS A 149-MEMBER FUSION. Context for the 08-23 read, NOT a re-reading of it.
+
+`notebooks/w40/out/hboyang_s6e8-150-member-fusion/result.json`:
+`member_count 149`, `fold_definition StratifiedKFold(5, shuffle=True, random_state=42)`,
+`base_meta_oof 0.9701185`, `pooled_oof_auc_mix 0.9701816`, **`nested_pooled_oof_auc 0.9701846`**.
+
+So the +708e-6 standalone-AUC outlier w49 could not explain has an ordinary explanation: **it is
+not a base model, it is a rival 150-column stack** built on our exact folds. Two consequences
+worth having in hand *before* the read, neither of which moves w48d's thresholds:
+
+- The author's **own nested control scores marginally HIGHER than the mix** (+3.0e-6), i.e. by
+  the author's own test the mix is not inflated by their nesting. That leans toward the **HONEST**
+  branch (predicted LB 0.97123, band [0.97120, 0.97125]).
+- ⚠ We imported **`mix`, not `nested`** — `w42c_vet.csv` has both (`hboyang_nested` solo
+  0.970185, `hboyang_mix` solo 0.970182). If a future run ever wants this vector, it should want
+  the nested one.
+
+⚠ **The rule is `w48d_arm217.json` and it is unchanged: ≥0.97116 HONEST, ≤0.97080 INFLATED.**
+Read the score against that, not against this section.
+
+---
+
 # 🔴🔴 THE PLAN IS NOT THE SENDER. READ THIS BEFORE ANY SEND DAY (w48, 2026-08-21)
 
 `w26g_send.py` **does not read JOURNAL.md, RESEARCH.md, or any `*_prereg.txt`.** It reads ONE

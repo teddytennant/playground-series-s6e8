@@ -1,0 +1,66 @@
+{
+  "members": [
+    {
+      "member": "ern711_contextual",
+      "gate_a": "FAIL",
+      "gate_b": "PASS",
+      "level": "L1 (spline transformer NN)",
+      "promotes": false,
+      "ref": "ern711/contextualized-deep-univariate-spline-transformer",
+      "source": "w40/out/ern711_contextualized-deep-univariate-spline-transformer/contextualized-deep-univariate-spline-transformer.log",
+      "evidence_line_present": true,
+      "why": "Per-epoch `FINAL` AUC is computed on the held-out fold; `Fold 0: early stopping.` then `FOLD 0 BEST | E09 | ... FINAL 0.967637` and `OOF after fold 0: 0.967637`. The published OOF IS the argmax over ~16 noisy per-epoch readings taken on the very rows it publishes."
+    },
+    {
+      "member": "ern711_multilevel",
+      "gate_a": "FAIL",
+      "gate_b": "PASS",
+      "level": "L1 (spline transformer + hypernetwork)",
+      "promotes": false,
+      "ref": "ern711/multi-level-deep-univariate-spline-transformer",
+      "source": "w40/out/ern711_multi-level-deep-univariate-spline-transformer/multi-level-deep-univariate-spline-transformer.log",
+      "evidence_line_present": true,
+      "why": "The SAME artefact applied TWICE and nested: `Fold 0: base early stopping.` -> `BASE BEST | E09`, then `Fold 0: hypernetwork early stopping.` -> `FOLD 0 HYPER BEST | Base E09 0.967685 | Hyper E01 0.967868 | Gain +0.000183`, and `OOF after fold 0: 0.967868` takes the second argmax. The author prints the selection gain itself as the headline number."
+    },
+    {
+      "member": "ravi200_publicm12",
+      "gate_a": "FAIL",
+      "gate_b": "PASS",
+      "level": "L1 (XGBoost)",
+      "promotes": false,
+      "ref": "mhamza0810/s6e8-single-model-fe-cv-0-96947 (via ravi20076 datacollation, column PUBLICM12)",
+      "source": "w51_hamza/s6e8-single-model-fe-cv-0-96947.ipynb",
+      "evidence_line_present": true,
+      "why": "`n_estimators: 20000` with `early_stopping_rounds=200` and `eval_set=[(x_val, y_val)]`, where `x_val` is the held-out fold whose `val_preds` are written straight into the OOF. 20,000 candidate stopping points selected on the scored fold -- the strongest form of the artefact in this set."
+    },
+    {
+      "member": "ravi200_publicm13",
+      "gate_a": "FAIL",
+      "gate_b": "PASS",
+      "level": "L1 (lookup transformer NN)",
+      "promotes": false,
+      "ref": "tamerlanomralinov/s6e8-lookup-transformer-insights-lb-0-97041 (via ravi20076 datacollation, column PUBLICM13)",
+      "source": "w34/out/tamerlanomralinov_s6e8-lookup-transformer-insights-lb-0-97041/s6e8-lookup-transformer-insights-lb-0-97041.log",
+      "evidence_line_present": true,
+      "why": "`fold0 ep 11 valAUC=0.96784 best=0.96784` ... `fold 0 done AUC=0.96784` -- the reported fold AUC is the RUNNING BEST on the validation fold. ALSO `folds 11`: this author used an 11-fold partition, so its OOF is not even produced on our partition and each value comes from a model trained on ~10/11 of the data."
+    },
+    {
+      "member": "ravi200_l2stack1r",
+      "gate_a": "PASS",
+      "gate_b": "FAIL",
+      "level": "L2 (Ridge stack over 17 columns)",
+      "promotes": false,
+      "ref": "ravi20076/playgrounds6e8-public-l2stack-v1",
+      "source": "w34/ravi20076_playgrounds6e8-public-l2stack-v1/playgrounds6e8-public-l2stack-v1.ipynb",
+      "evidence_line_present": true,
+      "why": "GATE A PASSES on its own terms -- a Ridge with `max_iter=100_000`, no `early_stopping`, no `eval_set`, no callback anywhere, and a log that prints only per-fold OOF logloss. GATE B FAILS: it is a LEVEL-2 stack, and the 17 columns it stacks are the same public pool whose es status the four rows above just failed. A clean stacker over contaminated columns publishes contaminated predictions."
+    }
+  ],
+  "n_fail": 5,
+  "branch": "R2 CLAUSE STANDS",
+  "fold_partition_identical_to_ours": true,
+  "fold_labels_permuted": false,
+  "ad216_stdcorr_cv": 0.970150088,
+  "wanted_cv": 0.970140006,
+  "ad216_promoted": false
+}
