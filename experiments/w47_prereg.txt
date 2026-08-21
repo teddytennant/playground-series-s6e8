@@ -1,0 +1,97 @@
+w47 PRE-REGISTRATION -- written 2026-08-21 ~01:55 UTC, BEFORE any w47 script exists.
+=====================================================================================
+Committed before the analysis is run.  At cap (10/10 for the 08-21 UTC day, all sent
+00:07-00:08 UTC), so nothing here can be a submission decision; it is a diagnostic
+that must land BEFORE tomorrow's ten score at ~00:08 UTC on 08-22, because it changes
+how w46d's reading rule may be read.
+
+THE ISSUED ANGLE IS NOT FOLLOWED, AND THE REASON IS ON THE RECORD
+----------------------------------------------------------------
+The angle issued for this slot is "error analysis / OOF segmentation".  JOURNAL w46
+section 8 item 6 lists "error analysis / OOF segmentation" among the do-not-reopen
+lines, as did w45 section 8 and w44 section 8.  I am taking w46 section 8 item 3
+instead -- re-estimating the era term -- and the reason it moved to the top is below.
+
+WHAT I NOTICED, AND WHY IT CANNOT WAIT A RUN
+--------------------------------------------
+w46 section 2 asserted, in `w46c_predlb.py`'s module docstring and in the journal,
+that the -29.82e-6 miss on the five 08-21 files "is NOT model form and it is NOT
+drift", and closed off extrapolation with this check:
+
+    "In-sample residual by CV quintile is FLAT (+1.24/+0.05/-1.07/+0.02/-0.22e-6),
+     so the linear-in-CV slope is not failing at the top of the range and this is
+     not an extrapolation artefact."
+
+That check cannot detect what it was used to rule out.  w30b is ordinary least
+squares with a constant and a CV term, so its residuals are ORTHOGONAL TO CV BY
+CONSTRUCTION: sum(r) = 0 and sum(r*cv) = 0 are normal equations, not findings.  A
+flat in-sample residual-vs-CV profile is guaranteed whatever the truth is.
+
+And the design point matters here in a way w46 did not check.  The 78 fitted files
+top out at cv 0.9701180.  The five 08-21 files run cv 0.9701220 to 0.9701400 -- four
+of the five are STRICTLY ABOVE THE ENTIRE FITTED CV RANGE, and the fifth sits at its
+edge.  Every one of the ten files queued for 08-22 is in that same region.  So the
+one check w46 ran to dismiss extrapolation is mechanically uninformative, and the
+five points it was defending are pure extrapolation.  That does not make w46c wrong;
+it makes it UNTESTED where it claimed to be tested.
+
+THE HYPOTHESES, REGISTERED WITH THRESHOLDS
+------------------------------------------
+E1  EXTRAPOLATION.  Refit w30b's exact form on the low-CV part of the 78 and predict
+    the held-out top of the CV range.  If the top-band mean held-out residual is
+    <= -10e-6 at a comparable dCV, then a material part of the -29.82e-6 is the
+    predictor failing above its support, NOT an ad>=195 era effect.
+    >= -3e-6 -> extrapolation is not the story and w46c's era reading survives.
+    In between -> partial; report the split, do not round it to one story.
+
+E2  GENERIC PROSPECTIVE OPTIMISM.  Expanding-window: for each day D from 08-13 to
+    08-20, fit on every file first scored BEFORE D, predict day D.  Let m = the mean
+    of those day-ahead residuals.  |m| < 5e-6 -> the predictor is prospectively
+    unbiased on old design points, and the 08-21 miss is specific to something about
+    those files.  m <= -10e-6 -> the predictor is generically optimistic out of
+    sample and w46c's era term is partly re-labelling a known bias.
+
+E3  THE CLAIMED PRECISION.  w46 section 2 scored the miss at z = -8.6 against
+    resid_sd_new = 7.756e-6, which is an IN-SAMPLE dof-corrected residual sd on a
+    sample containing near-twin files (w30b's own docstring records a test-set rho of
+    0.999979 for one pair).  Registered: the leave-one-out held-out residual sd will
+    exceed 7.756e-6.  If it exceeds 11e-6, then |z| for the five falls below 6 and
+    the "not a draw" claim, while probably still true, was overstated as written.
+
+E4  SLOPE vs LEVEL, and this is the one that changes tomorrow's reading.  w30b's CV
+    slope is 1.856 e-6 of LB per e-6 of CV, fitted on 78 files that include near
+    twins.  A slope fitted too steep over-predicts by (1.856 - s_true) * dCV above
+    the fit centre, which is a RAMP in CV; an era effect is a LEVEL.  Registered
+    discriminator, computable tomorrow on n=15 (the five already scored plus the ten
+    queued, which span dCV ~ 18e-6):
+        regress (actual - w30b prediction) on cv among the 15.
+        slope <= -0.6 per e-6  -> the miss is at least partly a bad CV slope, and the
+                                  correct fix is a re-estimated slope, NOT a dummy.
+        slope within +/-0.4    -> a LEVEL shift, and w46c's dummy is the right form.
+    Whichever way it reads, `ERA_SHIFT` gets re-estimated on all 15 points, which is
+    w46 section 8 item 3.
+
+WHAT DOES *NOT* CHANGE, WHATEVER THIS RUN FINDS
+-----------------------------------------------
+1. The 08-22 send list and its order stand exactly as w46d registered them.  w46a
+   prices all ten at dE[cost] <= +0.05e-6 under BOTH predictors; nothing about the
+   diagnosis alters what to send.
+2. The five-file VETO stands: w29_ad194stdcorr_ens4, w29_ad194stdcorr_rescale,
+   w36_ad199std_logit, w38_ad202std_logit, w40_ad211std_logit.
+3. w46d's r-threshold reading rule (r <= -20 confirm / r >= -10 reject) is NOT
+   rewritten by this run.  This run may only ADD the E4 slope read alongside it.
+   I am registering that addition now, before the ten score, precisely so it cannot
+   be chosen afterwards to suit whichever answer arrives.
+4. No seventh arm gets built (w45 section 3), whatever ARM 217 prints.
+5. The operational conclusion of w44 section 6 -- stop importing members -- is
+   unaffected.  Era and saturation both say CV gains at the top do not convert.
+
+HONEST STATEMENT OF WHAT THIS CANNOT SETTLE
+-------------------------------------------
+Era (ad>=195) and CV-region (cv > 0.970118) are near-perfectly confounded in
+everything this account has ever sent, because the builds that pushed CV above
+0.970118 are exactly the ad>=195 builds.  Nothing on this disk can fully separate
+them, and no send can either, because there is no low-CV ad>=195 file and no
+high-CV ad<195 file to send.  E1 tests whether the SHAPE of the CV relation is
+enough to produce the miss without any era term at all.  That is the strongest
+available read and it is not a clean separation.  Say so in the journal.
