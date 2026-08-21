@@ -9192,3 +9192,84 @@ additionally had an `ORDER` list that disagreed with the CSV it generates — `w
 edited the artefact and not the source, so a documented re-run would have silently reverted the
 slot-9 dequeue. **When you edit a generated artefact, edit the generator in the same commit, and
 then re-run the generator to prove they agree.**
+
+---
+
+## ⚠ `setsid` DOES NOT EXIST ON THIS BOX — use `experiments/detach.py` for every long build
+
+Found 2026-08-21 (w41), after the w36g→w38d→w40f chain was found dead with 5½ hours lost.
+
+Background builds launched with plain `nohup ... &` **die when the agent session that launched
+them ends**. All three chained jobs stopped at 18:44 UTC on 08-20, at the moment the w40 session
+closed; w38d and w40f never started at all.
+
+The obvious fix fails silently, which is the trap. `setsid` is **not installed here** — the same
+family as `ps` and `pgrep` (w40 §0). Inside a backgrounded shell it fails with
+`setsid: command not found`, the launch reports success, and nothing runs.
+
+**Use `experiments/detach.py`** — double-fork + `os.setsid()` in Python, always available:
+
+    .venv/bin/python experiments/detach.py <logfile> bash experiments/<runner>.sh
+
+**Verify with `/proc`, and check PPID and SID, not just existence:**
+
+    for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" in
+      *blend_lab*) echo "PID=${d#/proc/} PPID=$(awk '{print $4}' $d/stat) SID=$(awk '{print $6}' $d/stat) :: $c";; esac; done
+
+A correctly detached daemon shows **PPID=1** and a session id of its own. Anything else will be
+killed with the session.
+
+## ⛔⛔ THE w30b LB PREDICTOR IS OPTIMISTIC ABOVE CV 0.9701183 — `pred_lb` IS AN UPPER BOUND
+
+Established 2026-08-21 (w41) by the **held-out** test in `experiments/w41b_heldout.py`. w39c
+froze a `pred_lb` per queued file *before* the 08-21 drain; this compares realised against
+frozen, as opposed to the in-sample residuals (mean 5.8e-10, sd 7.2e-6, n=78) on the fitted rows.
+
+**Judge it only in-domain.** The predictor was fitted on stack files spanning CV
+**[0.9700125, 0.9701183]**. Five of the ten sent files were single-member `w37_cal_*` vectors at
+CV 0.958–0.969, *below the fitted minimum*, where `w37e`'s R2 independently proves the offset is
+non-linear (a 6.28σ miss). Their +500e-6 mean residual is extrapolation noise and must not be
+pooled with the rest.
+
+| group | n | mean resid | sd |
+|---|---|---|---|
+| stack files, CV **above** the fitted max | 4 | **−29.2e-6** | 11.2e-6 |
+| single members, CV below the fitted min | 5 | +500.6e-6 | 662e-6 |
+
+**All 4 in-domain files came in below prediction; z = −8.1** against the in-sample sd. The LB's
+quantisation floor is only 2.9e-6, so this is well above resolution.
+
+The sharpest statement of it, two files differing only in earned CV:
+
+    w29_ad194stdcorr  CV 0.9701183 -> LB 0.97118
+    w36_ad199stdcorr  CV 0.9701400 -> LB 0.97118      (+21.7e-6 CV bought ZERO LB)
+
+**Rules this sets:**
+- Quote `pred_lb` and `P(beat best)` from `w26d_queueprice.py` as **upper bounds**, never as
+  estimates, until the predictor is re-fit on `experiments/w41b_heldout.csv`.
+- The CV→LB slope flattens at the top of our range; arms sized against the old steeper
+  conversion are over-valued.
+- ⚠ **This does NOT license moving final selection off CV.** It is a *public-slice* measurement
+  used to correct a *public-slice* tool (the send-queue order). The private set is a different,
+  larger slice, and "CV stopped paying on public so select on something else" is the Rogii
+  failure inverted. **Selection stays on CV.**
+
+## ⛔ THE es-on-val DEFLATION CONSTANT IS WITHDRAWN — the bias is MEMBER-SPECIFIC
+
+Settled 2026-08-21 (w41) by `w37e_readout.py` on 5 landed calibration sends. Read in the
+registered order:
+
+- **R1 (clean audit) PASSES.** Our `ram_hgb` send scored 0.96945 vs the author's title LB
+  0.96945 — 0.0 steps. The title LB belongs to that vector, so the w36f line's *foundation*
+  holds. This was the gate that could have withdrawn the whole line, and it did not.
+- **R2 (clean anchor) FAILS.** `mkt_realmlp` missed by +1.56e-3 = **6.28σ**. The offset is not
+  linear in AUC over a ~1e-2 range.
+- **R3 (dirty) — no single constant is right.** n=3, mean shortfall **−4.24e-5**, between-member
+  sd **3.70e-4**. w36f's single reading of **+2.729e-4 is inconsistent with this mean** and is
+  **not usable as a deflation constant**. `omid_tabm` came in *negative*, which on a
+  self-submitted vector cannot be mis-attribution — the LB provably belongs to those
+  predictions, so the *line* is wrong at that AUC, not the member.
+
+**The es-on-val quarantine STANDS. Do not re-open the deflation-constant line** — it is closed,
+cheaply, which was a pre-registered outcome. (n=3 < the 5 w37a needs to resolve the between-
+member *spread*, so this is a verdict on the constant only.)

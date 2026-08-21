@@ -1458,3 +1458,19 @@ slot 1 of the 08-21 drain.
 
 Movement is still concentrated at the top and daily: eight of the top twenty re-scored on 08-20.
 The board is not stalling, so holding 0.97118 will drift downward in rank without new sends.
+
+## 2026-08-21 00:2x UTC (w41)
+
+Rank **18 at 0.97118** after the 08-21 drain. Leader MILANFX 0.97134 (unchanged since 08-18).
+**Gold cut (top 14 of ~2,433) is 0.97120** — two grid steps up.
+
+The field tightened overnight: 0.97125 now buys only ~rank 5-8, where it was comfortably top-5
+before. Eleven teams sit at 0.97121-0.97130.
+
+Us at 0.97118 in a 5-way tie (Masaya Kawamata, Mursal Gorchuyev, Malhar Ujawane, mraz1006).
+delai50 alone at 0.97119 separates that tie from the 0.97120 cut.
+
+⚠ **The 08-21 drain sent our best-CV file ever (`w36_ad199stdcorr`, CV 0.9701400) and it scored
+0.97118 — exactly tying the account best rather than beating it.** +21.7e-6 of CV bought zero
+public LB. See RESEARCH's "w30b LB predictor is optimistic" section: the CV→LB slope flattens at
+the top of our range, so closing the 2-step gap to gold is harder than the queue prices imply.

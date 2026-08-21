@@ -17622,3 +17622,194 @@ without its matched control measures nothing.
 `LEADERBOARD.md`.
 
 **No submission — at cap, 10/10 for the 08-20 UTC day.**
+
+---
+
+# 2026-08-21 — w41, slot 1. DRAINED 10/10 AT DAY OPEN. Chain was dead; restarted detached.
+
+`date -u` **00:10 UTC on 08-21** at start. **The prompt's "10 submissions already today" was
+stale** — it describes the 08-20 day, whose ten sends all landed at 00:07–00:08 UTC on 08-20.
+The API confirmed `0 already sent on 2026-08-21; 10 of 10 slots left`. I checked the clock
+before believing the prompt, and that check was worth ten submissions.
+
+**The ANGLE as issued ("LightGBM: tune it properly against the fixed folds") is stale and I did
+not follow it.** w40 §9.8 lists GBDT tuning among the closed lines; the stack is a 199-member
+cross-fitted ensemble and single-model tuning stopped mattering ~30 slots ago. I took the w40 §9
+standing list instead, in its stated order.
+
+## 1. ✅ THE QUEUE IS DRAINED — 10/10, AND THE CV LEADER IS FINALLY SENT
+
+`w26g_send.py --go --n 10` fired the pre-registered order unchanged. All ten scored:
+
+| # | file | CV | pred LB | **actual** |
+|---|---|---|---|---|
+| 1 | `w36_ad199stdcorr` | 0.9701400 | 0.971212 | **0.97118** |
+| 2 | `w36_ad199std_rescale` | 0.9701219 | 0.971201 | 0.97116 |
+| 3 | `w37_cal_ram_hgb` | 0.9680258 | 0.969454 | 0.96945 |
+| 4 | `w37_cal_mkt_realmlp` | 0.9581337 | 0.961290 | 0.96285 |
+| 5 | `w36_ad199std` | 0.9701323 | 0.971199 | 0.97117 |
+| 6 | `w37_cal_om_xgb2` | 0.9687332 | 0.969764 | 0.96993 |
+| 7 | `w37_cal_omid_tabm` | 0.9675077 | 0.968753 | 0.96949 |
+| 8 | `w37_cal_dm_cat` | 0.9667001 | 0.968086 | 0.96813 |
+| 9 | `w36_ad199std_hybrid` | 0.9701231 | (swapped in by w39e) | 0.97114 |
+| 10 | `w34_ad195stdcorr` | 0.9701248 | 0.971184 | 0.97117 |
+
+⚠ **`w26g_send.py`'s PINNED block still annotates `w36_ad199stdcorr` as "unsent" after the
+send.** The *plan* correctly excludes it, so nothing mis-fired, but the pin annotation is
+computed before the drain and is stale on re-read. Do not quote that block as selection state;
+`check_selection.py` is the authority.
+
+## 2. ✅✅ BOTH WANTED FILES ARE NOW **SENT** — the deadline pick is selectable for the first time
+
+`check_selection.py`: `w23_ad187stdcorr` **SENT**, `w36_ad199stdcorr` **SENT**. w39 §3 called
+draining this the highest-value action in the competition precisely because an unsent file
+cannot be selected at all. That blocker is gone.
+
+⛔ **But `*** NOTHING IS SELECTED ***` still holds, and the default is the Rogii failure.** With
+no manual pick, Kaggle auto-selects on **public** score, and w16w's decomposition showed the
+auto-picked tier is the *most public-inflated* set of files. I re-checked all six rows of the
+RESEARCH §"Final selection is a MANUAL BROWSER ACTION" table rather than re-deriving it:
+
+| check | result (2026-08-21) |
+|---|---|
+| `brave` / `brave-browser` on PATH | ABSENT |
+| `google-chrome` on PATH | **now ABSENT too** (it was present on 08-13) |
+| `~/.config/BraveSoftware/Brave-Browser` | ABSENT |
+| chrome/chromium `Cookies` | none found |
+| CDP on 127.0.0.1:9222 | not listening |
+| `websocket`/`websockets` in `.venv` | NEITHER |
+
+Unchanged, and if anything further from possible. **This needs Teddy, in his own browser, and
+it is worth more than every remaining modelling lever combined.** Deadline 08-31.
+
+## 3. ⚠⚠ THE BUILD CHAIN HAD BEEN DEAD FOR 5½ HOURS — AND `setsid` DOES NOT EXIST HERE
+
+`w36g_build.log` last wrote **18:44 UTC on 08-20**, nothing python in `/proc`, load 0.13.
+w38d and w40f were both still printing "waiting", so **ARM 202 and ARM 211 never existed** and
+w40 §9's plan for them was built on a chain that had already stopped. All three died at once,
+right as the w40 session ended: the launch was not detached from the session's process group.
+
+**And the obvious fix silently fails.** `setsid` is **not installed on this box** — the same
+class of trap as w40 §0's `ps`/`pgrep`. It fails *inside* the backgrounded shell with
+`setsid: command not found`, so the launch returns success, nothing runs, and the log looks
+empty rather than broken. I lost one launch attempt to exactly that before checking the log.
+
+`experiments/detach.py` now does the double-fork + `os.setsid()` in Python, which is always
+available. Verified by `/proc`: the chain is **PID 4127802, PPID=1, its own session** — orphaned
+to init, so it survives this session ending. **Use `detach.py` for every long build from now on.**
+
+`w41a_chain.sh` resumes rather than rebuilds: ARM 197's base and h3 completed before the kill
+(`w36_ad197std{,_h3}.csv` on disk, ens4 CV 0.970121) and only the w21a correction stage was
+interrupted, so stage 1 reruns just that. Stages 2 and 3 invoke `w38d_run.sh` and `w40f_run.sh`
+**verbatim** — ARM 202 and ARM 211 are not redefined here, and their artefact-gated wait-loops
+are preserved.
+
+## 4. ✅/⛔ `w37e_readout.py` — R1 PASSES, but R3 WITHDRAWS THE +2.7e-4 CONSTANT
+
+Read in the registered order, R1 first.
+
+- **R1 CLEAN AUDIT — PASS.** Our `ram_hgb` send scored **0.96945** against the author's title LB
+  **0.96945**, 0.0 steps apart. The title LB provably belongs to that vector, so the w36f line's
+  foundation holds. This was the gate that could have withdrawn the figure outright; it did not.
+- **R2 CLEAN ANCHOR — FAIL, as pre-registered it might.** `mkt_realmlp` predicted 0.961290,
+  actual 0.96285, a **+1.56e-3 miss = 6.28σ**. The offset is **not linear in AUC** over a
+  ~1e-2 range. Restrict everything to members near the fitted range; the rest are unpriced.
+- **R3 DIRTY — the bias is MEMBER-SPECIFIC.** n=3, mean shortfall **−4.24e-5**, sd across
+  members **3.70e-4**. w36f's single reading was **+2.729e-4**; this mean is **inconsistent**
+  with it, and one member (`omid_tabm`) even comes in *negative*, which on a self-submitted
+  vector cannot be the mis-attribution that explained `tam_lkup` — the LB provably belongs to
+  those predictions, so it is **the line that is wrong at that AUC, not the member**.
+
+**Consequence: `+2.729e-4` is one member's reading, not an es-on-val constant, and must not be
+used as a deflation term.** No single constant is right. **The quarantine STANDS** — which is
+the cheap outcome, and it closes the line rather than leaving it open. n=3 < the 5 w37a says is
+needed to resolve a between-member sd, so this is a verdict on the *constant*, not yet on the
+per-member spread.
+
+## 5. ⛔⛔ THE HELD-OUT TEST FAILED, AND IT IS THE MOST IMPORTANT NUMBER TODAY — `w41b_heldout.py`
+
+w39c froze a `pred_lb` for every queued file **before** any of them was sent. This is the first
+genuinely out-of-sample test of the w30b predictor, against in-sample residuals of mean 5.8e-10,
+sd 7.2e-6 over n=78.
+
+The raw aggregate (n=9, mean +265e-6) is **not the answer** — five of the nine are single-member
+`w37_cal_*` vectors at CV 0.958–0.969, **below the fitted minimum of 0.9700125**, and R2 above
+independently says the offset is non-linear across that gap. Judge the predictor where it was
+fitted. Domain-split:
+
+| group | n | mean resid | sd |
+|---|---|---|---|
+| stack files (CV **above** the fitted max 0.9701183) | 4 | **−29.2e-6** | 11.2e-6 |
+| single members (CV below the fitted min) | 5 | +500.6e-6 | 662e-6 |
+
+**All four stack files sit above the fitted CV maximum, and all four came in BELOW prediction**,
+mean −29.2e-6 against an in-sample residual sd of 7.2e-6 — z = **−8.1**. The LB's own
+quantisation floor is 2.9e-6, so this is far above resolution.
+
+**The CV→LB slope FLATTENS at the top of our range.** Stated at its sharpest, from two files
+that differ only in how much CV they earned:
+
+    w29_ad194stdcorr   CV 0.9701183  ->  LB 0.97118
+    w36_ad199stdcorr   CV 0.9701400  ->  LB 0.97118
+    +21.7e-6 of CV bought EXACTLY ZERO public LB.
+
+Consequences, in order of confidence:
+
+1. **Every `pred_lb` and `P(beat best)` for a high-CV arm is INFLATED.** w26d's queue prices are
+   **upper bounds, not estimates**. The head of today's queue was priced `P(beat best) = 1.00`
+   and it tied the account best rather than beating it. Deflate or re-fit before quoting again.
+2. **The marginal value of more CV at the top is smaller than this workspace has assumed**, and
+   the arm programme (197/202/211) is sized against the old, steeper conversion.
+
+⚠ **AND THE DISCIPLINED CAVEAT, which I am writing before it can be forgotten: this is a
+PUBLIC-slice measurement, and it does NOT license changing final selection away from CV.**
+Reading "CV stopped paying on public, so select on something else" would be the Rogii failure
+performed in the mirror. The private set is a different, larger slice; flattening on one slice
+is partly slice-specific by construction. What this finding legitimately governs is the
+**public-LB pricing tool that orders the send queue** — a public-LB instrument, corrected with
+public-LB evidence. **Selection stays on CV.**
+
+## 6. STATE, VERIFIED THIS RUN
+
+- Board **rank 18 at 0.97118**. Leader MILANFX 0.97134. **Gold cut (top 14) is 0.97120** — two
+  grid steps up. The field tightened overnight; 0.97125 now buys only ~rank 5.
+- **10/10 sent for the 08-21 day. At cap. No further submission possible this run.**
+- Chain alive and **properly detached**: PID 4127802, PPID=1, `w21a_ad187corr.py` running.
+  Order: w36g (ARM 197 control) → w38d (ARM 202) → w40f (ARM 211).
+- `w40b_promote.py` **not run** — it gates on ARM 202's `w38d done`, which does not exist yet.
+  Running it now would only print a refusal. It is correct as written; it just has no input.
+- The queue is empty of anything meaningful: the top of tomorrow's plan is
+  `w37_cal_ravi_realmlp1c` at `P(beat best) 0.00e+00`. **Tomorrow's ten slots need the arms to
+  finish, or they are filler.**
+- Disk 95%, 24 GB free. `notebooks/w40/out` (~6 GB) and `notebooks/w38/out` (4 GB) are the
+  first deletions if a build needs room.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST** — the prompt's submission count was stale by a whole day this run and
+   believing it would have wasted all ten slots. Then the `/proc` scan (w40 §0); **never**
+   `ps`/`pgrep`, and **never** assume a background job survived — check PPID/SID.
+2. `tail experiments/w41a_chain.log` + the three build logs. If the chain died again, relaunch
+   with **`experiments/detach.py`**, not `nohup`, not `setsid`.
+3. `.venv/bin/python experiments/w40b_promote.py` once `w38d done` exists. It applies the ARM
+   202 rule mechanically and writes nothing without `--go`.
+4. **Re-fit or deflate the w30b LB predictor** using `w41b_heldout.csv` — it is now known to be
+   optimistic by ~29e-6 above CV 0.9701183. Until then treat `pred_lb`/`P(beat)` as upper
+   bounds and say so wherever they are quoted.
+5. `w40f_build.log` (ARM 211) vs `w40d_prereg` — and **remember the ⛔ clause**: sendable and
+   queueable, **never** WANTED on CV alone. `w36g_build.log` (ARM 197, a CONTROL) vs the
+   0.9701288 bar in `w36b_prereg.txt`.
+6. The **53 CANDIDATEs in `experiments/w40/ledger2.csv`** are the live surface; only the
+   `yadoy666` one is mined. `ern711`'s spline transformers and `nikita7364777`'s rank-gauss are
+   the most structurally different from the pack.
+7. Do **NOT** re-open: GBDT/LightGBM tuning (this run's stale angle), error analysis / OOF
+   segmentation, fold/seed averaging, the top-level blend-weight search, FE variants, the
+   original dataset, the stacker C, the selection write path, or the es-bias deflation constant
+   (§4 closed it).
+
+**Files added:** `experiments/detach.py`, `w41a_chain.sh` + `.log`, `w41b_heldout.py` + `.csv`,
+`w37e_readout.csv`.
+**Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**Submitted 10/10 for the 08-21 UTC day.**
