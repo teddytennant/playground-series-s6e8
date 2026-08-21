@@ -1,0 +1,69 @@
+w45 PRE-REGISTRATION -- written 2026-08-21 01:15 UTC, BEFORE w45a_tierprice.py exists
+====================================================================================
+
+WHY A SEVENTH REPRICE IS NOT RE-LITIGATION
+------------------------------------------
+The six prior pricings (w15i, w16s, w16u, w16w, w17d/w17g, w18a) all answer:
+"what does it cost not to click, given that auto-slot 1 is held by w16e_aonly /
+w16q_ens4avg / w16t_cellens4?"  Those three files are NO LONGER IN EITHER TIER.
+They score 0.97108; the tiers now sit at 0.97118 and 0.97117.  Every published
+number in check_selection.py's notes, in w18a_lawif_joint.json and in
+w19c_clicksens.json prices a configuration of the board that no longer exists.
+This is not a new estimate of the same quantity -- the quantity changed.
+
+THE LIVE TIERS, read 2026-08-21 01:12 UTC (check_selection.py, page_size 200)
+----------------------------------------------------------------------------
+auto-slot 1, public 0.97118, FOUR-way tie:
+    w36_ad199stdcorr      CV 0.9701400060   <-- THIS IS THE WANTED FILE
+    w29_ad194stdcorr      CV 0.9701182875   -21.7e-6
+    w27_ad190stdcorr      CV 0.9701181344   -21.9e-6
+    w21_ad187corr_ens4    CV 0.9701039331   -36.1e-6
+auto-slot 2, public 0.97117, FIVE-way tie:
+    w36_ad199std          CV 0.9701323250
+    w34_ad195stdcorr      CV 0.9701247949
+    w27_ad190std          CV 0.9701109338
+    w21_ad187corr         CV 0.9701068814
+    w22_ad187corr_rankraw CV 0.9701001355
+WANTED = (w23_ad187stdcorr CV 0.9701150809, w36_ad199stdcorr CV 0.9701400060), both SENT.
+
+TWO STRUCTURAL CHANGES, both new and neither previously recorded
+----------------------------------------------------------------
+(a) For the first time in this competition the WANTED file is ITSELF inside
+    auto-slot 1's tie.  One branch of the auto-draw is the CV pick exactly.
+(b) The old contrast was dLB +30e-6 against dCV -5.3e-6: an auto-pick that led
+    hugely on public and slightly on CV, so conditioning could attribute almost
+    all of the lead to slice noise and the click came out cheap (+2.3e-6).
+    The new tie members are EXACTLY LEVEL on public (dLB = 0, same rounded
+    score) and 21.7-36.1e-6 BEHIND on CV.  There is no public lead left for the
+    conditioning to shrink away.  The CV deficit passes through nearly intact.
+
+REGISTERED PREDICTIONS
+----------------------
+Conditioning is the same scalar map w18a proved (M = w*I, gamma = beta +
+(1-beta)*w, beta -0.2477, w 0.1238 -> gamma ~= -0.093).  With dLB = 0 the
+contrast is mu = dCV + gamma*(0 - dCV) = dCV*(1 - gamma) ~= 1.093 * dCV.
+
+P1  The three NON-wanted members of the 0.97118 tie price the limit-1 click at
+    between +15e-6 and +30e-6 each.  FALSIFIED if any lands below +10e-6 or
+    above +45e-6.
+P2  The w36_ad199stdcorr branch prices at <= +1e-6 in magnitude (it IS the pick;
+    the only residue is E[max of the two WANTED] minus E[that one file], which
+    is <= 0 by Jensen).  FALSIFIED if |cost| > 1e-6 there.
+P3  The uniform-tiebreak average over the four branches is >= +10e-6, i.e. at
+    least 2x every previously published figure and >= ~2.5 board places.
+    FALSIFIED below +10e-6.
+P4  P(the auto file beats BOTH wanted files privately) <= 0.10 for each of the
+    three non-wanted branches -- i.e. still not a coin flip, as w17d/w18a found,
+    and now more decisive rather than less.  FALSIFIED if any exceeds 0.20.
+P5  TAU ROBUSTNESS.  w19c found the whole click sign-flips at tau = 1.72e-6
+    because the auto-pick's 30e-6 public lead needed tau = 0 to be pure noise.
+    That lead is GONE (dLB = 0).  PREDICTED: no sign flip anywhere on
+    tau in [0, 3e-6]; the cheapest branch stays >= +8e-6 at tau = 3e-6.
+    FALSIFIED by any sign change in the sweep.  This is the prediction I am
+    least sure of and the one most worth being wrong about.
+
+WHAT THE ANSWER DECIDES
+-----------------------
+Nothing about WANTED -- that is a CV quantity and is untouched.  It decides how
+hard the handoff note in RESEARCH.md should push the click, and it replaces six
+stale numbers that price a board configuration that no longer exists.
