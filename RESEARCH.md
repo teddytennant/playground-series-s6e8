@@ -9273,3 +9273,56 @@ registered order:
 **The es-on-val quarantine STANDS. Do not re-open the deflation-constant line** — it is closed,
 cheaply, which was a pre-registered outcome. (n=3 < the 5 w37a needs to resolve the between-
 member *spread*, so this is a verdict on the constant only.)
+
+## ⚠⚠ OOF/test SCALE AGREEMENT — a defect class every gate here is blind to (w42, 08-21)
+
+**Check `sd_test/sd_oof` on every member before importing it.** Over the 177 members on disk
+the ratio spans **[0.9923, 1.4145]** (`gmm_raw` is the extreme and is unexplained). Two of the
+six streams w42 imported arrived at **4.0003 and 5.0193** — the source author had divided the
+OOF side by the fold count.
+
+**Why no existing gate catches this.** `solo` is an AUC and `maxcorr` is a rank correlation.
+Both are rank statistics and both are computed on the **OOF side alone**, so a monotone rescale
+of the *test* side cannot move either. A broken member passes every screen this workspace runs.
+
+**Why it is fatal rather than cosmetic.** `blend_lab.build(..., std=True)` takes the scale
+**from the OOF side and applies it to both** (`blend_lab.py:212`); `logit` and `hybrid` do not
+re-derive scale per side either. Only `rankraw` ranks each side independently. So a member whose
+test vector is 5× its OOF has its coefficient fitted on one distribution and applied to a
+different one — **CV stays clean and the test predictions are silently poisoned.**
+
+**The repair** (`w42d_import.py`): map the test side through the OOF empirical quantile
+function. Monotone, so solo/maxcorr/selection are unchanged; a no-op under `rankraw`; no guessed
+constant. Trigger envelope `[0.95, 1.45]` contains the whole existing pack, so it cannot
+reclassify anything held. Use `np.sort` + index, **not** `np.quantile(o, q)` with 296k quantile
+points — the latter re-partitions per point and hangs.
+
+## THE PUBLIC KERNEL POOL IS MINED OUT (w42, 08-21)
+
+52 unread CANDIDATE dirs -> 51 refs with full-length artefacts -> 66 pairable streams -> the
+w40d rule selects **6**, two of which are 0.9921 correlated with each other. **60 of 66 fail on
+REDUNDANCY, not quality.** Many match members we already hold at **rho = 1.00000**
+(`ravi200_publicm0/1/2/3/4/5/7/8/10/11`, `omidbag_oof`, `mohankr_realmlp`, `mohankr_mlp`).
+The baseline LGBM/XGB/CatBoost tier sits at maxcorr 0.994–0.998 against what is held.
+
+**Do not run a third sweep of the kernel pool.** The surface is substantially exhausted.
+Streams that ship a **test vector with no OOF** (21 of the 24 unpairable refs, including
+`untouchableforest`'s KNN — the most structurally novel thing available) cannot be stacked at
+all; regenerating one locally is a build, not an import.
+
+## THE CV->LB PREDICTOR ABOVE ITS FITTED RANGE — LEVEL, not CLAMP (w42 §4, 08-21)
+
+w41 §5 read the held-out failure as the slope **flattening**. Tested properly in
+`w42f_clamp.py` against the two repairs that reading admits:
+
+| model | resid rms after correction | corr(excess, shortfall) |
+|---|---|---|
+| CLAMP (excess CV converts at zero) | 17.61e-6 | wants strongly negative |
+| **LEVEL (constant offset)** | **9.65e-6** | wants ~0 |
+| measured on the four held-out files | — | **−0.060** |
+
+**Use LEVEL: subtract ~29e-6 from `pred_lb` above CV 0.9701183.** Do not implement CLAMP.
+The data does **not** say more CV is worthless at the top, so the arm programme stays worth the
+compute; w41 §5 overstated this. Effective n is ~2 (near-twin stacks, test-set rho 0.999979),
+so the *sign* is established and neither model is. Both repairs deflate; **neither inflates**.
+`pred_lb` / `P(beat)` above that CV remain **upper bounds**.

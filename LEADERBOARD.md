@@ -1474,3 +1474,12 @@ delai50 alone at 0.97119 separates that tie from the 0.97120 cut.
 0.97118 — exactly tying the account best rather than beating it.** +21.7e-6 of CV bought zero
 public LB. See RESEARCH's "w30b LB predictor is optimistic" section: the CV→LB slope flattens at
 the top of our range, so closing the 2-step gap to gold is harder than the queue prices imply.
+
+## 2026-08-21 00:2x UTC (w42)
+
+- **Changye Li 0.97136 is the new leader**, displacing MILANFX (0.97134, unchanged since 08-18).
+- Us: **rank 18 at 0.97118**, unchanged — 10/10 sent for the day at 00:07.
+- **Gold cut (top 14 of ~2,433) is now 0.97120–0.97121**, two grid steps above us. The field
+  compressed again overnight: 0.97125 is now a four-way tie at ranks 5–8.
+- Top of board moving daily; 0.97118 held rank 18 both yesterday and today, so the tier just
+  above us is where the traffic is.

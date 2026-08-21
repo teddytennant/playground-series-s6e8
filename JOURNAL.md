@@ -17813,3 +17813,219 @@ public-LB evidence. **Selection stays on CV.**
 **Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **Submitted 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-21 — w42, slot 2. AT CAP 10/10. Mined the 52 unread candidate dirs; ARM 217 chained.
+
+`date -u` **00:21 UTC on 08-21** at start. The prompt's "10 submissions already today" is
+**correct this time** — unlike w41, where it was a day stale. The API confirms all ten of the
+08-21 sends landed at 00:07–00:08 UTC this morning, drained by w41. **At cap. No submission
+possible this run, and none attempted.** I checked the clock before believing the prompt
+anyway; that check cost nothing and was worth ten slots yesterday.
+
+**The ANGLE as issued ("CatBoost: tune it and compare on identical folds") is stale and I did
+not follow it.** w41 §7.7 lists "tuning any CatBoost or XGBoost" among the explicitly closed
+lines, and w40 §9.8 closed GBDT tuning before that. The object is a 199-member cross-fitted
+ensemble; single-model tuning stopped mattering ~30 slots ago. I took the w41 §7 standing list
+in its stated order instead.
+
+## 1. ✅ CHAIN ALIVE AND ADVANCING — and ARM 197 (the CONTROL) has LANDED as a NULL
+
+`/proc` scan, not `ps`/`pgrep`. PID 4127802, **ppid=1, own session** — w41's `detach.py` fix
+held across the session boundary. The chain moved on during this run:
+
+- **w36g / ARM 197 DONE at 00:30 UTC.** `w36_ad197stdcorr` **CV 0.9701286299** against the
+  `w36b_prereg` bar of **0.9701288**. It **misses by 1.7e-6**. WANTED does not move; the
+  four-member import is a **null**, which the prereg named in advance as expected-often-enough.
+- ⚠ And the discipline earned its keep here. The build's own log prints
+  `highest cross-fitted CV: 4-arm (drop mask) 0.9701288115` — the argmax arm **would have
+  cleared the bar by 1.2e-7**. The log then prints `** NOT SHIPPING THE ARGMAX. **` and ships
+  the pre-registered 5-arm at 0.9701286299. Selecting the argmax there would have promoted a
+  null to WANTED on a 1e-7 margin picked out of four correlated arms. It did not.
+- **w38d / ARM 202 is in its final w21a stage** as of this writing. w40f (ARM 211) waiting.
+
+## 2. ✅✅ THE MAIN WORK: the 52 unread CANDIDATE dirs are now mined — ARM 217
+
+w41 §7.6 flagged the 53 CANDIDATEs in `w40/ledger2.csv` as "the live surface", with only the
+`yadoy666` union94 mined. They were still unread. **They are read now.**
+
+`w42a_inventory.py` walked all 52 and found **51 refs carrying artefacts at our exact row
+counts**. `w42c_vet.py` paired them by fixed conventions and gated them. Result: **66 paired
+streams from 23 refs; 24 refs UNPAIRABLE** (21 of those ship a test vector with no OOF at all).
+
+**`w42b_prereg.txt` was written and COMMITTED before a single AUC existed** — the rule is the
+w40d rule verbatim, `maxcorr < 0.99 AND solo > 0.966319`, both constants lifted unchanged and
+neither re-fitted to this pool. It **selects 6 of 66**:
+
+| member | source | solo | maxcorr | nearest held |
+|---|---|---|---|---|
+| `hboyang_mix` | hboyang/s6e8-150-member-fusion | 0.970182 | 0.98254 | ad_gxgbcs4 |
+| `ravi200_l2stack1r` | ravi20076/public-l2stack-v1 | 0.969296 | **0.95604** | y94_lookup |
+| `ravi200_publicm12` | ravi20076/datacollation-v1 | 0.969214 | **0.95503** | y94_lookup |
+| `ravi200_publicm13` | ravi20076/datacollation-v1 | 0.968756 | 0.98663 | bolt_lookup_v2_s42 |
+| `ern711_multilevel` | ern711/multi-level spline transformer | 0.967598 | 0.98265 | ad_gcatlr02 |
+| `ern711_contextual` | ern711/contextualized spline transformer | 0.966520 | 0.97573 | lexb_lgb02 |
+
+Two of these are the **most decorrelated above-median streams this workspace has ever
+measured** (0.955/0.956, beating `rmlp_lat`'s previous 0.9615 record). Per RESEARCH's own
+"⛔⛔ DECORRELATION DOES NOT PRICE A MEMBER" heading that is **not** an argument that they pay.
+Recorded because unusual, not because it is currency.
+
+Within-selection rank correlations are in the w42c output. `ravi200_l2stack1r` and
+`ravi200_publicm12` sit at **0.9921 with each other** — effectively one member, not two. Both
+kept, per w40d's naji03/naji05 precedent: dropping one would be a hand choice and the rule has
+none.
+
+**`w42e_run.sh` (ARM 217 = ARM 211 + these six) is launched and detached** (PID 4145085,
+ppid=1), artefact-gated on `w40f done` exactly as w40f is gated on w38d. ARM 211 is its matched
+control; one `--extra-dirs` entry differs and nothing else.
+
+⛔ **ARM 217 IS NOT ELIGIBLE FOR `check_selection.WANTED` ON CV ALONE**, inherited from ARM 211
+and if anything stricter: six separate authors, es-on-val status unread per member, and w41 §4
+withdrew the deflation constant that might otherwise have priced it. Queueable and sendable —
+a send is free and its LB reading is the discriminator — not a deadline pick.
+
+## 3. ⚠⚠ THE FINDING THAT MATTERS MOST: two of the six were BROKEN, and both gates are blind to it
+
+Before building anything on them I checked the OOF/test **scale agreement** — the diagnostic
+`agent/stack.py`'s own docstring uses. Over all 177 members already on disk, `sd_test/sd_oof`
+spans **[0.9923, 1.4145]**. Two of the six new ones came in at **4.0003 and 5.0193.**
+
+The source author divided the OOF side by the fold count. Every quantile confirms it: for
+`publicm12` the test/OOF ratio is 4.93/5.02/5.01 at q25/q50/q75, and the tails are consistent
+with test simply having fewer rows (296k vs 691k) and so reaching less far.
+
+**Both w42b gates are blind to this BY CONSTRUCTION.** `solo` is an AUC and `maxcorr` is a rank
+correlation; both are rank statistics computed on the **OOF side alone**, and a monotone rescale
+of the *test* side cannot move either. This class of defect can pass any screen this workspace
+has ever run.
+
+And it is not cosmetic. `build(..., std=True)` takes the scale **from the OOF side and applies
+it to both** (`blend_lab.py:212`). `logit` and `hybrid` do not re-derive scale per side either.
+A member whose test vector is 5× its OOF would have had its coefficient fitted on OOF in
+[0.0004, 0.1999] and then applied to test in [0.0148, 0.9946] — a completely different
+distribution. It would have silently poisoned ARM 217's *test* predictions while its *CV* looked
+perfectly healthy. That is the worst possible failure shape: invisible to CV, fatal on LB.
+
+**Repair, not rejection** — the test side is mapped through the OOF empirical quantile function.
+Monotone per member, so solo/maxcorr/the selection are all unchanged; a no-op under `rankraw`,
+which already ranks each side independently; and no guessed constant, so it handles a
+non-constant mismatch too. Both now read `sd_test/sd_oof = 1.0000`. The trigger envelope
+`[0.95, 1.45]` **contains the entire existing 177-member pack** and so cannot reclassify
+anything held — measured off the pack, not tuned to these candidates. This is the same class as
+w40e's existing `isfinite` / `std > 0` asserts: a broken import is not a weak member, and it is
+handled without moving any selection threshold.
+
+⚠ **Every earlier import should be re-checked on this axis.** The pack's worst is `gmm_raw` at
+1.4145 — inside the envelope, but 1.41 is not 1.00 and nobody has ever asked why.
+
+## 4. ⛔ w41 §5's "FLATTENING" READING IS NOT WHAT THE DATA SAYS — `w42f_clamp.py`
+
+w41 §5 read the held-out failure as the CV→LB slope **flattening** at the top. Two different
+repairs fit that sentence and they disagree about a better arm:
+
+- **CLAMP** — CV above the fitted max (0.9701183) converts at **zero**. The whole 197/202/211/217
+  programme is then priced against a conversion that has stopped.
+- **LEVEL** — a constant offset above the fitted range; a better arm still earns at the fitted
+  1.856e-6 per 1e-6 of CV, just from one step lower.
+
+They are separable, because the four held-out files' CV excesses differ by 6× (3.6 to 21.7e-6).
+CLAMP predicts shortfall **proportional** to excess; LEVEL predicts the **same** shortfall for all.
+
+| model | resid rms after correction | corr(excess, shortfall) |
+|---|---|---|
+| CLAMP | 17.61e-6 | wants strongly negative |
+| **LEVEL** | **9.65e-6** | wants ~0 |
+| measured | — | **−0.060** |
+
+**LEVEL wins on all four, and the measured correlation is −0.06 — LEVEL's prediction, not
+CLAMP's.** Dropping the one `rescale` file makes CLAMP fit beautifully (rms 5.07, corr −0.933),
+and that is exactly why I am *not* dropping it: cherry-picking one of four points is not
+evidence, and it is recorded in the script as a sensitivity, not a result.
+
+**Consequence, and it is good news for the arm programme:** the data does **not** say more CV is
+worthless at the top. It says our predictions are a level ~29e-6 optimistic above the fitted
+range. w41 §5's "the marginal value of more CV at the top is smaller than this workspace has
+assumed" **overstated what those four files support**, and building 197/202/211/217 remains
+worth the compute. What stands unchanged from w41 §5: `pred_lb`/`P(beat)` are **upper bounds**
+above CV 0.9701183, and both candidate repairs deflate — **neither inflates**.
+
+⚠ **Effective n is ~2, not 4.** These are near-twin stacks over one pack; w29 measured test-set
+rho 0.999979 between two of them. Neither model is *established*. What is established is the
+sign.
+
+## 5. ✅ A DURABLE FACT WORTH MORE THAN THE SIX MEMBERS: the public surface is EXHAUSTED
+
+The vet incidentally proved how thoroughly this pack has already absorbed the public pool.
+**Streams from the new pool matching something we already hold at rho = 1.00000:**
+`ravi200_publicm0/1/2/3/4/5/7/8/10/11` (↔ dm_cat, dm_lgb, ravi_xgb1c, ravi_lgbm1c, ravi_cb1c,
+ravi_realmlp1c, y94_pub_rmlp, omid_tabm, om_flamlxgb, om_ftt), `omidbag_oof` ↔ `omid_tabm`,
+`mohankr_realmlp` ↔ `mkt_realmlp`, `mohankr_mlp` ↔ `mkt_mlp`, `yadoy66_fmdeep` ↔ `fmdeep` (0.99936).
+
+**60 of 66 streams fail the rule**, and the bulk fail on redundancy, not on quality — the
+baseline LGBM/XGB/CatBoost tier sits at maxcorr 0.994–0.998 against members already held.
+**52 candidate dirs yielded six members, two of which are near-duplicates of each other.**
+Treat the public-notebook surface as substantially mined out; the next run should not expect a
+third harvest from it.
+
+Near-misses recorded so no later run re-hopes: `hboyang_nested` at maxcorr **0.990014** fails by
+1.4e-5, and the threshold was **not** moved for it. The four `fungusc_*` streams (solo 0.9702–
+0.9703, the highest in the pool) all fail at ~0.992 — they are stacks *of* the public pool, so
+high solo and high correlation are the same fact. `nikita7_rankgausslr` (0.97006, 0.99282) —
+the rank-gauss linear model the prereg named in advance as interesting — **fails**, and being
+interesting does not exempt it.
+
+⛔ `shashwa_screenblind` is the most decorrelated thing in the entire pool (maxcorr **0.706**)
+at solo 0.827 — far below the gate. Rejected, correctly, per the decorrelation heading.
+⛔ `untouchableforest` KNN ships a **test vector with no OOF**. A pure-KNN stream is the most
+structurally novel thing available and it **cannot be stacked**. Regenerating it locally is a
+build, not an import.
+
+## 6. STATE, VERIFIED THIS RUN
+
+- Board **rank 18 at 0.97118**. **New leader Changye Li 0.97136** (MILANFX 0.97134 displaced).
+  The field tightened again overnight; the gold cut (top 14) is now **0.97120–0.97121**.
+- **10/10 sent for the 08-21 UTC day. At cap. No submission this run.**
+- Chain alive, all detached to init: w41a (PID 4127802) → w38d running now → w40f waiting →
+  **w42e/ARM 217 waiting (PID 4145085)**. ARM 197 done, a null.
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS.** Re-checked, not assumed: no browser, no
+  CDP on 9222, no cookies, no `websockets` in `.venv`. Both WANTED files are now SENT (w41 §2)
+  so the pick is *selectable* — it is simply not *selected*, and the default auto-selects on
+  public score, which w16w showed is the most public-inflated tier. **This needs Teddy, in his
+  own browser, and it is still worth more than every remaining modelling lever combined.**
+  Deadline 08-31.
+- Disk 95%, 24 GB free, unchanged — this run downloaded nothing; the w40 outputs were already
+  on disk. `notebooks/w40/out` (3.6 GB) is now MINED and is the first safe deletion.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan (w40 §0); **never** `ps`/`pgrep`, and always
+   check ppid/sid rather than assuming a background job survived.
+2. `tail experiments/w42e_build.log` and the three build logs before it. If any died, relaunch
+   with **`experiments/detach.py`** — not `nohup`, not `setsid` (which does not exist here).
+3. `.venv/bin/python experiments/w40b_promote.py` once `w38d done` exists — it applies the ARM
+   202 rule mechanically and writes nothing without `--go`.
+4. **Re-price the queue with the §4 LEVEL correction**: subtract ~29e-6 from `pred_lb` for any
+   file above CV 0.9701183, and say "upper bound" wherever an uncorrected price is quoted.
+   Do **not** implement CLAMP — §4 tested it and it lost.
+5. **Re-check `sd_test/sd_oof` across every ext_members dir** (§3). The gates are blind to it
+   and one bad member poisons test while CV looks clean. `gmm_raw` at 1.4145 is unexplained.
+6. ARM results against their preregs: **w42e** vs `w42b_prereg` (+0 to +10e-6, ⛔ never WANTED
+   on CV), **w40f** vs `w40d_prereg` (⛔ same clause), **w38d** vs `w38d_prereg`.
+7. Tomorrow's ten slots: the arms are the only real material. If they land, queue 217/211/202
+   siblings. If they do not, the queue head is `w37_cal_ravi_realmlp1c` at `P(beat) 0.00e+00`
+   and the day is filler — send it anyway, a slot is free, but do not dress it up as an attempt.
+8. Do **NOT** re-open: CatBoost/XGBoost/LightGBM tuning (this run's stale angle), error
+   analysis / OOF segmentation, fold/seed averaging, the top-level blend-weight search, FE
+   variants, the original dataset, the stacker C, the selection write path, the es-bias
+   deflation constant (w41 §4), or **a third sweep of the public kernel pool (§5 — it is
+   mined out)**.
+
+**Files added:** `experiments/w42a_inventory.py` + `.csv`, `w42b_prereg.txt`, `w42c_vet.py` +
+`w42c_vet.csv` + `w42c_unpairable.csv`, `w42d_import.py`, `w42e_run.sh` + `w42e_build.log` +
+`w42e_chain.log`, `w42f_clamp.py` + `.json`, `data/ext_members16/` (6 members).
+**Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

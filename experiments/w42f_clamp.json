@@ -1,0 +1,10 @@
+{
+ "slope_e6": 1.8563296706069337,
+ "cv_fitted_max": 0.9701183,
+ "n": 4,
+ "level_offset_e6": -29.156437008598378,
+ "clamp_resid_rms_e6": 17.61145823183332,
+ "level_resid_rms_e6": 9.65278327543671,
+ "corr_excess_shortfall": -0.059770438802899596,
+ "resid_sd_in_sample_e6": 7.2
+}
