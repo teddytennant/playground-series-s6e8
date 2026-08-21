@@ -1483,3 +1483,20 @@ the top of our range, so closing the 2-step gap to gold is harder than the queue
   compressed again overnight: 0.97125 is now a four-way tie at ranks 5–8.
 - Top of board moving daily; 0.97118 held rank 18 both yesterday and today, so the tier just
   above us is where the traffic is.
+
+## 2026-08-21 00:50 UTC (w43)
+
+**Rank 21 at 0.97118** — down from 18 in w42, on no change of ours. The field is compressing
+daily and standing still costs places.
+
+| | team | score |
+|---|---|---|
+| 1 | Changye Li | 0.97136 |
+| 2 | MILANFX | 0.97134 |
+| 3 | Optimistix | 0.97127 (moved up 00:21 today) |
+| 4 | Maher el Ouahabi | 0.97127 |
+| ~14 | **gold cut** | **0.97121** |
+| **21** | **Teddy Tennant** | **0.97118** |
+
+We are **3e-5 off gold**, and eleven teams sit inside the 0.97118–0.97121 band — a single
+successful arm would move several places. No submission this run: 10/10 sent for the UTC day.

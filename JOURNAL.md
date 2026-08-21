@@ -18029,3 +18029,182 @@ build, not an import.
 **Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-21 — w43, slot 3. AT CAP 10/10. The side-agreement audit: pack is clean, one stale artefact fixed, KS retired as a gate.
+
+`date -u` **00:45 UTC on 08-21** at start. The prompt's "10 submissions already today" is
+**correct**. The API confirms all ten 08-21 sends landed at 00:07–00:08 UTC. **At cap. No
+submission possible this run, and none attempted.** Clock checked before believing the prompt,
+as w41/w42 both require.
+
+**The ANGLE as issued ("XGBoost: third leg of the ensemble") is stale and I did not follow
+it.** w42 §7.8 lists "CatBoost/XGBoost/LightGBM tuning" among the explicitly closed lines, and
+w40 §9.8 closed GBDT tuning before that. The object is a ~200-member cross-fitted ensemble;
+single-model tuning stopped mattering ~30 slots ago. I took w42 §7's standing list in order and
+did **item 5**, the one item that neither needs the chain to finish nor a free slot.
+
+## 1. ✅ CHAIN ALIVE. ARM 202 still building.
+
+`/proc` scan, not `ps`/`pgrep`. All three detached jobs alive with ppid=1: w41a chain
+(4127802), w42e/ARM 217 (4145085), and w38d's final stage `w21a_ad187corr.py` (4143105,
+`w38d_build.log` touched 4 min before this run started). w38d has printed its decile arm
+(`+3.195e-6 xfit, se 4.984, t +0.64, 4/5, CV 0.9701363007`) and all three permuted controls.
+Order unchanged: **w38d → w40f (ARM 211) → w42e (ARM 217)**. `w40b_promote.py` still cannot
+run: no `w38d done` yet.
+
+## 2. ✅✅ THE MAIN WORK: w42 §3's axis re-checked across ALL 249 members. `w43a_scaleaudit.py`
+
+w42 §3 found two imported members whose test vector was 4× and 5× its own OOF vector, noted
+that **both** w42b gates are blind to it by construction (solo AUC and maxcorr are rank
+statistics on the OOF side alone; no monotone rescale of the *test* side can move either), and
+closed with "every earlier import should be re-checked on this axis". Done — every `oof_*` /
+`test_*` pair `load_members` can reach, across `data/oof`, `oof/`, and all 20 `ext_members*`
+dirs, in the loader's own first-wins order. **249 members.**
+
+**`sd_test/sd_oof` spans [0.9923, 1.4145] and NOT ONE member falls outside the w42d import
+envelope [0.95, 1.45].** The scale axis is clean. No second broken import exists on this disk.
+
+### ✅ `gmm_raw` at 1.4145 is EXPLAINED — w42 §7.5 called it "unexplained"
+
+It is not a scale fault. `gmm_raw` is **near-degenerate**: `sd_oof 0.000953` over a range of
+`[0.47442, 1.00000]`, mean 0.50014 on both sides, solo AUC 0.8216. Essentially all its mass
+sits at one point with a vanishing right tail, so its variance is set entirely by a few hundred
+tail rows and the ratio is a statement about that tail, not about scale. Means agree to 4
+decimals and the ranges match. Nothing to repair. It is also **not in ARM 217** — it lives in
+`ext_members9`, which is not in w42e's `--extra-dirs`.
+
+## 3. ⚠→✅ A STALE ARTEFACT FOUND AND FIXED, before the arm that consumes it built
+
+Chasing an inconsistency (`test_ravi200_publicm12`'s stored values are **not** a subset of its
+own OOF values, which a quantile map makes impossible), I re-ran `w42d_import.py` unchanged
+into a scratch dir. **11 of the 12 arrays reproduce bit-exactly. `test_ravi200_publicm12` does
+not.** The on-disk copy was a leftover of an earlier version of the repair; the committed code
+produces a different vector (`isin = 1.0000`, a genuine quantile map, against the stale copy's
+0.3444).
+
+Recomputing the raw pre-import ratios straight from the source kernel dirs pins exactly which
+members the repair legitimately touched:
+
+| member | raw ratio as the author shipped it | on disk now | test byte-unchanged |
+|---|---|---|---|
+| hboyang_mix | 1.0000 | 1.00000 | ✅ |
+| **ravi200_l2stack1r** | **4.0003** | 1.00000 | repaired |
+| **ravi200_publicm12** | **5.0193** | 1.00005 | repaired |
+| ravi200_publicm13 | 1.0022 | 1.00223 | ✅ |
+| ern711_multilevel | 0.9999 | 0.99994 | ✅ |
+| ern711_contextual | 0.9965 | 0.99654 | ✅ |
+
+The stale vector was **numerically harmless** — it agrees with the correct one to `max|d| =
+5.9e-6`, which is 8e-5 of one member sd, at spearman 0.99990. I replaced it anyway, because
+ARM 217 had **not yet started building** and the standard that matters is that an artefact is
+byte-reproducible from the script that claims to have produced it. `data/ext_members16` is now
+verified byte-identical to a clean rerun of `w42d_import.py`. Stale copy kept at
+`experiments/w43_stale_test_ravi200_publicm12.npy.bak`.
+
+⚠ **The general lesson: `w42d_import.py` prints its repair to stdout and w42 saved no log of
+it.** That is why "which two were repaired?" cost a reconstruction this run. Build scripts tee;
+import scripts should too.
+
+## 4. ⛔⛔ KS IS NOT A GATE. It is confounded by fold-averaging, and I measured the confound.
+
+I did not stop at the ratio, because `sd_test/sd_oof` is a blunt instrument — it is one number
+and it cannot see a clip, a per-side recalibration, or a shape change. So `w43a` also computes
+the **two-sample KS distance between each member's OOF and test marginals**, on the reasoning
+that train and test are iid draws from one generator, so a correct export's two sides are two
+samples of one distribution. That null has a known critical point: `1.9495*sqrt(1/691369 +
+1/296302) = 0.00428` at 99.99%.
+
+**164 of 249 members exceed it.** A screen that rejects two thirds of a pack that has been
+scoring 0.9701 for weeks is not finding 164 defects. **The null is wrong, and I chased down
+exactly why rather than reporting the number.** `w43c_ksconfound.py`:
+
+The two sides are not produced the same way even for a perfect export. **OOF row *i* comes from
+the ONE fold model that did not train on *i* — a MIXTURE of 5 models. The test vector is the
+MEAN of all 5.** A mixture of 5 correlated predictors and their mean have different marginals by
+construction. Testable prediction: averaging 5 lattices *smooths*, so the gap is largest exactly
+where the OOF side is most discrete.
+
+| statistic | measured | prediction |
+|---|---|---|
+| spearman(ks, OOF lattice resolution) | **−0.326** | negative ✅ |
+| spearman(ks, test-minus-OOF resolution) | **+0.281** | positive ✅ |
+| spearman(ks, \|ratio−1\|) | +0.193 | would dominate if KS tracked scale faults ❌ |
+
+| OOF-resolution quartile | median KS | n |
+|---|---|---|
+| coarsest | **0.01403** | 63 |
+| q2 | 0.00479 | 62 |
+| q3 | 0.00495 | 64 |
+| **finest (fully continuous)** | **0.00426** | 60 |
+
+**The finest quartile's median KS is 0.00426 against a null critical point of 0.00428.** For
+members with no lattice the null is exactly right. The lattice tier (`res_oof < 0.5`, the
+lookup/quantised members — `bolt_lookup_v*`, `y94_lookup`, `bei_lookup_fixed24`,
+`ravi200_publicm13`) has median KS **0.05656**, a **13× gap**. The confound is the whole story.
+
+⛔ **Do not gate on KS.** `ratio` gates; KS does not. It cannot separate a broken import from
+the ordinary signature of a correct 5-fold export, and it would reject the entire lookup tier.
+
+### The one thing KS did surface, recorded but NOT acted on
+
+Among the 78 fully-continuous-OOF members, where KS *is* valid, the two largest are
+`orig_bin` (**0.01709**) and `orig_binm` (0.01381) — the original-dataset transfer members.
+`orig_bin`'s mean moves **+0.0141** from OOF (0.50598) to test (0.52012). Both apply one fixed
+model to both sides, so a directional mean shift means the model is sensitive to something that
+differs between the two frames — almost certainly missingness, since they are trained on the
+7,500 complete-data originals and scored on a 14–19% missing frame (RESEARCH's "matched
+missingness" section). This is the only signal in the pack that even gestures at train/test
+covariate shift, and it is confined to two members RESEARCH already prices at **−1e-6 to −6e-6
+across twelve readings**. The continuous tier's median sits at the null, so there is **no global
+shift**. Recorded for a future run; not a reason to touch a frozen pack without a prereg.
+
+## 5. The §4-LEVEL re-pricing (w42 §7.4) — no script needed, and here is why
+
+w42 §7.4 asks for the queue to be re-priced by subtracting ~29e-6 from `pred_lb` above CV
+0.9701183. **A LEVEL correction is a constant offset, so it is rank-preserving and reorders
+nothing.** It changes no send decision and no queue order; it changes only the honesty of a
+quoted absolute number. Recorded as a quoting rule in RESEARCH rather than spent as compute.
+
+## 6. STATE, VERIFIED THIS RUN
+
+- Board **rank 21 at 0.97118** — down from 18 overnight, on no change of ours. Leader
+  **Changye Li 0.97136**; Optimistix moved to 0.97127 at 00:21 today. **Gold cut (top 14) is
+  0.97121.** We are 3e-5 off gold and the field is compressing daily.
+- **10/10 sent for the 08-21 UTC day. At cap. No submission this run.**
+- Chain alive, all detached to init: w41a (4127802) → **w38d running** → w40f → w42e/ARM 217
+  (4145085). ARM 197 done, a null (w42 §1).
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS.** Not re-litigated this run; w42 §6 checked
+  it. Default auto-selects on public score, which w16w showed is the most public-inflated
+  tier. **This needs Teddy, in his own browser, and it is still worth more than every remaining
+  modelling lever combined.** Deadline 08-31.
+- Disk 95%, 24 GB free. `notebooks/w40/out` (3.6 GB) is MINED and is the first safe deletion.
+- ⛔ `git push` still blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan (w40 §0) checking ppid/sid; **never**
+   `ps`/`pgrep`, and never assume a detached job survived.
+2. `tail experiments/w38d_build.log`, then `w40f_build.log`, then `w42e_build.log`. If any
+   died, relaunch with **`experiments/detach.py`** — not `nohup`, not `setsid` (absent here).
+3. `.venv/bin/python experiments/w40b_promote.py` once `w38d done` exists — it applies the ARM
+   202 rule mechanically and writes nothing without `--go`.
+4. ARM results against their preregs: **w38d** vs `w38d_prereg`, **w40f** vs `w40d_prereg`,
+   **w42e** vs `w42b_prereg` — the last two ⛔ **never WANTED on CV alone**.
+5. Tomorrow's ten slots: the arms are the only real material. If they land, queue 217/211/202
+   siblings. If not, the queue head is `w37_cal_ravi_realmlp1c` at `P(beat) 0.00e+00` — send it
+   anyway, a slot is free, but do not dress it up as an attempt.
+6. Do **NOT** re-open: **the member side-scale axis (§2 — all 249 clean, closed)**, **KS as a
+   gate (§4 — confounded, closed)**, `gmm_raw`'s ratio (§2), the §4-LEVEL re-pricing as a
+   script (§5), XGBoost/CatBoost/LightGBM tuning (this run's stale angle), error analysis /
+   OOF segmentation, fold/seed averaging, the top-level blend-weight search, FE variants, the
+   original dataset, the stacker C, the selection write path, the es-bias deflation constant
+   (w41 §4), or a third sweep of the public kernel pool (w42 §5 — mined out).
+
+**Files added:** `experiments/w43a_scaleaudit.py` + `.csv`, `w43b_repro_import.py`,
+`w43c_ksconfound.py` + `.csv`, `w43_stale_test_ravi200_publicm12.npy.bak`.
+**Modified:** `data/ext_members16/test_ravi200_publicm12.npy` (§3), `RESEARCH.md`,
+`LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-21 UTC day.**

@@ -9326,3 +9326,81 @@ The data does **not** say more CV is worthless at the top, so the arm programme 
 compute; w41 §5 overstated this. Effective n is ~2 (near-twin stacks, test-set rho 0.999979),
 so the *sign* is established and neither model is. Both repairs deflate; **neither inflates**.
 `pred_lb` / `P(beat)` above that CV remain **upper bounds**.
+
+## Member side-agreement: what gates, what does NOT (w43, 2026-08-21) — CLOSED
+
+An imported member arrives as an `oof_*` / `test_*` pair. w42 §3 found two whose **test vector
+was 4× and 5× its own OOF vector** — the author had divided the OOF side by the fold count.
+**Both selection gates (`solo` AUC, `maxcorr` rank correlation) are blind to this BY
+CONSTRUCTION:** both are rank statistics computed on the OOF side alone, so no monotone rescale
+of the *test* side can move either. `build(..., std=True)` takes the scale from the OOF side and
+applies it to both (`blend_lab.py:212`); `logit`/`hybrid` do not re-derive scale per side. So the
+defect is **invisible to CV and fatal on LB** — the worst possible shape.
+
+### ✅ The gate: `sd_test / sd_oof` must lie in [0.95, 1.45]
+
+Envelope measured off the pack, never tuned to a candidate. **w43a audited all 249 members
+`load_members` can reach** (`data/oof`, `oof/`, all 20 `ext_members*`, loader's first-wins
+order): the ratio spans **[0.9923, 1.4145]** and **not one member falls outside**. The scale
+axis is CLOSED — do not re-audit it. `experiments/w43a_scaleaudit.py` re-runs it in ~20 min.
+
+Repair, not rejection, when it fires: map the test side through the OOF empirical quantile
+function (`w42d_import.py`). Monotone, so `solo`/`maxcorr`/the selection are unchanged; a no-op
+under `rankraw`; no guessed constant, so it handles non-constant mismatch too.
+
+- **`gmm_raw`'s 1.4145 (the extreme) is NOT a fault.** It is near-degenerate: `sd_oof 0.000953`
+  over range `[0.474, 1.000]`, mean 0.50014 both sides, solo 0.8216. Variance is set by a few
+  hundred tail rows, so the ratio describes that tail, not a scale. Not in ARM 217 (`ext_members9`).
+- **`sd_test/sd_oof` slightly BELOW 1 is the HEALTHY signature**, not a fault: OOF rows come from
+  one fold model each, the test vector is the mean of 5, and averaging shrinks variance. The
+  0.9923 floor is that effect.
+
+### ⛔⛔ The non-gate: KS between the two sides' marginals. DO NOT USE IT.
+
+Tempting, because ratio is one number and cannot see a clip or a reshape. Train/test are iid
+draws from one generator, so the null looks clean: `1.9495*sqrt(1/691369 + 1/296302) = 0.00428`
+at 99.99%. **164 of 249 members exceed it.** The null is wrong, and `w43c_ksconfound.py`
+measured why:
+
+**OOF is a MIXTURE of 5 fold models; test is their MEAN.** Those have different marginals by
+construction. Averaging 5 lattices *smooths*, so the gap is largest where the OOF side is most
+discrete — confirmed in sign and dominant:
+
+| OOF-lattice-resolution quartile | median KS |
+|---|---|
+| coarsest (lookup / quantised tier) | **0.01403** |
+| finest (fully continuous) | **0.00426** — i.e. exactly the null |
+
+`spearman(ks, res_oof) = −0.326`, `spearman(ks, smoothing) = +0.281`, but
+`spearman(ks, |ratio−1|)` only **+0.193** — KS does *not* primarily track scale faults. Lattice
+tier (`res_oof < 0.5`) median KS **0.05656** vs continuous **0.00445**: a **13× gap**.
+**KS cannot separate a broken import from a correct 5-fold export, and gating on it would
+reject the entire lookup tier.** Closed.
+
+One thing it did surface, recorded not acted on: among the 78 continuous-OOF members the two
+largest KS are `orig_bin` (0.01709, mean moves **+0.0141** OOF→test) and `orig_binm` (0.01381) —
+the original-dataset transfer members, trained on 7,500 complete-data rows and scored on a
+14–19% missing frame. The continuous tier's median sits *at* the null, so there is **no global
+train/test covariate shift**.
+
+### Provenance rule (learned the hard way, w43 §3)
+
+`data/ext_members16/test_ravi200_publicm12.npy` on disk was a **stale artefact of an earlier
+version of the repair** — 11 of the 12 arrays reproduced bit-exactly from an unchanged rerun of
+`w42d_import.py`, that one did not. Numerically harmless (`max|d| = 5.9e-6`, 8e-5 of a member
+sd, spearman 0.99990) and replaced with the reproducible vector before ARM 217 consumed it.
+**An import script's repair decisions must be tee'd to a log like the build scripts are** —
+w42 saved none, so "which two were repaired?" cost a full reconstruction from the source dirs.
+Re-verify with: rerun the import into a scratch dir, assert byte-equality, delete the scratch.
+
+## Quoting rule for `pred_lb` above CV 0.9701183 (w41 §4 / w42 §4)
+
+The held-out failure is a **LEVEL** offset (~29e-6 optimistic), not a CLAMP — w42 §4 tested
+both and LEVEL won on all four files (resid rms 9.65e-6 vs 17.61e-6; measured
+corr(excess, shortfall) −0.060, which is LEVEL's prediction). Consequences:
+
+- Subtract ~29e-6 from any `pred_lb` quoted above CV 0.9701183, and call it an **upper bound**.
+- **A level offset is rank-preserving: it reorders nothing and changes no send decision.**
+  There is no queue to "re-price" — it is a quoting rule, not a computation. Do not build a
+  script for it.
+- More CV at the top is **not** worthless. Building better arms remains worth the compute.
