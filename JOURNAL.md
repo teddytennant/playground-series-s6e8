@@ -20511,3 +20511,237 @@ report, the NaN-safe message fail-safe), `experiments/w48e_order.py` (the w55a r
 regenerated `experiments/w26d_queueprice.csv`, plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+---
+
+# 2026-08-22 — w56, slot 5 of 10. **AT CAP, 10/10 already sent — no submission.** Read the source of the one member the whole ARM 217 question rests on, which nobody had ever opened. It is an **aggregator over 138 third-party streams**, so **w40d already bars the ad217 family from CV-based selection whatever tomorrow's read says** — and that bar, which lived only in RESEARCH.md, is now **enforced in `check_selection.py` and exercised by a test**. Also **refuted this run's own opening hypothesis** and withdrew the instrument that produced it.
+
+`date -u` **13:36 UTC on 08-22** at start. `/proc` scan per-pid with `tr` (never `ps`/`pgrep`):
+the only live process for this competition is my own `claude -p` (pid 668585, started 13:35:57,
+ppid 632806 = `run-competition.sh playground-series-s6e8 10`). `ls experiments/w5*` shows w50–w55
+taken, so this is **w56**. Kaggle token alive. API reports **10 submissions on 2026-08-22 (UTC)**,
+all sent by w52 at 12:37–12:38, scoring 0.97113–0.97118. **At the cap; research and code only,
+per the hard rules.**
+
+⚠ **The ANGLE as issued — "Error analysis: find where the current best model is wrong. Segment
+the out-of-fold errors and look for structure a feature could capture"** — is on the
+do-not-reopen list verbatim (**"error analysis / OOF segmentation"**, w55 §8.6), and would be
+moot at 0 slots regardless. w55 §8 left two open tasks: the 08-23 send (not available, the day
+has not rolled) and the 27-slot gap (a BUILD task whose expected value on the private score is
+zero — a filler below the auto-selection tier is harmless and worthless, and saying so is more
+useful than spending a run manufacturing 27 of them). What follows is what I did instead.
+
+## 1. 🔴🔴 NOBODY HAD EVER READ `hboyang_mix`'s SOURCE. IT IS AN AGGREGATOR OVER 138 STREAMS
+
+Everything about ARM 217 — the highest-CV object on disk inside the gold cut's range, the seven
+vetoed ad217 files, tomorrow's slot 1 — rests on one imported vector, `oof_hboyang_mix`. w51
+audited the **other five** members of `ext_members16` by opening their source logs and failed all
+five. It explicitly wrote *"It does NOT settle `hboyang_mix` — not under test in w51"* and
+reserved it for the 08-23 LB read. **So the one member that matters most is the one member whose
+source was never opened.** `kaggle kernels output` had been run on it (w40) but not
+`kernels pull -m`; only the log and `result.json` were on disk, never the notebook.
+
+Pulled it (`notebooks/w56/hboyang_fusion/`) and read the registry:
+
+| streams | source |
+|---|---|
+| 10 | `naji*` — najiama **blends** (`*_blend_oof_predictions.csv`, level-2 objects) |
+| 6 | `candidate_naji*` — hboyang's blends **OF** those blends |
+| 41 | `bolt_*` boltuzamaki · 64 `sz_*` szymonkapiski |
+| 5 | `fm_*` raykkretzschmar · 7 `golem_*` dariushafshar · 5 `a_*` adarsh1077 |
+| 11 | `fresh_*`/`local_*` — hboyang's own |
+
+**138 of 149 (92.6%) third-party, across SEVEN public OOF libraries** — `kernel-metadata.json`'s
+own `dataset_sources`. Among them **16 lookup-transformer-family** members (the family w51
+convicted **by source read**) and **14 `sz_pub_*` copies of public models**, including
+`sz_pub_ravi`. `result.json` gives `fold_definition StratifiedKFold(5, shuffle=True,
+random_state=42)` — **our exact partition**, so any es-on-val in those streams lands on exactly
+the rows our combiner scores. Every quoted string is re-asserted against its file (w51a's
+discipline): if a re-pull changes the source, `w56a` fails loudly instead of quoting a stale fact.
+
+RESEARCH (w40) already has the rule for this shape: **"an AGGREGATOR's streams cannot be
+es-cleared"**, and `w40d_prereg`'s consequence — *an arm containing un-es-cleared streams may be
+built, priced, queued and SENT, but is NOT ELIGIBLE for `check_selection.WANTED` on CV alone.*
+**ARM 217 is such an arm, and that is settled now, independent of any leaderboard read.**
+
+## 2. ✅ AND IT IS WIRED — FIFTH INSTANCE OF THE SAME BUG, FIRST ONE ON THE *SELECTION* PATH
+
+w40d's rule lived **only in RESEARCH.md**. w49/w53/w54/w55 each paid a run for this exact shape on
+the send path; this is the fifth instance and the first on the path that decides the private
+score. Nothing stopped a future run from setting `WANTED` to the CV argmax, and **the two highest
+CVs ever built here are both ineligible under a rule nothing enforced**:
+
+    w50_ad216stdcorr  CV 0.9701500880   highest on disk, +10.1e-6 above WANTED   (w51 evidence)
+    w42_ad217stdcorr  CV 0.9701788      +38.8e-6 above best sent, the ONLY       (w56a evidence)
+                                        object on disk inside the gold cut
+
+`check_selection.py` now carries `WANTED_INELIGIBLE` (pattern → the reading that convicts it) and
+`assert_wanted_eligible()`, **called at import**, raising `SystemExit(3)` with the reason printed.
+`experiments/w56b_wantedguard.py` is the regression test and it **exercises** rather than asserts:
+all six guard strings present *including the call site, not just the def*; live WANTED passes; and
+it **fires** on `w42_ad217stdcorr.csv` and on `w50_ad216stdcorr.csv`. A guard nobody has watched
+fire is a guard nobody knows works — that is the whole lesson of w54 and w55.
+
+## 3. ⚠ I ALSO SUSPECTED THE 08-23 PREREG OF BEING UNFALSIFIABLE. **MEASURED, AND REFUTED.**
+
+This run opened on the theory that `w48d_arm217.json` had the fault w48d discarded its own first
+design for, in the other direction: that its rejection region is unreachable under the es-on-val
+mechanism it tests. The argument was seductive — RESEARCH's own mechanism sentence is *"inflates
+a member's OOF and **not** its test vector"*, and the 08-23 read prices the **test** vector.
+
+It is wrong, and `w56a_arm217power.py` shows why. Put every hypothesis on one axis, δ = how much
+`oof_hboyang_mix` overstates the honest quality of the fusion. The same δ drives both sides:
+
+    point prediction 0.971230 (band 0.971198..0.971252, width 55e-6)
+    HONEST   >= 0.97116   fires for δ <=  70e-6
+    INFLATED <= 0.97080   fires for δ >= 430e-6
+    H_FULL (w49c's corrected +708.3e-6 standalone gap) -> lb 0.97052
+                                    = 278e-6 CLEAR inside the INFLATED region ✅
+
+**The branch is reachable. The test is powered against the extreme alternative. Send it as
+registered, read it against the registered thresholds, and do not re-open this.** Recorded as
+refuted in RESEARCH so the next run does not re-derive the same seductive wrong argument.
+
+⚠ What is worth carrying: the **INDETERMINATE zone is δ ∈ [70, 430]e-6 = 10%–61% of H_FULL —
+51 percentage points of the hypothesis space maps to "report it and change nothing"**, and
+*partial* contamination (a genuinely strong fusion that is also somewhat inflated) is the modal
+outcome. That branch resolves to "the veto stands", which is the safe direction, so the design is
+sound — but **expect an indeterminate score and do not read one as a soft HONEST.**
+
+## 4. ⛔ THE CONJUNCTION, REGISTERED BEFORE THE SCORE EXISTS — WHAT A *HONEST* READ CANNOT BUY
+
+- **INFLATED** → as registered: drop `hboyang_mix`, the ad217 veto is FINAL.
+- **in between** → as registered: report it, change nothing. **The modal outcome.**
+- **HONEST** → the member is not **grossly** contaminated, and w45 §3 / w44's import line are
+  reopened on the record exactly as w48d says. ⚠ **IT DOES NOT CLEAR w40d.** HONEST rules out
+  gross contamination and nothing narrower — δ ≤ 70e-6 survives it, and §1 established the
+  aggregator fact on evidence a leaderboard read cannot touch. **ARM 217 stays WANTED-INELIGIBLE
+  on CV. A HONEST read licenses SENDING and pricing ad217 on the LB, never SELECTING it.**
+
+Written today, against a score that does not exist yet, precisely so it cannot be argued
+backwards tomorrow. Selecting on a public read is the Rogii failure and this account has made it.
+
+**Consequence for the board (§6): there is no path to gold from disk.** Gold wants +40.9e-6 of CV
+over the best sent; the only object in that range is ad217, and no branch of tomorrow's read puts
+it into a selection. Play for the best CV-selected private score, and say so plainly.
+
+## 5. ⛔ ONE INSTRUMENT BUILT, USED, AND **WITHDRAWN** IN THE SAME RUN
+
+To price δ I first built a sensitivity instrument: degrade `oof_hboyang_mix` by blending its ranks
+toward uniform noise, refit a cross-fitted 2-column stack over `ad211std_h3`'s output, read the
+δ at which the gain dies. It produced a confident number (369e-6) and **that number is garbage.**
+Noise-blending collapses standalone AUC far faster than it destroys rank-correlation with the
+honest signal, so the stacker keeps extracting value long after the AUC has gone:
+
+    λ=0.02  column has lost    73e-6 of AUC   still carries +74.2e-6 of gain
+    λ=0.05  column has lost   528e-6 of AUC   still carries +29.6e-6
+    λ=0.28  column has lost ~31000e-6 of AUC  gain finally reaches zero
+
+An honest member 73e-6 weaker would not behave like that. **A δ read off this curve's local slope
+is meaningless**; the sweep is retained in the script **for its level at λ=0 only**, with the
+limitation in the docstring and the withdrawal in RESEARCH so it is not re-spent.
+
+✅ **The one measurement kept:** `hboyang_mix` is worth **+89.32e-6** to a cross-fitted 2-column
+stack over `ad211std_h3`'s own output (0.9701311176 → 0.9702204330 on the frozen folds) —
+**2.1× what the 217-column pack refit extracted from all six new members** (+41.71e-6). The pack's
+own stacker under-uses the column by half. A fact about the combiner; **evidence for neither
+branch**, and recorded as such.
+
+## 6. THE BOARD — FLAT ACROSS THE WHOLE DAY
+
+Read ~13:5x UTC. **Us `Teddy Tennant` 0.97118, rank 62** of 200 listed. Leader **0.97141**
+(`Changye Li`, 11:23). Gold cut (14th) **0.97124** (`william950615`, 11:33 — the holder rotates,
+the number does not). Identical to w55's ~13:2x read. See §4 for why §1 closes the last route to
+that number from disk.
+
+## 7. ⛔ UNCHANGED BLOCKERS — RE-VERIFIED
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS** (`check_selection.py` exit 1, re-run this run
+  with the new guard in place — the guard passes on the live WANTED). WANTED
+  `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr`, both sent and selectable. **This needs Teddy, in
+  his own browser.** Deadline **08-31**. Largest unmanaged risk on the account. The route was
+  re-probed to exhaustion on 08-13 (no browser binary, no profile with cookies, no CDP on 9222,
+  no `brave` MCP tools) — **do not re-probe it, and do not "fix" it by installing a browser.**
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 8. VERIFICATION — THE WHOLE CHAIN RE-RUN, NOT ASSUMED
+
+`check_selection.py` is on the send path, so an edit to it has to be proved harmless.
+**w54a exit 0, w55a exit 0, w56b exit 0, w39a exit 0, w39b exit 0, w39c exit 0, w39d exit 0**,
+`check_selection` exit 1 as expected. `w48e_order.py --day 2026-08-23` re-verifies all ten end to
+end (rows, NaN, md5, CV-from-OOF) and still plans **slot 1 = `w48_cal_hboyang_mix`, THE ARM 217
+TEST**, with w55's registered description intact on all five `member` rows. `w26g_send.py --n 90`
+dry still plans **63** with **19 blocked as vetoed and 0 unpriceable**, and still prints the
+day-stamp warning (correct — the queue is 08-23's and today is 08-22).
+
+## 9. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), and
+   **`ls experiments/w<next>*`** before claiming a run number.
+2. **Send the 08-23 ten.** Chain: `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** (slot 1 must
+   be `w48_cal_hboyang_mix`, and the **day-stamp warning must be GONE** — that is the proof it is
+   today's list) → `--go`. Re-run `w48e_order.py --day 2026-08-23 --write` **only** if `w23b`
+   changed the queue. ⚠ If the day has rolled past 08-23, `w48e` refuses — correct. **ADD a key to
+   `ORDERS`, never edit another day's.**
+3. **Read `w48_cal_hboyang_mix` against the REGISTERED thresholds — ≥0.97116 HONEST, ≤0.97080
+   INFLATED — and then against §4's conjunction, which was registered before the score existed.**
+   A reason to read carefully is **never** a reason to move the threshold. **Expect
+   INDETERMINATE: §3 measures that branch as the modal outcome, and it means the veto stands.**
+   ⚠ **HONEST DOES NOT UN-VETO ad217 FOR SELECTION** — §1's aggregator fact is evidence a
+   leaderboard read cannot touch, and `check_selection.WANTED_INELIGIBLE` now enforces it.
+4. **Run `w54a_vetoexpiry.py`, `w55a_unpriced.py` AND `w56b_wantedguard.py` on any run that sends
+   or that touches `check_selection.py`.** All three re-read their target and assert their guard
+   is still present; exit 1 means it is gone.
+5. The 27-slot gap (63 sendable vs 90) is real but its expected value on the **private** score is
+   **zero** — a filler certified below the tier is harmless and worthless. Certify with
+   `w55a_unpriced.py` if you build one; do not spend a whole run manufacturing 27.
+6. Do **NOT** re-open: **error analysis / OOF segmentation (this run's issued ANGLE — closed)**,
+   fold/seed averaging, the top-level blend-weight search, hill climbing / NNLS / non-negative
+   blends, w46c's level dummy, the es-on-val status of `ext_members16`, ARM 216 as a deadline
+   pick, `d_five` as signal, the import line, the within-group redundancy test, the member
+   side-scale axis, KS as a gate, GBDT tuning, FE variants, **the original dataset (closed three
+   times, measured NEGATIVE)**, the stacker `C`, the selection write path / the browser route
+   (probed to exhaustion 08-13), the es-bias deflation constant, a fourth sweep of the public
+   kernel pool, the era shift, the logit veto, the w37 es-bias readout, per-fold rank
+   normalisation, the leaderboard timestamp as a tie-break probe, **the 08-23 prereg's
+   falsifiability (§3, measured and REFUTED)**, and **noise-blend degradation as an AUC→stack-CV
+   transfer (§5, WITHDRAWN)**.
+7. ⚠ **NEW: w40d's WANTED-ineligibility rule was the FIFTH instance of "a rule that lives in a
+   paragraph is not a rule" — and the first on the SELECTION path, where it decides the private
+   score rather than a send order. When RESEARCH states a rule, grep the module that would have
+   to enforce it.** ⚠ **NEW: the member a whole arm rests on had never had its source opened,
+   because a partial read (`kernels output`) looked like a full one. `kernels output` gives you
+   the artefacts; `kernels pull -m` gives you the code. They are not the same audit.** ⚠ **NEW:
+   an instrument that produces a confident number is not a calibrated one — check the response
+   at a perturbation whose true effect you already know (here: 73e-6 of AUC lost, +74.2e-6 of
+   gain retained, which no honest member would do).** ⚠ A rule that lives in a printed PARAGRAPH
+   is not a rule, and a row the rule cannot be EVALUATED on is not covered by it. ⚠ A rule that
+   lives in the ORDER of a list is not a rule. ⚠ A documented mechanism is not a wired mechanism
+   — when a comment claims a protection, grep for the assignment. ⚠ `w48e`'s write block resets
+   `send_rank`/`msg`/`why` to NaN; hand a message to `_REGMSG` and apply it after the reset.
+   ⚠ An unused slot is only "pure waste" once the final picks are selected; until then a slot
+   above the auto-selection tier is a LIABILITY. ⚠ Never use in-sample residuals to test
+   extrapolation. ⚠ Never lower the `cv >= 0.97` floor. ⚠ A send list that is only in a prereg is
+   not a send list. ⚠ A send list not keyed to its day is a bug waiting to fire. ⚠ `blend_lab
+   --build` ships the whole family and the queue globs `submissions/` — veto and register a new
+   pack's files IN THE SAME RUN. ⚠ Do not delegate a priced module on the send path without
+   MOVING the self-check it asserts against. ⚠ A STALE queue carries only the veto as it stood
+   when it was written. ⚠ Never let a calibration/`member` row into a `max(CV)`. ⚠ Always pass
+   `--page-size` to the submissions API — it defaults to 50 and truncates silently.
+
+**Files added:** `experiments/w56a_arm217power.py`, `experiments/w56a_arm217power.json`,
+`experiments/w56b_wantedguard.py`, `notebooks/w56/hboyang_fusion/` (the pulled notebook source
+and its `kernel-metadata.json` — `w56a` re-asserts against both).
+**Modified:** `experiments/check_selection.py` (`WANTED_INELIGIBLE`, `assert_wanted_eligible()`
+and its import-time call), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+⚠ **w56 correction, same run:** the "Files added" line above lists
+`notebooks/w56/hboyang_fusion/`. **`notebooks/` is gitignored**, so the pulled source is on disk
+but **not in the commit** — a fresh checkout has to re-pull it before `w56a_arm217power.py` can
+re-assert against it, and that is now the first thing the script's own docstring says, with both
+commands (`kernels pull -m` for the code, `kernels output` for the log). The committed change set
+is exactly `experiments/check_selection.py`, the three new `w56*` files, and the three markdown
+files. This matters beyond bookkeeping: §1's whole finding rests on assertions against files git
+does not carry, so the re-pull instruction is part of the finding, not a footnote to it.

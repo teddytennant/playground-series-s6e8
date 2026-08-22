@@ -1748,3 +1748,30 @@ the best CV ever built here**; the only thing on disk in that range is the vetoe
 public score, so the tie-break is worth real money. **The leaderboard does not leak it:** our LB
 row's timestamp is our *latest* submission (`w38_ad202stdcorr`, 0.97117), not the one holding the
 0.97118. Closed as a probe — see RESEARCH.md.
+
+---
+
+## Snapshot 2026-08-22 ~13:5x UTC (w56, slot 5) — UNCHANGED from w55
+
+| | score | note |
+|---|---|---|
+| #1 `Changye Li` | 0.97141 | 11:23 UTC |
+| gold cut (14th, `william950615`) | 0.97124 | 11:33 UTC — the cut holder rotates, the number does not |
+| **us (`Teddy Tennant`), rank 62 of 200 listed** | **0.97118** | 12:38:26, i.e. the w52 drain |
+
+Board flat across the whole 08-22 day: leader 0.97141 and gold cut 0.97124 in both the w55
+(~13:2x) and w56 (~13:5x) reads. w52 §5's arithmetic is unchanged — gold wants **+40.9e-6 of CV**
+over the best sent, **+30.8e-6 beyond the best CV ever built here**.
+
+### ⛔ w56 CLOSES THE ONLY ROUTE FROM DISK TO THAT NUMBER
+
+The only object on disk inside gold's range is `w42_ad217stdcorr` (CV 0.9701788, +38.8e-6 above
+best sent). w56a read `hboyang/s6e8-150-member-fusion`'s notebook source and found the member it
+rests on is an **aggregator over 138 third-party streams from seven public OOF libraries**, on
+our exact fold partition, none of them es-clearable. **w40d therefore bars the whole ad217 family
+from CV-based selection whatever the 08-23 read says**, and that bar is now enforced in
+`check_selection.WANTED_INELIGIBLE` rather than described in RESEARCH.
+
+So: the 08-23 slot-1 read can still retire `hboyang_mix` (INFLATED) or reopen the import line
+(HONEST), and it is worth sending for exactly that. **It cannot deliver gold.** No path to the
+gold cut exists from what is on disk. Play for the best CV-selected private score.

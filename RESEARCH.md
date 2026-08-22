@@ -4,6 +4,103 @@ Durable facts. Anything learned once goes here so no later run pays for it twice
 
 ---
 
+# 🔴🔴 `hboyang_mix` IS AN AGGREGATOR OVER 138 UN-ES-CLEARABLE STREAMS — w40d BINDS ON ARM 217 (w56)
+
+Nobody had read this notebook's source. w51 audited the other five members of
+`ext_members16` and **explicitly left `hboyang_mix` untested**, reserved for the 08-23 read.
+`experiments/w56a_arm217power.py` pulled `hboyang/s6e8-150-member-fusion` (`kernels pull -m`,
+now in `notebooks/w56/hboyang_fusion/`) and read the registry out of the source:
+
+| streams | source |
+|---|---|
+| 10 | `naji*` — najiama **blends** (`*_blend_oof_predictions.csv`, i.e. level-2 objects) |
+| 6 | `candidate_naji*` — hboyang's blends **OF** those blends |
+| 41 | `bolt_*` — boltuzamaki OOF library |
+| 64 | `sz_*` — szymonkapiski 47-model library |
+| 5 | `fm_*` raykkretzschmar · 7 `golem_*` dariushafshar · 5 `a_*` adarsh1077 |
+| 11 | `fresh_*`/`local_*` — hboyang's own |
+
+**138 of 149 streams (92.6%) are third-party, from SEVEN public OOF libraries.** Among them
+**16 lookup-transformer-family** members (the family w51 convicted by source read) and
+**14 `sz_pub_*` copies of public models**, including `sz_pub_ravi`. `result.json` confirms
+`fold_definition StratifiedKFold(5, shuffle=True, random_state=42)` — **our exact partition**,
+so any es-on-val in those streams lands on exactly the rows our combiner scores.
+
+⇒ **RESEARCH (w40): "an AGGREGATOR's streams cannot be es-cleared."** So `w40d_prereg`'s rule
+binds on ARM 217 **independent of the 08-23 read**: *an arm containing un-es-cleared streams may
+be built, priced, queued and SENT, but is NOT ELIGIBLE for `check_selection.WANTED` on CV alone.*
+
+## ✅ AND IT IS NOW WIRED. `check_selection.WANTED_INELIGIBLE`, exercised by `w56b`
+
+w40d's rule lived **only in this file** — the fifth instance of w54/w55's generalisation, and the
+first on the *selection* path rather than the send path. Nothing stopped a future run from
+setting `WANTED` to the CV argmax, and **the two highest CVs ever built here are both ineligible**:
+
+    w50_ad216stdcorr  CV 0.9701500880  highest on disk, +10.1e-6 above WANTED   (w51 evidence)
+    w42_ad217stdcorr  CV 0.9701788     +38.8e-6 above best sent, the ONLY       (w56a evidence)
+                                       object on disk inside the gold cut
+
+`check_selection.py` now carries `WANTED_INELIGIBLE` + `assert_wanted_eligible()`, **called at
+import**, raising `SystemExit(3)`. `experiments/w56b_wantedguard.py` is the regression test and
+it **exercises** the guard rather than asserting it: guard strings present (including the call
+site, not just the def), live WANTED passes, and it **fires** on `w42_ad217stdcorr.csv` and
+`w50_ad216stdcorr.csv`. Run it on any run that touches `check_selection.py` or moves WANTED.
+⚠ Retire an entry **HERE, in the same commit as the evidence**, with the reading quoted in the
+value. Do not delete a key to make a run pass.
+
+---
+
+# ⚠ THE 08-23 ARM 217 READ IS WELL POSED — MY OWN "UNFALSIFIABLE" SUSPICION IS REFUTED (w56)
+
+w56 opened by suspecting `w48d_arm217.json` of the fault w48d discarded its own first design
+for, in the other direction: that its rejection region is unreachable under the es-on-val
+mechanism it tests. **Measured, and REFUTED. Do not re-open it.**
+
+Put every hypothesis on one axis — δ = how much `oof_hboyang_mix` overstates the honest quality
+of the fusion. The same δ drives both sides, which is exactly why the read is informative:
+on CV it is why ARM 217 gained; on LB the test vector is **not** inflated by es-on-val
+(w40: *"inflates a member's OOF and not its test vector"*), so the read comes in δ low.
+
+    point prediction 0.971230 (band 0.971198..0.971252, width 55e-6)
+    HONEST   >= 0.97116  fires for δ <=  70e-6
+    INFLATED <= 0.97080  fires for δ >= 430e-6
+    H_FULL (w49c's corrected +708.3e-6 standalone gap) -> lb 0.97052, i.e. 278e-6 CLEAR
+                                                          inside the INFLATED region ✅
+
+**So the branch is reachable and the test is powered against the extreme alternative.**
+⚠ But the INDETERMINATE zone is δ ∈ [70, 430]e-6 = **10%–61% of H_FULL — 51 percentage points
+of the hypothesis space maps to "report it and change nothing"**, and *partial* contamination
+(a genuinely strong fusion that is also somewhat inflated) is the modal outcome. That branch
+resolves to "the veto stands", which is the safe direction, so the design is fine — but expect
+it, and do not read an indeterminate score as a soft HONEST.
+
+## ⛔ AND THE CONJUNCTION, REGISTERED BEFORE THE SCORE EXISTS
+
+- **INFLATED** → as registered: drop `hboyang_mix`, the ad217 veto is FINAL.
+- **in between** → as registered: report it, change nothing. **The modal outcome.**
+- **HONEST** → the member is not **grossly** contaminated, and w45 §3 / w44's import line are
+  reopened on the record exactly as w48d says. ⚠ **IT DOES NOT CLEAR w40d.** HONEST rules out
+  gross contamination and nothing narrower — δ ≤ 70e-6 still survives it. ARM 217 stays
+  WANTED-INELIGIBLE on CV. **A HONEST read licenses SENDING and pricing ad217 on the LB, never
+  SELECTING it.** Selecting on a public read is the Rogii failure this account already made.
+
+## Two measurements kept, and one instrument WITHDRAWN
+
+✅ **`hboyang_mix` is worth +89.32e-6 to a cross-fitted 2-column stack over `ad211std_h3`'s own
+output** (0.9701311176 → 0.9702204330 on the frozen folds) — **2.1× what the 217-column pack
+refit extracted from all six new members** (+41.71e-6). The pack's own stacker under-uses the
+column by half. That is a fact about the combiner, and **evidence for neither branch**.
+
+⛔ **WITHDRAWN, do not re-spend: degrading a column by blending its ranks toward uniform noise is
+NOT a usable AUC→stack-CV transfer.** It collapses standalone AUC far faster than it destroys
+rank-correlation with the honest signal, so the stacker keeps extracting value long after the
+AUC has gone: at λ=0.02 the column has lost **73e-6** of AUC and still carries **+74.2e-6** of
+gain; it takes λ≈0.28 and **~31,000e-6** of AUC to reach zero. A δ read off that curve's local
+slope (this run's first attempt quoted 369e-6) is meaningless. The sweep is retained in
+`w56a_arm217power.py` **for its level at λ=0 only**, with the limitation in its docstring.
+
+---
+
 # 🔴🔴 A RULE IN A PRINTED PARAGRAPH IS NOT A RULE EITHER — AND AN UNPRICEABLE ROW IS UNCOVERED (w55)
 
 Fourth bug of this shape on the send path (w49 keyed the writer to the day, w53 the reader, w54

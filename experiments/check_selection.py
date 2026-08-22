@@ -246,6 +246,68 @@ COMP = "playground-series-s6e8"
 # identical construction on the 187 pack, and the only one of the two with a real LB print.
 WANTED = {"w36_ad199stdcorr.csv", "w23_ad187stdcorr.csv"}
 
+# ---------------------------------------------------------------------------
+# WANTED-INELIGIBILITY, ENFORCED (w56, 2026-08-22)
+# ---------------------------------------------------------------------------
+# `w40d_prereg` adopted the rule and nothing ever checked it:
+#
+#     "an arm containing un-es-cleared streams may be built, priced, queued and SENT,
+#      but is NOT ELIGIBLE for check_selection.WANTED on CV alone. Its LB reading is
+#      the discriminator; its CV is not."
+#
+# That rule lived only in RESEARCH.md, which is exactly the failure mode w54 and w55
+# each paid a run for on the send path: a rule that lives in a paragraph is not a rule.
+# It matters here because the two highest CVs ever built in this workspace are BOTH
+# ineligible under it, and a future run reading the CV ledger will find them at the top:
+#
+#   w50_ad216stdcorr  CV 0.9701500880  — the highest on disk, +10.1e-6 above WANTED
+#   w42_ad217stdcorr  CV 0.9701788     — +38.8e-6 above the best sent, the only object
+#                                        on disk inside the gold cut's range
+#
+# Both fail on evidence that is already in, not on suspicion:
+#   ad216 — w51 read the source logs: four of the five `ext_members16` members it rests
+#           on are es-on-val, and the fifth is a level-2 stack over the same public
+#           columns. Our fold partition is BYTE-IDENTICAL to theirs, so the inflation
+#           lands on exactly the rows this workspace scores.
+#   ad217 — w56a read `hboyang/s6e8-150-member-fusion`'s notebook source: `hboyang_mix`
+#           is an AGGREGATOR over 138 third-party streams from seven public OOF
+#           libraries (16 of them lookup-transformer-family, the family w51 convicted
+#           by source read), on the same fold partition. Its streams cannot be
+#           es-cleared here, so w40d binds.
+#
+# ⚠ THE 08-23 READ DOES NOT LIFT THIS. `w48d_arm217.json` sends `hboyang_mix`'s raw test
+# vector and reads its public score. A HONEST result (lb >= 0.97116) rules out GROSS
+# contamination and nothing narrower — w56a measured the rejection region at 430e-6 of
+# member AUC while the whole disputed effect needs far less — so HONEST licenses SENDING
+# and pricing ad217 on the LB, never SELECTING it on CV. Selecting on a public read is
+# the Rogii failure this account has already made once.
+#
+# To retire an entry: retire it HERE, in the same commit as the evidence, with the
+# reading that retires it quoted in the value. Do not delete the key to make a run pass.
+WANTED_INELIGIBLE = {
+    "w50_ad216": "w51 source read — 4/5 ext_members16 members es-on-val on our own folds, "
+                 "5th is a level-2 over the same columns. Not WANTED on CV (w40d).",
+    "w42_ad217": "w56a source read — hboyang_mix is an aggregator over 138 un-es-clearable "
+                 "third-party streams. Not WANTED on CV (w40d). The 08-23 LB read does "
+                 "not lift this; see w56a_arm217power.json.",
+}
+
+
+def assert_wanted_eligible(wanted=WANTED):
+    """Fail loudly if WANTED names an arm that w40d bars from CV-based selection."""
+    bad = [(w, why) for w in sorted(wanted)
+           for pat, why in WANTED_INELIGIBLE.items() if w.startswith(pat)]
+    if bad:
+        print("\n⛔⛔ WANTED NAMES A w40d-INELIGIBLE ARM — REFUSING TO PROCEED")
+        for w, why in bad:
+            print(f"   {w}\n     {why}")
+        print("   Retire the WANTED_INELIGIBLE entry on evidence, in the same commit,")
+        print("   or pick a different file. Do not edit this check to make a run pass.")
+        raise SystemExit(3)
+
+
+assert_wanted_eligible()
+
 # kagglesdk lives in the CLI's own uv tool venv, not in .venv.
 KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"
 

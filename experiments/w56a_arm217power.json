@@ -1,0 +1,112 @@
+{
+  "pool": {
+    "n_members": 149,
+    "counts": {
+      "naji (najiama BLENDS, level-2)": 10,
+      "candidate_naji (blends OF blends)": 6,
+      "bolt_ (boltuzamaki library)": 41,
+      "sz_ (szymonkapiski 47-model library)": 64,
+      "fm_ (raykkretzschmar fm-lattice)": 5,
+      "golem_ (dariushafshar golem library)": 7,
+      "a_ (adarsh1077 library)": 5,
+      "fresh_/local_ (hboyang's own)": 11
+    },
+    "third_party": 138,
+    "dataset_sources": [
+      "najiama/predicting-smartphone-addiction-oof-submission-csv",
+      "raykkretzschmar/s6e8-fm-lattice-blend-members",
+      "szymonkapiski/s6e8-oof-library-47-models",
+      "adarsh1077/s6e8-adarsh-oof-library",
+      "dariushafshar/s6e8-golem-oof-library",
+      "boltuzamaki/s6e8-oof-prediction-library",
+      "hboyang/s6e8-150-fusion-local-members"
+    ],
+    "families": {
+      "lookup-transformer family (w51 Gate A FAIL on tamerlanomralinov)": 16,
+      "sz_pub_* \u2014 szymonkapiski's copies of PUBLIC models": 14,
+      "ravi20076 (w51 Gate B FAIL as a level-2 over contaminated columns)": 1,
+      "tabm / realmlp / resnet / ft-transformer NN members": 26
+    }
+  },
+  "axis": {
+    "pred": 0.9712298944175404,
+    "honest_at": 0.97116,
+    "inflated_at": 0.9708,
+    "band": [
+      0.9711975834065615,
+      0.9712522654518098
+    ],
+    "d_leave_honest": 6.989441754035042e-05,
+    "d_enter_inflated": 0.0004298944175403774,
+    "d_full": 0.0007083,
+    "lb_at_full": 0.9705215944175404,
+    "dead_zone_frac": [
+      0.09867911554475563,
+      0.6069383277430148
+    ]
+  },
+  "value": {
+    "auc_base": 0.9701331846110895,
+    "auc_h": 0.970181553604739,
+    "cv0": 0.9701311175584307,
+    "cv1": 0.9702204330349643,
+    "gain": 8.931547653356908e-05,
+    "gain_vs_pack": 2.1413226718847014,
+    "sweep": [
+      {
+        "lam": 0.0,
+        "auc_col": 0.970181553604739,
+        "d_auc_col": 0.0,
+        "cv": 0.9702204330349643,
+        "gain": 8.931547653356908e-05
+      },
+      {
+        "lam": 0.02,
+        "auc_col": 0.9701089859592197,
+        "d_auc_col": -7.256764551932804e-05,
+        "cv": 0.9702053212927051,
+        "gain": 7.420373427435845e-05
+      },
+      {
+        "lam": 0.05,
+        "auc_col": 0.969653324219366,
+        "d_auc_col": -0.0005282293853730025,
+        "cv": 0.9701607625002067,
+        "gain": 2.9644941775930356e-05
+      },
+      {
+        "lam": 0.1,
+        "auc_col": 0.967765533332905,
+        "d_auc_col": -0.002416020271833963,
+        "cv": 0.9701405748638805,
+        "gain": 9.457305449767084e-06
+      },
+      {
+        "lam": 0.2,
+        "auc_col": 0.9579621962381009,
+        "d_auc_col": -0.01221935736663815,
+        "cv": 0.9701335762686739,
+        "gain": 2.458710243180562e-06
+      },
+      {
+        "lam": 0.4,
+        "auc_col": 0.8949237444124238,
+        "d_auc_col": -0.07525780919231517,
+        "cv": 0.9701287211821441,
+        "gain": -2.3963762866285876e-06
+      },
+      {
+        "lam": 1.0,
+        "auc_col": 0.5020167228298406,
+        "d_auc_col": -0.46816483077489845,
+        "cv": 0.9701306867010893,
+        "gain": -4.308573414713024e-07
+      }
+    ]
+  },
+  "conjunction": {
+    "binds": "w40d",
+    "third_party": 138,
+    "n": 149
+  }
+}
