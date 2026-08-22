@@ -1,0 +1,139 @@
+w59 PRE-REGISTRATION — THE HIJACK BREAK-EVEN, AND THE SENDER'S CV BAR
+=====================================================================
+Written and COMMITTED before experiments/w59a_hijackprice.py exists. Every number below is a
+prediction, not a reading. 2026-08-22, ~14:5x UTC. Run w59. Slot 8 of 10, at cap (10/10 sent
+2026-08-22 12:37-12:38 UTC), so nothing here is a submission decision for today; it is the send
+policy for the 08-23 ten, which the planner already lays out.
+
+THE ANGLE AS ISSUED — "find the original source dataset and concatenate it" — IS SUBSTITUTED.
+JOURNAL §9.7 has it closed three separate times and MEASURED NEGATIVE. Re-opening it would be
+the near-copy the angle mechanism exists to prevent. Substituted below.
+
+
+WHAT THIS RUN IS ABOUT
+----------------------
+w58 wired a gate on the send path: a file that can land ABOVE the auto-selection tier is not a
+filler, it is a FINAL ENTRY, so it must clear the bar a final entry clears. The bar it wired is
+
+    w26g_send.wanted_cv_bar()  =  min CV over WANTED  =  w23_ad187stdcorr  =  0.9701150809
+                                                      =  dcv -24.93e-6 vs the PICK
+
+and the argument for it, quoted verbatim from the docstring, is:
+
+    "A file that can be auto-selected displaces one of our two final entries, so the bar it has
+     to clear is the bar the entry it displaces already cleared."
+
+⚠ THAT ARGUMENT DESCRIBES THE WORLD WHERE WE CLICKED. In the world we are actually in, nothing
+is selected, so a hijacker displaces NOT a WANTED file but A UNIFORM DRAW FROM TIER 1. The bar
+is therefore being set against the wrong counterfactual, and the right one is measurable with
+the machinery already on disk. w58 explicitly refused to give the hijack a point estimate — for
+`hboyang_mix`, correctly, since its quality was the quantity the 08-23 read exists to measure.
+But for a file with an honest cross-fitted CV the hijack cost is just w57a's `price()` evaluated
+on {X, one tier-1 draw}, and nobody has ever evaluated it. THE BAR HAS NEVER BEEN MEASURED.
+
+Sixth instance of this workspace's recurring shape: a rule asserted by argument and enforced by
+a number nobody priced. The five before it were all about whether a rule was WIRED. This one is
+about whether a wired rule is at the RIGHT PLACE.
+
+AND THE SECOND HALF, WHICH IS THE PART THAT COULD MOVE THE PRIVATE SCORE. Every run so far has
+treated "above the tier" as a hazard to be blocked. If the break-even says a good file HELPS by
+hijacking, then above-the-tier is also a LEVER: with ~90 slots left and auto-selection picking
+on public score, deliberately courting an above-tier landing by a high-CV file is the only way
+to raise P(the pick is in the final pair) above its current 0.400 without the click.
+
+
+THE STANDING NUMBERS THIS IS REGISTERED AGAINST (w57a_tierprice2.json, w58a_tiergate.json)
+------------------------------------------------------------------------------------------
+    TIER 1, public 0.97118, 5 files      dcv vs PICK (e-6)
+      w36_ad199stdcorr  = the PICK             0.00
+      w40_ad211stdcorr                        -2.53
+      w29_ad194stdcorr                       -21.72
+      w27_ad190stdcorr                       -21.87
+      w21_ad187corr_ens4                     -36.07
+      -> MEAN TIER-1 dcv                     -16.438
+
+    base  = MODEL B, status quo, mean over the 10 pairs   =  7.855203984805849e-6
+    uni1  = uniform limit 1 (worthless hijacker)          = 17.947859612689353e-6
+    D     = the DILUTION break-even (w58)                 = 12.97e-6
+    bar   = the sender's live CV bar                      = 24.93e-6 below the PICK
+    P(pick inside the auto 2)                             = 0.400
+
+DEFINITIONS FIXED NOW, SO THEY CANNOT BE CHOSEN TO SUIT THE ANSWER
+    cost_hijack(X)   = mean over d in TIER1 of price([X, d]).  X takes auto-slot 1 alone; the
+                       second auto-pick is one uniform draw from the tied tier, exactly the
+                       construction behind w57a's uniform_limit1.
+    H                = the dcv at which cost_hijack(X) crosses `base`, linearly interpolated
+                       between the two bracketing REAL files. Reported as a positive magnitude
+                       below the PICK. A hijacker HELPS iff its CV is within H of the PICK.
+    cost_hijack_cond = the same, but X's (LB - CV) residual is set to the conditional mean of
+                       its public score GIVEN it exceeded tier + STEP/2 — i.e. conditioned on
+                       the hijack having actually happened — instead of carrying the common gap
+                       alone. H_cond is its break-even.
+
+
+REGISTERED PREDICTIONS
+----------------------
+P1  MONOTONICITY. cost_hijack is decreasing in CV over the candidate set (>= 10 real files with
+    OOF vectors on disk): Spearman(cost_hijack, dcv) <= -0.95.
+
+P2  THE POINT. H lies in [10, 22]e-6. Point prediction H = 16.4e-6, on the reasoning that a
+    hijacker REPLACES a tier-1 draw, so it is neutral when it is an average tier-1 member, and
+    the mean tier-1 dcv is -16.438.
+
+P3  THE DIRECTION, AND THE DECISION. H < 24.93e-6 — the sender's current bar is TOO LOOSE, and
+    admits hijackers that make the exposure WORSE than doing nothing. If P3 is FALSIFIED the bar
+    is fine or too strict and NOTHING GETS WIRED this run.
+
+P4  H > D = 12.97e-6. Hijacking tolerates a slightly worse file than joining the tier does.
+
+P5  THE HONEST LIMIT, ON A REAL FILE. cost_hijack(PICK) lies in [-4, 0)e-6 — strictly negative,
+    confirming w58a's asserted "X honest -> cost <= 0" bound on a file rather than in a limit.
+
+P6  IT BINDS ON THE LIVE PLAN. At least one row of the 08-23 ten that the planner currently
+    sends passes the current bar and FAILS the H bar. Named in advance: `w27_ad188stdcorr`
+    (slot 10, CV 0.9701168076, dcv -23.20, hijack risk 3.3%).
+
+P7  THE PAIR. price([w38_ad202std_h3, w40_ad211std_h3]) < 4.0e-6 — if the two best ELIGIBLE
+    unsent files both land above the tier, the auto pair is better than the status quo `base`.
+
+P8  THE LEVER. cost_hijack(w40_ad211std_h3) < base = 7.855e-6 — deliberately promoting the best
+    eligible unsent file is better than leaving the tier alone.
+
+P9  BACKFILL, NOT SUBTRACTION (w58's P8 lesson, re-tested). With the H bar wired, the 08-23 plan
+    still fills to TEN rows.
+
+P10 THE CONDITIONING CORRECTION, AND ITS SIGN, FROM THE MECHANISM. w57a fits gamma = -0.0918
+    (beta = -0.2478): the map from a file's public-gap to its private-gap is NEGATIVE. So
+    conditioning on "X landed above the tier" — which is conditioning on a HIGH public score —
+    lowers X's expected private score. Therefore
+
+        H_cond  <  H_uncond,
+
+    i.e. the unconditional break-even is ANTI-conservative and the true bar is STRICTER still.
+    Band: H_cond in [4, 20]e-6, and H_uncond - H_cond in (0, 12]e-6.
+    ⚠ If the sign comes out the other way, gamma's sign is being misread somewhere and NOTHING
+    GETS WIRED until that is resolved.
+
+GATES, both inherited from w58a and non-negotiable
+    GATE T  the live tier must equal what w57a_tierprice2.json recorded it ran on, else w57a is
+            stale and every figure here is quoted against a dead scale. Exit 2.
+    GATE R  the enlarged NAMES design must reproduce w57a's MODEL B (7.855203984805849) and
+            uniform_limit1 (17.947859612689353) to < 1e-6 on the tier-1 subset. Exit 3.
+
+
+WHAT GETS WIRED IF THIS CONFIRMS, AND WHAT DOES NOT
+---------------------------------------------------
+IF P3 CONFIRMS: `w26g_send.wanted_cv_bar()` is REPLACED by a bar read from the measured
+break-even, taking the STRICTER of {H_uncond, H_cond} below the PICK, read out of
+w59a_hijackprice.json rather than hard-coded (w45a went stale by freezing a live quantity).
+The old bar stays in the file as the documented WRONG counterfactual, not deleted.
+
+⛔ WHAT DOES NOT GET WIRED, WHATEVER THE NUMBERS SAY:
+  - `--allow-above-tier` is NOT passed and `hboyang_mix` is NOT un-deferred. w58 §4's argument
+    is untouched by any number here: no branch of the ARM 217 read moves WANTED, so its expected
+    value to the private score is zero, and P5/P8 measure ELIGIBLE files with cross-fitted CVs,
+    which `hboyang_mix` is not (fam=member).
+  - No entry is retired from `check_selection.WANTED_INELIGIBLE` to let a high-CV arm through.
+  - P_MAX is NOT lowered or raised to change how many slots the gate costs.
+  - WANTED does not move. Nothing in this run is a selection argument.
+  - No file is built. This run prices files that already have OOF vectors on disk.
