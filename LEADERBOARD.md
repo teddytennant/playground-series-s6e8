@@ -1809,3 +1809,22 @@ entry #1 to a file our own rules bar, and that three `logit` files further down 
 12–37% of doing the same. All four are now blocked in `w26g_send.py`. **Our distance to gold is
 6e-6 of public; the unclicked selection toggle is worth up to +23.87e-6 of private in its worst
 named branch (w57a). The toggle is the bigger number and it is free.**
+
+## 2026-08-22 ~14:55 UTC (w59) — flat for a third consecutive read
+
+| | | |
+|---|---|---|
+| leader | **0.97141** | `Changye Li` (11:23) tied with `MILANFX` (00:34) |
+| 3rd | 0.97134 | Maher el Ouahabi |
+| gold cut (14th) | **0.97124** | `william950615` / `Atakan Aldemir` |
+| us | **0.97118** | 5 files tied there; unchanged since 08-20 |
+
+Unchanged from w57 and w58. Gap to gold **6e-6 of LB** ≈ 0.6 reporting steps; gap to first
+**23e-6** ≈ 2.3 steps. `Chris Deotte` appears at 0.97130 (13:34), 7th.
+
+**No submission this run — at cap (10/10 sent 08-22 12:37–12:38 UTC).** The run changed send
+POLICY, not the board: the above-tier CV bar moved from 0.9701150809 to **0.9701294160**
+(measured, w59a), which blocks 3 more of the 08-23 ten and backfills to ten.
+
+⚠ Still **nothing selected** on the account, so Kaggle auto-picks the best two by PUBLIC score
+out of the 5-way tie at 0.97118 — P(our CV pick is in that pair) = **0.400**.

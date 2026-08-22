@@ -21266,3 +21266,245 @@ Read ~14:5x UTC. Leader **0.97141** (`Changye Li`, tied with `MILANFX`). Gold cu
 `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+---
+
+# w59 — 2026-08-22, slot 8 of 10. THE SENDER'S CV BAR WAS NEVER MEASURED. IT IS NOW, AND IT WAS TOO LOOSE BY 14.3e-6
+
+**AT CAP BEFORE THIS RUN BEGAN: 10/10 sent 2026-08-22 12:37–12:38 UTC, and it is still 08-22
+(14:42 UTC at the top of the run). No submission. This run is send POLICY for the 08-23 ten,
+which the planner already lays out and which this run changes.**
+
+**ANGLE SUBSTITUTED.** Issued angle was *"find the original source dataset and concatenate it"*.
+JOURNAL §9.7 has it **closed three separate times and measured NEGATIVE**. Re-running it is the
+near-copy the angle mechanism exists to prevent. ⛔ No browser MCP in this session either
+(`ToolSearch` for it returns nothing) — the click stays blocked from here, §0 of w58 still holds.
+
+## 1. 🔴 THE BAR w58 WIRED WAS SET AGAINST THE WRONG COUNTERFACTUAL
+
+w58 wired the above-tier gate and set its bar at `min CV over WANTED` = `w23_ad187stdcorr` =
+**0.9701150809**, dcv **−24.93e-6** vs the pick. The argument, verbatim from `wanted_cv_bar`:
+
+> *"A file that can be auto-selected displaces one of our two final entries, so the bar it has to
+> clear is the bar the entry it displaces already cleared."*
+
+⚠ **THAT ARGUMENT DESCRIBES THE WORLD WHERE WE CLICKED.** Nothing is selected. A hijacker does
+not displace a WANTED file — it displaces **a uniform draw from tier 1**, a different and much
+weaker object. w58 refused to give the hijack a point estimate, *correctly*, because its hijacker
+(`hboyang_mix`) had no comparable CV — but that refusal then got carried onto files that **do**
+have one, and the number those files are judged against was never priced at all.
+
+**Sixth instance of the workspace's recurring shape, and the first of a NEW sub-species.** The
+five before it (w49/w53/w54/w55/w58) all asked *is the rule wired?* This one asks *is the wired
+rule at the right PLACE?* ⚠ **A rule can be correctly wired, correctly tested, and still be
+enforced at a number nobody ever measured.**
+
+## 2. ✅ MEASURED — `experiments/w59a_hijackprice.py`, prereg `w59_prereg.txt` @ a406e6d
+
+`cost_hijack(X) = mean over d ∈ TIER1\{X\} of price([X,d])` — X takes auto-slot 1 alone, the
+second pick is one draw from the tie it left behind. Priced on **23 real files** (tier 1, tier 2,
+the whole 08-23 plan, both WANTED), never on an invented dcv — w58's P6b was that run's weakest
+point for exactly that reason. GATE T (tier unchanged from w57a) and GATE R (the enlarged design
+reproduces w57a's MODEL B to **4.0e-9** and uniform-limit-1 to **6.5e-9**) both PASS.
+
+| break-even | H | ⇒ CV bar |
+|---|---|---|
+| unconditional | 12.97e-6 | 0.9701270406 |
+| **conditional on the landing** | **10.59e-6** | **0.9701294160** |
+| the sender's bar as it stood | (24.93e-6) | 0.9701150809 |
+
+> **A hijacker HELPS iff its cross-fitted CV is within 10.6e-6 of the pick. The bar was set
+> 14.34e-6 too loose, and admitted files that make E[max] strictly WORSE than doing nothing.**
+
+**The conditional reading is the one that binds, and its SIGN was registered in advance from the
+mechanism (P10).** A hijack is *by definition* the branch where the file landed high on the
+public slice, and w57a fits **gamma = −0.0918** — the public-gap → private-gap map is NEGATIVE —
+so conditioning on that landing *lowers* the file's expected private score. The unconditional
+break-even is therefore anti-conservative. Registered: `H_cond < H_uncond`. **Measured 10.59 vs
+12.97. ✅ CONFIRMED, and it moved the bar 2.4e-6 in the direction the mechanism said.**
+
+## 3. ⚠⚠ WITHDRAWN AND REBUILT INSIDE THE RUN — MY FIRST `breakeven()` WAS w58's OWN P6b BUG
+
+The first cut took **the first row below `base` and the LAST row at or above it** — interpolating
+across the **whole 40e-6 range** instead of between the two files that actually straddle the
+crossing. It read **H = 17.79**; the adjacent pair reads **12.97**. A 4.8e-6 error, in the
+*loose* direction, in the very instrument written to catch a bar that was too loose.
+
+⚠ **NEW LESSON: "interpolated between real files" is not a property of the FILES, it is a
+property of the BRACKET.** w58 §5 already banned inventing a dcv; I obeyed that and then
+extrapolated across eighteen real files instead. Rebuilt as `crossings()`, adjacent pairs only,
+and it now **reports every further crossing** rather than letting one global fit swallow them —
+there is a real second crossing, because `w21_ad187corr_ens4` (dcv −36.07, cost +12.59) breaks
+monotonicity: it is *in* tier 1, so hijacking removes it from its own draw set.
+
+⚠ **Also caught: the `cond` column at the model-internal sd is DEGENERATE and is NOT used.** That
+sd is **557e-6**, fifty-five times the 10e-6 distance to the threshold, so the truncated-normal
+shift saturates and *every* file collapses onto the worthless-hijacker limit (17.95e-6). It is
+printed with that reason attached rather than deleted. The bar uses the sender's own fitted
+**PRED_SD = 8.77e-6**.
+
+## 4. ✅✅ GATE I — NOT PLANNED, AND IT COLLAPSES TWO OF THIS WORKSPACE'S NUMBERS INTO ONE
+
+The table showed the hijack costs crossing `base` between the same two files, at the same
+fraction, as w58's dilution deltas. That is not a coincidence — **it is an identity.** Adding X
+to a 5-file tier takes MODEL B from a mean over C(5,2)=10 pairs to a mean over C(6,2)=15, and the
+**5 new pairs are exactly `{X,d}` for d ∈ TIER1** — which is what `cost_hijack(X)` already
+averages. So for every X outside the tier,
+
+    delta_dilution(X)  ==  (cost_hijack(X) - base) / 3
+
+Asserted numerically over 18 files: **max |difference| = 7.8e-12e-6.**
+
+> **w58's DILUTION break-even D and this run's HIJACK break-even H are THE SAME NUMBER.** One bar
+> governs both landings. **An above-tier landing simply carries exactly 3× the leverage of an
+> in-tier one, in either direction.**
+
+That 3× is new and it matters both ways: it triples the damage w58's table implied for a bad
+above-tier landing, and it triples the payoff for a good one. ⚠ Conditioning breaks the identity
+— and only in the hijack direction, because "landed in the tier" and "landed above the tier" are
+different truncations. D stays 12.97 for dilution; H drops to 10.59 for the hijack.
+
+## 5. ✅ WIRED — `hijack_cv_bar()`, and the old function is KEPT as the documented wrong answer
+
+`w26g_send.wanted_cv_bar()` is **not deleted**. It stays in the file with the refutation in its
+docstring, so a future run that re-derives the "displaces a final entry" argument finds the
+measurement against it. `hijack_cv_bar()` reads the bar **live** from `w59a_hijackprice.json`
+(never a source constant — w45a went stale exactly that way), refuses if the artefact's GATE T
+did not pass, and returns `None` → **BLOCK** if it cannot be read.
+
+`experiments/w59b_barguard.py` **exercises** it, w56b's idiom, 15 checks, FAILURES: 0 — the bar
+is live, equals `pick_cv − H_binding`, `H_binding` is the stricter of the two, it is **stricter
+than the old WANTED bar**, it *fires* 1e-9 below and *passes* 1e-9 above, it blocks
+`w27_ad188stdcorr` and `w36_ad197stdcorr` by name, still admits `w40_ad211std_h3`, and with the
+artefact removed it goes `None` and blocks. ⚠ **w58a's GATE S string was re-pointed, not
+softened** — the property it checks ("a CV bar is read live and wired into the eligibility
+test") is unchanged; only the symbol moved, and the reason is in the source at the check.
+
+## 6. WHAT IT COSTS, ON THE LIVE 08-23 TEN — AND P9 SAYS THE PLAN DOES NOT SHRINK
+
+Blocks go **4 → 7**. The three new ones are the rows that fail the bar **and** carry ≥2% hijack
+risk (the two-part test doing its job — seven other plan rows fail the CV bar but cannot
+realistically reach the tier, so they still send):
+
+    w38_ad202std_rescale   pred_lb 0.971171  P(above tier) 0.061  cv dcv -19.97
+    w40_ad211std_rescale   pred_lb 0.971173  P(above tier) 0.082  cv dcv -19.02
+    w27_ad188stdcorr       pred_lb 0.971171  P(above tier) 0.053  cv dcv -23.20
+
+**`w27_ad188stdcorr` is the one w58 §3 waved through by name** — *"a 3.3% hijack risk is fine: if
+it hijacks, it hijacks with a file we would be content to select."* It is dcv **−23.20**, more
+than twice the measured break-even. **We would not have been content.**
+
+**✅ P9 CONFIRMED — the plan still fills to TEN**, backfilling `w27_ad188raw_logit`,
+`w27_ad188std_logit`, `w36_ad197std_rescale`, all with hijack risk under 0.2%. w58's P8 lesson
+holds again: **a filter on a backfilling queue is a substitution, not a subtraction.**
+
+## 7. ⚠ THE LEVER IS REAL AND CURRENTLY UNARMED — SAY BOTH HALVES
+
+Every run so far has treated above-the-tier purely as a hazard. It is also the **only way to
+raise P(the pick is in the final pair) above its current 0.400 without the click**:
+
+    P8 ✅  w40_ad211std_h3 alone above the tier  -> +3.599e-6  vs status quo +7.855e-6
+    P7 ❌  BOTH best eligible files above it     -> +4.505e-6  (registered < 4.0 — MISSED)
+    P5 ✅  the PICK itself above the tier        -> -0.017e-6  (w58a's "honest -> <=0", on a real file)
+
+So a good hijack removes **up to 4.26e-6 of the 7.86e-6 standing exposure — 54% of it.** ⚠ **But
+nothing in the queue can pull it.** Arming it needs a file that is *simultaneously* CV ≥
+0.9701294 **and** pred_lb ≈ 0.97118, and every eligible file above the bar prices at pred_lb
+0.971157 (risk 0.08%). The only objects on disk with both properties are the **ad216/ad217 arms,
+which `WANTED_INELIGIBLE` bars on es-contamination** — and that veto is not for sale here.
+**That is the next build target, and it is now the highest-value object in this workspace.**
+
+⚠ **P7's miss is recorded as a miss.** +4.505 vs a registered `< 4.0`. The direction survives
+(4.505 < base 7.855, the pair still helps) but the band did not, and two near-twin files at
+dcv −6.8/−7.0 dilute each other more than I priced.
+
+## 8. THE REGISTERED PREDICTIONS (`experiments/w59_prereg.txt`, committed a406e6d BEFORE the instrument)
+
+| | prediction | outcome |
+|---|---|---|
+| P1 | Spearman(cost, dcv) ≤ −0.95 | ✅ **−0.9852** |
+| P2 | H ∈ [10,22]e-6, point 16.4 | ✅ **12.97** (point missed by 3.4) |
+| P3 | H < 24.93 → **the bar is TOO LOOSE** | ✅ **the decision test, CONFIRMED** |
+| P4 | H > D = 12.97 | ❌ **FALSIFIED BY THEOREM — H *is* D** (§4) |
+| P5 | cost_hijack(PICK) ∈ [−4,0) | ✅ **−0.017** |
+| P6 | `w27_ad188stdcorr` flips to blocked | ✅ (8 files flip; 3 actually blocked once risk is applied) |
+| P7 | best eligible pair < 4.0e-6 | ❌ **FALSIFIED, +4.505** |
+| P8 | best eligible single < base | ✅ **+3.599 < +7.855** |
+| P9 | the plan still fills to ten | ✅ **CONFIRMED** |
+| P10 | H_cond < H_uncond, from gamma < 0 | ✅ **10.59 < 12.97** |
+
+⚠ **P4 is the interesting failure.** I registered H > D expecting two different quantities and got
+an identity instead. Registering a *strict* inequality is what turned a tie into a falsification
+rather than a shrug — **if I had written H ≥ D I would have banked a confirmation and never found
+GATE I.**
+
+## 9. VERIFICATION — THE WHOLE CHAIN, AFTER EVERY EDIT
+
+**w54a exit 0, w55a exit 0, w56b exit 0, w57c exit 0, w39a exit 0 (FAILURES: 0), w58a exit 0
+(GATE T / GATE R / GATE S all PASS), w59a exit 0 (GATE T / GATE R / GATE I all PASS), w59b exit 0
+(FAILURES: 0)**, `check_selection` **exit 1** as expected. `w26g_send.py --n 10` dry-plans ten
+cleanly with the new bar live. `w25a_cvlb_full.py` was **not** run (w57 §4). `w48e_order.py` was
+**not** re-run — the gate lives in the sender, so the plan is derived at send time.
+
+## 10. THE BOARD — FLAT FOR A THIRD READ
+
+14:55 UTC. Leader **0.97141** (`Changye Li`, tied with `MILANFX`). Gold cut (14th) **0.97124**.
+Us **0.97118**. Unchanged from w57 and w58.
+
+## 11. ⛔ UNCHANGED BLOCKERS
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS. Needs Teddy, in his own browser.** Deadline
+  **08-31**. Worth +7.86e-6 of removed exposure, plus the ARM 217 read it unblocks, plus the
+  slots the gate holds back. No browser MCP attached (§0).
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 12. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   `ls -d experiments/w<next>*`. Check whether `mcp__brave__*` is in the tool list — if it is,
+   **make the click**.
+2. **Send the 08-23 ten.** `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** (expect **7**
+   blocked, slot 1 `w34_ad195std_h3`, and the backfill to reach ten) → `--go`.
+3. ⚠ **RUN `w57a_tierprice2.py` → `w58a_tiergate.py` → `w59a_hijackprice.py` ON EVERY SEND DAY,
+   AFTER THE SEND, IN THAT ORDER.** Each gates on the one before it. **The bar moves with the
+   tier**, and `hijack_cv_bar()` reads w59a's artefact live — a stale artefact means the sender
+   is enforcing yesterday's bar. Then `w59b_barguard.py`.
+4. **Run `w54a`, `w55a`, `w56b`, `w57c`, `w58a`, `w59b` on any run that sends, touches
+   `check_selection.py`, or touches anything under the pricer.**
+5. ⛔ **DO NOT pass `--allow-above-tier`** and do not un-defer the ARM 217 read. w58 §4 is
+   untouched by anything measured here. **THE FIX IS THE CLICK, NOT THE FLAG.**
+6. 🎯 **THE ONE BUILD TARGET WORTH A RUN (§7): an ELIGIBLE arm with CV ≥ 0.9701294 AND pred_lb
+   ≈ 0.97118.** It is the only unarmed lever on the board that does not need the human — worth up
+   to 4.26e-6 of the 7.86e-6 standing exposure, at 3× the leverage of an in-tier landing.
+   ⛔ It must clear w40d on its own evidence. **Do NOT reach for ad216/ad217 to arm it.**
+7. Do **NOT** re-open anything on w58 §9.7's list, and add to it: **the original dataset (closed
+   FOUR times now — this run's issued angle, substituted, never re-run)**.
+8. ⚠ **NEW: a rule can be correctly WIRED, correctly TESTED, and enforced at a number nobody
+   MEASURED.** Five runs asked *is it wired?*; this one asked *is it in the right place?* — and it
+   was 14.3e-6 out. **When you inherit a threshold, ask what it was measured against.**
+   ⚠ **NEW: "interpolated between real files" is a property of the BRACKET, not of the files.**
+   Adjacent straddles only; report every further crossing (§3).
+   ⚠ **NEW: register STRICT inequalities.** P4 as `H ≥ D` would have banked a confirmation and
+   hidden GATE I. The tie *was* the finding.
+   ⚠ **NEW: check a truncation's sd against the distance it is truncating at.** 557e-6 against a
+   10e-6 threshold saturates to a constant and looks like an answer (§3).
+   ⚠ **NEW: when a gate's symbol is renamed, re-point the guard string and say why AT the check.**
+   A renamed guard that silently stops matching is a deleted guard.
+   ⚠ Carried: a rule enforced on the wrong COLUMN is not enforced · a POINT PREDICTION IS NOT A
+   GATE · a filter on a backfilling queue is a SUBSTITUTION, price the replacement · register
+   against files you HOLD · while nothing is selected, "measurement send" is not a category ·
+   `w25a_cvlb_full.py` is NOT read-only · a hard-coded tier goes stale every send day · a prereg
+   that re-stamps itself is not a prereg · `E[max]` over two near-twin stacks has no resolution ·
+   a rule in a PARAGRAPH is not a rule · a rule in the ORDER of a list is not a rule · `w48e`'s
+   write block resets `send_rank`/`msg`/`why` to NaN · an unused slot is only "pure waste" once
+   the final picks are selected · never use in-sample residuals to test extrapolation · never
+   lower the `cv >= 0.97` floor · never let a `member` row into a `max(CV)` · always pass
+   `--page-size`.
+
+**Files added:** `experiments/w59_prereg.txt`, `experiments/w59a_hijackprice.py`,
+`experiments/w59a_hijackprice.json`, `experiments/w59b_barguard.py`.
+**Modified:** `experiments/w26g_send.py` (`hijack_cv_bar`, `HIJACKPRICE`, the CVBAR call site,
+the block message; `wanted_cv_bar` retained and marked superseded), `experiments/w58a_tiergate.py`
+(GATE S string re-pointed), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**

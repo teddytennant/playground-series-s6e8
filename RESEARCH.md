@@ -1,5 +1,96 @@
 # Research — playground-series-s6e8
 
+# 🔴🔴 THE SEND-PATH CV BAR WAS NEVER MEASURED — AND IT WAS 14.3e-6 TOO LOOSE (w59, 2026-08-22)
+
+w58 wired the above-tier gate at `min CV over WANTED` = 0.9701150809 (dcv −24.93 vs the pick) on
+the argument *"a file that can be auto-selected displaces one of our two final entries, so the
+bar it has to clear is the bar the entry it displaces already cleared."*
+
+⚠ **THAT ARGUMENT DESCRIBES THE WORLD WHERE WE CLICKED.** Nothing is selected, so a hijacker
+displaces **a uniform draw from tier 1**, not a WANTED file. `experiments/w59a_hijackprice.py`
+prices the real counterfactual — `cost_hijack(X) = mean over d ∈ TIER1\{X} of price([X,d])` — on
+**23 real files**, with w58a's GATE T and GATE R intact (reproduces w57a's MODEL B to 4.0e-9).
+
+| break-even | H | CV bar |
+|---|---|---|
+| unconditional | 12.97e-6 | 0.9701270406 |
+| **conditional on the landing — THE BAR** | **10.59e-6** | **0.9701294160** |
+| the old WANTED bar | (24.93e-6) | 0.9701150809 |
+
+> **A hijacker HELPS iff its cross-fitted CV is within 10.6e-6 of the pick.**
+
+**The conditional reading binds, and its SIGN was registered in advance from the mechanism.** A
+hijack is by definition the branch where the file landed high on the public slice, and w57a fits
+**gamma = −0.0918** — the public-gap → private-gap map is NEGATIVE — so conditioning on that
+landing *lowers* the expected private score. The unconditional break-even is anti-conservative.
+
+### ✅✅ GATE I — THE DILUTION AND HIJACK BREAK-EVENS ARE THE SAME NUMBER, IDENTICALLY
+
+Adding X to a 5-file tier takes MODEL B from a mean over C(5,2)=10 pairs to C(6,2)=15, and the
+**5 new pairs are exactly `{X,d}` for d ∈ TIER1** — what `cost_hijack(X)` already averages. So
+
+    delta_dilution(X) == (cost_hijack(X) - base) / 3      max |diff| over 18 files = 7.8e-12e-6
+
+> **w58's D and w59's H are one quantity. One bar governs both landings. An ABOVE-tier landing
+> carries exactly 3× the leverage of an IN-tier one, in either direction.**
+
+Conditioning breaks the identity, and only on the hijack side — "landed in the tier" and "landed
+above the tier" are different truncations. D stays 12.97 for dilution; H is 10.59 for the hijack.
+
+### ✅ WIRED — `w26g_send.hijack_cv_bar()`, read LIVE from `w59a_hijackprice.json`
+
+Never a source constant (w45a went stale that way); refuses unless the artefact's GATE T passed;
+returns `None` → **BLOCK** if unreadable. `wanted_cv_bar()` is **kept, not deleted**, with the
+refutation in its docstring so a future run that re-derives the old argument meets the
+measurement. `experiments/w59b_barguard.py` **exercises** it (15 checks, FAILURES: 0) including
+the fail-safe and three real files by name. w58a's GATE S string was **re-pointed, not softened**.
+
+**Cost on the live 08-23 ten: blocks 4 → 7.** The three new ones fail the bar *and* carry ≥2%
+hijack risk: `w38_ad202std_rescale` (6.1%, dcv −19.97), `w40_ad211std_rescale` (8.2%, −19.02),
+and **`w27_ad188stdcorr` (5.3%, dcv −23.20) — the file w58 §3 waved through by name** as one
+"we would be content to select". At more than twice the break-even, we would not have been.
+**The plan still fills to TEN** (backfill: `w27_ad188raw_logit`, `w27_ad188std_logit`,
+`w36_ad197std_rescale`, all under 0.2% risk).
+
+### ⚠ THE LEVER IS REAL AND CURRENTLY UNARMED
+
+Above-the-tier is not only a hazard: it is the only way to raise P(the pick is in the final pair)
+above **0.400** without the click.
+
+    the PICK itself above the tier      -0.017e-6   (w58a's "honest -> <=0", on a real file)
+    w40_ad211std_h3 above the tier      +3.599e-6   vs status quo +7.855e-6  -> removes 54%
+    both best eligible files above it   +4.505e-6
+
+⚠ **Nothing in the queue can pull it.** Arming needs CV ≥ **0.9701294** *and* pred_lb ≈ 0.97118
+together; every eligible file above the bar prices at pred_lb 0.971157 (0.08% risk). The only
+objects with both are the **ad216/ad217 arms, barred by `WANTED_INELIGIBLE`** — not for sale.
+🎯 **Building an eligible arm with both properties is the highest-value target on the board that
+does not need the human.**
+
+### ⚠ THREE INSTRUMENT LESSONS PAID FOR IN THIS RUN
+
+- ⚠⚠ **"Interpolated between real files" is a property of the BRACKET, not of the files.** The
+  first `breakeven()` took the first row under `base` and the LAST row over it — a global fit
+  across 40e-6 dressed as a bracket. It read **17.79** where the adjacent pair reads **12.97**,
+  4.8e-6 out in the LOOSE direction, inside the instrument written to catch a loose bar.
+  Adjacent straddles only, and **report every further crossing** — the cost curve is not
+  monotone (a tier-1 file's hijack removes it from its own draw set).
+- ⚠ **Check a truncation's sd against the distance it truncates at.** The model-internal
+  predictive sd is **557e-6** against a **10e-6** threshold distance: the shift saturates and
+  every file collapses onto the worthless limit, producing a confident constant. Use the
+  sender's fitted **PRED_SD = 8.77e-6**.
+- ⚠ **Register STRICT inequalities.** `H > D` was falsified by an identity; `H ≥ D` would have
+  banked a confirmation and hidden GATE I entirely. **The tie was the finding.**
+
+### ⚠⚠ AND THE GENERAL ONE
+
+**A rule can be correctly WIRED, correctly TESTED, and enforced at a number nobody MEASURED.**
+w49/w53/w54/w55/w58 all asked *is the rule wired?* This is the first run to ask *is the wired
+rule in the right PLACE?* — and it was 14.3e-6 out. **When you inherit a threshold, ask what it
+was measured against, not whether it fires.**
+
+---
+
 # 🔴🔴 WHILE NOTHING IS SELECTED, A "MEASUREMENT SEND" IS NOT A CATEGORY (w58, 2026-08-22)
 
 Any file that can reach the auto-selection tier **is a final entry**, whatever the reason it was

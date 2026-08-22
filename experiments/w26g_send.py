@@ -58,13 +58,25 @@ import json as _json                                                        # no
 from check_selection import WANTED as _WANTED, WANTED_INELIGIBLE            # noqa: E402
 
 
-def wanted_cv_bar():
-    """The CV of the WEAKER of the two WANTED files.
+HIJACKPRICE = os.path.join(HERE, "w59a_hijackprice.json")
 
-    A file that can be auto-selected displaces one of our two final entries, so the bar it has
-    to clear is the bar the entry it displaces already cleared. Read from the artefact rather
-    than hard-coded: w45a went stale precisely because a live quantity was frozen into source.
-    Returns None if the artefact cannot supply it -- callers must then BLOCK, not wave through.
+
+def wanted_cv_bar():
+    """⛔ SUPERSEDED BY `hijack_cv_bar` (w59). KEPT, NOT DELETED, AS THE DOCUMENTED WRONG ANSWER.
+
+    This returned the CV of the WEAKER of the two WANTED files, on the argument that
+
+        "a file that can be auto-selected displaces one of our two final entries, so the bar it
+         has to clear is the bar the entry it displaces already cleared."
+
+    ⚠ THAT ARGUMENT DESCRIBES THE WORLD WHERE WE CLICKED. Nothing is selected, so a hijacker
+    does NOT displace a WANTED file -- it displaces A UNIFORM DRAW FROM TIER 1, which is a
+    different and much lower-quality object. w59a measured the real break-even at 10.59e-6
+    below the pick against this function's 24.93e-6: the bar was TOO LOOSE by 14.3e-6 of CV
+    and admitted hijackers that make the exposure strictly WORSE than doing nothing.
+
+    Still called by nothing on the send path. Retained so a future run that re-derives the
+    "displaces a final entry" argument finds the measurement that refutes it.
     """
     try:
         cvs = _json.load(open(TIERPRICE))["cv"]
@@ -72,6 +84,40 @@ def wanted_cv_bar():
     except (OSError, KeyError, ValueError, TypeError):
         return None
     return min(vals) if len(vals) == len(_WANTED) else None
+
+
+def hijack_cv_bar():
+    """The CV a file must clear before it is allowed to risk landing ABOVE the auto tier (w59).
+
+    MEASURED, not asserted. `w59a_hijackprice.py` prices the real counterfactual: if X lands
+    above the tier it takes auto-slot 1 alone and the second auto-pick is one uniform draw from
+    the tie X left behind, so the question is whether E[max(X, draw)] beats E[max(draw, draw')].
+    That crosses the status quo at H below the pick, and a file HELPS iff its cross-fitted CV is
+    within H. Read LIVE from the artefact -- w45a went stale by freezing a live quantity into
+    source, and H moves with the tier, so this must be re-derived on every send day.
+
+    ⚠ The bar taken is the CONDITIONAL one. A hijack is by definition the branch where the file
+    landed high on the public slice, and w57a fits gamma = -0.092 -- the public-gap to
+    private-gap map is NEGATIVE -- so conditioning on that landing LOWERS the file's expected
+    private score. The unconditional break-even (12.97e-6) is anti-conservative; the conditional
+    one (10.59e-6) is the bar. Both are in the JSON; `H_binding` is the stricter.
+
+    ⚠ w59a GATE I: this is the SAME number as w58's DILUTION break-even D, identically, because
+    the pairs a 6th tier member adds to MODEL B are exactly the pairs a hijacker draws from --
+    delta_dilution(X) = (cost_hijack(X) - base)/3. One bar governs both landings. The hijack
+    simply carries 3x the leverage, in either direction.
+
+    Returns None if the artefact cannot supply it -- callers must then BLOCK, not wave through.
+    """
+    try:
+        d = _json.load(open(HIJACKPRICE))
+        bar = float(d["cv_bar_new"])
+        # The artefact must have been produced on the tier we are actually sending against.
+        if not d.get("gate_t") == "PASS" or not (0.9 < bar < 1.0):
+            return None
+    except (OSError, KeyError, ValueError, TypeError):
+        return None
+    return bar
 
 
 def auto_tier(rows):
@@ -129,10 +175,12 @@ def above_tier_reason(r, bar):
     if cv is None or pd.isna(cv):
         return "no cv — cannot be shown to be an acceptable final entry"
     if bar is None:
-        return "the WANTED CV bar could not be read from w57a_tierprice2.json — failing safe"
+        return ("the w59 hijack CV bar could not be read from w59a_hijackprice.json — failing "
+                "safe. Re-run w57a_tierprice2.py then w59a_hijackprice.py.")
     if float(cv) < bar:
-        return (f"cv {float(cv):.10f} < the weaker WANTED file's {bar:.10f} — it would displace "
-                f"a final entry that is better on CV")
+        return (f"cv {float(cv):.10f} < the w59 hijack bar {bar:.10f} — above the tier it would "
+                f"take auto-slot 1 from a uniform tier-1 draw and make E[max] WORSE, at 3x the "
+                f"leverage of an in-tier landing (w59a GATE I)")
     return None
 LOG = os.path.join(HERE, "w26g_sent.csv")
 
@@ -239,14 +287,15 @@ def main():
 
     # w58: the tier is LIVE, never a constant -- a hard-coded tier is what went stale in w45a.
     TIER = auto_tier(rows)
-    CVBAR = wanted_cv_bar()
+    CVBAR = hijack_cv_bar()
     if TIER is None:
         print("\n⛔ could not read the auto-selection tier from the board. Refusing to plan: "
               "the tier rule cannot be evaluated, and w55's lesson is that a row the rule "
               "cannot be evaluated on is not covered by it.")
         sys.exit(2)
     print(f"auto-selection tier {TIER:.5f} (2nd-highest public score, with multiplicity); "
-          f"WANTED CV bar {CVBAR if CVBAR is None else f'{CVBAR:.10f}'}")
+          f"w59 hijack CV bar {CVBAR if CVBAR is None else f'{CVBAR:.10f}'} "
+          f"(measured, not the old WANTED bar)")
 
     sent_names = {r["fileName"] for r in rows}
     sent_md5 = set()

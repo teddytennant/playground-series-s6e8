@@ -275,7 +275,12 @@ def main() -> None:
     need = {
         "the flag": 'ap.add_argument("--allow-above-tier"',
         "the live tier": "TIER = auto_tier(rows)",
-        "the WANTED CV bar": "CVBAR = wanted_cv_bar()",
+        # w59 re-pointed this at the MEASURED bar. The property GATE S checks is unchanged --
+        # "a CV bar is read LIVE from an artefact and wired into the eligibility test" -- only
+        # the symbol moved, because `wanted_cv_bar` was measured to be the wrong counterfactual
+        # (24.93e-6 vs the real 10.59e-6). The old function is still in the file, documented as
+        # wrong; this string must name the one the send path actually calls.
+        "the live CV bar": "CVBAR = hijack_cv_bar()",
         "the eligibility test": "_aw = above_tier_reason(r, CVBAR)",
         "the probabilistic test": "_risk >= P_MAX",
         "the block": "above.append((r.file",
