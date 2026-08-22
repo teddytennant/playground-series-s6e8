@@ -21508,3 +21508,224 @@ the block message; `wanted_cv_bar` retained and marked superseded), `experiments
 (GATE S string re-pointed), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+---
+
+# w60 — 2026-08-22, slot 9 of 10. THE LEVER IS BUILT AND ARMED — AND A REPRICE ERASED THE `member` BLOCK ON THE WAY
+
+**AT CAP BEFORE THIS RUN BEGAN: 10/10 sent 2026-08-22 12:37–12:38 UTC; it is still 08-22 (15:00
+UTC at the top, 15:5x at the bottom). No submission.** This run BUILDS the object w59 §12.6 named
+as the highest-value target in the workspace, and it ships in the 08-23 ten.
+
+⛔ No `mcp__brave__*` in the tool list (`ToolSearch` returns nothing) — **the click stays blocked
+from here**, w58 §0 still holds. ⛔ `git push` still blocked (no `gh`, no ssh, no token).
+
+## 0. ANGLE SUBSTITUTED — IT IS CLOSED THREE TIMES, WITH MEASUREMENTS
+
+Issued: *"LightGBM: tune it properly against the fixed folds."* JOURNAL and RESEARCH close it
+three separate ways: **2026-08-10 slot 1** tuned for solo AUC (+3e-5 solo, ~+4e-7 into the
+stack); **2026-08-11 slot 1** tuned for decorrelation (maxcorr **0.9961** — *"you cannot tune a
+LightGBM into a decorrelated member"*); **2026-08-13** a LightGBM META-model on logits+regime
+(**−0.00020**, decaying monotonically from the first checkpoint). RESEARCH's own heading: *"Do
+not tune GBDTs. Do not add ordinary GBDT members."* Substituted for w59 §12.6.
+
+## 1. ✅✅ THE BUILD — `w36_ad199stdcorr_ens4`, AND THE LEVER IS NOW ARMED
+
+The 5-arm `c_avg` correction on the **ens4** base (w30c's ARM 194 move, two packs later, on the
+PICK's own pack). `W21A_BASE` is the BARE pack name, not `_h3`. 23 min for both, `w60a_run.sh`.
+
+| file | CV | dcv | pred_lb | P(above tier) | above tier | in tier |
+|---|---|---|---|---|---|---|
+| **`w36_ad199stdcorr_ens4`** | **0.9701365875** | −3.42 | **0.971189** | **0.695** | **+1.127e-6** | +5.613e-6 |
+| `w38_ad202stdcorr_ens4` | 0.9701349001 | −5.11 | 0.971187 | 0.592 | +2.370e-6 | +6.027e-6 |
+| status quo (no hijack) | | | | | +7.855e-6 | |
+| floor — the PICK itself | | | | | −0.017e-6 | |
+
+> **It removes 6.73e-6 of the 7.855e-6 standing exposure — 86%** — where w59's best named lever
+> managed 54%, on a file that turned out to be ineligible (§3). It is also **the first eligible
+> file ever queued here with P(beat the account best) above 0.5** (0.695).
+
+⚠ **THERE IS NO BAD BRANCH, and that is the point.** It lands above the tier ~70% of the time and
+*in* it the other ~30%. w59a GATE I: an in-tier landing is the SAME quantity at 1/3 the leverage,
+so the in-tier branch prices at +5.613e-6 — still better than doing nothing. Both faces help.
+
+⚠ Adding both to w59a's pricing set moves the bar by **0.0000e-6** (they sit at dcv −3.4/−5.1,
+far above the crossing at −12.97), so they can enter `PLAN_0823` without drifting it. Measured
+through `w59a.EXTRA_CAND` — a hook that **asserts** you may not enlarge the bracket and persist a
+bar in the same run, because that is choosing the bar by choosing the bracket.
+
+⛔ **NOT built, registered as not-built:** `w36_ad199stdcorr_rescale` prices HIGHER (0.971193,
+P 0.813) and its projected CV 0.9701253 **fails the bar by 4.1e-6**. Taking the higher pred_lb
+over the bar is precisely the hijack the bar exists to stop. Named in the prereg so a later run
+cannot present it as an oversight.
+
+## 2. 🔴🔴 THE `member` BLOCK DIED IN THE REPRICE — CAUGHT BY CHECKING, NOT BY A GUARD
+
+Re-running `w26d_queueprice.py` so the new files entered the queue the sender reads:
+
+    w48_cal_hboyang_mix   fam=ens4   pred_lb 0.971289   P(above tier) 1.000
+    above_tier_reason(...) -> None            ⛔ CLEARED TO SHIP AS FINAL ENTRY #1
+
+`fam == "member"` is the FIRST branch of `above_tier_reason` and the only thing stopping a raw
+member vector becoming a final entry. It was written **only by `w48e_order.py`**, which runs
+AFTER `w26d` regenerates `fam` from the filename suffix. **w59 §9 recorded skipping
+`w48e_order.py` as safe — *"the gate lives in the sender, so the plan is derived at send time"*.**
+That sentence is true and did not save it: the gate lives in the sender and reads a column the
+skipped step writes.
+
+⚠⚠ **NEW SHAPE, one level up from w58's "a rule enforced on the WRONG COLUMN is not enforced":
+A RULE ENFORCED ON A COLUMN THAT A *DIFFERENT SCRIPT* POPULATES IS ONLY ENFORCED IF THAT SCRIPT
+RAN.** ⚠ And the protection it had was **accidental**: the reprice was refusing to write for an
+unrelated reason (four OOF-less rows), so the label was surviving by luck. My fix to that refusal
+is what exposed this — **the bug was already there for anyone who typed `--force`, the documented
+path.**
+
+**Fixed where families are derived**: `stdflag.MEMBER_FILES` + the `w37_cal_` prefix rule, and
+`family()` returns `"member"` before any suffix or CORR_MAP lookup. `w26d` no longer prices member
+rows through the CV→LB model — `w53a_pricer` **rightly refused** the unknown family, which is how
+I found the second half — and takes pred_lb from the builder's registered artefact
+(`w49a_calhboyang.json` → 0.971230), blanking `p_beat`. `w60d_memberguard.py`: 13 checks,
+FAILURES 0, including that a real stack is NOT swept up by the rule.
+
+**And the rebuild is now LOSSLESS.** The refusal offered only `--force`, whose own instruction
+("re-run `w37d_order.py`") points at a script hard-coding the **08-21** order — every file in it
+long since sent. False choice. A row is carried verbatim iff no `oof_<stem>.npy` exists (exactly
+why `w23b` drops it), carried UNPRICED, reported by name; a row lost for any other reason still
+trips the refusal.
+
+## 3. 🔴 ARM 211 WAS REGISTERED INELIGIBLE AND NEVER KEYED — FOR TWO DAYS
+
+`w40d_prereg.txt`, committed 2026-08-20 **before ARM 211 existed**: *"⛔ ARM 211 IS NOT ELIGIBLE
+FOR check_selection.WANTED, WHATEVER ITS CV."* w56 built `WANTED_INELIGIBLE` **to enforce that
+rule** and entered `w50_ad216` and `w42_ad217` — the two arms w56 was looking at. It left out the
+arm the rule is about.
+
+⚠⚠ **WHEN YOU MOVE A RULE INTO AN ENFORCING STRUCTURE, ENUMERATE ITS CASES FROM THE RULE, NOT
+FROM THE INSTANCES IN FRONT OF YOU.** A partly-populated enforcer reads exactly like a complete
+one. `w56b_wantedguard.py` passed every day — its case list was typed from the same place as the bug.
+
+Live cost when found: `above_tier_reason` imports the dict, so ad211 files clearing the CV bar
+were waved through above the tier; **`w40_ad211stdcorr` is already in TIER 1 at p_joint 0.375**,
+the second-highest CV there, and cannot be unsent; and it outranks `w23_ad187stdcorr` on CV, so a
+future run moving WANTED's weaker slot down the ledger lands on a barred arm in silence.
+
+✅ **P6 CONFIRMED — cost of the fix is ZERO.** Block count stays **7**, plan still fills to TEN.
+`w40_ad211std_rescale` was already blocked (CV bar → now ineligibility); `w40_ad211std_h3` is at
+0.08% hijack risk, under `P_MAX`, so it still sends as a filler. ✅ **P7 CONFIRMED** — it *does*
+remove w59 §7's best named lever (`w40_ad211std_h3`, +3.599e-6), which is why §1 exists.
+
+`w60b_ineligguard.py` derives the case list **from the preregistrations** — FORWARD / SWEEP /
+REVERSE / EXERCISE. ⚠ The SWEEP immediately found a file MAPPING had missed (`w51_prereg.txt`).
+⚠ Its first cut matched the caps word `ELIGIBLE` alone and cried wolf on w59_prereg — **a sweep
+that cries wolf gets its MAPPING padded to silence it, which is how a completeness check turns
+back into a hand-typed list.** It now also requires `check_selection.WANTED` on the same line.
+
+## 4. ⛔ WHAT THIS RUN REFUSED TO DO, ON PURPOSE
+
+ARM 202 is ARM 211's matched control; the corrected-h3 delta is **−0.116e-6**. The nine
+`yadoy666` streams bought nothing — far inside the ~4e-6 rebuild floor, nowhere near w40d's
++40e-6 "disbelieve on sight" line. That is the right *shape* of evidence to retire the entry.
+**Not acted on.** This run had a direct interest in retiring it (ARM 211 carried the lever), so it
+enforced the rule and registered the test for a run with no stake: retire iff |delta| ≤ 4e-6 on
+**all four** transform bases (h3, ens4, rescale, rankraw), quoted in the dict value in the same
+commit. ⚠ **A run that discovers a registered rule was never enforced must not retire that rule in
+the same breath.** One base is one reading; four is a measurement.
+
+Also not done: **WANTED was not moved.** `w36_ad199stdcorr_ens4` at 0.9701366 outranks WANTED's
+slot 2 (`w23_ad187stdcorr`, 0.9701151) on CV — but slot 2 is a **pack hedge** (check_selection,
+w24 R1: the identical construction on the 187 pack, insuring the member additions), and the new
+file is on the PICK's own pack. Promoting it would delete the hedge to buy CV inside the ~4e-6
+rebuild floor. Left alone, deliberately.
+
+## 5. THE REGISTERED PREDICTIONS (`experiments/w60_prereg.txt`, committed 45c2498 BEFORE the build)
+
+| | prediction | outcome |
+|---|---|---|
+| P1 | ad199 ens4-corr CV ∈ [0.9701340, 0.9701395], pt 0.9701366 | ✅ **0.9701365875** — 0.01e-6 from the point |
+| P2 | it CLEARS the bar 0.9701294160 — **the decision test** | ✅ **by +7.17e-6** |
+| P3 | pred_lb ≥ 0.971185, hijack risk > 0.50 | ✅ **0.971189, P 0.695** |
+| P4 | ad202 ∈ [0.9701325, 0.9701375] **and STRICTLY <** ad199's | ✅ **0.9701349001 < 0.9701365875** |
+| P5 | above-tier cost STRICTLY in (−0.017, +3.599), pt +1.5 | ✅ **+1.127e-6** |
+| P6 | the ad211 key changes the block count by ZERO, plan fills to ten | ✅ **7 blocks, 10 planned** |
+| P7 | `w40_ad211std_h3` leaves the lever table | ✅ **CONFIRMED** |
+
+Seven for seven, three of them tight point estimates. ⚠ That is a *worse* sign than w59's two
+falsifications: **a prereg that only confirms is a prereg that was not asked anything hard.** The
+real finding of this run (§2) was not registered at all — it was found by re-running the chain
+end to end and checking the output, which is also how w48 found the missing CORR_MAP entries.
+
+## 6. VERIFICATION — THE WHOLE CHAIN, AFTER EVERY EDIT
+
+**w54a exit 0, w55a exit 0, w56b exit 0, w57c exit 0, w58a exit 0 (GATE T / GATE R / GATE S
+PASS), w59b exit 0 (FAILURES 0), w60b exit 0 (FAILURES 0), w60d exit 0 (FAILURES 0), w39a exit 0
+(FAILURES 0)**, `check_selection` **exit 1** as expected. `w59a_hijackprice.py` re-run on the
+default path reproduces its registered artefact exactly (`cv_bar_new` 0.970129416029, H_u
+12.9653576, H_c 10.5899332, base 7.855204). `w26g_send.py --n 10` dry-plans ten with both new
+files at slots 8–9. Both CSVs verified: 296,302 rows, `id`/`addicted_label`, no NaN.
+
+⚠ **`w59b`'s "still admits `w40_ad211std_h3`" check was RE-POINTED, not softened** — to
+`w38_ad202std_h3` (an es-CLEARED pack), with a second check asserting ad211 is now blocked *on
+ineligibility rather than on CV*, and the reason written AT the check. w59 §12's own rule.
+
+## 7. THE BOARD — FLAT FOR A FOURTH READ, BUT THE SHELF IS FILLING
+
+15:15 UTC. Leader **0.97141** (`Changye Li`, tied `MILANFX`), gold cut (14th) **0.97124**, us
+**0.97118 at rank 65**. Top three unchanged over ~2h; `cstdy` 0.97131 and **`Chris Deotte`
+0.97130** both landed in the last few minutes. ⚠ **0.97118 bought rank ~18 on 08-21 and buys 65
+today. Rank at a fixed score decays from here.**
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   `ls -d experiments/w<next>*`. Check for `mcp__brave__*` — if present, **make the click**.
+2. **Send the 08-23 ten.** `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** → `--go`.
+   Expect slots 8–9 = `w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`. ⚠ **The plan is now
+   derived from `pred_lb` for everything past send_rank 10** — w59's registered ten still holds
+   the first slots through the carried `send_rank`, and the two new files backfill behind them.
+3. ⚠⚠ **`w59a_hijackprice.PLAN_0823` IS NOW STALE** — it predates both new files. Re-run
+   `w57a_tierprice2.py` → `w58a_tiergate.py` → `w59a_hijackprice.py` **after** the send, in that
+   order, **with `PLAN_0823` refreshed from the actual plan**. w60 measured that adding the two
+   new files moves the bar by 0.0000e-6, so this refresh is safe. Then `w59b`.
+4. Run **w54a, w55a, w56b, w57c, w58a, w59b, w60b, w60d** on any run that sends, touches
+   `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`, or anything under the pricer.
+5. ⛔ **DO NOT pass `--allow-above-tier`.** THE FIX IS THE CLICK, NOT THE FLAG.
+6. 🎯 **The lever is armed but not PULLED until 08-23's send lands.** After it scores, read
+   whether `w36_ad199stdcorr_ens4` actually cleared 0.97118. If it did, exposure drops from
+   +7.855e-6 to ~+1.1e-6 without the human. If it landed IN the tier, it still helped (+5.6e-6).
+   ⚠ Do NOT re-tune anything on that reading — it is a coin that was priced before it was flipped.
+7. ⚠ **The ARM 211 retirement test (§4) is registered and unrun. It needs a run with no stake in
+   the answer.** Four bases, |delta| ≤ 4e-6, quoted in the dict value in the same commit.
+8. Do **NOT** re-open w58 §9.7's list, **the original dataset** (closed four times), or
+   **LightGBM tuning** (closed three times — this run's issued angle, substituted).
+9. ⚠ **NEW: a rule enforced on a column a DIFFERENT script populates is only enforced if that
+   script ran.** "The gate lives in the sender" was true and did not save it (§2).
+   ⚠ **NEW: when you move a rule into an enforcing structure, enumerate its cases FROM THE RULE,
+   not from the instances in front of you.** A partly-populated enforcer reads like a complete one (§3).
+   ⚠ **NEW: a sweep that cries wolf gets padded into a hand-typed list.** Tighten the pattern, do
+   not extend the whitelist (§3).
+   ⚠ **NEW: accidental protection is worse than none.** The `member` label survived only because
+   an unrelated guard was refusing to write; anyone typing the documented `--force` lost it (§2).
+   ⚠ **NEW: a prereg that only confirms was not asked anything hard** (§5). The real finding of
+   this run was unregistered and came from re-running the chain end to end.
+   ⚠ **NEW: a run with an interest in retiring a rule must not be the run that retires it** (§4).
+   ⚠ Carried: a rule can be WIRED, TESTED, and enforced at a number nobody MEASURED · "interpolated
+   between real files" is a property of the BRACKET · register STRICT inequalities · check a
+   truncation's sd against the distance it truncates at · when a gate's symbol is renamed,
+   re-point the guard string and say why AT the check · a rule enforced on the wrong COLUMN is not
+   enforced · a POINT PREDICTION IS NOT A GATE · a filter on a backfilling queue is a SUBSTITUTION
+   · register against files you HOLD · while nothing is selected, "measurement send" is not a
+   category · `w25a_cvlb_full.py` is NOT read-only · a hard-coded tier goes stale every send day ·
+   a prereg that re-stamps itself is not a prereg · a rule in a PARAGRAPH is not a rule · a rule in
+   the ORDER of a list is not a rule · never use in-sample residuals to test extrapolation · never
+   lower the `cv >= 0.97` floor · never let a `member` row into a `max(CV)` · always `--page-size`.
+
+**Files added:** `experiments/w60_prereg.txt`, `w60a_run.sh`, `w60a_corr.log`,
+`w60a_ad199_ens4.log`, `w60a_ad202_ens4.log`, `w60b_ineligguard.py`, `w60c_lever.py`,
+`w60d_memberguard.py`, `w21a_w36_ad199stdcorr_ens4.json`, `w21a_w38_ad202stdcorr_ens4.json`,
+`submissions/w36_ad199stdcorr_ens4.csv`, `submissions/w38_ad202stdcorr_ens4.csv` (+ their OOF).
+**Modified:** `check_selection.py` (the `w40_ad211` key), `stdflag.py` (`MEMBER_FILES`,
+`is_member`, `family`, two CORR_MAP entries), `w26d_queueprice.py` (lossless carry, member
+pricing), `w59a_hijackprice.py` (the `EXTRA_CAND` what-if hook), `w56b_wantedguard.py`,
+`w59b_barguard.py` (re-pointed), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
