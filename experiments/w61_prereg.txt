@@ -1,0 +1,102 @@
+w61 PRE-REGISTRATION — written 2026-08-22 ~15:55 UTC, BEFORE experiments/w61a_armctl.py exists
+==============================================================================================
+(Verify with `git log` on this file against the mtime of experiments/w61a_armctl.json.)
+
+ANGLE SUBSTITUTED, AND WHY
+--------------------------
+Issued angle: "CatBoost: it usually handles categoricals better than the others on survey-style
+data. Tune and compare on identical folds." It is closed, with measurements, in RESEARCH:
+  * RESEARCH "Do not tune GBDTs. Do not add ordinary GBDT members." — the `rest` group of 35
+    ordinary XGB/LGBM/CatBoost members is worth +0.000206 +- 0.000011 TOTAL, i.e. 5.9e-6 EACH.
+  * The CatBoost function class is already in the pack four ways (`cat_lat`, `cat_native`,
+    `cat_native_ctr2`, `cat_natlat`) and `run_catboost.py --inner` is the honest tuning path,
+    already built and already run.
+  * The one place foreign CatBoosts paid (+10.3e-6 each, adarsh1077) was measured to be a
+    property of the PIPELINE we did not hold, not of the function class — RESEARCH: "prefer a
+    pipeline we do not hold", not "prefer CatBoost".
+Re-tuning a CatBoost against the frozen folds is therefore the near-copy the angle mechanism
+exists to prevent. Substituted for JOURNAL w60 §8 item 7 — the ONE registered, unrun test in
+the workspace, which w60 explicitly deferred to "a run with no stake in the answer".
+
+WHY THIS RUN HAS NO STAKE — stated before the measurement, so it can be checked
+-------------------------------------------------------------------------------
+w60 deferred the test because w60 had a direct interest in retiring the rule: ARM 211 carried
+`w40_ad211std_h3`, the best above-tier lever w59 could name (+3.599e-6). That interest is GONE.
+w60 built `w36_ad199stdcorr_ens4` (+1.127e-6), which is strictly better than the ad211 lever on
+the same pricer, is eligible, and is already in the live 08-23 plan at slot 8. Retiring ad211
+therefore cannot improve this account's lever position — it can only ADD an inferior option.
+So the incentive on this run points AGAINST retirement, which is the opposite of w60's, and a
+PASS verdict here is evidence against interest.
+
+⚠ HONESTY CLAUSE — THIS IS AN AUDIT, NOT A BLIND TEST
+------------------------------------------------------
+The four CVs this test reads have been on disk since 08-21/08-22 and are quoted in
+`w23b_sendqueue.csv` and in this account's own submission descriptions. I can already read
+approximate deltas off that ledger before writing a line of code. The criterion was fixed by
+w60 and cannot be moved by me; the DATA was not hidden from me. This is a registered-criterion
+AUDIT, and the only things it adds over re-quoting the ledger are (a) re-derivation from the
+raw OOF vectors rather than from a table, which is exactly the chain w48a found stale before,
+and (b) the enforcement act itself. Recorded here so no later run can read this as a blind
+confirmation. Its evidential weight is the CRITERION being pre-fixed, not the numbers being
+unknown.
+
+THE REGISTERED CRITERION, quoted verbatim from w60_prereg.txt (NOT restated, NOT relaxed)
+------------------------------------------------------------------------------------------
+    RETIRE `w40_ad211` from WANTED_INELIGIBLE iff the ad211-minus-ad202 matched-control delta
+    is within +-4e-6 on ALL FOUR transform bases held on disk (h3, ens4, rescale, rankraw),
+    measured on the frozen folds, AND that reading is quoted in the dict value in the same
+    commit. A null group delta is not es-clearance, but it does bound the inflation the rule
+    exists to refuse. One base is one reading; four is a measurement.
+
+MATCHEDNESS — a precondition the criterion assumes and does not itself check
+----------------------------------------------------------------------------
+The delta is only a control if the two arms differ by exactly the nine streams. Verified from
+the build scripts BEFORE running: `w40f_run.sh` is `w38d_run.sh` with `ext_members15` appended
+to --extra-dirs and nothing else changed (same --drop list, same --standardize, same
+blend_lab, same make_h3, same w21a corr tag pattern), and `data/ext_members15/` holds exactly
+nine `oof_y94_*.npy` / `test_y94_*.npy` pairs. w61a ASSERTS both, and a failure of either is a
+REFUSE regardless of the deltas — an unmatched control measures nothing.
+
+REGISTERED PREDICTIONS
+----------------------
+ P1  All four base deltas |ad211 - ad202| <= 4e-6.  THIS IS THE DECISION TEST.
+ P2  Recomputing CV from `submissions/oof_<stem>.npy` with roc_auc_score on the frozen folds
+     reproduces every CV in `w23b_sendqueue.csv` / `w26d_queueprice.csv` to < 5e-10 for all
+     eight files. A mismatch anywhere REFUSES the retirement — the criterion says "measured on
+     the frozen folds", and a ledger that does not reproduce is not a measurement.
+ P3  The SIGN is not uniform: the nine streams do not help on every base. At least one of the
+     four deltas is negative and at least one is positive. (A uniformly positive set of four
+     would be the signature of a real group contribution, and a real contribution is exactly
+     what could carry inflation.)
+ P4  The corrected-h3 pair (`w40_ad211stdcorr` vs `w38_ad202stdcorr`) reproduces w60's quoted
+     -0.116e-6 to within 0.01e-6. This pair is NOT one of the four and is NOT part of the
+     criterion — it is the reading w60 already published, re-derived as a control on my
+     recomputation.
+ P5  The two bases NOT named in the criterion but held on disk (`hybrid`, `logit`) are
+     reported and NOT used to decide. If either exceeds 4e-6, that is REPORTED AS A FINDING
+     and the retirement still proceeds on the registered four — the criterion is w60's, and
+     widening it after seeing the numbers is choosing the bar by choosing the bracket, which
+     w59a/w60 §1 already refused once.
+ P6  Retiring changes NOTHING in the live 08-23 plan: the block count stays at 7 and the plan
+     still fills to ten. (`w40_ad211std_rescale` is blocked on the w59a CV bar INDEPENDENTLY
+     of eligibility — w60 §3 recorded it as blocked on both — and `w40_ad211std_h3` is already
+     admitted at 0.08% hijack risk.) If the block count MOVES, that is a finding and it goes
+     in the journal, because it would mean w60 §3's "cost of the fix is ZERO" was wrong.
+
+⛔ WHAT THIS RUN WILL NOT DO, WHATEVER THE NUMBERS SAY
+------------------------------------------------------
+1. It will NOT move `check_selection.WANTED` onto an ad211 file. Retiring an INELIGIBILITY is
+   not the same act as making a PICK, and `w40_ad211stdcorr` (CV 0.9701374733) outranks
+   WANTED's slot 2 `w23_ad187stdcorr` (0.9701150808) on CV, so the two acts are one keystroke
+   apart. Slot 2 is a PACK HEDGE (w24 R1) and its value is not its CV. Any WANTED move is a
+   separate run, on its own registered argument.
+2. It will NOT touch `w50_ad216` or `w42_ad217`. Their ineligibility rests on READ SOURCE
+   EVIDENCE (w51a: 4/5 members es-on-val on our own folds; w56a: an aggregator over 138
+   un-es-clearable streams), not on an unknown. A matched-control test does not speak to them
+   and this run does not go near them.
+3. It will NOT relax `w60b_ineligguard.py`. The guard's FORWARD/SWEEP/REVERSE/EXERCISE
+   structure must still pass with ad211 retired: the REVERSE half asserts every key is backed
+   by a registration, and a RETIRED key must leave no dangling registration behind. If the
+   guard needs a change to pass, that change is part of this run and is described at the check.
+4. It will NOT submit. The account is at cap: 10/10 sent 2026-08-22 12:37-12:38 UTC and it is
+   still 08-22 (15:44 UTC at the top of this run).
