@@ -1,0 +1,70 @@
+w58 PRE-REGISTRATION — written 2026-08-22 ~14:35 UTC, BEFORE w58a_tiergate.py existed.
+Committed before the instrument. Everything below is falsifiable and two-sided.
+
+CONTEXT ALREADY IN HAND (declared, so no prediction below claims credit for it):
+  - w57a_tierprice2.json: tier1 = 5 files at public 0.97118, MODEL B mean cost +7.855e-6,
+    P(pick in the auto 2) = 0.40.  Only 3 of the 10 tier-1 pairs are expensive (~23e-6):
+    the pairs drawn entirely from {w21_ad187corr_ens4, w27_ad190stdcorr, w29_ad194stdcorr}.
+  - w48d_arm217.json: hboyang_pred 0.9712299, band [0.9711976, 0.9712523],
+    rule HONEST >= 0.97116 / INFLATED <= 0.97080.
+  - An accidental module-level import of w48e_order.py this run printed its TOP 12 BY
+    PREDICTED LB, in which w48_cal_hboyang_mix reads pred_lb 0.97129. I therefore do NOT
+    register P2 as a discovery; it is restated only so the gate check is on the record.
+
+THE CLAIM UNDER TEST
+  Tomorrow's slot 1, `w48_cal_hboyang_mix` (THE ARM 217 TEST), is registered to land ABOVE
+  the 0.97118 auto-selection tier. With `check_selection` exiting 1, Kaggle auto-selects the
+  best two by PUBLIC score. So sending it is, under its own registered point prediction, an
+  act of FINAL SELECTION of a file that `check_selection.WANTED_INELIGIBLE` bars from being
+  selected on CV, and whose "CV" is a raw member's OOF AUC that RESEARCH says must never be
+  compared against a cross-fitted stack CV.
+
+PREDICTIONS
+
+P1  `w26g_send.py --n 10 --day 2026-08-23` (dry) plans `w48_cal_hboyang_mix` at slot 1 and
+    does NOT list it as blocked. i.e. no tier gate exists on the send path.
+      FALSIFIED IF it is blocked, or is absent from the plan. Then w58's premise is wrong
+      and NOTHING is to be wired; say so and stop.
+
+P2  Its queue `pred_lb` is >= 0.97119, strictly above the live tier-1 public score.
+      FALSIFIED IF pred_lb < 0.97118.
+
+P3  The live tier-1 set is UNCHANGED from w57a_tierprice2.json: public 0.97118, exactly the
+    same 5 stems. (No sends since 12:38 UTC.)
+      FALSIFIED IF the set or the score differs. Then w57a is stale too and must be re-run
+      before any figure of its is quoted.
+
+P4  Among the ten rows `w26g` actually plans for 08-23, `w48_cal_hboyang_mix` is the ONLY
+    one with pred_lb >= 0.97118.
+      FALSIFIED IF zero, or two or more, qualify. Two or more means the exposure is bigger
+      than the ARM 217 test and the gate must cover all of them.
+
+P5  Under w57a's own cost function, a NEW file joining tier 1 lowers the MODEL-B mean iff its
+    cross-fitted CV is within a break-even distance D of the pick, and D lies in [8, 15]e-6.
+      FALSIFIED IF D falls outside that interval. Report D either way.
+
+P6  Two-sided sanity on P5's mechanism, at the two CVs the live tier already contains:
+      (a) adding a twin at dcv = -2.53e-6 gives a MODEL-B mean BELOW 6.0e-6;
+      (b) adding a laggard at dcv = -21.7e-6 gives a MODEL-B mean ABOVE 9.0e-6.
+      FALSIFIED IF either inequality fails. If (b) comes in BELOW 7.855e-6 then dilution is
+      unconditionally good, the whole gate idea is wrong, and I must write that up as such.
+
+P7  THE DECISION TEST, registered before I compute it. The ARM 217 read cannot change the
+    final pick under ANY of its three registered branches (w56's conjunction: INFLATED ->
+    veto final; INDETERMINATE -> change nothing; HONEST -> "licenses SENDING and pricing
+    ad217 on the LB, never SELECTING it"). If that reading is right, the test's expected
+    value to the PRIVATE score is exactly ZERO, and its cost is P(lands above tier) times a
+    real exposure -> the send must be deferred until selection is made.
+      FALSIFIED IF any branch of w48d/w56 as written can move WANTED. Then the test has real
+      selection value, the trade is live, and a flat block is the wrong instrument.
+
+P8  If the gate is wired, the ten planned for 08-23 becomes NINE sendable plus one deferred,
+    and every one of the remaining nine has pred_lb < 0.97118.
+      FALSIFIED IF the count is not 9, or any survivor is at/above the tier.
+
+WHAT I WILL NOT DO
+  - Not re-run `w25a_cvlb_full.py` (w57 §4: it re-centres MU and the SENDER stops importing).
+  - Not move WANTED. Not retire a VETO entry. Not touch the 08-23 order file unless P8 forces
+    it, and if it does, `w48e_order.py --day 2026-08-23 --write` is re-run and re-verified.
+  - Not cancel the ARM 217 test. DEFERRED-UNTIL-SELECTED is the proposal; a flat cancel would
+    be a different decision and is not registered here.
