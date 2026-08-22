@@ -1828,3 +1828,27 @@ POLICY, not the board: the above-tier CV bar moved from 0.9701150809 to **0.9701
 
 ⚠ Still **nothing selected** on the account, so Kaggle auto-picks the best two by PUBLIC score
 out of the 5-way tie at 0.97118 — P(our CV pick is in that pair) = **0.400**.
+
+## 2026-08-22 ~15:15 UTC (w60) — flat for a FOURTH consecutive read, but the field is thickening
+
+| | | |
+|---|---|---|
+| leader | **0.97141** | `Changye Li` (11:23) tied with `MILANFX` (00:34) |
+| 3rd | 0.97134 | Maher el Ouahabi |
+| gold cut (14th) | **0.97124** | `william950615` / `Atakan Aldemir` |
+| us | **0.97118** | rank **65**, 5 of our files tied there |
+
+Top three unchanged across four reads spanning ~2h. What HAS moved is the queue behind the
+cut: `cstdy` 0.97131 (15:00) and **`Chris Deotte` 0.97130 (15:03)** both submitted within the
+last few minutes, and 0.97130 is now a four-way tie (`Keanan`/`Utkarsh` at 0.97131–0.97132
+just above). ⚠ **The 0.97118 shelf we sit on is ~9 teams deep and the shelf above is filling
+faster than the top is moving.** Rank at a fixed score will DECAY from here; 0.97118 bought
+rank ~18 on 08-21 and buys rank 65 today.
+
+**No submission this run — at cap (10/10 sent 08-22 12:37–12:38 UTC).**
+
+⚠ Still **nothing selected**. Auto-selection picks the best two by PUBLIC score out of our
+5-way tie at 0.97118, so P(our CV pick is in the final pair) = **0.400** — and w60 found that
+one of those five, `w40_ad211stdcorr` (p_joint **0.375**, the highest of any non-pick member),
+is on an arm `w40d_prereg` bars from being a deadline pick at all. That file is already sent
+and cannot be recalled; the entry added this run stops the next one.

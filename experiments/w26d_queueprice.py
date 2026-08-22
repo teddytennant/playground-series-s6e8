@@ -44,7 +44,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # whole ten-file day drops from P = 0.647 to 0.083. A filename is not provenance; `stdflag`
 # derives the flag from the WAVE NUMBER, because `--standardize` entered the chain at w23 and
 # every build since passes it. That module gates itself against w25f's own 60 rows.
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "agent"))
 sys.path.insert(0, HERE)
+from common import SUB  # noqa: E402 — w60, for the un-regenerable-row carry below
 import stdflag  # noqa: E402
 from stdflag import STD_FILES, family, is_std  # noqa: E402,F401
 
@@ -168,13 +170,36 @@ stdflag.require_corr_registered(q.stem)   # a new *corr file must be classified 
 q["fam"] = q.stem.map(family)
 q["std"] = q.stem.map(is_std)          # see is_std: a whitelist here was a BUG
 q["corr"] = q.stem.map(is_corr)
-q["pred_lb"] = [predict(r.cv, r.fam, r.std, r.corr, r.stem) for r in q.itertuples()]
+# ⚠ MEMBER ROWS ARE NOT PRICED BY THIS MODEL (w60). `family()` now derives `fam == "member"`
+# itself (stdflag.MEMBER_FILES) instead of waiting for `w48e_order.py` to write the label into
+# the CSV — and `w53a_pricer` rightly REFUSES a family that is not in its fitted design, because
+# an unknown family collapses onto the h3 reference level and produces a price that looks real.
+# A raw member vector has no transform and no cross-fitted stack CV, so there is nothing here to
+# price it with. Its predicted LB comes from the instrument its own builder registered, and its
+# `p_beat` is blanked: a MEASUREMENT must never sort, or be promoted, on a probability of
+# beating anyone (w48e's words, now enforced where the label lives).
+MEMBER_PRED = {"w48_cal_hboyang_mix": ("w49a_calhboyang.json", "pred_lb")}
+
+
+def _price(r):
+    if r.fam == "member":
+        src = MEMBER_PRED.get(r.stem)
+        if src and os.path.exists(os.path.join(HERE, src[0])):
+            return float(json.load(open(os.path.join(HERE, src[0])))[src[1]])
+        # No registered instrument -> NaN, and w55's rule then applies: a row the tier test
+        # cannot be evaluated on is NOT covered by it, and `w26g_send` blocks on the NaN.
+        return float("nan")
+    return predict(r.cv, r.fam, r.std, r.corr, r.stem)
+
+
+q["pred_lb"] = [_price(r) for r in q.itertuples()]
 q["sd"] = [resid_sd(r.stem) for r in q.itertuples()]
 q["era"] = [W46.new_era(r.stem) for r in q.itertuples()]
 
 # P(beat the account best). The file must print STRICTLY above 0.97118, and the LB rounds to
 # 1e-5, so the target on the underlying scale is BEST_LB + STEP/2.
 q["p_beat"] = 1.0 - norm.cdf((BEST_LB + STEP / 2 - q.pred_lb) / q.sd)
+q.loc[q.fam == "member", "p_beat"] = np.nan   # a measurement never sorts on P(beat) -- w48e
 
 # PRIORITY. The queue is ranked on predicted PUBLIC LB, which is the right order for chasing
 # public rank and the WRONG order for the one thing a submission is actually needed for here:
@@ -253,22 +278,57 @@ print("  the CV leader to be an even-money shot at the board; negative means alr
 # columns are merged back, and the write ABORTS if it would drop a row or a set `send_rank`
 # that the file on disk already has. To deliberately re-price from scratch, pass --force, and
 # re-run `w37d_order.py` immediately afterwards to rebuild the order.
+#
+# ⚠ EXTENDED w60, 2026-08-22. The guard above was doing its job and STILL blocked real work:
+# w60 built two new files, re-ran `w23b_sendqueue.py`, and the reprice refused because the four
+# OOF-less `w37_cal_*` / member rows are not regenerable from `w23b_sendqueue.csv`. The only
+# documented way past it was `--force`, whose own instruction ("re-run w37d_order.py") points at
+# a script that hard-codes the 08-21 order — every file in it long since sent. So the choices on
+# offer were: lose the four rows, or leave two new files out of the queue the sender reads.
+#
+# That is a false choice, and the fix is to make the REBUILD LOSSLESS rather than to force past
+# a guard that is correctly telling you the rebuild is lossy. A row is carried verbatim iff the
+# script provably cannot regenerate it — no `oof_<stem>.npy` on disk, which is the exact reason
+# `w23b_sendqueue.py` drops it — and it is carried UNPRICED, because it never had a CV to price
+# from. ⛔ Any row lost for ANY OTHER reason still trips the refusal: the guard caught a real
+# w39 bug and must keep its teeth. Carrying is reported by name, never silent.
 _CARRY = ["send_rank", "msg", "why"]
 _dst = os.path.join(HERE, "w26d_queueprice.csv")
 
 
+def _unpriceable(stems):
+    """Stems with no stored OOF vector — exactly what w23b_sendqueue.py drops, and the only
+    rows this script is entitled to carry rather than rebuild."""
+    return {s for s in stems
+            if not os.path.exists(os.path.join(SUB, f"oof_{str(s).replace('.csv','')}.npy"))}
+
+
 def _write(force=False):
     global q
-    lost_rows, lost_rank = [], []
+    lost_rows, lost_rank, carried = [], [], []
     if os.path.exists(_dst):
         prev = pd.read_csv(_dst)
         keep = [c for c in _CARRY if c in prev.columns]
         if keep:
             q = q.merge(prev[["file"] + keep], on="file", how="left")
         lost_rows = sorted(set(prev.file) - set(q.file))
+        carry_ok = sorted(_unpriceable(lost_rows))
+        if carry_ok:
+            add = prev[prev.file.isin(carry_ok)].copy()
+            for c in q.columns:
+                if c not in add.columns:
+                    add[c] = float("nan")
+            q = pd.concat([q, add[q.columns]], ignore_index=True)
+            carried = carry_ok
+            lost_rows = sorted(set(lost_rows) - set(carry_ok))
         if "send_rank" in prev.columns:
             ranked = prev[prev.send_rank.notna()]
             lost_rank = sorted(set(ranked.file) & set(lost_rows))
+    if carried:
+        print(f"\n  carried {len(carried)} un-regenerable row(s) forward UNPRICED (no OOF vector "
+              f"on disk, so this script never priced them and cannot):")
+        for f in carried:
+            print(f"      {f}")
     if (lost_rows or lost_rank) and not force:
         print(f"\n*** REFUSING TO WRITE {os.path.basename(_dst)} ***")
         print(f"    {len(lost_rows)} row(s) on disk are not in the rebuilt queue and would be")

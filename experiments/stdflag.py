@@ -120,7 +120,62 @@ CORR_MAP = {
     # five of the six ext_members16 authors still have unread es-on-val status and dropping
     # the sixth does not discharge that clause.
     "w50_ad216stdcorr": "h3",           # w50a_run.sh, base w50_ad216std_h3
+    # w60, 2026-08-22. Classified from `w60a_run.sh`, not from the suffix: both runners set
+    # W21A_BASE to the BARE pack name (`w36_ad199std` / `w38_ad202std`), which is the all-four
+    # ens4 mix — NOT the `_h3` base every entry above uses. So the corrected base is ens4 and
+    # the family is ens4, and here the suffix rule happens to agree. That agreement is why the
+    # entry still has to be made by hand: `require_corr_registered` exists because a reader
+    # cannot tell from the NAME whether the suffix was right, and a run that skipped the check
+    # on the grounds that it "obviously" parses would have skipped it for w38_ad202stdcorr too,
+    # which parses to ens4 and is h3. Same construction as w29_ad194stdcorr_ens4 (w30c), two
+    # packs later. Built to arm w59 §7's lever: eligible, over the w59a CV bar, above the tier.
+    "w36_ad199stdcorr_ens4": "ens4",    # w60a_run.sh, base w36_ad199std (ens4)
+    "w38_ad202stdcorr_ens4": "ens4",    # w60a_run.sh, base w38_ad202std (ens4)
 }
+
+
+# ---------------------------------------------------------------------------------------
+# MEMBER FILES — raw member test-prediction vectors, NOT cross-fitted stacks (registered w60).
+# ---------------------------------------------------------------------------------------
+# ⚠⚠ WHY THIS MOVED HERE, 2026-08-22. `fam == "member"` is the FIRST branch of
+# `w26g_send.above_tier_reason` — the test that stops a raw member vector being installed as a
+# final entry while auto-selection is live. It was written ONLY by `w48e_order.py`, a
+# post-processing step that runs AFTER `w26d_queueprice.py` regenerates `fam` from the filename
+# suffix. So the label was a value in a CSV, and any reprice silently erased it.
+#
+# w59 §9 recorded skipping `w48e_order.py` as safe "because the gate lives in the sender". The
+# gate does live in the sender — and it reads a column the skipped step writes. w60 re-ran the
+# reprice and `w48_cal_hboyang_mix` came back as `fam=ens4`, `pred_lb` 0.971289, P(above the
+# 0.97118 tier) = 1.000, and `above_tier_reason` returned **None**: the ARM 217 member vector
+# was cleared to ship as final entry #1, which is exactly the outcome w58 deferred it to avoid.
+#
+# ⚠ NEW SHAPE, one level up from w58's "a rule enforced on the WRONG COLUMN is not enforced":
+# **a rule enforced on a column that a DIFFERENT script populates is only enforced if that
+# script ran.** Derive the label where families are derived, so no ordering can lose it.
+#
+# Registered BY HAND, like CORR_MAP, from what the file IS rather than from its name:
+MEMBER_FILES = {
+    # w49a: the raw test vector of imported pack member `hboyang_mix`. Its 0.9701816 is a
+    # standalone member OOF AUC and is NOT a cross-fitted stack CV — the comparison RESEARCH.md
+    # says must never be made. ⛔ THE ARM 217 TEST; w58 deferred it until `check_selection`
+    # exits 0. This entry is what keeps it deferred through a reprice.
+    "w48_cal_hboyang_mix",
+    # w55a: certified below the auto tier but carrying NO cross-fitted CV, so they cannot be
+    # shown to be acceptable final entries at all.
+    "w15f_antistudent_cv",
+    "w16d_membercell",
+}
+
+# The `w37_cal_*` calibration sends are member vectors by construction — `w37b_calfiles.py`
+# writes one per quarantined member to price the es-on-val bias — so they are matched by rule
+# rather than enumerated, and the rule is anchored on the builder's own prefix.
+_CAL_PREFIX = "w37_cal_"
+
+
+def is_member(stem: str) -> bool:
+    """True iff this file is a raw MEMBER prediction vector rather than a cross-fitted stack."""
+    stem = str(stem).replace(".csv", "")
+    return stem in MEMBER_FILES or stem.startswith(_CAL_PREFIX)
 
 
 def family(stem: str) -> str:
@@ -130,6 +185,10 @@ def family(stem: str) -> str:
     sd 8.349e-6), NOT with w25f's (`coefs_old`, 8.408e-6) -- w25f was fitted with the two
     known-wrong labels in place, so mixing its coefficients with these labels is neither model.
     """
+    # `member` outranks every transform label: these files have no transform, and the send
+    # path's above-tier test keys on exactly this string (w60).
+    if is_member(stem):
+        return "member"
     return CORR_MAP.get(stem, family_suffix(stem))
 
 

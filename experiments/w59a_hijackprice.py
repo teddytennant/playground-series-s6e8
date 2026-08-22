@@ -78,6 +78,22 @@ P6_NAMED = "w27_ad188stdcorr"
 P7_PAIR = ("w38_ad202std_h3", "w40_ad211std_h3")
 P8_FILE = "w40_ad211std_h3"
 
+# --------------------------------------------------------------------------------------
+# w60 WHAT-IF HOOK. Both default to the registered behaviour, so `python w59a_...py` is
+# bit-for-bit what it was; only a caller that sets them deliberately sees anything else.
+#
+# WHY IT EXISTS: w60 built two files that did not exist when this instrument was written and
+# needs them priced by THIS model, not by a second copy of it. But CAND is also the bracket
+# the break-even is interpolated in, so adding a file NEAR THE CROSSING MOVES THE BAR — and
+# the sender reads that bar live. So the two things are separated on purpose:
+#   * `EXTRA_CAND` adds files to the pricing set and to the lever table;
+#   * `WRITE_ARTEFACT = False` stops the run persisting a bar derived from an enlarged design.
+# ⛔ A run may NOT set EXTRA_CAND and leave WRITE_ARTEFACT True — that is how you would choose
+# a bar by choosing a bracket. The assertion below refuses it. A new file earns its place in
+# the bracket by entering PLAN_0823 on a send day, through the registered path.
+EXTRA_CAND: tuple = ()
+WRITE_ARTEFACT = True
+
 
 def main() -> None:
     raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
@@ -111,7 +127,13 @@ def main() -> None:
     # Candidates: every real file with an OOF vector that could stand in for a hijacker. Tier 1
     # and tier 2 give the spread that brackets the break-even; the 08-23 plan is what the answer
     # binds on. No invented dcv -- w58's P6b was the weakest thing in that run for exactly that.
-    CAND = list(dict.fromkeys(list(TIER1) + list(TIER2) + PLAN_0823 + list(WANTED)))
+    assert not (EXTRA_CAND and WRITE_ARTEFACT), (
+        "EXTRA_CAND enlarges the bracket the break-even is interpolated in. Persisting a\n"
+        "     bar derived from it would be choosing the bar by choosing the bracket.\n"
+        "     Set WRITE_ARTEFACT = False for a what-if (w60), or get the file into\n"
+        "     PLAN_0823 on a send day and re-run this unmodified.")
+    CAND = list(dict.fromkeys(list(TIER1) + list(TIER2) + PLAN_0823 + list(WANTED)
+                              + list(EXTRA_CAND)))
     NAMES = sorted(set(CAND))
     missing = [k for k in NAMES if not os.path.exists(os.path.join(SUB, f"oof_{k}.npy"))]
     assert not missing, f"no OOF vector for {missing} -- cannot price them, do not guess"
@@ -349,6 +371,15 @@ def main() -> None:
               f"(status quo {base:+.3f})")
     if p8_cost is not None:
         print(f"  P8 {P8_FILE} alone above the tier                      -> {p8_cost:+.3f}e-6")
+        print(f"     ⛔ w60: {P8_FILE} is on a w40d-INELIGIBLE arm (ARM 211) and can no longer")
+        print(f"        be sent above the tier at all. This row is kept as the registered w59")
+        print(f"        reading; it is NOT an available lever. See check_selection.WANTED_INELIGIBLE.")
+    floor = next(r["uncond"] for r in rows if r["stem"] == PICK)   # w59 §7 P5: the PICK itself
+    for x in EXTRA_CAND:
+        c = next((r["uncond"] for r in rows if r["stem"] == x), None)
+        if c is not None:
+            print(f"  w60 {x} alone above the tier -> {c:+.3f}e-6  "
+                  f"(status quo {base:+.3f}, floor {floor:+.3f} = the PICK itself)")
 
     # ---------------------------------------------------------------- REGISTERED PREDICTIONS
     print("\n=== the registered predictions (w59_prereg.txt) ===")
@@ -394,9 +425,15 @@ def main() -> None:
                plan_0823=PLAN_0823, newly_blocked=flipped,
                pair_cost=pair_cost, p8_cost=p8_cost, spearman=sp,
                predictions=dict(p1=p1, p2=p2, p3=p3, p4=p4, p5=p5, p6=p6, p7=p7, p8=p8, p10=p10))
+    out["extra_cand"] = list(EXTRA_CAND)
+    if not WRITE_ARTEFACT:
+        print("\n⚠ WHAT-IF RUN (EXTRA_CAND set) — artefact NOT written, and the bar above is")
+        print("  NOT the live bar. The sender keeps reading the registered w59a_hijackprice.json.")
+        return out
     with open(os.path.join(HERE, "w59a_hijackprice.json"), "w") as f:
         json.dump(out, f, indent=1, default=float)
     print("\nwrote experiments/w59a_hijackprice.json")
+    return out
 
 
 if __name__ == "__main__":
