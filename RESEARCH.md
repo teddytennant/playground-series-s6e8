@@ -215,6 +215,40 @@ not 82, and report **19 blocked**.
 
 ---
 
+# 🔴🔴 `w25a_cvlb_full.py` IS NOT A READ-ONLY REFRESH — IT TAKES THE **SENDER** DOWN (w57)
+
+**Running it looks like audit maintenance. It re-centres the pricer and `w26g_send.py` then
+refuses to import.** Found 2026-08-22 by stepping on it.
+
+    w46c_predlb.py:59      MU = _t[_t.cv >= 0.97].cv.mean()        # _t = w25a_cvlb_full.csv
+
+`MU` is the origin the whole M2 design is expressed around (`cv6 = (cv - MU) * 1e6`, and the era
+term is an **interaction**, `era:cv6`). `w53a_pricer` **fits** on `w52b_cvlb93.csv`'s
+**precomputed `cv6`** — frozen at the old MU — while **predicting** through `(cv - MU) * 1e6` at
+the new one. They desync:
+
+    MU before  0.9700571395217258   (78 rows, cv >= 0.97)
+    MU after   0.9700678992717492   (93 rows)            shift +10.76e-6
+    w53a gate  "predict_flags() does not reproduce the M2 fit (21.8591 vs 7.7200e-6)"
+
+`w26d_queueprice` imports `w53a_pricer`; `w26g_send.py` imports `w26d_queueprice`. **While the
+refreshed table sits on disk the sender will not import.** Recovery is `git checkout --
+experiments/w25a_cvlb_full.csv experiments/w25a_cvlb_full.json`.
+
+⛔ **Refreshing that table is a DELIBERATE SEND-PATH CHANGE**, not maintenance: refit M2,
+regenerate `w52b_cvlb93.csv`'s `cv6`, re-derive `w52b_joint.json` and `w52d_predlb.json`, and move
+`MU_PINNED` — **all in the same commit.** Never as a side effect of running an audit.
+
+✅ **`experiments/w57c_muguard.py` pins MU and proves the pin is load-bearing** — it replays the
+real incident at the exact MU the refresh produced and requires the blow-up (`7.7200 → 21.8591e-6,
+2.8x`). **Run it on any run that sends or touches anything under the pricer.**
+
+⚠ Sixth instance of "a rule that lives in a paragraph is not a rule", and the first where the
+dangerous action is disguised as routine maintenance. w53a's gate catches the desync — but only
+*after* the table is rewritten, and it reports the symptom (a residual sd), not the cause.
+
+---
+
 # THE AUTO-SELECTION TIER — THE ONE NUMBER THAT MAKES A SLOT FREE OR A LIABILITY (w54)
 
 While `check_selection` reports nothing selected, Kaggle auto-selects the best **two by PUBLIC
@@ -229,8 +263,11 @@ Above the tier, a high-public/low-CV file actively degrades the final private re
 
 ⚠ **The brief's "an extra submission can never hurt" is FALSE on this account** until the final
 picks are selected. Its own "final selection is still on CV" clause is what overrides it.
-⚠ The tier is a **tie** at 0.97118 held by four files (incl. WANTED `w36_ad199stdcorr`); ties are
-resolved by Kaggle, not by us — that is w50b's bound.
+⚠ The tier is a **tie** at 0.97118 held by **FIVE** files as of the 08-22 sends (incl. WANTED
+`w36_ad199stdcorr`, plus `w40_ad211stdcorr` which landed 12:38 UTC); ties are resolved by Kaggle,
+not by us — that is w50b's bound. **The tier membership CHANGES ON EVERY SEND DAY: re-derive it
+live, never quote a count from a paragraph.** `w57a_tierprice2.py` derives it live and records
+what it ran on.
 
 **Standing consequence:** with the veto binding, **63 sendable vs 90 slots = 27 slots unfilled.**
 Fill them with files predicted **below 0.97118**. Never by retiring a veto.
@@ -718,11 +755,38 @@ predictions in `w45_prereg.txt` CONFIRMED):
 | `w27_ad190stdcorr` | 0.9701181344 | −21.9e-6 | **+23.88e-6** |
 | `w21_ad187corr_ens4` | 0.9701039331 | −36.1e-6 | **+39.38e-6** |
 
-- **limit 1, uniform tiebreak: +21.74e-6. limit 2 (Kaggle's documented default): +15.77e-6.**
-- **The honest bracket is the TIEBREAK, which is undocumented and unreadable:**
-  **latest-first → +0.00e-6** (we get the pick free; `w36_ad199stdcorr` is the newest of the
-  four), **earliest-first → +35.15e-6** (`w21_ad187corr_ens4` + `w21_ad187corr`).
-  We cannot tell which. Clicking makes the question moot, which is the entire argument.
+⛔⛔ **EVERY NUMBER IN THE TABLE ABOVE AND THE THREE BULLETS BELOW IS VOID (w57, 2026-08-22).**
+They price the FOUR-file tier. The 08-22 sends made it five and `w45a_tierprice.py`'s own GATE A
+now refuses to run. **Use `experiments/w57a_tierprice2.json`.** Kept here only so the supersession
+is visible; do not quote these:
+
+- ~~limit 1, uniform tiebreak: +21.74e-6. limit 2: +15.77e-6.~~ **VOID**
+- ~~latest-first → +0.00e-6, earliest-first → +35.15e-6.~~ **VOID**
+
+# ✅ THE LIVE CLICK PRICE (w57, 2026-08-22, 5-file tier) — `w57a_tierprice2.json`
+
+⚠ **w45a's LIMIT-2 MODEL WAS ALSO WRONG.** It draws one file from tier 1 and one from tier 2. That
+is only right when tier 1 holds exactly ONE file. `0.97118` is a **rounded display value**; true
+public scores inside the tie are distinct, so Kaggle's "best two by public score" takes the top
+**two by true score** and, with five files in tier 1, **both come from tier 1 — tier 2 is never
+reached.** MODEL B below is the live mechanism; MODEL A is retained only for comparability.
+
+| quantity | w45a (4-file, VOID) | **w57a (live 5-file)** |
+|---|---|---|
+| limit-1 uniform average | +21.74e-6 | **+17.95e-6** |
+| MODEL A, one per tier (not the mechanism) | +15.77e-6 | +10.42e-6 |
+| **MODEL B, both from tier 1 — USE THIS** | — | **+7.86e-6** |
+| P(the CV pick is inside the auto 2) | 2/4 = 0.500 | 4/10 = **0.400** |
+| worst named tiebreak (earliest-first / A–Z) | +35.15e-6 | **+23.87e-6** |
+| latest-first / Z–A | +0.00e-6 | **−0.07e-6** (contains the pick) |
+
+**The 08-22 sends were NET FAVOURABLE on this exposure** (registered two-sided as R7, confirmed).
+Mechanism: `w40_ad211stdcorr` is only −2.53e-6 of CV below the pick, so the three pick-missing
+pairs it joins cost ~2.8e-6 instead of ~23e-6. **P(pick selected) FELL 0.50 → 0.40 while the COST
+HALVED** — those point opposite ways and only the cost is the decision.
+
+⚠ **RE-RUN `w57a_tierprice2.py` ON EVERY SEND DAY, AFTER THE SEND.** Its JSON records the tier
+membership it ran on; compare that against the live board before quoting any figure from it.
 
 ### Why the click stopped being a knife-edge bet
 

@@ -1775,3 +1775,20 @@ from CV-based selection whatever the 08-23 read says**, and that bar is now enfo
 So: the 08-23 slot-1 read can still retire `hboyang_mix` (INFLATED) or reopen the import line
 (HONEST), and it is worth sending for exactly that. **It cannot deliver gold.** No path to the
 gold cut exists from what is on disk. Play for the best CV-selected private score.
+
+## 2026-08-22 ~14:0x UTC (w57) — flat all day, but the auto-selection exposure was re-priced
+
+**Us `Teddy Tennant` 0.97118, rank 62** of 200 listed. Leader **0.97141** (`Changye Li`, 11:23).
+Gold cut (14th) **0.97124**. Identical to w55/w56's reads — the board has not moved all day.
+
+Local density is brutal and worth keeping in view: **18 teams at 0.97119**, 7 at 0.97122,
+10 at 0.97121. One 1e-5 step near us is **~10 places**, so the 6e-5 to the gold cut is not a
+near miss — it is most of the field.
+
+⚠ **The tier that decides our FINAL score moved today, and it is not the same thing as our rank.**
+Our own 10 sends put a fifth file into the best-public tie at 0.97118:
+`w40_ad211stdcorr`, `w36_ad199stdcorr` (the CV pick), `w29_ad194stdcorr`, `w27_ad190stdcorr`,
+`w21_ad187corr_ens4`. Since nothing is selected, Kaggle auto-selects two of those five.
+**Re-priced at +7.86e-6 (w57a, MODEL B), half the previously published +15.77e-6** — the day's
+sends were net favourable, because the file that diluted the tie is only −2.53e-6 of CV off the
+pick. P(the CV pick is auto-selected) nonetheless fell 0.50 → 0.40. See RESEARCH's live table.

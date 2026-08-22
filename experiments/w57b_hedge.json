@@ -1,0 +1,29 @@
+{
+ "pick": "w36_ad199stdcorr",
+ "hedge": "w23_ad187stdcorr",
+ "swap": "w40_ad211stdcorr",
+ "rho_swap": 0.9999575137695262,
+ "rho_hedge": 0.9998341326704372,
+ "cv": {
+  "w36_ad199stdcorr": 0.9701400059625017,
+  "w23_ad187stdcorr": 0.9701150808744373,
+  "w40_ad211stdcorr": 0.9701374732624002
+ },
+ "private_sd": {
+  "w36_ad199stdcorr": 196.9193859233668,
+  "w23_ad187stdcorr": 197.039355649182,
+  "w40_ad211stdcorr": 196.93509797992596
+ },
+ "rho_pick_hedge": 0.9995219455189451,
+ "rho_pick_swap": 0.9999640460317493,
+ "fitted_shrink": 0.2128894262933636,
+ "p_pick_beats_hedge_at_fitted": 0.9993600066774653,
+ "breakeven_shrink": 0.9999999999976648,
+ "breakeven_over_fitted": 4.697274154986239,
+ "emax_gap_nodisc": -0.04709090176038444,
+ "q1": true,
+ "q4": true,
+ "q5": true,
+ "withdrawn": "first cut's Q2/Q3 -- placeholder sd + hardcoded rho, degenerate, VOID",
+ "verdict": "second pick UNCHANGED; tail-insurance rationale, not an E[max] one"
+}

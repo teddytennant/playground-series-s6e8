@@ -20745,3 +20745,259 @@ commands (`kernels pull -m` for the code, `kernels output` for the log). The com
 is exactly `experiments/check_selection.py`, the three new `w56*` files, and the three markdown
 files. This matters beyond bookkeeping: §1's whole finding rests on assertions against files git
 does not carry, so the re-pull instruction is part of the finding, not a footnote to it.
+
+---
+
+# 2026-08-22 — w57, slot 6 of 10. **AT CAP, 10/10 already sent — no submission.** Consolidation, and it found live breakage. **RESEARCH's headline click price was VOID** — today's own sends moved the auto-selection tier and nobody re-priced it. Re-priced: the click is worth **+7.86e-6, HALF the published +15.77e-6**, and today's ten were **net favourable**. Also found and pinned a landmine where **an audit script silently takes the SENDER down.**
+
+`date -u` **13:57 UTC on 08-22** at start. `/proc` scan per-pid with `tr` (never `ps`/`pgrep`):
+the only live process for this competition is my own `claude -p` (pid 676202, ppid 632806 =
+`run-competition.sh playground-series-s6e8 10`). `ls experiments/w5*` shows w50–w56 taken, so
+this is **w57**. Kaggle token alive. API reports **10 submissions on 2026-08-22 (UTC)**, all sent
+by w52 at 12:37–12:38, scoring 0.97113–0.97118. **At the cap; research and code only.**
+
+The ANGLE — *"Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check the
+CV-to-LB gap across every experiment so far, and make sure the strongest submission is the one
+selected"* — is honoured, with one substitution stated up front. **w39c already ran the CV→LB-gap
+leg of this exact angle** (its docstring quotes the angle verbatim) and w52b re-ran the full
+93-row table **this morning**, after today's sends. Re-deriving it a third time would have been
+the "several near-copies" the angle exists to prevent. So the gap leg became: *audit the
+instruments that report the gap*. That is where the breakage was.
+
+## 1. 🔴🔴 THE PUBLISHED CLICK PRICE WAS VOID — OUR OWN SENDS INVALIDATED IT SIX HOURS EARLIER
+
+`w45a_tierprice.py` carries a GATE A that re-derives the auto-selection tiers from the live board
+and refuses to run if they moved. **Run this run, it fired.** Today's ten sends changed both:
+
+    auto-slot 1  public 0.97118   4 files -> 5   (+ w40_ad211stdcorr, CV 0.9701374733)
+    auto-slot 2  public 0.97117   5 files -> 7   (+ w38_ad202stdcorr, + w40_ad211std)
+
+So **every click figure in RESEARCH.md — `+0.00 / +15.77 / +21.74 / +35.15e-6` — priced a board
+configuration that stopped existing at 12:38 UTC**, and RESEARCH's own tier line still read
+*"held by four files"*. The gate did its job; the problem is that **nothing runs the gate on a
+send day.** w52 sent the ten and w53–w56 all worked on other things.
+
+⚠ The deeper fault is structural, not clerical: **w45a hard-codes the tier membership it was
+registered against, so it goes stale on EVERY send day.** `w57a_tierprice2.py` derives the tiers
+**live** and writes the membership it ran on into its own JSON, so a future run can tell at a
+glance whether the number still applies instead of trusting it.
+
+## 2. ✅ RE-PRICED — AND w45a's LIMIT-2 MODEL WAS ALSO WRONG, IN A WAY THAT NOW MATTERS
+
+`experiments/w57_prereg.txt` was written and committed (`90a289d`) **before** `w57a` existed.
+Same math as w45a/w18a — same `beta`, same LAW-IF conditioning, same Clark `E[max]`, same
+conservative non-additivity corr, same tau sweep. Only the file set changed; that is the point.
+
+⚠⚠ **w45a draws auto-pick 1 from tier 1 and auto-pick 2 from tier 2. That is only correct when
+tier 1 holds exactly ONE file.** `0.97118` is a *rounded display value* — the true public scores
+inside the tie are distinct (AUC over a 59k-row slice does not tie exactly), so Kaggle's "best two
+by public score" takes the top **two by true score**, and with five files in tier 1 **both come
+from tier 1 and tier 2 is never reached.** Both models are reported; MODEL B is the live one.
+
+| | w45a (4-file tier) | w57a (live 5-file tier) |
+|---|---|---|
+| limit-1 uniform average | +21.74e-6 | **+17.95e-6** |
+| MODEL A, one per tier (w45a's form, *not* the mechanism) | +15.77e-6 | +10.42e-6 |
+| **MODEL B, both from tier 1 (correct)** | — | **+7.86e-6** |
+| P(the CV pick is inside the auto 2) | 2/4 = 0.500 | 4/10 = **0.400** |
+| worst named tiebreak (earliest-first / A–Z) | +35.15e-6 | **+23.87e-6** |
+| latest-first / Z–A | +0.00e-6 | **−0.07e-6** (contains the pick) |
+
+**All seven registered predictions CONFIRMED (R1–R7).** The mechanism is worth stating plainly:
+`w40_ad211stdcorr` is only **−2.53e-6** of CV below the pick, so the three pick-missing pairs it
+joins cost **~2.8e-6** instead of the ~23e-6 the old tie's members cost. **P(the pick is selected)
+FELL 0.50 → 0.40 and the COST still halved** — because the file diluting the tie is nearly as good
+as the pick. Those two facts point opposite ways and only the second one is the decision.
+
+⚠ **This is the brief's "an extra submission can never hurt" being false and then, this time,
+being false in our FAVOUR.** It is not a reason to relax the rule — R7 was registered as a genuine
+two-sided test ("if either comes in ABOVE, the day's sends made the exposure WORSE and that must
+be written up as such"), and it happened to come back favourable. A rule that only gets checked
+when the answer is bad is not a rule.
+
+## 3. ⛔ THE −0.07e-6 SAYS "SWAP THE SECOND PICK". IT IS A TRAP. SECOND PICK UNCHANGED.
+
+MODEL B prices `w36_ad199stdcorr + w40_ad211stdcorr` at **−0.07e-6** — marginally *better* than
+WANTED. Naively: move the hedge to `w40_ad211stdcorr` and pocket +22.4e-6 of CV.
+
+⛔⛔ **WITHDRAWAL, SAME RUN.** My first cut of `w57b_hedge.py` registered Q2/Q3 ("the era discount
+flips the sign"). Both came back FALSIFIED — and inspection showed **the instrument, not the
+hypothesis, was at fault**: it fed `emax` a **placeholder per-file sd** (a `.get(...)` default that
+fired silently because the key did not exist) and a **hardcoded rho of 0.99999**. With those
+inputs both pairs collapse onto their common dominant member and the printed difference was
+exactly `+0.000e-6` — a degenerate object, not a measurement. **Those readings are VOID and are
+quoted nowhere.** Rebuilt with the LAW-IF pair covariance derived properly.
+
+What the correct instrument shows, including the part that cuts against me:
+
+    rho(pick, w40_ad211stdcorr) 0.99995751   sd(difference) 1.67e-6   <- twin
+    rho(pick, w23_ad187stdcorr) 0.99983413   sd(difference) 6.09e-6   <- current hedge, 3.9x further
+    P(pick > hedge) at w52d's FITTED 21.29% era shrink   0.999360
+    shrink needed for the hedge to break even            100%  =  4.70x the fitted effect
+
+**Q1/Q4/Q5 CONFIRMED, and the honest reading is not the one I expected.** The second pick is worth
+**almost nothing under the sampling model, whichever file holds it** — two near-identical stacks
+have a private *difference* sd well under 1e-6, so a 22e-6 CV gap is never overturned by slice
+noise, and `E[max]` is just the better file's mean in both pairs. **w57a's −0.07e-6 sits inside
+that same dead zone: it is not evidence for the swap, because the instrument has no resolution
+there.** The hedge is **tail insurance**, and the tail is 4.7× the fitted era effect.
+
+**So it stays, on a decision-theoretic argument, not a measurement one.** `w23_ad187stdcorr` is
+ad187 = **PRE-era**; the pick and the proposed swap are ad199 and ad211, both **inside** the era
+whose CV this workspace already distrusts (w44 §6's flat dose-response, w46c's "CV runs ahead of
+LB", w52d's era slope 1.4425 vs base 1.8327). The swap buys 0.07e-6 of noise and sells **the only
+pick this account holds outside that era.** w16c made exactly this trade and paid 0.10e-6 for it.
+
+## 4. 🔴🔴 THE LANDMINE — AN AUDIT SCRIPT TAKES THE **SENDER** DOWN, AND IT LOOKS LIKE A CHORE
+
+The largest finding of the run, and I found it by stepping on it. `w39c_gapaudit.py` fits a stale
+table, so I refreshed it the obvious way — `w25a_cvlb_full.py`, which reads the live board and
+rewrites `w25a_cvlb_full.csv`. It looks like read-only maintenance. **It is not.**
+
+    w46c_predlb.py:59      MU = _t[_t.cv >= 0.97].cv.mean()        # _t = w25a_cvlb_full.csv
+
+`MU` is the origin the **entire M2 design** is expressed around (`cv6 = (cv - MU) * 1e6`, and the
+era term is an *interaction*, `era:cv6`). `w53a_pricer` **fits** on `w52b_cvlb93.csv`'s
+**precomputed `cv6`** — frozen at the old MU — while **predicting** through `(cv - MU) * 1e6` at
+the new one. Measured:
+
+    MU before  0.9700571395217258   (78 rows, cv >= 0.97)
+    MU after   0.9700678992717492   (93 rows)            shift +10.76e-6
+    w53a gate  "predict_flags() does not reproduce the M2 fit (21.8591 vs 7.7200e-6)"
+
+`w26d_queueprice` imports `w53a_pricer`; `w26g_send.py` imports `w26d_queueprice`. **For as long
+as that refreshed table sat on disk, the SENDER WOULD NOT IMPORT.** One `git checkout` of a CSV
+that looks like an output artefact restored it. I did **not** re-centre the pricer: doing that the
+day before a registered ten-file send whose slot 1 carries **pre-registered LB thresholds**
+(≥0.97116 HONEST / ≤0.97080 INFLATED) would invalidate the prereg's own predicted band.
+
+✅ **`experiments/w57c_muguard.py` pins MU and PROVES THE PIN IS LOAD-BEARING.** It checks the
+live value, that `w52b_joint.json` and `w52d_predlb.json` agree with it, that the table still
+reproduces it, that `w53a_pricer` imports at all — and then **replays the real incident**,
+rebuilding w53a's gate arithmetic at the exact MU the refresh produced and requiring it to blow
+up: `7.7200 -> 21.8591e-6, 2.8x`. That reproduces w53a's observed failure to four decimals. **A
+guard nobody has watched fire is a guard nobody knows works** (w54/w55/w56).
+
+⚠ **Sixth instance of "a rule that lives in a paragraph is not a rule", and the first where the
+dangerous action is disguised as ROUTINE MAINTENANCE.** w53a's gate does catch the desync — but
+only *after* something has rewritten the table, and it reports the *symptom* (a residual sd)
+rather than the *cause* (someone ran an audit script). The pin names the cause, at import.
+
+## 5. ✅ `w39c_gapaudit.py` HAD TWO DEFECTS AND EXITED 0 WITH BOTH
+
+**(a) It fitted a STALE table.** `w25a_cvlb_full.csv` is a frozen snapshot two board-days behind
+(87 rows against 111 scored). Its top-LB tie held **three** files while the live tie held **five**
+— **and the two it was missing were `w36_ad199stdcorr` (the CV pick itself) and
+`w40_ad211stdcorr`.** So the paragraph whose entire job is to say whether auto-selection is
+dangerous **was computed on a table that did not contain the file the danger is about.** This is
+the *same failure RESEARCH already records once* for `w39b_autoselect` (it built its CV dict from
+the queue and took `max()`, so "every figure in the auto-selection report was measured against"
+the wrong leader). ✅ **`GATE S`** now re-derives the tie from the LIVE board and exits 2, with the
+MU hazard spelled out in the refusal so the next run does not "just refresh it" as I did.
+
+**(b) Its "frozen" pre-registration was NOT frozen.** The block printed
+`frozen {pd.Timestamp.utcnow()}` and re-read the **current** queue, so **every run silently
+rewrote the predictions and re-stamped them with the present time** — including into
+`w39c_gapaudit.json`'s `prereg_0821` key. A later run comparing realised LB against "the frozen
+prediction" would have compared against a prediction **regenerated after the outcome was
+knowable**, which is the exact inverse of a held-out test. It was also mislabelled "the 08-21
+drain" while reading the **08-23** plan. ✅ Now written **once** to `w39c_prereg_frozen.json`,
+re-read and reprinted with its ORIGINAL timestamp thereafter, keyed to the queue's own `plan_day`,
+and never overwritten.
+
+⛔ **`w39c` is now SUPERSEDED for the auto-selection question and rests at exit 2.** That is
+correct, not a regression: its auto-selection paragraph cannot be computed honestly from a frozen
+table, and unfreezing it is a send-path change. `w57a` answers the same question from the live
+board and needs no table. w39c's unique remaining value — the family-by-family residual
+decomposition — is worth having, but only after a deliberate refit.
+
+## 6. ✅ THE SELECTION ARGMAX RE-CHECKED AFTER TODAY'S TEN — WANTED STILL CORRECT
+
+The angle's third leg. `w36_ad199stdcorr` CV **0.970140006** is still the **highest-CV eligible
+sent file**; today's best new send was `w38_ad202stdcorr` at 0.9701375891, **−2.4e-6 short**. The
+two higher CVs on disk (`w50_ad216stdcorr` 0.9701500880, `w42_ad217stdcorr` 0.9701788) remain
+**WANTED-ineligible** under w40d and `check_selection.WANTED_INELIGIBLE` enforces it (w56b exit 0).
+**WANTED = {w36_ad199stdcorr, w23_ad187stdcorr} is unchanged and correct.**
+
+## 7. VERIFICATION — THE WHOLE CHAIN RE-RUN AFTER EVERY EDIT, NOT ASSUMED
+
+**w54a exit 0, w55a exit 0, w56b exit 0, w57c exit 0, w39a exit 0** (FAILURES: 0),
+`check_selection` **exit 1** as expected, **w39c exit 2** as designed. `w48e_order.py --day
+2026-08-23` re-verifies all ten end to end (rows, NaN, md5, CV-from-OOF) and still plans **slot 1
+= `w48_cal_hboyang_mix`, THE ARM 217 TEST**, with the five registered `member` descriptions
+intact. `w26g_send.py --n 10` dry plans exactly that ten. `w53a_pricer` imports at RESID_SD
+7.7200e-6. **The send path is byte-for-byte where w56 left it.**
+
+## 8. THE BOARD — FLAT ALL DAY
+
+Read ~14:0x UTC. **Us `Teddy Tennant` 0.97118, rank 62** of 200 listed. Leader **0.97141**
+(`Changye Li`). Gold cut (14th) **0.97124**. Local density is brutal: **18 teams at 0.97119**, so
+one 1e-5 step is ~10 places. Unchanged from w55/w56.
+
+## 9. ⛔ UNCHANGED BLOCKERS — RE-VERIFIED
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS.** **This needs Teddy, in his own browser.**
+  Deadline **08-31**. Still the largest unmanaged risk — but §2 re-prices it at **+7.86e-6**, half
+  the published figure, with a **+23.87e-6 worst named branch**. The route was probed to
+  exhaustion on 08-13; **do not re-probe it, and do not "fix" it by installing a browser.**
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 10. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), and
+   **`ls experiments/w<next>*`** before claiming a run number.
+2. **Send the 08-23 ten.** Chain: `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** (slot 1 must
+   be `w48_cal_hboyang_mix`, and the **day-stamp warning must be GONE**) → `--go`. Re-run
+   `w48e_order.py --day 2026-08-23 --write` **only** if `w23b` changed the queue.
+3. **Read `w48_cal_hboyang_mix` against the REGISTERED thresholds — ≥0.97116 HONEST, ≤0.97080
+   INFLATED — then against w56 §4's conjunction.** **Expect INDETERMINATE** (w56 §3 measures it as
+   the modal outcome); it means the veto stands. ⚠ **HONEST DOES NOT UN-VETO ad217 FOR SELECTION.**
+4. ⚠ **NEW — RUN `w57a_tierprice2.py` ON EVERY SEND DAY, AFTER THE SEND.** The tier moves whenever
+   a file lands at or above 0.97118, and §1 is what happens when nobody re-prices it. Its JSON
+   records the tier it ran on; compare that against the live board before quoting any number.
+5. **Run `w54a`, `w55a`, `w56b` AND `w57c_muguard.py` on any run that sends, touches
+   `check_selection.py`, or touches anything under the pricer.** `w57c` is the new one and it is
+   the cheapest insurance on the board: it is what stands between a routine-looking audit refresh
+   and a sender that will not import.
+6. The 27-slot gap (63 sendable vs 90) is real but its expected value on the **private** score is
+   **zero**. Do not spend a run manufacturing 27 fillers.
+7. Do **NOT** re-open: **the CV→LB gap table (w52b re-ran it on all 93 this morning; w39c is
+   superseded and gated — §5)**, error analysis / OOF segmentation, fold/seed averaging, the
+   top-level blend-weight search, hill climbing / NNLS, w46c's level dummy, the es-on-val status of
+   `ext_members16`, ARM 216 as a deadline pick, `d_five` as signal, the import line, the
+   within-group redundancy test, the member side-scale axis, KS as a gate, GBDT tuning, FE
+   variants, **the original dataset (closed three times, measured NEGATIVE)**, the stacker `C`, the
+   selection write path / the browser route (probed to exhaustion 08-13), the es-bias deflation
+   constant, a fourth sweep of the public kernel pool, the era shift, the logit veto, the w37
+   es-bias readout, per-fold rank normalisation, the leaderboard timestamp as a tie-break probe,
+   the 08-23 prereg's falsifiability, noise-blend degradation as an AUC→stack-CV transfer, and
+   **the second-pick swap to `w40_ad211stdcorr` (§3, measured; the E[max] gain is inside a dead
+   zone and the hedge is tail insurance)**.
+8. ⚠ **NEW: `w25a_cvlb_full.py` IS NOT A READ-ONLY REFRESH — it re-centres the pricer via
+   `w46c_predlb.MU` and the SENDER stops importing. Pinned by `w57c_muguard.py`. Never refresh
+   that table as a side effect of running an audit.** ⚠ **NEW: a hard-coded tier goes stale on
+   every send day — derive it live and record what you ran on.** ⚠ **NEW: a prereg that re-stamps
+   itself with `utcnow()` on every run is not a prereg.** ⚠ **NEW: `E[max]` over two near-twin
+   stacks has NO RESOLUTION — sd(difference) < 2e-6 against CV gaps of 20e-6+. A sub-0.1e-6
+   "improvement" from that instrument is not a small effect, it is no measurement at all.**
+   ⚠ **NEW: an instrument that silently defaults a missing parameter (`.get(k, placeholder)`)
+   will produce a confident number from an object you never built. Fail on the missing key.**
+   ⚠ A rule that lives in a printed PARAGRAPH is not a rule. ⚠ A rule that lives in the ORDER of a
+   list is not a rule. ⚠ A documented mechanism is not a wired mechanism. ⚠ `w48e`'s write block
+   resets `send_rank`/`msg`/`why` to NaN. ⚠ An unused slot is only "pure waste" once the final
+   picks are selected; until then a slot above the auto-selection tier is a LIABILITY. ⚠ Never use
+   in-sample residuals to test extrapolation. ⚠ Never lower the `cv >= 0.97` floor. ⚠ A send list
+   that is only in a prereg is not a send list. ⚠ A send list not keyed to its day is a bug waiting
+   to fire. ⚠ `blend_lab --build` ships the whole family and the queue globs `submissions/`.
+   ⚠ Do not delegate a priced module on the send path without MOVING the self-check. ⚠ A STALE
+   queue carries only the veto as it stood when it was written. ⚠ Never let a calibration/`member`
+   row into a `max(CV)`. ⚠ Always pass `--page-size` to the submissions API.
+
+**Files added:** `experiments/w57_prereg.txt`, `experiments/w57a_tierprice2.py`,
+`experiments/w57a_tierprice2.json`, `experiments/w57b_hedge.py`, `experiments/w57b_hedge.json`,
+`experiments/w57c_muguard.py`.
+**Modified:** `experiments/w39c_gapaudit.py` (GATE S, the real freeze, the MU-hazard refusal text,
+the superseded note), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+**Restored:** `experiments/w25a_cvlb_full.{csv,json}` via `git checkout` — see §4.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**

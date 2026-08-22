@@ -1,0 +1,195 @@
+{
+ "read_utc_note": "tiers derived live; compare `tiers` against the board before quoting",
+ "tiers": {
+  "slot1": [
+   "w21_ad187corr_ens4",
+   "w27_ad190stdcorr",
+   "w29_ad194stdcorr",
+   "w36_ad199stdcorr",
+   "w40_ad211stdcorr"
+  ],
+  "slot2": [
+   "w21_ad187corr",
+   "w22_ad187corr_rankraw",
+   "w27_ad190std",
+   "w34_ad195stdcorr",
+   "w36_ad199std",
+   "w38_ad202stdcorr",
+   "w40_ad211std"
+  ],
+  "slot1_public": 0.97118,
+  "slot2_public": 0.97117
+ },
+ "wanted": [
+  "w23_ad187stdcorr",
+  "w36_ad199stdcorr"
+ ],
+ "pick": "w36_ad199stdcorr",
+ "n_scored": 111,
+ "cv": {
+  "w21_ad187corr": 0.9701068813712079,
+  "w21_ad187corr_ens4": 0.970103933067418,
+  "w22_ad187corr_rankraw": 0.9701001354964539,
+  "w23_ad187stdcorr": 0.9701150808744373,
+  "w27_ad190std": 0.970110933814171,
+  "w27_ad190stdcorr": 0.9701181344162544,
+  "w29_ad194stdcorr": 0.9701182875261917,
+  "w34_ad195stdcorr": 0.9701247948837451,
+  "w36_ad199std": 0.9701323249566141,
+  "w36_ad199stdcorr": 0.9701400059625017,
+  "w38_ad202stdcorr": 0.9701375890907046,
+  "w40_ad211std": 0.9701309541017873,
+  "w40_ad211stdcorr": 0.9701374732624002
+ },
+ "lb": {
+  "w21_ad187corr": 0.97117,
+  "w21_ad187corr_ens4": 0.97118,
+  "w22_ad187corr_rankraw": 0.97117,
+  "w23_ad187stdcorr": 0.97116,
+  "w27_ad190std": 0.97117,
+  "w27_ad190stdcorr": 0.97118,
+  "w29_ad194stdcorr": 0.97118,
+  "w34_ad195stdcorr": 0.97117,
+  "w36_ad199std": 0.97117,
+  "w36_ad199stdcorr": 0.97118,
+  "w38_ad202stdcorr": 0.97117,
+  "w40_ad211std": 0.97117,
+  "w40_ad211stdcorr": 0.97118
+ },
+ "beta": -0.24772151396659794,
+ "gamma": -0.0917578215897171,
+ "gap": 1022.23023152745,
+ "limit1": {
+  "w21_ad187corr_ens4": {
+   "cost": 39.38319198763929,
+   "p_joint": 0.014961231849921486,
+   "dcv": -36.07289508367195,
+   "dlb": 0.0
+  },
+  "w27_ad190stdcorr": {
+   "cost": 23.878758318373002,
+   "p_joint": 0.08196850352840518,
+   "dcv": -21.871546247331786,
+   "dlb": 0.0
+  },
+  "w29_ad194stdcorr": {
+   "cost": 23.711599346715957,
+   "p_joint": 0.0825721341718082,
+   "dcv": -21.71843631004755,
+   "dlb": 0.0
+  },
+  "w36_ad199stdcorr": {
+   "cost": 0.000326632522046566,
+   "p_joint": null,
+   "dcv": 0.0,
+   "dlb": 0.0
+  },
+  "w40_ad211stdcorr": {
+   "cost": 2.765421778196469,
+   "p_joint": 0.3748316888021437,
+   "dcv": -2.5327001015318373,
+   "dlb": 0.0
+  }
+ },
+ "uniform_limit1": 17.947859612689353,
+ "model_a": {
+  "pairs": {
+   "w21_ad187corr_ens4+w21_ad187corr": 35.149507851107046,
+   "w21_ad187corr_ens4+w22_ad187corr_rankraw": 37.785330362967215,
+   "w21_ad187corr_ens4+w27_ad190std": 30.657564021646976,
+   "w21_ad187corr_ens4+w34_ad195stdcorr": 15.689031009445898,
+   "w21_ad187corr_ens4+w36_ad199std": 7.468450518208556,
+   "w21_ad187corr_ens4+w38_ad202stdcorr": 1.7213832138804719,
+   "w21_ad187corr_ens4+w40_ad211std": 8.96501697122585,
+   "w27_ad190stdcorr+w21_ad187corr": 23.860409006127156,
+   "w27_ad190stdcorr+w22_ad187corr_rankraw": 23.874833751586266,
+   "w27_ad190stdcorr+w27_ad190std": 23.828152533620596,
+   "w27_ad190stdcorr+w34_ad195stdcorr": 15.627286993898451,
+   "w27_ad190stdcorr+w36_ad199std": 7.43570194975473,
+   "w27_ad190stdcorr+w38_ad202stdcorr": 1.7210661678109318,
+   "w27_ad190stdcorr+w40_ad211std": 8.9051045589149,
+   "w29_ad194stdcorr+w21_ad187corr": 23.691553839715198,
+   "w29_ad194stdcorr+w22_ad187corr_rankraw": 23.70566752704326,
+   "w29_ad194stdcorr+w27_ad190std": 23.5861965600634,
+   "w29_ad194stdcorr+w34_ad195stdcorr": 15.648225417593494,
+   "w29_ad194stdcorr+w36_ad199std": 7.4395188122289255,
+   "w29_ad194stdcorr+w38_ad202stdcorr": 1.721244336455129,
+   "w29_ad194stdcorr+w40_ad211std": 8.911277124658227,
+   "w36_ad199stdcorr+w21_ad187corr": 0.00032395648304373026,
+   "w36_ad199stdcorr+w22_ad187corr_rankraw": 0.0003256233176216483,
+   "w36_ad199stdcorr+w27_ad190std": 0.00031003530602902174,
+   "w36_ad199stdcorr+w34_ad195stdcorr": 5.525641608983278e-05,
+   "w36_ad199stdcorr+w36_ad199std": -0.04494731477461755,
+   "w36_ad199stdcorr+w38_ad202stdcorr": -0.14439096697606146,
+   "w36_ad199stdcorr+w40_ad211std": -0.02214278548490256,
+   "w40_ad211stdcorr+w21_ad187corr": 2.765400112955831,
+   "w40_ad211stdcorr+w22_ad187corr_rankraw": 2.765415387460962,
+   "w40_ad211stdcorr+w27_ad190std": 2.7652454180642962,
+   "w40_ad211stdcorr+w34_ad195stdcorr": 2.7623613998293877,
+   "w40_ad211stdcorr+w36_ad199std": 2.413163300487213,
+   "w40_ad211stdcorr+w38_ad202stdcorr": 1.363743930007331,
+   "w40_ad211stdcorr+w40_ad211std": 2.670963369309902
+  },
+  "mean": 10.419667121438708
+ },
+ "model_b": {
+  "pairs": {
+   "w21_ad187corr_ens4+w27_ad190stdcorr": 23.872363039292395,
+   "w21_ad187corr_ens4+w29_ad194stdcorr": 23.704628548701294,
+   "w21_ad187corr_ens4+w36_ad199stdcorr": 0.000325780245475471,
+   "w21_ad187corr_ens4+w40_ad211stdcorr": 2.7654140326194465,
+   "w27_ad190stdcorr+w29_ad194stdcorr": 22.748357767472044,
+   "w27_ad190stdcorr+w36_ad199stdcorr": 0.00023131235502660275,
+   "w27_ad190stdcorr+w40_ad211stdcorr": 2.7644605371169746,
+   "w29_ad194stdcorr+w36_ad199stdcorr": 0.00029582891147583723,
+   "w29_ad194stdcorr+w40_ad211stdcorr": 2.76488249655813,
+   "w36_ad199stdcorr+w40_ad211stdcorr": -0.06891949521377683
+  },
+  "mean": 7.855203984805849,
+  "p_pick": 0.4,
+  "mean_missing_pick": 13.10335107029338,
+  "named": {
+   "earliest-first": [
+    "w21_ad187corr_ens4",
+    "w27_ad190stdcorr"
+   ],
+   "latest-first": [
+    "w36_ad199stdcorr",
+    "w40_ad211stdcorr"
+   ],
+   "filename A-Z": [
+    "w21_ad187corr_ens4",
+    "w27_ad190stdcorr"
+   ],
+   "filename Z-A": [
+    "w40_ad211stdcorr",
+    "w36_ad199stdcorr"
+   ]
+  },
+  "mean_optimistic": 7.855411791859661
+ },
+ "tau_sweep": {
+  "0.0": 7.855203984805849,
+  "0.5": 7.6719733706559055,
+  "1.0": 7.360315436939709,
+  "1.72": 7.022373593319207,
+  "2.5": 6.754477206035517,
+  "3.0": 6.599716366897337,
+  "5.0": 6.022922462970018
+ },
+ "tau_flip": false,
+ "supersedes": "w45a_tierprice (4-file tier 1, stale since the 08-22 sends)",
+ "w45a_published": {
+  "uniform_limit1": 21.74,
+  "limit2_mean": 15.77,
+  "wanted_branch": 0.0,
+  "n_tier1": 4
+ },
+ "r1": true,
+ "r2": true,
+ "r3": true,
+ "r4": true,
+ "r5": true,
+ "r6": true,
+ "r7": true
+}
