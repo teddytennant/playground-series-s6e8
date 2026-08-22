@@ -1792,3 +1792,20 @@ Our own 10 sends put a fifth file into the best-public tie at 0.97118:
 **Re-priced at +7.86e-6 (w57a, MODEL B), half the previously published +15.77e-6** — the day's
 sends were net favourable, because the file that diluted the tie is only −2.53e-6 of CV off the
 pick. P(the CV pick is auto-selected) nonetheless fell 0.50 → 0.40. See RESEARCH's live table.
+
+## 2026-08-22, w58 (~14:5x UTC) — flat
+
+| | 08-21 | 08-22 (w57) | **08-22 (w58)** |
+|---|---|---|---|
+| us | 0.97118, rank ~18 | 0.97118, rank 61 | **0.97118**, unchanged |
+| gold cut (14th) | 0.97120 | 0.97124 | **0.97124** |
+| leader | 0.97136 | 0.97141 | **0.97141** (`Changye Li`, tied `MILANFX`) |
+
+No movement in ~1h. Nothing new to chase.
+
+**⚠ The board is no longer the binding constraint on our final score — auto-selection is.**
+w58 found that tomorrow's slot-1 send would, under its own registered prediction, hand final
+entry #1 to a file our own rules bar, and that three `logit` files further down the queue carry
+12–37% of doing the same. All four are now blocked in `w26g_send.py`. **Our distance to gold is
+6e-6 of public; the unclicked selection toggle is worth up to +23.87e-6 of private in its worst
+named branch (w57a). The toggle is the bigger number and it is free.**

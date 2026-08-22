@@ -49,6 +49,91 @@ DAILY_CAP = 10
 N_TEST = 296_302
 PAGE = 500
 QUEUE = os.path.join(HERE, "w26d_queueprice.csv")
+TIERPRICE = os.path.join(HERE, "w57a_tierprice2.json")
+
+# w58: the constants the ABOVE-TIER gate needs. `WANTED_INELIGIBLE` is the SAME dict
+# `check_selection.assert_wanted_eligible` enforces -- imported, never re-typed, so retiring an
+# entry there retires it here in the same commit.
+import json as _json                                                        # noqa: E402
+from check_selection import WANTED as _WANTED, WANTED_INELIGIBLE            # noqa: E402
+
+
+def wanted_cv_bar():
+    """The CV of the WEAKER of the two WANTED files.
+
+    A file that can be auto-selected displaces one of our two final entries, so the bar it has
+    to clear is the bar the entry it displaces already cleared. Read from the artefact rather
+    than hard-coded: w45a went stale precisely because a live quantity was frozen into source.
+    Returns None if the artefact cannot supply it -- callers must then BLOCK, not wave through.
+    """
+    try:
+        cvs = _json.load(open(TIERPRICE))["cv"]
+        vals = [float(cvs[w.replace(".csv", "")]) for w in _WANTED]
+    except (OSError, KeyError, ValueError, TypeError):
+        return None
+    return min(vals) if len(vals) == len(_WANTED) else None
+
+
+def auto_tier(rows):
+    """The auto-selection tier: the 2nd-highest PUBLIC score on the account, WITH multiplicity.
+
+    Kaggle auto-selects the best two submissions by public score, so a file is capable of being
+    auto-selected iff it scores at or above the second-highest score already on the board. With
+    five files tied at the top the second-highest is that same tied value, which is why this
+    counts duplicates rather than distinct values (w58). Returns None if the board cannot be
+    read -- callers must BLOCK, not wave through.
+    """
+    ps = sorted((float(r["publicScore"]) for r in rows
+                 if r.get("publicScore") not in (None, "")), reverse=True)
+    return ps[1] if len(ps) >= 2 else None
+
+
+# w58: the pricer's own residual sd, WIDE branch (ad>=195). The sender owns a constant rather
+# than importing w53a, because w57 §4 showed that putting a priced module on the send path is
+# how the sender stops importing. `w58a_tiergate.py` ASSERTS this equals w53a's wide branch and
+# exits non-zero if the pricer is refitted -- the check lives outside the send path, on purpose.
+PRED_SD = 8.77e-6
+STEP = 1e-5              # the public LB reports to 5 decimals
+P_MAX = 0.02             # tolerated P(a non-final-entry file lands ABOVE the tier)
+
+
+def hijack_risk(pred_lb, tier):
+    """P(this file's true public score lands strictly ABOVE the tier), on the live tier.
+
+    ⚠ A POINT PREDICTION IS NOT A GATE. The first cut of this filter thresholded `pred_lb >=
+    tier` and let `w36_ad197std_logit` (pred_lb 0.971177, cv 94e-6 BELOW the pick) through on a
+    3e-6 margin against a residual sd of 8.77e-6 -- an 18% chance of the exact hijack the gate
+    exists to prevent. The displayed score is rounded to `STEP`, so "above the tier" means above
+    `tier + STEP/2` on the underlying scale.
+    """
+    from math import erf, sqrt
+    z = (tier + STEP / 2 - float(pred_lb)) / PRED_SD
+    return 0.5 * (1.0 - erf(z / sqrt(2.0)))
+
+
+def above_tier_reason(r, bar):
+    """Why this at-or-above-tier row must not be sent, or None if it is an acceptable final entry.
+
+    THE RULE (w58): while nothing is selected, a file above the tier is not a filler, it is a
+    FINAL ENTRY. So it must clear the bar a final entry clears.
+    """
+    fam = str(getattr(r, "fam", ""))
+    stem = str(r.file).replace(".csv", "")
+    if fam == "member":
+        return ("fam=member — a raw member's OOF AUC is not a cross-fitted stack CV (w53), "
+                "so it cannot be compared against the pick at all")
+    for pat, why in WANTED_INELIGIBLE.items():
+        if stem.startswith(pat):
+            return f"w40d-ineligible arm — {why}"
+    cv = getattr(r, "cv", None)
+    if cv is None or pd.isna(cv):
+        return "no cv — cannot be shown to be an acceptable final entry"
+    if bar is None:
+        return "the WANTED CV bar could not be read from w57a_tierprice2.json — failing safe"
+    if float(cv) < bar:
+        return (f"cv {float(cv):.10f} < the weaker WANTED file's {bar:.10f} — it would displace "
+                f"a final entry that is better on CV")
+    return None
 LOG = os.path.join(HERE, "w26g_sent.csv")
 
 
@@ -130,6 +215,20 @@ def main():
     ap.add_argument("--allow-unpriced", action="store_true",
                     help="send rows with no pred_lb anyway. The wrong tool: certify them with "
                          "experiments/w55a_unpriced.py and re-run w48e_order.py --write.")
+    # w58 -- THE SAME BUG A THIRD TIME, one level up again. w54 wrote the tier rule, w55
+    # enforced only its NaN branch, and a row WITH a `pred_lb` that sits AT OR ABOVE the tier
+    # still walked straight through. The 08-23 plan's slot 1, `w48_cal_hboyang_mix`, is exactly
+    # that row: pred_lb 0.971230 against a 0.97118 tier, `fam == "member"`, and barred from
+    # CV-based selection by `check_selection.WANTED_INELIGIBLE`. While `check_selection` exits
+    # 1, Kaggle auto-selects the best TWO by public score, so sending it IS selecting it.
+    # w58a prices the hijack at up to +17.95e-6 against a +7.86e-6 status quo -- 2.28x -- and
+    # w56's registered conjunction says NO branch of the ARM 217 read can move WANTED, so the
+    # send has zero expected value for the private score against a real cost. Unconditional and
+    # default-on, exactly like the two filters above.
+    ap.add_argument("--allow-above-tier", action="store_true",
+                    help="send files predicted at or above the auto-selection tier anyway. "
+                         "Only defensible once `check_selection` exits 0 — with the final picks "
+                         "chosen, auto-selection does not apply and the tier stops mattering.")
     a = ap.parse_args()
 
     rows = api_submissions()
@@ -137,6 +236,17 @@ def main():
     left = DAILY_CAP - len(today)
     print(f"{len(rows)} submissions on record; {len(today)} already sent on {daystr} (UTC); "
           f"{left} of {DAILY_CAP} slots left today")
+
+    # w58: the tier is LIVE, never a constant -- a hard-coded tier is what went stale in w45a.
+    TIER = auto_tier(rows)
+    CVBAR = wanted_cv_bar()
+    if TIER is None:
+        print("\n⛔ could not read the auto-selection tier from the board. Refusing to plan: "
+              "the tier rule cannot be evaluated, and w55's lesson is that a row the rule "
+              "cannot be evaluated on is not covered by it.")
+        sys.exit(2)
+    print(f"auto-selection tier {TIER:.5f} (2nd-highest public score, with multiplicity); "
+          f"WANTED CV bar {CVBAR if CVBAR is None else f'{CVBAR:.10f}'}")
 
     sent_names = {r["fileName"] for r in rows}
     sent_md5 = set()
@@ -204,7 +314,7 @@ def main():
     # A dry run plans the full --n regardless of slots left, so a slot at the cap can still
     # SEE tomorrow's queue and check it is sane. Only a real send is clamped by `left`.
     cap = a.n if not a.go else min(a.n, max(left, 0))
-    plan, seen_md5, blocked, unpriced = [], set(), [], []
+    plan, seen_md5, blocked, unpriced, above = [], set(), [], [], []
     for r in q.itertuples():
         if len(plan) >= cap:
             break
@@ -230,6 +340,18 @@ def main():
         if _why and not a.allow_unpriced:
             unpriced.append((r.file, _why))
             continue
+        # w58: AT OR ABOVE THE TIER. Not a filler -- a final entry. See --allow-above-tier.
+        # Two-part test, and the order is the point: first ask whether the row could honestly BE
+        # a final entry, and only if it could not, ask how likely it is to become one.
+        _pl = getattr(r, "pred_lb", None)
+        if not a.allow_above_tier:
+            _aw = above_tier_reason(r, CVBAR)
+            if _aw:
+                _risk = 1.0 if (_pl is None or pd.isna(_pl)) else hijack_risk(_pl, TIER)
+                if _risk >= P_MAX:
+                    above.append((r.file, float("nan") if _pl is None or pd.isna(_pl)
+                                  else float(_pl), _risk, _aw))
+                    continue
         p = os.path.join(SUB, r.file)
         m = r.md5 if isinstance(getattr(r, "md5", None), str) else None
         if m is None and os.path.exists(p):
@@ -273,6 +395,21 @@ def main():
             print(f"       ... and {len(unpriced) - 8} more")
         print("     Certify with `.venv/bin/python experiments/w55a_unpriced.py`, then re-run"
               "\n     `w48e_order.py --day <today> --write`. Do NOT pass --allow-unpriced.")
+
+    if above:
+        print(f"\n  ⛔ {len(above)} file(s) with P(landing above the {TIER:.5f} "
+              f"AUTO-SELECTION TIER) >= {P_MAX:.0%}\n     skipped, not sent (w58). Nothing is "
+              f"selected, so Kaggle auto-picks the best two by PUBLIC\n     score: a file above "
+              f"the tier is not a filler, it is a FINAL ENTRY, and must clear\n     the bar a "
+              f"final entry clears. Risk is on the LIVE tier at sd {PRED_SD*1e6:.2f}e-6.")
+        for f, pl, risk, why in above[:8]:
+            print(f"       {f:34s} pred_lb {pl:.6f}  P(above tier) {risk:.3f}")
+            print(f"       {'':34s} {why}")
+        if len(above) > 8:
+            print(f"       ... and {len(above) - 8} more")
+        print("     THE FIX IS THE CLICK, not the flag: once `check_selection` exits 0 these "
+              "become\n     sendable and --allow-above-tier is the right tool. Until then it "
+              "is the wrong one.")
 
     if not plan:
         print("\nnothing to send: the queue is drained of everything sendable.")

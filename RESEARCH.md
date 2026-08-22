@@ -1,5 +1,111 @@
 # Research — playground-series-s6e8
 
+# 🔴🔴 WHILE NOTHING IS SELECTED, A "MEASUREMENT SEND" IS NOT A CATEGORY (w58, 2026-08-22)
+
+Any file that can reach the auto-selection tier **is a final entry**, whatever the reason it was
+queued. The 08-23 plan's slot 1 — `w48_cal_hboyang_mix`, THE ARM 217 TEST — carries
+`pred_lb 0.971230` against a **0.97118** tier, and `w48d_arm217.json` registers its whole band
+at **[0.9711976, 0.9712523]**, entirely above it. `check_selection` exits 1, so Kaggle
+auto-selects the best two by PUBLIC score: **sending it installs an aggregator's raw member
+vector as final entry #1** — a file `check_selection.WANTED_INELIGIBLE` bars from CV-based
+selection, whose "CV" is a member OOF AUC this file forbids comparing against a stack CV.
+
+**Fifth bug of the same shape on the send path** (w49 the writer's day, w53 the reader's, w54 the
+veto-as-sort-order, w55 the unpriceable rows). w54 wrote the tier rule; **w55 wired only its NaN
+branch.** A row *with* a `pred_lb` sitting *above* the tier walked straight through for four days.
+⚠ **A rule enforced on the WRONG COLUMN is not enforced. When you wire a rule, re-read the rule,
+not the last bug it caught.**
+
+### What it costs — `experiments/w58a_tiergate.json`
+
+| branch | cost of not clicking |
+|---|---|
+| status quo, no hijack (w57a MODEL B, 5-file tier) | **+7.86e-6** |
+| a hijacker that turns out worthless (the auto pair degenerates to one draw from tier 1) | **+17.95e-6** |
+| a hijacker that turns out honest (it dominates E[max]) | ≤ 0 |
+
+**2.28×** in the bad branch. ⛔ **No point estimate is given for `hboyang_mix` on purpose** — its
+quality is the quantity the 08-23 read exists to measure. w56 measures INDETERMINATE, the bad
+end, as **modal**.
+
+### ⛔ THE DECISION: the ARM 217 read is DEFERRED UNTIL THE CLICK, not cancelled
+
+**No branch of the read can move WANTED** (w56's registered conjunction: INFLATED → veto final;
+INDETERMINATE → change nothing; HONEST → *"licenses SENDING and pricing ad217 on the LB, never
+SELECTING it"*). **So its expected value to the PRIVATE score is exactly zero**, against a real
+cost. Zero upside vs real downside is not a trade. The condition that retires the deferral is
+`check_selection` exiting **0** — and nothing else. ⛔ **Do not pass `--allow-above-tier`.**
+**THE FIX IS THE CLICK, NOT THE FLAG.**
+
+### ✅ WIRED — `w26g_send.py --allow-above-tier` (default OFF)
+
+Live tier via `auto_tier(rows)` = **2nd-highest public score WITH multiplicity** (never a
+constant; w45a went stale by freezing one). Two-part test, and **the order is the point**: first
+ask whether the row could honestly *be* a final entry; only if it could not, ask how likely it is
+to *become* one.
+
+Ineligible if `fam == "member"` · the stem is in `check_selection.WANTED_INELIGIBLE` (imported,
+never re-typed) · **or its CV is below the weaker WANTED file's** — a file above the tier
+*displaces* a final entry, so it must clear the bar the entry it displaces already cleared.
+
+⚠⚠ **A POINT PREDICTION IS NOT A GATE.** The first cut thresholded `pred_lb >= TIER` and let
+`w36_ad197std_logit` through on a **3e-6 margin against an 8.77e-6 residual sd** — an **18%**
+hijack chance, CV **94e-6 below the pick**. Rebuilt as `hijack_risk()` = P(true score >
+tier + STEP/2), **`P_MAX = 2%`**. What it blocks, three of which are the `blend158_logit` shape
+w13 named as the whole of this account's selection exposure:
+
+    w48_cal_hboyang_mix  pred_lb 0.971230  P(above) 1.000  fam=member, no comparable CV
+    w34_ad196std_logit   pred_lb 0.971182  P(above) 0.367  cv 0.9700495 < WANTED bar
+    w36_ad197std_logit   pred_lb 0.971177  P(above) 0.174  cv 0.9700459 < WANTED bar
+    w34_ad195std_logit   pred_lb 0.971175  P(above) 0.117  cv 0.9700443 < WANTED bar
+
+**Cost: four slots out of ninety — the full drain plans 59 where it planned 63.** The gap's
+expected value on the *private* score is zero; the exposure is not. ⚠ **The daily ten does NOT
+shrink — the sender BACKFILLS** (08-23 slot 10 becomes `w27_ad188stdcorr`, CV 0.9701168, above
+the WANTED bar). **A filter on a backfilling queue is a substitution, not a subtraction: price
+the replacement, not the removal.**
+
+**GATE S** re-asserts all six guard strings are in the sender **and** that the sender's
+deliberately-duplicated `PRED_SD` still equals `w53a_pricer.pred_sd` on the wide branch
+(8.770e-6; narrow 7.756e-6). The duplication is intentional — w57 §4 showed a priced module on
+the send path is how the sender stops importing — which is why the check must live **outside** it.
+
+---
+
+# THE DILUTION BREAK-EVEN — D = 12.97e-6. THE SEND POLICY FOR EVERY SPARE SLOT (w58)
+
+A file that lands **in** the tier (not above it) becomes an extra tier-1 member. Only **3 of the
+10** current tier-1 pairs are expensive (~23e-6): those drawn entirely from
+`{w21_ad187corr_ens4, w27_ad190stdcorr, w29_ad194stdcorr}`. Adding a member near the pick dilutes
+them; adding a laggard manufactures new ones.
+
+Measured on **real files** — every tier-2 file is a counterfactual tier-1 member that missed by
+one reporting step (`w58a_tiergate.py`, GATE R proves the enlarged design reproduces w57a to 5e-9):
+
+    dcv  -2.42  MODEL B  +5.66  HELPS      dcv -15.21  +8.55  HURTS
+    dcv  -6.82           +6.44  HELPS      dcv -19.97  +8.91  HURTS
+    dcv -11.38           +7.36  HELPS      dcv -39.87 +11.11  HURTS
+
+> **A file joining tier 1 HELPS iff its cross-fitted CV is within 12.97e-6 of the pick,
+> i.e. CV ≥ 0.9701270406.**
+
+This is the mechanism behind w57 §2: `w40_ad211stdcorr` at dcv −2.53 was well inside D, which is
+why the 08-22 sends came back net favourable. **That was luck; this is policy.**
+⚠ D moves with the tier. Re-run `w57a_tierprice2.py` then `w58a_tiergate.py` after every send day.
+
+---
+
+# ⚠ NO BROWSER MCP IS ATTACHED TO THIS AGENT SESSION (w58) — but check, it is one call
+
+`/home/nixos/CLAUDE.md` documents a `brave` MCP server holding Teddy's real logged-in profile.
+**`ToolSearch` for it returns nothing in this session.** So the click stays blocked from here —
+but the reason is *"the tool is not attached to the agent"*, distinct from *"the authenticated
+API has no write method"* (also true, and closed 08-13). ⚠ **If a future run sees `mcp__brave__*`
+in its tool list, the click is executable in that run.** One call at the top of every run.
+
+---
+
+
 Durable facts. Anything learned once goes here so no later run pays for it twice.
 
 ---
@@ -271,6 +377,12 @@ what it ran on.
 
 **Standing consequence:** with the veto binding, **63 sendable vs 90 slots = 27 slots unfilled.**
 Fill them with files predicted **below 0.97118**. Never by retiring a veto.
+
+✅ **THE RULE IS NOW ENFORCED IN CODE (w58) — `w26g_send.py --allow-above-tier`, default OFF.**
+Until 2026-08-22 it lived only in this paragraph and in the sender's unfilled-slots message; w55
+wired only its NaN branch. It is now a probability test, not a threshold on `pred_lb`. The
+standing count is **59 sendable vs 90 = 31 unfilled**; do not recover those four by lowering
+`P_MAX`. See the w58 box at the top of this file.
 
 ---
 
@@ -806,6 +918,11 @@ Consequences, all measured in `w45a_tierprice.json`:
   The result no longer depends on the one assumed quantity in the model.
 - `P(the auto file beats BOTH wanted files privately)` = **0.083 / 0.082 / 0.015**. Not a
   coin flip, and more decisive than w18a's 0.043/0.031/0.058, not less.
+
+⚠ **UPDATED BY w58 (2026-08-22): the click is worth strictly MORE than the +7.86e-6 above.**
+It also (a) unblocks the ARM 217 read, which is deferred precisely because auto-selection is live
+(`--allow-above-tier` becomes the right tool the moment `check_selection` exits 0), and (b)
+releases the four slots the w58 gate is holding back. See the w58 box at the top of this file.
 
 ### Why this is now the largest number on the table
 

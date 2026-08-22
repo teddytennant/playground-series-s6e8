@@ -21001,3 +21001,268 @@ the superseded note), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 **Restored:** `experiments/w25a_cvlb_full.{csv,json}` via `git checkout` — see §4.
 
 **No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+---
+
+# 2026-08-22 — w58, slot 7 of 10. **AT CAP, 10/10 already sent — no submission.** Found that **tomorrow's slot 1 is an act of FINAL SELECTION**, priced it, and made the auto-selection tier rule bind in code for the first time. Fifth bug of the same shape on the send path, and the first one with a scheduled victim.
+
+`date -u` **14:19 UTC**. `/proc` scan per-pid (never `ps`/`pgrep`): the only live process for this
+competition is my own `claude -p` (pid 684734, ppid 632806 = `run-competition.sh
+playground-series-s6e8 10`). `ls -d experiments/w5*` shows w50–w57 taken, so this is **w58**.
+Kaggle token alive. API reports **10 submissions on 2026-08-22 (UTC)**, all sent by w52 at
+12:37–12:38, scoring 0.97113–0.97118. **At the cap; research and code only.**
+
+**⚠ THE ANGLE IS STALE AND I AM SUBSTITUTING, ON THE RECORD.** *"Foundation: confirm the metric,
+build the fixed-fold CV harness, and get one honest GBDT baseline scored"* — the metric is AUC
+and has been in `RESEARCH.md` since 08-09, the frozen SKF5 seed-42 folds have carried every one
+of 111 scored submissions, and the GBDT line was closed with a mechanism on 08-13. Re-running it
+would be the "several near-copies" the angle exists to prevent. **Substituted: audit the one
+send-path rule that has been written down three times and enforced zero times.** That is where
+the breakage was, and it was scheduled to fire in ~10 hours.
+
+## 0. FIRST, THE CHEAP CHECK NOBODY HAD RUN: IS THERE A BROWSER IN THIS SESSION?
+
+The click (§9) needs a browser, and `/home/nixos/CLAUDE.md` documents a `brave` MCP server
+holding Teddy's real logged-in profile. **One `ToolSearch` call: no browser MCP is connected to
+this session.** So the route stays closed from here — but the reason is now *"the tool is not
+attached to the agent"*, not *"the API has no write method"* (which is also true, w45). ⚠ **If a
+future run ever sees `mcp__brave__*` in its tool list, the click is executable in that run.**
+That is worth one call at the top of any run, and it is now the first line of §10.
+
+## 1. 🔴🔴 THE 08-23 SLOT-1 SEND IS, UNDER ITS OWN REGISTERED PREDICTION, A FINAL SELECTION
+
+`w26g_send.py --n 10` dry, run before I touched anything:
+
+    1. w48_cal_hboyang_mix.csv    CV 0.9701815536   pred_lb 0.971230   P(beat best) nan
+
+`w48d_arm217.json` registers that file's whole predictive band at **[0.9711976, 0.9712523]** —
+**entirely above the 0.97118 auto-selection tier.** `check_selection` exits 1, so Kaggle
+auto-selects **the best two by PUBLIC score**. Therefore sending it does not "measure" anything
+in a vacuum: under its own registered point prediction it **installs an aggregator's raw member
+vector as this account's FINAL ENTRY #1**.
+
+The same file is barred from CV-based selection by `check_selection.WANTED_INELIGIBLE`
+("w56a source read — hboyang_mix is an aggregator over 138 un-es-clearable third-party
+streams"), and its "CV" is a **member OOF AUC**, which `RESEARCH` says must never be compared
+against a cross-fitted stack CV. So the file is simultaneously (a) forbidden as a pick, (b)
+unpriceable as a candidate, and (c) scheduled to become a pick by default.
+
+⚠ **This is the FIFTH bug of the identical shape on the send path.** w49 keyed the writer to the
+day; w53 keyed the reader; w54 found the veto was only a sort order; w55 found four rows the tier
+rule could not be *evaluated* on. **w55 fixed the tier rule's NaN branch and only its NaN
+branch** — `w26g` blocks a row with no `pred_lb`. A row *with* a `pred_lb`, sitting *above* the
+tier, walked straight through. The rule w54 wrote — *"a file is SAFE to send iff its predicted
+public score is < the tier"* — has been in `RESEARCH.md` and in `w26g`'s own unfilled-slots
+message for four days and **was still enforced by nothing.**
+
+## 2. ✅ PRICED — AND THE HIJACK IS DELIBERATELY LEFT WITHOUT A POINT ESTIMATE
+
+`experiments/w58a_tiergate.py`. Two gates before any number is quoted:
+
+- **GATE T** re-derives the tier LIVE and compares it against what `w57a_tierprice2.json`
+  recorded it ran on. Unchanged (5 files @ 0.97118) — **P3 CONFIRMED.**
+- **GATE R** re-runs w57a's LAW-IF on an **enlarged 22-file design** (the candidates are appended
+  to `NAMES`, which moves the GLS common-gap fit and every covariance entry) and requires it to
+  reproduce w57a's headline. `MODEL B 7.855203980e-6 vs 7.855203985` (|d| 4.7e-9),
+  `uniform-limit-1 17.947859606 vs 17.947859613` (|d| 6.9e-9). **PASS.** Without this every
+  figure below would be on a different scale from the number it claims to extend.
+
+**(A) THE HIJACK.** A file landing *above* the tier takes auto-slot 1 alone; slot 2 is then one
+uniform draw from the old tier 1.
+
+| branch | cost of not clicking |
+|---|---|
+| status quo, no hijack (MODEL B over the 5-file tier) | **+7.86e-6** |
+| hijacker turns out worthless → the pair degenerates to that single draw | **+17.95e-6** |
+| hijacker turns out honest → it dominates E[max] | **≤ 0** |
+
+**2.28× the standing exposure in the bad branch.** ⛔ **NO POINT ESTIMATE IS GIVEN FOR
+`hboyang_mix`, on purpose:** its quality is exactly the quantity the 08-23 read exists to
+measure, so pricing it would assume the answer. w56 measures INDETERMINATE — the worthless end —
+as the **modal** outcome.
+
+**(B) THE DILUTION**, which is the send policy for the remaining slot gap and has a real answer.
+Measured on **real files, not a hypothetical dcv**: every tier-2 file is a counterfactual tier-1
+member that missed by one reporting step and already has an OOF vector.
+
+    w38_ad202stdcorr        dcv  -2.42   MODEL B  +5.66   HELPS   (-2.19)
+    w40_ad211std_h3         dcv  -6.82            +6.44   HELPS   (-1.42)
+    w36_ad197stdcorr        dcv -11.38            +7.36   HELPS   (-0.49)
+    w34_ad195stdcorr        dcv -15.21            +8.55   HURTS   (+0.70)
+    w38_ad202std_rescale    dcv -19.97            +8.91   HURTS   (+1.06)
+    w22_ad187corr_rankraw   dcv -39.87           +11.11   HURTS   (+3.26)
+
+**BREAK-EVEN D = 12.97e-6.** A file joining tier 1 **helps** iff its cross-fitted CV is within
+**13.0e-6** of the pick, i.e. **CV ≥ 0.9701270406**. Below that it manufactures new pick-missing
+pairs faster than it dilutes the old ones. *This is the mechanism behind w57 §2 — `w40_ad211stdcorr`
+at dcv −2.53 was well inside D, which is why the 08-22 sends came back net favourable. It was
+luck, not policy; now it is policy.*
+
+## 3. ✅ WIRED — AND MY FIRST CUT OF THE GATE WAS ITSELF THE BUG IT WAS CATCHING
+
+`w26g_send.py` gains `--allow-above-tier` (default OFF, documented as the wrong tool), a **LIVE**
+tier (`auto_tier()` = 2nd-highest public score **with multiplicity** — never a constant; w45a
+went stale exactly by freezing one), and a two-part test whose **order is the point**: first ask
+whether the row could honestly **be** a final entry, and only if it could not, ask how likely it
+is to **become** one.
+
+Ineligible if: `fam == "member"` (a raw member's OOF is not a stack CV) · the stem is in
+`check_selection.WANTED_INELIGIBLE` (imported, never re-typed, so retiring an entry there retires
+it here in the same commit) · **or its CV is below the weaker WANTED file's** — because a file
+above the tier *displaces a final entry*, so the bar it must clear is the bar the entry it
+displaces already cleared.
+
+⛔⛔ **WITHDRAWAL, SAME RUN, AND IT IS THE SAME CLASS OF ERROR I WAS DOCUMENTING.** My first cut
+thresholded `pred_lb >= TIER`. It blocked hboyang and one other — and then the sender's
+**backfill pulled in `w36_ad197std_logit` at pred_lb 0.971177**, three e-6 *under* the tier
+against a residual sd of **8.77e-6**: an **18% chance** of the exact hijack the gate exists to
+prevent, with a CV **94e-6 below the pick**. **A point prediction is not a gate.** Rebuilt as
+`hijack_risk(pred_lb, tier)` = P(true score > tier + STEP/2) at the pricer's wide-branch sd, with
+`P_MAX = 2%`.
+
+What the corrected gate blocks — **three of the four are the `blend158_logit` shape that w13's
+audit named as the whole of this account's selection exposure, and none of the three was in the
+original ten:**
+
+    w48_cal_hboyang_mix   pred_lb 0.971230  P(above tier) 1.000  fam=member, no comparable CV
+    w34_ad196std_logit    pred_lb 0.971182  P(above tier) 0.367  cv 0.9700495 < WANTED bar
+    w36_ad197std_logit    pred_lb 0.971177  P(above tier) 0.174  cv 0.9700459 < WANTED bar
+    w34_ad195std_logit    pred_lb 0.971175  P(above tier) 0.117  cv 0.9700443 < WANTED bar
+
+**The cost is four slots out of ninety: the full drain plans 59 where it planned 63.** RESEARCH
+already prices the unfilled gap's effect on the **private** score at **zero**, and the exposure
+those four carried is not zero. ⚠ **And the 08-23 ten does not shrink** — it backfills to a full
+ten with `w27_ad188stdcorr` (CV 0.9701168, *above* the WANTED bar, so a 3.3% hijack risk is fine:
+if it hijacks, it hijacks with a file we would be content to select).
+
+**GATE S** (w55a's idiom) re-asserts all six guard strings are still in the sender **and** that
+the sender's duplicated `PRED_SD` still equals `w53a_pricer.pred_sd` on the wide branch
+(8.770e-6; narrow 7.756e-6). The sd is duplicated **on purpose** — w57 §4 showed that putting a
+priced module on the send path is how the sender stops importing — which is exactly why checking
+it from **outside** the send path is mandatory.
+
+## 4. ⛔ THE DECISION: THE ARM 217 READ IS **DEFERRED UNTIL THE CLICK**, NOT CANCELLED
+
+P7 was registered as the decision test, because a flat block would be the wrong instrument if any
+branch of the read could move the final pick. **It cannot.** w56's registered conjunction:
+INFLATED → the veto is final; INDETERMINATE (**modal**) → report it, change nothing; HONEST →
+*"licenses SENDING and pricing ad217 on the LB, **never SELECTING it**"*, and it does not clear
+w40d. `check_selection.WANTED_INELIGIBLE` bars `w42_ad217` in code, checked by the script.
+
+**So the read's expected value to the PRIVATE score is exactly zero, and its cost is
+P(above tier) × up to +10.1e-6 of extra exposure.** Zero upside against a real downside is not a
+trade. ⚠ **It is DEFERRED, not cancelled**: the moment `check_selection` exits 0, auto-selection
+stops applying, the tier stops mattering, `--allow-above-tier` becomes the right tool, and the
+read runs with its registered thresholds intact. **THE FIX IS THE CLICK, NOT THE FLAG.**
+
+⚠ **This makes the click worth strictly more than w57 priced it.** It is no longer only +7.86e-6
+of removed exposure; it also **unblocks the one experiment on the board that is currently
+unrunnable**, and it removes the 4-slot drag on the drain.
+
+## 5. THE REGISTERED PREDICTIONS (`experiments/w58_prereg.txt`, committed at 5f96a12 BEFORE the instrument)
+
+| | prediction | outcome |
+|---|---|---|
+| P1 | slot 1 is planned and not blocked (no tier gate exists) | ✅ **CONFIRMED** |
+| P2 | its `pred_lb` ≥ 0.97119 | ✅ **CONFIRMED** (0.971230) |
+| P3 | live tier unchanged from w57a | ✅ **CONFIRMED** (GATE T) |
+| P4 | it is the ONLY planned row at/above the tier | ✅ **CONFIRMED** (1 of 10) |
+| P5 | break-even D ∈ [8, 15]e-6 | ✅ **CONFIRMED** — D = **12.97e-6** |
+| P6a | twin at dcv −2.53 → MODEL B < 6.0 | ✅ **CONFIRMED** (dcv −2.42 → 5.66) |
+| P6b | laggard at dcv −21.7 → MODEL B > 9.0 | ⚠ **CONFIRMED BY INTERPOLATION ONLY**, 9.24 |
+| P7 | no branch of the ARM 217 read moves WANTED | ✅ **CONFIRMED** |
+| P8 | the ten becomes nine sendable + one deferred | ❌ **FALSIFIED** — it stays **ten** |
+
+⚠ **P6b is the weakest thing in this run and I am flagging it rather than rounding it up.** No
+real file sits at dcv −21.7; I registered against a number I invented instead of against a file I
+had. The bracketing pair (−19.97 → 8.91, −29.07 → 10.63) interpolates to **9.24e-6**, above 9.0
+by 0.24e-6 — inside the interpolation's own slack. **Register against the files you hold.**
+
+⚠ **P8's falsification is the useful one.** I predicted the plan would shrink; it does not,
+because **the sender backfills**. The gate does not cost a slot on any given day — it changes
+*who fills it* — and the first replacement it reached for was `w36_ad197std_logit`, which is why
+§3's withdrawal happened at all. **A filter on a queue that backfills is a substitution, not a
+subtraction; price the replacement, not the removal.**
+
+## 6. VERIFICATION — THE WHOLE CHAIN RE-RUN AFTER EVERY EDIT
+
+**w54a exit 0, w55a exit 0, w56b exit 0, w57c exit 0, w39a exit 0** (FAILURES: 0), `w58a` exit 0
+(GATE T / GATE R / GATE S all PASS), `check_selection` **exit 1** as expected. `w26g_send.py
+--n 10` and `--n 90` both dry-plan cleanly with the gate live. **`w48e_order.py` was NOT re-run
+and the 08-23 order file is untouched** — the gate lives in the sender, so the plan is derived at
+send time and no order rewrite is needed. `w25a_cvlb_full.py` was **not** run (w57 §4).
+
+## 7. THE BOARD — FLAT
+
+Read ~14:5x UTC. Leader **0.97141** (`Changye Li`, tied with `MILANFX`). Gold cut (14th)
+**0.97124**. Us **0.97118**. Unchanged from w57.
+
+## 8. ⛔ UNCHANGED BLOCKERS — RE-VERIFIED
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS. This needs Teddy, in his own browser.**
+  Deadline **08-31**. Worth **+7.86e-6** of removed exposure (w57 §2) **plus** the ARM 217 read
+  it unblocks (§4) **plus** the four slots the gate is holding back (§3). No browser MCP is
+  attached to this session (§0).
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 9. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   **`ls -d experiments/w<next>*`** before claiming a run number. **NEW:** also check whether
+   `mcp__brave__*` is in the tool list — if it is, **make the click** (§0).
+2. **Send the 08-23 ten.** Chain: `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** (the
+   day-stamp warning must be GONE; **expect the w58 block to name 4 files and slot 1 to be
+   `w38_ad202std_rescale`, NOT `w48_cal_hboyang_mix`**) → `--go`. Re-run `w48e_order.py --day
+   2026-08-23 --write` **only** if `w23b` changed the queue.
+3. ⛔ **DO NOT pass `--allow-above-tier` to un-defer the ARM 217 read.** §4 is a decision with a
+   registered argument: zero expected value for the private score against a real cost. The
+   condition that retires it is `check_selection` exiting 0, and nothing else.
+4. ⚠ **RUN `w57a_tierprice2.py` ON EVERY SEND DAY, AFTER THE SEND**, then **`w58a_tiergate.py`**
+   (its GATE T will refuse if w57a is stale). The tier moves whenever a file lands at or above
+   0.97118, and the break-even D moves with it.
+5. **Run `w54a`, `w55a`, `w56b`, `w57c` AND `w58a` on any run that sends, touches
+   `check_selection.py`, or touches anything under the pricer.**
+6. The slot gap is now **31** (59 sendable vs 90) and its expected value on the **private** score
+   is still **zero**. Do not spend a run manufacturing fillers, and **do not fill it by lowering
+   `P_MAX` or retiring a veto.** If you want the slots back, get the click.
+7. Do **NOT** re-open: the CV→LB gap table (w52b, 93 rows, 08-22), error analysis / OOF
+   segmentation, fold/seed averaging, the top-level blend-weight search, hill climbing / NNLS,
+   w46c's level dummy, the es-on-val status of `ext_members16`, ARM 216 as a deadline pick,
+   `d_five` as signal, the import line, the within-group redundancy test, the member side-scale
+   axis, KS as a gate, GBDT tuning, FE variants, **the original dataset (closed three times,
+   measured NEGATIVE)**, the stacker `C`, the selection **write** path / the authenticated API
+   route (probed to exhaustion 08-13), the es-bias deflation constant, a fourth sweep of the
+   public kernel pool, the era shift, the logit veto, the w37 es-bias readout, per-fold rank
+   normalisation, the leaderboard timestamp as a tie-break probe, noise-blend degradation as an
+   AUC→stack-CV transfer, and **the second-pick swap to `w40_ad211stdcorr` (w57 §3)**.
+8. ⚠ **NEW: a rule enforced on the WRONG COLUMN is not enforced.** w55 read w54's tier rule and
+   wired `pred_lb is NaN`. The property that makes a row unsafe above the tier is *no comparable
+   CV*, not *no price* — and `w48_cal_hboyang_mix` has a price. **When you wire a rule, re-read
+   the rule, not the last bug it caught.**
+   ⚠ **NEW: A POINT PREDICTION IS NOT A GATE.** A threshold on `pred_lb` against an 8.77e-6
+   residual sd let an 18%-hijack file through on a 3e-6 margin. Gate on the probability.
+   ⚠ **NEW: a filter on a queue that BACKFILLS is a substitution, not a subtraction.** Price the
+   replacement (P8).
+   ⚠ **NEW: register against the files you HOLD, not against a dcv you invented** (P6b).
+   ⚠ **NEW: while nothing is selected, "measurement send" is not a category.** Any file that can
+   reach the tier is a final entry, whatever the reason it was queued.
+   ⚠ `w25a_cvlb_full.py` is NOT a read-only refresh — it re-centres the pricer via
+   `w46c_predlb.MU` and the SENDER stops importing (pinned by `w57c`).
+   ⚠ A hard-coded tier goes stale on every send day — derive it live and record what you ran on.
+   ⚠ A prereg that re-stamps itself with `utcnow()` is not a prereg. ⚠ `E[max]` over two near-twin
+   stacks has NO RESOLUTION. ⚠ An instrument that silently defaults a missing parameter will
+   produce a confident number from an object you never built. ⚠ A rule that lives in a printed
+   PARAGRAPH is not a rule. ⚠ A rule that lives in the ORDER of a list is not a rule. ⚠ A
+   documented mechanism is not a wired mechanism. ⚠ `w48e`'s write block resets
+   `send_rank`/`msg`/`why` to NaN. ⚠ An unused slot is only "pure waste" once the final picks are
+   selected. ⚠ Never use in-sample residuals to test extrapolation. ⚠ Never lower the `cv >= 0.97`
+   floor. ⚠ A send list not keyed to its day is a bug waiting to fire. ⚠ Never let a
+   calibration/`member` row into a `max(CV)`. ⚠ Always pass `--page-size`.
+
+**Files added:** `experiments/w58_prereg.txt`, `experiments/w58a_tiergate.py`,
+`experiments/w58a_tiergate.json`.
+**Modified:** `experiments/w26g_send.py` (the `--allow-above-tier` gate, `auto_tier`,
+`wanted_cv_bar`, `above_tier_reason`, `hijack_risk`, the block report), plus `RESEARCH.md`,
+`LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
