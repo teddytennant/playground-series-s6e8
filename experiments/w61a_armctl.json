@@ -1,0 +1,98 @@
+{
+  "bar": 4e-06,
+  "criterion_bases": [
+    "h3",
+    "ens4",
+    "rescale",
+    "rankraw"
+  ],
+  "failures": [],
+  "added_dirs": [
+    "ext_members15"
+  ],
+  "streams": [
+    "y94_lookup",
+    "y94_naji03",
+    "y94_naji05",
+    "y94_pub_rmlp",
+    "y94_pub_tabnet",
+    "y94_rmlp_lat",
+    "y94_rmlp_lat3",
+    "y94_tabm_deeper",
+    "y94_tabm_imp"
+  ],
+  "rows": [
+    {
+      "base": "h3",
+      "in_criterion": true,
+      "stem_211": "w40_ad211std_h3",
+      "cv_211": 0.9701331846110895,
+      "stem_202": "w38_ad202std_h3",
+      "cv_202": 0.9701330213726455,
+      "delta_e6": 0.16323844409527055
+    },
+    {
+      "base": "ens4",
+      "in_criterion": true,
+      "stem_211": "w40_ad211std",
+      "cv_211": 0.9701309541017874,
+      "stem_202": "w38_ad202std",
+      "cv_202": 0.9701305726031559,
+      "delta_e6": 0.3814986314631952
+    },
+    {
+      "base": "rescale",
+      "in_criterion": true,
+      "stem_211": "w40_ad211std_rescale",
+      "cv_211": 0.9701209816379527,
+      "stem_202": "w38_ad202std_rescale",
+      "cv_202": 0.970120035404027,
+      "delta_e6": 0.9462339256582908
+    },
+    {
+      "base": "rankraw",
+      "in_criterion": true,
+      "stem_211": "w40_ad211std_rankraw",
+      "cv_211": 0.9701044021654542,
+      "stem_202": "w38_ad202std_rankraw",
+      "cv_202": 0.9701067553636527,
+      "delta_e6": -2.3531981984126205
+    },
+    {
+      "base": "hybrid",
+      "in_criterion": false,
+      "stem_211": "w40_ad211std_hybrid",
+      "cv_211": 0.9701194945387204,
+      "stem_202": "w38_ad202std_hybrid",
+      "cv_202": 0.9701232617749084,
+      "delta_e6": -3.767236188001455
+    },
+    {
+      "base": "logit",
+      "in_criterion": false,
+      "stem_211": "w40_ad211std_logit",
+      "cv_211": 0.9700578440584922,
+      "stem_202": "w38_ad202std_logit",
+      "cv_202": 0.9700575874003036,
+      "delta_e6": 0.25665818859099687
+    },
+    {
+      "base": "corr_h3(control, NOT in criterion)",
+      "in_criterion": false,
+      "stem_211": "w40_ad211stdcorr",
+      "cv_211": 0.9701374732624001,
+      "stem_202": "w38_ad202stdcorr",
+      "cv_202": 0.9701375890907046,
+      "delta_e6": -0.11582830450329595
+    }
+  ],
+  "worst_criterion_delta_e6": 2.3531981984126205,
+  "P1": true,
+  "P2": true,
+  "P3": true,
+  "P4": true,
+  "corr_delta_e6": -0.11582830450329595,
+  "extra_bases_over_bar": [],
+  "verdict": "RETIRE",
+  "quote": "w61a four-base matched control, PASS: h3 +0.16, ens4 +0.38, rescale +0.95, rankraw -2.35 e-6, worst +2.35e-6 vs the +-4e-6 bar."
+}

@@ -1852,3 +1852,30 @@ rank ~18 on 08-21 and buys rank 65 today.
 one of those five, `w40_ad211stdcorr` (p_joint **0.375**, the highest of any non-pick member),
 is on an arm `w40d_prereg` bars from being a deadline pick at all. That file is already sent
 and cannot be recalled; the entry added this run stops the next one.
+
+## 2026-08-22 ~16:10 UTC (w61) — flat at the top for a FIFTH read; we are rank **66** on a nine-deep shelf
+
+| | | |
+|---|---|---|
+| leader | **0.97141** | `Changye Li` (11:23) tied with `MILANFX` (00:34) |
+| 3rd | 0.97134 | Maher el Ouahabi |
+| gold cut (14th) | **0.97124** | `william950615` |
+| us — team **Teddy Tennant** | **0.97118** | rank **66** (was 65 at w60's read) |
+
+The 0.97118 shelf spans ranks **65–73, nine teams**, and we sit 2nd within it on submission
+time. Top three unchanged across five reads spanning ~3h; `cstdy` 0.97131 and `Chris Deotte`
+0.97130 have settled into the 6th–7th band they entered at w60. Gap to gold **6e-6** ≈ 0.6
+reporting steps.
+
+⚠ **Rank at a fixed score keeps decaying: 0.97118 bought ~18 on 08-21, 65 at 15:15 today, 66 at
+16:10.** Only a new score moves us; the eight teams sharing our shelf are ordered by submission
+time and we cannot outrun that.
+
+**No submission this run — at cap (10/10 sent 08-22 12:37–12:38 UTC).**
+
+⚠ Still **nothing selected**, so Kaggle auto-picks the best two by PUBLIC score out of our
+5-way tie at 0.97118; P(our CV pick is in the final pair) = **0.400**, unchanged. What DID
+change: `w40_ad211stdcorr` (p_joint **0.375**, the likeliest auto-selection after the pick
+itself) was a file our own prereg barred from being a deadline pick, and w61's four-base
+matched-control test retired that bar on evidence. The price is unchanged (+7.855e-6 standing
+exposure); the outcome is no longer one our rules forbid.

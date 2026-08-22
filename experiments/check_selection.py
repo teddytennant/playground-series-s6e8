@@ -321,16 +321,52 @@ WANTED_INELIGIBLE = {
     "w42_ad217": "w56a source read — hboyang_mix is an aggregator over 138 un-es-clearable "
                  "third-party streams. Not WANTED on CV (w40d). The 08-23 LB read does "
                  "not lift this; see w56a_arm217power.json.",
-    "w40_ad211": "w40d_prereg.txt, committed BEFORE ARM 211 existed: the nine `yadoy666` "
-                 "union94 streams come from an AGGREGATOR and their es-on-val status is "
-                 "UNKNOWN — neither log-read nor absent-by-mechanism. ⛔ Not WANTED on CV "
-                 "whatever its CV. Retire only on the four-base matched-control test in "
-                 "w60_prereg.txt, quoted here, in the same commit.",
+}
+
+# ---------------------------------------------------------------------------------------
+# RETIRED ENTRIES — a bar that was lifted ON EVIDENCE, kept here so it cannot be re-derived
+# from scratch and cannot be re-imposed (or ignored) without meeting the record. w61, 08-22.
+# ---------------------------------------------------------------------------------------
+# ⚠ A RETIRED KEY IS NOT A DELETED KEY. w60_prereg's retirement clause says the retiring
+# reading must be "quoted in the dict value in the same commit" — if retirement meant removing
+# the key there would be no value to quote it in, and `w60b_ineligguard`'s REVERSE half (every
+# key backed by a registration) would read a silent deletion and a considered retirement
+# identically. So the key MOVES here, carrying the original clause AND the measurement.
+WANTED_RETIRED = {
+    "w40_ad211": (
+        "RETIRED 2026-08-22 by w61a_armctl.py (verdict RETIRE, FAILURES 0) on the four-base "
+        "matched-control test registered in w60_prereg.txt and left unrun by the run that "
+        "registered it. THE ORIGINAL BAR (w40d_prereg.txt, committed BEFORE ARM 211 existed): "
+        "the nine `yadoy666` union94 streams come from an AGGREGATOR and their es-on-val "
+        "status is UNKNOWN — neither log-read nor absent-by-mechanism; ⛔ not WANTED on CV "
+        "whatever its CV. THE READING THAT RETIRES IT, ad211 minus ad202, cross-fitted CV "
+        "recomputed from the raw OOF vectors on the frozen SKF5 seed-42 folds: h3 +0.163, "
+        "ens4 +0.381, rescale +0.946, rankraw -2.353 e-6 — worst |delta| 2.353e-6 against the "
+        "±4e-6 rebuild floor, all four bases inside it, and the sign is not uniform. Reported "
+        "and NOT decided on (w61_prereg P5): hybrid -3.767, logit +0.257, corrected-h3 -0.116 "
+        "e-6, also all inside. ARM 211 is ARM 202 plus exactly those nine streams and nothing "
+        "else (w40f_run.sh vs w38d_run.sh; w61a GATE M asserts it), so the nine bought NOTHING "
+        "as a group. An es-on-val member's OOF is INFLATED, the combiner UP-weights it and the "
+        "stack CV RISES — inflation is a gain here, not a loss — so a null group delta bounds "
+        "the inflation the bar exists to refuse. ⚠ THIS IS NOT es-CLEARANCE. The nine streams' "
+        "es status is still unknown and w40d's reasoning is still correct about them; what is "
+        "measured is that ARM 211's CV does not depend on them. If a future arm ADDS weight to "
+        "these streams — a different pack, a different combiner, a re-weighting — this "
+        "retirement does not carry over and the bar must be re-derived on that arm's own "
+        "matched control. See experiments/w61a_armctl.json."
+    ),
 }
 
 
 def assert_wanted_eligible(wanted=WANTED):
-    """Fail loudly if WANTED names an arm that w40d bars from CV-based selection."""
+    """Fail loudly if WANTED names an arm that w40d bars from CV-based selection.
+
+    A RETIRED bar does not refuse — that is what retiring it on evidence bought — but it does
+    NOT go quiet either. w61 lifted the ARM 211 bar on a matched-control measurement whose own
+    value says it is not es-clearance, and the file it would let into WANTED
+    (`w40_ad211stdcorr`, CV 0.9701374733) outranks WANTED's current slot 2 on CV. So any run
+    that puts a formerly-barred arm in WANTED has to see the record it is standing on.
+    """
     bad = [(w, why) for w in sorted(wanted)
            for pat, why in WANTED_INELIGIBLE.items() if w.startswith(pat)]
     if bad:
@@ -340,6 +376,12 @@ def assert_wanted_eligible(wanted=WANTED):
         print("   Retire the WANTED_INELIGIBLE entry on evidence, in the same commit,")
         print("   or pick a different file. Do not edit this check to make a run pass.")
         raise SystemExit(3)
+    lifted = [(w, why) for w in sorted(wanted)
+              for pat, why in WANTED_RETIRED.items() if w.startswith(pat)]
+    for w, why in lifted:
+        print(f"\n⚠ NOTICE — WANTED names {w}, an arm whose ineligibility bar was RETIRED.")
+        print("   Read the record before treating its CV as ordinary:")
+        print("   " + why[:300] + "...")
 
 
 assert_wanted_eligible()

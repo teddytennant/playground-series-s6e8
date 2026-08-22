@@ -1,5 +1,119 @@
 # Research — playground-series-s6e8
 
+# ✅ THE ARM 211 BAR IS RETIRED — the registered four-base matched control PASSED (w61, 2026-08-22)
+
+`w40d_prereg.txt`, committed 2026-08-20 **before ARM 211 existed**, barred the arm from
+`check_selection.WANTED` whatever its CV: the nine `yadoy666` union94 streams come from an
+AGGREGATOR and their es-on-val status is UNKNOWN. w60 keyed that rule in (it had been registered
+and never keyed for two days) and registered — but deliberately did not run — the one test that
+may lift it, because w60 had a direct interest in lifting it. **w61 had none: w60's own build
+`w36_ad199stdcorr_ens4` (+1.127e-6) is strictly better than the ad211 lever (+3.599e-6) on the
+same pricer, so retiring ad211 could only ADD an inferior option.** The incentive pointed against
+the verdict it returned.
+
+`experiments/w61a_armctl.py`, CV recomputed from `submissions/oof_<stem>.npy` on the frozen SKF5
+seed-42 folds — re-derived from the raw artefact, not re-quoted from a table:
+
+| base | ARM 211 | ARM 202 | delta | in criterion |
+|---|---|---|---|---|
+| h3 | 0.9701331846 | 0.9701330214 | **+0.163e-6** | YES |
+| ens4 | 0.9701309541 | 0.9701305726 | **+0.381e-6** | YES |
+| rescale | 0.9701209816 | 0.9701200354 | **+0.946e-6** | YES |
+| rankraw | 0.9701044022 | 0.9701067554 | **−2.353e-6** | YES |
+| hybrid | 0.9701194945 | 0.9701232618 | −3.767e-6 | reported only |
+| logit | 0.9700578441 | 0.9700575874 | +0.257e-6 | reported only |
+| corrected-h3 | 0.9701374733 | 0.9701375891 | −0.116e-6 | w60's control, reproduced |
+
+> **Worst |delta| 2.353e-6 against the ±4e-6 rebuild floor. All six bases and the corrected pair
+> are inside it; mean −0.73e-6. VERDICT RETIRE, FAILURES 0.**
+
+**The mechanism, and it is the whole argument:** an es-on-val member's OOF is INFLATED, so the
+meta-combiner UP-weights it and the stack's cross-fitted CV RISES. **Inflation is a gain here,
+not a loss.** A null group delta therefore *bounds* the inflation the bar exists to refuse.
+⚠ **It is NOT es-clearance** — the nine streams' es status is still unknown and w40d's reasoning
+about them is still correct. What is measured is that ARM 211's CV **does not depend on them**.
+If a future arm puts weight on those streams the retirement does not carry over.
+
+**GATE M — matchedness, which the criterion assumes and does not check.** `w40f_run.sh` is
+`w38d_run.sh` with `ext_members15` appended and nothing else changed (identical `--drop`, both
+`--standardize`, both `make_h3`); `data/ext_members15/` holds exactly nine paired `y94_*`
+streams. w61a asserts both and a failure of either is a REFUSE whatever the deltas.
+
+**Also measured, unregistered:** the nine rank 4/5/9/10/12/39/70/82/84 on solo OOF AUC among 177
+members (0.9668–0.9688) — strong but unremarkable against `ravi200_l2stack1r` 0.96930. Nine
+strong members buying nothing as a group is the standing "a pipeline we already hold" result.
+
+### ⚠ RETIREMENT IS A THIRD STATE, NOT AN ABSENCE — `check_selection.WANTED_RETIRED`
+
+w60's clause requires the retiring reading to be *"quoted in the dict value in the same commit"*.
+**If retirement meant deleting the key there would be no value to quote it in**, and
+`w60b_ineligguard`'s REVERSE half (every key backed by a registration) would read a silent
+deletion and a considered retirement identically. So the key MOVES to `WANTED_RETIRED` carrying
+the original clause and all seven readings. `assert_wanted_eligible` no longer refuses on it but
+**prints a NOTICE** — the file it admits (`w40_ad211stdcorr`) outranks WANTED's slot 2 on CV, so
+admitting it silently would put a formerly-barred arm one keystroke from being a deadline pick.
+
+`w60b_ineligguard.py` gained `_check_retirement`: the artefact must exist, **its own verdict**
+must be RETIRE, its failure count zero, and every per-base delta it measured must appear verbatim
+in the dict value — re-read from the ARTEFACT, never typed into the guard, because a check whose
+expected values come from the same keystrokes as the thing checked is the w56 failure this file
+exists for. It carries a **NEGATIVE CONTROL** that makes it refuse three ways (a value quoting a
+delta the artefact does not measure; a key with no named evidence; an artefact whose verdict is
+KEEP, on a scratch copy). ⚠ `w60b`'s and `w59b`'s ad211 EXERCISE checks were **RE-POINTED to
+`w42_ad217stdcorr`, NOT SOFTENED**, with the reason at the check and each PAIRED with a new
+assertion that ad211 is now admitted — so an edit cannot satisfy one by breaking the other.
+
+### WHAT IT CHANGES, AND WHAT IT DOES NOT
+
+**No pick moves.** `w40_ad211stdcorr` (0.9701374733) is **2.53e-6 BELOW** WANTED slot 1
+`w36_ad199stdcorr` (0.9701400060) — inside the rebuild floor, so there is no CV case against
+slot 1. It is +22.4e-6 above slot 2 `w23_ad187stdcorr`, but slot 2 is a **PACK HEDGE** (w24 R1)
+whose value is not its CV; any move needs its own registered argument about the hedge.
+
+**The sender is untouched.** Blocked set byte-identical with the bar live and retired — 24 files
+both ways, symmetric difference empty — and the 08-23 plan still fills to ten with the same
+members. Three ad211 files change block REASON from `w40d-ineligible` to the w59 CV bar and stay
+blocked; `w40_ad211std_h3` was never gated (0.08% risk, under `P_MAX`).
+
+**What it discharges is governance, not price.** `w40_ad211stdcorr` is in auto-selection TIER 1
+at **p_joint 0.375**, the highest of any non-pick member — so until w61 the most likely
+auto-selection outcome after the pick itself was **a file our own preregistration forbade as a
+deadline pick**. w57a/w59a never read eligibility, so no price moves: standing exposure is still
++7.855e-6 and the lever still prices at +1.127e-6.
+
+---
+
+# 🔴 "THE BLOCK COUNT" IS NOT AN INVARIANT, AND TWO PREREGS REGISTERED IT AS ONE (w61, 2026-08-22)
+
+w59 registered *"blocks 4 → 7"*; w60 registered *"the ad211 key changes the BLOCK COUNT by zero
+— ✅ 7 blocks"*. `w26g_send.py` prints **24** today on a queue whose md5 has not changed since
+w60. The loop `break`s at `len(plan) >= cap`, so the printed number is **the blocks encountered
+before the plan filled to ten** — a function of the queue ORDER, and w60's reprice changed it.
+
+⚠⚠ **A COUNT THAT DEPENDS ON WHERE A LOOP STOPPED IS NOT AN INVARIANT. REGISTER THE SET, NOT ITS
+CARDINALITY.** Same family as "a rule enforced on the wrong COLUMN" and "a rule enforced on a
+column a different SCRIPT populates": well-formed, pointed at something that was not the thing.
+The correct form is the **set difference over the whole unsent queue**, which is order-
+independent — that is how w61 confirmed P6. Today's 24 decompose as **12** w40d-ineligible (all
+ad216/ad217), **11** w59-CV-bar, **1** member.
+
+---
+
+# ⛔ CATBOOST TUNING IS CLOSED — do not re-open it (w61, 2026-08-22)
+
+Fourth angle now closed by measurement rather than by opinion, alongside the original dataset
+(×4) and LightGBM tuning (×3):
+* the `rest` group — **35** ordinary XGB/LGBM/CatBoost members — is worth +0.000206 ± 0.000011
+  **in total**, i.e. **5.9e-6 each**;
+* the CatBoost function class is already in the pack four ways (`cat_lat`, `cat_native`,
+  `cat_native_ctr2`, `cat_natlat`), and `run_catboost.py --inner` is the honest tuning path,
+  built and run;
+* the one place foreign CatBoosts paid (**+10.3e-6 each**, adarsh1077) was measured to be a
+  property of the **PIPELINE we did not hold**, not of the function class. The operational rule
+  is *"prefer a pipeline we do not hold"*, NOT *"prefer CatBoost"*.
+
+---
+
 # ✅ THE LEVER IS ARMED — TWO ELIGIBLE FILES NOW CLEAR THE BAR *AND* PRICE ABOVE THE TIER (w60, 2026-08-22)
 
 w59 §7 named one build target and called it the highest-value object in the workspace: an

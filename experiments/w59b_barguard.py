@@ -93,10 +93,26 @@ def main() -> None:
     for stem, cv in (("w38_ad202std_h3", 0.9701330214),):
         check(f"still admits {stem} (eligible, over the bar)",
               SND.above_tier_reason(row(cv, stem), bar) is None, f"cv {cv:.10f}")
-    for stem, cv in (("w40_ad211std_h3", 0.9701331846),):
+    # ⚠ RE-POINTED AGAIN w61, NOT SOFTENED, and the reason lives here. w60 pointed this at
+    # `w40_ad211std_h3` to assert ad211 was refused on ELIGIBILITY rather than on CV. w61 then
+    # ran the four-base matched-control test w60_prereg registered — h3 +0.163, ens4 +0.381,
+    # rescale +0.946, rankraw -2.353 e-6, all inside the ±4e-6 rebuild floor — and RETIRED that
+    # bar (check_selection.WANTED_RETIRED). Keeping the old assertion would assert the
+    # retirement did not happen. The property under test is unchanged — "a still-barred arm is
+    # refused on eligibility BEFORE the CV bar is consulted" — and it now runs on the harder
+    # subject: `w42_ad217stdcorr` clears the CV bar by 49.4e-6, more than any file on disk, so
+    # this is what breaks first if the two halves of the test ever swap order. ⛔ Do not point
+    # it back at ad211.
+    for stem, cv in (("w42_ad217stdcorr", 0.9701788311219954),):
         blocked = SND.above_tier_reason(row(cv, stem), bar)
-        check(f"NOW blocks {stem} on w40d-ineligibility, not on CV",
-              bool(blocked) and "ineligible" in blocked, f"cv {cv:.10f} (clears the bar)")
+        check(f"blocks {stem} on w40d-ineligibility, not on CV",
+              bool(blocked) and "ineligible" in blocked, f"cv {cv:.10f} (clears the bar by 49e-6)")
+    # ...and the retired arm is no longer refused on eligibility. Paired with the line above so
+    # a future edit cannot satisfy one by breaking the other.
+    for stem, cv in (("w40_ad211std_h3", 0.9701331846),):
+        why = SND.above_tier_reason(row(cv, stem), bar)
+        check(f"and NO LONGER blocks {stem} on eligibility (w61 retirement)",
+              not (why and "ineligible" in why), f"cv {cv:.10f} -> {str(why)[:40]}")
 
     # ---- 5. FAIL-SAFE. Point the module at a missing artefact; the bar must vanish and BLOCK.
     keep = SND.HIJACKPRICE

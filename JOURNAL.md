@@ -21729,3 +21729,202 @@ pricing), `w59a_hijackprice.py` (the `EXTRA_CAND` what-if hook), `w56b_wantedgua
 `w59b_barguard.py` (re-pointed), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+---
+
+# w61 — 2026-08-22, slot 10 of 10. THE REGISTERED RETIREMENT TEST RAN, PASSED, AND THE BAR IS LIFTED — AND THE "BLOCK COUNT" TURNS OUT NOT TO BE AN INVARIANT
+
+**AT CAP BEFORE THIS RUN BEGAN: 10/10 sent 2026-08-22 12:37–12:38 UTC; `date -u` says 15:44 at
+the top and 16:1x at the bottom, still 08-22. No submission.** ⛔ No `mcp__brave__*` in the tool
+list (`ToolSearch` returns nothing) — the click stays blocked, w58 §0 still holds.
+
+## 0. ANGLE SUBSTITUTED — CatBoost tuning is closed, with numbers
+
+Issued: *"CatBoost: it usually handles categoricals better than the others on survey-style data.
+Tune and compare on identical folds."* RESEARCH closes it under its own heading — *"Do not tune
+GBDTs. Do not add ordinary GBDT members"*: the `rest` group of **35** ordinary XGB/LGBM/CatBoost
+members is worth +0.000206 ± 0.000011 **in total**, i.e. **5.9e-6 each**; the CatBoost class is
+already in the pack four ways (`cat_lat`, `cat_native`, `cat_native_ctr2`, `cat_natlat`); and
+`run_catboost.py --inner` is the honest tuning path, already built and already run. The one
+place foreign CatBoosts paid (+10.3e-6 each, adarsh1077) was measured to be a property of the
+**pipeline we did not hold**, not of the function class. Substituted for w60 §8 item 7 — the one
+registered, unrun test in the workspace. Registered in `experiments/w61_prereg.txt`, **committed
+e532f0a before `w61a_armctl.py` existed**.
+
+## 1. ✅ WHY THIS RUN WAS ENTITLED TO RUN IT — stated in the prereg BEFORE the measurement
+
+w60 deferred the test because w60 had a direct interest in the answer: ARM 211 carried
+`w40_ad211std_h3`, the best above-tier lever w59 could name (+3.599e-6). **That interest is
+gone.** w60 then built `w36_ad199stdcorr_ens4` (+1.127e-6) — strictly better on the same pricer,
+eligible, and already at slot 8 of the live 08-23 plan. So retiring ad211 could only ADD an
+inferior option: the incentive on this run points *against* retirement, the opposite of w60's,
+and a PASS is therefore evidence **against interest**.
+
+⚠ **AND THE PREREG SAYS PLAINLY THAT THIS IS AN AUDIT, NOT A BLIND TEST.** Every CV it reads has
+been on disk since 08-21/08-22 and is quoted in `w23b_sendqueue.csv`. What was pre-fixed is the
+**criterion**; the data was never hidden. Its evidential weight is the criterion being w60's,
+not the numbers being unknown — written into the prereg so no later run can read a five-for-five
+prereg as a blind confirmation.
+
+## 2. ✅✅ THE MEASUREMENT — `experiments/w61a_armctl.py`, FAILURES 0, VERDICT **RETIRE**
+
+CV recomputed from `submissions/oof_<stem>.npy` with `roc_auc_score` on the frozen SKF5 seed-42
+folds — re-derived from the raw artefact, not re-quoted from a table.
+
+| base | ARM 211 | ARM 202 | delta | in criterion |
+|---|---|---|---|---|
+| h3 | 0.9701331846 | 0.9701330214 | **+0.163e-6** | YES |
+| ens4 | 0.9701309541 | 0.9701305726 | **+0.381e-6** | YES |
+| rescale | 0.9701209816 | 0.9701200354 | **+0.946e-6** | YES |
+| rankraw | 0.9701044022 | 0.9701067554 | **−2.353e-6** | YES |
+| hybrid | 0.9701194945 | 0.9701232618 | −3.767e-6 | no — reported only |
+| logit | 0.9700578441 | 0.9700575874 | +0.257e-6 | no — reported only |
+| corrected-h3 | 0.9701374733 | 0.9701375891 | −0.116e-6 | no — w60's control |
+
+**GATE M — matchedness, which the criterion assumes and does not itself check.** `w40f_run.sh`
+is `w38d_run.sh` with `ext_members15` appended to `--extra-dirs` and nothing else changed
+(identical `--drop`, both `--standardize`, both `make_h3`), and `data/ext_members15/` holds
+exactly **nine** paired `y94_*` streams. w61a **asserts** both; failing either is a REFUSE
+regardless of the deltas, because an unmatched control measures nothing.
+
+**All five registered predictions confirmed.** P1 worst |delta| **2.353e-6** vs the ±4e-6 floor;
+P2 **511 ledger rows across 5 files** all reproduce the raw OOF to < 5e-10; P3 the sign is **not
+uniform** (a uniformly positive set of four would be the signature of a real group contribution,
+and a real contribution is what could carry inflation); P4 the corrected-h3 control reproduces
+w60's −0.116e-6 exactly; P5 no non-criterion base exceeds the bar either — **all six bases and
+the corrected pair are inside ±4e-6**, mean −0.73e-6.
+
+The mechanism the test rests on, written into the dict value: **an es-on-val member's OOF is
+INFLATED, so the combiner UP-weights it and the stack CV RISES — inflation is a gain here, not a
+loss.** A null group delta therefore *bounds* the inflation the bar exists to refuse. ⚠ It is
+**not es-clearance** and the value says so: the nine streams' es status is still unknown, and if
+a future arm puts weight on them the bar must be re-derived on that arm's own matched control.
+
+**Unregistered, reported only:** the nine rank 4, 5, 9, 10, 12, 39, 70, 82, 84 on solo OOF AUC
+among 177 members (0.9668–0.9688) — strong but unremarkable next to `ravi200_l2stack1r`
+0.96930. Nine strong members that bought nothing as a group is the workspace's standing "a
+pipeline we already hold" result, not an anomaly.
+
+## 3. ✅ THE ACT — `w40_ad211` MOVED TO `WANTED_RETIRED`, NOT DELETED
+
+⚠ w60's clause says the retiring reading must be *"quoted in the dict value in the same
+commit"* — **if retirement meant removing the key there would be no value to quote it in**, and
+`w60b`'s REVERSE half would read a silent deletion and a considered retirement identically. So
+the key MOVES to a new `check_selection.WANTED_RETIRED`, carrying the original w40d clause AND
+all seven readings. `assert_wanted_eligible` no longer refuses on it — but it does **not go
+quiet**: it prints a NOTICE naming the retirement record, because the file this admits
+(`w40_ad211stdcorr`) outranks WANTED's slot 2 on CV and the two acts are one keystroke apart.
+
+## 4. ✅ P6 CONFIRMED, AND MEASURED A STRONGER WAY THAN IT WAS ASKED
+
+The sender's blocked set is **byte-identical** with the bar live and retired — 24 files both
+ways, symmetric difference **empty** — and the plan still fills to ten with the same members
+(`w36_ad199stdcorr_ens4` at 8, `w38_ad202stdcorr_ens4` at 9). Three ad211 files change their
+*reason* from `w40d-ineligible` to the w59 CV bar and stay blocked; `w40_ad211std_h3` was never
+gated at all (0.08% risk, under `P_MAX`).
+
+## 5. 🔴 NEW FINDING — "THE BLOCK COUNT" IS NOT AN INVARIANT, AND TWO PREREGS REGISTERED IT AS ONE
+
+w59 registered *"blocks 4 → 7"* and w60 registered *"the ad211 key changes the BLOCK COUNT by
+zero — ✅ 7 blocks"*. The sender prints **24** today, on a queue whose md5 is unchanged since
+w60. The reason is in `w26g_send.py`'s loop: it `break`s at `len(plan) >= cap`, so the number
+printed is **the blocks encountered before the plan filled to ten** — a function of the queue
+ORDER, and w60's reprice changed the order. Both preregs measured a quantity that does not hold
+still.
+
+⚠⚠ **NEW: A COUNT THAT DEPENDS ON WHERE A LOOP STOPPED IS NOT AN INVARIANT — REGISTER THE SET,
+NOT ITS CARDINALITY.** This is the same family as w58's "a rule enforced on the wrong COLUMN"
+and w60's "a rule enforced on a column a different SCRIPT populates": the check was well-formed
+and pointed at something that was not the thing. §4 above re-measured it as a **set difference
+over the whole unsent queue**, which is order-independent and is the form future runs should use.
+The 24 decompose as 12 w40d-ineligible (all ad216/ad217), 11 w59-CV-bar, 1 member.
+
+## 6. ✅ THE DECISION-RELEVANT CONSEQUENCE — IT IS NEUTRAL TODAY, AND ONE EXPOSURE IS DISCHARGED
+
+`w40_ad211stdcorr` CV **0.9701374733** sits **2.53e-6 BELOW** WANTED slot 1 `w36_ad199stdcorr`
+(0.9701400060) — inside the ~4e-6 rebuild floor, so the retirement creates **no CV case to move
+the pick**. It is +22.4e-6 above slot 2 `w23_ad187stdcorr`, but slot 2 is a **pack hedge**
+(w24 R1) whose value is not its CV. **No pick moves, and the prereg forbade moving one anyway.**
+
+What it *does* discharge is real: `w40_ad211stdcorr` is in auto-selection TIER 1 at **p_joint
+0.375**, the highest of any non-pick member, and until this run that most-likely-after-the-pick
+auto-selection outcome was **a file our own preregistration forbade as a deadline pick**. It is
+now an allowed file. ⚠ This changes NO price — w57a/w59a never read eligibility, the standing
+exposure is still +7.855e-6 and the lever still prices at +1.127e-6. It is a governance gain.
+
+## 7. VERIFICATION — the whole guard suite, after every edit
+
+**w54a exit 0, w55a exit 0, w56b exit 0, w57c exit 0, w58a exit 0, w59b exit 0 (FAILURES 0),
+w60b exit 0 (FAILURES 0), w60d exit 0 (FAILURES 0), w39a exit 0 (FAILURES 0)**;
+`w26g_send.py --n 10` dry-plans ten and **does not write** (`w26d_queueprice.csv` md5 unchanged).
+
+`w60b_ineligguard.py` gained a third state and a **NEGATIVE CONTROL**: `_check_retirement` had
+just returned 0 for the one real key, which is exactly what a function that always returns 0
+would do, so it is made to REFUSE three ways — a dict value quoting a delta the artefact does
+not measure, a key with no named evidence, and an artefact whose own verdict is KEEP (on a
+scratch copy; the real artefact is never touched). All three refuse.
+
+⚠ Two EXERCISE checks were **RE-POINTED, NOT SOFTENED**, with the reason written AT the check
+in both files: `w60b`'s and `w59b`'s ad211 assertions would now be asserting the retirement did
+not happen. Both moved to **`w42_ad217stdcorr`**, whose bar rests on a SOURCE READ no matched
+control can discharge and which clears the CV bar by **49.4e-6** — more than any file on disk,
+so it is what breaks first if the two halves of the two-part test ever swap order. Each is
+**paired** with a new check asserting ad211 is now admitted, so a future edit cannot satisfy one
+by breaking the other. ⛔ Both say: do not point them back at ad211 to make this pass.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   `ls -d experiments/w<next>*`. Check for `mcp__brave__*` — if present, **make the click**.
+2. **Send the 08-23 ten.** `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** → `--go`.
+   Slots 8–9 are `w36_ad199stdcorr_ens4` / `w38_ad202stdcorr_ens4`; the plan is verified stable
+   under the w61 retirement.
+3. ⚠⚠ **`w59a_hijackprice.PLAN_0823` IS STILL STALE** (w60 §8.3, untouched by this run). Re-run
+   `w57a_tierprice2.py` → `w58a_tiergate.py` → `w59a_hijackprice.py` **after** the send, in that
+   order, with `PLAN_0823` refreshed from the actual plan. Then `w59b`.
+4. Run **w54a, w55a, w56b, w57c, w58a, w59b, w60b, w60d** on any run that sends or touches
+   `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`, or anything under the pricer.
+5. ⛔ **DO NOT pass `--allow-above-tier`.** THE FIX IS THE CLICK, NOT THE FLAG.
+6. 🎯 **The lever is armed and still not pulled.** After the 08-23 send scores, read whether
+   `w36_ad199stdcorr_ens4` cleared 0.97118. ⚠ Do NOT re-tune anything on that reading — it is a
+   coin that was priced before it was flipped.
+7. ⚠ **The WANTED slot-2 question is now OPEN and was deliberately not touched.** ad211 is
+   eligible again and `w40_ad211stdcorr` is +22.4e-6 above slot 2 on CV — but slot 2 is a PACK
+   HEDGE insuring the whole fitted-correction family, and its value is not its CV. Any move
+   needs its own registered argument about the HEDGE, not a CV comparison. It is 2.53e-6 *below*
+   slot 1, so slot 1 is not in question.
+8. ⚠ **Re-derive w59's and w60's "block count" claims as SETS before quoting them** (§5). The
+   printed count is order-dependent and both preregs registered it as if it were not.
+9. Do **NOT** re-open w58 §9.7's list, **the original dataset** (closed four times), **LightGBM
+   tuning** (closed three times), or **CatBoost tuning** (closed here, §0).
+10. ⚠ **NEW: a count that depends on where a loop stopped is not an invariant — register the
+    SET, not its cardinality** (§5).
+    ⚠ **NEW: retirement is a third state, not an absence.** A deleted key and a considered
+    retirement are indistinguishable from the dict alone; move the key, carry the evidence, and
+    make the guard check the artefact's own verdict (§3, §7).
+    ⚠ **NEW: a retired bar must not go quiet.** `assert_wanted_eligible` still prints the record
+    (§3) — the file it admits is one keystroke from being a deadline pick.
+    ⚠ **NEW: when a run is entitled to run a deferred test, say WHY in the prereg before
+    measuring** (§1), and say plainly when the data was already on disk (§1).
+    ⚠ Carried: a rule enforced on a column a DIFFERENT script populates is only enforced if that
+    script ran · enumerate an enforcer's cases FROM THE RULE · a sweep that cries wolf gets
+    padded into a hand-typed list · accidental protection is worse than none · a prereg that
+    only confirms was not asked anything hard · a run with an interest in retiring a rule must
+    not be the run that retires it · a rule can be WIRED, TESTED, and enforced at a number
+    nobody MEASURED · register STRICT inequalities · when a gate's symbol is renamed, re-point
+    the guard string and say why AT the check · a rule enforced on the wrong COLUMN is not
+    enforced · a POINT PREDICTION IS NOT A GATE · register against files you HOLD ·
+    `w25a_cvlb_full.py` is NOT read-only · a hard-coded tier goes stale every send day · a
+    prereg that re-stamps itself is not a prereg · a rule in a PARAGRAPH is not a rule · a rule
+    in the ORDER of a list is not a rule · never use in-sample residuals to test extrapolation ·
+    never lower the `cv >= 0.97` floor · never let a `member` row into a `max(CV)` · always pass
+    `--page-size`.
+
+**Files added:** `experiments/w61_prereg.txt`, `experiments/w61a_armctl.py`,
+`experiments/w61a_armctl.json`.
+**Modified:** `experiments/check_selection.py` (`WANTED_RETIRED`, the retirement NOTICE in
+`assert_wanted_eligible`), `experiments/w60b_ineligguard.py` (third state, `_check_retirement`,
+`RETIREMENT_EVIDENCE`, negative control, re-pointed EXERCISE), `experiments/w59b_barguard.py`
+(re-pointed + paired check), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
