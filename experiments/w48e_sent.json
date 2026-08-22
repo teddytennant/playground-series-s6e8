@@ -90,8 +90,12 @@
 "w29_ad194std_logit.csv",
 "w29_ad194std_rescale.csv",
 "w29_ad194stdcorr.csv",
+"w34_ad195std_hybrid.csv",
 "w34_ad195stdcorr.csv",
+"w34_ad196std_hybrid.csv",
+"w36_ad197std_hybrid.csv",
 "w36_ad199std.csv",
+"w36_ad199std_h3.csv",
 "w36_ad199std_hybrid.csv",
 "w36_ad199std_rescale.csv",
 "w36_ad199stdcorr.csv",
@@ -99,5 +103,11 @@
 "w37_cal_mkt_realmlp.csv",
 "w37_cal_om_xgb2.csv",
 "w37_cal_omid_tabm.csv",
-"w37_cal_ram_hgb.csv"
+"w37_cal_ram_hgb.csv",
+"w38_ad202std.csv",
+"w38_ad202std_rankraw.csv",
+"w38_ad202stdcorr.csv",
+"w40_ad211std.csv",
+"w40_ad211std_rankraw.csv",
+"w40_ad211stdcorr.csv"
 ]

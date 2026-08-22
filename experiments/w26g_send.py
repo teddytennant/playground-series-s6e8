@@ -119,6 +119,29 @@ def main():
           f"and fingerprinted")
 
     q = pd.read_csv(QUEUE)
+    # ⚠ THE QUEUE MUST BE KEYED TO TODAY (w53). w49 keyed `w48e_order.py`, the WRITER, to the UTC
+    # day so a registered list could never be written for the wrong one. Nothing keyed the READER,
+    # and the gap is not theoretical: w53 dry-ran this sender against the 08-22 CSV on the evening
+    # of 08-22 and it planned a ten that (a) omitted `w48_cal_hboyang_mix`, slot 1 of the
+    # registered 08-23 list, and (b) included two `logit`-family files. Both follow from the same
+    # mechanism -- every priority-1 row was already sent, so the plan fell through to the
+    # priority-0 tail, where no veto applies because `w48e` enforces the veto as priority -1 and
+    # DROPS the `vetoed` column before writing. A stale queue is an UNVETOED queue.
+    #
+    # A dry run is allowed to look at a queue for another day -- that is how a run at the cap
+    # inspects tomorrow's plan -- but it says so loudly. A real send refuses.
+    _day = str(q["plan_day"].iloc[0]) if "plan_day" in q.columns and len(q) else None
+    if _day != daystr:
+        _msg = (f"queue was written for {_day or 'AN UNSTAMPED DAY (pre-w53 artefact)'}, "
+                f"not today ({daystr})")
+        if a.go:
+            print(f"\n⛔ REFUSING TO SEND: {_msg}.\n"
+                  f"   Run `w48e_order.py --day {daystr} --write` first. Do not send off a stale "
+                  f"queue: its priority-1 band is another day's list, and the files behind it "
+                  f"carry no veto.")
+            return 1
+        print(f"\n⚠ DRY RUN AGAINST A QUEUE FOR ANOTHER DAY: {_msg}. The plan below is NOT the "
+              f"registered list for today and is NOT veto-filtered.")
     # `priority` pins `check_selection.WANTED` to the head (w28). A deadline pick that is never
     # submitted cannot be selected, and that outranks any public-LB ordering.
     if "priority" not in q.columns:

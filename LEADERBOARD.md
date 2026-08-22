@@ -1692,3 +1692,21 @@ can only add; our linear stacker subtracts, and weak decorrelated members act as
 highest CV ever built here**. The only file on disk in that range is `w42_ad217stdcorr`
 (+38.8e-6), currently vetoed on es-on-val grounds. `w48_cal_hboyang_mix` (slot 1, 08-23) is the
 registered test that decides it.
+
+## Snapshot 2026-08-22 ~13:0x UTC (w53 read)
+
+| | score | note |
+|---|---|---|
+| leader | 0.97141 | `Changye Li` (11:23) and `MILANFX` (00:34) tied |
+| 3rd | 0.97134 | `Maher el Ouahabi` |
+| **gold cut (14th)** | **0.97124** | `Atakan Aldemir` |
+| **us — `Teddy Tennant`** | **0.97118** | **rank 62** |
+
+Unchanged from w52's 12:5x read (rank 61 → 62 is field drift below us, not a move by us). The
+board's ~5e-5 overnight jump on 08-21→08-22 is what moved us from ~18 to the low 60s; the gold
+requirement is now **+40.9e-6 of CV** over the best sent file and **+30.8e-6 beyond the best CV
+ever built here**. Nothing on disk reaches it except the vetoed ARM 217 family — whose registered
+read (`w48_cal_hboyang_mix` vs `w48d_arm217.json`: ≥0.97116 HONEST, ≤0.97080 INFLATED) is slot 1
+of the 08-23 send.
+
+⚠ Team name on the board is **`Teddy Tennant`**, not `thtennant`. Grep for both.

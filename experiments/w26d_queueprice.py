@@ -90,11 +90,23 @@ MU = _fit.cv.mean()
 # support, which makes it BIGGER at -34.1e-6). It is not a model artefact.
 #
 # The correction lives in ONE place, w46c_predlb.py. Do not re-inline it here or anywhere.
-import w46c_predlb as W46  # noqa: E402
+# ⚠ THE MODEL IS w53a's M2, NOT w46c (changed w53, 2026-08-22). w46c's flat era LEVEL dummy
+# was refuted by the ten-file experiment w47b designed to test it: all three registered rules
+# fired against it (w52 §2), and w52b's leave-one-day-out comparison put the era x cv
+# INTERACTION ahead of the dummy on the full 12-day LODO (8.69 vs 9.59e-6) and on the era slice
+# (8.77 vs 12.82e-6). The era files do not sit a fixed distance below the line; they convert CV
+# to LB at 79% of the base slope. w52 §8.4 registered this rewire as the next run's job and
+# warned that the GATE below asserts against w30b and would hard-fail inside `w48e_order.py` on
+# the send path if the model were swapped without moving it. It has been moved, not deleted.
+#
+# The correction lives in ONE place, w53a_pricer.py. Do not re-inline it here or anywhere.
+import w53a_pricer as PR  # noqa: E402
+import w46c_predlb as W46  # noqa: E402  — SUPERSEDED; kept only for ERA_MIN_AD / new_era
 
 M = json.load(open(os.path.join(HERE, "w30b_corrterm.json")))
-C, RESID = M["coefs"], M["resid_sd_new"]
-RESID_ERA = W46.SD_NEW     # 10.69e-6 -- carries the uncertainty in the era term itself
+C = M["coefs"]             # w30b's coefficients, still used by the M0 comparison printed below
+RESID = PR.RESID_SD        # 7.72e-6 -- M2's in-sample residual sd, dof-corrected
+RESID_ERA = PR.SD_ERA      # 8.77e-6 -- M2's HELD-OUT era-slice RMSE under leave-one-day-out
 BEST_LB = 0.97118          # account best, w21_ad187corr_ens4
 STEP = 1e-5                # the LB reports to 5 decimals
 
@@ -109,41 +121,44 @@ def predict(cv, fam, standardised, corrected=False, stem=None):
     """Predicted public LB, in absolute AUC. `standardised` is the combiner-scaling flag,
     `corrected` the c_avg-correction flag (w30b).
 
-    ⚠ PASS `stem`. Without it this returns the RAW w30b prediction, which is known wrong by
-    -30e-6 for any ad>=195 build. The argument is optional only so the pre-w48 callers (w39b,
-    w39c, w39d) keep working unchanged; every file those three price is ad<=194, where raw and
-    corrected agree exactly. Any NEW caller must pass it."""
-    lb6 = C["const"] + C["cv_e6"] * (cv - MU) * 1e6 + C.get(f"fam[{fam}]", 0.0)
-    if standardised:
-        lb6 += C["std"]
-    if corrected:
-        lb6 += C["corr"]
-    if stem is not None and W46.new_era(stem):
-        lb6 += W46.ERA_SHIFT
-    return lb6 * 1e-6
+    ⚠ PASS `stem`. Without it this prices the file as PRE-ERA, which is wrong by the whole era
+    slope adjustment for any ad>=195 build. The argument is optional only so the pre-w48 callers
+    (w39b, w39c, w39d) keep working unchanged; every file those three price is ad<=194, where
+    era and non-era agree exactly. Any NEW caller must pass it."""
+    era = stem is not None and PR.new_era(stem)
+    return PR.predict_flags(cv, fam, standardised, corrected, era)
 
 
 def resid_sd(stem=None):
-    """The predictive sd for `stem`, in absolute AUC. Wider in the new era because the era
-    level term is itself estimated from only ERA_N=5 points."""
-    return (RESID_ERA if (stem is not None and W46.new_era(stem)) else RESID) * 1e-6
+    """The predictive sd for `stem`, in absolute AUC. Wider in the new era because M2's era
+    slope is estimated from 15 points and the era slice is where it is asked to extrapolate;
+    RESID_ERA is w52c's HELD-OUT leave-one-day-out RMSE on that slice, not an in-sample number."""
+    return (RESID_ERA if (stem is not None and PR.new_era(stem)) else RESID) * 1e-6
 
 
-# GATE. Re-predict the 60 files the model was fitted on and require its residual sd back.
-_fit["fam"] = _fit.stem.map(family)
-_fit["std"] = _fit.stem.map(is_std)
-_fit["corr"] = _fit.stem.map(is_corr)
-_r6 = (_fit.lb.values - np.array([predict(r.cv, r.fam, r.std, r.corr)
-                                  for r in _fit.itertuples()])) * 1e6
-# w25f divides the residual sum of squares by its DOF (n - p), not by n. Using np.std's
-# default ddof=0 here read 7.68e-6 against its 8.41e-6 and failed this gate on the first
-# run -- a real 9% discrepancy, not a rounding one, and precisely the kind of quiet
-# parameterisation slip the gate exists to catch. sqrt(60/50) = 1.095 accounts for it exactly.
-_dof = len(_fit) - len(C)
-_rsd = float(np.sqrt((_r6 ** 2).sum() / _dof))
-print(f"GATE: refitted-sample residual sd {_rsd:.2f}e-6 (dof {_dof}) vs w25f's "
-      f"{RESID:.2f}e-6 -- {'PASS' if abs(_rsd - RESID) < 0.5 else 'FAIL'}")
-assert abs(_rsd - RESID) < 0.5, "predict() does not reproduce w30b; nothing below is readable"
+# GATE. MOVED to M2 (w53), not deleted -- w52 §8's standing warning is that deleting the
+# self-check is the tempting shortcut when the model underneath it changes. It has caught two
+# real parameterisation slips already (raw-vs-centred CV, and ddof), and both were silent.
+#
+# The gate now re-predicts the 93 rows M2 was fitted on THROUGH `predict()` -- the public entry
+# point this file's callers use, including `w48e_order.py` on the send path -- and requires
+# w53a's own dof-corrected residual sd back. Note the era flag is passed via `stem`, so a
+# regression in the era routing (the exact thing this rewire changes) fails the gate loudly.
+_g = pd.read_csv(os.path.join(HERE, "w52b_cvlb93.csv"))
+_g6 = (_g.lb.values - np.array([predict(r.cv, r.fam, bool(r["std"]), bool(r["corr"]), r.stem)
+                                for _, r in _g.iterrows()])) * 1e6
+_dof = len(_g) - len(PR.NAMES)
+_rsd = float(np.sqrt((_g6 ** 2).sum() / _dof))
+print(f"GATE: M2 refitted-sample residual sd {_rsd:.3f}e-6 (dof {_dof}) vs w53a's "
+      f"{RESID:.3f}e-6 -- {'PASS' if abs(_rsd - RESID) < 0.01 else 'FAIL'}")
+assert abs(_rsd - RESID) < 0.01, "predict() does not reproduce w53a's M2; nothing below is readable"
+# Second gate, unchanged in spirit from w53a's: the WANTED deadline pick is the one row whose
+# true LB this workspace cares about. If a refit moves it, the pricer changed under the decision.
+_wp = predict(PR.WANTED_CV, family(PR.WANTED_STEM), is_std(PR.WANTED_STEM),
+              is_corr(PR.WANTED_STEM), PR.WANTED_STEM)
+print(f"GATE: {PR.WANTED_STEM} pred {_wp:.6f} vs actual {PR.WANTED_LB:.5f} -- "
+      f"{'PASS' if abs(_wp - PR.WANTED_LB) < 5e-6 else 'FAIL'}")
+assert abs(_wp - PR.WANTED_LB) < 5e-6, "M2 no longer reproduces the WANTED pick's actual LB"
 
 
 q = pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
@@ -173,7 +188,7 @@ q = q.sort_values(["priority", "pred_lb"], ascending=[False, False])
 _pin = q[q.priority == 1].file.tolist()
 print(f"PINNED to the head of the queue (check_selection.WANTED, unsent): {_pin or 'none'}")
 
-print(f"{len(q)} unsent files with a stored OOF vector, priced under w46c "
+print(f"{len(q)} unsent files with a stored OOF vector, priced under w53a M2 "
       f"(resid sd {RESID:.2f}e-6 pre-era / {RESID_ERA:.2f}e-6 for ad>={W46.ERA_MIN_AD}, "
       f"centred at mu={MU:.10f})\n")
 print("TOP 12 BY PREDICTED PUBLIC LB")

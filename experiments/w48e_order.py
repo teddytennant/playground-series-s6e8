@@ -381,6 +381,18 @@ for r in q[q.priority == 1].itertuples():
     pb = "     --  " if not np.isfinite(r.p_beat) else f"{r.p_beat:9.2e}"
     print(f"  {int(r.send_rank):3d} {r.file:28s} {r.cv:.10f} {r.pred_lb:8.5f} {pb}  {kind}")
 
+# ⚠ STAMP THE DAY INTO THE ARTEFACT (w53). w49 keyed the WRITER to the day so a list can never
+# be written for the wrong one. It did not key the READER. `w26g_send.py` reads this CSV with no
+# idea which day it was written for, and w53 dry-ran the consequence: with the 08-22 CSV still on
+# disk, all ten of its priority-1 rows are already sent, w26g skips them, falls through to the
+# priority-0 tail and plans a DIFFERENT ten -- one that omits `w48_cal_hboyang_mix` (slot 1 of the
+# registered 08-23 list, and the only live path to gold on this account) and includes two `logit`
+# files, which is the precise auto-selection exposure the VETO above exists to close. The veto is
+# NOT in this file's columns -- it is applied as priority -1 and the column is dropped -- so a
+# stale CSV carries no veto at all. One constant column closes it; w26g refuses to --go unless
+# this equals today's UTC date.
+q["plan_day"] = DAY
+
 if "--write" in sys.argv:
     q.drop(columns=["vetoed"]).to_csv(DST, index=False)
     print(f"\n  wrote {os.path.basename(DST)} -- {len(q[q.priority==1])} ranked, "

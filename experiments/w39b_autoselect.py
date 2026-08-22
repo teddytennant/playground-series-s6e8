@@ -53,6 +53,19 @@ q = q[(q.priority == 1) & (~q.sent.astype(str).str.lower().eq("true"))].copy()
 q = q.sort_values("send_rank")
 print(f"sent files with a public score: {len(full)}   |   queued for the 08-21 drain: {len(q)}")
 
+# ⚠ A CALIBRATION ROW IS NOT A CANDIDATE, AND IT MUST NOT BECOME THE BASELINE (w53).
+# `w48e_order.py` relabels a calibration send's family to "member". Left in, `w48_cal_hboyang_mix`
+# takes `max(CV)` below with its published OOF AUC of 0.9701815536 -- a RAW IMPORTED MEMBER's
+# self-reported number, which w51 read as early-stopped on the rows it publishes, and which is
+# not a cross-fitted stack CV and not comparable to one. Every "vs the CV leader" figure in this
+# report was then measured against it, turning the exposure into a meaningless -60e-6. Drop the
+# rows before anything reads them.
+_cal = q.fam.astype(str).eq("member")
+if _cal.any():
+    print(f"  dropping {int(_cal.sum())} calibration row(s) -- no stack price, not a candidate, "
+          f"not a CV baseline: {', '.join(q[_cal].stem)}")
+q = q[~_cal].copy()
+
 CV = dict(zip(full.stem, full.cv))
 LB = dict(zip(full.stem, full.lb))
 for r in q.itertuples():

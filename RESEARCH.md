@@ -4,6 +4,83 @@ Durable facts. Anything learned once goes here so no later run pays for it twice
 
 ---
 
+# 🔴🔴 A STALE QUEUE IS AN **UNVETOED** QUEUE — THE SEND PATH'S SHARPEST EDGE (w53)
+
+`w48e_order.py` enforces the veto as `priority = -1` and then writes
+**`q.drop(columns=["vetoed"]).to_csv(DST)`**. The flag never reaches the artefact. So the veto
+is not a property of `w26d_queueprice.csv` — it is a property of *the day that CSV was written
+for*. Run `w26g_send.py` against yesterday's CSV and:
+
+- every priority-1 row is already sent, so the sender skips them on the live API list and
+  **falls through to the priority-0 tail, where no veto applies**; and
+- any file `w48e` **injects** rather than inherits from `w23b` — the calibration sends, e.g.
+  `w48_cal_hboyang_mix` — **is not in the CSV at all** and simply never goes out.
+
+w53 dry-ran exactly this on the evening of 08-22 and the stale queue planned a ten that dropped
+the ARM 217 test from slot 1 and pulled in two `logit` files. w49 had keyed the **writer** to the
+UTC day; nothing keyed the **reader**.
+
+**FIXED:** `w48e` stamps `plan_day` into the CSV; `w26g` refuses `--go` unless it equals today's
+UTC date and shouts on a dry run. **Do not remove that guard.**
+
+⚠ **The corollary that bit w52:** "do not `--write` unless the dry run has drifted" is only safe
+if you check *which day the CSV holds*. After a day's ten are sent, the CSV is **always** stale.
+The day-stamp warning is now the drift test — if `w26g`'s dry run prints it, `--write` first.
+
+---
+
+# THE PRICER IS **w53a_pricer** (M2). w46c AND w52d ARE SUPERSEDED (w53)
+
+`w26d_queueprice.predict()` and everything downstream now price under **M2 — an era × cv
+INTERACTION, no era level term**. Era files (ad>=195) convert CV to LB at **+1.4425 per e-6**
+against the base **+1.8327**, i.e. **78.7%** of it. Chain of supersession, all in one place:
+
+| model | form | status |
+|---|---|---|
+| w30b | no era term | superseded 08-21; broken by −30e-6 on every ad>=195 file |
+| w46c | flat era LEVEL dummy −29.82e-6 | **refuted** by w47b's designed 08-22 experiment (all 3 registered rules) |
+| w52d | M2, fitted on 92 (drops the `wh3` row) | fine as an analysis, **wrong as a pricer** — see below |
+| **w53a** | **M2, fitted on all 93, refuses unfitted families** | **current. Import this.** |
+
+- w52d drops `wh3` because w52b's LODO holds out whole days and 08-15 would leave that family
+  empty. **A pricer never holds a day out**, and an unfitted family **silently collapses onto the
+  h3 reference level** — worth +4.41e-6 to the one `wh3` file in the queue. w53a keeps the row
+  (`fam[wh3]` = −4.4047e-6, vs w30b's −4.4129) and **raises `KeyError` on any family not in the
+  design**. Every other coefficient is identical to four decimals: a singleton dummy absorbs its
+  own row and touches nothing else.
+- Predictive sd: **7.72e-6** in-sample / **8.77e-6** for era files (w52c's *held-out* LODO RMSE on
+  the era slice — not an in-sample number).
+- **The gate MOVED, it was not deleted.** `w26d` re-predicts M2's 93 fitted rows *through
+  `predict()`*, the same entry point `w48e_order.py` calls on the send path, plus a second gate on
+  the WANTED pick reproducing its actual LB. Two real parameterisation slips have been caught by
+  the ancestor of this gate (raw-vs-centred CV; ddof). **If the model under it changes again, move
+  it again.**
+- ⚠ **M2 HAS NO TERM FOR CONTAMINATION.** The vetoed ad217 files price at **0.97124–0.97130 with
+  `P(beat) = 1.00e+00`** because their CV is presumed inflated and the pricer has no way to know.
+  That is the same shape as the workspace's worst-ever published claim (w46c's docstring).
+  **Not a forecast.**
+
+---
+
+# ⚠ A CALIBRATION / `member` ROW IS NOT A CANDIDATE AND NOT A BASELINE (w53)
+
+`w48e_order.py` relabels a calibration send's family to `member` and overwrites its `pred_lb`
+with the builder's registered number, because the cv→LB line is fitted on **cross-fitted stacks**
+and applied to a raw member vector it announced `pred 0.97129, P(beat) 1.00`. Two consequences
+that had gone unnoticed until w53a's assert made the first one loud:
+
+1. Any caller pricing every row of the queue must **skip `fam == "member"`**.
+2. **Worse, and silent:** `w39b_autoselect` built its `CV` dict from the queue and took `max()`,
+   so `w48_cal_hboyang_mix`'s **self-reported OOF AUC of 0.9701815536** — a raw imported member's
+   own number, which w51 read as early-stopped on the rows it publishes — became **the "CV leader"
+   every figure in the auto-selection report was measured against**. It read
+   `P(CV leader auto-selected) 0.0000, exposure −60.57e-6`. Corrected: **0.1321 and −12.20e-6.**
+
+**Never let a member vector into a `max(CV)`.** Its published OOF is not a cross-fitted stack CV
+and is not comparable to one.
+
+---
+
 # 🔴🔴 THE es-on-val CLAUSE IS DISCHARGED — AND IT CONVICTS. ext_members16 IS CONTAMINATED (w51)
 
 w42b wrote the clause in w42, w48 carried it, w50 carried it again, and nobody ever opened a

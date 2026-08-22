@@ -65,6 +65,17 @@ def price(stems_q, limit, sd, seed):
                 p_gap_worse_10e6=float((gap < -10.0).mean()))
 
 
+# ⚠ THIS ANALYSIS IS HISTORICAL (noted w53). Its subject, `w36_ad199std_logit`, was sent on
+# 2026-08-21 and is scored, so `w48e_order.py` no longer carries it in the queue and there is
+# nothing left to drop. The conclusion it reached is already enforced -- the stem is in w48e's
+# VETO dict by name -- so exit cleanly rather than crash on a KeyError and send a later run
+# debugging a question that has already been answered and acted on.
+if DROP not in set(q.stem):
+    print(f"{DROP} is no longer in the queue (sent 2026-08-21, scored "
+          f"{LB.get(DROP, 'n/a')}). This simulation has no subject left; its finding lives in "
+          f"w48e_order.VETO. Nothing to do.")
+    raise SystemExit(0)
+
 keep = [s for s in q.stem if s != DROP]
 print(f"CV leader {LEADER} ({CV[LEADER]:.10f}); dropping {DROP} "
       f"({(CV[DROP]-CV[LEADER])*1e6:+.1f}e-6 of CV)\n")

@@ -19910,3 +19910,196 @@ THE ARM 217 TEST, then nine drains); all ten pass rows/NaN/md5/CV-reproduction. 
 **Modified:** `experiments/w23b_sendqueue.csv`, `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **Submitted 10 of 10 for the 08-22 UTC day — w47b's full registered experiment.**
+
+---
+
+# 2026-08-22 — w53, slot 2 of 10. **AT CAP, 10/10 already sent — no submission.** Did the registered pricer rewire, and in dry-running it found a **live defect that would have mis-sent tomorrow's ten and dropped the ARM 217 test**.
+
+`date -u` **12:54 UTC on 08-22** at start. `/proc` scan clean — nothing for this competition
+detached or inherited. `ls experiments/w5*` shows w50/w51/w52 taken, so this is **w53**. Kaggle
+token alive. API reports **10 submissions on 2026-08-22 (UTC)** — w52 sent w47b's registered ten
+at 12:37–12:38. **At the cap. Research and code only, per the hard rules.**
+
+⚠ **The ANGLE as issued — "Feature engineering: interactions, in-fold target and count
+encodings, careful categorical treatment"** — is on the do-not-reopen list as **FE variants**,
+and has been on every run's list since w41. It is also moot at 0 slots. w52 §8 registered a
+specific next task instead (§8.4, the pricer rewire) and that is what this run did.
+
+## 1. ✅ THE REGISTERED REWIRE IS DONE — `w26d_queueprice.predict()` NOW PRICES UNDER M2
+
+w52 refuted w46c's flat era **level dummy** with the experiment w47b designed to test it, and
+w52d fitted the replacement (**M2**, an era × cv **interaction**: era files convert CV to LB at
+**+1.443 per e-6 against the base +1.833, 78.7% of it**). But the send path still priced under
+w46c, because `predict()` **asserts** it reproduces w30b's residual sd and delegating it trips
+that assert **inside `w48e_order.py`, on the critical send path**. w52 deferred it to "a run
+with slots".
+
+**Doing it at 0 slots is the SAFER side of that trade, not the worse one**, and w52 had it
+backwards. The 08-23 window opens in ~11h. A rewire that breaks the ritual is discovered *now*,
+by a dry run, instead of tomorrow with the window open — which is the exact failure w51 §3 had
+to fix. §2 below is the proof that this was the right call.
+
+**`experiments/w53a_pricer.py`** is the M2 pricer as a module. `w26d` imports it; nothing is
+re-inlined. **The gate MOVED, it was not deleted** (w52 §8's new standing warning is that
+deleting it is the tempting shortcut). It now re-predicts M2's own 93 fitted rows *through the
+public entry point the send path calls*, and there is a second gate on the WANTED pick:
+
+    GATE: M2 refitted-sample residual sd 7.720e-6 (dof 81) vs w53a's 7.720e-6 -- PASS
+    GATE: w36_ad199stdcorr pred 0.971181 vs actual 0.97118 -- PASS
+
+**One deliberate difference from w52d, and it is not cosmetic.** w52d drops the single `wh3` row
+— it had to, because w52b's leave-one-day-out holds out whole days and holding out 08-15 left
+family `wh3` with no rows. **A pricer has no such constraint**, and dropping it does real damage,
+because an unfitted family silently collapses onto the **h3 reference level**. There is exactly
+one `wh3` file in the unsent queue and w30b prices `fam[wh3]` at **−4.41e-6**, so w52d-as-pricer
+would have quietly handed that file +4.41e-6 it has not earned. w53a fits all 93 and — the part
+that matters more than the coefficient — **raises `KeyError` on any family not in the design**.
+Measured cost of keeping the row: **every other coefficient identical to four decimals**, and
+`fam[wh3]` comes back at **−4.4047e-6** against w30b's −4.4129. A singleton dummy absorbs its own
+row and touches nothing else. *A silent fallback to the reference level is how a pricer lies.*
+
+**Re-pricing the queue is NOT the small change w52 §4 assumed** (it quoted w46b's +0.47e-6 for the
+free-rider ordering, a pre-M2 number, without re-measuring):
+
+    88 unsent, 52 of them era: era files move -18.08 .. +35.05e-6 (mean +6.40)
+    ORDERING: 67 of 88 positions change.  Top file UNCHANGED.
+
+It does not touch 08-23 — that order is a hardcoded registered list — but "the pricer cannot
+reorder it anyway" was true for the wrong reason.
+
+## 2. 🔴🔴 THE DEFECT — A STALE QUEUE IS AN **UNVETOED** QUEUE, AND IT WAS LIVE FOR TOMORROW
+
+Dry-running the chain end to end is what this run was for, and the chain was **not** clean.
+
+w49 keyed **`w48e_order.py`, the WRITER**, to the UTC day, so a registered list can never be
+written for the wrong one. **Nothing keyed the READER.** `w26g_send.py` reads
+`w26d_queueprice.csv` with no idea which day it was written for. And w52 §8.2's instruction —
+*"do not `--write` unless the dry run has drifted"* — was written believing the CSV already held
+the right day's list. **It does not.** It held the **08-22** list, whose ten rows are now all
+sent.
+
+I dry-ran the sender against it rather than reasoning about it. The result:
+
+| | registered ORDER_0823 | what the stale queue actually planned |
+|---|---|---|
+| slot 1 | **`w48_cal_hboyang_mix` — THE ARM 217 TEST** | `w27_ad188stdcorr` |
+| contents | 10 registered, veto-filtered | a different ten, **including `w27_ad188raw_logit` and `w27_ad188std_logit`** |
+
+Two independent harms, one mechanism. Every priority-1 row is already sent, so `w26g` skips them
+on the live API list and **falls through to the priority-0 tail** — where:
+
+- 🔴 **`w48_cal_hboyang_mix` is absent entirely.** It is injected by `w48e`, not by `w23b`. So the
+  ARM 217 test would simply not have gone out. Per w52 §5 that read is **the only live path to
+  gold on this account**, and it would have been dropped silently, on a day whose ten looked full.
+- 🔴 **No veto applies in the tail.** `w48e` enforces the veto as `priority = -1` and then
+  **`q.drop(columns=["vetoed"]).to_csv(...)`** — the flag never reaches the artefact. So the two
+  `logit` files planned above carry no veto and nothing would have stopped them. `logit` carries
+  **fam +145.3e-6**, the largest family term by 4.2×, on a low CV; that is the precise
+  auto-selection exposure the VETO dict exists to close, and `check_selection` still reports
+  **nothing is selected**, so Kaggle auto-picks on best *public* score.
+
+**FIXED IN CODE, both halves.** `w48e_order.py` stamps `plan_day = DAY` into the written CSV;
+`w26g_send.py` **refuses `--go`** unless that equals today's UTC date, and shouts on a dry run:
+
+    ⚠ DRY RUN AGAINST A QUEUE FOR ANOTHER DAY: queue was written for AN UNSTAMPED DAY
+      (pre-w53 artefact), not today (2026-08-22). The plan below is NOT the registered
+      list for today and is NOT veto-filtered.
+
+Then, because **w52's own drift test has now fired**, I ran `w48e_order.py --day 2026-08-23
+--write`. All ten verify (296,302 rows, no NaN, md5, CV reproduces from the stored OOF), 19
+vetoed and pushed to the back, and the sender now plans **exactly ORDER_0823 with
+`w48_cal_hboyang_mix` first**. Writing is safe at 0 slots and the new guard means an 08-23-stamped
+queue cannot be sent on 08-22 by accident.
+
+## 3. ✅ EVERY DOWNSTREAM CONSUMER RE-RUN — TWO BROKE, BOTH FOR REAL REASONS
+
+Not asserted, run: `w39a` OK (0 failures), `w39c` OK, `w39b` and `w39d` **crashed**.
+
+- **`w39d_logithazard`** — `KeyError: 'w36_ad199std_logit'`. Not the rewire: its subject was sent
+  on 08-21 and `w48e` drops scored rows. The analysis is **historical** and its finding is already
+  enforced (the stem is in `w48e.VETO` by name). Now exits cleanly saying so, instead of sending a
+  later run to debug a question already answered and acted on.
+- **`w39b_autoselect`** — `KeyError: family 'member'`. **w53a's new assert caught a real bug that
+  the old silent fallback had been hiding.** `w48e` relabels a calibration send's family to
+  `member`; the old pricer collapsed it onto h3 and priced it anyway. That is exactly what
+  `w48e`'s own comment forbids ("A CALIBRATION FILE MUST NOT CARRY A STACK PRICE" — applied to a
+  raw member vector the linear form announced `pred 0.97129, P(beat) 1.00`).
+  ⚠ **And the deeper half was worse than the crash.** `w39b` builds `CV` from the queue and takes
+  `max()`, so `w48_cal_hboyang_mix` — a **raw imported member's self-reported OOF AUC of
+  0.9701815536**, which w51 read as early-stopped on the rows it publishes — was becoming **the
+  "CV leader" that every figure in the auto-selection report is measured against.** The report
+  read `P(CV leader in the auto-selected set) 0.0000` and `exposure −60.57e-6` — both meaningless.
+  With calibration rows dropped before anything reads them:
+
+      CV leader overall: w40_ad211std_h3  cv 0.9701331846
+      P(CV leader lands in the auto-selected set)  0.1321  (was 0.0000)
+      exposure that actually bites (better pick):  -12.20e-6  (was -60.57e-6)
+
+  This does not supersede **w50b**, which is the binding bound on the real WANTED pick.
+
+## 4. THE BOARD — UNCHANGED FROM w52's READ, AND THE GOLD PICTURE IS THE SAME
+
+Read 13:0x UTC. **Us 0.97118, rank 62** (was 61 at 12:5x — field drift, not a move by us).
+Gold cut (14th, `Atakan Aldemir`) **0.97124**. Leader **0.97141** (`Changye Li` / `MILANFX`).
+w52 §5's arithmetic stands: gold wants **+40.9e-6 of CV** over the best sent, i.e. **+30.8e-6
+beyond the best CV ever built here**, and the only thing on disk in that range is the vetoed
+ARM 217 family. **Tomorrow's slot 1 decides whether that veto is re-argued or final.**
+
+⚠ Note for whoever reads the queue print tomorrow: the vetoed ad217 files now price at
+**0.97124–0.97130 with `P(beat) = 1.00e+00`**. That is M2 doing its job on a CV it has no reason
+to distrust — **M2 has no term for contamination**. It is the same shape of number w46c's
+docstring flags as the workspace's worst-ever published claim. **Do not read it as a forecast.**
+
+## 5. ⛔ UNCHANGED BLOCKERS — RE-VERIFIED, NOT ASSUMED
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS.** Re-probed this run, cheaply: `brave`,
+  `brave-browser`, `chromium`, `google-chrome`, `firefox` **all absent from PATH**;
+  `~/.config/BraveSoftware/Brave-Browser` **absent**; **no `curl` on the box**; `DISPLAY` unset;
+  **no browser MCP tool in this session's toolset**. There is no path to the toggle from here.
+  WANTED `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr` — both sent and selectable.
+  **This needs Teddy, in his own browser.** Deadline **08-31**. Largest unmanaged risk on the
+  account.
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 6. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid (**never** `ps`/`pgrep`), and
+   **`ls experiments/w<next>*`** before claiming a run number.
+2. **Send the 08-23 ten.** The queue is **already written and day-stamped `2026-08-23`** (§2), so
+   the chain is just `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** (confirm slot 1 is
+   `w48_cal_hboyang_mix` and the day-stamp warning is **gone**, which is now the proof it is
+   today's list) → `--go`. Re-run `w48e_order.py --day 2026-08-23 --write` **only** if `w23b`
+   changed the queue. ⚠ **If the day has rolled past 08-23, `w48e` will refuse — that is correct.
+   ADD a key to `ORDERS`, never edit another day's.**
+3. **Read `w48_cal_hboyang_mix` against `w48d_arm217.json`'s REGISTERED thresholds — ≥0.97116
+   HONEST, ≤0.97080 INFLATED.** §4 is a reason to read it *carefully*, **not** a reason to move
+   the threshold. HONEST → ARM 217 (+38.8e-6 of CV) is the only thing on disk in gold's range and
+   the veto must be re-argued on the evidence. INFLATED → the veto stands, **there is no path to
+   gold from disk**, say so plainly and play for the best CV-selected private score.
+4. Do **NOT** re-open: **w46c's level dummy (refuted — and now unwired, w53 §1)**, hill climbing /
+   NNLS / non-negative blends, the es-on-val status of `ext_members16`, ARM 216 as a deadline
+   pick, `d_five` as signal, the import line, the within-group redundancy test, the member
+   side-scale axis, KS as a gate, GBDT tuning, error analysis / OOF segmentation, fold/seed
+   averaging, the top-level blend-weight search, **FE variants (this run's issued ANGLE)**,
+   **the original dataset (closed three times, measured NEGATIVE)**, the stacker `C`, the
+   selection write path, the es-bias deflation constant, a fourth sweep of the public kernel
+   pool, the era shift, the logit veto, the w37 es-bias readout, per-fold rank normalisation.
+5. ⚠ **Never use in-sample residuals to test extrapolation.** ⚠ **Never lower the `cv >= 0.97`
+   floor.** ⚠ **A send list that is only in a prereg is not a send list.** ⚠ **A send list not
+   keyed to its day is a bug waiting to fire.** ⚠ **`blend_lab --build` ships the whole family and
+   the queue globs `submissions/` — veto and register a new pack's files IN THE SAME RUN.**
+   ⚠ **Do not delegate a priced module on the send path without MOVING the self-check it asserts
+   against.** ⚠ **NEW: a STALE queue is an UNVETOED queue — `w48e` drops the `vetoed` column on
+   write and enforces it only as `priority`, so yesterday's CSV carries no veto at all. The
+   day-stamp guard now catches it; do not remove it.** ⚠ **NEW: never let a calibration/`member`
+   row into a `max(CV)`. A raw member's self-reported OOF is not a cross-fitted stack CV, and it
+   silently became the baseline of the whole auto-selection report** (§3).
+
+**Files added:** `experiments/w53a_pricer.py` + `.json`.
+**Modified:** `experiments/w26d_queueprice.py` (M2 + moved gate), `w48e_order.py` (day stamp),
+`w26g_send.py` (day guard), `w39b_autoselect.py` (calibration rows), `w39d_logithazard.py`
+(clean exit), plus the regenerated `w23b_sendqueue.csv`, `w26d_queueprice.csv` (**now the
+day-stamped 08-23 plan**), `w39a_audit.csv`, `w39b_autoselect.json`, `w39c_gapaudit.{csv,json}`,
+`RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
