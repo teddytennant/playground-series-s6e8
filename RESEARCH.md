@@ -10001,3 +10001,85 @@ not have an explanation, and the honest word is **unexplained**. Two candidates 
    anything. The instrument that *would* have teeth is the correlation of residuals after
    projecting out the held pack — more expensive, never run, and only worth it if the import
    line is ever reopened, which per §above it should not be.
+
+---
+
+## ⛔ w46c's ERA LEVEL DUMMY IS REFUTED (w52, 2026-08-22). THE CORRECTION IS A SLOPE.
+
+w46c corrected w30b with a **flat −29.82e-6 level dummy** for every ad≥195 file. w47b designed
+the 08-22 ten specifically to test that, and the test came back against it:
+
+    five PROBES (INSIDE cv support, cv6 +47..+55)   mean residual  −13.02e-6
+    five DRAINS (ABOVE cv support, cv6 +73..+80)    mean residual  −31.91e-6
+
+**w46c corrects both by the same −29.82.** The miss is not a level; it scales with CV.
+All three of w47b's registered rules were read (`experiments/w52a_read.py`):
+R1 p = −13.02 → **MIXED** (1.02e-6 off the CV-REGION branch, which therefore **did NOT fire** —
+the +29.8e-6 upward re-pricing of 19 queue files was NOT applied); R2 r5 = −31.91 → H1 confirmed
+high-CV side; R3 slope **−0.675 per e-6, t −4.27** → **BAD CV SLOPE, the fix is a slope**.
+
+### Four forms, compared by LEAVE-ONE-DAY-OUT on all 93 scored files (`w52b`, `w52c`)
+
+| form | | full 12-day LODO | era-slice |
+|---|---|---|---|
+| M0 no era term | w30b | 12.92e-6 | 18.83e-6 |
+| M1 era level dummy | **w46c** | 9.59 | 12.82 |
+| **M2 era × cv** | **w52d** | **8.69** | **8.77** |
+| M3 both | | 9.21 | 11.30 |
+
+An era **dummy is unidentified inside the era rows alone** (all are ad≥195, collinear with the
+intercept) — the joint fit must run on the full 93. In M3 the dummy flips sign (+24.39, t +1.86):
+once the slope is right, the dummy carries nothing.
+
+⚠ **PROVISIONAL**: on 08-21 alone M3 edges M2, 10.11 vs 10.28e-6 (0.17e-6 on n=5 — a tie, but
+w52c's pre-set binary test fired "disagree" and it is recorded as it fired). **Not in doubt on
+any cut: M1's dummy is beaten by both slope-carrying forms.**
+
+⚠ Benign gotcha: family `wh3` has **one** file in the whole scored set (`blend159av_wh3`, 08-15),
+so holding out 08-15 makes `fam[wh3]` unidentified and LODO returns UNIDENTIFIED for every form.
+Drop that row. Nothing to do with the era terms.
+
+### `experiments/w52d_predlb.py` — import THIS, not w46c
+
+Base CV slope **+1.833** per e-6; **era files convert at +1.443 (79% of it)**. Held-out era
+predictive sd **8.77e-6**. Verifies: WANTED `w36_ad199stdcorr` (cv 0.9701400060) → **0.971181**
+vs actual **0.97118**.
+
+⛔ **THE SEND PATH STILL PRICES UNDER w46c, DELIBERATELY.** `w26d_queueprice.predict()` adds
+`W46.ERA_SHIFT` and then **asserts** it reproduces w30b's residual sd. Delegating it to M2 trips
+that assert **inside `w48e_order.py`, on the critical send path** — the w51 §3 failure class.
+**Rewire only on a day with slots to re-verify the chain, and update the assert rather than
+deleting it.** Deferring is cheap: registered day-orders are hardcoded lists the pricer cannot
+reorder, and w46b priced the whole free-rider ordering at +0.47e-6 total.
+
+## 🔴 THE BOARD JUMPED ~5e-5 ON 08-22. WE FELL FROM RANK ~18 TO 61.
+
+| | 08-21 | **08-22** |
+|---|---|---|
+| us | 0.97118, rank ~18 | 0.97118, **rank 61** |
+| gold cut (14th) | 0.97120 | **0.97124** |
+| leader | 0.97136 | **0.97141** |
+
+Cause checked: `omidbaghchehsaraei/hill-climbing-ensemble` (31 votes, published 08-22).
+**Not something we are missing** — hill climbing is closed here *with a mechanism*: a climber can
+only add, a linear stacker can subtract, and weak-but-decorrelated members act as corrections,
+which a climber cannot represent. That closure stands; do not re-open on vote count.
+
+### What the gap costs in CV (`w52d`, for a file like the WANTED pick)
+
+    0.97119  ~58      cv 0.9701462   +6.2e-6 vs best SENT    −3.8e-6 vs best BUILT
+    0.97121  ~30      cv 0.9701601  +20.1e-6                +10.0e-6
+    0.97124  14 GOLD  cv 0.9701809  +40.9e-6                +30.8e-6
+    0.97141   1       cv 0.9702987 +158.7e-6               +148.7e-6
+
+⚠ Everything past the first row **extrapolates** beyond the fitted range (era files span cv
+0.9701041..0.9701371). It measures the size of the gap in CV units; it does **not** promise that
+reaching that CV delivers that LB. It does **not** touch selection — final picks are on CV.
+
+**Nothing on disk reaches gold.** Best CV ever built here is `w50_ad216stdcorr` 0.9701501; gold
+wants +30.8e-6 beyond it. The entire ad187→ad216 programme bought ~+10e-6 of CV.
+**The one exception:** `w42_ad217stdcorr` at cv 0.9701788 is **+38.8e-6 above best sent**, i.e.
+in range — but it is vetoed because w51 found all five `ext_members16` fail an es-on-val gate.
+**`w48d_arm217.json`'s registered test decides it: ≥0.97116 HONEST, ≤0.97080 INFLATED**, and
+`w48_cal_hboyang_mix` is **slot 1 of the 08-23 list**. Wanting it to be HONEST is not a reason to
+move that threshold — registering it in advance was the whole point.

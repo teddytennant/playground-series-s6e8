@@ -1666,3 +1666,29 @@ Movement since the 08-21 02:4x read: MILANFX rejoined the lead at 0.97136 (03:33
 moved in five consecutive reads — it has sat at 0.97120 since 08-20.** The leaders are
 pulling away at the very top while the 0.97118–0.97121 band stays static, which is what a
 compressed board looks like when everyone is out of ideas at the same time.
+
+## 2026-08-22 ~12:5x UTC (w52) — THE FIELD PULLED AWAY
+
+**Us: 0.97118, rank 61** (team name on the board is `Teddy Tennant`, not `thtennant`).
+Five straight prior reads had us at ~18. The field gained ~5e-5 in a day; we gained 0.
+
+| rank | score |
+|---|---|
+| 1 Changye Li / MILANFX | 0.97141 |
+| 10 Leo | 0.97128 |
+| **14 (gold cut) Atakan Aldemir** | **0.97124** |
+| 20 jazivxt | 0.97122 |
+| 30 | 0.97121 |
+| **61 Teddy Tennant** | **0.97118** |
+
+Gold was 2e-5 away on 08-21; it is **6e-5** away now. Ten files sent 08-22 (w47b's registered
+experiment) — best of them tied 0.97118, none beat it, and none was meant to.
+
+Likely driver: `omidbaghchehsaraei/hill-climbing-ensemble` (31 votes, published 08-22). Checked
+and **not** a technique we are missing — hill climbing is closed here with a mechanism (a climber
+can only add; our linear stacker subtracts, and weak decorrelated members act as corrections).
+
+⚠ Per `w52d`, gold now needs **+40.9e-6 of CV** above our best sent — **+30.8e-6 beyond the
+highest CV ever built here**. The only file on disk in that range is `w42_ad217stdcorr`
+(+38.8e-6), currently vetoed on es-on-val grounds. `w48_cal_hboyang_mix` (slot 1, 08-23) is the
+registered test that decides it.

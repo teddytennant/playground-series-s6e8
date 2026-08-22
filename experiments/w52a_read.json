@@ -1,0 +1,92 @@
+{
+ "day": "2026-08-22",
+ "n_sent": 10,
+ "probes": [
+  {
+   "stem": "w40_ad211std_rankraw",
+   "cv": 0.9701044022,
+   "lb": 0.97114,
+   "resid_e6": -6.041922673949429
+  },
+  {
+   "stem": "w38_ad202std_rankraw",
+   "cv": 0.9701067554,
+   "lb": 0.97114,
+   "resid_e6": -10.410237654912002
+  },
+  {
+   "stem": "w34_ad196std_hybrid",
+   "cv": 0.970109125,
+   "lb": 0.97113,
+   "resid_e6": -16.457805849245943
+  },
+  {
+   "stem": "w34_ad195std_hybrid",
+   "cv": 0.9701108333,
+   "lb": 0.97113,
+   "resid_e6": -19.628973825680518
+  },
+  {
+   "stem": "w36_ad197std_hybrid",
+   "cv": 0.9701124257,
+   "lb": 0.97114,
+   "resid_e6": -12.584993193121008
+  }
+ ],
+ "drains": [
+  {
+   "stem": "w36_ad199std_h3",
+   "cv": 0.9701354276,
+   "lb": 0.97116,
+   "resid_e6": -31.280978972425544
+  },
+  {
+   "stem": "w38_ad202std",
+   "cv": 0.9701305726,
+   "lb": 0.97116,
+   "resid_e6": -35.97686377976306
+  },
+  {
+   "stem": "w40_ad211std",
+   "cv": 0.9701309541,
+   "lb": 0.97117,
+   "resid_e6": -26.685053549191373
+  },
+  {
+   "stem": "w40_ad211stdcorr",
+   "cv": 0.9701374733,
+   "lb": 0.97118,
+   "resid_e6": -27.68364860950001
+  },
+  {
+   "stem": "w38_ad202stdcorr",
+   "cv": 0.9701375891,
+   "lb": 0.97117,
+   "resid_e6": -37.89861158542962
+  }
+ ],
+ "R1": {
+  "p": -13.024786639381778,
+  "sem": 3.74,
+  "verdict": "MIXED",
+  "action": "fit an era term and a cv-region term jointly on the pooled 15; report both."
+ },
+ "R2": {
+  "r5": -31.905031299261918,
+  "r3_excl_stdcorr": -31.314298767126655,
+  "verdict": "H1 CONFIRMED on the high-CV side"
+ },
+ "R3": {
+  "slope": -0.6749406308127718,
+  "slope_se": 0.15810169026169424,
+  "level": 20.1104266399617,
+  "level_se": 10.713920799369411,
+  "n": 15,
+  "verdict": "BAD CV SLOPE -- the fix is a re-estimated slope, not a dummy"
+ },
+ "named_pair": {
+  "above": -32.45254712580525,
+  "below": -12.584993193121008,
+  "split": 19.867553932684245
+ }
+}

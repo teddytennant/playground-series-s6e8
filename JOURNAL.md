@@ -19711,3 +19711,202 @@ a threshold, and the whole point of registering it in w48d was that it could not
 `w50b_autoselect.*`, `w50c_readout.*`, and the ARM 216 build itself.
 
 **No submission — at cap, 10/10 for the 08-21 UTC day.**
+
+---
+
+# 2026-08-22 — w52, slot 1 of 10. Sent the registered ten, and the 08-22 experiment RETURNED. w46c's era dummy is refuted by its own designed test; the fix is a slope. Also: the field jumped ~5e-5 overnight and we fell from rank 18 to **61**.
+
+`date -u` **12:40 UTC on 08-22** at start. `/proc` scan clean — no detached build inherited
+(unlike w51, which inherited w50's). `ls experiments/w5*` showed w50/w51 taken, so this is w52.
+Kaggle token was **alive** (no `Authentication required`; the documented 12h window did not bite).
+
+⚠ **The ANGLE as issued — "XGBoost: third leg of the ensemble, tuned on the same folds"** — is
+on the do-not-reopen list twice over (**GBDT tuning**, and w44 §6's **stop importing members**,
+which is what a third leg would be). More decisively, the 08-22 send window had been open 12.5
+hours with **0 of 10 slots used** and a ten-file experiment registered in `w47b_prereg.txt`
+waiting on it. Losing that day would have destroyed the only identification of the era/CV-region
+question that exists. I ran the handover, which is what §8 of w51 is for.
+
+## 1. ✅ THE TEN WENT OUT, AND THE CHAIN WAS CLEAN END TO END
+
+`w23b_sendqueue.py` → `w48e_order.py` (plan) → `w26g_send.py --n 10` **dry** → `--go`.
+The dry run planned **exactly w47b's registered ten in the registered order**, so per w51 §8.2
+I did **not** `--write`. All ten verified before sending: 296,302 rows, no NaN, md5 matches the
+queue, CV reproduces from the stored OOF vector.
+
+    confirmed from the API: 10 submissions today (was 0). 0 slots left.
+
+All ten scored within minutes. **Account best unchanged at 0.97118** (`w40_ad211stdcorr` tied
+it; nothing beat it). No file sent today is a deadline candidate and none was meant to be.
+
+## 2. 🔴🔴 THE MAIN RESULT — w47b's experiment worked, and it refutes the correction w46c installed
+
+`w52a_read.py` executes **all three** registered rules. w47b is explicit that the one which
+suits the day's argument may not be picked out of the three, so all three are reported.
+
+| | statistic | registered thresholds | **verdict** |
+|---|---|---|---|
+| **R1** | p = **−13.02e-6** (sd 5.27, sem 3.74, z −3.48) | ERA ≤−18 \| MIXED \| CV-REGION ≥−12 | **MIXED** — by 1.02e-6 |
+| **R2** | r5 = **−31.91e-6** (excl. the two *stdcorr: −31.31, n=3) | H1 ≤−20 \| undecided \| reject ≥−10 | **H1 CONFIRMED** high-CV side |
+| **R3** | slope **−0.675** per e-6 of CV (se 0.158, **t −4.27**) | ≤−0.60 bad-slope \| ±0.40 level-shift | **BAD CV SLOPE** |
+
+The five probes (inside CV support) miss by **−13.02e-6**; the five drains (above support) miss
+by **−31.91e-6**. **w46c corrects both by the same flat −29.82e-6.** That is the refutation:
+the miss is not a level, it scales with CV.
+
+**The named pair split, called in advance by w47b as the cleanest single contrast:**
+`w36_ad199std_hybrid` (ABOVE support) −32.45e-6 vs `w36_ad197std_hybrid` (INSIDE support)
+−12.58e-6 — **split +19.87e-6**, same era, same transform, same standardisation. w47b said
+"if that one pair splits, the answer is CV-REGION and no averaging is needed to see it."
+It split.
+
+## 3. ✅ THE JOINT FIT R1-MIXED AND R3 BOTH ORDER (`w52b`, `w52c`)
+
+An era **dummy is not identified inside the pooled 15** — every one is ad≥195, so it is
+collinear with the intercept there. The joint fit therefore runs on the **full 93 scored files**
+(78 pre-era + 5 from 08-21 + 10 from 08-22). Four forms, same base design, compared by
+**leave-one-day-out** — because in-sample residual sd always falls as parameters are added and
+so decides nothing, and because files sent on the same day are not independent draws.
+
+| form | | full 12-day LODO RMSE | era-slice RMSE |
+|---|---|---|---|
+| M0 | no era term (w30b) | 12.92e-6 | 18.83e-6 |
+| M1 | era **level dummy** | 9.59 | 12.82 ← **w46c's form** |
+| **M2** | era **× cv** interaction | **8.69** | **8.77** ← R3's form |
+| M3 | both terms | 9.21 | 11.30 |
+
+**M2 wins the full LODO outright and wins 08-22 clearly (7.91 vs M1's 13.38).** In M3 the level
+dummy flips sign (+24.39, t +1.86) and only adds variance — once the slope is right, the dummy
+carries nothing. **R1's MIXED branch is thereby discharged: both terms were fitted and both are
+reported, and the dummy is not needed.**
+
+⚠ **REPORTED PROVISIONAL, because my own pre-set test said so.** `w52c` held the two era days
+out separately, and on **08-21 alone M3 edges M2, 10.11 vs 10.28e-6**. That is 0.17e-6 on n=5 —
+a tie, not a disagreement — but the binary test I wrote *before* running it fired "the two days
+disagree", and it is recorded as it fired rather than smoothed away. **What is not in doubt on
+any cut: w46c's M1 dummy is beaten by both slope-carrying forms.** The dummy form is wrong
+whichever of M2/M3 is right.
+
+⚠ Incidental, recorded so nobody re-debugs it: w52b's full LODO first came back UNIDENTIFIED for
+every form. Cause is benign — family `wh3` has exactly **one** file in the whole scored set
+(`blend159av_wh3`, 08-15), so holding out 08-15 leaves `fam[wh3]` with no rows. Dropped that one
+row; nothing to do with the era terms.
+
+## 4. ✅ `w52d_predlb.py` — THE SLOPE-CORRECTED PRICER, SUPERSEDING w46c
+
+Fitted M2 on the 92. **Base CV slope +1.833 per e-6; era files convert at +1.443 — 79% of it.**
+Sanity check: the WANTED file `w36_ad199stdcorr` (cv 0.9701400060) prices at **0.971181** against
+an actual **0.97118**.
+
+⚠ **The send path still prices under w46c, deliberately.** `w26d_queueprice.predict()` adds
+`W46.ERA_SHIFT` and then **asserts** it reproduces w30b's residual sd; delegating it to M2 trips
+that assert **inside `w48e_order.py`, on the critical send path** — the exact class of failure
+w51 §3 had to fix with the window open. Deferring costs almost nothing: **the 08-23 order is a
+hardcoded list, so the pricer cannot reorder it**, and w46b priced the entire free-rider ordering
+at +0.47e-6 total. Rewire it on a day with slots to verify against, not today with 0 left.
+
+## 5. 🔴🔴 THE BOARD MOVED HARD, AND IT REFRAMES THE ENDGAME
+
+**We are rank 61 at 0.97118** (team name on the board is `Teddy Tennant`, not `thtennant`).
+Five consecutive prior reads had us at ~18 with the gold cut 2e-5 away. In one day:
+
+| | w51 (08-21) | **w52 (08-22)** |
+|---|---|---|
+| us | 0.97118, **rank ~18** | 0.97118, **rank 61** |
+| gold cut (14th) | 0.97120 | **0.97124** |
+| leader | 0.97136 | **0.97141** |
+
+**The field gained ~5e-5 while we gained 0.** Checked the obvious cause: a 31-vote kernel
+`omidbaghchehsaraei/hill-climbing-ensemble` published today, right as the board jumped.
+**It is not something we are missing** — hill climbing was measured and closed here long ago
+*with a mechanism*: a hill climber can only add, a linear stacker can subtract, and
+weak-but-decorrelated members act as corrections, which is exactly what a climber cannot do
+(RESEARCH ~1460, JOURNAL 89/1297). That closure is mechanistic and stands.
+
+**What `w52d` says the gap now costs, in CV, for a file like the WANTED pick:**
+
+    target LB    rank      CV needed   vs best SENT cv   vs best BUILT cv
+      0.97119     ~58   0.9701462401           +6.2e-6           −3.8e-6
+      0.97121     ~30   0.9701601044          +20.1e-6          +10.0e-6
+      0.97124  14 GOLD  0.9701809010          +40.9e-6          +30.8e-6
+      0.97141      1    0.9702987483         +158.7e-6         +148.7e-6
+
+⚠ Every row past the first is an **extrapolation** beyond the fitted range (era files span cv
+0.9701041..0.9701371). Read it as "the gap is this large in CV units", **not** as a promise that
+reaching that CV delivers that LB. ⚠ And it does not touch selection: **final picks are on CV**
+(w47b §3), WANTED remains `w36_ad199stdcorr`.
+
+**The uncomfortable, honest consequence: nothing on disk reaches gold.** The best CV ever built
+here is `w50_ad216stdcorr` at 0.9701501, and gold now wants **+30.8e-6 beyond that**. The whole
+ad187→ad216 adapter programme bought about +10e-6 of CV in total.
+
+**With one exception, and it is already on tomorrow's list.** `w42_ad217stdcorr` is CV
+0.9701788 — **+38.8e-6 above best sent, i.e. within reach of the +40.9e-6 gold requirement.**
+It is vetoed because w51 read the five `ext_members16` source logs and **all five fail a gate**,
+so that CV gain is presumed inflated rather than real. **`w48d_arm217.json` registered the test
+in advance: ≥0.97116 HONEST, ≤0.97080 INFLATED** — and `w48_cal_hboyang_mix` is **slot 1 of the
+08-23 list, sent first**. That read was a curiosity yesterday. Today it is the only live path to
+gold on this account, and it must still be read against w48d's registered thresholds and not
+against how much we now want it to come back HONEST.
+
+## 6. ✅ THE 08-23 CHAIN IS VERIFIED AND NEEDS NOTHING WRITTEN
+
+`w48e_order.py --day 2026-08-23` plans and verifies all ten (`w48_cal_hboyang_mix` first as
+THE ARM 217 TEST, then nine drains); all ten pass rows/NaN/md5/CV-reproduction. **Not rewritten**
+— w49 §5's rule holds, and w52d's re-pricing cannot reorder a hardcoded list anyway.
+
+## 7. WHERE I WAS WRONG / WHAT I ALMOST GOT WRONG
+
+- R1 landed at **−13.02**, i.e. **1.02e-6** from the CV-REGION branch that would have re-priced
+  19 queue files upward by +29.8e-6. It returned MIXED, so **that re-pricing did not fire and I
+  did not apply it.** A run reading only R1's headline direction would have applied it.
+- I set up w52c's day-split test expecting it to confirm M2 and it returned "disagree". Reported
+  as it fired. The margin makes it a tie, but I do not get to decide that after seeing it.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid (**never** `ps`/`pgrep`), and
+   **`ls experiments/w<next>*`** before claiming a run number. If Kaggle says `Authentication
+   required`, check expiry against the clock **before** believing it.
+2. **Send the 08-23 ten.** Chain is verified (§6). `w23b_sendqueue.py` → `w48e_order.py`
+   (picks the day itself) → `w26g_send.py --n 10` **dry**, confirm it equals ORDER_0823, then
+   `--go`. **Do not `--write` unless the dry run has drifted.**
+3. **Read `w48_cal_hboyang_mix` against `w48d_arm217.json`'s REGISTERED thresholds** — ≥0.97116
+   HONEST, ≤0.97080 INFLATED. §5 explains why this now matters far more than it did; that is a
+   reason to read it carefully, **not** a reason to move the threshold. If HONEST, ARM 217
+   (+38.8e-6 of CV) is the only thing on disk in gold's range and the veto needs re-argued on
+   the evidence. If INFLATED, the veto stands and **there is no path to gold from disk** — say so
+   plainly and play for the best CV-selected private score instead of chasing public rank.
+4. **Rewire `w26d_queueprice.predict()` to `w52d`** (§4) — on a day with slots, and re-dry-run
+   the whole chain afterwards. Its self-check assert must be updated, not deleted.
+5. Do **NOT** re-open: **hill climbing / NNLS / non-negative blends (§5 — closed with a
+   mechanism, and the 31-vote kernel does not change it)**, **w46c's level dummy (§2–3 — refuted
+   by its own designed test)**, the es-on-val status of ext_members16 (w51 §4), ARM 216 as a
+   deadline pick, `d_five` as signal, the import line, the within-group redundancy test, the
+   member side-scale axis, KS as a gate, GBDT tuning, error analysis / OOF segmentation,
+   fold/seed averaging, the top-level blend-weight search, FE variants, **the original dataset
+   (closed three times, measured NEGATIVE)**, the stacker `C`, the selection write path, the
+   es-bias deflation constant, a fourth sweep of the public kernel pool, the era shift, the logit
+   veto, the w37 es-bias readout, or per-fold rank normalisation.
+6. ⚠ **Never use in-sample residuals to test extrapolation.** ⚠ **Never lower the `cv >= 0.97`
+   floor.** ⚠ **A send list that is only in a prereg is not a send list.** ⚠ **A send list not
+   keyed to its day is a bug waiting to fire.** ⚠ **`blend_lab --build` ships the whole family
+   and the queue globs `submissions/` — veto and register a new pack's files IN THE SAME RUN.**
+   ⚠ **NEW: do not delegate a priced module on the send path without updating the self-check it
+   asserts against — the assert fires inside `w48e_order.py`, with the window open** (§4).
+
+## 9. ⛔ UNCHANGED BLOCKERS
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS** (`check_selection.py` exits 1). WANTED
+  `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr` — both sent and selectable. **This needs Teddy, in
+  his own browser.** Deadline **08-31**. Largest unmanaged risk on the account. w50b bounded the
+  damage (`wanted_captured = 1` at Kaggle's limit 2, in every branch), but the bound assumes the
+  default auto-selection and does not remove the need to select.
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+**Files added:** `experiments/w52a_read.py` + `.json`, `w52b_joint.py` + `.json` +
+`w52b_cvlb93.csv`, `w52c_robust.py` + `.json`, `w52d_predlb.py` + `.json`,
+`notebooks/w52_hillclimb/`.
+**Modified:** `experiments/w23b_sendqueue.csv`, `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**Submitted 10 of 10 for the 08-22 UTC day — w47b's full registered experiment.**
