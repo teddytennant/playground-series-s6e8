@@ -1,0 +1,49 @@
+w57 PRE-REGISTRATION — re-pricing the final-selection click on the LIVE tiers.
+Written 2026-08-22 ~14:05 UTC, BEFORE experiments/w57a_tierprice2.py existed or ran.
+
+CONTEXT. `w45a_tierprice.py`'s GATE A fired this run: the auto-selection tiers it hard-coded
+on 2026-08-21 have MOVED. The 10 files sent 2026-08-22 12:37-12:38 changed both:
+
+    auto-slot 1  public 0.97118   4 files -> 5   (+ w40_ad211stdcorr, CV 0.9701374733)
+    auto-slot 2  public 0.97117   5 files -> 7   (+ w38_ad202stdcorr, + w40_ad211std)
+
+Every click price published in RESEARCH.md (+0.00 / +15.77 / +21.74 / +35.15e-6) prices the
+4-member tier and is therefore VOID. This re-prices on the live tier, same math, same beta,
+same conservative corr, same tau sweep.
+
+⚠ SEPARATELY: w45a's LIMIT-2 model draws one file from tier 1 and one from tier 2. That is
+wrong whenever tier 1 holds >= 2 files, which it now does (5). The displayed 0.97118 is a
+ROUNDED value; the true public scores are distinct, so the top TWO by true score are both
+inside tier 1 and tier 2 is never reached. Both models are reported; MODEL B is the correct
+one and MODEL A is retained only for comparability with the published figure.
+
+    MODEL A (w45a's, retained for comparability): one draw from tier 1, one from tier 2.
+    MODEL B (correct): the auto-selected pair is a uniformly random 2-subset of tier 1.
+
+REGISTERED PREDICTIONS. Bands are wide on purpose; a band that only my point estimate can
+land in tests nothing.
+
+  R1  limit-1 cost of the `w36_ad199stdcorr` branch (it IS the WANTED pick): |cost| <= 1.0e-6.
+      Re-checks w45a's P2 on the enlarged file set.
+
+  R2  limit-1 cost of the NEW branch `w40_ad211stdcorr`: in (0, 6.0]e-6.
+      Rationale: its dCV against the pick is only -2.53e-6 and w45a measured cost ~ 1.09*|dCV|.
+
+  R3  limit-1 uniform-tiebreak average over the FIVE tier-1 branches: in [15, 21]e-6,
+      and STRICTLY BELOW w45a's published 4-branch +21.74e-6.
+      Rationale: the added 5th branch is far cheaper than the three it dilutes.
+
+  R4  MODEL B uniform cost over the 10 pairs: in [5, 12]e-6, and STRICTLY BELOW w45a's
+      published limit-2 figure of +15.77e-6.
+
+  R5  P(the WANTED pick is inside the auto-selected 2) under MODEL B uniform = 0.400 exactly,
+      DOWN from 0.500 at the 4-member tier. Arithmetic check, not a discovery.
+
+  R6  GATE B (w18a's P6: M = w*I) still holds, max |M - w*I| < 1e-6, on the enlarged set.
+
+  R7  DIRECTION OF THE DAY'S 10 SENDS on the click price: NET FAVOURABLE. Concretely R3 and
+      R4 both come in below their w45a counterparts. If either comes in ABOVE, the day's
+      sends made the unclicked-toggle exposure WORSE and that must be written up as such.
+
+WHAT NO BRANCH OF THIS BUYS. Nothing here changes WANTED, which is decided on CV. The click
+remains a human browser action, still blocked on this box. This prices it; it does not do it.
