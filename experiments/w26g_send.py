@@ -101,6 +101,24 @@ def main():
     ap.add_argument("--go", action="store_true", help="actually submit. Without it, plan only.")
     ap.add_argument("--n", type=int, default=DAILY_CAP, help="max files to send this run")
     ap.add_argument("--tag", default="w26g", help="prefix for the submission message")
+    # ⛔ THE VETO IS A DEFERRAL UNTIL SOMETHING MAKES IT A BLOCK (w54). `w48e_order.py` encodes
+    # the veto as `priority = -1` and this sender sorts on priority descending, so a vetoed file
+    # merely goes to the BACK of the plan. That is safe only while the queue is longer than the
+    # slots that remain, and w54a computed the date it stops being true: on 2026-08-22 there were
+    # 82 unsent files and 90 slots left before the 08-31 deadline, so a mechanical drain at the
+    # cap reaches the first vetoed file on 2026-08-29 and sends all 19 of them by the deadline --
+    # including `w50_ad216std_logit`, the logit family term on the highest CV base on disk, which
+    # `w48e` calls "the single most dangerous file in submissions/". While `check_selection`
+    # reports nothing selected, Kaggle auto-selects on best PUBLIC score, which is precisely the
+    # exposure the veto exists to close.
+    #
+    # So the filter is here, it defaults to ON, and it is deliberately NOT conditional on a live
+    # `check_selection` read: an API hiccup must not silently un-veto the queue. Fail safe.
+    # Retiring a veto is an evidence decision and belongs in `w48e.VETO`, one entry at a time,
+    # with the reason written down -- not in a flag on the send line.
+    ap.add_argument("--allow-vetoed", action="store_true",
+                    help="send priority<0 files anyway. Only defensible once selection is "
+                         "confirmed made; retire the VETO entry in w48e_order.py instead.")
     a = ap.parse_args()
 
     rows = api_submissions()
@@ -138,10 +156,16 @@ def main():
             print(f"\n⛔ REFUSING TO SEND: {_msg}.\n"
                   f"   Run `w48e_order.py --day {daystr} --write` first. Do not send off a stale "
                   f"queue: its priority-1 band is another day's list, and the files behind it "
-                  f"carry no veto.")
+                  f"carry a stale day's veto.")
             return 1
+        # ⚠ NOT "carries no veto" any more (w54). The priority<0 filter above is unconditional, so
+        # a stale CSV's vetoed rows are still blocked. What a stale CSV loses is everything the
+        # veto has learned SINCE it was written -- `w48e.VETO` is applied at WRITE time and the
+        # `vetoed` column is dropped, so a row vetoed today reads as priority 0 in yesterday's
+        # artefact and sails through. Re-write, don't reason about it.
         print(f"\n⚠ DRY RUN AGAINST A QUEUE FOR ANOTHER DAY: {_msg}. The plan below is NOT the "
-              f"registered list for today and is NOT veto-filtered.")
+              f"registered list for today, and it carries only the veto as it stood on "
+              f"{_day or 'the day it was written'}.")
     # `priority` pins `check_selection.WANTED` to the head (w28). A deadline pick that is never
     # submitted cannot be selected, and that outranks any public-LB ordering.
     if "priority" not in q.columns:
@@ -169,11 +193,15 @@ def main():
     # A dry run plans the full --n regardless of slots left, so a slot at the cap can still
     # SEE tomorrow's queue and check it is sane. Only a real send is clamped by `left`.
     cap = a.n if not a.go else min(a.n, max(left, 0))
-    plan, seen_md5 = [], set()
+    plan, seen_md5, blocked = [], set(), []
     for r in q.itertuples():
         if len(plan) >= cap:
             break
         if r.file in sent_names:
+            continue
+        if int(getattr(r, "priority", 0)) < 0 and not a.allow_vetoed:
+            # Not "skip": BLOCKED. Collected and reported after the plan so it cannot scroll off.
+            blocked.append(r.file)
             continue
         p = os.path.join(SUB, r.file)
         m = r.md5 if isinstance(getattr(r, "md5", None), str) else None
@@ -197,8 +225,25 @@ def main():
         seen_md5.add(real)
         plan.append(r)
 
+    if blocked:
+        print(f"\n  ⛔ {len(blocked)} VETOED file(s) skipped, not sent (w54). Reasons are in "
+              f"`w48e_order.py`'s VETO dict:")
+        for f in blocked[:8]:
+            print(f"       {f}")
+        if len(blocked) > 8:
+            print(f"       ... and {len(blocked) - 8} more")
+        print("     A vetoed file is unsendable while `check_selection` reports nothing "
+              "selected.")
+        print("     Retire the entry in w48e_order.py on evidence; do NOT pass --allow-vetoed.")
+
     if not plan:
-        print("\nnothing to send: the queue is drained.")
+        print("\nnothing to send: the queue is drained of everything sendable.")
+        if blocked:
+            print("  ⚠ SLOTS WILL GO UNFILLED. That is the intended trade: the brief's "
+                  "\"an extra\n    submission can never hurt\" is FALSE on this account while "
+                  "nothing is selected,\n    because Kaggle then auto-selects on best PUBLIC "
+                  "score. Build something new and\n    non-vetoed to fill them; do not reach "
+                  "for the veto list.")
         return 0
 
     print(f"\nplan, {len(plan)} file(s):")

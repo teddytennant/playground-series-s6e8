@@ -1710,3 +1710,23 @@ read (`w48_cal_hboyang_mix` vs `w48d_arm217.json`: ≥0.97116 HONEST, ≤0.97080
 of the 08-23 send.
 
 ⚠ Team name on the board is **`Teddy Tennant`**, not `thtennant`. Grep for both.
+
+## 2026-08-22 13:1x UTC (w54)
+
+Unchanged from w53's 13:0x read — no move by us (at cap since 12:38).
+
+| | team | score |
+|---|---|---|
+| 1 | Changye Li | 0.97141 |
+| 1 | MILANFX | 0.97141 |
+| 3 | Maher el Ouahabi | 0.97134 |
+| 14 (gold cut) | Atakan Aldemir | 0.97124 |
+| ~62 | **us** | **0.97118** |
+
+Gold needs **+40.9e-6 of CV** over the best sent, i.e. **+30.8e-6 beyond the best CV ever built
+here**. Only the vetoed ARM 217 family is on disk in that range; 08-23 slot 1
+(`w48_cal_hboyang_mix`) is the registered read that decides whether its veto is re-argued.
+
+⚠ **Our 0.97118 is a four-way tie on the account** (`w40_ad211stdcorr`, `w36_ad199stdcorr`,
+`w29_ad194stdcorr`, `w27_ad190stdcorr`). That tie IS the auto-selection tier (w54) — while
+nothing is selected, Kaggle picks two of them and we do not choose which.

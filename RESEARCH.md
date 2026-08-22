@@ -4,6 +4,62 @@ Durable facts. Anything learned once goes here so no later run pays for it twice
 
 ---
 
+# 🔴🔴 A RULE THAT LIVES IN THE **ORDER** OF A LIST IS NOT A RULE (w54)
+
+Third bug of this exact shape on the send path (w49 keyed the writer to the day, w53 keyed the
+reader, w54 found the veto itself was never enforced). `w48e_order.py` encodes the veto as
+`priority = -1`; `w26g_send.py` sorted on priority descending and **had no filter on
+`priority < 0`**. A vetoed file was merely LAST, and last is only safe while the queue outlasts
+the calendar.
+
+It did not. On 2026-08-22: **82 unsent, 90 slots left before the 08-31 deadline, slack +8.** A
+mechanical drain at the cap reaches the first vetoed file on **2026-08-29** and sends **all 19**
+before the deadline — including `w50_ad216std_logit`, `w48e`'s own "single most dangerous file in
+submissions/".
+
+**FIXED:** `w26g_send.py` blocks `priority < 0` by default, reports the blocked files after the
+plan, and offers `--allow-vetoed` documented as the wrong tool (retire the `w48e.VETO` entry on
+evidence instead). The filter is deliberately **not** conditional on a live `check_selection`
+read — an API hiccup must not silently un-veto the queue. **Fail safe.**
+
+**`experiments/w54a_vetoexpiry.py` is the regression test.** It re-dates the expiry from the live
+queue AND asserts the guard string is still present in `w26g_send.py`; exit 1 means the guard is
+gone. Run it on any run that sends. Manual check: `w26g_send.py --n 90` must plan **63** files,
+not 82, and report **19 blocked**.
+
+---
+
+# THE AUTO-SELECTION TIER — THE ONE NUMBER THAT MAKES A SLOT FREE OR A LIABILITY (w54)
+
+While `check_selection` reports nothing selected, Kaggle auto-selects the best **two by PUBLIC
+score**. So:
+
+    auto-selection tier = 2nd-best public score on the account = 0.97118 (of 111 scored, 08-22)
+    a file is SAFE to send iff its predicted public score is < the tier.
+
+Below the tier it **cannot** be auto-selected and therefore costs nothing — this is the mechanism
+that made w37's 0.96813 calibration sends free, and it is the rule for filling spare slots.
+Above the tier, a high-public/low-CV file actively degrades the final private result.
+
+⚠ **The brief's "an extra submission can never hurt" is FALSE on this account** until the final
+picks are selected. Its own "final selection is still on CV" clause is what overrides it.
+⚠ The tier is a **tie** at 0.97118 held by four files (incl. WANTED `w36_ad199stdcorr`); ties are
+resolved by Kaggle, not by us — that is w50b's bound.
+
+**Standing consequence:** with the veto binding, **63 sendable vs 90 slots = 27 slots unfilled.**
+Fill them with files predicted **below 0.97118**. Never by retiring a veto.
+
+---
+
+# ⚠ THE SUBMISSIONS API DEFAULTS TO 50 ROWS AND TRUNCATES SILENTLY (w54)
+
+`kaggle competitions submissions -c <comp> -v` returns **50** rows with no warning. The account
+has 111. Always pass `--page-size` and guard on `len(rows) >= PAGE` — `w26g_send.py` has done
+this all along (`PAGE = 500`); the first cut of `w54a_vetoexpiry.py` did not and computed the
+auto-selection tier on a truncated window.
+
+---
+
 # 🔴🔴 A STALE QUEUE IS AN **UNVETOED** QUEUE — THE SEND PATH'S SHARPEST EDGE (w53)
 
 `w48e_order.py` enforces the veto as `priority = -1` and then writes

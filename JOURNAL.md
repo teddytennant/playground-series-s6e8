@@ -20103,3 +20103,175 @@ day-stamped 08-23 plan**), `w39a_audit.csv`, `w39b_autoselect.json`, `w39c_gapau
 `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+---
+
+# 2026-08-22 — w54, slot 3 of 10. **AT CAP, 10/10 already sent — no submission.** Found that **the veto is a deferral, not a block, and dated its expiry: 2026-08-29.** Fixed it on the send path and turned the arithmetic into a regression test.
+
+`date -u` **13:07 UTC on 08-22** at start. `/proc` scan clean for this competition (the one live
+`kg_watch.py` belongs to `kaggriculture`, not here). `ls experiments/w5*` shows w50–w53 taken, so
+this is **w54**. Kaggle token alive. API reports **10 submissions on 2026-08-22 (UTC)**, sent by
+w52 at 12:37–12:38. **At the cap; research and code only, per the hard rules.**
+
+⚠ **The ANGLE as issued — "Blending: rank-average or weight the tuned models by OOF performance,
+search blend weights on OOF"** — is on the do-not-reopen list twice over: **"the top-level
+blend-weight search"** and **"hill climbing / NNLS / non-negative blends (w49 §5 — closed with a
+mechanism)"**. It is also moot at 0 slots. w53 §6 registered the send as the next task; the day
+has not rolled, so that is not available either. What follows is what I did instead, and §1 is
+the argument that it was worth more than either.
+
+## 1. 🔴🔴 THE VETO EXPIRES ON **2026-08-29** — IT WAS NEVER A BLOCK, ONLY AN ORDERING
+
+`w48e_order.py` encodes the veto as `priority = -1`. `w26g_send.py` then sorts
+`["priority", "send_rank", "pred_lb"]` with `ascending=[False, True, False]`. **That puts a
+vetoed file at the BACK of the plan and does nothing else to it.** I read every line of the plan
+loop: there was **no filter on `priority < 0` anywhere on the send path.**
+
+Ordering-as-veto is safe only while the queue outlasts the calendar, and it does not:
+
+    UTC today 2026-08-22, deadline 2026-08-31
+    sent today            10 of 10  ->  0 slots left today
+    9 whole send days     ->  90 slots
+    queue (plan_day 2026-08-23): 82 unsent = 10 pinned + 53 tail + 19 VETOED
+    slack (slots - unsent)  +8
+
+**There are 8 more slots than files.** A mechanical drain at the cap therefore exhausts the
+priority-0 tail partway through 08-29, and from that instant the sender's next-best row *is* a
+vetoed one. `experiments/w54a_vetoexpiry.py` walks the sender's own ordering forward day by day
+and returns the date: **08-29, and all 19 of the 19 vetoed files go out before the deadline** —
+including `w50_ad216std_logit`, which `w48e`'s own comment calls *"the single most dangerous file
+in submissions/"* (fam[logit] +147.14e-6 on the highest CV base on disk). `check_selection` still
+exits 1, so Kaggle auto-selects on best **public** score. That is precisely and exactly the
+exposure the VETO dict was written to close, arriving on a schedule, with no run in between
+required to make a mistake.
+
+**This is the same class of bug as w53 §2 and it is the third one on this path.** w49 keyed the
+writer to the day; w53 keyed the reader; w54 finds that the veto itself was never enforced by
+anything but sort order. The pattern: *a rule that lives in the ORDER of a list is not a rule.*
+
+## 2. ✅ FIXED, FAIL-SAFE, AND EXERCISED RATHER THAN ASSERTED
+
+`w26g_send.py` now **blocks** `priority < 0` in the plan loop, collects the blocked files, and
+reports them after the plan where they cannot scroll off. Three deliberate choices:
+
+- **Default ON, and NOT conditional on a live `check_selection` read.** The tempting version
+  makes the filter auto-retire when selection is made — but then an API hiccup silently un-vetoes
+  the queue on the send path. Fail safe.
+- **`--allow-vetoed` exists but is documented as the wrong tool.** Retiring a veto is an evidence
+  decision and belongs in `w48e.VETO`, one entry at a time, with the reason written down.
+- **`blocked` is reported as BLOCKED, not "skip".** The existing skips (md5 dupes, bad files) are
+  routine; this one is a policy decision and reads differently.
+
+Exercised, not reasoned about — `--n 90`, which simulates the 08-29 state directly:
+
+    plan stops at 63 files (= 10 pinned + 53 tail), not 82
+    ⛔ 19 VETOED file(s) skipped, not sent (w54)
+         w42_ad217std_logit.csv / w42_ad217stdcorr.csv / w50_ad216std_logit.csv / ...
+    and with --allow-vetoed the ad216/ad217/logit families reappear — the flag works too
+
+`w54a_vetoexpiry.py` now **asserts the guard string is still present in `w26g_send.py`** and exits
+1 if it is gone. Prose in a journal does not survive; a test that re-reads the sender does. The
+failure mode this protects against is silent — a sender without the filter plans a perfectly
+normal-looking ten.
+
+**The 08-23 chain is unchanged and re-verified end to end:** dry run plans exactly ORDER_0823
+with `w48_cal_hboyang_mix` at slot 1; `w48e --day 2026-08-23` re-prints `veto check: 19 files
+vetoed, none of them in the registered ten. OK`. Downstream re-run, not assumed: **w39a exit 0
+(0 failures), w39b exit 0, w39c exit 0, w39d exit 0 (clean no-op), `check_selection` exit 1 as
+expected.**
+
+## 3. ⚠ THE HONEST COST — **27 SLOTS WILL NOW GO UNFILLED**, AND THE RULE FOR FILLING THEM
+
+63 sendable against 90 remaining slots. I am not going to pretend that is free: the brief says an
+unused slot is pure waste. **But the brief's premise is false on this account.** "An extra
+submission can only help your public rank and can never hurt it" holds only when the final picks
+are chosen; while nothing is selected, Kaggle picks the best **two by public score**, so a
+high-public/low-CV file actively degrades the private result. The veto outranks the brief here,
+and the brief's own §"Final selection is still on CV" is the clause that says so.
+
+That gives the exact rule for filling the gap, now printed by `w54a`:
+
+    auto-selection tier   0.97118   (2nd-best public of 111 scored)
+    a filler is SAFE iff its predicted public score is < 0.97118
+
+Below the tier a file **cannot** be auto-selected, so it costs nothing — which is precisely why
+w37's 0.96813 calibration sends were free, and it retroactively justifies them on a mechanism
+rather than on intuition. **Fill the 27 slots with files BELOW the tier. Never by retiring a
+veto.** ⚠ Note the tier is a *tie* at 0.97118, held by four files including WANTED
+`w36_ad199stdcorr` — ties there are resolved by Kaggle, not by us, which is w50b's bound and not
+something this run improves.
+
+⚠ **Also fixed a defect in my own first cut of `w54a`:** it called the submissions API without
+`--page-size` and got the default **50 rows**, not 111 — so the tier was computed on a truncated
+window. `w26g_send.py` has passed an explicit page size with a truncation guard all along; I did
+not copy it. Now it does, with the same guard. The tier is unchanged at 0.97118 over the full 111.
+
+## 4. THE BOARD — UNCHANGED, GOLD PICTURE UNCHANGED
+
+Read 13:1x UTC. Leader **0.97141** (`Changye Li` / `MILANFX`). Gold cut (14th, `Atakan Aldemir`)
+**0.97124**. Us **0.97118**. w52 §5's arithmetic stands: gold wants **+40.9e-6 of CV** over the
+best sent, **+30.8e-6 beyond the best CV ever built here**, and the only thing on disk in that
+range is the vetoed ARM 217 family. **Tomorrow's slot 1 still decides whether that veto is
+re-argued or final.**
+
+## 5. ⛔ UNCHANGED BLOCKERS
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS** (`check_selection.py` exits 1, re-run this
+  run). WANTED `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr` — both sent and selectable. **This
+  needs Teddy, in his own browser.** Deadline **08-31**. Largest unmanaged risk on the account,
+  and §1 is the second thing this run found that is downstream of it.
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 6. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid (**never** `ps`/`pgrep`), and
+   **`ls experiments/w<next>*`** before claiming a run number.
+2. **Send the 08-23 ten.** Queue is written and day-stamped `2026-08-23`. Chain:
+   `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** (slot 1 must be `w48_cal_hboyang_mix`
+   and the day-stamp warning must be **gone** — that is the proof it is today's list) → `--go`.
+   Re-run `w48e_order.py --day 2026-08-23 --write` **only** if `w23b` changed the queue.
+   ⚠ If the day has rolled past 08-23, `w48e` refuses — correct. **ADD a key to `ORDERS`, never
+   edit another day's.**
+3. **Read `w48_cal_hboyang_mix` against `w48d_arm217.json`'s REGISTERED thresholds — ≥0.97116
+   HONEST, ≤0.97080 INFLATED.** A reason to read *carefully*, **never** to move the threshold.
+   HONEST → ARM 217 (+38.8e-6 of CV) is the only thing on disk in gold's range and the veto must
+   be re-argued on the evidence. INFLATED → veto stands, **no path to gold from disk**, say so
+   plainly and play for the best CV-selected private score.
+4. **Run `w54a_vetoexpiry.py` on any run that sends.** It re-dates the expiry from the live queue
+   and re-asserts the filter is still in `w26g_send.py`. Exit 1 means the guard is gone.
+5. **The 27-slot gap (§3) needs candidates below 0.97118.** Building them is a real task for a run
+   WITH slots. Do not close it by retiring a veto.
+6. Do **NOT** re-open: **the top-level blend-weight search and hill climbing / NNLS / non-negative
+   blends (this run's issued ANGLE — closed with a mechanism in w49 §5)**, w46c's level dummy
+   (refuted, and unwired in w53 §1), the es-on-val status of `ext_members16`, ARM 216 as a
+   deadline pick, `d_five` as signal, the import line, the within-group redundancy test, the
+   member side-scale axis, KS as a gate, GBDT tuning, error analysis / OOF segmentation,
+   fold/seed averaging, FE variants, **the original dataset (closed three times, measured
+   NEGATIVE)**, the stacker `C`, the selection write path, the es-bias deflation constant, a
+   fourth sweep of the public kernel pool, the era shift, the logit veto, the w37 es-bias
+   readout, per-fold rank normalisation.
+7. ⚠ **NEW, AND IT IS THE GENERAL FORM OF THREE BUGS ON THIS PATH: a rule that lives in the
+   ORDER of a list is not a rule. If it must not happen, filter it, and write a test that
+   re-reads the code.** ⚠ **NEW: an unused slot is only "pure waste" once the final picks are
+   selected. Until then a slot above the auto-selection tier is a LIABILITY, not a freebie.**
+   ⚠ Never use in-sample residuals to test extrapolation. ⚠ Never lower the `cv >= 0.97` floor.
+   ⚠ A send list that is only in a prereg is not a send list. ⚠ A send list not keyed to its day
+   is a bug waiting to fire. ⚠ `blend_lab --build` ships the whole family and the queue globs
+   `submissions/` — veto and register a new pack's files IN THE SAME RUN. ⚠ Do not delegate a
+   priced module on the send path without MOVING the self-check it asserts against. ⚠ A STALE
+   queue carries only the veto as it stood when it was written. ⚠ Never let a calibration/`member`
+   row into a `max(CV)`. ⚠ **Always pass `--page-size` to the submissions API — it defaults to 50
+   and truncates silently** (§3).
+
+**Files added:** `experiments/w54a_vetoexpiry.py`.
+**Modified:** `experiments/w26g_send.py` (the `priority < 0` filter, `--allow-vetoed`, the blocked
+report, and the now-accurate stale-queue warning), plus the re-run `w39a_audit.csv`,
+`w39b_autoselect.json`, `w39c_gapaudit.{csv,json}`, `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+⚠ **w54 correction, same run:** the "Files modified" line above lists the re-run `w39a/w39b/w39c`
+artefacts. They were re-run (all exit 0) but their outputs are **byte-identical** — `git status`
+shows them unmodified. The change set is exactly `w26g_send.py`, the new `w54a_vetoexpiry.py`,
+and the three markdown files. The re-runs were a check, not a change, and that is the better
+outcome: a send-path edit that moved a downstream artefact would have needed explaining.
