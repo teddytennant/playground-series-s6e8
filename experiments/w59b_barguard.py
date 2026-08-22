@@ -82,9 +82,21 @@ def main() -> None:
     for stem, cv in (("w27_ad188stdcorr", 0.9701168076), ("w36_ad197stdcorr", 0.9701286299)):
         check(f"blocks {stem} (passed the OLD bar)",
               bool(SND.above_tier_reason(row(cv, stem), bar)), f"cv {cv:.10f}")
+    # ⚠ RE-POINTED w60, NOT SOFTENED — and the reason lives here, at the check. This row used to
+    # be `w40_ad211std_h3` (cv 0.9701331846), asserting the bar does not OVER-block a file that
+    # clears it. w60 added `w40_ad211` to `check_selection.WANTED_INELIGIBLE` — w40d_prereg
+    # registered ARM 211 as never WANTED-eligible before the arm existed and w56 left it out of
+    # the dict it built to enforce that — so ad211 is now refused ABOVE the tier on the
+    # eligibility half of the two-part test, before the CV bar is ever consulted. The property
+    # under test is unchanged ("a file that clears the bar is still admitted"); only the subject
+    # moved, to an es-CLEARED pack. ⛔ Do not point it back at ad211 to make this pass.
+    for stem, cv in (("w38_ad202std_h3", 0.9701330214),):
+        check(f"still admits {stem} (eligible, over the bar)",
+              SND.above_tier_reason(row(cv, stem), bar) is None, f"cv {cv:.10f}")
     for stem, cv in (("w40_ad211std_h3", 0.9701331846),):
-        check(f"still admits {stem}", SND.above_tier_reason(row(cv, stem), bar) is None,
-              f"cv {cv:.10f}")
+        blocked = SND.above_tier_reason(row(cv, stem), bar)
+        check(f"NOW blocks {stem} on w40d-ineligibility, not on CV",
+              bool(blocked) and "ineligible" in blocked, f"cv {cv:.10f} (clears the bar)")
 
     # ---- 5. FAIL-SAFE. Point the module at a missing artefact; the bar must vanish and BLOCK.
     keep = SND.HIJACKPRICE

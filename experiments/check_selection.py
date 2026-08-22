@@ -282,6 +282,37 @@ WANTED = {"w36_ad199stdcorr.csv", "w23_ad187stdcorr.csv"}
 # and pricing ad217 on the LB, never SELECTING it on CV. Selecting on a public read is
 # the Rogii failure this account has already made once.
 #
+# ⚠⚠ ARM 211 WAS MISSING FROM THIS DICT FOR TWO DAYS — AND IT IS THE ARM THE RULE IS ABOUT
+# (added w60, 2026-08-22). w56 wrote this dict to enforce w40d_prereg.txt, quotes w40d by name
+# in the comment above, and then entered ad216 and ad217 — the two arms w56 happened to be
+# looking at. ARM 211 is the arm w40d_prereg was WRITTEN about; its clause is the source of the
+# sentence this dict exists to enforce, verbatim and pre-registered before ARM 211 existed:
+#
+#     ⛔ ARM 211 IS NOT ELIGIBLE FOR check_selection.WANTED, WHATEVER ITS CV.
+#
+# So the rule was lifted out of a paragraph and into code, and lost its originating case in
+# transit. ⚠ THE LESSON IS NARROWER AND NASTIER THAN w54/w55/w56's "a rule in a paragraph is
+# not a rule": when you MOVE a rule into an enforcing structure, enumerate its cases FROM THE
+# RULE, not from the instances in front of you. A partially-populated enforcer reads exactly
+# like a complete one and every guard it passes is evidence of nothing.
+#
+# What the omission was costing, all of it live at the time it was found:
+#   * `w26g_send.above_tier_reason` imports this dict. ad211 files clearing the w59 CV bar were
+#     waved through ABOVE the auto tier — installed as final entries w40d forbids.
+#   * `w40_ad211stdcorr` (CV 0.9701374733) is ALREADY in auto-selection TIER 1 at p_joint 0.375,
+#     the second-highest CV of any tier-1 member (w57a_tierprice2.json). Nothing can unsend it;
+#     the entry stops the NEXT one.
+#   * It outranks `w23_ad187stdcorr` (0.9701150808) on CV, so a future run moving WANTED's weaker
+#     slot down the CV ledger lands on a barred arm and `assert_wanted_eligible` stays silent.
+#
+# ⛔ THE RETIREMENT TEST IS REGISTERED IN w60_prereg.txt AND WAS DELIBERATELY NOT RUN BY THE RUN
+# THAT ADDED THIS KEY. ARM 202 is ARM 211's matched control and the corrected-h3 delta is
+# -0.116e-6 — the nine `yadoy666` streams bought nothing, far inside the ~4e-6 rebuild floor and
+# nowhere near w40d's +40e-6 "disbelieve on sight" line. That is the right SHAPE of evidence, and
+# w60 had a direct interest in it (ARM 211 carried w59 §7's lever), so w60 enforced the rule and
+# left the retirement to a run with no stake: |delta| <= 4e-6 on ALL FOUR transform bases held on
+# disk (h3, ens4, rescale, rankraw), quoted here in the same commit. One base is one reading.
+#
 # To retire an entry: retire it HERE, in the same commit as the evidence, with the
 # reading that retires it quoted in the value. Do not delete the key to make a run pass.
 WANTED_INELIGIBLE = {
@@ -290,6 +321,11 @@ WANTED_INELIGIBLE = {
     "w42_ad217": "w56a source read — hboyang_mix is an aggregator over 138 un-es-clearable "
                  "third-party streams. Not WANTED on CV (w40d). The 08-23 LB read does "
                  "not lift this; see w56a_arm217power.json.",
+    "w40_ad211": "w40d_prereg.txt, committed BEFORE ARM 211 existed: the nine `yadoy666` "
+                 "union94 streams come from an AGGREGATOR and their es-on-val status is "
+                 "UNKNOWN — neither log-read nor absent-by-mechanism. ⛔ Not WANTED on CV "
+                 "whatever its CV. Retire only on the four-base matched-control test in "
+                 "w60_prereg.txt, quoted here, in the same commit.",
 }
 
 

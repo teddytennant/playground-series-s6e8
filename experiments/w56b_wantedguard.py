@@ -31,6 +31,12 @@ REQUIRED = [
     "raise SystemExit(3)",
     "w50_ad216",
     "w42_ad217",
+    # ⚠ ADDED w60. This list was typed from the two arms w56 was looking at, and ARM 211 — the
+    # arm w40d_prereg was WRITTEN about — was not one of them, so this guard passed for two days
+    # over an incomplete registry. The string check below is a floor; the COMPLETENESS check
+    # that derives the case list from the preregs themselves is `w60b_ineligguard.py`, and that
+    # is the one that would have caught it. Run both.
+    "w40_ad211",
 ]
 
 
