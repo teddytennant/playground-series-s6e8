@@ -20275,3 +20275,239 @@ artefacts. They were re-run (all exit 0) but their outputs are **byte-identical*
 shows them unmodified. The change set is exactly `w26g_send.py`, the new `w54a_vetoexpiry.py`,
 and the three markdown files. The re-runs were a check, not a change, and that is the better
 outcome: a send-path edit that moved a downstream artefact would have needed explaining.
+
+---
+
+# 2026-08-22 — w55, slot 4 of 10. **AT CAP, 10/10 already sent — no submission.** Found **four queue rows the auto-selection tier rule could not be evaluated on at all**, bounded every one of them on two calibrated instruments, and made the rule bind in code. Also found that **slot 1 of tomorrow's ten was going to ship a submission description reading `P(beat) nan`** and describing THE ARM 217 TEST as a queue-drain.
+
+`date -u` **13:18 UTC on 08-22** at start. `/proc` scan clean for this competition (the live
+`claude`/`kg_watch.py` processes belong to `kaggriculture`). `ls experiments/w5*` shows w50–w54
+taken, so this is **w55**. Kaggle token alive. API reports **10 submissions on 2026-08-22 (UTC)**,
+sent by w52 at 12:37–12:38. **At the cap; research and code only, per the hard rules.**
+
+⚠ **The ANGLE as issued — "Seed and fold diversity: same models across multiple seeds and fold
+splits, averaged"** — is on the do-not-reopen list verbatim (**"fold/seed averaging"**, w54 §6.6),
+and is moot at 0 slots regardless. w54 §6.5 registered the one open BUILD task ("the 27-slot gap
+needs candidates below 0.97118") and §6.2 the one open SEND task (tomorrow's ten). Neither is
+available today. What follows is what I did instead, and §1 is why it was worth more than either.
+
+## 1. 🔴🔴 FOUR SENDABLE ROWS CARRY `pred_lb = NaN` — THE TIER RULE CANNOT BE EVALUATED ON THEM
+
+w54 established the one number that makes a spare slot free or a liability:
+
+    auto-selection tier = 2nd-best PUBLIC score on the account = 0.97118
+    a filler is SAFE iff its predicted public score is < the tier
+
+and wrote it into `RESEARCH.md` and into `w26g_send.py`'s own unfilled-slots message. **It is
+enforced by nothing.** I read the whole plan loop: there is no test on `pred_lb` anywhere.
+
+That would be a latent problem on its own. It is a live one because four sendable rows have **no
+price at all** — `cv = NaN`, `pred_lb = NaN`, `p_beat = NaN`:
+
+    w15f_antistudent_cv   w16d_membercell   w37_cal_dkv_xgb   w37_cal_ravi_realmlp1c
+
+`w48e_order.py`'s own comment defends them:
+
+> *"They are NOT dropped — w37_cal_ravi_realmlp1c and w37_cal_dkv_xgb are legitimate unsent
+> calibration files whose whole point is that they are not ranked on CV. **They keep priority 0
+> and sort last.**"*
+
+**That is exactly the argument w54 refuted for the veto, in the same file, one screen away.**
+Sorting last is safe only while the queue outlasts the calendar, and w54 *measured* that it does
+not: 63 sendable against 90 remaining slots, so "last" is reached on ~**2026-08-29**. On that day
+these four go out, and:
+
+- the tier rule cannot be evaluated on them — they are invisible to the only mechanism that
+  decides whether a spare slot is free or a liability; and
+- their submission description renders, literally, as `CV nan, family ens4, w26d predicted LB
+  nan with P(beats the 0.97118 account best) nan ... this is nan e-6 below the best sent CV`.
+  The brief says outright that past submission descriptions are this account's memory across
+  runs. Four `nan` descriptions are a real loss, not a cosmetic one.
+
+**This is the fourth bug of this exact shape on the send path** (w49 keyed the writer to the day,
+w53 the reader, w54 found the veto was only a sort order). The generalisation w54 wrote —
+*a rule that lives in the ORDER of a list is not a rule* — needed one more clause, which is now
+in RESEARCH: **and neither is a rule that lives in a printed paragraph, and a row the rule cannot
+be EVALUATED on is not covered by it even once it is enforced.**
+
+## 2. ✅ BOUNDED, ON TWO INSTRUMENTS, EACH CALIBRATED ON THIS ACCOUNT'S OWN LANDED HISTORY
+
+It would have been easy to wave these four through — they are old, low-CV objects that
+"obviously" score nowhere near the tier. This account has been burned by obviously.
+`experiments/w55a_unpriced.py` measures instead.
+
+**INSTRUMENT A — Spearman to the nearest scored file, with an empirical envelope.** Rank all 111
+scored submissions plus the unpriced rows on a **fixed deterministic stride** of the test rows
+(every 5th, 59,261 rows — a stride and not an RNG draw, so the bound is reproducible without
+carrying a seed). Then build the envelope from the account's own 6,105 scored pairs: the largest
+`|Δ public|` ever observed at each similarity threshold.
+
+    spearman >=    pairs    max |delta public|
+    0.99900        3395        190.0e-6
+    0.99990         387         40.0e-6
+    0.99999          62         20.0e-6
+
+**And it refuses to certify one of them, which is the point.** `w37_cal_dkv_xgb`'s nearest scored
+neighbour is only **0.98905** away — off the grid entirely — so the envelope collapses to the
+global max of 8330e-6 and the bound (0.97778) is vacuous. The script says `⛔ INVALID` rather than
+quoting it.
+
+**INSTRUMENT B — the w37 calibration prereg, validated out of sample.** A raw imported member has
+a better instrument and it was pre-registered a week ago: `w37c_prereg.csv` carries a `pred_lb`
+for **all seven** calibration files, and **five have since landed**. Their residuals calibrate it:
+
+    w37_cal_mkt_realmlp  pred 0.961290  actual 0.96285   +1560.4e-6
+    w37_cal_omid_tabm    pred 0.968753  actual 0.96949    +737.0e-6
+    w37_cal_om_xgb2      pred 0.969764  actual 0.96993    +165.6e-6
+    w37_cal_dm_cat       pred 0.968086  actual 0.96813     +43.5e-6
+    w37_cal_ram_hgb      pred 0.969454  actual 0.96945      -3.5e-6
+    -> bound = registered pred_lb + the worst overshoot ever seen (+1560.4e-6)
+
+Each row is certified on the **tighter of whichever instruments are VALID for it**. All four clear:
+
+| file | instrument | point | bound | tier | margin |
+|---|---|---|---|---|---|
+| `w15f_antistudent_cv` | spearman (0.9999978 to `w15f_antistudent_avg`) | 0.971070 | 0.971090 | 0.97118 | **+90.0e-6** |
+| `w16d_membercell` | spearman (0.9999851 to `w16b_cellweight`) | 0.971070 | 0.971110 | 0.97118 | **+70.0e-6** |
+| `w37_cal_ravi_realmlp1c` | prereg | 0.966409 | 0.967969 | 0.97118 | **+3210.5e-6** |
+| `w37_cal_dkv_xgb` | prereg | 0.966243 | 0.967803 | 0.97118 | **+3377.0e-6** |
+
+**None of the four can be auto-selected. They were never the hazard; the absence of a mechanism
+to know that was.** These are empirical envelopes over the account's own history, not proofs, and
+the script says so — but the tightest margin is 90e-6 against a 20e-6 worst-ever envelope, and
+the loosest is 3377e-6 against a 1560e-6 worst-ever residual.
+
+## 3. ✅ THREE FIXES, ALL EXERCISED RATHER THAN ASSERTED
+
+1. **`w26g_send.py` blocks unpriceable rows.** Default ON, unconditional on a live
+   `check_selection` read (an API hiccup must not silently un-guard the queue — fail safe,
+   exactly like w54's veto filter). NaN `cv` is tolerated **only** where the row has renounced
+   being a candidate by declaring `fam == "member"` (w53: a member's published OOF is not a
+   cross-fitted stack CV). `--allow-unpriced` exists and is documented as the wrong tool.
+   Exercised: with the four still unpriced, `--n 90` planned **59, not 63**, and reported them.
+2. **`w48e_order.py` adopts w55a's certification**, writing a real `pred_lb` and `fam = "member"`
+   for each — a row NOT in the registry keeps its NaN on purpose, so the sender blocks it. That
+   is the fail-safe for the *next* unpriceable row, whoever adds it. After the rewrite `--n 90`
+   plans **63** again with real prices.
+3. **`w55a_unpriced.py` re-asserts the guard string is still in `w26g_send.py`** and exits 1 if
+   it is gone — w54a's shape. Prose in a journal does not survive; a test that re-reads the
+   sender does.
+
+**The 08-23 chain is unchanged and verified by keyed diff, not by eye.** Only two columns moved
+on only those four rows (`fam` ens4→member, `pred_lb` NaN→certified); `send_rank`, `msg`, `why`,
+`p_beat`, `priority`, `plan_day`, `sent`, `md5`, `stem`, `std`, `corr` — **0 real differences**.
+`w48e --day 2026-08-23` re-verifies all ten end to end (rows, NaN, md5, CV-from-OOF) and re-prints
+`veto check: 19 files vetoed, none of them in the registered ten. OK`. Dry run still plans exactly
+ORDER_0823 with `w48_cal_hboyang_mix` at slot 1. Downstream re-run, not assumed: **w54a exit 0,
+w39a exit 0, w39b exit 0, w39c exit 0, w39d exit 0**, `check_selection` exit 1 as expected.
+
+## 4. 🔴 AND THE SAME PATTERN AGAIN, ON TOMORROW'S SLOT 1 — THE `msg` OVERRIDE WAS NEVER WIRED
+
+Fixing (2) exposed a third instance in the same run. `w26g_send.py` carries this comment:
+
+> *"A `msg` on the queue row replaces the queue-drain boilerplate. Without this, a w37
+> calibration send would be described as a queue-drain attempt and a future run reading the
+> submission history would misread its ~0.958 public score as a huge regression."*
+
+**Nothing ever set `msg`.** `w48e`'s write block does `for c in ("send_rank", "msg", "why"):
+q[c] = np.nan` and no assignment site existed — it is why my first attempt at (2) silently
+vanished. So the protection that comment describes has never once operated, and tomorrow's
+**slot 1, `w48_cal_hboyang_mix` — THE ARM 217 TEST, the file whose public score decides whether
+the ad217 veto is re-argued** — was going to ship:
+
+    w26g queue-drain w48_cal_hboyang_mix — CV 0.9701815536, family member, w26d predicted LB
+    0.971230 with P(beats the 0.97118 account best) nan. ... this is -66.5e-6 below the best
+    sent CV.
+
+Three defects in one string: it calls the registered ARM 217 test a *queue-drain*; it prints
+`P(beat) nan`; and that final figure compares **a raw member's OOF against a cross-fitted stack
+CV**, the one comparison `RESEARCH.md` says must never be made — the mistake that silently made
+this same file the "CV leader" of w39b's whole auto-selection report until w53 caught it.
+
+`WHY[stem]` was already the registered rationale, thresholds and all, sitting unused in a CSV
+column. **Connected it.** All five `member` rows now carry an evidence-bearing description; slot 1's
+is the w48d registration verbatim, `>=0.97116 HONEST; <=0.97080 INFLATED` included, so tomorrow's
+reader sees the decision rule in the submission history itself. Verified: 5 registered messages,
+533–776 chars (the account has landed 3,618), and **zero** NaN-cv rows left without one.
+
+## 5. THE LEADERBOARD TIMESTAMP IS OUR LATEST SUBMISSION, NOT OUR BEST — A DEAD END, CLOSED
+
+The account best 0.97118 is now a **FIVE**-way tie (RESEARCH said four; today's `w40_ad211stdcorr`
+joined it). With nothing selected Kaggle auto-picks two by public score, so *which* two it breaks
+the tie toward is worth real money — `w36_ad199stdcorr` (WANTED) is one of the five, and
+`w21_ad187corr_ens4` from 08-17 is another. I checked whether the public leaderboard leaks the
+tie-break: our row reads `2026-08-22 12:38:26.843000, 0.97118`. That timestamp is
+`w38_ad202stdcorr`, which scored **0.97117** — i.e. the LB shows our **latest** submission's time
+against our **best** score. **It carries no information about which file Kaggle would select.**
+Recorded in RESEARCH so nobody probes it again. w50b's bound on the tie stands, unimproved.
+
+## 6. THE BOARD — UNCHANGED
+
+Read 13:2x UTC. **Us 0.97118, rank 62** of 200 listed. Leader **0.97141** (`Changye Li`). Gold cut
+(14th, `Atakan Aldemir`) **0.97124**. w52 §5's arithmetic stands: gold wants **+40.9e-6 of CV**
+over the best sent, **+30.8e-6 beyond the best CV ever built here**, and the only thing on disk in
+that range is the vetoed ARM 217 family. **Tomorrow's slot 1 still decides whether that veto is
+re-argued or final.**
+
+## 7. ⛔ UNCHANGED BLOCKERS — RE-VERIFIED
+
+- ⛔ **`*** NOTHING IS SELECTED ***` STILL HOLDS** (`check_selection.py` exit 1, re-run this run).
+  WANTED `w36_ad199stdcorr`, 2nd `w23_ad187stdcorr` — both sent and selectable. **This needs
+  Teddy, in his own browser.** Deadline **08-31**. Largest unmanaged risk on the account, and §1,
+  §4 and §5 are all downstream of it.
+- ⛔ `git push` blocked (no `gh`, no ssh, no token). Commits are local.
+
+## 8. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan on ppid/sid (**never** `ps`/`pgrep`), and
+   **`ls experiments/w<next>*`** before claiming a run number.
+2. **Send the 08-23 ten.** Chain: `w23b_sendqueue.py` → `w26g_send.py --n 10` **dry** (slot 1 must
+   be `w48_cal_hboyang_mix`, and the **day-stamp warning must be GONE** — that is the proof it is
+   today's list) → `--go`. Re-run `w48e_order.py --day 2026-08-23 --write` **only** if `w23b`
+   changed the queue. ⚠ If the day has rolled past 08-23, `w48e` refuses — correct. **ADD a key to
+   `ORDERS`, never edit another day's.**
+3. **Read `w48_cal_hboyang_mix` against the REGISTERED thresholds — ≥0.97116 HONEST, ≤0.97080
+   INFLATED.** They are now printed in the submission's own description (§4). A reason to read
+   carefully is **never** a reason to move the threshold. HONEST → ARM 217 (+38.8e-6 of CV) is the
+   only thing on disk in gold's range and the veto must be re-argued on the evidence. INFLATED →
+   veto stands, **no path to gold from disk**, say so plainly and play for the best CV-selected
+   private score.
+4. **Run `w54a_vetoexpiry.py` AND `w55a_unpriced.py` on any run that sends.** Both re-read the
+   sender and assert their guard is still present; exit 1 means it is gone.
+5. **The gap is now 27 slots** (63 sendable vs 90). Building candidates **below 0.97118** is a real
+   task for a run WITH slots. Do not close it by retiring a veto, and do not close it by sending
+   an uncertified row — certify with `w55a_unpriced.py`, which is now the mechanism for exactly
+   this.
+6. Do **NOT** re-open: **fold/seed averaging (this run's issued ANGLE — closed)**, the top-level
+   blend-weight search, hill climbing / NNLS / non-negative blends, w46c's level dummy (refuted
+   and unwired), the es-on-val status of `ext_members16`, ARM 216 as a deadline pick, `d_five` as
+   signal, the import line, the within-group redundancy test, the member side-scale axis, KS as a
+   gate, GBDT tuning, error analysis / OOF segmentation, FE variants, **the original dataset
+   (closed three times, measured NEGATIVE)**, the stacker `C`, the selection write path, the
+   es-bias deflation constant, a fourth sweep of the public kernel pool, the era shift, the logit
+   veto, the w37 es-bias readout, per-fold rank normalisation, **and the leaderboard timestamp as
+   a tie-break probe (§5, closed with a measurement)**.
+7. ⚠ **NEW, AND IT COMPLETES w54's GENERALISATION: a rule that lives in a printed PARAGRAPH is not
+   a rule either — and a row the rule cannot be EVALUATED on is not covered by it even once it is
+   enforced. Price it or block it.** ⚠ **NEW: `w48e`'s write block resets `send_rank`/`msg`/`why`
+   to NaN. Any message registered EARLIER in that file is wiped — hand it to `_REGMSG` and apply
+   it after the reset.** ⚠ **NEW: a documented mechanism is not a wired mechanism. `w26g`'s `msg`
+   override was described in a comment for days and connected to nothing (§4). When a comment
+   claims a protection, grep for the assignment.** ⚠ A rule that lives in the ORDER of a list is
+   not a rule. ⚠ An unused slot is only "pure waste" once the final picks are selected; until then
+   a slot above the auto-selection tier is a LIABILITY. ⚠ Never use in-sample residuals to test
+   extrapolation. ⚠ Never lower the `cv >= 0.97` floor. ⚠ A send list that is only in a prereg is
+   not a send list. ⚠ A send list not keyed to its day is a bug waiting to fire. ⚠ `blend_lab
+   --build` ships the whole family and the queue globs `submissions/` — veto and register a new
+   pack's files IN THE SAME RUN. ⚠ Do not delegate a priced module on the send path without MOVING
+   the self-check it asserts against. ⚠ A STALE queue carries only the veto as it stood when it
+   was written. ⚠ Never let a calibration/`member` row into a `max(CV)`. ⚠ Always pass
+   `--page-size` to the submissions API — it defaults to 50 and truncates silently.
+
+**Files added:** `experiments/w55a_unpriced.py`, `experiments/w55a_unpriced.json`.
+**Modified:** `experiments/w26g_send.py` (the unpriceable filter, `--allow-unpriced`, the blocked
+report, the NaN-safe message fail-safe), `experiments/w48e_order.py` (the w55a registry adoption,
+`_REGMSG` applied after the write reset, and the ARM 217 test's registered description), the
+regenerated `experiments/w26d_queueprice.csv`, plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**

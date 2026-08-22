@@ -4,6 +4,95 @@ Durable facts. Anything learned once goes here so no later run pays for it twice
 
 ---
 
+# 🔴🔴 A RULE IN A PRINTED PARAGRAPH IS NOT A RULE EITHER — AND AN UNPRICEABLE ROW IS UNCOVERED (w55)
+
+Fourth bug of this shape on the send path (w49 keyed the writer to the day, w53 the reader, w54
+found the veto was only a sort order). w54's tier rule — *"a filler is SAFE iff its predicted
+public score is < 0.97118"* — lived in this file and in `w26g_send.py`'s own unfilled-slots
+message and **was enforced by nothing**. Worse, four sendable rows carried `cv = NaN` and
+`pred_lb = NaN`, so the rule could not have been **evaluated** on them even once enforced:
+
+    w15f_antistudent_cv   w16d_membercell   w37_cal_dkv_xgb   w37_cal_ravi_realmlp1c
+
+`w48e_order.py` defended them with *"they keep priority 0 and sort last"* — the exact argument
+w54 refuted for the veto, in the same file. Last is reached ~**2026-08-29** (63 sendable, 90
+slots), and their submission description renders as `CV nan ... predicted LB nan ... P(beat) nan
+... nan e-6 below the best sent CV`.
+
+**FIXED, three parts:** `w26g_send.py` blocks any row with NaN `pred_lb` (default on,
+unconditional on a live `check_selection` read — fail safe; `--allow-unpriced` documented as the
+wrong tool). NaN `cv` is tolerated **only** where `fam == "member"`. `w48e_order.py` adopts
+`w55a_unpriced.json`'s certification and writes a real price; a row NOT in the registry keeps its
+NaN **on purpose** so the sender blocks it. `w55a_unpriced.py` re-asserts the guard string is
+still in the sender and exits 1 if it is gone.
+
+**Manual check:** with a row unpriced, `w26g_send.py --n 90` plans **59**; after
+`w48e_order.py --day <today> --write`, **63**, with 19 blocked as vetoed and 0 unpriceable.
+
+**⚠ THE GENERAL FORM, now complete:** *a rule that lives in the ORDER of a list is not a rule,
+a rule that lives in a printed PARAGRAPH is not a rule, and a row the rule cannot be EVALUATED
+on is not covered by it even once it is enforced.* **Price it or block it.**
+
+---
+
+# HOW TO CERTIFY A FILE BELOW THE TIER WITHOUT A CV — TWO INSTRUMENTS (w55)
+
+`experiments/w55a_unpriced.py`. This is the mechanism for filling the 27-slot gap safely; use it,
+do not eyeball a file as "obviously low".
+
+- **INSTRUMENT A — Spearman + empirical envelope.** Rank every scored submission and the target
+  on a **fixed deterministic stride** of the test rows (every 5th; a stride, NOT an RNG draw, so
+  the bound is reproducible with no seed). Build the envelope from the account's own scored pairs:
+  the largest `|Δ public|` ever observed at each similarity threshold. Measured 08-22 over 111
+  files / 6,105 pairs: **>=0.999 → 190e-6, >=0.9999 → 40e-6, >=0.99999 → 20e-6**.
+  ⚠ It **does not cover everything and must say so**: at spearman ~0.989 the envelope collapses
+  to the global max (8330e-6) and the bound is vacuous. The script prints `⛔ INVALID` there
+  rather than quoting it.
+- **INSTRUMENT B — the w37 calibration prereg, validated out of sample.** `w37c_prereg.csv`
+  registered a `pred_lb` for all **seven** calibration files and **five have landed**; residuals
+  `+1560.4 / +737.0 / +165.6 / +43.5 / −3.5 e-6`. Bound = registered `pred_lb` + worst overshoot.
+  This is the right instrument for a **raw imported member**, which Spearman cannot reach.
+
+Certify on the **tighter of whichever instruments are VALID**. All four rows cleared on 08-22 with
+margins **+90 / +70 / +3210 / +3377 e-6**. These are empirical envelopes over this account's own
+history, not proofs — quote the margin alongside the envelope that produced it.
+
+---
+
+# ⚠ A DOCUMENTED MECHANISM IS NOT A WIRED MECHANISM (w55)
+
+`w26g_send.py` has carried this comment for days: *"A `msg` on the queue row replaces the
+queue-drain boilerplate. Without this, a w37 calibration send would be described as a queue-drain
+attempt and a future run reading the submission history would misread its ~0.958 public score as
+a huge regression."* **Nothing ever set `msg`.** `w48e`'s write block does
+`for c in ("send_rank", "msg", "why"): q[c] = np.nan` and there was no assignment site at all.
+
+Consequence: tomorrow's **slot 1, `w48_cal_hboyang_mix` — THE ARM 217 TEST** — was going to ship
+`"queue-drain ... P(beats the 0.97118 account best) nan ... this is -66.5e-6 below the best sent
+CV"`, where that last figure compares a **raw member's OOF against a cross-fitted stack CV**, the
+one comparison this file says must never be made.
+
+**FIXED:** `WHY[stem]` — already the registered rationale, thresholds included — is now wired into
+`msg` for every `fam == "member"` row, via a `_REGMSG` dict.
+⚠ **`w48e`'s write block resets `send_rank`/`msg`/`why` to NaN.** Any message registered EARLIER
+in that file is wiped. Hand it to `_REGMSG` and apply it **after** the reset.
+⚠ **When a comment claims a protection, grep for the assignment.**
+
+---
+
+# ⚠ THE LEADERBOARD TIMESTAMP IS OUR LATEST SUBMISSION, NOT OUR BEST — DEAD END (w55)
+
+The account best 0.97118 is a **FIVE**-way tie (was four; `w40_ad211stdcorr` joined it on 08-22),
+and with nothing selected Kaggle auto-picks two by public score, so the tie-break matters —
+WANTED `w36_ad199stdcorr` is one of the five, `w21_ad187corr_ens4` (08-17) is another.
+`kaggle competitions leaderboard -s -v` shows our row as
+`2026-08-22 12:38:26.843000, 0.97118`. That timestamp is `w38_ad202stdcorr`, which scored
+**0.97117**. So the LB pairs our **latest submission's time** with our **best score** and
+**carries no information about which file Kaggle would select.** Do not probe it again. w50b's
+bound on the tie stands, unimproved.
+
+---
+
 # 🔴🔴 A RULE THAT LIVES IN THE **ORDER** OF A LIST IS NOT A RULE (w54)
 
 Third bug of this exact shape on the send path (w49 keyed the writer to the day, w53 keyed the

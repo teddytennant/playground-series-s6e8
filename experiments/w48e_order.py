@@ -290,7 +290,15 @@ q["std"] = q.stem.map(is_std)
 q["corr"] = q.stem.map(QP.is_corr)
 # ⚠ rows with no stored OOF vector have no CV and therefore no price. They are NOT dropped --
 # w37_cal_ravi_realmlp1c and w37_cal_dkv_xgb are legitimate unsent calibration files whose
-# whole point is that they are not ranked on CV. They keep priority 0 and sort last.
+# whole point is that they are not ranked on CV.
+# ⚠⚠ THE ORIGINAL COMMENT ENDED "They keep priority 0 and sort last." THAT WAS THE ARGUMENT,
+# AND IT IS THE SAME ONE w54 REFUTED FOR THE VETO: sorting last is safe only while the queue
+# outlasts the calendar, and w54 measured that it does not (63 sendable against 90 remaining
+# slots). "Sorts last" is reached on ~2026-08-29, and an unpriced row is one the tier rule
+# -- "a filler is SAFE iff its predicted public score is < 0.97118" -- cannot be evaluated on
+# at all, sent with a submission message reading "predicted LB nan ... P(beat) nan".
+# w55a bounds each such row on two instruments (Spearman-to-nearest-scored + the w37c prereg,
+# each calibrated on this account's own landed history) and registers a point estimate below.
 _has = q.cv.notna()
 q["pred_lb"] = np.nan
 q.loc[_has, "pred_lb"] = [QP.predict(r.cv, r.fam, r.std, r.corr, r.stem)
@@ -306,12 +314,72 @@ q.loc[_has, "p_beat"] = 1.0 - _norm.cdf(
 # the account best. w37e's R2 killed the linear form off-range at 6.3σ precisely so this would
 # not be done. Overwrite with the builder's own registered prediction, and blank p_beat: these
 # files are measurements and must never sort or be promoted on a probability of beating anyone.
+# ⚠⚠ AND ITS MESSAGE (w55). The comment above says a calibration send must not be described as
+# a queue-drain -- "a future run reading the submission history would misread its ~0.958 public
+# score as a huge regression" is `w26g_send.py`'s own words for why the `msg` override exists.
+# THE OVERRIDE WAS NEVER WIRED. `msg` is reset to NaN at write time below and nothing ever set
+# it, so w48_cal_hboyang_mix -- slot 1 of the 08-23 list, THE ARM 217 TEST, the file whose
+# public score decides whether the ad217 veto is re-argued -- was going to ship: "queue-drain
+# ... P(beats the 0.97118 account best) nan ... this is -66.5e-6 below the best sent CV", where
+# that last figure compares a raw member's OOF against a cross-fitted stack CV, the one
+# comparison RESEARCH.md says must never be made. `WHY[stem]` is already the registered
+# rationale, thresholds and all; it just was not connected to anything. Connect it.
+_REGMSG = {}
 for stem, jf in CAL_ROWS.items():
     m = q.stem == stem
     if m.any() and os.path.exists(os.path.join(HERE, jf)):
         q.loc[m, "pred_lb"] = json.load(open(os.path.join(HERE, jf)))["pred_lb"]
         q.loc[m, "p_beat"] = np.nan
         q.loc[m, "fam"] = "member"
+        if stem in WHY:
+            _REGMSG[f"{stem}.csv"] = (
+                f"w26g slot-1 calibration {stem} — {WHY[stem]} Family `member`: a MEASUREMENT, "
+                f"not a candidate. Its 0.9701816 is a raw member's standalone OOF and is NOT a "
+                f"cross-fitted stack CV — do not compare the two, and do not read this file's "
+                f"public score as a leaderboard attempt.")
+
+# ⚠ THE UNPRICEABLE ROWS (w55). Any row still carrying NaN pred_lb after the CAL_ROWS pass is
+# invisible to the tier rule. `w55a_unpriced.json` certifies each one below the auto-selection
+# tier on the tighter of two instruments and supplies a point estimate; we adopt it, and mark
+# the row `member` for the same reason the calibration rows are marked: it is a MEASUREMENT,
+# not a candidate, and must never enter a max(CV) or sort on a probability of beating anyone.
+# A row NOT in the registry keeps its NaN on purpose -- `w26g_send.py` blocks it (w55), which
+# is the fail-safe. Certifying a new one is a w55a run, not an edit here.
+_UP = os.path.join(HERE, "w55a_unpriced.json")
+if os.path.exists(_UP):
+    _up = json.load(open(_UP))
+    _n = 0
+    for _f, _r in _up["rows"].items():
+        _m = (q.file == _f) & q.pred_lb.isna()
+        if not _m.any():
+            continue
+        if not _r.get("safe"):
+            print(f"  ⛔ {_f} is in the w55a registry but NOT certified below the tier; "
+                  f"leaving it unpriced so the sender blocks it")
+            continue
+        q.loc[_m, "pred_lb"] = _r["reg_lb"]
+        q.loc[_m, "p_beat"] = np.nan
+        q.loc[_m, "fam"] = "member"
+        # ...and its MESSAGE, here, at the registration site. Without this the row falls through
+        # to `w26g`'s queue-drain template, which formats `cv` and `p_beat` -- both NaN on a
+        # member row -- and ships a description reading "CV nan ... P(beat) nan ... nan e-6
+        # below the best sent CV". This account's submission descriptions ARE its memory across
+        # runs (the brief says so outright), so a `nan` description is a real loss, and the
+        # evidence for the certification belongs in the same place the certification is applied.
+        _REGMSG[_f] = (
+            f"w55 tail-fill {_f[:-4]} — a MEASUREMENT, not a candidate. Family `member`: this "
+            f"is a raw member / superseded object with NO cross-fitted stack CV, so it is "
+            f"deliberately unranked and must never enter a max(CV). Sent only to fill a slot "
+            f"that would otherwise go unused. w55a certifies its public score BELOW the "
+            f"{_up['tier']:.5f} auto-selection tier — instrument `{_r['instrument']}`, point "
+            f"estimate {_r['reg_lb']:.6f}, bound {_r['bound']:.6f}, margin "
+            f"{_r['margin_e6']:+.1f}e-6 — so it cannot be auto-selected while nothing is "
+            f"selected, and therefore costs nothing. NOT a deadline pick.")
+        _n += 1
+    print(f"  priced {_n} previously-unpriceable row(s) from w55a_unpriced.json "
+          f"(tier {_up['tier']:.5f}; every one certified below it)")
+else:
+    print("  ⚠ w55a_unpriced.json absent — unpriceable rows stay NaN and w26g will block them")
 
 q["vetoed"] = q.stem.isin(VETO)
 print(f"  {int((~_has).sum())} row(s) carry no CV and are left unranked: "
@@ -365,6 +433,14 @@ print("\n  all ten: 296,302 rows, no NaN, md5 matches the queue, CV reproduces f
 for c in ("send_rank", "msg", "why"):
     q[c] = np.nan
 q["why"] = q["why"].astype(object)
+# ⚠ AFTER the reset, never before -- this loop wipes `msg`, which is why the two earlier
+# assignment sites had to hand their text to `_REGMSG` rather than write it directly (w55).
+q["msg"] = q["msg"].astype(object)
+for _f, _t in _REGMSG.items():
+    q.loc[q.file == _f, "msg"] = _t
+if _REGMSG:
+    print(f"  registered a submission message for {len(_REGMSG)} member row(s): "
+          f"{', '.join(sorted(f[:-4] for f in _REGMSG))}")
 q["priority"] = 0
 for i, stem in enumerate(ORDER, 1):
     m = q.stem == stem

@@ -1730,3 +1730,21 @@ here**. Only the vetoed ARM 217 family is on disk in that range; 08-23 slot 1
 ⚠ **Our 0.97118 is a four-way tie on the account** (`w40_ad211stdcorr`, `w36_ad199stdcorr`,
 `w29_ad194stdcorr`, `w27_ad190stdcorr`). That tie IS the auto-selection tier (w54) — while
 nothing is selected, Kaggle picks two of them and we do not choose which.
+
+## 2026-08-22 13:2x UTC — w55 read (no submission, at cap 10/10)
+
+| | team | public |
+|---|---|---|
+| 1 | Changye Li | 0.97141 |
+| 14 (gold cut) | Atakan Aldemir | 0.97124 |
+| **62** | **Teddy Tennant** | **0.97118** |
+
+Unchanged from w54's read. Gold wants **+40.9e-6 of CV** over the best sent, **+30.8e-6 beyond
+the best CV ever built here**; the only thing on disk in that range is the vetoed ARM 217 family.
+
+**New this run:** our 0.97118 is now a **FIVE**-way tie on the account, not four —
+`w40_ad211stdcorr` (sent 08-22 12:38) joined `w36_ad199stdcorr` (WANTED), `w29_ad194stdcorr`,
+`w27_ad190stdcorr` and `w21_ad187corr_ens4`. With nothing selected Kaggle auto-picks two by
+public score, so the tie-break is worth real money. **The leaderboard does not leak it:** our LB
+row's timestamp is our *latest* submission (`w38_ad202stdcorr`, 0.97117), not the one holding the
+0.97118. Closed as a probe — see RESEARCH.md.

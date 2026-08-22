@@ -119,6 +119,17 @@ def main():
     ap.add_argument("--allow-vetoed", action="store_true",
                     help="send priority<0 files anyway. Only defensible once selection is "
                          "confirmed made; retire the VETO entry in w48e_order.py instead.")
+    # Same reasoning one level up, and it is the SAME BUG (w55). w54 established the number
+    # that makes a spare slot free or a liability -- "a filler is SAFE iff its predicted public
+    # score is < the 0.97118 auto-selection tier" -- and wrote it into RESEARCH.md and into
+    # this file's own unfilled-slots message. Nothing enforced it, and four queue rows carry
+    # `pred_lb = NaN`, so it could not have been enforced on them anyway. w48e's comment
+    # defended those rows with "they keep priority 0 and sort last", which is exactly the
+    # argument w54 refuted for the veto: last is reached on ~2026-08-29. Certification belongs
+    # in `w55a_unpriced.py`, on evidence, not in a flag on the send line.
+    ap.add_argument("--allow-unpriced", action="store_true",
+                    help="send rows with no pred_lb anyway. The wrong tool: certify them with "
+                         "experiments/w55a_unpriced.py and re-run w48e_order.py --write.")
     a = ap.parse_args()
 
     rows = api_submissions()
@@ -193,7 +204,7 @@ def main():
     # A dry run plans the full --n regardless of slots left, so a slot at the cap can still
     # SEE tomorrow's queue and check it is sane. Only a real send is clamped by `left`.
     cap = a.n if not a.go else min(a.n, max(left, 0))
-    plan, seen_md5, blocked = [], set(), []
+    plan, seen_md5, blocked, unpriced = [], set(), [], []
     for r in q.itertuples():
         if len(plan) >= cap:
             break
@@ -202,6 +213,22 @@ def main():
         if int(getattr(r, "priority", 0)) < 0 and not a.allow_vetoed:
             # Not "skip": BLOCKED. Collected and reported after the plan so it cannot scroll off.
             blocked.append(r.file)
+            continue
+        # w55: unpriceable. A row with no `pred_lb` is a row the auto-selection tier rule
+        # cannot be evaluated on, and its submission message renders as "predicted LB nan ...
+        # P(beat) nan", destroying the provenance trail every later run reads back. `w48e`
+        # prices such rows from `w55a_unpriced.json` once w55a has CERTIFIED them below the
+        # tier on a calibrated instrument; a row that reaches here still NaN has been certified
+        # by nothing. Unconditional and default-on, exactly like the veto filter above.
+        # NaN `cv` is tolerated ONLY where the row has renounced being a candidate by declaring
+        # fam == "member" (w53: a member's published OOF is not a cross-fitted stack CV).
+        _why = None
+        if pd.isna(getattr(r, "pred_lb", None)):
+            _why = "no pred_lb — never certified against the auto-selection tier"
+        elif pd.isna(getattr(r, "cv", None)) and str(getattr(r, "fam", "")) != "member":
+            _why = "no cv and fam != member — undeclared candidate carrying no CV"
+        if _why and not a.allow_unpriced:
+            unpriced.append((r.file, _why))
             continue
         p = os.path.join(SUB, r.file)
         m = r.md5 if isinstance(getattr(r, "md5", None), str) else None
@@ -236,6 +263,17 @@ def main():
               "selected.")
         print("     Retire the entry in w48e_order.py on evidence; do NOT pass --allow-vetoed.")
 
+    if unpriced:
+        print(f"\n  ⛔ {len(unpriced)} UNPRICEABLE file(s) skipped, not sent (w55). The "
+              f"auto-selection tier\n     rule cannot be evaluated on a row with no price, so "
+              f"the row is not sendable:")
+        for f, why in unpriced[:8]:
+            print(f"       {f:34s} {why}")
+        if len(unpriced) > 8:
+            print(f"       ... and {len(unpriced) - 8} more")
+        print("     Certify with `.venv/bin/python experiments/w55a_unpriced.py`, then re-run"
+              "\n     `w48e_order.py --day <today> --write`. Do NOT pass --allow-unpriced.")
+
     if not plan:
         print("\nnothing to send: the queue is drained of everything sendable.")
         if blocked:
@@ -263,6 +301,15 @@ def main():
         # calibration send would be described as a queue-drain attempt and a future run reading
         # the submission history would misread its ~0.958 public score as a huge regression.
         override = getattr(r, "msg", None)
+        # ⚠ NaN-safe (w55). The default template formats `cv` and `p_beat`; a `member` row has
+        # neither, and would ship "CV nan ... P(beat) nan". `w48e` writes a proper `msg` for
+        # every row it certifies, so this branch should never fire -- it is the fail-safe for
+        # a certified row that somehow arrives without one, and it refuses rather than lie.
+        _has_msg = isinstance(override, str) and override.strip()
+        if not _has_msg and pd.isna(getattr(r, "cv", None)):
+            print(f"  skip {r.file}: fam={r.fam} row has no cv and no registered msg; "
+                  f"re-run w48e_order.py --write so it is described honestly")
+            continue
         msg = (f"{a.tag} queue-drain {r.stem} — CV {r.cv:.10f}, family {r.fam}, "
                f"w26d predicted LB {r.pred_lb:.6f} with P(beats the 0.97118 account best) "
                f"{r.p_beat:.2e}. Sent because the brief's economics make an unused slot pure "
