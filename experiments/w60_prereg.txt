@@ -1,0 +1,110 @@
+w60 PRE-REGISTRATION — written 2026-08-22 ~15:10 UTC, BEFORE any corrected ens4 base exists
+============================================================================================
+(Verify with `git log` on this file against the mtime of experiments/w60a_corr.log and of
+submissions/oof_w36_ad199stdcorr_ens4.npy — neither exists when this is committed.)
+
+ANGLE SUBSTITUTED, AND WHY
+--------------------------
+Issued angle: "LightGBM: tune it properly against the fixed folds". It is CLOSED THREE TIMES,
+each with a measurement, and RESEARCH says so under its own heading:
+  * 2026-08-10 slot 1 — tuned for solo AUC: +3e-5 solo, ~+4e-7 into the stack. Null.
+  * 2026-08-11 slot 1 — tuned for DECORRELATION: maxcorr 0.9961 against the pack. "You cannot
+    tune a LightGBM into a decorrelated member."
+  * 2026-08-13 — a LightGBM META-model on logits+regime: -0.00020, decaying monotonically from
+    the first checkpoint. RESEARCH: "Do not tune GBDTs. Do not add ordinary GBDT members."
+Re-running it is the near-copy the angle mechanism exists to prevent. Substituted for JOURNAL
+w59 §12.6, which names ONE build target and calls it the highest-value object in the workspace.
+
+THE TARGET (w59 §7)
+-------------------
+While `check_selection` exits 1, Kaggle auto-selects the best two by PUBLIC score, and
+P(the pick is in the final pair) = 0.400 at a standing cost of +7.855e-6. The ONLY lever that
+raises it without the human is a file that lands ABOVE the tier and is itself an acceptable
+final entry. That needs, SIMULTANEOUSLY:
+      CV >= 0.9701294160   (w59a's conditional hijack bar)   AND   pred_lb ~ 0.97118 (the tier)
+w59 found nothing eligible with both: every eligible file over the bar prices at pred_lb
+0.971157 (0.08% hijack risk), and the only objects with both are ad216/ad217, which
+`WANTED_INELIGIBLE` bars. w59 §12.6: "It must clear w40d on its own evidence. Do NOT reach for
+ad216/ad217 to arm it."
+
+THE CONSTRUCTION, fixed here before any number exists
+-----------------------------------------------------
+`w21a_ad187corr.py` (the 5-arm scheme-average c_avg correction) applied to the **ens4** base of
+ARM 199 — the PICK's own pack — via W21A_BASE/W21A_TAG, exactly as w30c did for ARM 194. No new
+model, no refit, no new members, no search. The `corr` flag is worth +13.72e-6 of pred_lb and
+the `ens4` family +13.41e-6 in w53a's M2, and their SUM is what lifts an already-over-the-bar CV
+past the tier. Nothing here is chosen with reference to the public leaderboard.
+
+  BUILD 1 (target)   W21A_BASE=w36_ad199std        -> w36_ad199stdcorr_ens4
+  BUILD 2 (control)  W21A_BASE=w38_ad202std        -> w38_ad202stdcorr_ens4
+Build 2 is a matched control on the other es-CLEARED pack, run with one env var different.
+
+⛔ NOT built, and the reason is registered: `w36_ad199stdcorr_rescale`. It would price HIGHER
+(pred_lb 0.971193, P 0.813) and its projected CV 0.9701253 FAILS the bar by 4.1e-6. Picking the
+higher pred_lb over the bar is precisely the hijack w59a wired the bar to stop. It is named here
+so a later run cannot present it as an oversight.
+
+REGISTERED PREDICTIONS
+----------------------
+Base CVs, measured before the build (frozen SKF5 seed-42, agent/common.get_folds):
+    w36_ad199std      0.9701323250      w38_ad202std      0.9701305726
+The corr delta over 11 h3 bases runs +3.94 .. +6.07e-6 and shrinks with base strength; the ONE
+ens4 reading (ARM 194) is +4.330 against its h3 sibling's +4.281, and rescale/rankraw on the
+same base gave +3.377/+7.553. So:
+
+ P1  w36_ad199stdcorr_ens4 cross-fitted CV in [0.9701340, 0.9701395]  (delta +1.8..+7.2e-6),
+     point estimate 0.9701366.
+ P2  It CLEARS the w59a conditional hijack bar 0.9701294160.  (Needs delta > -2.9e-6; no corr
+     reading in this workspace has ever been negative.)  THIS IS THE DECISION TEST.
+ P3  Its pred_lb >= 0.971185 = tier + STEP/2, i.e. hijack_risk > 0.50 — making it the FIRST
+     ELIGIBLE file on disk that both clears the bar and is odds-on to land above the tier.
+ P4  w38_ad202stdcorr_ens4 CV in [0.9701325, 0.9701375], and STRICTLY LESS THAN build 1's.
+     (w59 §8 P4: register STRICT inequalities. A tie here would itself be the finding.)
+ P5  Priced through w59a on the live tier, build 1 alone above the tier costs STRICTLY LESS
+     than +3.599e-6 (w59 §7 P8, w40_ad211std_h3, dcv -6.82) and STRICTLY MORE than -0.017e-6
+     (w59 §7 P5, the PICK itself, the floor). Point estimate +1.5e-6.
+ P6  Adding `w40_ad211` to WANTED_INELIGIBLE (below) changes the 08-23 BLOCK COUNT BY ZERO and
+     the plan still fills to TEN. (Both ad211 rows in the plan are already blocked on the CV
+     bar or sit under P_MAX=2%.)
+ P7  With ad211 barred, `w40_ad211std_h3` is REMOVED from the §7 lever table, so the best
+     lever w59 could name becomes UNAVAILABLE and the pre-build lever value degrades from
+     +3.599e-6 back to the +7.855e-6 status quo.
+
+THE SEPARATE FINDING THIS RUN IS ENFORCING — NOT A PREDICTION, ALREADY MEASURED
+-------------------------------------------------------------------------------
+w40d_prereg.txt, committed 2026-08-20 before ARM 211 existed, reads verbatim:
+
+    ⛔ ARM 211 IS NOT ELIGIBLE FOR check_selection.WANTED, WHATEVER ITS CV.
+
+w56 built `check_selection.WANTED_INELIGIBLE` TO ENFORCE THAT RULE — quoting w40d by name in
+its own docstring — and put ad216 and ad217 in it. **It left out ARM 211, the arm the rule was
+written about.** So the rule was moved from a paragraph into code and lost its originating case
+on the way in. Consequences, all live:
+  * `w26g_send.above_tier_reason` imports that dict, so ad211 files clearing the CV bar are
+    currently waved through ABOVE the tier — installed as final entries the prereg forbids.
+  * `w40_ad211stdcorr` (CV 0.9701374733) is ALREADY in auto-selection TIER 1 at p_joint 0.375,
+    and is the second-highest CV of any tier-1 member. `assert_wanted_eligible` cannot see it.
+  * It is above `w23_ad187stdcorr` (0.9701150808) on CV, so any future run moving WANTED's
+    weaker slot on the CV ledger moves it onto a barred arm and nothing fires.
+This run ADDS the key. It does NOT retire it.
+
+⛔ WHAT THIS RUN DELIBERATELY DOES NOT DO
+-----------------------------------------
+ARM 211's matched control is ARM 202 and the delta is measured at **-0.116e-6** on the corrected
+h3 base (0.9701374733 vs 0.9701375891) — the nine yadoy666 streams bought NOTHING, well inside
+the ~4e-6 rebuild floor and nowhere near the +40e-6 "disbelieve on sight" line. That is a real
+argument that there is no CV inflation to worry about, and it is therefore exactly the shape of
+evidence WANTED_INELIGIBLE's docstring says may retire an entry.
+
+**It is not acted on in this run, on purpose.** A run that discovers a registered rule was never
+enforced must not retire that rule in the same breath, and this run has a direct interest in
+retiring it (ad211 carries the §7 lever). The retirement test is registered here instead, for a
+later run with no stake in the answer:
+
+    RETIRE `w40_ad211` from WANTED_INELIGIBLE iff the ad211-minus-ad202 matched-control delta
+    is within +-4e-6 on ALL FOUR transform bases held on disk (h3, ens4, rescale, rankraw),
+    measured on the frozen folds, AND that reading is quoted in the dict value in the same
+    commit. A null group delta is not es-clearance, but it does bound the inflation the rule
+    exists to refuse. One base is one reading; four is a measurement.
+
+Nothing in this run may be used to pre-empt that test.
