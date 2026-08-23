@@ -1,0 +1,107 @@
+w67 PREREG -- 2026-08-23, slot 6 of 10 (ZERO slots available; the UTC day is at 10/10, stamped
+12:41:06 .. 12:41:34, best of the ten 0.97119). Committed BEFORE experiments/w67a_aboveslope.py
+exists. Nothing below is chosen from a number this run produced.
+
+================================================================================
+0. THE ANGLE IS CLOSED; w66 SECTION 9 ITEM 3 IS TAKEN INSTEAD
+================================================================================
+Issued: "Foundation: confirm the metric, build the fixed-fold CV harness, and get one honest
+GBDT baseline scored."
+
+Closed on all three counts and has been for weeks: the metric is AUC (RESEARCH.md), the fixed
+folds are StratifiedKFold(5, shuffle, seed) used identically by every experiment since w14, and
+the GBDT line is 202 members deep. w58 section 9.7 forbids re-opening it. The run therefore
+takes w66 section 9 item 3, which is marked with a target and reads:
+
+  "R2 IS OPEN AND ITS REGISTERED REPAIR IS WRONG. Do NOT refit w53a under GLS -- w66c measured
+   that making in-range predictions 73% worse. The open question is narrower: is the +1.83 or
+   the +0.96 slope right ABOVE the fitted range? The only clean instrument is a file built
+   above FIT_CV_MAX and sent ... so this answers itself from the 08-24 sends onward if someone
+   keeps score. Register that first."
+
+This run registers it. It does NOT keep score yet -- the scores do not exist until 08-24.
+
+================================================================================
+1. GIVEN, NOT PREDICTED (declared, because it was seen during orientation)
+================================================================================
+Seen before this prereg was written, and therefore NOT predicted:
+
+  * FIT_CV_MIN 0.9700125369, FIT_CV_MAX 0.9701400060 (== w36_ad199stdcorr, the fit argmax)
+  * BASE_SLOPE +1.8327, ERA_SLOPE +1.4425 (frozen OLS, w53a)
+  * GLS(93) cv6 +0.9582 se 0.2183, era:cv6 -0.0554 se 0.1056  (w66c_attrib.json)
+  * RESID_SD 7.7200e-6, SD_ERA 8.77e-6, ROUND_VAR 8.333 (units 1e-12, sd 2.887e-6)
+  * `w23b_sendqueue.csv` has 74 rows; ten have cv > FIT_CV_MAX; the argmax of those ten is
+    `w48_cal_hboyang_mix` at 0.9701815536, which is family `member` and can never be sent.
+
+DECLARED CONTAMINATION. Section 3's power arithmetic can be done on the back of an envelope
+from the five numbers above, and I did part of it before writing this file: the nine sendable
+excesses sum of squares about their mean is order 1.6e3, giving an IID se of order 0.23 and a
+separation-to-se ratio of order 2.3. P4 and P6 are therefore WEAK predictions and must be read
+as such. P5 (the correlation inflation factor) was NOT computed in any form beforehand and is
+the one prediction here carrying full weight.
+
+================================================================================
+2. THE ESTIMAND, STATED ONCE, BY REFERENCE
+================================================================================
+Above FIT_CV_MAX the two candidate models agree on every term except the cv slope. Write
+
+    lb_hat(k) = ANCHOR(k) + s * excess(k),    excess(k) = (cv[k] - FIT_CV_MAX) * 1e6
+
+where ANCHOR(k) is the FROZEN pricer's own prediction for file k evaluated with its cv clamped
+to FIT_CV_MAX -- so the family, std, corr and era terms are held at exactly what w53a already
+says, and `s` is the only free quantity. All nine sendable above-range files are ad216/ad217,
+hence era, so the contrast is the ERA slope:
+
+    H_OLS: s = ERA_SLOPE  = +1.4425          H_GLS: s = +0.9028 (= GLS(93) cv6 + era:cv6)
+    SEPARATION = 0.5397 per e-6
+
+`s` is estimated by GLS of (lb - ANCHOR)/1e-6 on excess, with Omega = Sxx[js,js] + I*ROUND_VAR,
+Sxx built by `w63a_setprice.fit` -- IMPORTED, never re-implemented -- exactly as w66a does.
+
+================================================================================
+3. PREDICTIONS
+================================================================================
+P1  GATE. The frozen pricer re-derives BETA from its own 93-row table to < 1e-9. (Same gate as
+    w66 P1; a run that cannot reproduce the frozen fit may not reason about its slope.)
+
+P2  Exactly 9 unsent queue files have cv > FIT_CV_MAX after the `member` family is excluded,
+    and EVERY one of the 9 is era (ad >= 195), so the era slope is the whole contrast and the
+    base slope never enters. STRICT: 9, not "about 9".
+
+P3  |ERA_SLOPE - (GLS93 cv6 + GLS93 era:cv6)| = 0.5397, to within 1e-4.
+
+P4  (WEAK -- see section 1) The IID se of s_hat, at per-point sd sqrt(RESID_SD^2 + ROUND_VAR),
+    lands in [0.15, 0.35].
+
+P5  (FULL WEIGHT) The CORRELATED se exceeds the IID se, and the ratio se_corr/se_iid lands in
+    the INTERVAL [1.0, 6.0]. Registered as an interval and not as a one-sided bar, per w66
+    section 7: a one-sided bar cleared by two orders of magnitude constrains nothing.
+
+P6  (WEAK -- see section 1) RESOLUTION, bucketed in advance. Let R = SEPARATION / se_corr.
+      (a) R <  1.96  -> NO RESOLUTION: even a perfectly-landed s_hat cannot exclude the loser
+      (b) 1.96 <= R < 3.92 -> ONE-SIDED: excludes only if s_hat lands on a hypothesis
+      (c) R >= 3.92  -> CLEAN: the two hypotheses' 95% intervals are disjoint
+    PREDICTED BUCKET: (a). If (a) holds then w66 section 9 item 3's claim that the question
+    "answers itself from the 08-24 sends onward" is FALSE, and saying so is this run's result.
+
+P7  POWER CONTROL. Synthesise z = ANCHOR + s_true*excess noiselessly for s_true in
+    {+1.4425, +0.9028} and confirm the GLS estimator returns each to < 1e-9. An se is only
+    evidence about power if the estimator is unbiased on data it should nail.
+
+P8  NEGATIVE CONTROL. Permute excess against the residual 2000 times; the null distribution of
+    s_hat is centred at 0 within 3 se of its own mean.
+
+P9  THE SEND PATH DOES NOT MOVE. The 2026-08-24 dry plan is byte-identical before and after
+    this run, ten slots, and `check_selection.WANTED` is unchanged. w67 touches NO module on
+    the send path -- w67a is a new read-only file and nothing else is edited.
+
+================================================================================
+4. WHAT THIS RUN MAY NOT DO
+================================================================================
+  * MUST NOT refit or edit `w53a_pricer.py`. w66c measured that the GLS refit makes in-range
+    predictions 73% worse; R2's registered repair is wrong and stays unapplied.
+  * MUST NOT move `check_selection.WANTED`. R1 asserts it and w56b is its guard, not w67.
+  * MUST NOT re-open slot 2 (closed, w64 sections 1-6), the original dataset, LightGBM or
+    CatBoost tuning, feature engineering, blending, seed/fold diversity, or error analysis.
+  * MUST NOT run `w26d_queueprice.py` AS A SCRIPT -- import it (w66 section 10).
+  * MUST NOT submit. The UTC day is at 10/10.
