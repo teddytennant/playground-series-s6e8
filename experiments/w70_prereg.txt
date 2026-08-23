@@ -1,0 +1,73 @@
+w70 PRE-REGISTRATION — CAN THE PUBLIC LEADERBOARD ADJUDICATE THE `stdcorr` CV BASIS?
+Committed BEFORE experiments/w70e_basisfit.py exists. 2026-08-23, ~17:30 UTC.
+
+§0. WHAT IS OPEN, AND WHAT THIS RUN MAY AND MAY NOT DO
+------------------------------------------------------
+w70 §3 established that every corrected file has two stored, defensible CVs — SHIPPED
+(`fast_auc` of the shipped OOF vector) and HONEST (`base_auc + nested_delta`) — differing by
+`scheme_optimism`, measured at 0.000–3.523e-6 (mean 1.771e-6) across the 20 corrected files.
+Everything in the workspace ranks on SHIPPED. Whether it should is an OPEN DECISION.
+
+⛔ w70 MAY NOT TAKE THAT DECISION: it computed the optimism table before registering any bar on
+it, and switching the basis reorders the send queue and rewrites registered days. This file
+registers a DIFFERENT and narrower question, blind, before the harness exists:
+
+    Does the public leaderboard PREFER one basis over the other?
+
+If it does, that is evidence a later run can register a bar against. If it cannot resolve the
+difference, that is ALSO a result — it forces the basis decision onto the CV-comparison argument
+(§3b) and forbids a later run from settling it by pointing at the LB.
+
+§1. THE ESTIMAND
+----------------
+`w53a_pricer` fits public LB on (cv6, family, std, corr, era:cv6) over its sent fit table `_t`
+by least squares. Refit that model TWICE, identically, changing exactly one thing: for the rows
+whose stem is a corrected file, take `cv` on the SHIPPED basis (model S) or the HONEST basis
+(model H). Everything else — the design matrix, the row set, MU, the family levels — is w53a's,
+imported and not restated.
+
+    D_SD  = RESID_SD(H) − RESID_SD(S)        [e-6; NEGATIVE means the honest basis predicts better]
+
+⚠ NOTE THE DESIGN ALREADY CARRIES A `corr` DUMMY, so the MEAN optimism (1.771e-6) is absorbed by
+a level term under BOTH models. What can move `D_SD` is only the WITHIN-corrected VARIATION in
+optimism (0.000 on 6 files, 2.529e-6 mean on 14). This is stated here, before the reading,
+because it is the reason the registered prediction below is a null.
+
+§2. THE REGISTERED READINGS
+---------------------------
+P1  VALIDITY GATE. Model S must reproduce `w53a.RESID_SD` and every entry of `w53a.BETA` to
+    < 1e-9. If it does not, the harness is not the pricer and NOTHING BELOW IS READABLE.
+    Registered as a HARD STOP, not a warning.
+
+P2  POWER, COMPUTED AND PRINTED BEFORE THE READING. Report (a) how many fit rows are corrected,
+    (b) the sd of the optimism over exactly those rows, (c) the se of `D_SD` from a paired
+    bootstrap over the fit rows, 2000 resamples, seed 70. ⚠ A null in `D_SD` is evidence of
+    absence ONLY against this number.
+
+P3  THE READING, REGISTERED BLIND AND PREDICTED TO BE A NULL:
+      |D_SD| < 0.5e-6  AND  |D_SD| < 1 se   ->  **UNINFORMATIVE**. The LB cannot adjudicate the
+        basis, and a later run may NOT cite it either way. THIS IS WHAT I PREDICT.
+      D_SD <= −0.5e-6 AND |D_SD| >= 2 se    ->  evidence FOR the honest basis.
+      D_SD >= +0.5e-6 AND |D_SD| >= 2 se    ->  evidence FOR the shipped basis.
+      anything else                          ->  UNINFORMATIVE, and say which clause failed.
+    ⚠ Registered as an INTERVAL with a STRICT companion, per w64's lesson 3 — a bare sign test
+    on a quantity I expect to be zero would "resolve" on noise.
+
+P4  NEGATIVE CONTROL / VACUITY. Re-run the H fit with the SAME optimism magnitudes SHUFFLED
+    across the corrected rows (numpy default_rng(70), 200 shuffles). Report the distribution of
+    the shuffled `D_SD`. If the true `D_SD` sits inside the bulk of the shuffled distribution,
+    the true relabelling is indistinguishable from an ARBITRARY one — which is what P3's
+    "uninformative" verdict means, made concrete rather than asserted.
+    ⚠ THIS GUARDS THE NULL BRANCH. Per w65's lesson, name the branch: a WIDE shuffled
+    distribution makes a null STRONGER here, not weaker, and would make a FIRE verdict weaker.
+
+§3. WHAT WOULD FALSIFY THE WHOLE EXERCISE
+------------------------------------------
+If P1 fails, or if fewer than 5 fit rows are corrected (P2a), the design has no content and the
+run must print that and stop rather than report `D_SD`.
+
+§4. NOT IN SCOPE
+----------------
+No decision on the ranker's basis. No edit to `w53a_pricer`, `w26d_queueprice`, `w23b_sendqueue`,
+`w48e_order`, `w26g_send`, `stdflag` or any registered send day. No submission. `w70b_basisguard`
+stays agnostic between the bases whatever this returns.
