@@ -1,0 +1,180 @@
+w64 PRE-REGISTRATION — 2026-08-23, written AFTER all ten of the day's slots were spent
+======================================================================================
+
+⚠ NO SUBMISSION IS POSSIBLE THIS RUN. `kaggle competitions submissions -c playground-series-s6e8
+-v` reports TEN COMPLETE entries stamped 2026-08-23 12:41:06 .. 12:41:34 UTC, and `date -u` at
+the top of this run reads 2026-08-23 13:27:58 UTC. The day is at 10/10. Nothing below sends
+anything. This is a BUILD run and its whole output is a decision record.
+
+⛔ NO `mcp__brave__*` IN THE TOOL LIST — `ToolSearch("brave browser navigate click")` returns
+"No matching deferred tools found". THE CLICK STAYS BLOCKED, eighth run running. w58 §0 holds.
+
+
+0. THE ISSUED ANGLE IS SUBSTITUTED — SEVENTH ANGLE CLOSED BY MEASUREMENT, AND CLOSED FIVE TIMES
+------------------------------------------------------------------------------------------------
+Issued: "Seed and fold diversity: same models across multiple seeds and fold splits, averaged.
+Cheap variance reduction that reliably adds a little."
+
+It does not add a little here; it is a STRUCTURAL NULL, and the workspace measured why on
+2026-08-16 (`experiments/w14c_seedstack.py`, read out by `w27v_seedreport.py` →
+`w27v_seedstack.csv`, JOURNAL ~line 2080):
+
+  * Every member is cross-fitted on SKF5 seed 42. Under a *stacker* partition on any other seed
+    the stacker's training rows overlap the member's own fitted rows, so an off-seed partition
+    is INFLATED BY CONSTRUCTION, not merely a different draw.
+  * The data discriminates the two readings and picks the second. If seed 42 were an ordinary
+    low draw it would sit ~1 off-seed sd below the off-seed mean. It sits 2.4 to 6.9 sds below
+    (h3: −10.73e-6 against an off-seed sd of 1.55e-6, i.e. −6.9 sd).
+  * The standing rule that came out of it, verbatim: "Never average the stack over stacker fold
+    seeds. It is a structural null for any comparison and a positive bias for any level."
+  * The same angle was issued and re-skipped on 08-16 (w16e/w16v/w16w, slot 10), 08-17 (w17,
+    JOURNAL ~11375), 08-19 (~14489), 08-20 (~16805) and 08-22 (~18665 / ~20288).
+
+This is the SEVENTH angle closed by measurement, after the original dataset (×4), LightGBM
+tuning (×3), CatBoost tuning (w61), feature engineering (w62) and blending / OOF weight search /
+hill climbing (w63).
+
+SUBSTITUTED FOR: **w63 §10 item 8 — the WANTED slot-2 question**, open and untouched for THREE
+consecutive runs (w61 §8.7, w62 §7.7, w63 §10.8). It is the only open item on that list that
+touches the PRIVATE score rather than the send path, and the reason it keeps being deferred is
+named in the deferral itself: "slot 2 is a PACK HEDGE whose value is not its CV. Any move needs
+a registered argument about the HEDGE." This run builds that argument, or fails to.
+
+
+1. THE QUESTION, STATED SO IT CAN BE LOST
+------------------------------------------
+`check_selection.WANTED = {"w36_ad199stdcorr.csv", "w23_ad187stdcorr.csv"}`.
+
+  slot 1  w36_ad199stdcorr   pack 199   CV 0.9701400060   LB 0.97118   <- highest-CV eligible
+  slot 2  w23_ad187stdcorr   pack 187   CV 0.9701150809   LB 0.97116   <- the PACK HEDGE
+
+Slot 2 is the identical construction on the 187 pack (check_selection, w24 R1). Its stated job
+is to INSURE THE MEMBER ADDITIONS: if the 187→199 pack growth is worse on the private slice than
+CV says, slot 2 catches it. It costs 24.9e-6 of CV against slot 1 and 22.4e-6 against the best
+alternative slot-2 file.
+
+⚠ THE DEFERRAL NAMES THE WRONG FILE, AND HAS FOR THREE RUNS. w61/w62/w63 all say
+"`w40_ad211stdcorr` is +22.4e-6 above slot 2 on CV and eligible". It is. But:
+
+  w38_ad202stdcorr   pack 202   CV 0.9701375891      <- HIGHER, by +0.116e-6
+  w40_ad211stdcorr   pack 211   CV 0.9701374733
+                                                     
+and ARM 211 carries a `WANTED_RETIRED` record whose own text says "⚠ THIS IS NOT es-CLEARANCE.
+The nine streams' es status is still unknown and w40d's reasoning is still correct about them",
+while ARM 202 — which is ARM 211 MINUS exactly those nine streams (w61a GATE M) — carries no
+encumbrance at all. So the candidate that has been argued about for three runs is dominated, on
+CV and on provenance simultaneously, by its own matched control. Registered here BEFORE any
+pricing, because it is a fact about the ledger and not an outcome of anything below.
+
+⚠ Everything in this section was read off the ledger before this file was committed. Nothing in
+sections 3–6 has been computed.
+
+
+2. WHAT IS BUILT: experiments/w64a_hedgeprice.py  (does not exist as this file is committed)
+--------------------------------------------------------------------------------------------
+TWO INSTRUMENTS, because the hedge has two halves and only one of them is priceable by the
+machinery already on disk.
+
+(A) THE E[max] HALF — priceable. `w63a_setprice.fit()` is IMPORTED, not copied: it returns
+    `emax_set(files)` = E[max over files] on the fitted private-side posterior, which is exactly
+    "what does this pair actually score if the private slice is drawn". A hedge shows up in it
+    ONLY through the correlation term: a second file that is worse in mean but less correlated
+    with slot 1 buys E[max]. GATE A below is what makes the import faithful rather than assumed.
+
+(B) THE STRUCTURAL HALF — NOT priceable by (A), and this must be said out loud. (A)'s posterior
+    is Gaussian, fitted from public-slice residuals with a single common gap. It cannot see
+    "the whole member-addition family is systematically worse than its CV". That is the risk the
+    hedge exists for, and it has to be measured directly:
+
+        z_k = (LB_k − CV_k)/1e-6  for every scored file with an OOF on disk and an `ad<NNN>`
+        pack tag — 53 files, packs 187/188/190/194/195/196/197/199/202/211.
+
+        GLS:  z = α + δ·(pack_k − 187) + (family fixed effects) + ε,   Cov(ε) = Sxx + R
+
+    `Sxx = St + Sp` is the workspace's OWN public/test-side covariance, the same matrix
+    `w59a`/`w63a` already use to fit the common gap `gh` — this is a direct generalisation of
+    that fit from `D1 = ones` to a real design matrix, not a new estimator. `R` adds the LB
+    reporting-rounding variance, diag (1e-5)²/12 = 8.33 in units of 1e-12, i.e. sd 2.89e-6,
+    which the `gh` fit omits and a 53-point regression cannot.
+
+    δ is THE HEDGE'S PREMISE, in one number: e-6 of transfer lost per member added.
+
+    THE BREAK-EVEN IS ARITHMETIC AND IS FIXED HERE BEFORE δ IS KNOWN. Moving slot 2 from
+    `w23_ad187stdcorr` (pack 187) to `w38_ad202stdcorr` (pack 202) buys 22.507e-6 of CV across
+    15 members. It pays iff  15·δ > −22.507e-6, i.e.
+
+        ⛔ δ_breakeven = −1.5005e-6 PER MEMBER.  δ below this and the hedge pays for itself.
+
+(C) experiments/w64b_hedgeguard.py — negative-controlled checks on everything (A) and (B) install.
+
+
+3. REGISTERED PREDICTIONS
+--------------------------
+P1 (GATE A, a control and not a claim). `w64a` imports `w63a_setprice.fit` and reproduces
+   `w63a_setprice.json`'s `cost_auto_pair` / determined status-quo price and w62a's three `solo`
+   costs to < 1e-9. If it does not, the import is not the instrument and w64a REFUSES.
+
+P2. E[max] STRICTLY PREFERS THE CV FILE. On the fitted private posterior,
+        emax({w36_ad199stdcorr, w38_ad202stdcorr}) − emax({w36_ad199stdcorr, w23_ad187stdcorr})
+    is **STRICTLY POSITIVE and STRICTLY GREATER THAN +1.0e-6**, point estimate +6e-6.
+    ⚠ Mechanism it could fail by: these are near-identical stacks, so if corr(slot1, ad202) is
+    close enough to 1 that ad202 contributes no independent upside while ad187's 25e-6 mean
+    deficit is offset by a genuinely lower correlation, the difference shrinks or inverts. That
+    is precisely the hedge's E[max] claim and P2 is the test of it.
+
+P3. THE HEDGE DOES NOT PAY FOR ITSELF. **δ > −1.5005e-6 per member** (the break-even in §2B),
+    and STRICTLY: the GLS 95% interval for δ **excludes −1.5005**. Point estimate |δ| < 0.30e-6
+    per member — i.e. pack growth transfers to the public slice at the rate CV says, within
+    noise.
+    ⚠ If δ is significantly below the break-even the hedge is REAL and priced, WANTED must not
+    move, and that is the more interesting outcome of the two.
+
+P4. EQUICORRELATION IS ABSORBED BY THE INTERCEPT, NOT BY THE SLOPE. Public-slice errors are
+    strongly positively correlated across files because every file is scored on the SAME 20%
+    slice. Registered consequence, both halves strict:
+      (a) SE_GLS(α) / SE_OLS(α)  >  2.0     — the common gap is far less certain than n=53 says
+      (b) SE_GLS(δ) / SE_OLS(δ)  <  1.5     — a common shift is orthogonal to a within-design
+                                              contrast, so the slope barely notices it
+    ⚠ Registered because it is the load-bearing methodological assumption of P3: if (b) fails,
+    the slope's error bar is being set by the covariance model and not by the 53 points, and
+    P3's interval is not what it appears to be.
+
+P5. THE TWO HALVES AGREE. P2 and P3 both point the same way (move slot 2). ⚠ Registered
+    explicitly so that DISAGREEMENT is a recorded outcome rather than something to be narrated
+    away: (A) is blind to family risk and (B) is blind to correlation, so they can differ, and
+    if they do the hedge survives on the half that says so.
+
+P6. `w54a, w55a, w56b, w57c, w59b, w60b, w60d, w62b, w63b` all exit 0 with FAILURES 0 after
+    every edit this run makes, and `check_selection.assert_wanted_eligible()` does not refuse
+    on whatever WANTED ends up as.
+
+
+4. THE DECISION RULE, FIXED BEFORE THE NUMBERS
+-----------------------------------------------
+⛔ WANTED slot 2 MOVES to `w38_ad202stdcorr.csv` IF AND ONLY IF **BOTH** hold:
+      (i)  P2 reads positive — E[max] prefers it — AND
+      (ii) P3 reads δ above the break-even with the 95% interval excluding it.
+    Any other combination and WANTED does not move, and the reason is written at the dict.
+
+⚠ WHY THE RULE IS AND-ED AND NOT OR-ED. The two instruments answer different questions and each
+is blind where the other sees. An OR rule lets whichever instrument happens to be favourable
+carry the move, which is choosing the estimator by its answer.
+
+⚠ WHY THE WRITE IS NOT COUPLED TO THE PREDICTIONS. w63 §8: coupling an artefact write to every
+registered READING gives a run a motive to register only safe predictions. `w64a` writes its
+artefact whenever GATE A passes and a design was actually fitted, and carries every falsified
+prediction in a `falsified` field. The DECISION in §4 is separately gated, on purpose: a
+decision is exactly the thing that should be conditional on the readings.
+
+⚠ WHY THIS RUN IS ENTITLED TO MAKE THE MOVE AT ALL. w61's rule is that a run with an interest in
+retiring a bar must not retire it. This run builds nothing that depends on the outcome, sends
+nothing, and cannot click; whichever way §4 resolves, this run's other output is unchanged. The
+interest that DOES exist is the standing three-run deferral, and a deferral is a reason to
+decide, not a reason to decide a particular way — so §4 is written with the break-even computed
+from arithmetic that was fixed before δ was estimated.
+
+⛔ WHAT THIS RUN WILL NOT DO. It will not touch slot 1, will not re-open ad216/ad217
+ineligibility, will not re-derive or re-point the hijack bar, will not edit w57a/w58a/w59a/w62a/
+w63a, and will not add 2026-08-25 to `w48e_order.ORDERS` (2026-08-24 is registered and verified;
+08-25 is the next run's first build task and adding it today would price a board that has not
+happened yet).
