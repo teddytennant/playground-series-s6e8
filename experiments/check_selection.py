@@ -246,6 +246,71 @@ COMP = "playground-series-s6e8"
 # identical construction on the 187 pack, and the only one of the two with a real LB print.
 WANTED = {"w36_ad199stdcorr.csv", "w23_ad187stdcorr.csv"}
 
+# ---------------------------------------------------------------------------------------
+# ⛔ SLOT 2 IS SETTLED AT A MEASURED SIZE — DO NOT RE-OPEN IT (w64, 2026-08-23)
+# ---------------------------------------------------------------------------------------
+# Slot 2 was deferred as "a PACK HEDGE whose value is not its CV" for THREE consecutive runs
+# (w61 §8.7, w62 §7.7, w63 §10.8), each of which said the same sentence and made no argument.
+# `experiments/w64a_hedgeprice.py` made it, with two instruments and a decision rule fixed in
+# `w64_prereg.txt` before either was run. The answer is not "we still cannot tell". It is that
+# THE WHOLE DECISION IS WORTH 0.14e-6, and here is each half of why.
+#
+# (1) E[max] ON THE FITTED PRIVATE POSTERIOR (w63a's estimator, imported, GATE A reproduces its
+#     recorded price to 0.000e+00). The entire `*stdcorr` ladder — the same construction at packs
+#     187/188/190/194/195/197/202/211 — spans **0.1447e-6 of E[max] while spanning 22.51e-6 of
+#     CV**. Slot 1's mean dominates and every candidate correlates with it above 0.9995, so the
+#     second slot contributes almost nothing whichever file fills it. The contrast three runs
+#     deferred (`w23_ad187stdcorr` -> `w38_ad202stdcorr`) is **+0.1444e-6** — under the ~2e-6
+#     rebuild floor and under the +0.45e-6/parameter search-optimism floor.
+#
+#     ⚠ AND THE HEDGE'S OWN MECHANISM IS MEASURED AND IS NEARLY EMPTY. Decorrelation is the ONLY
+#     channel through which a hedge can pay in this instrument. corr(slot1, incumbent) = 0.999544
+#     against corr(slot1, challenger) = 0.999973. Forcing the incumbent's correlation up to the
+#     challenger's, holding its own mean and sd, moves its E[max] by **0.0003e-6 of the 0.1447e-6
+#     the mean deficit costs — 0.2%**. The incumbent would need corr 0.998410 to break even and
+#     it reads 0.999544. The hedge does not pay for itself; it is simply too small to matter.
+#
+# (2) THE STRUCTURAL HALF, which (1) is blind to by construction — a Gaussian posterior with one
+#     common gap cannot represent "the member-addition family transfers worse than its CV".
+#     Measured directly: GLS of the public-slice residual (LB - CV) on PACK SIZE over all 53
+#     scored pack-tagged files, packs 187..211, family fixed effects, covariance = the
+#     workspace's own `Sxx = St + Sp` plus the LB reporting-rounding variance (sd 2.887e-6),
+#     intervals scaled by sqrt(max(chi2/dof, 1)) = 1.090.
+#
+#         delta = -0.0586 e-6 per member,  95% CI [-0.7673, +0.6501]
+#         break-even (22.507e-6 of CV over 15 members) = -1.5005 e-6 per member
+#
+#     The interval excludes the break-even by 4.0 sigma. ⚠ AND THE NULL IS INFORMATIVE, because
+#     the power control says so: injecting a slope AT the break-even into the same 53 residuals
+#     is recovered to 5e-14 and detected at 2 sigma. A regression that could not see the effect
+#     would report the same tight zero.
+#
+# (3) THE DECISION. w64_prereg §4 fixed an AND rule before the numbers: move iff E[max] prefers
+#     the challenger AND the pack-transfer slope clears the break-even. Read (i) NO / (ii) YES,
+#     so **WANTED DOES NOT MOVE**. ⚠ §4(i) was itself AMBIGUOUS — the prereg registered P2 as a
+#     NUMBER (> +1.0e-6) and §4(i) as a DESCRIPTION ("reads positive"), and at +0.1444e-6 those
+#     are different answers. That is w63 §3's own defect committed one run after recording it.
+#     Both readings are in `w64a_hedgeprice.json` (`p2_strict` false, `p2_loose` true) and the
+#     CONSERVATIVE one was taken, because picking the reading after seeing where it points is
+#     exactly what the rule exists to stop.
+#
+# ⚠⚠ AND THE THREE DEFERRALS NAMED THE WRONG FILE. All three say "`w40_ad211stdcorr` is +22.4e-6
+# above slot 2 on CV and eligible". `w38_ad202stdcorr` is +22.5e-6 — HIGHER by 0.116e-6 — and
+# ARM 202 is ARM 211 minus exactly the nine `yadoy666` union94 streams (w61a GATE M), so it
+# carries no `WANTED_RETIRED` record at all while ad211 carries one whose own text says "THIS IS
+# NOT es-CLEARANCE". The candidate argued about for three runs is dominated on CV and on
+# provenance simultaneously by its own matched control. If slot 2 is ever revisited, revisit it
+# with `w38_ad202stdcorr`, not `w40_ad211stdcorr`.
+#
+# ⛔ WHAT WOULD RE-OPEN THIS, AND NOTHING ELSE WOULD. Both halves are conditional on the board:
+#   (a) a slot-1 candidate appears whose mean is NOT dominant — the E[max] flatness above is a
+#       consequence of slot 1 sitting above every candidate, and a genuine two-peak board would
+#       make slot 2 worth several e-6 again; or
+#   (b) the pack ladder extends far enough that 24 members of extrapolation is no longer the
+#       whole design — delta's interval is +-0.65 e-6/member and 40 more members would make a
+#       transfer penalty this small worth 26e-6.
+# Neither is true today. See experiments/w64a_hedgeprice.py, w64a_hedgeprice.json, w64b_hedgeguard.py.
+
 # ---------------------------------------------------------------------------
 # WANTED-INELIGIBILITY, ENFORCED (w56, 2026-08-22)
 # ---------------------------------------------------------------------------

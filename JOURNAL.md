@@ -22444,3 +22444,232 @@ the check), `w26d_queueprice.csv` (rebuilt, `plan_day = 2026-08-24`), plus `RESE
 
 ⛔ `git push` still blocked (no `gh`, no ssh, no token) — seventh run in a row. Commits are
 **local only**.
+
+# w64 — 2026-08-23, slot 3 of 10 (ZERO slots available). SLOT 2 IS SETTLED, AND IT WAS NEVER WORTH A RUN
+
+`date -u` 13:27:58 UTC. The Kaggle API reports **TEN COMPLETE submissions stamped 2026-08-23
+12:41:06 .. 12:41:34**. The day is at **10/10 and no submission is possible.** `/proc` scan
+(per-pid, `tr`, never `ps`/`pgrep`) shows only `run-competition.sh`, its `tee`, and this agent.
+⛔ **No `mcp__brave__*` in the tool list** — `ToolSearch` returns "No matching deferred tools
+found". **The click stays blocked, EIGHTH run running.** w58 §0 holds.
+
+## 0. ANGLE SUBSTITUTED — the SEVENTH angle closed, and this one was closed FIVE separate times
+
+Issued: *"Seed and fold diversity: same models across multiple seeds and fold splits, averaged.
+Cheap variance reduction that reliably adds a little."* It is a **STRUCTURAL NULL** here and the
+workspace measured why on 2026-08-16 (`w14c_seedstack.py` → `w27v_seedstack.csv`): every member
+is cross-fitted on SKF5 **seed 42**, so under any other *stacker* partition the stacker's
+training rows overlap the member's own fitted rows and the partition is **inflated by
+construction**. The data discriminates the two readings — seed 42 sits **2.4 to 6.9 sd** below
+the off-seed mean (h3: −10.73e-6 against an off-seed sd of 1.55e-6), not the ~1 sd an ordinary
+low draw would give. Standing rule: *"Never average the stack over stacker fold seeds."* Issued
+and re-skipped on 08-16, 08-17, 08-19, 08-20 and 08-22. Substituted for **w63 §10 item 8**.
+
+## 1. 🎯 THE THREE-RUN DEFERRAL IS CLOSED — AND THE ANSWER IS THAT THE DECISION IS WORTH 0.14e-6
+
+`check_selection.WANTED = {w36_ad199stdcorr, w23_ad187stdcorr}`. Slot 2 has been deferred as
+*"a PACK HEDGE whose value is not its CV; any move needs a registered argument about the HEDGE"*
+by **w61 §8.7, w62 §7.7 and w63 §10.8** — the same sentence three times, no argument once.
+`experiments/w64a_hedgeprice.py` makes it, against `w64_prereg.txt` committed **0eb2e53 before
+the file existed**. ⚠ The answer is NOT "we still cannot tell":
+
+| instrument | reading |
+|---|---|
+| E[max], the whole `*stdcorr` ladder at packs 187…211 | spans **0.1447e-6** while spanning **22.51e-6 of CV** |
+| the contrast three runs deferred (`ad187stdcorr` → `ad202stdcorr`) | **+0.1444e-6** |
+| GLS pack-transfer slope δ over 53 scored files | **−0.0586e-6/member**, 95% CI **[−0.767, +0.650]** |
+| the break-even (22.507e-6 of CV over 15 members) | **−1.5005e-6/member** — excluded by **4.0σ** |
+
+**Neither half supports the hedge, and neither half supports the move either.** Slot 1's mean
+dominates every candidate and everything correlates with it above 0.9995, so the second slot
+contributes almost nothing whichever file fills it.
+
+## 2. 🔴 THE HEDGE'S OWN MECHANISM IS MEASURED, AND IT EARNS 0.2% OF WHAT IT COSTS
+
+Decorrelation is the **only** channel through which a hedge can pay in the E[max] instrument.
+
+    corr(slot1, w23_ad187stdcorr)  = 0.999544   mean deficit -24.93e-6
+    corr(slot1, w38_ad202stdcorr)  = 0.999973   mean deficit  -2.42e-6
+
+Force the incumbent's correlation up to the challenger's, holding its own mean and sd: its
+E[max] moves by **+0.0003e-6 of the +0.1447e-6 the mean deficit costs — 0.2%**. The incumbent
+would need corr **0.998410** to break even and it reads **0.999544**. ⚠ My first reading of the
+flat ladder was "the hedge is fairly priced"; the counterfactual says the opposite and is the
+reason it was computed. **A flat contrast is not evidence that two effects cancel — it can just
+mean the instrument has no resolution in that direction, and only a counterfactual separates
+them.** Here it is the latter: the ladder is flat because slot 2 barely matters at all.
+
+## 3. 🎯 THE STRUCTURAL HALF — A GLS THE WORKSPACE COULD HAVE RUN ANY DAY FOR THREE RUNS
+
+E[max]'s posterior is Gaussian with one common gap; it **cannot** represent "the whole
+member-addition family transfers worse than its CV", which is the risk the hedge exists for. So
+that is measured directly, and the estimator is not a new one: `w59a`/`w63a` already fit the
+common gap by GLS of `z = LB − CV` against `D1 = ones` under `Sxx = St + Sp`. **This generalises
+`D1` to a design matrix** — intercept, `pack − 187`, and family fixed effects — over all **53
+scored files carrying an `ad<NNN>` tag and an OOF on disk**, packs 187…211.
+
+    delta (pack)  -0.0586 +- 0.3318 -> 0.3616 e-6/member   chi2/dof 1.188, scale 1.090
+    families      ens4 +12.5, hybrid -8.6, logit +81.9, rankraw +21.5, rescale +9.1 (ref h3)
+
+Two things the fit needed and `gh`'s own fit does not have. (a) **The LB rounding term.** The
+public score is reported to 1e-5, so every `z` carries an independent uniform rounding error,
+var (1e-5)²/12, **sd 2.887e-6**. A single common intercept over 100+ files barely notices it; a
+53-point regression with a within-design slope does, and omitting it understates the slope's
+error bar **in exactly the direction that makes P3 easier to confirm**. (b) **A one-sided
+goodness-of-fit scaling**, `sqrt(max(chi2/dof, 1))` — an se of 0.33e-6 on 53 points is set by
+the covariance MODEL, not by the scatter, so it is only trustworthy if the scatter agrees; and
+a model that happens to fit well must never be allowed to BUY a narrower interval.
+
+⚠⚠ **AND THE NULL IS ONLY EVIDENCE OF ABSENCE BECAUSE A POWER CONTROL SAYS SO.** A slope injected
+**at the break-even** into the same 53 residuals is recovered to **5.1e-14** and **detected at
+2σ**; so is one at half that. Without it, "δ ≈ 0 with a tight interval" is indistinguishable from
+"this regression cannot see δ at all", and the two have opposite meanings.
+
+## 4. 🔴🔴 MY OWN PREREG COMMITTED w63 §3's DEFECT — ONE RUN AFTER w63 RECORDED IT
+
+w63 §3: *"A PREREG THAT QUOTES A NUMBER AND A DESCRIPTION THAT ARE DIFFERENT OBJECTS HAS
+REGISTERED NEITHER."* `w64_prereg` §3 registers **P2 as a NUMBER** — *"STRICTLY GREATER THAN
++1.0e-6"* — and §4 condition (i) as a **DESCRIPTION** — *"P2 reads positive — E[max] prefers
+it"*. At the measured **+0.1444e-6 those are different answers**, so §4(i) registered neither.
+
+**Both readings are printed, both are in the artefact (`p2_strict` false, `p2_loose` true), and
+the CONSERVATIVE one is taken**, because choosing the reading after seeing which way it points
+is the entire failure the rule exists to stop. ⚠ **NEW: WRITING THE RULE TWICE IS HOW YOU WRITE
+IT TWO DIFFERENT WAYS. A DECISION RULE MUST NAME ITS CONDITION BY REFERENCE (`P2`), NEVER
+RE-STATE IT IN PROSE.** w63's version of this defect was re-typing a neighbouring script's
+constant; mine was re-typing my own prediction eight lines later, which is worse, because I had
+both objects in front of me.
+
+## 5. ⚠⚠ THE THREE DEFERRALS NAMED THE WRONG FILE, AND IT IS DOMINATED TWO WAYS
+
+All three say *"`w40_ad211stdcorr` is +22.4e-6 above slot 2 on CV and eligible"*.
+
+    w38_ad202stdcorr   CV 0.9701375891   +22.508e-6   no bar of any kind
+    w40_ad211stdcorr   CV 0.9701374733   +22.392e-6   WANTED_RETIRED, "THIS IS NOT es-CLEARANCE"
+
+ARM 202 **is** ARM 211 minus exactly the nine `yadoy666` union94 streams (w61a GATE M), so the
+candidate argued about for three consecutive runs is **dominated on CV and on provenance
+simultaneously by its own matched control**. ⚠ **NEW: A DEFERRAL THAT IS COPIED FORWARD IS ALSO
+COPYING FORWARD ITS CANDIDATE. Re-derive the candidate from the ledger each time, or the item
+will be re-deferred against a file that stopped being the best one.**
+
+## 6. THE DECISION, AND WHY IT CLOSES RATHER THAN RENEWS
+
+`w64_prereg` §4 fixed an **AND** rule before any number existed: move iff E[max] prefers the
+challenger **AND** δ clears the break-even. Read **(i) NO / (ii) YES → WANTED DOES NOT MOVE.**
+⚠ w64b checks that the AND/OR choice was load-bearing: an OR rule flips the answer here, so the
+rule was doing work rather than decorating. The record is written **at the dict in
+`check_selection.py`**, with the two conditions that would re-open it and nothing else:
+
+  (a) a slot-1 candidate whose mean is **not dominant** — the flatness is a consequence of slot 1
+      sitting above everything, and a genuine two-peak board makes slot 2 worth several e-6; or
+  (b) a pack ladder long enough that 24 members is no longer the whole design — δ's interval is
+      ±0.65e-6/member, and 40 more members would make a penalty this small worth 26e-6.
+
+## 7. THE REGISTERED PREDICTIONS (`experiments/w64_prereg.txt`, committed 0eb2e53 BEFORE the build)
+
+| | prediction | outcome |
+|---|---|---|
+| P1 | GATE A: the imported estimator reproduces `w63a_setprice.json`'s base to <1e-9 | ✅ **0.000e+00** |
+| P2 | emax gain from the move **> +1.0e-6 STRICTLY**, point +6 | 🔴 **FALSIFIED, +0.1444** |
+| P3a | δ > break-even −1.5005 | ✅ **−0.0586** |
+| P3b | the 95% CI **EXCLUDES** the break-even | ✅ **[−0.767, +0.650], 4.0σ** |
+| P3c | \|δ\| < 0.30e-6/member (point) | ✅ **0.0586** |
+| P4a | SE_GLS(α)/SE_OLS(α) **> 2.0** | ✅ **3.341** |
+| P4b | SE_GLS(δ)/SE_OLS(δ) **< 1.5** | ✅ **0.030** — confirmed 50× harder than registered |
+| P5 | the two halves AGREE | 🔴 **FALSIFIED** — see §4; the disagreement is my own ambiguity |
+| P6 | the ten guards all exit 0, FAILURES 0 | ✅ |
+
+⚠ P4 is the one I would re-register differently. I predicted the slope's se ratio would be
+"< 1.5" on the reasoning that a common shift is orthogonal to a within-design contrast. It is
+**0.030** — GLS is **33× TIGHTER** than OLS on the slope, because the shared public slice makes
+the errors correlate at ~0.9999 and virtually all of the 866e-6 per-file dispersion is common.
+A one-sided bar that a value clears by 50× has not tested anything. ⚠ **NEW: A ONE-SIDED BAR
+CONFIRMED BY TWO ORDERS OF MAGNITUDE IS A BAR THAT WAS SET WITHOUT AN ESTIMATE. Register an
+INTERVAL when you have a mechanism, not just a direction.**
+
+## 8. VERIFICATION
+
+**w54a, w55a, w56b, w57c, w59b, w60b, w60d, w62b, w63b, w64b — all exit 0, FAILURES 0.** w64b is
+new: **30 checks, every one negative-controlled** — a plausible-but-wrong base must be rejected;
+a MOVE decision must be caught against the live dict; the break-even must be **re-derived** from
+`−dCV/n_members` and a wrong span must give a different bar; the file the deferrals named must
+still carry a retired bar while the challenger carries none; the power control must have
+injected **the break-even slope itself** and detected it; `chi2/dof = 0.25` must **not** shrink
+an interval; and `assert_wanted_eligible` must pass on the live WANTED **and refuse** on an
+ad217 one. GATE A is a **comparison, not a stamp**: it rebuilds w63a's 18-file design from the
+LIVE board and re-derives the price rather than reading `gate_w: true`.
+
+✅ **The 08-24 send chain still fills to exactly the registered ten** after the `check_selection`
+edit (`w26g_send.py --n 10` dry, slots 1–10 unchanged, bar live). ⚠ The queue on disk stays
+stamped `plan_day = 2026-08-24`; **tomorrow's run must still re-run all four commands.**
+
+## 9. NEXT RUN, IN ORDER
+
+1. `date -u` FIRST, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   `ls -d experiments/w6*`. Check for `mcp__brave__*` — if present, **make the click**.
+2. **THE SEND IS FOUR COMMANDS**: `w23b_sendqueue.py` → `w48e_order.py --day <TODAY> --write` →
+   `w26g_send.py --n 10` dry → `--go`. **2026-08-24 IS REGISTERED** and re-verified dry today.
+   **2026-08-25 IS NOT and w48e will exit 2** — adding that day's list is the first build task
+   of the 08-25 run, and w64 deliberately did not add it (it would price a board that has not
+   happened yet).
+3. ⛔ **SLOT 2 IS CLOSED** (§1–§6). Do not re-open it except on condition (a) or (b) recorded at
+   the `WANTED` dict. If it ever IS re-opened, the candidate is **`w38_ad202stdcorr`**, not
+   `w40_ad211stdcorr`.
+4. ⚠ **Register and test the refined P5 from w63 §4** — the additive price is optimistic iff both
+   candidates fall on the SAME side of the status quo. 78/78 and 0/26, but **post-hoc**. Still
+   untouched.
+5. ⚠ **The break-even's 16.5e-6 bracket hole** (w63 §5a) is still the dominant uncertainty in the
+   hijack bar. ⛔ Do NOT close it by hand-picking bracket files. Check `max|M − wI| < 1e-6` before
+   attempting the 121-file version.
+6. Run **w54a, w55a, w56b, w57c, w59b, w60b, w60d, w62b, w63b, w64b** on any run that sends or
+   touches `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`, `w48e_order.py`,
+   `w26g_send.py` or either pricer.
+7. ⛔ **Do NOT** re-open w58 §9.7's list, **the original dataset** (×4), **LightGBM tuning** (×3),
+   **CatBoost tuning** (w61), **feature engineering** (w62), **blending / OOF weight search /
+   hill climbing** (w63), or **seed and fold diversity** (closed here, §0 — seventh angle).
+8. ⚠ **NEW: a decision rule must name its condition BY REFERENCE, never re-state it in prose**
+   (§4) — I re-typed my own prediction eight lines later and got two different rules.
+   ⚠ **NEW: a flat contrast is not two effects cancelling; it can be an instrument with no
+   resolution in that direction, and only a counterfactual separates them** (§2).
+   ⚠ **NEW: a null is evidence of absence only with a POWER CONTROL — inject the effect at the
+   size that would matter and confirm the instrument detects it** (§3).
+   ⚠ **NEW: a one-sided bar confirmed by two orders of magnitude was set without an estimate;
+   register an INTERVAL when you have a mechanism** (§7).
+   ⚠ **NEW: a deferral copied forward copies its CANDIDATE forward too — re-derive the candidate
+   from the ledger each time** (§5).
+   ⚠ **NEW: our board name is `Teddy Tennant`, not `thtennant`** — a leaderboard grep for the
+   Kaggle username finds nothing and would read as "not on the board".
+   ⚠ Carried: a measurement at one value of a parameter is not a law unless you derived the
+   parameter out · a prereg that quotes a NUMBER and a DESCRIPTION that are different objects has
+   registered neither · coupling the artefact write to every reading gives a run a motive to
+   register only safe predictions · a guard that names the artefact's PATH is testing a different
+   file the moment the code moves · raising your own tier unblocks files the risk gate was
+   rejecting · a per-file price is not additive — price the SET · "lossless" over ROWS does not
+   hold over the FILE · moving a rule upstream can break the script that used to own it · a GATE
+   and a PRIORITY are not the same mechanism · a STAMP is not a comparison · a claim measured on
+   one configuration is not a general law · a count that depends on where a loop stopped is not
+   an invariant · retirement is a third state · a retired bar must not go quiet · say WHY a run
+   is entitled to a deferred test · a rule enforced on a column a DIFFERENT script populates is
+   only enforced if that script ran · enumerate an enforcer's cases FROM THE RULE · a sweep that
+   cries wolf gets padded into a hand-typed list · accidental protection is worse than none · a
+   prereg that only confirms was not asked anything hard · a run with an interest in retiring a
+   rule must not retire it · a rule can be WIRED, TESTED and enforced at a number nobody MEASURED
+   · register STRICT inequalities · a rule enforced on the wrong COLUMN is not enforced · a POINT
+   PREDICTION IS NOT A GATE · register against files you HOLD · `w25a_cvlb_full.py` is NOT
+   read-only · a hard-coded tier goes stale every send day · a prereg that re-stamps itself is
+   not a prereg · a rule in a PARAGRAPH is not a rule · a rule in the ORDER of a list is not a
+   rule · never use in-sample residuals to test extrapolation · never lower the `cv >= 0.97`
+   floor · never let a `member` row into a `max(CV)` · always pass `--page-size`.
+
+**Files added:** `experiments/w64_prereg.txt`, `w64a_hedgeprice.py`, `w64a_hedgeprice.json`,
+`w64b_hedgeguard.py`.
+**Modified:** `experiments/check_selection.py` (the slot-2 closure recorded at the `WANTED`
+dict — **`WANTED` itself is UNCHANGED**), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**Board at 14:05 UTC: 0.97119, rank 64 of 2,660, 21 teams tied with us, gold cut 0.97127.**
+
+**Submitted 0 — the 2026-08-23 UTC day was already at 10/10 when this run began.**
+
+⛔ `git push` still blocked (no `gh`, no ssh, no token) — eighth run in a row. Commits are
+**local only**.

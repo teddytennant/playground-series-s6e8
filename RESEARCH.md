@@ -1,5 +1,98 @@
 # Research — playground-series-s6e8
 
+# ⛔ WANTED SLOT 2 IS SETTLED — THE WHOLE DECISION IS WORTH 0.14e-6 (w64, 2026-08-23)
+
+Deferred as "a PACK HEDGE whose value is not its CV" by **w61 §8.7, w62 §7.7 and w63 §10.8** —
+the same sentence three times with no argument. `experiments/w64a_hedgeprice.py` made it
+(prereg `w64_prereg.txt`, committed 0eb2e53 BEFORE the file existed). **WANTED does NOT move,
+and the reason CLOSES the item rather than renewing it.**
+
+| instrument | reading |
+|---|---|
+| E[max], whole `*stdcorr` ladder at packs 187…211 | spans **0.1447e-6** while spanning **22.51e-6 of CV** |
+| the contrast three runs deferred (`w23_ad187stdcorr` → `w38_ad202stdcorr`) | **+0.1444e-6** |
+| GLS pack-transfer slope δ, 53 scored files | **−0.0586e-6/member**, 95% CI **[−0.767, +0.650]** |
+| break-even (22.507e-6 of CV over 15 members) | **−1.5005e-6/member** — excluded by **4.0σ** |
+
+**THE HEDGE'S MECHANISM IS MEASURED AND EARNS 0.2% OF WHAT IT COSTS.** Decorrelation is the only
+channel a hedge has in the E[max] instrument: corr(slot1, incumbent) **0.999544** vs
+corr(slot1, challenger) **0.999973**. Forcing the incumbent's correlation up to the challenger's,
+holding its own mean and sd, moves its E[max] by **+0.0003e-6 of the +0.1447e-6 the mean deficit
+costs**. It would need corr **0.998410** to break even. Slot 1's mean dominates everything and
+all candidates correlate above 0.9995, so **slot 2 barely matters whichever file fills it.**
+
+⚠⚠ **THE THREE DEFERRALS NAMED THE WRONG FILE.** All say "`w40_ad211stdcorr` is +22.4e-6 above
+slot 2 and eligible". `w38_ad202stdcorr` is **+22.508e-6 — higher by 0.116e-6 — and carries no
+bar of any kind**, while ad211 carries a `WANTED_RETIRED` record whose own text says "THIS IS NOT
+es-CLEARANCE". ARM 202 **is** ARM 211 minus the nine `yadoy666` union94 streams (w61a GATE M).
+⚠ **NEW: A DEFERRAL COPIED FORWARD COPIES ITS CANDIDATE FORWARD TOO. Re-derive the candidate
+from the ledger each time.** ⛔ If slot 2 is ever re-opened the candidate is `w38_ad202stdcorr`.
+
+⛔ **ONLY TWO THINGS RE-OPEN IT**, both recorded at the `WANTED` dict in `check_selection.py`:
+(a) a slot-1 candidate whose mean is **not dominant** — the flatness follows from slot 1 sitting
+above everything, and a two-peak board makes slot 2 worth several e-6; (b) a pack ladder long
+enough that 24 members is no longer the whole design — δ's interval is ±0.65e-6/member and 40
+more members would make a penalty this small worth 26e-6.
+
+
+# THE GLS TRANSFER REGRESSION — `gh`'s OWN FIT, GENERALISED TO A DESIGN MATRIX (w64, 2026-08-23)
+
+`w59a`/`w63a` already fit the common CV→LB gap by GLS of `z = LB − CV` against `D1 = ones` under
+`Sxx = St + Sp`. **Widening `D1` to a design matrix is free and answers questions nobody had
+been asking.** w64 used intercept + `pack − 187` + family fixed effects over the **53 scored
+files carrying an `ad<NNN>` tag and an OOF on disk**, packs 187…211:
+
+    delta (pack)  -0.0586 +- 0.3318 -> 0.3616 e-6/member    chi2/dof 1.188, scale 1.090
+    families      ens4 +12.5, hybrid -8.6, logit +81.9, rankraw +21.5, rescale +9.1  (ref h3)
+
+**TWO THINGS `gh`'s FIT DOES NOT HAVE AND A REGRESSION NEEDS.**
+1. ⚠ **THE LB ROUNDING TERM.** The public score is reported to 1e-5, so every `z` carries an
+   independent uniform rounding error: var (1e-5)²/12, **sd 2.887e-6**, added to the diagonal.
+   A single common intercept over 100+ files barely notices it; a 53-point regression with a
+   within-design slope does, and omitting it understates the slope's error bar **in exactly the
+   direction that makes the null easier to confirm**.
+2. ⚠ **A ONE-SIDED chi2/dof SCALING**, `sqrt(max(chi2/dof, 1))`. An se of 0.33e-6 on 53 points is
+   set by the covariance MODEL, not by the scatter. Scale up when the scatter exceeds the model;
+   **never let a model that happens to fit well BUY a narrower interval.**
+
+**SE_GLS/SE_OLS = 3.341 on the INTERCEPT and 0.030 on the SLOPE.** All 53 files are scored on the
+same 20% public slice, so their `z` errors correlate at ~0.9999 and virtually all of the ~866e-6
+per-file dispersion is COMMON. OLS ignoring that is wildly over-confident about the common gap
+and wildly under-confident about any within-design contrast. **GLS is 33× TIGHTER than OLS on
+the slope.** Use `Sxx`; never OLS a CV→LB residual.
+
+⚠⚠ **AND A NULL IS EVIDENCE OF ABSENCE ONLY WITH A POWER CONTROL.** w64 injects a slope **at the
+break-even** into the same 53 residuals: recovered to **5.1e-14**, **detected at 2σ**. Without
+it, "δ ≈ 0 with a tight interval" is indistinguishable from "this regression cannot see δ", and
+those have opposite meanings. **Inject the effect at the size that would change the decision.**
+
+
+# ⚠⚠ FOUR RULES ABOUT PREREGS AND INSTRUMENTS, ONE OF THEM SELF-INFLICTED (w64, 2026-08-23)
+
+**1. A DECISION RULE MUST NAME ITS CONDITION BY REFERENCE, NEVER RE-STATE IT IN PROSE.**
+`w64_prereg` §3 registered P2 as a NUMBER ("> +1.0e-6, STRICTLY") and §4(i) as a DESCRIPTION
+("P2 reads positive — E[max] prefers it"). At the measured **+0.1444e-6 those are different
+answers**, so §4(i) registered neither. This is **w63 §3's own defect, committed one run after
+w63 recorded it**, and worse: w63 re-typed a neighbouring script's constant, w64 re-typed its own
+prediction eight lines later with both objects on screen. Both readings are printed and carried
+in the artefact (`p2_strict` false, `p2_loose` true) and **the conservative one is taken.**
+
+**2. A FLAT CONTRAST IS NOT TWO EFFECTS CANCELLING.** The flat `*stdcorr` ladder first read as
+"the hedge is fairly priced". The counterfactual — same file, correlation forced to the
+challenger's — says decorrelation earns **0.2%**, so the ladder is flat because the instrument
+has **no resolution in that direction**, not because anything cancels. Only a counterfactual
+separates the two, and they have opposite implications.
+
+**3. A ONE-SIDED BAR CONFIRMED BY TWO ORDERS OF MAGNITUDE WAS SET WITHOUT AN ESTIMATE.** w64
+registered "SE_GLS(δ)/SE_OLS(δ) < 1.5" and read **0.030**. A bar cleared by 50× has not tested
+anything. **Register an INTERVAL when you have a mechanism, not just a direction.**
+
+**4. OUR BOARD NAME IS `Teddy Tennant`, NOT `thtennant`.** A leaderboard grep for the Kaggle
+username finds nothing across all 2,660 rows and reads as "not on the board". Walk the pages
+with `--page-token` and match on the display name or the score.
+
+
+
 # ✅ THE PRICER CHAIN IS UNBLOCKED — `w63a_setprice.py` (w63, 2026-08-23)
 
 `w57a` refuses (`assert PICK in TIER1`), `w58a` exits 2, `w59a` refuses on GATE T — all three

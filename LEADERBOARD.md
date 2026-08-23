@@ -1927,3 +1927,19 @@ by 42%, not the 86% w60 priced — see JOURNAL w62 §4.
 - Board shape unchanged otherwise: tier 2 is five files at 0.97118 including the CV **pick**
   `w36_ad199stdcorr`, which remains reachable **only by the click** — still blocked, no browser
   MCP attached for the seventh run running.
+
+## 2026-08-23 14:05 UTC (w64, build run — no submission, day was at 10/10)
+
+- **Account best 0.97119, rank 64 of 2,660** (full leaderboard walked, 14 pages of 200; the team
+  name on the board is **`Teddy Tennant`**, not `thtennant` — a page-name grep for `thtennant`
+  finds nothing and a run that grepped for it would conclude we are not on the board).
+- **21 teams are tied with us at 0.97119** (ranks 64–84). One more display step is worth ~20
+  places from here; we are on the flattest part of the curve.
+- Leader **MILANFX 0.97144**, then Changye Li 0.97142, then a wall of 0.97134 (Chris Deotte,
+  cstdy, Maher el Ouahabi). **Gold cut (14th) = 0.97127, 8e-6 above us.**
+- ⚠ **THE FIELD IS GROWING FASTER THAN OUR SCORE.** 2,047 teams on 08-22 → **2,660 today**, and
+  rank at a fixed score keeps decaying: 0.97118 bought rank ~18 on 08-21, 65 on 08-22, and
+  0.97119 buys 64 today. Standing still costs ~1 place an hour.
+- Board shape unchanged: auto-selection is still DETERMINED at the `w36_ad199stdcorr_ens4` +
+  `w38_ad202stdcorr_ens4` pair, and the CV pick is still reachable only by the click, still
+  blocked — **eighth run with no browser MCP attached.**
