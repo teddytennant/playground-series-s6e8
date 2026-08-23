@@ -1,0 +1,133 @@
+w65 PREREG -- 2026-08-23, slot 4 of 10 (ZERO slots available; the UTC day is at 10/10).
+Committed BEFORE experiments/w65a_armpair.py exists. Nothing below is chosen from a number
+that this run produced.
+
+================================================================================
+0. WHY THIS TEST, AND WHY IT IS NOT THE ISSUED ANGLE
+================================================================================
+Issued angle: "Error analysis: find where the current best model is wrong. Segment the
+out-of-fold errors and look for structure a feature could capture."
+
+That is the EIGHTH angle closed by measurement in this workspace and RESEARCH.md carries the
+closure under its own heading, "CLOSED (2026-08-14): error analysis / targeted correction on
+the generator's rule cells". Two instruments, both matched-controlled, both null:
+
+  (1) cross-fitted per-cell isotonic -- real cells -118e-6, size-matched permuted-cell control
+      -124e-6, real minus control +6e-6 with BOTH arms negative;
+  (2) cell-local LightGBM on a 40-column frame WITH the stack score as a feature, fitted on
+      one cell's rows, frozen folds restricted to the cell, against the same frame row-permuted
+      within the cell -- real minus control NEGATIVE at 9 of 9 checkpoints across BAND/D/G and
+      MONOTONICALLY WORSE WITH CAPACITY.
+
+`experiments/w16d_membercell.py` closes the member-weight version of the same idea: global,
+A-only and per-cell weights for the highest conditional-AUC-z member all pick w=0 on the
+TRAINING folds. `experiments/errormap.py` already located the errors (the hard population is
+4-8h daily screen time, within-band AUC 0.916/0.939) and the +0.0040 pooled-within gap is the
+arithmetic penalty of pooling populations of different difficulty, not a recoverable edge.
+The direction of the update is unambiguous: instrument (2) got monotonically worse with
+capacity, so a STRONGER base stack (199 members now, 159 then) makes it more negative, not
+less. Substituted.
+
+SUBSTITUTED FOR: the reading of "where the current best model is wrong" that is NOT closed and
+that is decision-relevant -- IS THE CURRENT BEST ACTUALLY THE BEST? `check_selection.WANTED`
+slot 1 is `w36_ad199stdcorr` (stored CV 0.9701400060). Its nearest rival `w38_ad202stdcorr`
+reads 0.9701375891, i.e. -2.417e-6. `check_selection.py` says in its own words, about exactly
+this situation: "Ranking these three files by their stored levels is not a measurement." The
+190-over-188 and 194-over-190 decisions were both made on w27w/w29d's paired-partition
+instrument and NOT on stored levels. The 199-over-202 comparison has never been run on it.
+
+================================================================================
+1. GIVEN, NOT PREDICTED (an audit of numbers already on disk, declared as such)
+================================================================================
+Recomputed this run from the 16 stored OOF vectors in submissions/ before this prereg was
+written, so these are NOT blind and are recorded here so no prediction below can be read as
+covering them. d = (ad202 - ad199), e-6, single partition (the frozen seed-42 SKF5):
+
+    h3 -2.406 | hybrid +0.133 | logit +0.481 | rankraw -4.437 | rescale -1.902
+    ens4 -1.752 | stdcorr -2.417 | stdcorr_ens4 -1.687        6 of 8 negative, mean -1.748
+
+================================================================================
+2. THE INSTRUMENT (w65a_armpair.py)
+================================================================================
+w29d_partition.py's design, moved up eight members. ARM 202 is ARM 199 plus EXACTLY the three
+`zhukovoleksiy` members in data/ext_members14 (lexb_cat_base, lexb_lgb02, lexb_xgb_base) --
+w38d_run.sh is w36b_run.sh with `ext_members14` appended and nothing else changed. So ONE LOAD
+SERVES BOTH ARMS: the 199 arm is the 202 matrix with those three columns deleted. Every
+transform in agent/stack.py is strictly per-column and --standardize divides by a per-column
+std, so subsetting after transform+scale is exactly equal to loading 199 members. That claim
+is not assumed, it is GATED (P2).
+
+Four arms, ONE process, IDENTICAL partitions, seeds 42,101,13,7:
+    202          the full pack
+    199          202 minus the three lexb columns                     <- the treatment
+    PLA1, PLA2   202 minus three OTHER columns, drawn with np.random.default_rng(65)
+                 from the 199 non-lexb members, disjoint from each other  <- MATCHED CONTROL
+The placebo is matched by construction: it is the SAME operator (delete three columns from the
+same scaled matrix, refit on the same partition) applied to columns that are not under test.
+It is the "misaligned control" pattern RESEARCH.md recommends -- nothing is refitted with a
+different operator, resampled or shuffled; only which three columns go.
+
+Transforms: hybrid, rankraw, rescale, and h3 = their rank-average. h3 is the base the WANTED
+files are built on. The WANTED objects are the `stdcorr` layer on top of h3; the 190, 194 and
+195 promotions were all argued on the h3 base contrast and this one is too.
+
+================================================================================
+3. THE DECISION RULES, FIXED HERE
+================================================================================
+R1 (THE MOVE). `check_selection.WANTED` slot 1 moves from `w36_ad199stdcorr` to
+    `w38_ad202stdcorr` IF AND ONLY IF BOTH:
+       (i)  the paired h3 delta (202 - 199) is STRICTLY POSITIVE in >= 3 of the 4 partitions,
+       AND
+       (ii) its mean over the 4 partitions is >= +2.0e-6.
+    Otherwise slot 1 STAYS. Referenced below as R1; no clause below re-states it in prose
+    (w64 section 4: a decision rule must name its condition BY REFERENCE).
+    Why >= +2.0e-6 and not the 4e-6 rebuild floor: the paired design cancels the BLAS-thread
+    term exactly (w27z: A-B is 0.000e+00 to the last digit) but not the partition term, so the
+    floor that applies here is the partition sd, not the cross-process one. 2.0e-6 is half the
+    cross-process floor and ~1.5x w29d's measured per-partition sd of the same contrast.
+
+R2 (THE PLACEBO). The three lexb members are declared NOT DISTINGUISHABLE FROM DELETING ANY
+    THREE COLUMNS iff the lexb h3 delta mean lies INSIDE the closed interval spanned by the
+    two placebo h3 delta means. R2 is REPORTED and moves NOTHING on its own; it is the
+    calibration of R1's scale, not a second decision.
+
+HONESTY CLAUSE. Section 1 is an audit. Sections 4 and 5 are blind: no number in them exists on
+disk at the moment this file is committed, and the four-arm partition run has not been started.
+
+================================================================================
+4. BLIND PREDICTIONS
+================================================================================
+P2  GATE: the seed-42 cells reproduce the SHIPPED stored OOF AUCs within 4e-6 for BOTH arms
+    and all four cells each (hybrid, rankraw, rescale, h3) -- 8 of 8. This is the test of the
+    one-load-serves-both-arms claim, and it is stronger than w29d's gate, which gated the
+    SMALL arm only. The bar is compared against values RECOMPUTED from the .npy files in the
+    same process, never against a hard-typed literal (w64: a stamp is not a comparison).
+    A cell off by more than 2e-5 is a LOAD error and voids everything below.
+P3  the paired h3 delta mean is NEGATIVE.
+P3b (THE INTERVAL, and the one that can actually fail) the paired h3 delta mean lands in
+    [-3.9, -0.9]e-6, i.e. within +-1.5e-6 of the stored single-partition h3 delta of -2.406.
+    Mechanism: pairing removes the thread term, leaving partition noise at w29d's measured
+    sd 1.34e-6, se 0.67e-6 over four partitions, so +-1.5e-6 is ~2.2 se.
+P4  the per-partition sd of the paired h3 delta is in [0.5, 3.0]e-6 (w29d read 1.34e-6 on the
+    identical instrument at 194/190).
+P5  R1 does NOT fire. `check_selection.WANTED` is UNCHANGED by this run.
+P6  R2 DOES fire: the lexb delta falls inside the placebo range.
+P7  LOAD-INTEGRITY CONTROL (w14c's mechanism, replicated on a third member set): for every
+    arm and every one of the four cells, (off-seed mean - seed 42) > +8e-6. Seed 42 is the
+    members' own fold seed, so a stacker on any other partition trains on rows its members
+    were fitted on and reads HIGH; if this does NOT appear, the load is not the shipped one.
+P8  the placebo spread |PLA1 - PLA2| on h3 is > 0.5e-6 -- a POWER CONTROL on R2. If the two
+    placebo draws land on top of each other, R2's interval is degenerate and "inside the
+    placebo range" means nothing. R2 is VOID if P8 fails, and that is registered here rather
+    than decided after the fact (w64 section 3: a null is evidence of absence only with a
+    power control).
+
+================================================================================
+5. WHAT IS NOT UNDER TEST
+================================================================================
+- Slot 2 is CLOSED at a measured size by w64 and is not touched. Neither condition (a) nor
+  (b) recorded at the WANTED dict is met by anything here.
+- ARM 211 and ARM 216/217 are not candidates: 211 reads BELOW 199 on every stored base and
+  216/217 are barred in `check_selection.WANTED_INELIGIBLE` on provenance, not on CV.
+- No submission. The 2026-08-23 UTC day was at 10/10 before this run began.
+- The 2026-08-24 send list stays as w64 registered it. This run does not re-price the queue.
