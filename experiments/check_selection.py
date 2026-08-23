@@ -386,6 +386,20 @@ WANTED_INELIGIBLE = {
     "w42_ad217": "w56a source read — hboyang_mix is an aggregator over 138 un-es-clearable "
                  "third-party streams. Not WANTED on CV (w40d). The 08-23 LB read does "
                  "not lift this; see w56a_arm217power.json.",
+    # w69 (2026-08-23). ARM 208 = ARM 211 minus ext_members14. Keyed BEFORE the arm was built
+    # and BEFORE its CV existed (w69_prereg.txt §2.1, committed 39843c6). ⚠ THE POINT, and the
+    # reason this key is not redundant with the retirement below: `w40_ad211` was retired on
+    # ARM 211's OWN matched control, and the final clause of that retirement says in terms
+    # that it does NOT carry to "a different pack, a different combiner, a re-weighting".
+    # ARM 208 is a different pack, and deleting three columns re-weights every remaining one
+    # INCLUDING the nine `yadoy666` streams the bar is about. So ARM 208 does not inherit ARM
+    # 211's clearance — it inherits ARM 211's BAR, and needs its own control to lose it.
+    "w69_ad208": "w69_prereg §2.1, keyed before the arm was built and before its CV existed "
+                 "— ARM 208 is ARM 211 minus the three ext_members14 members, a DIFFERENT "
+                 "PACK, so w40_ad211's retirement expressly does not carry over. Not WANTED "
+                 "on CV (w40d), whatever its CV. Lifted only by its own (208 − 199) matched "
+                 "control within ±4e-6 on all four criterion bases, quoted here in the same "
+                 "commit, and not by the run that built the arm.",
 }
 
 # ---------------------------------------------------------------------------------------

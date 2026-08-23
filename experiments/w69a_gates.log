@@ -1,0 +1,58 @@
+== loading the 211 pack ==
+211 members, dtype float32
+  transform logit        3s
+  hybrid: repaired 60 of 211 members
+  transform hybrid      16s
+  transform rankraw     33s
+  transform rescale     15s
+  211 pack scaled at 73s, 211 members
+
+== P1 GATE: pack composition ==
+  |211 load| = 211   (expected 211: True)
+  lexb  present 3/3   missing []
+  yadoy present 9/9  missing []
+  A211:  211 columns (expected 211) OK
+  A208:  208 columns (expected 208) OK
+  A202:  202 columns (expected 202) OK
+  A199:  199 columns (expected 199) OK
+
+  placebo draw (seed 69): [np.str_('imp_lgbm_tuned'), np.str_('orig_bin'), np.str_('bei_xgb_identity_digit_enhanced103'), np.str_('bei_exact_value_catboost_fixed4000'), np.str_('bolt_gandalf_gflu'), np.str_('ad_gnn_wide'), np.str_('bolt_lookup_v3_evidence'), np.str_('ad_gcatseed7'), np.str_('bolt_xgb_d7_alt1')]
+
+== P2: subsetted A202 vs a NATIVE 202-member load ==
+202 members, dtype float32
+  transform logit        8s
+  hybrid: repaired 55 of 202 members
+  transform hybrid      20s
+  transform rankraw     30s
+  transform rescale     14s
+  |subset| 202  |native| 202  same SET True  same ORDER True
+  logit    max|diff| 0.000000e+00   bitwise equal: True
+  hybrid   max|diff| 0.000000e+00   bitwise equal: True
+  rankraw  max|diff| 0.000000e+00   bitwise equal: True
+  rescale  max|diff| 0.000000e+00   bitwise equal: True
+
+== P3 negative control: drop nine OTHER columns instead ==
+  logit    max|diff| vs native 202: 1.598738e+02
+  hybrid   max|diff| vs native 202: 1.598738e+02
+  rankraw  max|diff| vs native 202: 5.734916e+00
+  rescale  max|diff| vs native 202: 4.778011e+01
+
+== P2: subsetted A199 vs a NATIVE 199-member load ==
+199 members, dtype float32
+  transform logit        7s
+  hybrid: repaired 54 of 199 members
+  transform hybrid      19s
+  transform rankraw     30s
+  transform rescale     14s
+  |subset| 199  |native| 199  same SET True  same ORDER True
+  logit    max|diff| 0.000000e+00   bitwise equal: True
+  hybrid   max|diff| 0.000000e+00   bitwise equal: True
+  rankraw  max|diff| 0.000000e+00   bitwise equal: True
+  rescale  max|diff| 0.000000e+00   bitwise equal: True
+
+  P2 -> CONFIRMED
+
+== P4 determinism control ==
+  two crossfits on the same array: diff 0.000e+00  exact: True
+
+--gates-only: stopping. FAILURES 0

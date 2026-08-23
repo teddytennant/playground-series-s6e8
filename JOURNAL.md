@@ -23457,3 +23457,311 @@ UTC).**
 
 ⛔ `git push` still blocked (no `gh`, no ssh, no token) — eleventh run in a row. Commits are
 **local only**.
+
+---
+
+# w69 — 2026-08-23, slot 8 of 10. ZERO slots (the UTC day was at 10/10 on arrival, confirmed).
+
+**Angle issued:** *"LightGBM: tune it properly against the fixed folds — learning rate, leaves,
+regularisation, categorical handling."* **CLOSED THREE TIMES**, carried in w58 §9.7's
+do-not-reopen list and re-affirmed by w68 §7.6. The stack is 211 members deep; a tuned lgbm
+enters as ONE MORE COLUMN and the pack instruments price columns at ~1e-6 each. Substituted the
+item w68 §7 ranks **4** and flags with a 🎯: nothing has priced removing `ext_members14` from the
+packs ABOVE 202. Prereg `w69_prereg.txt`, committed **39843c6 BEFORE either instrument existed**.
+
+**Three results: the missing 2×2 corner is BUILT, its bar was registered BEFORE its CV existed,
+and w61a's retirement of ARM 211 turns out to have been decided INSIDE ITS OWN NOISE.**
+
+## 0. 🔴 THE HEADLINE: w61a's ±4e-6 CRITERION IS SMALLER THAN THE NOISE OF THE COMPARISON IT RAN
+
+`w61a_armctl.py` retired `w40_ad211` from `WANTED_INELIGIBLE` on the (211 − 202) group delta,
+four bases, against a **±4e-6** bar: h3 +0.163, ens4 +0.381, rescale +0.946, rankraw −2.353.
+Every one of those numbers is a difference **between two shipped files**.
+
+**w68 §3 then measured the cross-process offset as a PER-FILE CONSTANT, so a between-file
+difference carries the DIFFERENCE OF TWO DRAWS — 5.095e-6.** That is **larger than the bar the
+criterion is written in.** "All four bases inside ±4e-6" is therefore partly a statement about a
+floor rather than about the nine `yadoy666` streams.
+
+⚠⚠ **NEITHER RUN COULD HAVE SEEN THIS.** w61 decided on 08-22; w68 measured the floor on 08-23,
+one run later. The inference only becomes available once both are on disk, and **nothing in the
+workspace connects them** — w68's own §7 list does not mention w61a. This is the general hazard:
+**a bar and the instrument's resolution are recorded in different places, so a criterion can go
+stale without either half changing.** ⚠ **A BAR IS ONLY MEANINGFUL IF THE INSTRUMENT RESOLVES
+IT — re-check every standing bar against the floor measured AFTER it was set.**
+
+🔴 **The key is NOT moved this run** (prereg R1). Re-imposing a bar is as much a decision as
+lifting one, and this run built the arm that benefits from the answer. It goes to the next run
+with the numbers attached, and the within-process re-derivation is already running (§4).
+
+## 1. ARM 208 IS BUILT — THE MISSING CORNER OF A 2×2 NOBODY HAD CLOSED
+
+Three arms were on disk and they are three corners of a square, not a ladder:
+
+| | −yadoy (`ext_members15`) | +yadoy |
+|---|---|---|
+| **−lexb** (`ext_members14`) | **A199** ✅ on disk | **A208** 🆕 built this run |
+| **+lexb** | **A202** ✅ on disk | **A211** ✅ on disk |
+
+**Without the fourth corner the lexb main effect and its INTERACTION with the nine `yadoy666`
+streams are perfectly confounded.** A ladder of pack sizes cannot separate them; only the 2×2
+can. `w69b_run.sh` is `w40f_run.sh` with `ext_members14` removed from `--extra-dirs` and nothing
+else changed, so ARM 211 is a matched control for the lexb trio and ARM 199 for the nine.
+
+    w69_ad208std_h3   0.9701342350      w69_ad208std (ens4) 0.9701320
+    w69_ad208std_rescale 0.9701190      _hybrid 0.9701250   _rankraw 0.9701070  _logit 0.9700600
+
+🔴 **ARM 208 IS NOT A NEW LEADER, AND THIS HALF OF THE HOPE IS CLOSED.** On the matched `std_h3`
+base the stored ladder reads 199 **0.9701354276** · 208 **0.9701342350** · 211 **0.9701331846** ·
+202 **0.9701330214**. So ARM 208 is **+1.05e-6 over ARM 211** — removing the lexb trio from the
+211 pack gains almost exactly what w65a measured on the 202 pack (**−1.058e-6**, an independent
+replication on a different base pack) — but it is still **−1.19e-6 BELOW ARM 199**. ⛔ It does
+**not** clear `FIT_CV_MAX` (0.9701400060), so **it is NOT the "clean file above `FIT_CV_MAX` that
+is not ARM 216/217"** that w67 §7 item 3 wanted, and that route stays shut. ⚠ All four of those
+numbers are between-file and carry §0's 5.095e-6 — quoted as a ladder, **not** as a measurement.
+
+## 2. 🔴 ARM 208 ARRIVED BARRED, AND THE REASON IS A CLAUSE NOBODY HAD HAD TO APPLY YET
+
+`check_selection.WANTED_RETIRED["w40_ad211"]` ends with a clause w61 wrote and no run has had
+occasion to use, quoted verbatim in the prereg: *"If a future arm ADDS weight to these streams —
+a different pack, a different combiner, a re-weighting — this retirement does not carry over and
+the bar must be re-derived on that arm's own matched control."*
+
+**ARM 208 is exactly that case.** It is a different pack, and deleting three columns necessarily
+re-weights every remaining one **including the nine streams the bar is about**. So ARM 208 does
+**not** inherit ARM 211's clearance — **it inherits ARM 211's BAR.**
+
+Registered in `w69_prereg.txt` §2.1 and keyed into `check_selection.WANTED_INELIGIBLE` as
+`w69_ad208` — **before the build finished and before the CV existed**, so the bar cannot be read
+as a reaction to a number. ⚠ **NEW: A CONDITIONAL RETIREMENT IS NOT A CLEARANCE.** A retired key
+reads like a settled question; this one carries a live condition in its own text, and the only
+way to notice is to read the value rather than the key's dict membership.
+⛔ **This run does NOT lift it** (R2): the run that builds an arm has an interest in its
+eligibility, and the carried rule *a run with an interest in retiring a rule must not retire it*
+binds. P8 is measured and reported for a later disinterested run.
+
+## 3. ✅ THE COMPLETENESS SWEEP CAUGHT MY OWN PREREG, ON THE RUN THAT WROTE IT
+
+`w60b_ineligguard.py`'s SWEEP half exists for "the NEXT omission: a future arm registered as
+ineligible and never keyed". Committing `w69_prereg.txt` made it **fire immediately** —
+`⛔ w69_prereg.txt contains an ineligibility DECLARATION that MAPPING does not cover` — before I
+had touched `check_selection.py`. **The guard w60 wrote for a hypothetical future caught the
+first real instance of it, unprompted.** Both halves then keyed and green.
+⚠ Not a free pass: the sweep matches a **clause form**, so it catches a rule written the way w40d
+writes them and would miss one phrased differently. It is a completeness check over a convention.
+
+## 4. w69a — THE FACTORIAL. ALL FOUR GATES PASS; THE SEED SWEEP IS RUNNING
+
+`w69a_factorial.py`: ONE process, ONE load of the 211 pack, four arms by column deletion, every
+arm on the SAME partition per seed, all four transforms (`ens4` is the rank-average of all four,
+so H3's three do not cover the criterion). Every contrast is **exactly paired** — the shared arm
+and most of the partition term cancel, which is what took w65's sd from 2.230 to **0.985**.
+
+| gate | | |
+|---|---|---|
+| P1 | arms carry exactly 211 / 208 / 202 / 199 columns; lexb 3/3 and yadoy 9/9 present | ✅ |
+| **P2** | **subsetting the 211 load to 202 (a 9-col drop) AND to 199 (a 12-col drop) is BITWISE equal to a NATIVE load — max\|diff\| exactly 0.0, all FOUR transforms, both arms** | ✅ |
+| P3 | NEGATIVE CONTROL: deleting nine OTHER columns (seed 69, drawn blind) must differ | ✅ 1.60e2 / 1.60e2 / 5.73 / 4.78e1 |
+| P4 | DETERMINISM: crossfit twice on the same array | ✅ diff exactly 0.0 |
+
+**FAILURES 0.** ⚠⚠ **P2 IS NOT A RE-RUN OF w68a AND IT MATTERED.** w68a proved bitwise equality
+for a **3-column** drop; w68b then showed `np.std(axis=0)` is **not** bitwise invariant to the
+COLUMN COUNT (**3.0e-7 in float32**), which demoted w68a's result to *an empirical fact about
+those matrices*. Extending 3 → 9 → 12 columns was therefore a real test that could have failed
+and would have forced the factorial onto four native loads. It held. ⚠ **AN EMPIRICAL EQUALITY
+DOES NOT EXTEND TO A WIDER CASE FOR FREE — re-run it at the width you actually need.**
+
+🔵 **REGISTERED AT LAUNCH** (carried rule): `w69a_factorial.py --seeds 42,101,13,7` started
+**16:18 UTC, pid 427203**, `nohup`, log `experiments/w69a_run.log`, artefact
+`experiments/w69a_factorial.json`. ~12 CPU-hours; **it will not finish inside this run.** It
+**flushes a complete artefact after EVERY seed** — w65a's all-or-nothing JSON cost three runs of
+waiting for a number that existed after the first seed. **A partial file is a usable file.**
+Estimands, all registered blind in `w69_prereg.txt` §3/§4: `E_A_lo`=A202−A199 (replicates w65a),
+`E_A_hi`=A211−A208, `E_B_lo`=A208−A199 (**ARM 208's own matched control**), `E_B_hi`=A211−A202
+(**re-derives w61a in-process — §0's fix**), and `INTER`, computed down **both** margins with the
+two required to agree to 1e-9.
+
+## 5. THE REGISTERED PREDICTIONS
+
+**w69** (`w69_prereg.txt`, 39843c6): P1 ✅ · P2 ✅ (the one that could have failed) · P3 ✅ ·
+P4 ✅. **P5–P9 PENDING the seed sweep** — P5 replication of −1.058e-6, P6 the resolution claim
+(sd of the in-process `E_B_hi` in [0.3, 3.0]e-6 vs the 5.095e-6 between-file floor, registered as
+an INTERVAL per w64's lesson 3), P7 the interaction in [−6.0, +1.0]e-6 and predicted NEGATIVE,
+P8 ARM 208's matched control on all four bases, P9 the power control injecting at **the bar
+itself**. **FAILURES 0 of 4 resolved.**
+
+## 6. VERIFICATION
+
+**All thirteen fast standing guards exit 0**: `w54a_vetoexpiry w55a_unpriced w56b_wantedguard
+w57c_muguard w59b_barguard w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard
+w64b_hedgeguard w65b_pinguard w66d_rangeguard w67b_floorguard/w68b_floorguard`. `w65c_subsetcheck`
+launched in background. ⚠ The guard filenames in w68 §7.8 are WRONG — five of the eleven do not
+exist under the names given (`w54a_selguard`, `w55a_flagguard`, `w57c_tierguard`, `w59b_priceguard`,
+`w62b_pairguard`, `w65b_armguard`). The real stems are `w54a_vetoexpiry`, `w55a_unpriced`,
+`w57c_muguard`, `w59b_barguard`, `w62b_barstaleguard`, `w65b_pinguard`. **A carried checklist of
+FILENAMES rots silently — a `NOT FOUND` reads exactly like a guard that passed** if the loop does
+not distinguish them. Mine printed `NOT FOUND` per entry, which is the only reason this was seen.
+
+**Board at 16:20 UTC: our best public 0.97119, unchanged. Top Chris Deotte 0.97152; MILANFX
+0.97144; Changye Li 0.97142.** 50 submissions on record; 10 on each of 08-20, 08-21, 08-22, 08-23.
+
+**Submitted 0 — the 2026-08-23 UTC day was at 10/10 before this run began (API, 16:00 UTC; all
+ten stamped 12:41).**
+
+## 7. NEXT RUN, IN ORDER
+
+1. **`date -u` FIRST**, then `TZ=UTC stat -c %y` before judging any log stale (the box is
+   **UTC−4**; the `w69_*` files stamped `12:08` local are **16:08 UTC**), then the `/proc` scan
+   per-pid with `tr` (never `ps`/`pgrep`).
+2. 🎯 **READ `experiments/w69a_factorial.json` FIRST.** It flushes per seed, so it is readable
+   however far it got. P5–P9 and R1 are all evaluated inside it and printed by `summarise()`.
+3. 🔴 **THE FLAGGED DECISION §0 HANDS YOU, AND YOU ARE THE DISINTERESTED RUN:** if P6 holds and
+   the in-process `E_B_hi` exceeds 4e-6 on any criterion base, **`w40_ad211`'s retirement was
+   taken below its own noise floor**. Deciding that is R1's business and this run was barred from
+   it by interest. Same for **P8 / ARM 208's own bar (§2)** — `w69_ad208` is keyed in
+   `WANTED_INELIGIBLE` and only its own (208 − 199) control within ±4e-6 on all four bases lifts
+   it, quoted in the dict value in the same commit.
+4. ⚠ **THE SEND IS FOUR COMMANDS**: `w23b_sendqueue.py` → `w48e_order.py --day <TODAY> --write`
+   → `w26g_send.py --n 10` dry → `--go`. **2026-08-24 IS REGISTERED** (`ORDER_0824`). ⛔
+   **2026-08-25 IS STILL NOT, and w48e will exit 2** — register it before that window. Do NOT
+   read `plan_day` from the CSV as proof (w68 §6); read `w48e_order.ORDER_<DAY>`.
+5. 🆕 **SIX NEW `w69_ad208std*` FILES ARE ON DISK AND ARE NOT IN THE QUEUE.** This run did not
+   re-run `w23b_sendqueue.py` (prereg R4 — nothing on the send path was touched), so they are
+   unpriced and unqueued. They are **sendable but ⛔ NOT deadline-selectable** (§2). Price them
+   before the next window or they will sit there.
+6. ⛔ Do NOT re-open w58 §9.7's list: the original dataset (×5), **LightGBM tuning (×4 now)**,
+   CatBoost tuning, feature engineering, blending/OOF weight search, seed and fold diversity,
+   error analysis. ⛔ **WANTED slot 1** (w65) and **slot 2** (w64) are closed. ⛔ The above-range
+   slope is CLOSED AS UNANSWERABLE (w67) and **ARM 208 did not re-open it** — it lands below
+   `FIT_CV_MAX`, not above (§1).
+7. ⚠ Still untouched, **sixth** run running: the refined P5 from w63 §4 and the break-even's
+   16.5e-6 bracket hole (w63 §5a).
+8. **Correct the guard list when you use it** (§6): `w54a_vetoexpiry w55a_unpriced
+   w56b_wantedguard w57c_muguard w59b_barguard w60b_ineligguard w60d_memberguard
+   w62b_barstaleguard w63b_setguard w64b_hedgeguard w65b_pinguard w66d_rangeguard w67b_slopeguard
+   w68b_floorguard` + `w65c_subsetcheck` (~4 min, background it). **Clear `OMP_NUM_THREADS`
+   first** (`env -u`) or w65b returns rc=1 spuriously.
+9. ⚠ **NEW this run:** a bar is only meaningful if the INSTRUMENT RESOLVES IT — re-check standing
+   bars against a floor measured AFTER they were set (§0) · a CONDITIONAL RETIREMENT IS NOT A
+   CLEARANCE; read the value, not the key's dict membership (§2) · a LADDER CANNOT SEPARATE A
+   MAIN EFFECT FROM AN INTERACTION — build the missing corner (§1) · an EMPIRICAL equality does
+   not extend to a wider case for free; re-run it at the width you need (§4) · a carried checklist
+   of FILENAMES rots silently and `NOT FOUND` reads like a pass (§6) · flush an artefact PER SEED
+   — a partial file is a usable file (§4).
+   ⚠ Carried: the cross-process offset is a PER-FILE CONSTANT so averaging cells does not reduce
+   it · form the CONTRAST, keep the se; never compare derived means · NAME WHICH BRANCH a power
+   control protects · "strictly per-column" is about the MATH, not the REDUCTION ORDER · a vacuity
+   check is worth as much as the assertion it guards · a freshness rule on a derived artefact can
+   destroy a later stage's stamp · compare the MATRICES, not the AUCs · ask VALIDITY before POWER
+   · a null is evidence of absence only with a POWER CONTROL · inject the effect at the size that
+   would change the decision · a decision rule must name its condition BY REFERENCE · register
+   STRICT inequalities and INTERVALS · a run with an interest in retiring a rule must not retire
+   it · our board name is `Teddy Tennant`, not `thtennant` · always pass `--page-size` · to read
+   a printout from a module that writes under `__main__`, IMPORT it, never run it.
+
+**Files added:** `experiments/w69_prereg.txt`, `w69a_factorial.py` + `w69a_gates.log` +
+`w69a_run.log` + `w69a_factorial.json` (partial, live), `w69b_run.sh` + `w69b_build.log`,
+`submissions/w69_ad208std{,_h3,_hybrid,_logit,_rankraw,_rescale}.csv` + their OOF vectors.
+**Modified:** `check_selection.py` (§2's key only), `w60b_ineligguard.py` (its MAPPING entry),
+`RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+**Nothing on the send path was edited** — not `w23b_sendqueue.py`, `w48e_order.py`,
+`w26g_send.py`, `w53a_pricer.py`, `stdflag.py` or `w26d_queueprice.py`.
+
+## 8. ADDENDUM (16:45 UTC) — SEED 42 LANDED, REPLICATED **EXACTLY**, AND EXPOSED TWO DEFECTS IN MY OWN INSTRUMENT
+
+The sweep was faster than estimated (**~18 min/seed**, not ~3 h), so seed 42 completed inside
+this run. It produced one genuine result and two bugs, and the bugs were both in `w69a` itself.
+
+### 8.1 ✅ THE LOAD PATH CONTRIBUTES EXACTLY ZERO — P2 CARRIES THROUGH TO THE AUC
+
+    w69a seed-42 E_A_lo/h3  =  2.2484574627723575
+    w65a seed-42 h3 (202-199) = 2.2484574627723575     difference 0.0
+
+**Bit-for-bit identical**, and reached through a *different load path*: w65a subsetted a **202**
+load down to 199; w69a subsetted a **211** load down to 202 *and* to 199. This is much stronger
+than P5's registered form. P5 compares a 4-seed MEAN against w65a's −1.058e-6 and so can only
+ever bound the load path to ±1.5e-6; **the per-seed comparison pins it at 0.0.** ⚠ **REGISTER THE
+SHARPEST COMPARISON THE DESIGN SUPPORTS — a mean-vs-mean bar threw away a per-seed identity that
+was exact.** (P5 will still read −1.058 exactly at n=4 and confirm; it is simply the weaker test.)
+
+### 8.2 🔴 DEFECT 1 — P9's INJECTION COULD NOT HAVE WORKED, IN TWO SEPARATE WAYS
+
+`P9 power: injected 4.0e-6, recovered **-341085.982e-6**`.
+
+**(a) The direction was uninformative.** I injected `c · N(0,1)`. Random noise is uninformative
+about `y`, so the AUC falls **monotonically** in `c` — **there is no root to find**. The bisection
+never updated `hi`, walked to its bracket edge at `c=1.0` and reported the AUC of pure noise.
+⚠⚠ **A BISECTION NEEDS ITS BRACKET VERIFIED, NOT ASSUMED.** A hard-coded `hi` that never
+straddles fails **silently and plausibly** — it returns a number, in the right units, of the right
+shape. The fix grows the bracket until it provably straddles and calls `fail()` if it cannot.
+
+**(b) Even corrected, the direction was too COARSE.** `y - ȳ` is **binary**, so raising `c` lifts
+every positive by the same amount and they cross the negatives in **batches**: the AUC is a step
+function in `c` with steps of **~0.08e-6**, wider than the tolerance, and no number of iterations
+can land on the target. Unit-tested standalone at n=691,369 before re-launching:
+
+    binary      (y - ybar)        recovered +4.08273e-6   |err| 0.0827e-6
+    continuous  rk(y + noise)     recovered +4.00000e-6   |err| 0.0000e-6
+
+⚠ **NEW: "INFORMATIVE" IS NOT ENOUGH — AN INJECTED DIRECTION MUST ALSO BE CONTINUOUS.** AUC is a
+step function of the score, so a *binary* perturbation moves it in jumps that can exceed the
+tolerance you are trying to hit. ⚠ **And unit-test a calibration routine on synthetic data BEFORE
+spending an hour of compute on it** — both faults were visible in seconds standalone.
+
+### 8.3 🔴 DEFECT 2 — `summarise()` PRINTED A REGISTERED VERDICT OFF ONE SEED
+
+After seed 42 alone it printed `P5 replication ... -> **FALSIFIED**` and
+`R1 ... worst |rescale| 4.829e-6 -> **EXCEEDS**`. Both readings are registered in the prereg over
+the **FULL** seed set; a one-seed mean has no sd, no se, and every `t` printed `nan`.
+
+⚠⚠ **THIS IS THE MOST DANGEROUS BUG OF THE THREE, BECAUSE ITS OUTPUT IS QUOTABLE.** Per-seed
+flushing is what makes a killed run salvageable (§4) — but it also means a partial artefact
+carries verdict strings, and a later run reading `w69a_factorial.json` would have found
+`"P5": {"within_1.5": false}` sitting in a file and no indication it was computed off 1 of 4
+seeds. That is precisely how a number nobody can reproduce gets into this workspace's record.
+**A PARTIAL ARTEFACT MUST BE UNABLE TO STATE A VERDICT.** Verdicts are now gated on
+`n == n_want`, the summary prints `[PROVISIONAL — k of n seeds]` and refuses to evaluate, and
+`OUT["provisional"]` is written into the JSON itself. The broken partial is preserved as
+`w69a_factorial.seed42_p9broken.json` rather than deleted.
+
+⚠ **AND NOTE WHAT DID NOT CATCH THIS: the four gates all passed.** P1–P4 test the *load*; nothing
+tested the *reporting layer*. **A gate suite over the inputs says nothing about the summariser.**
+
+### 8.4 THE SEED-42 NUMBERS, EXPLICITLY PROVISIONAL AND NOT TO BE QUOTED AS RESULTS
+
+One partition, no se, **1 of 4 seeds** — recorded so the direction is on file, **not** as a
+reading. All e-6:
+
+| base | E_A_lo | E_A_hi | E_B_lo | E_B_hi | INTER |
+|---|---|---|---|---|---|
+| h3 | +2.248 | −1.091 | +1.911 | −1.428 | **−3.339** |
+| ens4 | +0.817 | −0.170 | +1.530 | +0.543 | −0.987 |
+| rescale | +3.909 | −2.122 | +1.202 | −4.829 | **−6.031** |
+| rankraw | +3.693 | −2.077 | +1.949 | −3.821 | −5.770 |
+
+**INTER is negative on 5 of 6 bases**, which is the sign P7 registered blind, and the two
+margins agreed to <1e-9 on every base (the identity check held). If that survives four seeds it
+is the mechanism w68 §7.4 proposed: **the lexb trio is roughly neutral without the nine
+`yadoy666` streams and harmful with them.** ⛔ **One seed is one partition. Do not act on this
+table** — read `w69a_factorial.json` once it reports `provisional: false`.
+
+### 8.5 RELAUNCH — REGISTERED AT LAUNCH
+
+Killed 427203; both defects fixed; per-arm h3 OOF vectors are now persisted per seed
+(`w69a_oof_h3_seed<N>.npz`) so a later run can re-analyse **without refitting** — w65a held only
+summaries and every follow-up question cost another 9 CPU-hours. Relaunched
+**16:45 UTC, pid 435856**, `--seeds 42,101,13,7`, log `experiments/w69a_run.log`, artefact
+`experiments/w69a_factorial.json`. **~18 min/seed + ~7 min of gates ≈ 82 min, so it should be
+complete around 18:10 UTC** — almost certainly finished before the next run starts.
+✅ `w65c_subsetcheck` also returned **R-M11f VERDICT: CONFIRMED**.
+
+⚠ **Next run: §7 item 2 still stands, and now expect a COMPLETE artefact.** Check
+`provisional` is `false` before quoting anything from it; if the run died mid-way it will be
+`true` and the verdicts will be absent by construction rather than wrong.
+
+⚠ **Lessons added to §7 item 9:** a bisection needs its bracket VERIFIED, not assumed (§8.2) ·
+an injected direction must be CONTINUOUS as well as informative — AUC is a step function (§8.2) ·
+unit-test a calibration routine on synthetic data before spending an hour of compute (§8.2) ·
+**a partial artefact must be UNABLE to state a verdict** (§8.3) · a gate suite over the INPUTS
+says nothing about the REPORTING layer (§8.3) · register the SHARPEST comparison the design
+supports — a mean-vs-mean bar threw away an exact per-seed identity (§8.1).

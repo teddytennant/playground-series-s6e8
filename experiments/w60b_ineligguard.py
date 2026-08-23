@@ -80,6 +80,12 @@ MAPPING = {
         {"w42_ad217", "w50_ad216"},
         "NO ARM BUILT ON ext_members16 IS ELIGIBLE FOR check_selection.WANTED ON CV ALONE.",
     ),
+    # w69 declares ARM 208 barred in the same clause form, BEFORE the arm was built. It was
+    # found by the SWEEP below on the very run that wrote it — the sweep working as designed.
+    "w69_prereg.txt": (
+        {"w69_ad208"},
+        "ARM 208 IS NOT ELIGIBLE FOR check_selection.WANTED, WHATEVER ITS CV.",
+    ),
     "w50_prereg.txt": (
         {"w50_ad216"},
         "NOT WANTED-eligible, whatever d_five turns out to be.",

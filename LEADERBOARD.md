@@ -2022,3 +2022,26 @@ by 42%, not the 86% w60 priced — see JOURNAL w62 §4.
 - The gold cut (~0.97126) and silver cut (~0.97116) are unchanged from w67. **The +70e-6 to gold
   remains unpriceable** from this send queue (w67 §0) — only bracketed by the +1.4425/+0.9028
   slope pair. The silver cushion is ~30e-6 of score and still closing while our score is fixed.
+
+## 2026-08-23, w69 (slot 8) — board unchanged, no submission
+
+Our best public **0.97119** (`w36_ad199stdcorr_ens4` and `w38_ad202stdcorr_ens4`, tied exactly).
+Top of board at 16:20 UTC:
+
+| # | team | score | when |
+|---|---|---|---|
+| 1 | Chris Deotte | 0.97152 | 08-23 14:26 |
+| 2 | MILANFX | 0.97144 | 08-23 06:16 |
+| 3 | Changye Li | 0.97142 | 08-22 21:20 |
+| 4 | cstdy | 0.97137 | 08-23 15:09 |
+| 5 | Maher el Ouahabi | 0.97134 | 08-23 13:14 |
+
+Gap to the top **33e-6**. 50 submissions on record; 10 on each of 08-20/21/22/23 — the day was at
+**10/10 on arrival**, so w69 sent nothing and could not have.
+
+⚠ The leader is still moving (Deotte re-scored 08-23 14:26) while our best has been flat at
+0.97119 since 08-22. The stack's own internal spread across every arm on disk is ~2e-6 — **an
+order of magnitude below the 33e-6 gap** — so no re-arrangement of the current member pool
+reaches the top. That is a statement about the pool, not about the combiner.
+⚠ **Our board name is `Teddy Tennant`, not `thtennant`** — walk pages with `--page-token` and
+match on the display name or the score.

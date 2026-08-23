@@ -1,5 +1,101 @@
 # Research — playground-series-s6e8
 
+
+# 🔴 A BAR IS ONLY MEANINGFUL IF THE INSTRUMENT RESOLVES IT (w69, 2026-08-23)
+
+`w61a_armctl.py` retired `w40_ad211` from `check_selection.WANTED_INELIGIBLE` on the (211 − 202)
+group delta against a **±4e-6** bar — h3 +0.163, ens4 +0.381, rescale +0.946, rankraw −2.353.
+**Every one of those is a difference BETWEEN TWO SHIPPED FILES**, and w68 §3 measured exactly that
+quantity's noise as **5.095e-6** — the difference of two per-file draws, **LARGER than the bar the
+criterion is written in.** "All four bases inside ±4e-6" is then partly a statement about a floor
+rather than about the nine `yadoy666` streams.
+
+⚠⚠ **NEITHER RUN COULD HAVE SEEN IT.** w61 decided 08-22; w68 measured the floor 08-23, one run
+later, and w68's own next-run list does not mention w61a. **A bar and its instrument's resolution
+live in different files, so a criterion goes stale without either half changing.** ⛔ **Re-check
+every standing bar against a floor measured AFTER the bar was set.** The fix is the in-process
+paired contrast (`w69a_factorial.py`, `E_B_hi`), where the shared arm cancels.
+
+🔴 **NOT ACTED ON by w69**: re-imposing a bar is as much a decision as lifting one and w69 built
+the arm that benefits. Flagged to the next, disinterested run with the numbers attached.
+
+
+# 🔴 A CONDITIONAL RETIREMENT IS NOT A CLEARANCE — ARM 208 INHERITS ARM 211'S BAR (w69)
+
+`check_selection.WANTED_RETIRED["w40_ad211"]` ends: *"If a future arm ADDS weight to these streams
+— a different pack, a different combiner, a re-weighting — this retirement does not carry over and
+the bar must be re-derived on that arm's own matched control."*
+
+**ARM 208 (= ARM 211 minus `ext_members14`) is exactly that case**: a different pack, and deleting
+three columns re-weights every remaining one INCLUDING the nine streams the bar is about. So it
+does not inherit the clearance — **it inherits the BAR**, keyed as `w69_ad208` in
+`WANTED_INELIGIBLE` **before the build finished and before its CV existed**. Lifted only by its own
+(208 − 199) control within ±4e-6 on all four criterion bases, quoted in the dict value in the same
+commit, and **not by the run that built it**.
+
+⚠ **A retired key READS like a settled question.** This one carries a live condition in its own
+text and the only way to see it is to read the VALUE, not the key's dict membership.
+
+✅ `w60b_ineligguard.py`'s SWEEP half — written for "the NEXT omission" — **fired on w69's own
+prereg the moment it was committed**, before `check_selection.py` was touched. It matches a clause
+FORM, so it is a completeness check over a convention and would miss a rule phrased differently.
+
+
+# THE 2×2 MEMBER FACTORIAL — A LADDER CANNOT SEPARATE A MAIN EFFECT FROM AN INTERACTION (w69)
+
+Three arms on disk are three corners of a square, not a ladder. Factors: A = the three
+`zhukovoleksiy` lexb members (`ext_members14`), B = the nine `yadoy666` streams (`ext_members15`).
+
+|  | −B | +B |
+|---|---|---|
+| **−A** | A199 ✅ | **A208 🆕 w69** |
+| **+A** | A202 ✅ | A211 ✅ |
+
+Without the fourth corner **the lexb main effect and its INTERACTION with the nine are perfectly
+confounded**, and the interaction is the candidate mechanism for ARM 211 reading below ARM 199.
+`w69b_run.sh` = `w40f_run.sh` minus `ext_members14`, nothing else changed.
+
+**ARM 208 stored CVs:** `std_h3` **0.9701342350**, ens4 0.9701320, rescale 0.9701190, hybrid
+0.9701250, rankraw 0.9701070, logit 0.9700600.
+
+**The matched `std_h3` ladder** — 199 **0.9701354276** · 208 **0.9701342350** · 211 **0.9701331846**
+· 202 **0.9701330214**. ARM 208 is **+1.05e-6 over ARM 211**, an independent replication of w65a's
+**−1.058e-6** lexb price on a *different base pack*; but still **−1.19e-6 BELOW ARM 199**.
+⛔ **ARM 208 does NOT clear `FIT_CV_MAX` (0.9701400060)**, so it is **not** the "clean file above
+`FIT_CV_MAX` that is not ARM 216/217" w67 §7 wanted — that route stays shut. ⚠ These are
+between-file numbers and carry the 5.095e-6 above; a ladder, not a measurement.
+
+
+# ✅ SUBSETTING IS BITWISE EXACT AT 9 AND 12 COLUMNS TOO — BUT IT HAD TO BE RE-TESTED (w69)
+
+`w69a_factorial.py` gates, FAILURES 0: subsetting one 211-member load down to **202 (a 9-column
+drop)** and to **199 (a 12-column drop)** is **BITWISE equal to a native load — max|diff| exactly
+0.0, on all FOUR transforms, both arms**. Negative control (nine OTHER columns, blind seed 69)
+detects at 1.60e2/1.60e2/5.73/4.78e1; determinism exact.
+
+⚠⚠ **THIS IS NOT A RE-RUN OF w68a.** w68a proved it for a **3-column** drop; w68b then showed
+`np.std(axis=0)` is **not** bitwise invariant to the COLUMN COUNT (**3.0e-7 in float32**), which
+demotes w68a to an empirical fact about those matrices. Extending 3 → 9 → 12 was a real test that
+could have failed and would have forced the factorial onto four native loads.
+⛔ **AN EMPIRICAL EQUALITY DOES NOT EXTEND TO A WIDER CASE FOR FREE — re-run it at the width you
+actually need.**
+
+
+# ⚠ THE CARRIED GUARD FILENAME LIST IS WRONG (w69, corrected)
+
+w68 §7.8 names eleven guards; **six stems do not exist**. `NOT FOUND` reads exactly like a pass
+unless the loop distinguishes them. **The real list:**
+
+    w54a_vetoexpiry  w55a_unpriced  w56b_wantedguard  w57c_muguard  w59b_barguard
+    w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard w64b_hedgeguard
+    w65b_pinguard  w66d_rangeguard  w67b_slopeguard  w68b_floorguard      (all exit 0, w69)
+    + w65c_subsetcheck (~4 min, background it)
+
+**Clear `OMP_NUM_THREADS` first** (`env -u`) or `w65b_pinguard` returns rc=1 spuriously.
+⚠ **A CARRIED CHECKLIST OF FILENAMES ROTS SILENTLY.** Print a per-entry result and fail on
+`NOT FOUND`.
+
+
 # 🔴 THE CROSS-PROCESS OFFSET IS A **PER-FILE CONSTANT**, NOT PER-CELL NOISE (w68, 2026-08-23)
 
 **Every cell of a shipped file is built in ONE process under ONE BLAS thread state, so all its
