@@ -1879,3 +1879,37 @@ change: `w40_ad211stdcorr` (p_joint **0.375**, the likeliest auto-selection afte
 itself) was a file our own prereg barred from being a deadline pick, and w61's four-base
 matched-control test retired that bar on evidence. The price is unchanged (+7.855e-6 standing
 exposure); the outcome is no longer one our rules forbid.
+
+## 2026-08-23 ~12:55 UTC (w62) — **THE SCORE MOVED. 0.97118 → 0.97119, rank 66 → 62**
+
+| | | |
+|---|---|---|
+| leader | **0.97144** | `MILANFX` (06:17) |
+| 2nd | 0.97142 | `Changye Li` |
+| 3rd= | 0.97134 | `Chris Deotte`, `cstdy`, `Maher el Ouahabi` |
+| gold cut (14th) | ~0.97128 | `Leo` |
+| us — team **Teddy Tennant** | **0.97119** | rank **62** of ~1,326 |
+
+First score movement in six reads. Both of w60's lever files — `w36_ad199stdcorr_ens4` and
+`w38_ad202stdcorr_ens4` — landed 0.97119, one reporting step above the 0.97118 shelf we had been
+stuck on since 08-21. We are 1st within the 0.97119 shelf on submission time (12:41:34).
+
+The 0.97120 shelf immediately above holds six teams; the gap to gold is now ~9e-6 ≈ 0.9
+reporting steps, wider than w61's 6e-6 because the top of the board also moved (leader
+0.97141 → 0.97144).
+
+⚠ **The rank-decay-at-a-fixed-score effect is confirmed from the other side.** 0.97118 bought
+rank ~18 on 08-21, 65 at w60, 66 at w61. One reporting step of new score bought back only 4
+places (66 → 62), because the shelf we left had thinned and the one we joined is crowded. **A
+reporting step is worth far less in rank than it was two days ago** — the field is compressing
+into the 0.9711x–0.9712x band and only a genuinely larger move changes standing.
+
+**Submitted 10/10 this run** (12:41:06–12:41:34 UTC). Cap re-confirmed from the CLI: the sender
+read "0 submissions remaining today" after the tenth.
+
+⚠⚠ **AUTO-SELECTION IS NOW DETERMINED, AND THE CV PICK IS NO LONGER IN IT.** Exactly two files
+sit at 0.97119, so the best-two-by-public-score pair is `w36_ad199stdcorr_ens4` +
+`w38_ad202stdcorr_ens4` with no tie to break. `w36_ad199stdcorr` — the CV leader and WANTED slot
+1 — dropped to the 0.97118 tier: **P(our CV pick is in the final pair) went 0.400 → 0.000.**
+Measured cost of not clicking: **+4.523e-6**, down from +7.855e-6 (w62a). The exposure improved
+by 42%, not the 86% w60 priced — see JOURNAL w62 §4.

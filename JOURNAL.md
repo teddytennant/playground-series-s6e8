@@ -21928,3 +21928,256 @@ by breaking the other. ⛔ Both say: do not point them back at ad211 to make thi
 (re-pointed + paired check), plus `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **No submission — at cap, 10/10 for the 08-22 UTC day before this run began.**
+
+---
+
+# w62 — 2026-08-23, slot 1 of 10. **THE SCORE MOVED FOR THE FIRST TIME IN THREE DAYS — AND THE LEVER PAID LESS THAN HALF OF WHAT IT WAS PRICED AT, BECAUSE IT CLEARED TWICE**
+
+**Sent 10/10 at 12:41:06–12:41:34 UTC.** Cap re-confirmed from the CLI ("0 submissions
+remaining today" after the tenth). ⛔ No `mcp__brave__*` in the tool list (`ToolSearch` returns
+nothing) — the click stays blocked, w58 §0 still holds.
+
+## 0. ANGLE SUBSTITUTED — feature engineering is closed, with numbers
+
+Issued: *"Feature engineering: interactions, in-fold target and count encodings, and careful
+categorical treatment."* Closed in w15b/w15d and re-confirmed in w22: **thirty-five further
+generator-fingerprint features net −0.000182**, and the standard ratio/per-age/per-sleep set
+plus `is_missing_*` flags (`stephentarter/ps-s06e08-artifacts`) is recorded verbatim as *"squarely
+inside the closed feature-engineering-on-the-original-columns territory"*. Fifth angle closed by
+measurement, alongside the original dataset (×4), LightGBM tuning (×3) and CatBoost tuning (w61).
+Substituted for w61 §8 items 2–4, which were registered and unrun. Registered in
+`experiments/w62_prereg.txt`, **committed ba1e7c0 before `w62a_autopair.py` existed**.
+
+## 1. 🔴🔴 THE SEND CHAIN WAS BROKEN IN TWO PLACES AND BOTH WERE INVISIBLE UNTIL A DAY NEEDED IT
+
+w61 §8.2 said the send was three commands. It was not. The queue the sender reads carried **no
+`plan_day` column at all**, so `w26g_send.py --go` refused outright:
+
+    ⛔ REFUSING TO SEND: queue was written for AN UNSTAMPED DAY (pre-w53 artefact)
+
+**Cause.** `plan_day` is written by exactly one script, `w48e_order.py`, and w60 rebuilt the
+queue with `w26d_queueprice.py`, whose carry set is `_CARRY = ["send_rank", "msg", "why"]`.
+w60 called that rebuild **"LOSSLESS"** and it is — for the rows. It is not lossless for the
+column that keys the artefact to a DAY. ⚠ **NEW: "lossless" was established over ROWS and
+quoted over the FILE.** A carry that enumerates the columns it preserves silently drops every
+column added after it was written.
+
+**Then the repair itself was broken.** `w48e_order.py --day 2026-08-23 --write` raised:
+
+    KeyError: family 'member' is not in the fitted design [...]. Refusing to price it
+
+w60 moved the `member` label out of `w48e_order.py` and into `stdflag.family()` — the correct
+fix, and RESEARCH.md records it as such — so `q["fam"]` now reads `member` *before* w48e's
+pricing line instead of after it, and `w53a_pricer` rightly refused. **w60 skipped running
+`w48e_order.py` and so never saw that its own fix had broken the only writer of `plan_day`.**
+
+⚠⚠ **NEW SHAPE: MOVING A RULE UPSTREAM CAN BREAK THE SCRIPT THAT USED TO OWN IT — AND YOU FIND
+OUT ON THE DAY YOU NEED THAT SCRIPT.** This is w60's own lesson turned around. w60 learned "a
+rule enforced on a column a DIFFERENT script populates is only enforced if that script ran" and
+fixed it by moving the label earlier; the cost was that the later script now receives a value it
+was never written to handle. **Fixed at `w48e_order.py:302` by pricing through `QP._price` —
+w26d's own branch — so both writers of the CSV price by ONE rule.** The comment at the line says
+plainly not to "fix" it by mapping `member → h3`, which is exactly the silent collapse w53a
+refuses.
+
+## 2. 🔴 AND THE STALE QUEUE WAS AN **UNVETOED** QUEUE — IT HAD A VETOED ARM-216 FILE AT SLOT 10
+
+`w26g_send.py`'s own comment says it: *"A stale queue is an UNVETOED queue."* `w48e` applies
+`VETO` at WRITE time as `priority = -1` and drops the flag; `w26d` rebuilds `priority` from
+`WANTED` alone. So under w60's rebuild the 19 vetoed files read as ordinary priority-0 rows.
+
+**Dry plan off the stale queue:** slot 10 = **`w50_ad216std_hybrid`** — an ARM 216 file, in
+`w48e.VETO` with the clause *"w51: ARM 216, as above"*.
+**Dry plan off the re-stamped queue:** slot 10 = `w27_ad188raw_logit`. Slots 1–9 identical.
+
+⚠⚠ **w61 §4 CHECKED THIS AND PASSED IT.** It re-measured the sender's blocked set as an
+order-independent set difference — byte-identical, symmetric difference empty — and concluded
+*"the plan still fills to ten with the same members."* That was true and it did not help,
+because **the veto is not in the blocked set.** A vetoed file is not *blocked*; it is *demoted*,
+and demotion is invisible to a test that compares block sets. ⚠ **NEW: A GATE AND A PRIORITY
+ARE NOT THE SAME MECHANISM, AND A SET DIFFERENCE OVER THE GATE DOES NOT COVER THE PRIORITY.**
+w61's fix for w59/w60's cardinality bug was right and was still measuring the wrong object.
+
+**One command, `w48e_order.py --day 2026-08-23 --write`, fixed both §1 and §2.** It is now item
+1 of the next-run list, not a conditional footnote.
+
+## 3. ✅ THE SEND — ten out, and **THE LEVER CLEARED**
+
+    12:41:06  w34_ad195std_h3          0.97115      12:41:23  w38_ad202std_h3          0.97115
+    12:41:09  w36_ad197std             0.97116      12:41:26  w40_ad211std_h3          0.97116
+    12:41:12  w38_ad202std_hybrid      0.97113      12:41:28  w36_ad199stdcorr_ens4  **0.97119**
+    12:41:16  w36_ad197std_h3          0.97115      12:41:31  w38_ad202stdcorr_ens4  **0.97119**
+    12:41:19  w36_ad197stdcorr         0.97117      12:41:34  w27_ad188raw_logit       0.97116
+
+**Account best 0.97118 → 0.97119, rank 66 → 62.** First score movement since 08-21. Both of
+w60's lever files cleared the 0.97118 auto-selection tier they were built to clear, and they are
+the only two files on the board at 0.97119.
+
+## 4. 🎯🔴 THE LEVER PAID **+1.235e-6**, NOT THE **+6.73e-6** IT WAS PRICED AT — AND THE REASON IS THAT IT CLEARED **TWICE**
+
+w61 §8.6 said: read whether it cleared, and **do not re-tune anything on the reading**. Honoured
+— nothing moved. What follows is the reading.
+
+**Auto-selection is now DETERMINED.** Exactly two files sit above every other file, so
+"best two by public score" is `w36_ad199stdcorr_ens4` + `w38_ad202stdcorr_ens4` with no tie to
+break. w57a's MODEL B — a uniform draw over the 10 two-subsets of a five-file tier 1, +7.855e-6
+— prices a quantity that **no longer exists**, and w57a says so itself by refusing to run:
+`assert PICK in TIER1`. ⚠ **That assertion was not softened and `w57a_tierprice2.py` was not
+edited**: it is a registered artefact against a board that is gone, and re-pointing its R1–R7
+would destroy the record. `experiments/w62a_autopair.py` is its successor.
+
+**GATE V — the verbatim control.** Before pricing anything live, w62a runs its copied estimator
+on the board state RECORDED in `w57a_tierprice2.json` and must reproduce every `limit1` cost and
+all 10 `model_b` pair prices. **Worst absolute deviation `0.000e+00`.** It is w57a's estimator,
+not a lookalike.
+
+**THE COUNTERFACTUAL LADDER — every number on today's board, today's estimator, varying only
+the SELECTION mechanism:**
+
+| scenario | cost of not clicking |
+|---|---|
+| neither lever file cleared (7-file tie, uniform MODEL B) | **+5.758e-6** |
+| only `w38_ad202stdcorr_ens4` cleared | +4.407e-6 |
+| **ACTUAL — both cleared, determined pair** | **+4.523e-6** |
+| **only `w36_ad199stdcorr_ens4` cleared** — the best branch available | **+3.408e-6** |
+| the click itself (pick + either lever file) | −0.072e-6 / −0.030e-6 |
+
+> ⚠⚠ **A SECOND HIJACKER IS WORSE THAN ONE. The second lever file cost +1.115e-6** by taking
+> the slot that would otherwise have been drawn from the 0.97118 tie — **a tie that contained
+> the PICK**. `lever + pick` prices at **−0.072e-6**, i.e. better than clicking. The single-clear
+> branch is worth +3.408 precisely because it keeps a 1-in-6 shot at that pair; clearing twice
+> spends it.
+
+**The honest scorecard.** w60 registered *"removes 6.73e-6 of the 7.855e-6 standing exposure —
+86% of it"* and *"THERE IS NO BAD BRANCH"*. Realised, like-for-like against the same estimator:
+**+5.758 → +4.523, a gain of +1.235e-6, 21% of the exposure.** The build was still net positive
+and both files did what they were built to do. What w60 mispriced was not the files — its CV
+prediction for ad199-ens4 was 0.01e-6 out — it was the **JOINTNESS**. `w59a`'s `cost_hijack(X)`
+prices ONE file landing above the tier against a draw from the tie X leaves behind, and w60
+applied it independently to two files it then sent **on the same day**. ⚠⚠ **NEW: A PER-FILE
+HIJACK PRICE IS NOT ADDITIVE, AND ITS SIGN CAN INVERT WHEN TWO PRICED FILES ARE SENT TOGETHER.
+PRICE THE SET YOU ARE ACTUALLY SENDING.** The instrument was never wrong; it was asked a
+one-file question and answered a two-file day.
+
+⚠ These are counterfactuals in the **selection mechanism only** — each holds the fitted
+private-side posterior fixed while varying which files sit in tier 1. The two single-clear rows
+in particular keep a file's observed 0.97119 while pretending it did not clear. They are
+directionally sound and are not point predictions.
+
+**P(our CV pick is in the final pair) went 0.400 → 0.000.** `w36_ad199stdcorr` is now in tier 2.
+⚠ The pick is reachable **only by the click**. That is a governance loss, and it is priced into
+the +4.523 above rather than being an additional cost.
+
+**P7 FALSIFIED, and it overturns a durable RESEARCH.md claim.** RESEARCH.md says *"The tau
+sign-flip is dead. Swept tau ∈ [0,5]e-6 … nothing changes sign anywhere."* On the determined
+pair the cost goes +4.523 → **−0.502e-6 at tau = 5.0**. Mechanism: the WANTED pair is lopsided
+(`w23_ad187stdcorr` is −24.93e-6 of CV), so its `E[max]` is essentially the pick alone and gains
+almost nothing from idiosyncratic spread; the auto pair is balanced (−3.42, −5.11) and both
+members feed its max. w57a's claim was true **of a lopsided five-file tier** and does not
+generalise. ⚠ At w19c's reference tau = 1.72 the cost is still **+3.479e-6** — the sign is
+robust across the plausible range and flips only at ~3× that. **Reported, not acted on.**
+
+## 5. 🔴 THE HIJACK BAR THE SENDER READS WAS ONE STAMP AWAY FROM BEING VOID AND SILENT
+
+`w26g_send.hijack_cv_bar` carried this, verbatim:
+
+    # The artefact must have been produced on the tier we are actually sending against.
+    if not d.get("gate_t") == "PASS" or not (0.9 < bar < 1.0):
+
+⚠⚠ **THOSE ARE NOT THE SAME CLAIM.** `gate_t` is a STAMP recording that w59a's GATE T passed
+**on the day the artefact was written**. A frozen stamp cannot notice the board moving
+afterwards — and the same docstring says *"H moves with the tier, so this must be re-derived on
+every send day."* Today `w59a_hijackprice.py` began refusing to run on its own GATE T while
+`hijack_cv_bar` went on returning **0.9701294160** from the artefact GATE T had just voided.
+This is the third instance of one shape in three runs: **the comment states the rule, the code
+checks a proxy for it** (w58: wrong COLUMN; w60: a column a different SCRIPT populates).
+
+**Fixed where the bar is read**, not where it is written: `hijack_cv_bar(rows)` now compares the
+artefact's recorded `tiers.slot1` against the LIVE board as a **SET, not a count** (w61 §5), and
+returns `None` — which makes `above_tier_reason` BLOCK — when they differ. It prints the whole
+comparison rather than failing quietly. `rows=None` keeps the pre-w62 behaviour so `w59b`'s nine
+existing exercises still test what they tested.
+
+**`experiments/w62b_barstaleguard.py`, 9 checks, FAILURES 0**, including four negative controls:
+same-cardinality-different-membership must still void (the w61 §5 shape); tier+1 and tier−1 at
+the *same public value* must void, so a function comparing only the tier VALUE fails; both
+outcomes must be reachable from this file's own inputs, so a constant function fails; and the
+consequence is **paired** — a void bar must BLOCK an above-tier file while a live bar admits the
+same file — so an edit cannot satisfy one half by breaking the other. Live status is **reported,
+not asserted**, because "is it stale right now" is a fact about today and a guard that asserted
+it would start failing the moment the pricer is correctly re-run.
+
+## 6. VERIFICATION
+
+**w54a exit 0, w55a exit 0, w56b exit 0, w57c exit 0, w59b exit 0 (FAILURES 0), w60b exit 0
+(FAILURES 0), w60d exit 0 (FAILURES 0), w62b exit 0 (FAILURES 0)**; `w62a` FAILURES 1 — **P7,
+the registered falsification in §4, and nothing else**.
+
+⚠ **w58a exits 2 and w59a refuses. Both are CORRECT and neither is a break:** each is its own
+GATE T firing on the moved tier. The pricer chain `w57a → w58a → w59a` is now **blocked at the
+first step by design** (`assert PICK in TIER1`) and re-running it is a build task for the next
+run, not a re-run — see §7.
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` **FIRST**, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   `ls -d experiments/w6*`. Check for `mcp__brave__*` — if present, **make the click**.
+2. ⚠⚠ **THE SEND IS FOUR COMMANDS, NOT THREE.** `w23b_sendqueue.py` →
+   **`w48e_order.py --day <TODAY> --write`** → `w26g_send.py --n 10` dry → `--go`.
+   **`ORDERS`/`WHYS` in `w48e_order.py` have NO 2026-08-24 entry and it will exit 2** —
+   *"Refusing to write. Add the day to ORDERS/WHYS — do NOT re-run another day's list."* Adding
+   that day's list is the first build task of the next run. Do not skip w48e: §1 and §2 are both
+   what skipping it costs, and the second one puts a vetoed file on the board.
+3. 🔴 **THE PRICER CHAIN IS BLOCKED AND THE BAR IS VOID.** `w57a_tierprice2.py` refuses
+   (`PICK not in TIER1`), `w58a` exits 2, `w59a` refuses on GATE T, and `w26g_send` now
+   **blocks every above-tier file** in consequence (§5). Nothing above the tier can be sent
+   until a successor to `w59a` prices the hijack **against a DETERMINED pair** rather than
+   against a draw. ⚠ That successor must price **the SET being sent**, not each file alone —
+   §4 is what per-file pricing cost this time. `w62a_autopair.py` has the estimator and GATE V.
+4. ⛔ **DO NOT** soften `w57a`'s `assert PICK in TIER1`, edit `w57a_tierprice2.py`, or make
+   `hijack_cv_bar` pass by any route other than re-deriving the bar. **THE FIX IS THE PRICER,
+   NOT THE FLAG** — and the click is still the fix for the click.
+5. Run **w54a, w55a, w56b, w57c, w58a, w59b, w60b, w60d, w62b** on any run that sends or touches
+   `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`, `w48e_order.py`, or the pricer.
+6. ⚠ **Correct RESEARCH.md's "the tau sign-flip is dead."** It holds for a lopsided tier and
+   **not** for the balanced determined pair (§4). Done this run; do not let a future run re-quote
+   the old sentence.
+7. ⚠ **The WANTED slot-2 question is still OPEN and was again not touched** (w61 §8.7). ad211 is
+   eligible and `w40_ad211stdcorr` is +22.4e-6 above slot 2 on CV, but slot 2 is a PACK HEDGE
+   whose value is not its CV. Any move needs a registered argument about the HEDGE.
+8. Do **NOT** re-open w58 §9.7's list, **the original dataset** (×4), **LightGBM tuning** (×3),
+   **CatBoost tuning** (w61), or **feature engineering** (closed here, §0).
+9. ⚠ **NEW: a per-file price is not additive — price the SET you are actually sending** (§4).
+   ⚠ **NEW: "lossless" established over ROWS does not hold over the FILE** — a carry that
+   enumerates its columns drops every column added after it was written (§1).
+   ⚠ **NEW: moving a rule upstream can break the script that used to own it, and you find out
+   on the day you need that script** (§1). w60's fix was right; running it was the missing half.
+   ⚠ **NEW: a GATE and a PRIORITY are not the same mechanism.** A set difference over the
+   blocked set does not cover a veto that DEMOTES rather than blocks (§2).
+   ⚠ **NEW: a STAMP is not a comparison.** `gate_t == "PASS"` records a check that passed once;
+   it cannot notice the world moving afterwards (§5).
+   ⚠ **NEW: a claim measured on one configuration is not a general law.** "The tau sign-flip is
+   dead" was true of a lopsided tier and false of a balanced pair (§4).
+   ⚠ Carried: a count that depends on where a loop stopped is not an invariant — register the
+   SET · retirement is a third state, not an absence · a retired bar must not go quiet · say WHY
+   a run is entitled to a deferred test, and say when the data was already on disk · a rule
+   enforced on a column a DIFFERENT script populates is only enforced if that script ran ·
+   enumerate an enforcer's cases FROM THE RULE · a sweep that cries wolf gets padded into a
+   hand-typed list · accidental protection is worse than none · a prereg that only confirms was
+   not asked anything hard · a run with an interest in retiring a rule must not retire it · a
+   rule can be WIRED, TESTED and enforced at a number nobody MEASURED · register STRICT
+   inequalities · a rule enforced on the wrong COLUMN is not enforced · a POINT PREDICTION IS
+   NOT A GATE · register against files you HOLD · `w25a_cvlb_full.py` is NOT read-only · a
+   hard-coded tier goes stale every send day · a prereg that re-stamps itself is not a prereg ·
+   a rule in a PARAGRAPH is not a rule · a rule in the ORDER of a list is not a rule · never use
+   in-sample residuals to test extrapolation · never lower the `cv >= 0.97` floor · never let a
+   `member` row into a `max(CV)` · always pass `--page-size`.
+
+**Files added:** `experiments/w62_prereg.txt`, `w62a_autopair.py`, `w62a_autopair.json`,
+`w62b_barstaleguard.py`.
+**Modified:** `experiments/w48e_order.py` (price through `QP._price`; blank `p_beat` by family),
+`experiments/w26g_send.py` (`hijack_cv_bar(rows)` live-SET staleness check, new `live_tier1`),
+`experiments/w26d_queueprice.csv` (re-stamped `plan_day = 2026-08-23`, veto re-applied), plus
+`RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**Submitted 10/10 — 0 slots left for the 2026-08-23 UTC day.**

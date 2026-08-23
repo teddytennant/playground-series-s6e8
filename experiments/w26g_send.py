@@ -86,7 +86,7 @@ def wanted_cv_bar():
     return min(vals) if len(vals) == len(_WANTED) else None
 
 
-def hijack_cv_bar():
+def hijack_cv_bar(rows=None):
     """The CV a file must clear before it is allowed to risk landing ABOVE the auto tier (w59).
 
     MEASURED, not asserted. `w59a_hijackprice.py` prices the real counterfactual: if X lands
@@ -108,6 +108,22 @@ def hijack_cv_bar():
     simply carries 3x the leverage, in either direction.
 
     Returns None if the artefact cannot supply it -- callers must then BLOCK, not wave through.
+
+    ⚠⚠ w62: `rows` IS NOT OPTIONAL DECORATION. Until this run the staleness test was
+    `d["gate_t"] == "PASS"` and nothing else, and the line above it read "The artefact must have
+    been produced on the tier we are actually sending against." THOSE ARE NOT THE SAME CLAIM.
+    `gate_t` is a STAMP recording that w59a's GATE T passed **on the day the artefact was
+    written**; a frozen stamp cannot notice that the board moved afterwards, and this bar moves
+    with the tier -- the docstring above says so itself ("H moves with the tier, so this must be
+    re-derived on every send day"). The 08-23 sends moved tier 1 from five files at 0.97118 to
+    two at 0.97119 and `w59a_hijackprice.py` now REFUSES to run on its own GATE T, while this
+    function went on returning 0.9701294160 from the artefact GATE T just voided. The same shape
+    as w58's "a rule enforced on the wrong COLUMN" and w60's "a rule enforced on a column a
+    DIFFERENT script populates": the comment states the rule, the code checks a proxy for it.
+    So the comparison is made HERE, against the LIVE board, as a SET and not a count (w61 §5).
+    ⛔ Do not "fix" a void bar by passing the check -- re-run the pricer chain. Failing safe
+    costs at most the choice of one filler; a bar derived on a board that no longer exists is
+    how an above-tier file is admitted on a number that prices nothing.
     """
     try:
         d = _json.load(open(HIJACKPRICE))
@@ -117,7 +133,43 @@ def hijack_cv_bar():
             return None
     except (OSError, KeyError, ValueError, TypeError):
         return None
+    if rows is not None:
+        live = live_tier1(rows)
+        rec = d.get("tiers", {}).get("slot1")
+        if live is None or rec is None:
+            return None
+        lv, lset = live
+        if sorted(rec) != sorted(lset):
+            print(f"\n⛔ THE w59 HIJACK CV BAR IS VOID: it was derived on auto-slot-1 "
+                  f"{sorted(rec)},\n   the live board shows {sorted(lset)} @ {lv:.5f}. "
+                  f"w59a_hijackprice.py refuses to run\n   on a moved tier and this bar moves "
+                  f"with the tier. Blocking every above-tier file until\n   the pricer chain "
+                  f"is re-run. THE FIX IS THE PRICER, NOT THE FLAG.")
+            return None
     return bar
+
+
+def live_tier1(rows):
+    """(public value, set of stems) of the top PUBLIC score on the account, or None.
+
+    The auto-selected pair is the best two by public score, so tier 1 is the set of files
+    sharing the highest score. Reported as a SET: w61 §5 found two preregistrations that had
+    registered a queue's BLOCK COUNT, a quantity that depends on where a loop stopped. A set
+    difference is order-independent and is the form these comparisons take here.
+    """
+    best, stems = None, []
+    for r in rows:
+        ps = r.get("publicScore")
+        if ps in (None, ""):
+            continue
+        v = float(ps)
+        if best is None or v > best:
+            best, stems = v, []
+        if v == best:
+            stems.append(str(r["fileName"]).replace(".csv", ""))
+    if best is None:
+        return None
+    return best, sorted(set(stems))
 
 
 def auto_tier(rows):
@@ -287,7 +339,7 @@ def main():
 
     # w58: the tier is LIVE, never a constant -- a hard-coded tier is what went stale in w45a.
     TIER = auto_tier(rows)
-    CVBAR = hijack_cv_bar()
+    CVBAR = hijack_cv_bar(rows)
     if TIER is None:
         print("\n⛔ could not read the auto-selection tier from the board. Refusing to plan: "
               "the tier rule cannot be evaluated, and w55's lesson is that a row the rule "
