@@ -24203,3 +24203,62 @@ records it as *"exits 1"*. I read the exit code first and briefly concluded the 
 resolved. It has not. ⛔ **READ THE BANNER, NOT THE EXIT CODE** — the same lesson as w69 §2's
 "read the dict VALUE, not the key's membership", now with a second instance. A later run
 following the journal's "exits 1" as a liveness test will read 0 and mark this closed.
+
+## 9. ADDENDUM (17:50 UTC) — ⛔ CORRECTION TO §8.5, AND THE TOKEN EXPIRED MID-RUN
+
+### 9.1 🔴 §8.5's EXIT-CODE CLAIM IS WRONG. `check_selection.py` EXITS 1, AS THE JOURNAL SAYS.
+
+    $ .venv/bin/python experiments/check_selection.py > /tmp/cs3.txt 2>&1 ; echo $?
+    1
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+
+⛔ **§8.5's "it NOW EXITS 0 while printing that banner" IS MY OWN BUG, NOT THE WORKSPACE'S.** I
+ran `python check_selection.py | tail -25 ; echo "EXIT=$?"` — **`$?` in a pipeline is the exit
+status of the LAST command, which is `tail`.** `tail` succeeded, so it printed 0. The code was
+never in doubt: `check_selection.py:534` reads `if not selected: … return 1`, and line 724 is
+`sys.exit(main())`.
+
+⚠⚠ **THIS ONE HAD TO BE CORRECTED FAST BECAUSE THE FALSE VERSION IS LOAD-BEARING.**
+`w26g_send.py:371` and `:552` and `RESEARCH.md:1070` all gate deferred decisions — the ARM 217
+test, the above-tier sends — on the literal condition *"once `check_selection` exits 0"*. Had
+§8.5 stood, the next run would have believed that release condition was already satisfied by a
+bug and either "fixed" a non-bug or, far worse, distrusted a gate that is working correctly.
+
+⚠ **NEW LESSON, AND IT IS EMBARRASSINGLY BASIC: `$?` AFTER A PIPELINE IS THE LAST STAGE'S STATUS.**
+Every exit code this workspace has ever quoted through `| head`/`| tail` is suspect. Redirect to
+a file and read `$?`, or set `PIPESTATUS`/`pipefail`. ⛔ **The fourteen-guard sweep in §5 used
+`out=$(...)` COMMAND SUBSTITUTION, not a pipe, so `$?` there is the python status and those
+`rc=0` readings are sound.** I checked rather than assumed, because the same doubt applies.
+
+✅ **THE SUBSTANCE OF §8.5 IS UNCHANGED AND STILL THE LARGEST OPEN RISK.** Verified with a live
+token: **nothing is selected**; auto-slot 1 is a 2-way tie at public 0.97119
+(`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`); auto-slot 2 a 5-way tie at 0.97118. Kaggle
+will pick final entries **by public score**, which is the Rogii failure by default.
+**This needs Teddy in his own browser before 2026-08-31 and cannot be done from the API.**
+
+### 9.2 ⚠ THE KAGGLE TOKEN EXPIRED AT 17:41:21 UTC, MID-RUN — REFRESHED, NOT A BLOCKER
+
+Every API call started returning `Authentication required to call the Kaggle API` at ~17:42,
+after working all run. `access_token_expiration` was **2026-08-23T17:41:21Z**. This is the
+documented SDK sign-error window (JOURNAL §7 line 16412, RESEARCH line 10662): the CLI believes
+the token good for **30 minutes after it expires**, sends it, and Kaggle 401s. ⛔ **The error
+message names the wrong cause** — it reads as "your credential is gone" and the correct response
+is one function call. Applied RESEARCH's copy-paste fix (backed up to
+`credentials.json.bak.w70` first):
+
+    KaggleCredentials.load(client=k).refresh_access_token()   ->  refreshed
+
+**New expiry 2026-08-24T05:42:55Z**; CLI recovered immediately and `check_selection` then ran
+clean. ⚠⚠ **AND NOTE THE DATE ON THAT NEW EXPIRY: 05:42 UTC on 08-24.** Every send so far has
+gone out at **~12:41 UTC**, so **the 08-24 window will open with an ALREADY-EXPIRED token and
+will land inside the 30-minute lying window.** 🎯 **NEXT RUN: refresh the token BEFORE step 1 of
+the send chain, not after the first 401.**
+
+### 9.3 THE THREE FINDINGS OF §§8–9, RANKED BY WHAT THEY ARE WORTH
+
+1. **The selection click** (§8.5/§9.1) — unpriced but structural: it decides whether final
+   entries are chosen on CV or on the public slice. Needs Teddy. **Largest item on the account.**
+2. **The duplicate leak** (§8.2) — **+1.62e-6**, free, deterministic, moves public and private
+   together. Tooling built and verified; deliberately not applied to a registered file.
+3. **The stale "we have everything in the forum" sentence** (§8.1) — the conclusion survives on
+   its merits, the numbers in it do not. The field's 0.97123 is a circulating CSV, not a method.
