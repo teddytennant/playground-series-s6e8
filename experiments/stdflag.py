@@ -131,6 +131,23 @@ CORR_MAP = {
     # packs later. Built to arm w59 §7's lever: eligible, over the w59a CV bar, above the tier.
     "w36_ad199stdcorr_ens4": "ens4",    # w60a_run.sh, base w36_ad199std (ens4)
     "w38_ad202stdcorr_ens4": "ens4",    # w60a_run.sh, base w38_ad202std (ens4)
+    # w69, 2026-08-23. ARM 208 = ARM 211 minus `ext_members14`, the fourth corner of the 2x2
+    # member factorial. Classified from `w69b_run.sh:33`, which sets W21A_BASE="${NAME}_h3"
+    # with NAME=w69_ad208std -- so the corrected base is `w69_ad208std_h3` and the family is
+    # h3, matching w40_ad211stdcorr's construction exactly (w69b is w40f minus one --extra-dir).
+    #
+    # ⚠⚠ THE OMISSION WAS A LIVE SEND-PATH BREAK, NOT A BOOKKEEPING GAP -- the same shape as
+    # the w48 slot-8 entry three blocks above, and it recurred for the same reason. w69 built
+    # and shipped the file, wrote its CV into the journal, and did not re-run the send chain
+    # (its prereg R4 exempted it because "nothing on the send path was touched"). Dropping a
+    # new *corr CSV into submissions/ IS touching the send path: `require_corr_registered` is
+    # an ASSERT reached at IMPORT time by w26d_queueprice, so w26d, w48e_order and w26g_send
+    # all died on it and the registered 2026-08-24 ten could not have been priced or sent.
+    # ⛔ A BUILD THAT ADDS A FILE IS A SEND-PATH CHANGE EVEN IF IT EDITS NO SEND-PATH FILE.
+    # ⛔ ARM 208 INHERITS ARM 211's yadoy666 BAR -- keyed `w69_ad208` in
+    # check_selection.WANTED_INELIGIBLE. Registering the family here makes it SENDABLE and does
+    # NOT make it deadline-selectable; read that dict's VALUE, not its key membership.
+    "w69_ad208stdcorr": "h3",           # w69b_run.sh, base w69_ad208std_h3
 }
 
 

@@ -1,0 +1,26 @@
+{
+ "day": "2026-08-25",
+ "plan": [
+  "w29_ad194std_hybrid",
+  "w69_ad208std_rankraw",
+  "w36_ad197std_rescale",
+  "w36_ad199std_rankraw",
+  "w27_ad190std_h3",
+  "w27_ad188raw_h3",
+  "w69_ad208std_rescale",
+  "w69_ad208std_hybrid",
+  "w69_ad208std",
+  "w69_ad208std_h3"
+ ],
+ "tier": 0.97119,
+ "cv_bar": 0.9701288616800509,
+ "blocked": [
+  {
+   "stem": "w69_ad208stdcorr",
+   "cv": 0.9701391337793271,
+   "hijack": 0.041016286241752686,
+   "why": "w40d-ineligible arm \u2014 w69_prereg \u00a72.1, keyed before the arm was built and before its CV existed \u2014 ARM 208 is ARM 211 minus the three ext_members14 members, a DIFFERENT PACK, so w40_ad211's retirement expressly does not carry over. Not WANTED on CV (w40d), whatever its CV. Lifted only by its own (208 \u2212 199) matched control within \u00b14e-6 on all four criterion bases, quoted here in the same commit, and not by the run that built the arm."
+  }
+ ],
+ "failures": 0
+}

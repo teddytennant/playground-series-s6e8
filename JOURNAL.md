@@ -23804,3 +23804,250 @@ twelve runs stale and only a credential fixes it.
 **Still running at the close of this run:** `w69a_factorial.py` pid **435856**, seeds 101/13/7
 remaining, ~17 min each, **expected complete ~18:00 UTC**. Next run: read
 `experiments/w69a_factorial.json`, check `provisional` is `false`, then act on §7 items 2 and 3.
+
+---
+
+# w70 — 2026-08-23, slot 9 of 10. THE SEND PATH WAS BROKEN, AND `stdcorr` CVs COME IN TWO FLAVOURS
+
+**Submitted 0. The 2026-08-23 UTC day was at 10/10 before this run began** (API at 17:00 UTC;
+all ten stamped 12:41). Research and repair only, as the brief requires at the cap.
+
+## 0. ANGLE SUBSTITUTED — CatBoost tuning is closed, with numbers, five times over
+
+Issued: *"CatBoost: it usually handles categoricals better than the others on survey-style data.
+Tune and compare on identical folds."* **Closed by w61 §0 and re-closed by w62/w63/w65/w67/w68.**
+The `rest` group of 35 ordinary XGB/LGBM/CatBoost members is worth **+5.9e-6 each**; the CatBoost
+class is not distinguishable inside it; `run_catboost.py --inner` is the honest tuning path and
+has already been run. Nothing has changed since. Substituted the next-run list (§7 of w69).
+
+## 1. 🔴 THE SEND PATH WAS DEAD AND NOBODY HAD RUN IT — `w69_ad208stdcorr` WAS UNREGISTERED
+
+Importing `w48e_order` to plan the 08-25 window raised:
+
+    AssertionError: unregistered *corr files -- classify each by reading its build script,
+    do NOT let the suffix rule guess: ['w69_ad208stdcorr']
+
+`stdflag.require_corr_registered()` is an **ASSERT reached at IMPORT time** by
+`w26d_queueprice.py`, so **`w26d`, `w48e_order` and `w26g_send` all died on it** and the
+registered 2026-08-24 ten *could not have been priced or sent*. Fixed: `w69_ad208stdcorr` → `h3`,
+classified from `w69b_run.sh:33` (`W21A_BASE="${NAME}_h3"`, NAME=`w69_ad208std`), which is
+`w40_ad211stdcorr`'s construction exactly. The whole chain now runs clean.
+
+⚠⚠ **THIS IS THE THIRD TIME THIS EXACT FAILURE HAS HAPPENED** — w48 slot 8 hit it for
+`w38_ad202stdcorr`/`w40_ad211stdcorr`/`w42_ad217stdcorr`, and the comment block recording that is
+directly above the line I added. It recurred for a stated reason: **w69's prereg R4 exempted it
+from re-running the send chain because "nothing on the send path was touched."** Its own §7 says
+so. ⛔ **A BUILD THAT ADDS A FILE IS A SEND-PATH CHANGE EVEN IF IT EDITS NO SEND-PATH FILE** —
+dropping a new `*corr` CSV into `submissions/` *is* touching the send path, because a script
+globs that directory and asserts on what it finds. The exemption rule needs to be about
+**inputs**, not about **files edited**. Recorded in `stdflag.py` at the entry itself.
+
+⚠ And note what did NOT catch it: **all fourteen standing guards pass with the send path dead.**
+They were run first thing this run, before the break was found. None of them imports `w26d`.
+
+## 2. ✅ 2026-08-25 IS NOW REGISTERED — `w48e` no longer exits 2 on that window
+
+w69 §7 item 4 flagged it. `experiments/w70c_plan0825.py` **derives** the ten from the priced
+queue and writes `w70c_plan0825.json`; `w48e_order.py` reads it, asserting `day` and
+`failures == 0`. Derived, never hand-typed — the `w63a`/`PLAN_0824` convention, in the JSON form
+`w48e` already uses for the 08-22 order. (A module-level constant is impossible here: w70c must
+import `w48e_order` for `VETO` and `w26g_send` for its gates, so a constant would be a cycle.)
+
+**The registered ten, in send order (ascending CV, best LAST per w46b §5):**
+
+    1 w29_ad194std_hybrid   0.9701056245      6 w27_ad188raw_h3       0.9701136019
+    2 w69_ad208std_rankraw  0.9701073320      7 w69_ad208std_rescale  0.9701192359
+    3 w36_ad197std_rescale  0.9701085985      8 w69_ad208std_hybrid   0.9701248767
+    4 w36_ad199std_rankraw  0.9701111922      9 w69_ad208std          0.9701324886
+    5 w27_ad190std_h3       0.9701133391     10 w69_ad208std_h3       0.9701342350
+
+Dry-run clean: all ten 296,302 rows, no NaN, md5 matches the queue, CV reproduces from the OOF.
+
+### 2a. ⚠ A CV RANKING ALONE WOULD HAVE PLANNED A SLOT THE SENDER REFUSES
+
+`w69_ad208stdcorr` (**0.9701391338**, the highest-CV eligible unsent file in the whole queue) is
+**deliberately absent**. `w26g_send.py:490` skips a row iff `above_tier_reason(r)` is non-None
+**AND** `hijack_risk >= P_MAX`. Every previous plan only ever had to satisfy the second half,
+because no eligible file had tripped the first. ARM 208 does: `above_tier_reason` **prefix-matches
+`check_selection.WANTED_INELIGIBLE`**, where w69 keyed `w69_ad208`. Six ARM 208 files survive
+because their hijack risk is < 2%; the corrected one reads **4.10e-2** and would be refused.
+Planning it plans an unsent slot. `w70c` GATE 2 replays the sender's own two-part test over the
+whole plan, and GATE 3 asserts the blocked file is the one the rationale names and really is
+above the plan (a vacuity check on its own reasoning).
+
+✅ **AND THE GAP I WENT LOOKING FOR ISN'T THERE.** `WANTED_INELIGIBLE` governs deliberate final-
+entry selection; Kaggle **auto**-selection on best public score bypasses `check_selection`
+entirely, so "sendable but not deadline-selectable" looked unenforceable. It is enforced —
+`above_tier_reason` reads that same dict by prefix, so any ARM 208 file that could reach the tier
+is blocked in the sender. w69 got this right. Recorded because it reads like a hole and is not.
+
+## 3. 🔴🔴 THE FINDING — EVERY `stdcorr` CV EXISTS ON TWO BASES, AND w69 §9's LADDER MIXED THEM
+
+w69 §9 recorded ARM 208 as `base 0.9701342350 + nested_delta 3.2315e-6 ≈ **0.9701374665**` and
+read a four-pack ladder off it. **That is not the number anything in this workspace ranks on.**
+`w23b_sendqueue` ranks on `fast_auc(y, submissions/oof_<name>.npy)` — the shipped file's own OOF
+AUC — and for `w69_ad208stdcorr` that is **0.9701391338**, measured, not estimated.
+
+The two differ by `scheme_optimism` = `naive_delta − nested_delta`: what the correction's **arm
+choice** gains from being made on the same OOF it is then scored on. `w21a` has computed and
+stored it on every build and **nobody had ever read it across files.**
+`experiments/w70a_optimism.py` does, over all 20 corrected files (FAILURES 0 on three gates).
+
+### 3a. THE FOUR-PACK LADDER FLIPS
+
+|  arm | SHIPPED (what everything reads) | rk | HONEST (base + nested) | rk | optimism |
+|---|---|---|---|---|---|
+| 199 | **0.9701400060** | 1 | 0.9701405811 | 1 | 0.000 |
+| 208 | **0.9701391338** | 2 | 0.9701374665 | 3 | **1.876** |
+| 202 | 0.9701375891 | 3 | 0.9701360978 | 4 | **1.707** |
+| 211 | 0.9701374733 | **4** | 0.9701380021 | **2** | 0.000 |
+
+**shipped order 199 > 208 > 202 > 211  |  honest order 199 > 211 > 208 > 202.** ARM 211 goes from
+last to second. ⚠ **BOTH NUMBERS ARE REAL, BOTH ARE STORED, NEITHER IS LABELLED — a number that
+is right on either basis is WRONG in a ladder that mixes them,** and nothing could have caught it.
+
+⛔ **TWO CORRECTIONS TO w69, AND ONE THING THAT SURVIVES.**
+1. w69 §9's "ARM 208 is **2.54e-6 below** ARM 199" is wrong on its own (shipped) ladder: the
+   measured gap is **0.87e-6**, *inside* w68's 5.095e-6 between-file floor. On the shipped basis
+   ARM 208 and ARM 199 are **indistinguishable**, not separated.
+2. w69 §9's "ARM 208 is tied with 202 and 211 to well inside the floor" is wrong: it is
+   **+1.55e-6 / +1.66e-6 above** them on the shipped basis and **−0.54e-6 below** 211 on the
+   honest one. ⚠ w69 §1's headline — "ARM 208 is +1.05e-6 over ARM 211, an independent
+   replication of w65a's lexb price" — holds on the **uncorrected** `std_h3` base (where it was
+   actually measured) and **does not survive on the corrected base**, where the sign depends
+   entirely on which basis you pick.
+3. ✅ **§1's CONCLUSION IS UNCHANGED.** ARM 208 does **not** clear `FIT_CV_MAX` (0.9701400060) on
+   either basis, so it is still not the "clean file above `FIT_CV_MAX` that is not ARM 216/217"
+   w67 §7 wanted, and that route stays shut. The magnitude was wrong; the verdict was not.
+
+### 3b. IT IS BIG ENOUGH TO MATTER, AND IT IS **ONE FOLD**
+
+Over the 20 corrected files: optimism **min 0.000, max 3.523e-6, mean 1.771e-6**; zero on 6,
+non-zero on 14 (those 14 mean **2.529e-6**). ⛔ **That is LARGER than the ±2.0e-6 bar w65's R1
+decides on and comparable to the ±4e-6 bar three other standing criteria use.** It is a
+*differential* between two files of up to 3.5e-6, and — the part that matters — it is
+**independent of, and additive to, w68's 5.095e-6 cross-process floor**, and **a paired
+within-process contrast does NOT remove it**, because it lives in the correction's arm selection
+rather than in the BLAS draw. It is a **second** noise source on `stdcorr` comparisons and it had
+not been measured.
+
+🎯 **AND IT TRACES TO ONE FOLD.** Of the 20 files, **14 disagree with the naive arm on fold 3 and
+ZERO disagree on folds 0, 1 or 2** (three also disagree on fold 4). The whole optimism term is
+"on fold 3 the best correction arm is not `rule`, and the full-data fit picks `rule` anyway."
+This is a property of **fold 3**, not of any pack.
+
+⚠ **A ZERO IN THAT COLUMN IS LEGITIMATE, AND I NEARLY MISREAD IT.** My first reading of
+`scheme_optimism = 0.000` on 199 and 211 was that the nested loop had never run for the older
+builds. It had: `nested_picks` is present and non-trivial on all 20, and those two are unanimous
+`rrrrr`, so nested == naive **exactly and correctly**. `w70a` GATE 2 now asserts
+`optimism == 0 ⟺ every nested fold picked the naive arm`, because **an exact 0.0 is otherwise
+indistinguishable from a computation that never happened.**
+
+### 3c. WHAT IT DOES TO `FIT_CV_MAX` AND THE PRICER — FLAGGED, NOT ACTED ON
+
+`w53a.FIT_CV_MAX = _t.cv.max()` over the **sent** fit table, i.e. **the shipped basis**. It
+currently names `w36_ad199stdcorr`, whose optimism is 0.000 — so **the bar is honest by luck, not
+by construction.** The pricer then regresses public LB on shipped CV over a fit table that mixes
+corrected files (inflated ~1.8e-6 on average) with uncorrected ones (not inflated at all). That
+is a real, mild misspecification against a 7.72/8.77e-6 residual sd — not large enough to move
+the pricer, but it is exactly the wrong size to be ignored in the 1–5e-6 arm comparisons the
+journal runs on.
+
+⛔ **NO DECISION TAKEN, AND THE REASON IS PROCEDURAL, NOT TIMIDITY: I COMPUTED THE NUMBER BEFORE
+REGISTERING A BAR ON IT.** Switching the ranker's basis reorders the send queue and would rewrite
+already-registered days. That is a decision, it must be pre-registered, and this run is not
+entitled to take it having already seen the table. Handed to the next run with the numbers
+attached and a guard that will not fight either choice.
+
+### 3d. THE GUARD — `w70b_basisguard.py`, FAILURES 0, both negative controls fire
+
+Asserts **(A)** w70a's sweep covers every corrected file on disk — freshness by **set
+membership**, never by mtime (w68 §6: an mtime freshness rule destroys a later stage's stamp), so
+a new `*corr` build fails this until the sweep is re-run; **(B)** each file's stored
+`shipped`/`opt`/`honest` still reproduce from its own `w21a` artefact; **(C)** every corrected
+file in `w26d_queueprice.csv` is on the **same** basis as every other — currently all 7 on
+SHIPPED, consistent — with a **vacuity check** that refuses to pass on an empty match set.
+⛔ **It deliberately does NOT prefer a basis**, so a later run can switch without fighting it, as
+long as it switches all of them and re-derives the registered days.
+**Negative controls, both fire:** dropping one file from the sweep → `A` fails; flipping one
+file's `cv` to the honest basis → `C` fails with `THE RANKER MIXES BASES`.
+
+## 4. w69a IS STILL RUNNING — `provisional: true`, DO NOT QUOTE IT
+
+pid **435858**, seeds 42 and 101 complete, on seed 13 at the close of this run, ~17 min/seed →
+**expected complete ~18:00 UTC**. `"provisional": true` and **no verdict string is produced** —
+w69 §8.3's gate is working as designed. Seed 101's h3 reads E_A_lo −1.863, E_B_hi +0.177,
+INTER −0.523, all of which differ in sign or size from seed 42; **the per-seed spread is real and
+one seed is one partition.** P8 (ARM 208's own 208−199 matched control, the thing that lifts
+`w69_ad208` from `WANTED_INELIGIBLE`) and P6/R1 (whether `w61a`'s retirement of `w40_ad211` was
+taken below its own noise floor) both resolve inside it. **Neither was decided this run.**
+
+## 5. VERIFICATION
+
+**All fourteen standing guards exit 0, twice** — once at the top of the run and again after
+`stdflag.py` and `w48e_order.py` were edited. The corrected filename list in RESEARCH.md is
+accurate; no `NOT FOUND`. Plus the new `w70b_basisguard` (FAILURES 0) and `w70a_optimism`
+(FAILURES 0 on three gates). `w48e_order.py --day 2026-08-25` dry-runs clean.
+
+**Board at 17:00 UTC: our best public 0.97119, unchanged.** 121 submissions on record.
+⛔ `git push` still blocked (no `gh`, no ssh, no token) — **thirteenth run in a row.** Local only.
+
+## 6. NEXT RUN, IN ORDER
+
+1. **`date -u` FIRST** (box is UTC−4), then `TZ=UTC stat -c %y` before judging any log stale,
+   then the `/proc` scan per-pid with `tr` (never `ps`/`pgrep`).
+2. 🎯 **READ `experiments/w69a_factorial.json` AND CHECK `provisional` IS `false`** before
+   quoting anything. Then P5–P9 and R1, all evaluated inside it by `summarise()`.
+3. 🔴 **THE TWO FLAGGED DECISIONS, BOTH STILL OPEN AND BOTH FOR A DISINTERESTED RUN:**
+   (a) w69 §0 / RESEARCH — if P6 holds and the in-process `E_B_hi` exceeds 4e-6 on any criterion
+   base, `w40_ad211`'s retirement was taken below its own noise floor. (b) **P8 / ARM 208's own
+   bar**: `w69_ad208` is keyed in `WANTED_INELIGIBLE` and only its own (208−199) control within
+   ±4e-6 on all four bases lifts it — read the dict **VALUE**, not the key's membership. ⚠ If (b)
+   lifts, **`w69_ad208stdcorr` becomes sendable and `w70c_plan0825.py` MUST BE RE-RUN** — the
+   08-25 ten omits it only because the sender would refuse it (§2a).
+4. 🆕 **THE THIRD FLAGGED DECISION, NEW THIS RUN (§3c): the ranker's CV basis.** Pre-register a
+   bar BEFORE re-reading `w70a_optimism.json`; this run may not take it, having computed it.
+5. ⚠ **THE SEND IS FOUR COMMANDS**: `w23b_sendqueue.py` → `w48e_order.py --day <TODAY> --write`
+   → `w26g_send.py --n 10` dry → `--go`. **08-24 AND 08-25 ARE BOTH REGISTERED NOW.**
+   ⛔ 2026-08-26 is NOT; `w48e` will exit 2. Register it with `w70c_plan0825.py` as the template.
+   Do NOT read `plan_day` from the CSV as proof (w68 §6); read `w48e_order.ORDER_<DAY>`.
+6. ⛔ Do NOT re-open w58 §9.7's list: the original dataset (×5), LightGBM tuning (×4), **CatBoost
+   tuning (×6 now, §0)**, feature engineering, blending/OOF weight search, seed and fold
+   diversity, error analysis. ⛔ WANTED slots 1 (w65) and 2 (w64) are closed. ⛔ The above-range
+   slope is CLOSED AS UNANSWERABLE (w67) and ARM 208 does not re-open it on **either** basis (§3a).
+7. ⚠ Still untouched, **seventh** run running: the refined P5 from w63 §4 and the break-even's
+   16.5e-6 bracket hole (w63 §5a).
+8. **The guard list, now FIFTEEN** (all verified present and exit 0 this run):
+   `w54a_vetoexpiry w55a_unpriced w56b_wantedguard w57c_muguard w59b_barguard w60b_ineligguard
+   w60d_memberguard w62b_barstaleguard w63b_setguard w64b_hedgeguard w65b_pinguard
+   w66d_rangeguard w67b_slopeguard w68b_floorguard` **+ `w70b_basisguard`** + `w65c_subsetcheck`
+   (~4 min, background it). **Clear `OMP_NUM_THREADS` first** (`env -u`) or w65b returns rc=1.
+   ⚠⚠ **AND THE SUITE DOES NOT COVER THE SEND PATH** — all fourteen passed while `w26d`,
+   `w48e` and `w26g` were dead at import (§1). **Import the send chain as a smoke test.**
+9. ⚠ **NEW this run:** a build that ADDS A FILE is a send-path change even if it edits no
+   send-path file (§1) · a passing guard suite says nothing about a module none of them imports
+   (§1, §5) · a derived quantity has a BASIS and two right numbers make a wrong ladder (§3) ·
+   an exact 0.0 is indistinguishable from a computation that never ran — assert the ⟺ (§3b) ·
+   a bar can be honest BY LUCK rather than by construction (§3c) · a run that computed a number
+   may not then register a bar on it (§3c) · replay the CONSUMER's own gate when planning for it
+   (§2a) · a rule that reads like an unenforceable gap may already be enforced somewhere else —
+   go and look (§2a).
+   ⚠ Carried: read the VALUE of a conditional retirement, not the key · the cross-process offset
+   is a PER-FILE CONSTANT so averaging cells does not reduce it · form the CONTRAST, keep the se ·
+   a bisection needs its bracket VERIFIED · an injected direction must be CONTINUOUS as well as
+   informative · a partial artefact must be UNABLE to state a verdict · a gate suite over the
+   INPUTS says nothing about the REPORTING layer · register the SHARPEST comparison the design
+   supports · an EMPIRICAL equality does not extend to a wider case for free · a carried checklist
+   of FILENAMES rots silently · NAME WHICH BRANCH a power control protects · a vacuity check is
+   worth as much as the assertion it guards · compare the MATRICES, not the AUCs · ask VALIDITY
+   before POWER · a null is evidence of absence only with a POWER CONTROL · register STRICT
+   inequalities and INTERVALS · a run with an interest in retiring a rule must not retire it ·
+   our board name is `Teddy Tennant` · always pass `--page-size` · to read a printout from a
+   module that writes under `__main__`, IMPORT it, never run it.
+
+**Files added:** `experiments/w70a_optimism.py` + `w70a_optimism.json`,
+`w70b_basisguard.py`, `w70c_plan0825.py` + `w70c_plan0825.json`,
+`w23b_sendqueue.pre_w70.csv`. **Modified:** `stdflag.py` (the ARM 208 CORR_MAP entry),
+`w48e_order.py` (the 08-25 registration only), `w23b_sendqueue.csv`, `w26d_queueprice.{csv,json}`
+(regenerated), `RESEARCH.md`, `JOURNAL.md`.
+**No model was refitted and no submission was sent.**

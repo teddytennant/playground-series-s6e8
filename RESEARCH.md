@@ -1,6 +1,112 @@
 # Research — playground-series-s6e8
 
 
+# 🔴🔴 EVERY `stdcorr` CV EXISTS ON TWO BASES AND NEITHER IS LABELLED (w70, 2026-08-23)
+
+Every corrected file has two defensible CVs, both stored, both real:
+
+    SHIPPED = fast_auc(y, submissions/oof_<name>.npy)   == w21a combos[shipped]["cv"]
+    HONEST  = w21a base_auc + nested_delta
+
+They differ by `scheme_optimism` = `naive_delta − nested_delta` — what the correction's **arm
+choice** gains from being made on the same OOF it is then scored on. ⛔ **EVERYTHING IN THIS
+WORKSPACE RANKS ON `SHIPPED`**: `w23b_sendqueue`, `w26d_queueprice`, `w53a.FIT_CV_MAX`, every
+send plan, and every ladder in the journal. `w21a` has stored `scheme_optimism` on every build
+since w21 and **nobody had read it across files until `w70a_optimism.py`.**
+
+**Measured over all 20 corrected files on disk** (`experiments/w70a_optimism.json`):
+**min 0.000 · max 3.523e-6 · mean 1.771e-6 · zero on 6, non-zero on 14 (those mean 2.529e-6).**
+
+⛔ **THAT IS LARGER THAN THE ±2.0e-6 BAR w65's R1 DECIDES ON** and comparable to the ±4e-6 bar
+three other standing criteria use. It is a *differential* between two files of up to 3.5e-6, it
+is **independent of and additive to w68's 5.095e-6 cross-process floor**, and ⚠⚠ **A PAIRED
+WITHIN-PROCESS CONTRAST DOES NOT REMOVE IT** — it lives in the correction's arm selection, not in
+the BLAS draw. Two `stdcorr` files are separated by up to 3.5e-6 of pure fold-3 selection luck.
+
+🎯 **IT IS ONE FOLD.** Of the 20 files, **14 disagree with the naive arm on fold 3 and ZERO on
+folds 0/1/2** (three also on fold 4). The term is entirely "on fold 3 the best arm is not `rule`,
+and the full-data fit picks `rule` anyway."
+
+⚠ **A 0.000 IN THAT COLUMN IS LEGITIMATE.** It means every nested fold picked the naive arm
+(`nested_picks` all `rrrrr`), so nested == naive exactly. It is **not** a missing computation, and
+the two are otherwise indistinguishable — `w70a` GATE 2 asserts the ⟺.
+
+## THE LADDER FLIPS, AND w69 §9 MIXED THE BASES
+
+|  arm | SHIPPED | rk | HONEST | rk | optimism |
+|---|---|---|---|---|---|
+| 199 | **0.9701400060** | 1 | 0.9701405811 | 1 | 0.000 |
+| 208 | **0.9701391338** | 2 | 0.9701374665 | 3 | 1.876 |
+| 202 | 0.9701375891 | 3 | 0.9701360978 | 4 | 1.707 |
+| 211 | 0.9701374733 | **4** | 0.9701380021 | **2** | 0.000 |
+
+**shipped 199 > 208 > 202 > 211  |  honest 199 > 211 > 208 > 202.** w69 §9 quoted ARM 208 honest
+and the other three shipped. ⚠ **A NUMBER THAT IS RIGHT ON EITHER BASIS IS WRONG IN A LADDER THAT
+MIXES THEM.** Corrections: ARM 208 is **0.87e-6** below 199 (not 2.54e-6) and **inside** the
+floor, i.e. indistinguishable from it; and ARM 208 is **+1.6e-6 above** 202/211 on shipped but
+**−0.5e-6 below** 211 on honest, so w69 §1's "+1.05e-6 over ARM 211" replication of the lexb
+price **holds only on the uncorrected `std_h3` base where it was measured.**
+✅ **UNCHANGED:** ARM 208 does not clear `FIT_CV_MAX` on either basis; w67 §7's route stays shut.
+
+## `FIT_CV_MAX` IS HONEST BY LUCK
+
+`w53a.FIT_CV_MAX = _t.cv.max()` over the **sent** fit table — the SHIPPED basis. It names
+`w36_ad199stdcorr`, whose optimism happens to be **0.000**. The pricer then regresses LB on
+shipped CV over a table mixing corrected files (inflated ~1.8e-6) with uncorrected ones (not
+inflated) — a real mild misspecification against a 7.72/8.77e-6 residual sd.
+🔴 **OPEN DECISION, NOT TAKEN BY w70** (which computed the table and is therefore not entitled to
+register a bar on it): should the ranker move to the honest basis? `w70b_basisguard.py` is
+deliberately agnostic and passes on **either**, provided ALL corrected files move together and
+the registered send days are re-derived.
+
+
+# ⛔ A BUILD THAT ADDS A FILE IS A SEND-PATH CHANGE EVEN IF IT EDITS NO SEND-PATH FILE (w70)
+
+`stdflag.require_corr_registered()` is an ASSERT reached at **import** time by
+`w26d_queueprice.py`. w69 shipped `w69_ad208stdcorr.csv` into `submissions/` without a `CORR_MAP`
+entry and, per its prereg R4, skipped re-running the send chain because "nothing on the send path
+was touched." **`w26d`, `w48e_order` and `w26g_send` were therefore all dead at import and the
+registered 2026-08-24 ten could not have been priced or sent.** Third recurrence (w48 slot 8 was
+the first). Dropping a CSV into a globbed directory IS touching the send path. **The exemption
+rule must be about INPUTS, not about FILES EDITED.**
+
+⚠⚠ **ALL FOURTEEN STANDING GUARDS PASS WITH THE SEND PATH DEAD** — none of them imports `w26d`.
+**Import the send chain as a smoke test.** Fixed: `"w69_ad208stdcorr": "h3"` (from
+`w69b_run.sh:33`, `W21A_BASE="${NAME}_h3"`).
+
+
+# ✅ 2026-08-25 IS REGISTERED; 2026-08-26 IS NOT (w70)
+
+`experiments/w70c_plan0825.py` derives the ten from the priced queue → `w70c_plan0825.json`;
+`w48e_order.py` reads it and asserts `day` and `failures == 0`. Derived, never hand-typed.
+**Use it as the template for 08-26** — `w48e` exits 2 on an unregistered day.
+
+⚠ **THE FILTER PREVIOUS PLANS NEVER NEEDED: REPLAY THE SENDER'S OWN TWO-PART TEST.**
+`w26g_send.py:490` skips iff `above_tier_reason(r)` is non-None **AND** `hijack_risk >= P_MAX`.
+No eligible file had ever tripped the first half until ARM 208 — `above_tier_reason`
+**prefix-matches `check_selection.WANTED_INELIGIBLE`**, where `w69_ad208` is keyed. So
+`w69_ad208stdcorr` (0.9701391338, the highest-CV eligible unsent file in the queue) reads hijack
+**4.10e-2 ≥ P_MAX** and would be **REFUSED**; planning it plans a wasted slot. It is omitted
+**conditionally** — if w69's P8 lifts the key, re-run `w70c_plan0825.py`.
+
+✅ **NOT A GAP, THOUGH IT READS LIKE ONE:** Kaggle auto-selection bypasses `check_selection`
+entirely, but `above_tier_reason` reads the same dict, so a `WANTED_INELIGIBLE` file that could
+reach the tier is blocked **in the sender**. "Sendable but not deadline-selectable" is enforced.
+
+
+# ⚠ THE STANDING GUARD LIST IS NOW FIFTEEN (w70, corrected and re-verified)
+
+    w54a_vetoexpiry  w55a_unpriced  w56b_wantedguard  w57c_muguard  w59b_barguard
+    w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard w64b_hedgeguard
+    w65b_pinguard  w66d_rangeguard  w67b_slopeguard  w68b_floorguard  w70b_basisguard
+    + w65c_subsetcheck (~4 min, background it)
+
+All fifteen verified present and exit 0 (w70, twice — before and after that run's edits).
+**Clear `OMP_NUM_THREADS` first** (`env -u`) or `w65b_pinguard` returns rc=1 spuriously.
+⚠ A carried checklist of FILENAMES rots silently; print a per-entry result and fail on NOT FOUND.
+
+
+
 # 🔴 A BAR IS ONLY MEANINGFUL IF THE INSTRUMENT RESOLVES IT (w69, 2026-08-23)
 
 `w61a_armctl.py` retired `w40_ad211` from `check_selection.WANTED_INELIGIBLE` on the (211 − 202)

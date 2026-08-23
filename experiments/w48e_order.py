@@ -203,10 +203,41 @@ for _s, _p, _q in (("w40_ad211std_rescale", 0.0823, 0.0057),
     WHY_0824[_s] = _WHY_UNBLOCKED.format(p=_p, q=_q)
 WHY_0824["w40_ad211std_rescale"] += (" Best CV of the ten and therefore LAST.")
 
+# ---- 08-25: the drain, ten files, ZERO experiments -------------------------------------------
+# ⚠ READ FROM `w70c_plan0825.json`, NEVER RE-TYPED — the same rule as ORDER_0824 above, in the
+# JSON form this file already uses for the 08-22 order (`w47b_probe.json`). w70c cannot expose a
+# module-level constant the way w63a does: it has to import THIS module for `VETO` and
+# `w26g_send` for the two halves of the sender's refusal test, so a constant import would be a
+# cycle. The artefact carries `failures`, and a non-zero count means the derivation's own gates
+# did not pass — refuse it rather than send a list nothing checked.
+_P25 = json.load(open(os.path.join(HERE, "w70c_plan0825.json")))
+assert _P25["day"] == "2026-08-25", f"w70c artefact is for {_P25['day']}, not 2026-08-25"
+assert _P25["failures"] == 0, f"w70c_plan0825.json reports {_P25['failures']} failures"
+ORDER_0825 = list(_P25["plan"])
+
+# ⚠⚠ FIVE OF THE TEN ARE ARM 208, AND THE SIXTH — THE BEST OF THE PACK — IS DELIBERATELY ABSENT.
+# `w69_ad208stdcorr` (cv 0.9701391338) is the highest-CV eligible unsent file in the whole queue
+# and it is NOT here. Every ARM 208 file trips `above_tier_reason` because w69 keyed `w69_ad208`
+# in `check_selection.WANTED_INELIGIBLE` and that test prefix-matches; the other six survive only
+# because `w26g_send.py:493` also requires `hijack_risk >= P_MAX` and theirs is under 2%. The
+# corrected file reads 4.1e-2 and would be REFUSED at the send, so planning it plans a wasted
+# slot. ⛔ THE OMISSION IS CONDITIONAL: ARM 208's own (208 − 199) matched control landing inside
+# ±4e-6 on all four criterion bases (w69's registered P8) lifts the key, at which point the file
+# becomes sendable and THIS DAY MUST BE RE-DERIVED by re-running w70c_plan0825.py.
+_WHY_0825 = ("DRAIN. Highest-CV unsent non-vetoed non-member file left in the queue after the "
+             "08-24 ten, derived by w70c_plan0825.py from the priced queue and sent in ascending "
+             "CV order so the best of the ten goes LAST and wins any public tie (w46b §5).")
+_WHY_0825_A208 = (
+    " ⚠ ARM 208 — the fourth corner of w69's 2×2 member factorial. SENDABLE but ⛔ NOT "
+    "DEADLINE-SELECTABLE: `w69_ad208` is keyed in check_selection.WANTED_INELIGIBLE and it is "
+    "below the P_MAX hijack threshold that would otherwise stop it, not cleared of the bar.")
+WHY_0825 = {s: _WHY_0825 + (_WHY_0825_A208 if s.startswith("w69_ad208") else "")
+            for s in ORDER_0825}
+
 ORDERS = {"2026-08-22": list(REG["order"]), "2026-08-23": ORDER_0823,
-          "2026-08-24": list(ORDER_0824)}
+          "2026-08-24": list(ORDER_0824),   "2026-08-25": ORDER_0825}
 WHYS   = {"2026-08-22": WHY_0822,           "2026-08-23": WHY_0823,
-          "2026-08-24": WHY_0824}
+          "2026-08-24": WHY_0824,           "2026-08-25": WHY_0825}
 
 # calibration files have no entry in w23b_sendqueue (no stack CV to rank on) and must be
 # injected, exactly as w37c_prereg.py did for the w37 batch. stem -> (builder json, note).
