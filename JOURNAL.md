@@ -24262,3 +24262,142 @@ the send chain, not after the first 401.**
    together. Tooling built and verified; deliberately not applied to a registered file.
 3. **The stale "we have everything in the forum" sentence** (§8.1) — the conclusion survives on
    its merits, the numbers in it do not. The field's 0.97123 is a circulating CSV, not a method.
+
+## 10. ADDENDUM (18:10 UTC) — w69a LANDED COMPLETE. BOTH FLAGGED DECISIONS TAKEN.
+
+`w69a_factorial.py` finished **17:58:29 UTC**, four seeds, `"provisional": false`, **FAILURES 0**.
+w69's per-seed flushing and its provisional gate both worked exactly as designed: three
+`[PROVISIONAL — k of 4]` summaries with `registered readings NOT evaluated`, then one real one.
+
+    P5 replication  E_A_lo/h3 -1.058e-6  vs w65a's -1.058e-6   -> CONFIRMED (bar ±1.5)
+    P6 resolution   sd(E_B_hi/h3) 1.379e-6 vs the 5.095e-6 BETWEEN-FILE floor -> CONFIRMED
+    P7 interaction  INTER/h3 -1.651e-6 (t -1.89), NEGATIVE as registered blind -> CONFIRMED
+    P8 ARM 208 (208-199)  worst |rankraw| 4.840e-6 vs bar 4.0  -> **OVER**
+    R1 in-process E_B_hi  worst |rankraw| 1.800e-6 vs bar 4.0  -> **inside**
+    P9 power        injected +4.0e-6, recovered +4.000e-6, detected at 13.91 se -> CONFIRMED
+
+**P5 is exact to three decimals against a number produced by a different script on a different
+load path.** P6 is the one that matters most: the in-process paired contrast has sd **1.379e-6**
+where a comparison between two shipped files carries **5.095e-6** — **3.7× sharper**, and it is
+what makes both decisions below possible at all.
+
+### 10.1 ✅ R1 — `w40_ad211`'s RETIREMENT **STANDS**, AND ITS ORIGINAL REASONING DOES NOT
+
+w61a retired it on (211−202) **between-file** deltas (h3 +0.163, ens4 +0.381, rescale +0.946,
+rankraw −2.353) against a **±4e-6** bar. w68 later measured that quantity's own noise at
+**5.095e-6 — larger than the bar.** The criterion was unresolvable by its own instrument, and
+⛔ neither run could have seen it (w61 decided 08-22; w68 measured the floor 08-23).
+
+The **same estimand** as an in-process paired contrast (`E_B_hi`, where the shared arm cancels)
+reads **h3 −0.594, ens4 +0.233, rescale −1.070, rankraw −1.800 — worst 1.800e-6, all four inside
+±4e-6**, at sd 1.379e-6, with P9 confirming a 4e-6 effect is detected at 13.91 se. **So the null
+is absence, not blindness, and the verdict is unchanged on an instrument that resolves it.**
+
+⟹ **RETIREMENT STANDS.** `check_selection.WANTED_RETIRED["w40_ad211"]` now carries the
+re-derivation; the between-file readings are **kept, not deleted**, as the documented weaker
+basis. Nothing else in that entry moved — still not es-clearance, and its carry-over clause still
+binds. ⚠ **A decision can be RIGHT and its REASONING UNSOUND, and repairing the second without
+disturbing the first is the whole job here.**
+
+### 10.2 ⛔ P8 — ARM 208 **STAYS** `WANTED_INELIGIBLE`. THE BAR IS NOT MET.
+
+Registered text: *"Lifted only by its own (208 − 199) matched control within ±4e-6 on all four
+criterion bases."* The reading: **h3 +1.056, ens4 +1.096, rescale −0.497, rankraw +4.840.**
+**rankraw 4.840 > 4.0.** ⟹ **NOT LIFTED**, applied exactly as written — the rule was registered
+before the arm was built and before its CV existed, and it is not reinterpreted now that its
+number is known.
+
+⚠⚠ **AND THE READING CUTS THE OTHER WAY, WHICH IS RECORDED IN THE KEY ITSELF.** The bar is a
+**closeness** bar and ARM 208 fails it on **magnitude, not direction**: `E_B_lo` is **positive
+4/4 seeds** on h3 (**t +3.67**) and ens4 (**t +5.85**) — ARM 208 measures ~**1.1e-6 BETTER** than
+ARM 199 in-process. 🔴 **That is the OPPOSITE SIGN to the between-file stdcorr ladder of §3**,
+where ARM 208 reads 0.87e-6 *below* ARM 199. **The in-process contrast is the measurement; the
+ladder is not** — w68's 5.095e-6 floor is larger than the entire gap. §3 and §10.2 are the same
+lesson arriving from two directions in one run. The honest route to lifting it is **more seeds on
+rankraw, pre-registered before they are drawn** — not a re-reading of these four.
+
+✅ **CONSEQUENCE FOR §2a: NOTHING CHANGES.** The 08-25 ten omits `w69_ad208stdcorr` precisely
+because the key stands; it stands; **no re-derivation is needed.** The conditional I registered
+resolved to the branch already built.
+
+### 10.3 🔴 I REINTRODUCED §1's OWN DEFECT INSIDE ONE HOUR, AND IT DEADLOCKED
+
+Wiring 08-25 in, I wrote `assert _P25["failures"] == 0` **at module scope in `w48e_order.py`** —
+**exactly the import-time-assert shape that §1 found bricking `w26d`/`w48e`/`w26g` this morning,
+and that §7.1's guard was written to catch.** It then bit, and worse than the original:
+
+1. A self-reference I also introduced — GATE 1 compared the plan against *every* registered day,
+   and 08-25 is now read back **from w70c's own artefact**, so the plan collided with itself and
+   all ten files reported as re-sends. **A gate becomes self-referential the moment its output is
+   plugged into the thing it checks against.**
+2. w70c wrote `failures: 1`; `w48e` then refused at import; and **w70c imports `w48e` for its
+   VETO** — so w70c could never run again to fix the file it had just written. ⛔ **A DEADLOCK: a
+   script that persists its own failure into an artefact its own dependency refuses to load.**
+
+**Both fixed, and the fix is the general rule, not a patch:**
+- ⛔ **NEVER `assert` AT MODULE SCOPE IN A MODULE OTHER MODULES IMPORT — DEGRADE THE FEATURE.**
+  A missing, stale or failing artefact now **unregisters the day**, printing `⚠ 2026-08-25 is NOT
+  registered: …`, and the loud failure happens at the *local, correct* place (`DAY not in ORDERS`
+  → exit 2) instead of exploding in every importer.
+- ⛔ **NEVER PERSIST A PLAN THAT FAILED ITS OWN GATES.** w70c now exits 1 and leaves the previous
+  artefact untouched. Safe, because `w48e` re-runs veto / ten-distinct / md5 / CV-reproduces at
+  send time regardless.
+- The self-comparison is kept, inverted into a **drift check**: if the day IS registered, what is
+  registered must EQUAL what the pricer now derives.
+
+**Recovery verified end to end:** artefact deleted → `w48e --day 2026-08-25` **rc=2** with the
+right message and no traceback → `w70c` runs, **FAILURES 0** → `w48e --day 2026-08-25` **rc=0**,
+all ten verify. 08-23 and 08-24 both still **rc=0**.
+
+⚠ **THE UNCOMFORTABLE LESSON: I FOUND THIS DEFECT CLASS, WROTE A GUARD FOR IT, AND COMMITTED A
+FRESH INSTANCE OF IT ~90 MINUTES LATER.** `w70d_chainguard` did not catch mine, because it
+imports the chain and my artefact was still *valid* at the moment I ran it — the assert only
+fires on a bad artefact, i.e. exactly when the chain is already in trouble. **A guard that only
+fires in the broken state cannot warn you that you have built a way to reach it.** The structural
+fix (degrade, never assert at import) is the one that holds; the guard is the backstop.
+
+### 10.4 VERIFICATION AFTER ALL OF THE ABOVE
+
+**All SIXTEEN guards exit 0** (fourth sweep of the run, after every edit to `check_selection.py`,
+`w48e_order.py` and `w70c_plan0825.py`). `check_selection` still exits **1** (nothing selected —
+§9.1). `w48e_order.py` registers **08-23 rc=0, 08-24 rc=0, 08-25 rc=0**, the 08-25 ten verifying
+296,302 rows, no NaN, md5 matched, CV reproduced.
+
+### 10.5 NEXT RUN — THE LIST THAT SUPERSEDES §6
+
+1. **`date -u` FIRST.** 🎯 **THEN REFRESH THE KAGGLE TOKEN** (§9.2) — it expires
+   **2026-08-24T05:42:55Z** and sends go at ~12:41Z, so the window opens inside the 30-minute
+   lying window. RESEARCH has the copy-paste. **Then** `w70d_chainguard.py`, then the other 15.
+2. 🎯 **APPLY THE DUPLICATE LEAK** (§8.2, **+1.62e-6**, free, public and private move together).
+   `w70f_dupleak.py --inplace <stem>…` **BEFORE** step 1 of the send chain — the CV is unchanged
+   by construction and `w23b` then recomputes the md5. ⛔ Not `--apply` (a renamed copy has no
+   OOF and becomes unsendable). Register it first; it is the highest-value unspent item.
+3. 🔴 **THE SELECTION CLICK** (§9.1) — nothing is selected, Kaggle will auto-pick on **public**
+   score. **Needs Teddy in a browser before 08-31.** Largest item on the account; outranks the
+   33e-6 board gap. Verify with `check_selection.py > f 2>&1; echo $?` — **never through a pipe.**
+4. ✅ **CLOSED THIS RUN, DO NOT RE-OPEN:** R1 (§10.1, retirement stands, re-derived) · P8
+   (§10.2, ARM 208 stays barred; only more pre-registered rankraw seeds can move it) · the
+   2×2 factorial itself (P5/P6/P7/P9 all CONFIRMED) · whether the LB can adjudicate the CV basis
+   (§7.2, a powered null — **a later run may NOT cite the LB on it**) · all three duplicate
+   questions (§8.2: train-internal 0, test-internal 0, train↔test 2).
+5. 🔴 **STILL OPEN — the ranker's CV basis** (§3c). Pre-register a bar BEFORE re-reading
+   `w70a_optimism.json`. w70 may not: it computed the table.
+6. ⛔ **2026-08-26 IS NOT REGISTERED**; `w48e` exits 2. Use `w70c_plan0825.py` as the template.
+7. ⛔ Do NOT re-open w58 §9.7's list: original dataset (×5), LightGBM (×4), **CatBoost (×6)**,
+   feature engineering, blending/OOF weight search, seed/fold diversity, error analysis.
+   ⛔ WANTED slots 1 and 2 closed. ⛔ The above-range slope stays shut on **both** CV bases.
+8. ⚠ Still untouched, **eighth** run: w63 §4's refined P5 and w63 §5a's 16.5e-6 bracket hole.
+9. ⚠ **NEW LESSONS THIS RUN**, in rough order of how much they cost: never `assert` at module
+   scope in an imported module — **degrade the feature** (§1, §10.3) · never persist a plan that
+   failed its own gates (§10.3) · a gate goes self-referential the moment its output feeds what
+   it checks (§10.3) · a guard that only fires in the broken state cannot stop you building a
+   route to it (§10.3) · **`$?` after a pipeline is the LAST STAGE's status** (§9.1) · a build
+   that ADDS a file is a send-path change even if it edits none (§1) · a passing guard suite says
+   nothing about a module none of them imports (§1) · **a null recorded against the WRONG
+   QUESTION closes the right one** — write down which question a closure answers (§8.3) · a
+   derived quantity has a BASIS; two right numbers make a wrong ladder (§3) · an exact 0.0 is
+   indistinguishable from a computation that never ran — assert the ⟺ (§3b) · a bar can be honest
+   BY LUCK (§3c) · a run that computed a number may not register a bar on it (§3c) · replay the
+   CONSUMER's own gate when planning for it (§2a) · a decision can be RIGHT and its reasoning
+   UNSOUND (§10.1) · a **closeness** bar can fail on magnitude while the effect points the
+   favourable way (§10.2).

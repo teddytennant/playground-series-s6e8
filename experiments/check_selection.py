@@ -399,7 +399,7 @@ WANTED_INELIGIBLE = {
                  "PACK, so w40_ad211's retirement expressly does not carry over. Not WANTED "
                  "on CV (w40d), whatever its CV. Lifted only by its own (208 − 199) matched "
                  "control within ±4e-6 on all four criterion bases, quoted here in the same "
-                 "commit, and not by the run that built the arm.",
+                 "commit, and not by the run that built the arm.\n\nRESOLVED 2026-08-23 by w70, the DISINTERESTED run, on the COMPLETE four-seed w69a_factorial.json (provisional=false, FAILURES 0). The (208 - 199) matched control E_B_lo reads h3 +1.056, ens4 +1.096, rescale -0.497, rankraw +4.840 e-6. rankraw 4.840 EXCEEDS the +-4e-6 bar, so the criterion as registered is NOT met and THIS KEY STAYS. Applied as written: the rule was registered before the arm was built and is not reinterpreted now that its number is known.\n\nWHAT THE READING ALSO SHOWS, recorded because it cuts the OTHER way and a later run must see it: the bar is a CLOSENESS bar and ARM 208 fails it on MAGNITUDE, not direction. E_B_lo is POSITIVE 4/4 seeds on h3 (t +3.67) and ens4 (t +5.85) -- ARM 208 measures ~1.1e-6 BETTER than ARM 199 in-process. That is the OPPOSITE SIGN to the between-file stdcorr ladder (w70 sec 3: 208 reads 0.87e-6 BELOW 199 on shipped CV), and the in-process paired contrast is the measurement while the ladder is not -- w68's 5.095e-6 floor is larger than the whole gap. Only rankraw is out of band, on 4 seeds at se 1.085.\n\nIF A LATER RUN WANTS THIS LIFTED the honest route is MORE SEEDS on rankraw, pre-registered before they are drawn -- not a re-reading of these four.",
 }
 
 # ---------------------------------------------------------------------------------------
@@ -432,7 +432,7 @@ WANTED_RETIRED = {
         "measured is that ARM 211's CV does not depend on them. If a future arm ADDS weight to "
         "these streams — a different pack, a different combiner, a re-weighting — this "
         "retirement does not carry over and the bar must be re-derived on that arm's own "
-        "matched control. See experiments/w61a_armctl.json."
+        "matched control. See experiments/w61a_armctl.json.\n\nTHE BAR ABOVE WAS UNRESOLVABLE BY ITS OWN INSTRUMENT, AND THE RETIREMENT SURVIVES ANYWAY. w68 measured the noise on a difference BETWEEN TWO SHIPPED FILES at 5.095e-6 -- LARGER than the +-4e-6 bar the four readings above are quoted against -- so w61a's 'all four inside' was partly a statement about a floor. Neither run could have seen it: w61 decided 08-22, w68 measured the floor 08-23.\n\nRE-DERIVED 2026-08-23 by w70, the DISINTERESTED run, from the COMPLETE four-seed w69a_factorial.json -- the SAME estimand as an IN-PROCESS PAIRED contrast (E_B_hi = A211 - A202, where the shared arm and most of the partition term cancel): h3 -0.594, ens4 +0.233, rescale -1.070, rankraw -1.800 e-6. Worst |delta| 1.800e-6, ALL FOUR BASES INSIDE +-4e-6 -- the same verdict, now on an instrument that resolves the bar. The design's own sd on h3 is 1.379e-6 (w69 P6, CONFIRMED), 3.7x sharper than the between-file floor, and w69's P9 power control injected +4.0e-6 and recovered it at 13.91 se, so this null is evidence of ABSENCE rather than of blindness.\n\nTHE RETIREMENT WAS RIGHT AND ITS ORIGINAL REASONING WAS NOT. The between-file readings are kept above rather than deleted, as the documented weaker basis. Everything else in this entry is UNCHANGED -- this is still not es-clearance, and the carry-over clause above still binds; it is exactly what keyed w69_ad208."
     ),
 }
 

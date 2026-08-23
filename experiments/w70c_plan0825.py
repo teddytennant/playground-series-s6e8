@@ -129,9 +129,23 @@ def main() -> None:
         fail(f"the plan is not {N} distinct files: {plan}")
     if set(plan) & set(W.VETO):
         fail(f"the plan contains VETOED files: {sorted(set(plan) & set(W.VETO))}")
+    # ⚠ SKIP OUR OWN DAY. `w48e.ORDERS["2026-08-25"]` is read back FROM THIS SCRIPT'S ARTEFACT,
+    # so once the day is wired in, comparing the plan against every registered day compares it
+    # against ITSELF and fires on all ten. The gate became self-referential the moment its own
+    # output was plugged into the thing it checks. It is still worth running against the OTHER
+    # days, which is the collision it was written for.
     for d, o in W.ORDERS.items():
+        if d == DAY:
+            continue
         if set(plan) & set(o):
             fail(f"the plan re-sends files already registered for {d}: {sorted(set(plan) & set(o))}")
+    # ...and the self-comparison it replaces is still worth making, as a CONSISTENCY check:
+    # if 08-25 is already registered, what is registered must EQUAL what we just derived.
+    prev = W.ORDERS.get(DAY)
+    if prev is not None and list(prev) != list(plan):
+        fail(f"the registered {DAY} order has DRIFTED from what the pricer now derives.\n"
+             f"       registered: {list(prev)}\n       derived:    {list(plan)}\n"
+             f"       Re-run this script to rewrite the artefact, then re-check.")
 
     # GATE 2 — every planned file must actually survive the sender's own two-part test. This is
     # the check that would have caught `w69_ad208stdcorr`, and it is run over the WHOLE plan
@@ -162,6 +176,15 @@ def main() -> None:
         fail("the blocked file is NOT above the plan — omitting it costs nothing and the "
              "conditional re-derivation note is misleading")
 
+    # ⛔ NEVER PERSIST A PLAN THAT FAILED ITS OWN GATES. A written-out failure is what deadlocked
+    # this pair once already: w48e read it, refused, and w70c could not re-run to fix it because
+    # w70c imports w48e. Leaving the previous artefact untouched is safe — w48e re-runs every one
+    # of its own checks (veto, ten-distinct, md5, CV-reproduces) at send time.
+    if FAILURES:
+        print(f"\n  ⛔ {FAILURES} failure(s) — REFUSING to write the artefact. The previously "
+              f"written one\n     (if any) is untouched; 2026-08-25 stays registered on it or "
+              f"stays unregistered.")
+        sys.exit(1)
     with open(os.path.join(HERE, "w70c_plan0825.json"), "w") as f:
         json.dump(dict(day=DAY, plan=plan, tier=tier, cv_bar=bar,
                        blocked=[dict(stem=s, cv=c, hijack=r, why=w) for s, c, r, w in blocked],

@@ -210,10 +210,32 @@ WHY_0824["w40_ad211std_rescale"] += (" Best CV of the ten and therefore LAST.")
 # `w26g_send` for the two halves of the sender's refusal test, so a constant import would be a
 # cycle. The artefact carries `failures`, and a non-zero count means the derivation's own gates
 # did not pass — refuse it rather than send a list nothing checked.
-_P25 = json.load(open(os.path.join(HERE, "w70c_plan0825.json")))
-assert _P25["day"] == "2026-08-25", f"w70c artefact is for {_P25['day']}, not 2026-08-25"
-assert _P25["failures"] == 0, f"w70c_plan0825.json reports {_P25['failures']} failures"
-ORDER_0825 = list(_P25["plan"])
+# ⚠⚠ A BAD ARTEFACT UNREGISTERS THE DAY; IT MUST NEVER RAISE AT IMPORT. The first version of
+# this block `assert`ed on the artefact, and that is EXACTLY the w70 §1 defect it was written one
+# hour after: an import-time assert in a module the whole send chain imports takes down w26d,
+# w26g and this file together. Worse, it DEADLOCKED — w70c imports w48e for its VETO, so a run
+# of w70c that wrote `failures: 1` could never run again to fix it. An unregistered day already
+# has a loud, correct, LOCAL failure mode (the `DAY not in ORDERS` check below, exit 2), so
+# degrade to that instead of exploding in every importer.
+# ⛔ NEVER `assert` AT MODULE SCOPE IN A MODULE OTHER MODULES IMPORT — degrade the feature.
+_P25, _P25_WHY = None, None
+try:
+    _p = json.load(open(os.path.join(HERE, "w70c_plan0825.json")))
+    if _p.get("day") != "2026-08-25":
+        _P25_WHY = f"artefact is for {_p.get('day')!r}, not 2026-08-25"
+    elif _p.get("failures"):
+        _P25_WHY = f"w70c_plan0825.json reports {_p['failures']} failures"
+    elif len(_p.get("plan", [])) != 10:
+        _P25_WHY = f"artefact carries {len(_p.get('plan', []))} files, not ten"
+    else:
+        _P25 = _p
+except FileNotFoundError:
+    _P25_WHY = "w70c_plan0825.json is absent — run experiments/w70c_plan0825.py"
+except Exception as _e:                                            # noqa: BLE001
+    _P25_WHY = f"w70c_plan0825.json is unreadable: {_e}"
+if _P25 is None:
+    print(f"  ⚠ 2026-08-25 is NOT registered: {_P25_WHY}. Re-run w70c_plan0825.py.")
+ORDER_0825 = list(_P25["plan"]) if _P25 else None
 
 # ⚠⚠ FIVE OF THE TEN ARE ARM 208, AND THE SIXTH — THE BEST OF THE PACK — IS DELIBERATELY ABSENT.
 # `w69_ad208stdcorr` (cv 0.9701391338) is the highest-CV eligible unsent file in the whole queue
@@ -231,13 +253,15 @@ _WHY_0825_A208 = (
     " ⚠ ARM 208 — the fourth corner of w69's 2×2 member factorial. SENDABLE but ⛔ NOT "
     "DEADLINE-SELECTABLE: `w69_ad208` is keyed in check_selection.WANTED_INELIGIBLE and it is "
     "below the P_MAX hijack threshold that would otherwise stop it, not cleared of the bar.")
-WHY_0825 = {s: _WHY_0825 + (_WHY_0825_A208 if s.startswith("w69_ad208") else "")
-            for s in ORDER_0825}
+WHY_0825 = ({s: _WHY_0825 + (_WHY_0825_A208 if s.startswith("w69_ad208") else "")
+             for s in ORDER_0825} if ORDER_0825 else None)
 
 ORDERS = {"2026-08-22": list(REG["order"]), "2026-08-23": ORDER_0823,
-          "2026-08-24": list(ORDER_0824),   "2026-08-25": ORDER_0825}
+          "2026-08-24": list(ORDER_0824)}
 WHYS   = {"2026-08-22": WHY_0822,           "2026-08-23": WHY_0823,
-          "2026-08-24": WHY_0824,           "2026-08-25": WHY_0825}
+          "2026-08-24": WHY_0824}
+if ORDER_0825:                       # only a VERIFIED artefact registers the day
+    ORDERS["2026-08-25"], WHYS["2026-08-25"] = ORDER_0825, WHY_0825
 
 # calibration files have no entry in w23b_sendqueue (no stack CV to rank on) and must be
 # injected, exactly as w37c_prereg.py did for the w37 batch. stem -> (builder json, note).
