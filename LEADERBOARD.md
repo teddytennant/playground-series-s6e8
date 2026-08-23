@@ -2045,3 +2045,43 @@ order of magnitude below the 33e-6 gap** — so no re-arrangement of the current
 reaches the top. That is a statement about the pool, not about the combiner.
 ⚠ **Our board name is `Teddy Tennant`, not `thtennant`** — walk pages with `--page-token` and
 match on the display name or the score.
+
+## 2026-08-23, w70 (slot 9) — rank measured for the first time: **73**. No submission (10/10 on arrival).
+
+Our best public **0.97119**, unchanged since 08-22. Board at 17:35 UTC, `--page-size 2000`
+(201 rows returned, sorted descending, so the rank below is exact whatever sits under it):
+
+| # | team | score | when |
+|---|---|---|---|
+| 1 | Chris Deotte | 0.97152 | 08-23 14:26 |
+| 2 | MILANFX | 0.97144 | 08-23 06:16 |
+| 3 | Changye Li | 0.97142 | 08-22 21:20 |
+| 4 | cstdy | 0.97137 | 08-23 15:09 |
+| 5 | Maher el Ouahabi | 0.97134 | 08-23 13:14 |
+| **73** | **Teddy Tennant** | **0.97119** | 08-23 12:41 |
+
+**Gap to the top 33e-6. 37 teams are at or above 0.97123**, and 121 submissions are on record.
+
+### ⚠ THE 0.97123 CLUSTER IS ONE FILE, NOT 37 METHODS
+
+The two highest-scoring public notebooks were pulled and read in full this run. **Neither is a
+method.** `amanatar/s6e8-elite-rank-average-ensemble-0-97123` loads a pre-made
+`ULTIMATE_0.97123_SOTA.csv` and rank-averages it **95/5** with a throwaway LGBM — the 0.97123 is
+the *teacher file's* score. `itzzomkar/s6e8-0-97123` globs `/kaggle/input/**/submission.csv` and
+weights them by **substring-matching the filename**. So the cluster at 0.97123 is largely one
+circulating CSV's distribution list.
+
+⛔ **Do not chase it.** It is the Rogii failure by construction, and it is unusable under our own
+rules regardless: submission-only, no OOF, so no cross-fitted CV, so `fam=member` and the sender
+blocks it as a final entry. ⚠ But the standing journal sentence *"top public notebook 0.97101 <
+our 0.97106 … we have everything in the forum"* now has **stale numbers** — the public field did
+pass us, by 4e-6, on a file rather than a technique. The conclusion survives; the numbers do not.
+
+### 🔴 THE BOARD IS NOT THE RISK — THE UNCLICKED SELECTION IS
+
+`check_selection.py` **exits 1**: *nothing is selected*. Kaggle will therefore auto-select final
+entries **by best public score** — auto-slot 1 a 2-way tie at 0.97119
+(`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`), auto-slot 2 a 5-way tie at 0.97118. Choosing
+final entries off the public slice is exactly what the brief's Rogii warning is about, and it is
+the current default. **Needs Teddy, in his own browser, before 2026-08-31. Not doable from the
+API.** This outranks the 33e-6 gap.
