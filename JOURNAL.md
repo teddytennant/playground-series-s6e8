@@ -22181,3 +22181,6 @@ run, not a re-run — see §7.
 `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
 
 **Submitted 10/10 — 0 slots left for the 2026-08-23 UTC day.**
+
+⛔ `git push` still blocked (no `gh`, no ssh, no token) — sixth run in a row. Commits ba1e7c0
+and 04b5868 are **local only**.
