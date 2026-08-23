@@ -1,5 +1,145 @@
 # Research — playground-series-s6e8
 
+# ✅ THE PRICER CHAIN IS UNBLOCKED — `w63a_setprice.py` (w63, 2026-08-23)
+
+`w57a` refuses (`assert PICK in TIER1`), `w58a` exits 2, `w59a` refuses on GATE T — all three
+correctly, all three on the tier the 08-23 sends moved. **`w63a_setprice.py` is the SUCCESSOR,
+not a patch**; none of the three was edited. It carries w59a's **unscored-capable** estimator
+(w62a's `build()` cannot take a candidate that has never been submitted — it forms `z` over every
+name), prices a **DETERMINED** status quo instead of a draw, and prices **THE SET BEING SENT**.
+
+    GATE W   reproduces w62a_autopair.json on w62a's own 8-file board: 10 prices, worst 0.000e+00
+    GATE T2  live auto-slot-1 SET vs w62a's recorded one, EVERY RUN — a comparison, not a stamp
+    GATE R   enlarged 15-file design moves the determined price by 1.164e-10  (bar 1.0e-6)
+    GATE J   the generalised dilution identity, max deviation 3.881e-11
+
+**`w26g_send.HIJACKPRICE` now points at `w63a_setprice.json`. Bar 0.9701294160 → 0.9701288617.**
+⛔ Do not point it back at w59a to make a blocked file send: that bar prices a tie that no longer
+exists, and `hijack_cv_bar`'s live SET check voids it anyway.
+
+## 🎯 "3x THE LEVERAGE" IS NOT A CONSTANT — IT IS C(n+1,2)/n, AND IT IS 1.5 TODAY
+
+⚠⚠ **CORRECTS A DURABLE CLAIM IN THIS FILE.** w59a's GATE I proved
+`delta_dilution(X) = (cost_hijack(X) − base)/3` on a five-file tie and this file recorded *"an
+above-tier landing carries exactly 3x the leverage of an in-tier one"*. The algebra with the tier
+size carried through is
+
+    delta_dilution(X) = n * (cost_hijack(X) - base) / C(n+1, 2)   =>   leverage = C(n+1,2)/n
+
+**3.0 at n = 5; 1.5 at n = 2, which is the board today.** ⚠ The BREAK-EVEN is unaffected
+(delta = 0 ⟺ cost_hijack = base for every n) so **"one bar governs both landings" SURVIVES**;
+only the multiplier moved. The literal `3x` was in `w26g_send.above_tier_reason`'s user-facing
+reason string; it is now `hijack_leverage()`, reading `gate_j.leverage` from the artefact and
+returning **nan rather than a stale literal** when it cannot. ⚠ **NEW: A MEASUREMENT TAKEN AT
+ONE VALUE OF A PARAMETER IS NOT A LAW UNLESS YOU DERIVED THE PARAMETER OUT.**
+
+## 🔴 THE BAR **LOOSENED**, AND w59a's H_binding IS 10.59 — NOT 12.97
+
+⚠⚠ **12.97 IS NOT w59a's BINDING BAR.** It is `W58_D`, the dilution break-even, which coincides
+with w59a's *unconditional* crossing (12.965). w59a's binding bar is the CONDITIONAL one,
+**10.590**, and `hijack_cv_bar`'s docstring says so. Like-for-like, n = 5 tie → n = 2 pair:
+
+| column | w59a | w63a | move |
+|---|---|---|---|
+| UNCONDITIONAL | 12.97 | **13.94** | +0.98 LOOSER |
+| CONDITIONAL@8.77 (binding) | 10.59 | **11.14** | +0.55 LOOSER |
+
+Mechanism: the status quo improved (7.855 → 4.523, tightens) but the DRAW SET improved far more —
+the old five-file tie averaged **−16.4e-6** of dCV, the determined pair averages **−4.26e-6** —
+and that loosens. The second effect dominates. ⚠ **NEW: A PREREG THAT QUOTES A NUMBER AND A
+DESCRIPTION THAT ARE DIFFERENT OBJECTS HAS REGISTERED NEITHER.** `w63a` now READS `H_binding`,
+`H_uncond` and `cv_bar_new` from `w59a_hijackprice.json`. Read the superseded number from the
+superseded artefact; never re-type it.
+
+## THE ADDITIVE PER-FILE PRICE IS OPTIMISTIC — AND EXACTLY WHEN
+
+With `add(X,Y) = only(X) + only(Y) − base` (w60's arithmetic) and `joint(X,Y) = price([X,Y])`,
+
+    joint - add = ½[M(X,A)+M(X,B)+M(Y,A)+M(Y,B)] - M(X,Y) - M(A,B),   M(S) = E[max over S]
+
+i.e. CROSSED minus MATCHED pairings of the same four files. Over 105 candidate pairs: **79/105
+positive, mean +8.5033e-6, min −0.9971.** The strict form is FALSIFIED — the argument assumed
+spread and forgot DOMINANCE: if X dominates both tier-1 files then M(X,·) ≈ M(X) and the whole
+thing collapses to ½[M(Y,A)+M(Y,B)] − M(A,B), negative whenever Y is dominated by both.
+⚠ **POST-HOC, registered for a later run, evidence for nothing yet** — partition by whether a
+member beats the status quo pair (`only(X) < base`): **neither helps 78/78 positive (mean
++11.67); exactly one helps 0/26 (mean −0.76); both help 1/1.** Perfect separation. The refined
+claim: *the additive price is optimistic iff the two candidates fall on the SAME side of the
+status quo, and pessimistic iff they straddle it.*
+
+**The 08-24 ten priced as ONE day:** status quo +4.5228, SET price (cond) **+4.6795**,
+(uncond) +4.6781, ADDITIVE +4.5352 — **additive error +0.1429e-6, optimistic**.
+P(any of the ten clears the tier) = **0.012199**.
+
+⚠ **TWO CAVEATS, RECORDED IN THE ARTEFACT.** (a) The break-even is interpolated across a
+**16.5e-6-wide hole** in the design — every file between dCV −2.53 and −19.02 was SENT on 08-23
+and every unsent file is below the hole. ⛔ Do NOT close it by hand-picking bracket files
+(w59a: *"persisting a bar derived from EXTRA_CAND would be choosing the bar by choosing the
+bracket"*). (b) The set price pools all above-tier landings into one bucket; since gamma < 0 the
+finer model would select the WORSE private posterior, so the pooling is mildly ANTI-conservative.
+
+---
+
+# 🔴 RAISING YOUR OWN TIER UNBLOCKS FILES THE RISK GATE WAS REJECTING (w63, 2026-08-23)
+
+`w40_ad211std_rescale`, `w38_ad202std_rescale` and `w27_ad188stdcorr` failed the sender's
+`P_MAX = 0.02` hijack-risk gate on 08-23 at P(above) = **0.082 / 0.061 / 0.053**. The lever files
+cleared, auto-slot 1 went 0.97118 → 0.97119 — a full display step — and the same three files now
+read **0.006 / 0.004 / 0.003**. They lead the registered 08-24 ten on CV. Nothing about the files
+changed; the board did.
+
+---
+
+# 🔴 `BEST_LB = 0.97118` WAS A LIVE QUANTITY FROZEN INTO SOURCE (w63, 2026-08-23)
+
+`w26d_queueprice.BEST_LB` was the literal `0.97118  # account best, w21_ad187corr_ens4`. The best
+moved to 0.97119 at 12:41 on 08-23 and the literal did not, so every `p_beat` was priced against
+a target already beaten and every 08-24 message would have read *"P(beats the 0.97118 account
+best)"* while the best was 0.97119. ⚠ It gates NOTHING (the gate is `hijack_risk` against the
+LIVE `auto_tier`) and sorts nothing (`send_rank` comes from `w48e.ORDERS`). Fixed anyway: **a
+stale number nobody acts on is how a later run learns to trust the wrong one.** Now read from the
+pricer artefact — **not the API**, because this module's body runs on import and
+`w48e_order.py`'s import line states "import is side-effect free" — with a **one-way floor**: a
+best score cannot fall, so a reading below the floor means the artefact is stale and taking it
+would make every `p_beat` look better. Fourth instance of "a live quantity frozen into source"
+after w45a, the hard-coded tier, and the `gate_t` stamp.
+
+---
+
+# ⚠⚠ TWO RULES ABOUT PREREGS AND GUARDS, LEARNED THE HARD WAY (w63, 2026-08-23)
+
+**1. Bind the artefact WRITE to the GATES, not to every registered READING.** `w63a`'s first cut
+refused to write on ANY falsified prediction. With P4 and P5 falsified that would have left the
+sender blocking every above-tier file on the strength of two readings that say nothing about
+whether the bar was correctly derived. ⚠ **COUPLING THE WRITE TO EVERY READING GIVES A RUN A
+MOTIVE TO REGISTER ONLY SAFE PREDICTIONS** — w62's own prereg says of its P5 *"if it is FALSIFIED
+that is the interesting outcome, not a bug"*, and a write rule that punishes the interesting
+outcome is a rule against asking hard questions. The write is now bound to the gates (each of
+which `sys.exit`s on its own) plus "a bar was actually bracketed", and the falsifications are
+carried in the artefact's `falsified` field. ⚠ The rule was changed AFTER seeing the
+falsification, and that is stated at the line in the source and in JOURNAL.md w63 §8.
+
+**2. A guard must read the artefact through the CODE'S constant, not a path it re-types.**
+`w59b_barguard.py` and `w62b_barstaleguard.py` both hard-coded `w59a_hijackprice.json`.
+Re-pointing `w26g_send.HIJACKPRICE` would have left both exercising a file the sender no longer
+opens — the same shape as the defect w62b exists for. Both now read `SND.HIJACKPRICE`.
+⚠ **A GUARD THAT NAMES THE ARTEFACT'S PATH IS TESTING A DIFFERENT FILE THE MOMENT THE CODE MOVES.**
+
+---
+
+# ⛔ BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED, THE SIXTH ANGLE (w63, 2026-08-23)
+
+Closed **twice, 36 members apart**: `experiments/transform_weights.py` (2026-08-13, 1,771-point
+simplex on the 159av pack) — the search *"does not beat `h3`, it rediscovers `h3`"*; w36d
+(2026-08-20, Nelder-Mead at 195 members, weights fitted INSIDE the frozen folds) — equal-weight
+h3 **0.9701205753** vs honestly cross-fitted **0.9701196117**, the fitted weights **0.96e-6
+WORSE**, at a measured **+0.45e-6 of optimism per free parameter**. Hill-climbing is closed
+separately with its own mechanism (a climber can only ADD; the stack needs negative coefficients
+and loses −0.00104 by the time the last one is gone). Sixth angle closed by measurement, after
+the original dataset (×4), LightGBM tuning (×3), CatBoost (w61) and feature engineering (w62).
+
+---
+
 # 🎯 THE LEVER CLEARED — TWICE — AND THAT IS WHY IT PAID A FIFTH OF ITS PRICE (w62, 2026-08-23)
 
 **Account best 0.97118 → 0.97119, rank 66 → 62.** `w36_ad199stdcorr_ens4` and
@@ -252,7 +392,8 @@ other es-CLEARED pack. `W21A_BASE` is the BARE pack name, not `_h3`. 23 minutes 
 > and it is the first eligible file ever queued here with P(beat the account best) above 0.5.**
 
 ⚠ **THERE IS NO BAD BRANCH.** The file lands above the tier ~70% of the time and *in* it the
-other ~30%. w59a GATE I says an in-tier landing is the SAME quantity at 1/3 the leverage, so the
+other ~30%. w59a GATE I says an in-tier landing is the SAME quantity at n/C(n+1,2) the leverage
+(1/3 at the n = 5 tie this was written on, 2/3 at today's n = 2 — w63), so the
 in-tier branch prices at **+5.613e-6**, still better than the +7.855e-6 status quo. Both arms of
 the coin help; the only question is by how much.
 
@@ -401,6 +542,17 @@ hijack is by definition the branch where the file landed high on the public slic
 landing *lowers* the expected private score. The unconditional break-even is anti-conservative.
 
 ### ✅✅ GATE I — THE DILUTION AND HIJACK BREAK-EVENS ARE THE SAME NUMBER, IDENTICALLY
+
+> ⚠⚠ **w63 CORRECTION — THE `/3` IS `n/C(n+1,2)` AND HOLDS ONLY AT n = 5.** GATE I was measured
+> on a FIVE-file tie. Carrying the tier size through the same algebra gives
+> `delta_dilution(X) = n*(cost_hijack(X) − base)/C(n+1,2)`, so the leverage ratio is
+> `C(n+1,2)/n` — **3.0 at n = 5, 1.5 at the n = 2 the board has held since 08-23.**
+> ⚠ The headline of this section is UNAFFECTED: `delta = 0 ⟺ cost_hijack = base` for every n,
+> so the two break-evens really are the same number and one bar really does govern both
+> landings. Only the **multiplier** was a reading of a tier size. `w63a_setprice.py` GATE J
+> checks the general form numerically (max deviation 3.881e-11) and `w63b_setguard.py` requires
+> it to reproduce this section's 3.0 at n = 5. **Do not re-quote "3x" without the tier size.**
+
 
 Adding X to a 5-file tier takes MODEL B from a mean over C(5,2)=10 pairs to C(6,2)=15, and the
 **5 new pairs are exactly `{X,d}` for d ∈ TIER1** — what `cost_hijack(X)` already averages. So

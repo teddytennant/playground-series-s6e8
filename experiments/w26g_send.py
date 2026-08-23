@@ -58,7 +58,16 @@ import json as _json                                                        # no
 from check_selection import WANTED as _WANTED, WANTED_INELIGIBLE            # noqa: E402
 
 
-HIJACKPRICE = os.path.join(HERE, "w59a_hijackprice.json")
+# ⚠⚠ w63: THE ARTEFACT MOVED, AND IT MOVED BECAUSE THE BOARD DID. The 08-23 sends left auto-slot
+# 1 holding exactly TWO files, so the auto-selected pair is DETERMINED and `w59a_hijackprice.py`
+# — which prices a hijacker against a uniform draw from a five-file TIE — refuses to run on its
+# own GATE T. `w63a_setprice.py` is its successor: same estimator (its GATE W reproduces w62a's
+# ten recorded prices to 0.000e+00), determined status quo, and a price for the SET being sent
+# rather than for each file alone. w59a's artefact is KEPT, not deleted, as the record of the
+# board it was derived on, and `cv_bar_superseded` in the new one carries its bar.
+# ⛔ Do not point this back at w59a to make a blocked file send: that bar prices a tie that no
+# longer exists, and `hijack_cv_bar`'s live SET check would void it anyway.
+HIJACKPRICE = os.path.join(HERE, "w63a_setprice.json")
 
 
 def wanted_cv_bar():
@@ -105,7 +114,16 @@ def hijack_cv_bar(rows=None):
     ⚠ w59a GATE I: this is the SAME number as w58's DILUTION break-even D, identically, because
     the pairs a 6th tier member adds to MODEL B are exactly the pairs a hijacker draws from --
     delta_dilution(X) = (cost_hijack(X) - base)/3. One bar governs both landings. The hijack
-    simply carries 3x the leverage, in either direction.
+    simply carries more leverage, in either direction.
+
+    ⚠⚠ w63 CORRECTION, LEFT HERE RATHER THAN REWRITTEN AWAY: the paragraph above originally
+    ended "carries 3x the leverage". That 3 is C(n+1,2)/n at the FIVE-file tie w59a measured on,
+    not a constant of the problem. w63a's GATE J carries the tier size through the same algebra
+    and gets delta_dilution(X) = n*(cost_hijack(X) - base)/C(n+1,2) for every n, so the leverage
+    is C(n+1,2)/n -- 3.0 at n = 5 and 1.5 at the n = 2 the board holds today. The IDENTITY and
+    the BREAK-EVEN in this docstring are unchanged (delta = 0 iff cost_hijack = base for every
+    n), so "one bar governs both landings" stands; only the multiplier moved. See
+    `hijack_leverage()` below, which publishes the live number instead of a literal.
 
     Returns None if the artefact cannot supply it -- callers must then BLOCK, not wave through.
 
@@ -209,6 +227,29 @@ def hijack_risk(pred_lb, tier):
     return 0.5 * (1.0 - erf(z / sqrt(2.0)))
 
 
+def hijack_leverage():
+    """C(n+1,2)/n — how much more an ABOVE-tier landing costs than an in-tier one, at the LIVE n.
+
+    ⚠⚠ THIS USED TO BE THE LITERAL "3x" IN THE REASON STRING BELOW. w59a measured 3 on a
+    five-file tie and both this file and RESEARCH.md carried it as though it were a constant of
+    the problem. It is not: w63a's GATE J proves the identity
+
+        delta_dilution(X) = n * (cost_hijack(X) - base) / C(n+1, 2)
+
+    for every tier size n, so the leverage ratio is C(n+1,2)/n — 3.0 at n = 5 and 1.5 at n = 2,
+    which is where the board is today. ⚠ The BREAK-EVEN is unaffected (delta = 0 iff
+    cost_hijack = base for every n), so "one bar governs both landings" survives; only the
+    multiplier moved. A number that is a function of the board does not belong in a string.
+
+    Falls back to nan rather than to a stale literal: a reason string that says "nanx" is a
+    reader's problem, a reason string that says "3x" on a two-file tier is a wrong fact.
+    """
+    try:
+        return float(_json.load(open(HIJACKPRICE))["gate_j"]["leverage"])
+    except (OSError, KeyError, ValueError, TypeError):
+        return float("nan")
+
+
 def above_tier_reason(r, bar):
     """Why this at-or-above-tier row must not be sent, or None if it is an acceptable final entry.
 
@@ -227,12 +268,12 @@ def above_tier_reason(r, bar):
     if cv is None or pd.isna(cv):
         return "no cv — cannot be shown to be an acceptable final entry"
     if bar is None:
-        return ("the w59 hijack CV bar could not be read from w59a_hijackprice.json — failing "
-                "safe. Re-run w57a_tierprice2.py then w59a_hijackprice.py.")
+        return (f"the hijack CV bar could not be read from {os.path.basename(HIJACKPRICE)} — "
+                f"failing safe. Re-run the pricer chain against the LIVE tier.")
     if float(cv) < bar:
-        return (f"cv {float(cv):.10f} < the w59 hijack bar {bar:.10f} — above the tier it would "
-                f"take auto-slot 1 from a uniform tier-1 draw and make E[max] WORSE, at 3x the "
-                f"leverage of an in-tier landing (w59a GATE I)")
+        return (f"cv {float(cv):.10f} < the hijack bar {bar:.10f} — above the tier it would "
+                f"take auto-slot 1 from a tier-1 draw and make E[max] WORSE, at "
+                f"{hijack_leverage():.1f}x the leverage of an in-tier landing (w63a GATE J)")
     return None
 LOG = os.path.join(HERE, "w26g_sent.csv")
 

@@ -109,8 +109,55 @@ M = json.load(open(os.path.join(HERE, "w30b_corrterm.json")))
 C = M["coefs"]             # w30b's coefficients, still used by the M0 comparison printed below
 RESID = PR.RESID_SD        # 7.72e-6 -- M2's in-sample residual sd, dof-corrected
 RESID_ERA = PR.SD_ERA      # 8.77e-6 -- M2's HELD-OUT era-slice RMSE under leave-one-day-out
-BEST_LB = 0.97118          # account best, w21_ad187corr_ens4
 STEP = 1e-5                # the LB reports to 5 decimals
+
+# ⚠⚠ w63: THIS WAS `BEST_LB = 0.97118  # account best, w21_ad187corr_ens4` — A LIVE QUANTITY
+# FROZEN INTO SOURCE. On 2026-08-23 at 12:41 UTC `w36_ad199stdcorr_ens4` and
+# `w38_ad202stdcorr_ens4` both scored 0.97119 and the account best moved a full display step;
+# this constant did not. Every `p_beat` in the queue was then priced against a target that had
+# already been beaten, and every submission message would have gone out reading "P(beats the
+# 0.97118 account best)" while the best was 0.97119. RESEARCH.md already carries the general
+# form — "w45a went stale by freezing a live quantity into source" — and `hijack_cv_bar`'s
+# docstring repeats it. Same defect, a different constant, found four days later.
+#
+# ⚠ `p_beat` GATES NOTHING on the send path (the gate is `w26g_send.hijack_risk` against the
+# LIVE `auto_tier`) and it SORTS nothing (`send_rank` comes from `w48e_order.ORDERS`). So this
+# was a wrong number in a message and in an artefact, not an admitted file. Fixed anyway: a
+# stale number nobody acts on is how a later run learns to trust the wrong one.
+#
+# ⛔ READ FROM THE PRICER ARTEFACT, NOT FROM THE API. This module's body runs on import and
+# `w48e_order.py` says so at its import line ("import is side-effect free"); putting a network
+# call here would make every importer pay for it and would break that contract silently. The
+# pricer artefact carries the live top public score, is REFUSED by `w63a_setprice.py` unless it
+# matches the live board, and is a required step whenever the tier moves — so reading it here
+# couples this number to the one instrument that is not allowed to be stale.
+def _best_lb(floor=0.97118):
+    """The account's best PUBLIC score, from the pricer artefact, with a one-way floor.
+
+    The floor only ever holds the value UP. A best score cannot fall, so an artefact reading
+    below the last recorded best means it is stale or truncated, and taking it would make every
+    `p_beat` look BETTER than it is. Floor, warn, never lower.
+    """
+    best, src = floor, "the recorded floor"
+    for art in ("w63a_setprice.json", "w62a_autopair.json"):
+        try:
+            d = json.load(open(os.path.join(HERE, art)))
+            v = float(d.get("tiers", {}).get("slot1_public", d.get("tier1_public")))
+        except (OSError, KeyError, ValueError, TypeError):
+            continue
+        if v > best:
+            best, src = v, art
+        elif v < floor - 1e-12:
+            print(f"  ⚠ BEST_LB: {art} reads {v:.5f}, BELOW the recorded floor {floor:.5f}. "
+                  f"Holding the floor.")
+        break
+    if best > floor:
+        print(f"  BEST_LB: {floor:.5f} -> {best:.5f} (from {src}). p_beat is priced against the "
+              f"CURRENT best.")
+    return best
+
+
+BEST_LB = _best_lb()
 
 
 def is_corr(stem):

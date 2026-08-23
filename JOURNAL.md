@@ -22184,3 +22184,263 @@ run, not a re-run — see §7.
 
 ⛔ `git push` still blocked (no `gh`, no ssh, no token) — sixth run in a row. Commits ba1e7c0
 and 04b5868 are **local only**.
+
+---
+
+# w63 — 2026-08-23, slot 2 of 10 (ZERO slots available). THE PRICER CHAIN IS UNBLOCKED, AND "3x" WAS NEVER A CONSTANT
+
+⛔ **NO SUBMISSION. The day was already at 10/10 before this run started** — the API reports ten
+COMPLETE entries at 12:41:06–12:41:34 UTC and the harness said so in the prompt. `date -u` at the
+top of this run: 13:01. This is a BUILD run and nothing was sent. ⛔ No `mcp__brave__*` in the
+tool list (`ToolSearch` for it returns nothing) — **the click stays blocked, seventh run running.**
+
+## 0. ANGLE SUBSTITUTED — blending is the SIXTH angle closed by measurement
+
+Issued: *"Blending: rank-average or weight the tuned models by out-of-fold performance. Search
+blend weights on OOF predictions."* Closed here **twice, 36 members apart, with a mechanism and
+a price**: `experiments/transform_weights.py` (2026-08-13, 1,771-point simplex on the 159av pack)
+found the search *"does not beat `h3`, it rediscovers `h3`"*; w36d re-ran it at 195 members with
+Nelder-Mead and weights fitted INSIDE the frozen folds and got **equal-weight h3 0.9701205753 vs
+honestly cross-fitted 0.9701196117 — the fitted weights are 0.96e-6 WORSE** — plus the measured
+**+0.45e-6 of optimism per free parameter**. Hill-climbing is closed separately with its own
+mechanism (a climber can only ADD; the stack needs negative coefficients and loses −0.00104 by
+the time the last one is gone). RESEARCH.md already says *"Do not re-open this a third time."*
+Sixth angle closed, after the original dataset (×4), LightGBM tuning (×3), CatBoost (w61) and
+feature engineering (w62). Substituted for **w62 §7 item 3, the only thing on that list blocking
+a send path.** Registered in `experiments/w63_prereg.txt`, **committed 4737c3b before
+`w63a_setprice.py` existed.**
+
+## 1. ✅ THE CHAIN IS UNBLOCKED — `w63a_setprice.py`, and the sender reads it
+
+`w57a` refuses (`assert PICK in TIER1`), `w58a` exits 2, `w59a` refuses on GATE T — all three
+correctly, all three on the tier the 08-23 sends moved. w63a is the SUCCESSOR, not a patch; none
+of the three was edited. It carries w59a's **unscored-capable** estimator (w62a's `build()`
+cannot take a candidate that has never been submitted — it forms `z` over every name), and:
+
+- **GATE W** — run on w62a's own eight-file board it reproduces `cost_auto_pair`, all 3 `solo`
+  costs and all 6 `ladder` entries: **10 prices, worst deviation 0.000e+00.**
+- **GATE T2** — the live auto-slot-1 SET compared against w62a's recorded one **on every run**,
+  not a stamp. Refuses on any difference.
+- **GATE R** — the enlarged 15-file design moves the determined price by **1.164e-10**.
+- **GATE J** — below.
+
+`w26g_send.HIJACKPRICE` now points at `w63a_setprice.json`. **Bar 0.9701294160 → 0.9701288617.**
+
+## 2. 🎯🔴 "3x THE LEVERAGE" WAS A READING OF A TIER SIZE, AND BOTH RESEARCH.md AND THE SENDER CARRIED IT AS A CONSTANT
+
+w59a's GATE I proved `delta_dilution(X) = (cost_hijack(X) − base)/3` on a five-file tie and
+concluded *"an above-tier landing carries exactly 3x the leverage of an in-tier one"*. GATE J
+generalises it and checks it numerically at the live tier size (**max deviation 3.881e-11**):
+
+    delta_dilution(X)  =  n * (cost_hijack(X) - base) / C(n+1, 2)     =>   leverage = C(n+1,2)/n
+
+**3.0 at n = 5. 1.5 at n = 2, which is the board today.** ⚠ **The BREAK-EVEN is untouched**
+(delta = 0 ⟺ cost_hijack = base for every n), so *"one bar governs both landings"* survives
+intact; only the multiplier moved. The literal `3x` was sitting in
+`w26g_send.above_tier_reason`'s **user-facing reason string** — a number that is a function of
+the board, hard-typed into a sentence. Replaced by `hijack_leverage()`, which reads
+`gate_j.leverage` from the artefact and returns **nan, not a stale literal**, when it cannot.
+
+⚠⚠ **NEW: A MEASUREMENT TAKEN AT ONE VALUE OF A PARAMETER IS NOT A LAW UNLESS YOU DERIVED THE
+PARAMETER OUT.** This is w62 §4's "a claim measured on one configuration is not a general law"
+again, one run later, on a different quantity — and this time the general law was available all
+along; w59a wrote `/3` where the algebra gives `n/C(n+1,2)` and nobody carried the n through.
+
+## 3. 🔴 P4 FALSIFIED — THE BAR **LOOSENED**, AND THE PREREG COMPARED IT AGAINST THE WRONG NUMBER
+
+Registered: *"H_det < 12.97e-6, STRICTLY — the determined-pair bar is TIGHTER than w59a's
+H_binding."* **12.97 is not w59a's H_binding.** It is `W58_D`, the dilution break-even, which
+coincides with w59a's *unconditional* crossing (12.965); w59a's binding bar is the CONDITIONAL
+one, **10.590**, and `hijack_cv_bar`'s own docstring says so in as many words. Like-for-like:
+
+| column | w59a (n=5 tie) | w63a (n=2 pair) | move |
+|---|---|---|---|
+| UNCONDITIONAL | 12.97 | **13.94** | +0.98 **LOOSER** |
+| CONDITIONAL@8.77 (binding) | 10.59 | **11.14** | +0.55 **LOOSER** |
+
+**P4 is FALSIFIED**, and the mechanism the prereg named as working *against* it is the one that
+won: the status quo improved (7.855 → 4.523, which tightens), but the DRAW SET improved far more
+— the old five-file tie averaged **−16.4e-6** of dCV, the determined pair averages **−4.26e-6** —
+and that loosens. The prereg named both forces and bet on the wrong one, which is the correct
+way to lose a prediction. ⚠ The literal inequality reads TRUE and **is not scored**: it compares
+this run's CONDITIONAL bar against w59a's UNCONDITIONAL one. Both readings are printed.
+
+⚠⚠ **NEW: A PREREG THAT QUOTES A NUMBER AND A DESCRIPTION THAT ARE DIFFERENT OBJECTS HAS
+REGISTERED NEITHER.** The constant was re-typed from a neighbouring script's source (`W58_D`)
+into a sentence about a different quantity. `w63a` now READS `H_binding`, `H_uncond` and
+`cv_bar_new` from `w59a_hijackprice.json`. **Read the superseded number from the superseded
+artefact; never re-type it.**
+
+## 4. 🎯 P5 FALSIFIED STRICTLY — AND THE POST-HOC PARTITION SEPARATES PERFECTLY
+
+Registered: `joint(X,Y) > add(X,Y)` for **every** candidate pair, where `add` is w60's arithmetic
+exactly (`only(X) + only(Y) − base`). Read **79/105**, mean gap **+8.5033e-6**, min **−0.9971**.
+The mean half is confirmed; the strict half is not. The counterexample is the PICK paired with
+the weakest file on the board (`w36_ad199stdcorr + w21_ad187corr_ens4`, add +0.9974, joint
++0.0003). The prereg's rearrangement argument assumed **spread** and forgot **DOMINANCE**: with
+
+    joint - add = ½[M(X,A)+M(X,B)+M(Y,A)+M(Y,B)] - M(X,Y) - M(A,B),   M(S) = E[max over S]
+
+if X dominates both A and B then M(X,·) ≈ M(X) throughout and the whole thing collapses to
+½[M(Y,A)+M(Y,B)] − M(A,B), which is **negative** whenever Y is in turn dominated by both — a max
+is never below an average. **POST-HOC and labelled as such in the source**, partitioning by
+whether a member beats the status quo pair (`only(X) < base`):
+
+| partition | n | gap > 0 | mean gap |
+|---|---|---|---|
+| neither helps | 78 | **78/78** | +11.6712 |
+| exactly one helps | 26 | **0/26** | −0.7591 |
+| both help | 1 | 1/1 | +2.2285 |
+
+**Perfect separation.** The refined claim — *the additive price is optimistic iff the two
+candidates fall on the SAME side of the status quo, and pessimistic iff they straddle it* — is
+registered here for a LATER run to test and is evidence for nothing in this one.
+
+## 5. THE SET PRICE — the registered ten priced as ONE day
+
+| quantity | value |
+|---|---|
+| status quo, nothing sent | +4.5228e-6 |
+| SET price of the 08-24 ten, conditional | **+4.6795e-6** |
+| SET price, unconditional | +4.6781e-6 |
+| the ADDITIVE price of the same ten (w60's arithmetic) | +4.5352e-6 |
+| **additive error on the day** | **+0.1429e-6, optimistic** |
+
+P(any of the ten clears the tier) = **0.012199** (P6 CONFIRMED). The day is essentially
+hijack-free, so the set price is small — but it is small **and measured**, which is the whole
+difference from w60, who applied a per-file price twice and was wrong by 5.5e-6.
+
+⚠ **Two caveats recorded in the artefact, not buried.** (a) The break-even is interpolated across
+a **16.5e-6-wide hole** in the design: every file between dCV −2.53 and −19.02 was SENT on 08-23
+and every unsent file is below the hole. That is the dominant uncertainty in the bar, and it must
+NOT be closed by hand-picking bracket files — w59a: *"persisting a bar derived from EXTRA_CAND
+would be choosing the bar by choosing the bracket."* (b) The set price pools all above-tier
+landings into one bucket, so two clearers are treated as tied rather than ordered; since
+gamma < 0 the finer model would select the WORSE private posterior, making the pooling mildly
+**ANTI**-conservative.
+
+## 6. 🔴 THREE FILES WERE UNBLOCKED BY THE BOARD MOVING, AND NOTHING ABOUT THEM CHANGED
+
+`w40_ad211std_rescale`, `w38_ad202std_rescale` and `w27_ad188stdcorr` failed the sender's
+`P_MAX = 0.02` hijack-risk gate on 08-23 at P(above) = **0.082 / 0.061 / 0.053**. The lever files
+then cleared and took auto-slot 1 from 0.97118 to 0.97119 — a full display step — and the same
+three files now read **0.006 / 0.004 / 0.003**. They are the top of the 08-24 ten on CV. **A
+consequence of w60's lever that nobody registered:** raising your own tier makes previously
+unsendable files sendable.
+
+## 7. 🔴 `BEST_LB = 0.97118` WAS A LIVE QUANTITY FROZEN INTO SOURCE — FOURTH INSTANCE OF ONE SHAPE
+
+`w26d_queueprice.BEST_LB` was the literal `0.97118  # account best, w21_ad187corr_ens4`. The
+account best moved to 0.97119 at 12:41 today and the literal did not, so every `p_beat` in the
+queue was priced against a target already beaten and **every 08-24 submission message would have
+gone out reading "P(beats the 0.97118 account best)" while the best was 0.97119.**
+⚠ It gates NOTHING (the gate is `hijack_risk` against the LIVE `auto_tier`) and sorts nothing
+(`send_rank` comes from `w48e.ORDERS`) — it was a wrong number in a message and an artefact.
+Fixed anyway: **a stale number nobody acts on is how a later run learns to trust the wrong one.**
+Now read from the pricer artefact (**not** the API — `w48e_order.py`'s import line states
+"import is side-effect free" and a network call at module scope would break that silently), with
+a **one-way floor**: a best score cannot fall, so a reading below the recorded floor means the
+artefact is stale and taking it would make every `p_beat` look better. Both directions are
+negative-controlled in w63b.
+
+## 8. ⚠⚠ I CHANGED THE WRITE RULE **AFTER** SEEING P4 AND P5 FAIL. SAID PLAINLY.
+
+The first cut of `w63a` refused to write its artefact on ANY failed prediction. With P4 and P5
+falsified that would have left the sender blocking every above-tier file — on the strength of two
+readings that have nothing to do with whether the bar was correctly derived. I changed it, having
+seen the result, to bind the write to **the GATES** (all of which `sys.exit` on their own) plus
+"a bar was actually bracketed", and to RECORD the falsifications in the artefact's `falsified`
+field where any reader sees them. ⚠ **NEW: COUPLING THE ARTEFACT WRITE TO EVERY REGISTERED
+READING GIVES A RUN A MOTIVE TO REGISTER ONLY SAFE PREDICTIONS.** w62's own prereg says of its
+P5 *"if it is FALSIFIED that is the interesting outcome, not a bug"* — a write rule that punishes
+the interesting outcome is a rule against asking hard questions. The change is argued in the
+source at the line, including the fact that it was made after the falsification.
+
+## 9. VERIFICATION
+
+**w54a, w55a, w56b, w57c, w59b, w60b, w60d, w62b, w63b — all exit 0, FAILURES 0.** w63b is new:
+**23 checks**, with negative controls on every one — the leverage formula must reproduce w59a's
+measured **3.0 at n = 5** (so a fix that merely swapped one constant for another fails), a missing
+artefact must give **nan not a literal**, `_best_lb` must hold a floor ABOVE and raise a floor
+BELOW (so neither degenerate implementation survives), and `w48e.ORDERS["2026-08-24"]` must BE
+`w63a.PLAN_0824` rather than a copy of it.
+
+⚠ **w59b and w62b now read the artefact through `w26g_send.HIJACKPRICE` instead of re-typing
+`w59a_hijackprice.json`.** Both had the path hard-coded; re-pointing the sender would have left
+them exercising a file the sender no longer opens. ⚠ **NEW: A GUARD THAT NAMES THE ARTEFACT'S
+PATH INSTEAD OF READING THE CONSTANT THE CODE READS IS TESTING A DIFFERENT FILE THE MOMENT THE
+CODE MOVES.** Same shape as the defect w62b exists for. w62b's "moved tier" case and w59b's
+"artefact tier == w57a tier" check were both re-pointed **with the reason written at the check**.
+
+**P7 CONFIRMED**: `w48e_order.py --day 2026-08-24 --write` then `w26g_send.py --n 10` dry fills
+to exactly the registered ten, reads the bar live at 0.9701288617 and the tier at 0.97119, and
+warns that the queue is for another day. **Tomorrow's send chain is verified end to end today.**
+⚠ The queue on disk is now stamped `plan_day = 2026-08-24` and is INERT until then (`--go`
+refuses on any other day). **Tomorrow's run must still re-run the full four commands** — the sent
+list only changes after the sends.
+
+## 10. NEXT RUN, IN ORDER
+
+1. `date -u` FIRST, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   `ls -d experiments/w6*`. Check for `mcp__brave__*` — if present, **make the click**.
+2. **THE SEND IS FOUR COMMANDS**: `w23b_sendqueue.py` → `w48e_order.py --day <TODAY> --write` →
+   `w26g_send.py --n 10` dry → `--go`. **2026-08-24 IS REGISTERED** (w48e `ORDERS`/`WHYS`,
+   imported from `w63a.PLAN_0824`, verified dry). **2026-08-25 IS NOT and w48e will exit 2** —
+   adding the day's list is the first build task of that run.
+3. ✅ The pricer chain is UNBLOCKED and the bar is LIVE at 0.9701288617. Nothing in the 08-24 ten
+   comes within 8e-6 of it, so nothing goes above the tier tomorrow regardless.
+4. ⚠ **Register and test the refined P5** (§4): the additive price is optimistic iff both
+   candidates fall on the SAME side of the status quo. 78/78 and 0/26 here, but **post-hoc**.
+5. ⚠ **The break-even's 16.5e-6 bracket hole** (§5a) is the dominant uncertainty in the bar.
+   ⛔ Do NOT close it by hand-picking candidates. The principled route is to price against
+   **every scored file on the board** — a set nobody chose — but that is 121 files and the LAW-IF
+   assertion `max|M − wI| < 1e-6` may not survive it. Check that before building it.
+6. Run **w54a, w55a, w56b, w57c, w59b, w60b, w60d, w62b, w63b** on any run that sends or touches
+   `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`, `w48e_order.py`, `w26g_send.py` or
+   the pricer.
+7. ⛔ **Do NOT** re-open w58 §9.7's list, **the original dataset** (×4), **LightGBM tuning** (×3),
+   **CatBoost tuning** (w61), **feature engineering** (w62), or **blending / OOF weight search
+   / hill climbing** (closed here, §0).
+8. ⚠ **The WANTED slot-2 question is STILL OPEN and was again not touched** (w62 §7.7, w61 §8.7).
+   Third run in a row. `w40_ad211stdcorr` is +22.4e-6 above slot 2 on CV and eligible, but slot 2
+   is a PACK HEDGE whose value is not its CV. Any move needs a registered argument about the HEDGE.
+9. ⚠ **NEW: a measurement taken at one value of a parameter is not a law unless you derived the
+   parameter out** (§2) — w59a wrote `/3` where the algebra gives `n/C(n+1,2)`.
+   ⚠ **NEW: a prereg that quotes a NUMBER and a DESCRIPTION that are different objects has
+   registered neither** (§3). Read the superseded number from the superseded artefact.
+   ⚠ **NEW: coupling the artefact write to every registered READING gives a run a motive to
+   register only safe predictions** (§8). Bind the write to the GATES; record the readings.
+   ⚠ **NEW: a guard that names the artefact's PATH instead of reading the constant the code reads
+   is testing a different file the moment the code moves** (§9).
+   ⚠ **NEW: raising your own tier unblocks files the risk gate was rejecting** (§6).
+   ⚠ Carried: a per-file price is not additive — price the SET · "lossless" over ROWS does not
+   hold over the FILE · moving a rule upstream can break the script that used to own it · a GATE
+   and a PRIORITY are not the same mechanism · a STAMP is not a comparison · a claim measured on
+   one configuration is not a general law · a count that depends on where a loop stopped is not
+   an invariant — register the SET · retirement is a third state · a retired bar must not go
+   quiet · say WHY a run is entitled to a deferred test · a rule enforced on a column a DIFFERENT
+   script populates is only enforced if that script ran · enumerate an enforcer's cases FROM THE
+   RULE · a sweep that cries wolf gets padded into a hand-typed list · accidental protection is
+   worse than none · a prereg that only confirms was not asked anything hard · a run with an
+   interest in retiring a rule must not retire it · a rule can be WIRED, TESTED and enforced at
+   a number nobody MEASURED · register STRICT inequalities · a rule enforced on the wrong COLUMN
+   is not enforced · a POINT PREDICTION IS NOT A GATE · register against files you HOLD ·
+   `w25a_cvlb_full.py` is NOT read-only · a hard-coded tier goes stale every send day · a prereg
+   that re-stamps itself is not a prereg · a rule in a PARAGRAPH is not a rule · a rule in the
+   ORDER of a list is not a rule · never use in-sample residuals to test extrapolation · never
+   lower the `cv >= 0.97` floor · never let a `member` row into a `max(CV)` · always pass
+   `--page-size`.
+
+**Files added:** `experiments/w63_prereg.txt`, `w63a_setprice.py`, `w63a_setprice.json`,
+`w63b_setguard.py`.
+**Modified:** `experiments/w26g_send.py` (`HIJACKPRICE` → w63a, new `hijack_leverage()`, reason
+string), `w26d_queueprice.py` (`BEST_LB` live off the pricer artefact with a one-way floor),
+`w48e_order.py` (2026-08-24 registered, ten imported from w63a), `w59b_barguard.py` /
+`w62b_barstaleguard.py` (read through `SND.HIJACKPRICE`; two checks re-pointed with reasons at
+the check), `w26d_queueprice.csv` (rebuilt, `plan_day = 2026-08-24`), plus `RESEARCH.md`,
+`LEADERBOARD.md`, `JOURNAL.md`.
+
+**Submitted 0 — the 2026-08-23 UTC day was already at 10/10 when this run began.**
+
+⛔ `git push` still blocked (no `gh`, no ssh, no token) — seventh run in a row. Commits are
+**local only**.

@@ -41,7 +41,8 @@ def check(name, ok, detail=""):
 
 
 def main() -> None:
-    art = json.load(open(os.path.join(HERE, "w59a_hijackprice.json")))
+    # ⚠ w63: through the sender's own constant, not a path re-typed here — see w62b's note.
+    art = json.load(open(SND.HIJACKPRICE))
     bar = SND.hijack_cv_bar()
     print("=== w59b: the hijack CV bar is wired, live, strict, and fails safe ===")
 
@@ -64,9 +65,17 @@ def main() -> None:
 
     check("artefact was produced on the live tier (its GATE T passed)",
           art.get("gate_t") == "PASS", str(art.get("gate_t")))
-    prev = json.load(open(os.path.join(HERE, "w57a_tierprice2.json")))["tiers"]
-    check("artefact tier == w57a tier",
-          sorted(art["tiers"]["slot1"]) == sorted(prev["slot1"]),
+    # ⚠ RE-POINTED w63, NOT SOFTENED, and the reason lives here at the check. This compared the
+    # bar artefact's tier against `w57a_tierprice2.json`, which was the head of the pricer chain
+    # when it was written. The 08-23 sends moved auto-slot 1 to two files at 0.97119, w57a
+    # refuses to run on its own `assert PICK in TIER1`, and `w62a_autopair.json` is the head
+    # now — w63a's GATE T2 refuses unless the LIVE board matches it. Keeping w57a here would
+    # assert the board never moved, i.e. it would fail for exactly the reason the move was
+    # correct. The property under test is unchanged: the bar must have been derived on the tier
+    # the pricer chain last agreed on. ⛔ Do not point it back at w57a.
+    prev = json.load(open(os.path.join(HERE, "w62a_autopair.json")))
+    check("artefact tier == the pricer chain's head (w62a)",
+          sorted(art["tiers"]["slot1"]) == sorted(prev["tier1"]),
           f"{len(art['tiers']['slot1'])} files @ {art['tiers']['slot1_public']}")
 
     # ---- 4. FIRE IT. A row is a namespace shaped like the itertuples row the sender passes.
@@ -117,7 +126,7 @@ def main() -> None:
     # ---- 5. FAIL-SAFE. Point the module at a missing artefact; the bar must vanish and BLOCK.
     keep = SND.HIJACKPRICE
     try:
-        SND.HIJACKPRICE = os.path.join(HERE, "w59a_hijackprice.MISSING.json")
+        SND.HIJACKPRICE = keep + ".MISSING"
         gone = SND.hijack_cv_bar()
         check("bar is None when the artefact is unreadable", gone is None, repr(gone))
         check("and above_tier_reason then BLOCKS rather than waving through",

@@ -177,8 +177,36 @@ WHY_0822 = {
                             "file, the later timestamp wins the tier, free.",
 }
 
-ORDERS = {"2026-08-22": list(REG["order"]), "2026-08-23": ORDER_0823}
-WHYS   = {"2026-08-22": WHY_0822,           "2026-08-23": WHY_0823}
+# ---- 08-24: the drain, ten files, ZERO experiments ------------------------------------------
+# ⚠ THE TEN ARE IMPORTED FROM THE PRICER, NEVER RE-TYPED. `w63a_setprice.PLAN_0824` is the set
+# w63a priced as a DAY — its P6 ("P(any of the ten clears the tier) < 0.05", read 0.012199) is a
+# statement about THIS list, and a second hand-typed copy here would let the registered list and
+# the priced list drift apart without either file noticing. w62 §1 is what that costs.
+from w63a_setprice import PLAN_0824 as ORDER_0824                          # noqa: E402
+
+# ⚠ THREE OF THE TEN WERE BLOCKED YESTERDAY AND ARE UNBLOCKED TODAY, AND NOTHING ABOUT THEM
+# CHANGED. `w40_ad211std_rescale`, `w38_ad202std_rescale` and `w27_ad188stdcorr` failed the
+# sender's P_MAX = 0.02 hijack-risk gate on 08-23 at P(above) = 0.082 / 0.061 / 0.053. The two
+# lever files then cleared and took auto-slot 1 from 0.97118 to 0.97119 — a full display step —
+# and the same three files now read 0.006 / 0.004 / 0.003 against the higher threshold. The
+# board moving UP made previously-unsendable files sendable. That is a consequence of w60's
+# lever that nobody registered, and it is why they lead the list on CV.
+_WHY_DRAIN = ("DRAIN. Highest-CV unsent non-vetoed file left in the queue; sent in ascending "
+              "CV order so the best of the ten goes LAST and wins any public tie (w46b §5).")
+_WHY_UNBLOCKED = ("DRAIN, and NEWLY SENDABLE: blocked on 08-23 by the P_MAX hijack-risk gate at "
+                  "P(above the 0.97118 tier) = {p:.3f}; the tier is now 0.97119 and the same "
+                  "file reads {q:.3f}. Nothing about the file changed — the board did.")
+WHY_0824 = {s: _WHY_DRAIN for s in ORDER_0824}
+for _s, _p, _q in (("w40_ad211std_rescale", 0.0823, 0.0057),
+                   ("w38_ad202std_rescale", 0.0611, 0.0036),
+                   ("w27_ad188stdcorr", 0.0530, 0.0029)):
+    WHY_0824[_s] = _WHY_UNBLOCKED.format(p=_p, q=_q)
+WHY_0824["w40_ad211std_rescale"] += (" Best CV of the ten and therefore LAST.")
+
+ORDERS = {"2026-08-22": list(REG["order"]), "2026-08-23": ORDER_0823,
+          "2026-08-24": list(ORDER_0824)}
+WHYS   = {"2026-08-22": WHY_0822,           "2026-08-23": WHY_0823,
+          "2026-08-24": WHY_0824}
 
 # calibration files have no entry in w23b_sendqueue (no stack CV to rank on) and must be
 # injected, exactly as w37c_prereg.py did for the w37 batch. stem -> (builder json, note).

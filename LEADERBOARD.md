@@ -1913,3 +1913,17 @@ sit at 0.97119, so the best-two-by-public-score pair is `w36_ad199stdcorr_ens4` 
 1 — dropped to the 0.97118 tier: **P(our CV pick is in the final pair) went 0.400 → 0.000.**
 Measured cost of not clicking: **+4.523e-6**, down from +7.855e-6 (w62a). The exposure improved
 by 42%, not the 86% w60 priced — see JOURNAL w62 §4.
+
+## 2026-08-23 13:10 UTC (w63, build run — no submission, day was at 10/10)
+
+- **Account best 0.97119**, unchanged since the 12:41 sends. `w36_ad199stdcorr_ens4` and
+  `w38_ad202stdcorr_ens4` are still the only two files on the board at that score, so
+  **auto-selection remains DETERMINED** and `w63a`'s GATE T2 confirms it against the live board.
+- **62 teams strictly above 0.97119** on the 200-row window → we sit at ~63rd of ~1,326.
+- Leader **MILANFX 0.97144** (2026-08-23 06:16). **Gap to the top: 25e-6** — roughly 20× the
+  whole width of the determined pair's usable pricing range (1.05e-6), which is a useful sense
+  of scale: the selection-mechanism work is worth single-digit e-6 and the modelling gap is 25.
+- 121 scored submissions on the account, 121 distinct filenames, all fingerprinted on disk.
+- Board shape unchanged otherwise: tier 2 is five files at 0.97118 including the CV **pick**
+  `w36_ad199stdcorr`, which remains reachable **only by the click** — still blocked, no browser
+  MCP attached for the seventh run running.

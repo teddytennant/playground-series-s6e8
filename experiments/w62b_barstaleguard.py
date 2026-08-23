@@ -55,9 +55,16 @@ def main():
     print("w62b: the hijack CV bar goes VOID when the auto-slot-1 SET moves")
     print("=" * 92)
 
-    art = json.load(open(os.path.join(HERE, "w59a_hijackprice.json")))
+    # ⚠⚠ w63: READ THE ARTEFACT THE SENDER READS, NOT A PATH RE-TYPED HERE. This line used to
+    # be `json.load(open(os.path.join(HERE, "w59a_hijackprice.json")))`. When w63 re-pointed
+    # `w26g_send.HIJACKPRICE` at the successor pricer, that hard-coded path would have gone on
+    # testing a file the sender no longer opens — check 1 would have compared the LIVE bar
+    # against a SUPERSEDED one and failed for the right reason by accident, and every other
+    # check would have silently exercised the wrong artefact. Same shape as the defect this
+    # file exists for: the comment states the rule ("the artefact"), the code names a proxy.
+    art = json.load(open(S.HIJACKPRICE))
     rec = sorted(art["tiers"]["slot1"])
-    recv = float(art["tiers"].get("slot1_public", 0.97118))
+    recv = float(art["tiers"]["slot1_public"])
     bar = float(art["cv_bar_new"])
     print(f"  artefact: slot1 = {rec} @ {recv:.5f}, cv_bar_new = {bar:.10f}\n")
 
@@ -71,10 +78,14 @@ def main():
     check("rows=None -> unchanged (w59b's calls still valid)",
           S.hijack_cv_bar() is not None and abs(S.hijack_cv_bar() - bar) < 1e-15)
 
-    # 3. THE MOVED CASE — a different SET at a different value voids it.
-    moved = ["w36_ad199stdcorr_ens4", "w38_ad202stdcorr_ens4"]
-    check("MOVED tier (today's real move) -> VOID",
-          S.hijack_cv_bar(rows_for(moved, 0.97119)) is None)
+    # 3. THE MOVED CASE — a different SET at a different value voids it. ⚠ w63: this used to
+    #    name the 08-23 move literally, which stopped being a MOVE the moment the successor
+    #    artefact recorded that tier. Derived from the artefact instead, so it is a moved tier
+    #    for any artefact this ever runs against.
+    moved = sorted(set(rec) ^ {"z_moved_stem"})
+    assert sorted(moved) != rec, "the 'moved' tier must differ from the recorded one"
+    check("MOVED tier -> VOID", S.hijack_cv_bar(rows_for(moved, recv + 1e-5)) is None,
+          f"{moved}")
 
     # 4. NEGATIVE CONTROL A — a SET comparison, not a COUNT. w61 §5: a queue's BLOCK COUNT was
     #    registered twice as an invariant and was a function of where a loop stopped. Same
