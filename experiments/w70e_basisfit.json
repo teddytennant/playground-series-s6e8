@@ -1,0 +1,24 @@
+{
+ "sd_s": 7.720036371113876,
+ "sd_h": 7.731889723674441,
+ "D_SD": 0.011853352560565078,
+ "se": 0.0640521920784295,
+ "n_corr": 10,
+ "verdict": "UNINFORMATIVE \u2014 the LB cannot adjudicate the basis (the PREDICTED outcome)",
+ "shuf_mean": 0.02829722156916973,
+ "shuf_sd": 0.07370379015807779,
+ "true_pctile": 0.415,
+ "corrected_rows": [
+  "w21_ad187corr",
+  "w21_ad187corr_ens4",
+  "w22_ad187corr_rankraw",
+  "w23_ad187stdcorr",
+  "w27_ad190stdcorr",
+  "w29_ad194stdcorr",
+  "w34_ad195stdcorr",
+  "w36_ad199stdcorr",
+  "w40_ad211stdcorr",
+  "w38_ad202stdcorr"
+ ],
+ "failures": 0
+}
