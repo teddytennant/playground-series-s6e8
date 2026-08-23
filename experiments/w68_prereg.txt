@@ -1,0 +1,93 @@
+w68 PREREG -- 2026-08-23, slot 7 of 10 (ZERO slots; the UTC day was at 10/10 on arrival).
+Committed BEFORE experiments/w68a_subsetgate.py exists. Nothing below is chosen from a
+number this run produced. The w65a numbers ARE on disk and are declared as GIVEN in section 1.
+
+================================================================================
+0. WHY THIS TEST, AND WHY IT IS NOT THE ISSUED ANGLE
+================================================================================
+Issued angle: "Original dataset: find the real source dataset this synthetic data was
+generated from and concatenate it as extra training rows."
+
+CLOSED FOUR TIMES and carried in w58 section 9.7's do-not-reopen list (x4). The external
+members already in the stack (ext_members3..14, nine directories) ARE the public work built
+on that search; there is no unexploited source-data edge left to find, and no submission slot
+exists today to test one with. Substituted the item w67 section 7 ranks first: w65a finished
+this run and its GATE FAILED. Diagnosing a failed gate outranks a new angle (playbook step 1).
+
+================================================================================
+1. GIVEN, NOT PREDICTED (w65a_armpair.json, complete on disk before this file was written)
+================================================================================
+w65a ran all four seeds. R1 DOES NOT FIRE (positive 1/4, mean -1.058e-6); WANTED slot 1 stays
+`w36_ad199stdcorr`. R2 DOES NOT FIRE (lexb -1.058 outside placebo range [+2.742, +7.808]);
+P8 spread 5.066e-6 CONFIRMED; P7 worst +9.46e-6 CONFIRMED. P3/P3b/P4/P5 CONFIRMED, P6
+FALSIFIED. FAILURES 1: **P2 7/8** -- `arm 199 rankraw` off the shipped OOF by -6.49e-6,
+over the 4e-6 bar, under the 2e-5 VOID bar so nothing is voided.
+
+The offsets are SIGN-CONSISTENT WITHIN ARM, which is what makes this worth an instrument:
+    arm 202 (NOT subsetted):  +1.02 +1.64 +1.87 +1.47   mean +1.500e-6, 4/4 positive
+    arm 199 (SUBSETTED):      -0.77 -6.49 -3.94 -3.18   mean -3.595e-6, 4/4 negative
+    implied differential:                                     -5.095e-6
+A second, independent estimate of the same quantity: w65a's seed-42 h3 delta is +2.25e-6
+where the STORED single-partition delta (w65 prereg section 1) is -2.406e-6, a discrepancy of
++4.656e-6 and A SIGN FLIP. The two agree to 0.44e-6.
+
+================================================================================
+2. THE QUESTION, AND WHY IT IS LOAD-BEARING
+================================================================================
+w65a's R-M11f asserts: "ARM 199 is the ARM 202 matrix with the three ext_members14 columns
+deleted, and every transform in agent/stack.py is strictly per-column, so subsetting after
+transform+scale is EXACTLY EQUAL to loading 199 members."
+
+Reading the source, the mathematical half of that claim holds: `rankraw` is an explicit
+per-j loop; `hybrid`'s `bad` mask and its `s = B[:, bad].std(0)` are per-column; `rescale`'s
+`lo/hi` are `.min(0)/.max(0)`; and w65a's own `s = M.std(0)` is per-column. So the subsetted
+matrix SHOULD be bitwise identical to a native 199 load, and the -5.095e-6 should not exist.
+
+Something is wrong with one of those two statements and it matters beyond w65: R-M11f is the
+load-bearing assumption of w29d_partition.py, and the 190-over-188 and 194-over-190 promotions
+were both decided on that instrument. If subsetting is not exact, those decisions inherit an
+uncontrolled ~5e-6 term -- the same size as the effects they were deciding.
+
+================================================================================
+3. THE INSTRUMENT (w68a_subsetgate.py)
+================================================================================
+ONE process. Load the 202 pack (XDIRS as w65a) and, SEPARATELY IN THE SAME PROCESS, load the
+199 pack natively (XDIRS minus ext_members14 -- exactly w36b_run.sh's dir list). Then compare
+the two 199-column matrices DIRECTLY, before any fit. A matrix comparison, not an AUC
+comparison: an AUC difference confounds the data question with the lbfgs question, and the
+data question is answerable exactly.
+
+================================================================================
+4. BLIND PREDICTIONS
+================================================================================
+P1  GATE: the native load returns exactly 199 members, the 202 load exactly 202, and the
+    202 name list MINUS the three lexb names EQUALS the native 199 name list ELEMENTWISE AND
+    IN THE SAME ORDER. A set-equal-but-order-different result is itself the finding and is
+    reported as such rather than sorted away.
+P2  THE MAIN PREDICTION: for all three transforms, the subsetted matrix and the natively
+    loaded matrix are BITWISE EQUAL -- max |diff| is EXACTLY 0.0, not merely small.
+P3  Given P2, the seed-42 AUCs of the two 199 matrices agree to < 0.5e-6 in all four cells.
+P4  CONDITIONAL READING, registered now so it cannot be chosen later:
+      - if P2 and P3 both hold, the -5.095e-6 is NOT subsetting; it is the cross-process
+        rebuild floor, w65a's P2 bar of 4e-6 is too tight for it, and w65a's gate failure is
+        a FLOOR failure, not a LOAD failure. R-M11f SURVIVES and w29d is untouched.
+      - if P2 fails, R-M11f is FALSE, and w65a's R1/R2 plus w29d's 190/194 promotions all
+        inherit an uncontrolled term of the size of the effect they measure.
+    In EITHER branch w65a's R1 conclusion (slot 1 stays) is unaffected -- see section 5.
+P5  NEGATIVE CONTROL, so P2 cannot pass vacuously: an arm formed by deleting three OTHER
+    columns (PLA1's three, w65a's own draw) must NOT equal the native 199 matrix -- max
+    |diff| STRICTLY > 0 for all three transforms.
+P6  DETERMINISM CONTROL: crossfit called twice on the SAME array in this process returns a
+    bit-identical AUC (diff exactly 0.0). If this fails, no e-6 AUC comparison in this
+    workspace means anything and P3 is void.
+
+================================================================================
+5. WHAT THIS RUN DOES NOT DO
+================================================================================
+- It does NOT move `check_selection.WANTED`. w65a's R1 did not fire and this run has no
+  mechanism to make it fire: the measured lexb delta is -1.058e-6 and the subsetting bias, if
+  real, is +5.095e-6 IN 202's FAVOUR, so removing it makes the delta MORE negative, not less.
+  R1's non-firing is robust to the entire defect under test.
+- It does NOT re-price the queue, touch the 2026-08-24 send list, or edit anything on the
+  send path.
+- No submission. The 2026-08-23 UTC day was at 10/10 before this run began.
