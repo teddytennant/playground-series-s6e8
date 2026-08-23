@@ -40,11 +40,25 @@ the 33e-6 gap to the leader.
 
 ⛔ THIS SCRIPT DOES NOT APPLY THE OVERRIDE TO ANY REGISTERED FILE. The 08-24 and 08-25 tens are
 registered and md5-pinned; rewriting a planned file behind its plan's back is exactly what this
-workspace's machinery exists to prevent. `--apply <in> <out>` writes a NEW file and refuses to
-overwrite. A later run should register the change, then apply it at the top of its window.
+workspace's machinery exists to prevent. A later run should REGISTER the change, then apply it.
+
+🎯 **HOW TO APPLY IT, AND WHY `--inplace` IS THE RIGHT MODE RATHER THAN A RENAME.** The override
+touches TEST ids only, so a file's cross-fitted CV — computed by `w23b_sendqueue` as
+`fast_auc(y, submissions/oof_<name>.npy)` over TRAIN rows — is **completely unchanged**. Only the
+md5 moves, and `w23b` recomputes that from the file. So the whole chain stays self-consistent iff
+the override is applied **BEFORE step 1**:
+
+    w70f --inplace <stem>...        # rewrites submissions/<stem>.csv, backs up to .pre_dupleak
+    w23b_sendqueue.py               # re-globs, recomputes md5 AND cv -> both correct
+    w48e_order.py --day <DAY> --write ; w26g_send.py --n 10 ; --go
+
+⛔ **DO NOT reach for `--apply IN OUT` for this.** A renamed copy has no `oof_<newname>.npy`, so
+`w23b` records `cv = nan`, drops it from the ranked queue and `w48e` cannot defend it — the file
+becomes unsendable. `--apply` exists for scratch verification, not for the send path.
 
     .venv/bin/python experiments/w70f_dupleak.py                      # find, verify, value
-    .venv/bin/python experiments/w70f_dupleak.py --apply A.csv B.csv  # write B = A + overrides
+    .venv/bin/python experiments/w70f_dupleak.py --apply A.csv B.csv  # scratch copy, never in place
+    .venv/bin/python experiments/w70f_dupleak.py --inplace stem [stem...]   # the send-path mode
 """
 from __future__ import annotations
 
@@ -162,6 +176,39 @@ def apply_to(src, dst, overrides):
         print(f"     id {i}: {before[i]:.6f} -> {float(overrides[i]):.1f}")
 
 
+def inplace(stems, overrides):
+    """Rewrite submissions/<stem>.csv in place, keeping the OOF pairing (and so the CV) intact.
+
+    ⚠ A backup is written FIRST and the run aborts if one already exists — a second application
+    would be a no-op on the values but would overwrite the only copy of the original."""
+    for stem in stems:
+        src = os.path.join(SUB, f"{stem}.csv")
+        bak = src + ".pre_dupleak"
+        if not os.path.exists(src):
+            raise SystemExit(f"⛔ {src} does not exist")
+        if os.path.exists(bak):
+            raise SystemExit(f"⛔ {bak} already exists — {stem} looks already overridden; "
+                             f"refusing to clobber the original")
+        if not os.path.exists(os.path.join(SUB, f"oof_{stem}.npy")):
+            raise SystemExit(f"⛔ {stem} has no oof_{stem}.npy — w23b would rank it cv=nan and "
+                             f"w48e could not defend it. Refusing.")
+        d = pd.read_csv(src)
+        assert len(d) == N_TEST and list(d.columns) == ["id", "addicted_label"], stem
+        os.replace(src, bak)
+        before = {i: float(d.loc[d.id == i, "addicted_label"].iloc[0]) for i in overrides}
+        for i, lab in overrides.items():
+            assert int((d.id == i).sum()) == 1, f"id {i} not unique in {stem}"
+            d.loc[d.id == i, "addicted_label"] = float(lab)
+        assert d.addicted_label.notna().all() and len(d) == N_TEST
+        d.to_csv(src, index=False)
+        print(f"  {stem}: " + ", ".join(
+            f"id {i} {before[i]:.6f}->{float(overrides[i]):.1f}" for i in sorted(overrides))
+            + f"   (original at {os.path.basename(bak)})")
+    print("\n  ⚠ NOW RE-RUN `w23b_sendqueue.py` so the queue's md5 matches. The CV is unchanged "
+          "by\n    construction — the override touches TEST ids and the CV is an OOF/TRAIN "
+          "quantity.")
+
+
 def main() -> None:
     print("=" * 92)
     print("w70f  TRAIN↔TEST DUPLICATE LEAK")
@@ -182,7 +229,15 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    if "--apply" in sys.argv:
+    if "--inplace" in sys.argv:
+        k = sys.argv.index("--inplace")
+        o = find()
+        assert not FAILURES, "gates failed; refusing to apply"
+        stems = sys.argv[k + 1:]
+        if not stems:
+            raise SystemExit("⛔ --inplace needs at least one stem")
+        inplace(stems, o)
+    elif "--apply" in sys.argv:
         k = sys.argv.index("--apply")
         o = find()
         assert not FAILURES, "gates failed; refusing to apply"
