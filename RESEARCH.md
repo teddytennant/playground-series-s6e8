@@ -1,6 +1,94 @@
 # Research — playground-series-s6e8
 
 
+# 🎯 A TRAIN↔TEST DUPLICATE LEAK WORTH +1.62e-6, FREE AND SAFE (w70, 2026-08-23)
+
+**EXACTLY 2 of the 296,302 test rows match a train row on the full 12-feature vector**, and both
+matched train groups are label-PURE, so the labels are READ, not inferred:
+
+    id 735378 -> label 1        id 862871 -> label 0
+
+Priced off our own OOF and our own test ranks (`experiments/w70f_dupleak.py`, FAILURES 0):
+our stacks put **both at the ~33rd percentile**; one belongs at the top, the other at the bottom.
+
+    id 735378  true 1  @33.16%  (beats 90.7% of negatives)  ->  +0.441e-6
+    id 862871  true 0  @33.79%  (above 10.2% of positives)  ->  +1.181e-6
+    TOTAL, full test set                                        **+1.622e-6**
+
+✅ **SAFE IN THE WAY THAT MATTERS.** Each row is in the public slice w.p. 0.20, so the expected
+PUBLIC gain is the same +1.62e-6 — **public and private move together** because these are ground
+truth, not a slice-tuned hedge. Deterministic, cannot overfit, orthogonal to every model.
+For scale: **larger than the 1.058e-6 lexb price w65 spent four seeds and 9 CPU-hours on.**
+
+    .venv/bin/python experiments/w70f_dupleak.py                      # find, verify, price
+    .venv/bin/python experiments/w70f_dupleak.py --apply IN.csv OUT.csv   # refuses in-place/overwrite
+
+⛔ **NOT APPLIED to any registered file** — the 08-24/08-25 tens are md5-pinned and rewriting a
+planned file behind its plan is what the `w48e`/`w26d` apparatus exists to prevent. Register it,
+then apply at the top of a window. ⚠ It breaks the pricer's CV↔LB relation slightly: an
+overridden file has an unchanged CV and a ~1.6e-6 better LB.
+
+## ⛔⛔ WHY IT SAT UNFOUND — A NULL RECORDED AGAINST THE WRONG QUESTION CLOSES THE RIGHT ONE
+
+JOURNAL line 19481 records, as a closure: *"Train has no exact feature duplicates (691,369 rows →
+691,369 distinct on NUM+CAT), so duplicate-group leakage tests are unavailable here. Checked this
+run, **recorded so no one re-checks**."* **That measurement is correct** (w70f GATE 1 reproduces
+it exactly) **and it answers a DIFFERENT QUESTION.** Train-internal duplicates → whether CV folds
+need grouping. Train↔test overlap → whether any test label is already known. The note tested the
+first; its trailing clause closed the second, which nobody had tested.
+⚠ **WHEN CLOSING A LINE, WRITE DOWN WHICH QUESTION THE MEASUREMENT ANSWERS, NOT JUST THE NUMBER
+— and be suspicious of any closure whose last clause is "so no one re-checks."**
+
+
+# ⛔ `$?` AFTER A PIPELINE IS THE LAST STAGE'S STATUS, NOT THE SCRIPT'S (w70)
+
+`python check_selection.py | tail -25 ; echo $?` printed **0**; the script exits **1**. w70 §8.5
+briefly recorded a fabricated "the exit code now lies" defect on the strength of it, and that
+false claim was load-bearing — `w26g_send.py:371`/`:552` and RESEARCH:1070 gate the ARM 217 test
+and the above-tier sends on the literal condition *"once `check_selection` exits 0"*.
+⛔ **Redirect to a file and read `$?`, or use `PIPESTATUS`/`set -o pipefail`.**
+✅ `out=$(cmd)` COMMAND SUBSTITUTION is fine — `$?` there IS the command's status, so the
+fourteen-guard `rc=` sweep is sound.
+
+
+# ⚠⚠ REFRESH THE KAGGLE TOKEN **BEFORE** THE SEND CHAIN, NOT AFTER THE FIRST 401 (w70)
+
+The token expired **17:41:21Z** mid-run and every call returned `Authentication required`. This
+is the documented SDK sign-error window (RESEARCH line ~10662): the CLI trusts the token for
+**30 minutes after expiry**, sends it, and Kaggle 401s. Fixed in seconds:
+
+    cp ~/.kaggle/credentials.json ~/.kaggle/credentials.json.bak.<wave>
+    /home/nixos/.local/share/uv/tools/kaggle/bin/python -c "
+    from kagglesdk import KaggleClient
+    from kagglesdk.kaggle_creds import KaggleCredentials
+    with KaggleClient() as k:
+        KaggleCredentials.load(client=k).refresh_access_token()
+    print('refreshed')"
+
+🎯 **NEW EXPIRY 2026-08-24T05:42:55Z, AND EVERY SEND SO FAR HAS GONE AT ~12:41 UTC.** So the
+08-24 window opens with an already-expired token, inside the lying window. **Refresh first.**
+
+
+# THE BOARD, AND WHY THE PUBLIC 0.97123 IS NOT A METHOD (w70, 17:35Z)
+
+Our **0.97119 is rank 73**; leader Chris Deotte **0.97152**; **37 teams at or above 0.97123.**
+⚠ The standing sentence *"top public notebook 0.97101 < our 0.97106 … we have everything in the
+forum"* (JOURNAL ~4397) has **stale numbers** — best public is now **0.97123, above us**. Both
+top notebooks were pulled and read in full:
+
+- `amanatar/s6e8-elite-rank-average-ensemble-0-97123` loads a pre-made `ULTIMATE_0.97123_SOTA.csv`
+  and rank-averages it **95/5** with a throwaway LGBM. The score is the *teacher file's*.
+- `itzzomkar/s6e8-0-97123` globs `/kaggle/input/**/submission.csv` and rank-gauss blends them
+  with **weights from substring-matching the filename** (`elite`/`public`/`psa`/`would` → 0.35).
+
+✅ **NEITHER IS A METHOD; both re-blend one circulating CSV**, so the 37-team cluster is that
+file's distribution list. ⛔ **Do not chase it** — it is the Rogii failure, and it is unusable
+here anyway (submission-only, no OOF → no cross-fitted CV → `fam=member` → the sender blocks it).
+**The old conclusion survives on its merits; only its numbers are stale.**
+
+
+
+
 # 🔴🔴 EVERY `stdcorr` CV EXISTS ON TWO BASES AND NEITHER IS LABELLED (w70, 2026-08-23)
 
 Every corrected file has two defensible CVs, both stored, both real:
