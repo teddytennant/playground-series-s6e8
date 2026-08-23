@@ -1,0 +1,48 @@
+112 scored files with an OOF and a fitted family: 93 in the 93-row fit table, 19 out of it
+
+================================================================================================
+ARM A — are the OLS and GLS fits observationally distinguishable on the 112?
+================================================================================================
+  in-sample RMSE  OLS 17.426e-6   GLS 39.536e-6
+  fitted-value difference: mean +21.230, sd 28.565, max|.| 77.402 e-6   (w53a residual sd 7.720e-6)
+  corr(fitted_OLS, fitted_GLS) = 0.935991
+  => the disagreement is ACCURACY, on the max|difference| vs 3x residual sd test fixed in the docstring
+
+================================================================================================
+ARM B — refit by GLS on the SAME 93 rows, then score BOTH on the 19 held-out files
+================================================================================================
+  refit on 93 of the 93 rows (a fit-table row with no OOF on disk cannot enter the covariance)
+  term            frozen OLS     GLS(93)        se
+  const          +971068.8513 +971089.2744  576.3757
+  cv6                +1.8327     +0.9582    0.2183
+  fam[ens4]         +13.4084     +2.0459    1.9757
+  fam[hybrid]        +4.1367    -18.8810   10.0997
+  fam[logit]       +145.2814    +39.4466   15.6727
+  fam[rankraw]      +13.7549    +25.5778   11.4396
+  fam[rescale]      +32.9730     +6.7695   10.3008
+  fam[w]             -0.4527     +5.0053    3.6561
+  fam[wh3]           -4.4047     +7.3645    3.7662
+  std               -21.1060     -0.9064    4.6933
+  corr              +13.7231     +2.3752    2.4767
+  era:cv6            -0.3902     -0.0554    0.1056
+
+  held-out frozen OLS: RMSE   147.48e-6   MAE    66.04e-6   bias   +63.47e-6
+
+  held-out GLS(93)  : RMSE    36.22e-6   MAE    24.98e-6   bias   +24.26e-6
+
+  restricted to the 16 held-out files inside the pricer's range:
+    frozen OLS: RMSE   11.28e-6   MAE    9.43e-6   bias   +6.37e-6
+    GLS(93)  : RMSE   19.52e-6   MAE   15.00e-6   bias  +14.15e-6
+
+================================================================================================
+ARM C — the counterfactual the workspace actually asks: CV needed to top the board
+================================================================================================
+  best scored CV 0.9701400060 (w36_ad199stdcorr, family h3), account best LB 0.97119
+  target: one reporting step above, 0.97120
+
+  frozen OLS base  slope +1.8327/e-6 ->    5.46e-6 of CV per LB step; the +19.0e-6 gap to target needs    +10.4e-6 more CV
+  frozen OLS era   slope +1.4425/e-6 ->    6.93e-6 of CV per LB step; the +19.0e-6 gap to target needs    +13.2e-6 more CV
+  GLS(93) base     slope +0.9582/e-6 ->   10.44e-6 of CV per LB step; the +19.0e-6 gap to target needs    +19.8e-6 more CV
+  GLS(93) era      slope +0.9028/e-6 ->   11.08e-6 of CV per LB step; the +19.0e-6 gap to target needs    +21.0e-6 more CV
+
+wrote experiments/w66c_attrib.json

@@ -22673,3 +22673,334 @@ dict — **`WANTED` itself is UNCHANGED**), plus `RESEARCH.md`, `LEADERBOARD.md`
 
 ⛔ `git push` still blocked (no `gh`, no ssh, no token) — eighth run in a row. Commits are
 **local only**.
+
+# w66 — 2026-08-23, slot 5 of 10 (ZERO slots available). THE ANGLE WAS TAKEN AS ISSUED FOR THE FIRST TIME IN NINE RUNS, AND IT FOUND TWO REAL DEFECTS — ONE OF THEM IN MY OWN PREREG'S SAMPLE
+
+`date -u` 14:07:44 UTC at the start. The Kaggle API reports **TEN COMPLETE submissions stamped
+2026-08-23 12:41:06 .. 12:41:34**. The day is at **10/10 and no submission is possible.**
+`/proc` scan (per-pid, `tr`, never `ps`/`pgrep`) shows `run-competition.sh`, its `tee`, this
+agent, **w65's `w65a_armpair.py` still running**, and sixteen `gaten.py` processes belonging to
+the `kaggriculture` workspace — the box is at load 32 on 16 cores and everything here is ~3x
+slower than usual. ⛔ **No `mcp__brave__*` in the tool list** — the click stays blocked, NINTH
+run running.
+
+## 0. ⚠⚠ THE w65 RUN LEFT NO JOURNAL ENTRY. THIS IS THE RECONSTRUCTION.
+
+There is no `# w65` heading in `JOURNAL.md`. The run existed: it committed `7193479` and
+`4ca712d`, wrote `w65_prereg.txt`, `w65a_armpair.py`, `w65b_pinguard.py`, `w65c_subsetcheck.py`,
+and launched `w65a_armpair.py --seeds 42,101,13,7` at 13:56 UTC, which is **still running now**.
+It ended before writing up. Reconstructed from the artefacts so the work is not lost:
+
+* **w65's angle** ("error analysis") was the EIGHTH closed angle; it substituted the reading that
+  is not closed — *is the current slot-1 pick actually the best?* `WANTED` slot 1 is
+  `w36_ad199stdcorr`; `w38_ad202stdcorr` is 2.417e-6 behind **on stored levels only**, and
+  `check_selection.py` says of exactly that: *"Ranking these three files by their stored levels
+  is not a measurement."*
+* **w65a** is `w29d_partition.py` moved up eight members: four arms (202, 199, and two matched
+  three-column placebo drops PLA1/PLA2 seeded at 65) across four partitions, ONE load.
+* **w65b, w65c both pass.** w65c re-verifies R-M11f — subsetting the scaled 202-column matrix is
+  **bit-identical** (0.000e+00 over the 199 shared columns) to loading 199 members — which is the
+  gate the whole one-load-serves-all-arms design rests on.
+* **w65a is 12 of 48 fits in** and will not finish this run. Its seed-101 cells already read
+  **+15e-6 above seed 42** (arm 202 h3: 0.9701499 vs 0.9701345), which is w65's P7 load-integrity
+  control firing in the right direction and above its +8e-6 bar. ⚠ **The 08-24 run must read
+  `experiments/w65a_armpair.log` FIRST** and write up w65 as well as its own work.
+
+⚠ **NEW: A RUN THAT LAUNCHES A LONG JOB AND DOES NOT JOURNAL IT LEAVES NO OWNER FOR THE RESULT.**
+The next run had no way to know `w65a` existed except by scanning `/proc`. Register a background
+job in the journal AT LAUNCH, not at completion.
+
+## 1. THE ANGLE, TAKEN AS ISSUED
+
+*"Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check the CV-to-LB gap
+across every experiment so far, and make sure the strongest submission is the one selected."*
+
+Nine consecutive runs substituted their angle. This one did not, and it should not have: it is
+not a modelling idea, so no closure touches it, and it was last issued on **2026-08-19**
+(`w28a_cvlb_refresh.py`, 89 stems) — **forty files and three pricer versions ago**. Registered in
+`experiments/w66_prereg.txt`, committed **d7db059 before `w66a_pricercal.py` existed**.
+
+## 2. 🔴🔴 MY OWN PREREG'S SAMPLE WAS THE CONFOUND, AND THE REGISTERED HEADLINE WAS WRONG
+
+`w66a` registered PART A on a sample named by a **membership rule**: the 19 scored stems absent
+from w53a's 93-row fit table and carrying an OOF. It fitted a GLS calibration slope of realised
+LB on the frozen pricer's predicted LB and read:
+
+    beta_total = 0.4521   95% CI [0.2536, 0.6506]   -- the pricer OVER-SPREADS by 2.2x
+
+P2a ✅, P2c ✅ (real resolution), **P2b 🔴 and P2d 🔴 — the CI excluded 1.0**. Permutation null
+centred at −0.0001 with sd 0.0075 and p = 0.0000; the −0.45 injection recovered to 2e-16 and
+detected. Everything about the instrument checked out. **The sample did not.**
+
+`w66b_leverage.py` (**declared POST-HOC**) splits it. Three of the nineteen —
+`stack_pub88_mine_logit`, `stack_pub74_logit`, `stack_pub86_hybrid` — are ancient public-stack
+blends sitting **300–430e-6 of predicted LB below** the other sixteen. They span 640e-6 of the
+812e-6 total pred spread and carry **26.9% of the slope's linear weight**:
+
+| arm | n | pred spread | beta_total | 95% CI | excludes 1.0 |
+|---|---|---|---|---|---|
+| ALL (the registered sample) | 19 | 811.7e-6 | **0.4521** | [0.2536, 0.6506] | **YES** |
+| TIGHT (CV ≥ 0.9699) | 16 | 172.0e-6 | **0.9867** | [0.6670, 1.3063] | no |
+| FRESH (the ten 08-23 sends) | 10 | 50.2e-6 | **1.1363** | [0.6632, 1.6093] | no |
+
+**The intervals do not overlap.** By the rule fixed in `w66b`'s docstring before the arms ran,
+this is a **LEVERAGE ARTEFACT** and w66a's PART A headline must be restated: *the frozen pricer's
+predicted LB is calibrated 1:1 inside its operating range, and the over-spread is entirely
+extrapolation failure on three files nobody would ever submit again.*
+
+⚠⚠ **NEW, AND THE MAIN LESSON OF THIS RUN: A PREREG THAT NAMES ITS SAMPLE BY A MEMBERSHIP RULE
+HAS NOT REGISTERED ITS LEVERAGE.** "Absent from the fit table" is a perfectly precise rule and it
+admitted three points that decided the answer. A calibration slope is a leverage-weighted
+quantity; the prereg must fix a **trimming or influence rule** — or register the influence
+diagnostic itself — before the fit, exactly as it fixes the decision rule.
+
+⚠ **NEW: THE CONTAMINATION TOLD THE TRUTH AND THE MECHANISM DID NOT.** §1 of the prereg declared
+that orientation had already shown fourteen (pred, LB) pairs and that the eyeball said
+"beta ≈ 1", against the mechanism-derived registered interval of [0.55, 1.20] centred at 0.85.
+The eyeball was on the ten 08-23 files — which is the FRESH arm, and it read **1.1363**. Declare
+the contamination and score BOTH; a mechanism-derived interval is not automatically the better
+guess.
+
+## 3. 🎯 PART B SURVIVES THE SAME TEST, AND IT SPLITS INTO A REAL FINDING
+
+`w53a_pricer` fits by plain `np.linalg.lstsq` and `w30b_corrterm.json` reports its ses as if the
+93 LB values were independent. They are not — they are **one draw of one public slice**, and w64
+measured those errors correlating at ~0.9999. Refitting w53a's OWN design by GLS under
+`Sxx = St + Sp` (imported from `w63a_setprice.fit`, not re-implemented) plus the 1e-5 LB
+rounding term:
+
+| term | frozen OLS | w30b se | GLS | se | se ratio |
+|---|---|---|---|---|---|
+| const | +971068.85 | 2.32 | +971110.18 | **557.10** | **3.925** |
+| cv6 | **+1.8327** | 0.054 | **+0.7181** | 0.130 | **0.127** |
+| fam[logit] | +145.28 | 5.51 | +24.33 | 10.52 | 0.044 |
+| std | −21.11 | 3.61 | −0.37 | 4.46 | 0.027 |
+
+P4a ✅ (3.925 > 2.0), P4b ✅ (0.127 in [0.01, 0.50]), **P5 🔴** (|GLS cv6 − 1.8327| = 1.11, not
+< 0.30). **R2 FIRES on both the all-112 and the tight-109 arms** (tight: +0.8736 ± 0.2047, whose
+95% CI [0.472, 1.275] still excludes the frozen 1.8327). So this is **not** a leverage artefact:
+`w30b`'s standard errors are meaningless — the intercept is 240x looser than reported and every
+slope is 8–100x tighter — and the CV coefficient itself is ~2x too steep.
+
+## 4. 🎯 WHAT R2 ACTUALLY DEMANDS — AND IT IS **NOT** THE REFIT R2 REGISTERED
+
+`w66c_attrib.py` (**POST-HOC**) refits the same design by GLS on the **same 93 rows** and scores
+both models on the 19 files held out of both:
+
+| sample | frozen OLS RMSE | GLS(93) RMSE | winner |
+|---|---|---|---|
+| the 16 held-out files INSIDE the fitted range | **11.28e-6** | 19.52e-6 | **OLS, by 1.7x** |
+| all 19, incl. three ~400e-6 outside it | 147.48e-6 | **36.22e-6** | **GLS, by 4.1x** |
+
+**The frozen OLS pricer is the better model inside its range and the worse model outside it.**
+So R2 fires, and the follow-up it registered — "refit under GLS" — would make every in-range
+prediction **73% worse**. ⚠⚠ **NEW: R2's CONDITION WAS WRITTEN ON A COEFFICIENT, AND A
+COEFFICIENT DOES NOT TELL YOU WHICH QUERY IS BROKEN.** `pred_lb` is a FIT query and is fine.
+`cv_needed` is a COUNTERFACTUAL query — it asks what CV would be needed — and a counterfactual
+reads the attribution, which is what GLS just showed is not identified. Two queries, one rule,
+and the rule pointed at the wrong repair.
+
+## 5. 🔴 `FIT_CV_MAX` IS THE BEST CV ON RECORD, SO **EVERY** "CV NEEDED" NUMBER IS AN EXTRAPOLATION
+
+    FIT_CV_MIN 0.9700125369   FIT_CV_MAX 0.9701400060  == w36_ad199stdcorr, the WANTED slot-1 CV
+
+By construction, any target above the account best lands outside the fitted range. `cv_needed`
+carried a **prose** warning about this. w64: *a rule in a paragraph is not a rule.* It is now a
+number, derived from the fit table and never typed: `FIT_CV_MIN`, `FIT_CV_MAX`, `out_of_range()`
+and `cv_needed_flagged()`, and `w26d` prints the flag **at** the CV-needed table rather than
+under it. `cv_needed` itself is **unchanged** — nothing on the send path moved.
+
+The honest answer to the query the workspace actually asks: **to gain one reporting step of
+public LB from the best CV on record costs +10.4e-6 of CV under the frozen slope and +19.8e-6
+under GLS(93), and which end is right is not determined by the data in hand.** Every "gap to the
+board" figure this workspace has printed used the +1.83 end.
+
+## 6. 🔴 A `member` CALIBRATION ROW WAS THE ARGMAX OF `w26d`'s CV LEADER
+
+Found while patching the table above. `LEADER = float(max(q.cv.max(), _fit.cv.max()))` — over the
+**whole** queue. The argmax is **`w48_cal_hboyang_mix` at CV 0.9701815536**, a calibration
+vector that can never be selected. The standing rule has been in the journal since w48 — *never
+let a calibration/`member` row into a `max(CV)`* — and **w60d enforces the label in the SENDER
+and nowhere here.** Fixed at the point of use, with an assert that the filter removes something.
+
+⚠ The effect is **2.72e-6** (the next non-member is `w42_ad217stdcorr` at 0.9701788311), not the
+41.5e-6 my first draft of the comment claimed. **That smallness is the reason it survived: a
+wrong number that is nearly right is the kind nobody checks.** It is one member row today and
+the error scales with whatever calibration file gets built next.
+
+⚠ **NEW: A RULE ENFORCED IN ONE CONSUMER IS NOT ENFORCED. `w60d` proves the `member` label is
+correct and that the SENDER honours it; it says nothing about the other four modules that read
+the same frame.** Enumerate the consumers from the rule, not the rule from the consumer you
+happened to be editing.
+
+## 7. THE REGISTERED PREDICTIONS (`experiments/w66_prereg.txt`, committed d7db059 BEFORE the build)
+
+Scored on the **registered** sample, not on the post-hoc arms. §2 overturns the headline; it does
+not re-score the prereg.
+
+| | prediction | outcome |
+|---|---|---|
+| P1 | GATE: the frozen pricer re-derives from its own table to <1e-9 | ✅ **0.000e+00 on BETA and on resid_sd** |
+| P2a | beta_total < 1.0 out of sample | ✅ **0.4521** (⚠ artefact — §2) |
+| P2b | beta_total in [0.55, 1.20] | 🔴 **0.4521** (✅ 0.9867 on TIGHT, post-hoc) |
+| P2c | the 95% CI EXCLUDES 0 — the instrument has resolution | ✅ **[0.2536, 0.6506]** |
+| P2d | the 95% CI CONTAINS 1.0 | 🔴 **it excluded it** (✅ on TIGHT and FRESH, post-hoc) |
+| P3 | \|alpha\| <= 12e-6 (audit only, R3) | 🔴 **+162.3e-6, se 726e-6** — unidentified, as R3 said |
+| P4a | SE_GLS(const)/SE_OLS(const) > 2.0 | ✅ **3.925** |
+| P4b | the se ratio on cv6 lands in [0.01, 0.50] | ✅ **0.127** — the INTERVAL form w64 §7 demanded, and it bit |
+| P5 | \|GLS cv6 − 1.8327\| < 0.30 | 🔴 **1.1146** — R2 fires |
+| P6 | POWER CONTROL: −0.45 injection recovered exactly and detected | ✅ **err 2.2e-16, detected** |
+| P7 | NEGATIVE CONTROL: permutation null centred at 0 | ✅ **−0.0001, sd 0.0075, p = 0.0000** |
+| P8 | 12 guards exit 0; the 08-24 chain plans exactly ten, slots unchanged | ✅ **13 guards now, all 0; plan identical before and after the edits** |
+| P9 | SENSITIVITY: sign of c preserved and se widened | ✅ **−0.5506 vs −0.5479, se 0.1409 > 0.1013** |
+
+**FAILURES 0.** 9 of 13 confirmed. ⚠ P4b is the one that worked: w64 §7 said *"a one-sided bar
+confirmed by two orders of magnitude was set without an estimate; register an INTERVAL when you
+have a mechanism."* P4b was registered as an interval and it constrained a real answer instead of
+being cleared 50x over.
+
+## 8. VERIFICATION, END TO END
+
+**w54a, w55a, w56b, w57c, w59b, w60b, w60d, w62b, w63b, w64b, w65b, w65c, w66d — all exit 0,
+FAILURES 0**, re-run AFTER the edits to `w53a_pricer.py` and `w26d_queueprice.py`, both of which
+are on the send path. `w66d_rangeguard.py` is new: **20 checks, every one negative-controlled** —
+the range constants must be re-derived from the fit table and not typed; `out_of_range` must
+return 0.0 at both closed endpoints and FIRE with the right sign and magnitude 20e-6 outside;
+`cv_needed_flagged` must flag the real query and must NOT flag an in-range one; `cv_needed` must
+be byte-identical to before; the held-out RMSE split must be read from `w66c_attrib.json` and
+must show OLS winning inside and losing outside; and the pre-w66 `LEADER` rule must be
+**REJECTED** by the same check that accepts the new one.
+
+✅ **The 2026-08-24 send chain plans exactly ten, slots 1–10 byte-identical before and after this
+run's edits**, tier live at 0.97119, hijack CV bar live at 0.9701288617. ⚠ The queue on disk
+stays stamped `plan_day = 2026-08-24`; **tomorrow's run must still re-run all four commands.**
+
+⚠ Worth stating plainly: **every one of tomorrow's ten has P(beat the account best) ≤ 5.7e-3, and
+seven of them are below 1e-6.** The sendable queue is exhausted of anything that can move the
+public LB. That is not a reason to skip slots — the brief's economics still make an unused slot
+pure waste — but it is the reason no run since 08-19 has moved the score by building more of the
+same thing.
+
+## 9. NEXT RUN, IN ORDER
+
+1. `date -u` FIRST, then the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then
+   **`tail experiments/w65a_armpair.log`** — w65's four-arm partition run is the oldest open
+   measurement in the workspace and **w65 was never written up (§0)**. Check for
+   `mcp__brave__*` — if present, **make the click**.
+2. **THE SEND IS FOUR COMMANDS**: `w23b_sendqueue.py` → `w48e_order.py --day <TODAY> --write` →
+   `w26g_send.py --n 10` dry → `--go`. **2026-08-24 IS REGISTERED** and re-verified dry today.
+   **2026-08-25 IS NOT and w48e will exit 2.**
+3. 🎯 **R2 IS OPEN AND ITS REGISTERED REPAIR IS WRONG (§4).** Do NOT refit w53a under GLS — w66c
+   measured that making in-range predictions 73% worse. The open question is narrower: **is the
+   +1.83 or the +0.96 slope right ABOVE the fitted range?** The only clean instrument is a file
+   built above `FIT_CV_MAX` and sent, which is what every ad>195 build already is — so this
+   answers itself from the 08-24 sends onward if someone keeps score. Register that first.
+4. ⛔ **SLOT 2 IS CLOSED** (w64 §1–§6). ⛔ **WANTED did not move and must not move on a pricing
+   result** — R1 asserts it, and `w66d` is not the guard for it (`w56b` is).
+5. ⚠ Still untouched, third run running: **the refined P5 from w63 §4** (the additive price is
+   optimistic iff both candidates fall on the SAME side of the status quo; 78/78 and 0/26, but
+   post-hoc). And **the break-even's 16.5e-6 bracket hole** (w63 §5a).
+6. Run **w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d** on any run that sends
+   or touches `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`, `w48e_order.py`,
+   `w26g_send.py`, `w53a_pricer.py` or either pricer. ⚠ `w65c` and `w66d` are slow under load —
+   allow four minutes, and do not run the suite in one 120s shell.
+7. ⛔ **Do NOT** re-open w58 §9.7's list, **the original dataset** (×4), **LightGBM tuning** (×3),
+   **CatBoost tuning** (w61), **feature engineering** (w62), **blending / OOF weight search /
+   hill climbing** (w63), **seed and fold diversity** (w64), or **error analysis** (w65).
+8. ⚠ **NEW: a prereg that names its sample by a MEMBERSHIP RULE has not registered its LEVERAGE —
+   fix a trimming or influence rule before the fit** (§2).
+   ⚠ **NEW: declare contamination and score it — a mechanism-derived interval is not
+   automatically better than a look at the data** (§2).
+   ⚠ **NEW: a decision rule written on a COEFFICIENT does not tell you which QUERY is broken;
+   fit queries and counterfactual queries fail separately** (§4).
+   ⚠ **NEW: a rule enforced in ONE consumer is not enforced — enumerate the consumers from the
+   RULE** (§6).
+   ⚠ **NEW: a wrong number that is nearly right is the kind nobody checks** (§6).
+   ⚠ **NEW: register a background job in the journal AT LAUNCH — a run that launches a long job
+   and does not journal it leaves no owner for the result** (§0).
+   ⚠ Carried: a decision rule must name its condition BY REFERENCE, never re-state it in prose ·
+   a flat contrast can be an instrument with no resolution, and only a counterfactual separates
+   them · a null is evidence of absence only with a POWER CONTROL · a one-sided bar confirmed by
+   two orders of magnitude was set without an estimate; register an INTERVAL · a deferral copied
+   forward copies its CANDIDATE forward too · our board name is `Teddy Tennant`, not `thtennant`
+   · a measurement at one value of a parameter is not a law unless you derived the parameter out
+   · a prereg that quotes a NUMBER and a DESCRIPTION that are different objects has registered
+   neither · a guard that names the artefact's PATH is testing a different file the moment the
+   code moves · a per-file price is not additive — price the SET · a GATE and a PRIORITY are not
+   the same mechanism · a STAMP is not a comparison · a count that depends on where a loop
+   stopped is not an invariant · retirement is a third state · enumerate an enforcer's cases FROM
+   THE RULE · accidental protection is worse than none · a run with an interest in retiring a
+   rule must not retire it · register STRICT inequalities · a POINT PREDICTION IS NOT A GATE ·
+   register against files you HOLD · `w25a_cvlb_full.py` is NOT read-only · a hard-coded tier
+   goes stale every send day · a rule in a PARAGRAPH is not a rule · never use in-sample
+   residuals to test extrapolation · never lower the `cv >= 0.97` floor · never let a `member`
+   row into a `max(CV)` · always pass `--page-size`.
+
+**Files added:** `experiments/w66_prereg.txt`, `w66a_pricercal.py` + `.json` + `.log`,
+`w66b_leverage.py` + `.json` + `.log`, `w66c_attrib.py` + `.json` + `.log`,
+`w66d_rangeguard.py`.
+**Modified:** `experiments/w53a_pricer.py` (`FIT_CV_MIN`/`FIT_CV_MAX`/`out_of_range`/
+`cv_needed_flagged`; `cv_needed`'s behaviour UNCHANGED), `w26d_queueprice.py` (the `member`
+exclusion in `LEADER`, plus the out-of-fit flag printed at the CV-needed table), plus
+`RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+
+**Board at 14:38 UTC: 0.97119, rank 67 of 2,661, 19 teams tied with us. Top 0.97152 (Chris
+Deotte). Gold cut 0.97127 at rank 13; silver cut 0.97116 at rank 133. We are 8e-6 of LB below
+gold — which at the measured IN-RANGE transfer is 4.4e-6 to 8.3e-6 of CV, i.e. more than the
+whole 187→211 pack ladder has bought (w64: 22.5e-6 of CV across 24 members, delta ~0).**
+
+**Submitted 0 — the 2026-08-23 UTC day was already at 10/10 when this run began.**
+
+⛔ `git push` still blocked (no `gh`, no ssh, no token) — ninth run in a row. Commits are
+**local only**.
+
+**⚠ CORRECTION to §9's board line, made before commit.** I wrote "gold cut 0.97127 at rank 13"
+from `10 + 0.2%·(n−1000)`. Kaggle's rule for n > 1000 is `10 + 0.2%·n`, which `LEADERBOARD.md`
+has used since w64. **The gold cut is 0.97126 at rank 15, +70e-6 above us, not +80e-6.** Silver
+0.97116 at rank 133 stands. The §9 conclusion is unchanged and if anything understated: gold is
+**fourteen times** the width of the entire CV ladder under discussion, not eight.
+
+## 10. ADDENDUM — TWO MORE DEFECTS, BOTH FOUND BY DOING THE VERIFICATION RATHER THAN CLAIMING IT
+
+I ran `w26d_queueprice.py` **as a script** twice, to read its CV-needed table. That is what
+writes `w26d_queueprice.csv`, and it stripped the registered `plan_day = 2026-08-24` stamp that
+`w48e_order.py` had put there. ⚠ **Importing w26d is safe** — `_write()` is under
+`if __name__ == "__main__"` and the module prints *"imported, not run: w26d_queueprice.csv left
+untouched"* — so `w66d`'s import is fine and it was purely my two direct runs. Repaired by
+re-running the chain (`w23b_sendqueue.py` → `w48e_order.py --day 2026-08-24 --write` → dry), and
+the ten came back **byte-identical** with `plan_day` restored.
+⚠ **NEW: TO READ A PRINTOUT FROM A MODULE THAT WRITES UNDER `__main__`, IMPORT IT — NEVER RUN
+IT.** w39 recorded "`experiments/*.py` WRITE ON IMPORT" as the hazard; the hazard here is the
+mirror image, and the safe operation is the one that looks less safe.
+
+### 🔴 `w23b_sendqueue.csv` WAS TEN ROWS STALE, AND REFRESHING IT CRASHED `w48e_order.py`
+
+The committed `w23b_sendqueue.csv` still listed all ten files sent at 12:41 UTC today as
+unsent candidates — **w64 never re-ran the builder after the send window**. My re-run dropped
+exactly those ten, correctly. It then exposed a latent crash:
+
+    w48e_order.py:466   r = idx.loc[stem] if stem in idx.index else None
+                        print(f"... cv {r.cv:.10f} ...")     ->  AttributeError on None
+
+The loop appends `"NOT IN QUEUE"` to `prob` and then dereferences `r` unconditionally, so a
+registered stem missing from the queue **raises instead of reporting itself**. Every importer of
+`w48e_order` went red, `w63b_setguard.py` included — rc=1, no message, the guard suite silently
+losing a member. Fixed: a stem that left the queue **because it was sent** is reported and
+skipped (it cannot be written into a plan, so there is nothing to verify); a stem that left for
+any other reason is still a hard problem, and now says so instead of crashing.
+
+⚠ **NEW: A LATENT CRASH IS HELD LATENT BY A STALE ARTEFACT.** This could only fire once
+`w23b_sendqueue.csv` was brought up to date, and nothing had brought it up to date since the
+last send. **Staleness does not just make numbers wrong; it suppresses the errors that would
+have told you.**
+⚠ **NEW: `w23b_sendqueue.py` MUST BE RE-RUN AFTER EVERY SEND WINDOW, not only before the next
+one.** It is step 1 of the four-command chain and the chain is only run when sending, so the
+artefact spends 23 hours a day describing sent files as candidates.
+
+**Post-repair verification: w54a, w55a, w56b, w57c, w59b, w60b, w60d, w62b, w63b, w64b, w65b,
+w65c, w66d — all thirteen exit 0, FAILURES 0.** The 2026-08-24 dry plan is unchanged and
+`plan_day` reads `2026-08-24`.
+
+**Also modified by this addendum:** `experiments/w48e_order.py` (the None dereference),
+`w23b_sendqueue.csv` and `w26d_queueprice.{csv,json}` (regenerated; `best_lb` 0.97118 → 0.97119,
+which is w63's live-read working as designed).

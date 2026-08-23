@@ -102,15 +102,50 @@ def pred_sd(stem):
     return (SD_ERA if new_era(stem) else SD_OLD) * 1e-6
 
 
+# ⚠⚠ THE FITTED RANGE, AS A NUMBER RATHER THAN AS A PARAGRAPH (w66).
+# `cv_needed` used to carry a prose warning that anything above the best era CV on record is an
+# extrapolation. w64 §9: A RULE IN A PARAGRAPH IS NOT A RULE. These are the two ends of the CV
+# range this model was actually fitted on, derived from the fit table and never hand-typed, plus
+# the measured cost of leaving it.
+FIT_CV_MIN = float(_t.cv.min())
+FIT_CV_MAX = float(_t.cv.max())      # 0.9701400060 — EXACTLY the best CV on record, so every
+                                     # "CV needed to top the board" query is an extrapolation.
+
+
+def out_of_range(cv):
+    """How far outside the fitted CV range `cv` sits, in e-6. 0.0 means inside it.
+
+    w66c measured what leaving the range costs, on 19 files held out of the fit entirely:
+        inside the range (16 files)      frozen OLS RMSE  11.28e-6   GLS refit RMSE  19.52e-6
+        including 3 files ~400e-6 below  frozen OLS RMSE 147.48e-6   GLS refit RMSE  36.22e-6
+    So the frozen OLS pricer is the better model INSIDE its range by 1.7x and the worse model
+    outside it by 4x, and the failure grows with the distance. Above the range the two candidate
+    slopes (+1.8327 OLS, +0.9582 GLS-on-the-same-93) differ by 1.9x, which is the honest width
+    of a `cv_needed` answer and is wider than any number this workspace has printed for it.
+    """
+    if cv > FIT_CV_MAX:
+        return (cv - FIT_CV_MAX) * 1e6
+    if cv < FIT_CV_MIN:
+        return (cv - FIT_CV_MIN) * 1e6
+    return 0.0
+
+
 def cv_needed(target_lb, stem):
     """The CV this stem's family/flags would need in order to predict `target_lb`.
 
-    ⚠ Anything materially above the best era CV on record is an EXTRAPOLATION beyond the fitted
-    range. Read it as 'the gap is this large in CV units', not as a promise."""
+    ⛔ The return value is NOT a promise. Pair it with `out_of_range()`: `FIT_CV_MAX` is the best
+    CV on record, so any target above the account's best LB lands outside the fitted range by
+    construction. `cv_needed_flagged` returns both and is the entry point callers should use."""
     intercept = float(_design(0.0, family(stem), is_std(stem), is_corr(stem), new_era(stem))
                       @ BETA)
     slope = ERA_SLOPE if new_era(stem) else BASE_SLOPE
     return MU + ((target_lb * 1e6 - intercept) / slope) * 1e-6
+
+
+def cv_needed_flagged(target_lb, stem):
+    """(cv, out_of_range_e6). Behaviour of `cv_needed` is unchanged; this only adds the flag."""
+    cv = cv_needed(target_lb, stem)
+    return cv, out_of_range(cv)
 
 
 # --------------------------------------------------------------------------------- THE GATE

@@ -1,0 +1,53 @@
+================================================================================================
+PART A — the out-of-sample calibration slope, on three nested samples
+================================================================================================
+
+  ALL     n=19  pred spread   811.7e-6  chi2/dof 1.698 scale 1.303
+    beta_total =  0.4521   se 0.1013   95% CI [ 0.2536,  0.6506]   excludes 1.0: True   excludes 0: True
+    slope weight |w| top 4: w36..dcorr_ens4 +0.0024, blend158..d158_logit -0.0017, stack..b86_hybrid -0.0015, w40..d211std_h3 -0.0011
+    share of sum|w| in the 3 extrapolated files: 0.269
+
+  TIGHT   n=16  pred spread   172.0e-6  chi2/dof 0.733 scale 1.000
+    beta_total =  0.9867   se 0.1631   95% CI [ 0.6670,  1.3063]   excludes 1.0: False   excludes 0: True
+    slope weight |w| top 4: w36..dcorr_ens4 +0.0078, blend158..d158_logit -0.0061, w38..dcorr_ens4 +0.0048, blend150fx..50fx_logit -0.0042
+    share of sum|w| in the 3 extrapolated files: 0.000
+
+  FRESH   n=10  pred spread    50.2e-6  chi2/dof 1.010 scale 1.005
+    beta_total =  1.1363   se 0.2414   95% CI [ 0.6632,  1.6093]   excludes 1.0: False   excludes 0: True
+    slope weight |w| top 4: w36..dcorr_ens4 +0.0150, w38..dcorr_ens4 +0.0103, w38..std_hybrid -0.0071, w38..d202std_h3 -0.0063
+    share of sum|w| in the 3 extrapolated files: 0.000
+
+================================================================================================
+PART B — w53a's own design refitted by GLS, on all files and on the tight range
+================================================================================================
+
+  ALL     n=112  families 8  cv6 range   -415.8..   +82.9  chi2/dof 1.061
+    GLS cv6 = +0.7181  se 0.1300  95% CI [+0.4633, +0.9729]   (frozen OLS +1.8327)
+
+  TIGHT   n=109  families 8  cv6 range   -107.3..   +82.9  chi2/dof 1.041
+    GLS cv6 = +0.8736  se 0.2047  95% CI [+0.4723, +1.2749]   (frozen OLS +1.8327)
+
+================================================================================================
+THE READING, BY THE RULE FIXED IN THIS FILE'S DOCSTRING BEFORE THE ARMS RAN
+================================================================================================
+  ALL   beta_total 0.4521 CI [0.2536, 0.6506]
+  TIGHT beta_total 0.9867 CI [0.6670, 1.3063]
+  FRESH beta_total 1.1363 CI [0.6632, 1.6093]
+
+  intervals overlap: False
+  LEVERAGE ARTEFACT (tight contains 1.0 while all excludes it): True
+  ⚠⚠ w66a's PART A headline must be RESTATED as extrapolation failure only.
+
+  PART B: cv6 ALL +0.7181 +- 0.1300, TIGHT +0.8736 +- 0.2047, frozen +1.8327
+
+================================================================================================
+WHAT THE SLOPE COSTS — the CV needed to gain one reporting step (1e-5) of public LB
+================================================================================================
+  frozen OLS base  slope +1.8327/e-6  ->  need     5.46e-6 of CV per LB step
+  frozen OLS era   slope +1.4425/e-6  ->  need     6.93e-6 of CV per LB step
+  GLS all          slope +0.7181/e-6  ->  need    13.93e-6 of CV per LB step
+  GLS tight        slope +0.8736/e-6  ->  need    11.45e-6 of CV per LB step
+
+  account best LB 0.97119; best scored CV 0.9701400060
+
+wrote experiments/w66b_leverage.json

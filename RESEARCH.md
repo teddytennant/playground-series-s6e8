@@ -11304,3 +11304,148 @@ in range — but it is vetoed because w51 found all five `ext_members16` fail an
 **`w48d_arm217.json`'s registered test decides it: ≥0.97116 HONEST, ≤0.97080 INFLATED**, and
 `w48_cal_hboyang_mix` is **slot 1 of the 08-23 list**. Wanting it to be HONEST is not a reason to
 move that threshold — registering it in advance was the whole point.
+
+---
+
+## ⚠⚠ THE BLAS PIN DOES NOT REACH numpy IN ANY ANALYSIS SCRIPT (w65, 2026-08-23)
+
+`blend_lab.py` sets five thread-count env vars with `os.environ.setdefault` above its own
+`import numpy`, and its comment claims that from w28 on *"every build from here shares one BLAS
+configuration, so two files built on different days can be differenced again."*
+
+**That holds for `blend_lab.py` RUN AS A SCRIPT and for nothing else.** OpenBLAS reads
+`OMP_NUM_THREADS` when numpy loads it. A module that does `import numpy as np` at the top and
+`from blend_lab import load_all` twenty lines later has already loaded OpenBLAS by the time the
+`setdefault` runs, so the pin cannot move it. Measured directly in that exact order:
+
+```
+before blend_lab import : [('openblas', 16)]
+env  after  import      : OMP_NUM_THREADS=4  OPENBLAS_NUM_THREADS=4
+pools after import      : [('openblas', 4), ('openblas', 16), ('openmp', 4)]
+```
+
+numpy's OpenBLAS stays at **16**. The 4-thread pools are scipy's and sklearn's own copies,
+loaded after the variable was set. **The process runs a MIXED configuration that matches
+neither the shipped builds (all 4) nor an honestly unpinned run (all 16), and
+`os.environ["OMP_NUM_THREADS"]` reads `4` the whole time — the env var is exactly the thing
+that lies.** Confirmed by CPU accounting on the live w65a job: 15.4 CPU-seconds per wall second
+on a 16-core box.
+
+**`experiments/w65b_pinguard.py` sweeps `experiments/*.py` with `ast` and finds 19 scripts in
+this failure mode**, including `w27w_partition.py`, `w29d_partition.py` (the instrument that
+decided the 194-vs-190 promotion), `w23d_dtype.py`, `w25d_stdholdout.py`, `w26a_sensitivity.py`
+and `w65a_armpair.py` itself. (`w27z2_threads.py` is on the list but is NOT affected in
+practice — its docstring runs it as `OMP_NUM_THREADS=n .venv/bin/python …`, i.e. the variable is
+set in the SHELL before python starts, which does reach numpy. The sweep detects *reliance on
+the in-process pin*, not the shell form.)
+
+**WHAT THIS DOES AND DOES NOT INVALIDATE.** ⚠ Nothing paired. A paired contrast taken inside
+ONE process holds the thread configuration fixed and cancels the term exactly — w27z measured
+A−B at `0.000e+00` to the last digit. So w29d's 194-vs-190 reading and w65a's 202-vs-199
+reading stand. What it DOES invalidate is any **absolute** comparison an analysis script makes
+against a shipped `.npy`: those gates are measuring a thread-configuration difference on top of
+whatever they think they are measuring, and a gate that "reproduces the shipped build" is
+reproducing it *across* a configuration change, not within one.
+
+**THE FIX, AND HOW TO USE IT.** `experiments/blas_pin.py` — import it as the FIRST import,
+above numpy:
+
+```python
+from blas_pin import pin   # or just `import blas_pin`; pin() runs on import
+import numpy as np
+```
+
+`blas_pin.assert_pinned()` verifies with `threadpoolctl` that every loaded native pool is
+actually at 4 and raises otherwise. **Call that, never `os.environ.get`** — see above for why.
+`pin()` returns `False` if numpy is already imported, which is the one-line self-diagnosis.
+
+⚠ **Instrument lesson.** A configuration guard that is written as a side effect of an import
+is only in force for the import ORDER its author had in mind. State the precondition where it
+can be CHECKED (`assert_pinned`), not where it can be assumed. And the general form:
+**a setting whose own read-back cannot distinguish "applied" from "recorded" is not verified by
+reading it back.**
+
+# w66 (2026-08-23) — the CV→LB pricer, audited out of sample for the first time
+
+## ✅ THE FROZEN PRICER IS CALIBRATED 1:1 **INSIDE** ITS FITTED RANGE, AND ONLY THERE
+
+`w53a_pricer` is frozen on the 93 rows of `w52b_cvlb93.csv`. Nineteen scored stems are absent
+from that table and carry an OOF; **ten of them are the 2026-08-23 sends**, whose predicted LB
+went into the submission descriptions before the scores existed. GLS calibration slope of
+realised LB on predicted LB (`Sxx = St + Sp` from `w63a_setprice.fit`, plus the 1e-5 LB rounding
+term, one-sided `sqrt(max(chi2/dof,1))` scaling):
+
+| sample | n | pred spread | beta_total | 95% CI |
+|---|---|---|---|---|
+| all out-of-sample | 19 | 811.7e-6 | 0.4521 | [0.2536, 0.6506] |
+| **inside the fitted CV range** | 16 | 172.0e-6 | **0.9867** | [0.6670, 1.3063] |
+| **the ten 08-23 sends alone** | 10 | 50.2e-6 | **1.1363** | [0.6632, 1.6093] |
+
+The 19-file reading is a **leverage artefact**: three ancient public-stack blends
+(`stack_pub88_mine_logit`, `stack_pub74_logit`, `stack_pub86_hybrid`) sit 300–430e-6 below the
+rest, span 640e-6 of the 812e-6 pred range and carry 26.9% of the slope's linear weight.
+**Quote `pred_lb` at face value inside the range. It is not an upper bound there** — this
+supersedes the w41 §4 / w42 §4 quoting rule for in-range files, and leaves it standing above
+`FIT_CV_MAX`.
+
+## ⛔ `FIT_CV_MAX` == THE BEST CV ON RECORD, SO EVERY "CV NEEDED" NUMBER IS AN EXTRAPOLATION
+
+    w53a_pricer.FIT_CV_MIN = 0.9700125369
+    w53a_pricer.FIT_CV_MAX = 0.9701400060   == w36_ad199stdcorr, the WANTED slot-1 CV
+    w53a_pricer.out_of_range(cv) -> e-6 outside, 0.0 inside (closed at both ends)
+    w53a_pricer.cv_needed_flagged(target_lb, stem) -> (cv, out_of_range_e6)
+
+`cv_needed`'s behaviour is UNCHANGED; the flag is additive. `w26d_queueprice` prints an
+`outside fit` column **at** the CV-needed table. Guarded by `w66d_rangeguard.py` (20 checks, all
+negative-controlled).
+
+**The two defensible slopes disagree by 1.9x above the range**, and nothing in the data picks
+between them:
+
+| model | slope /e-6 | CV per LB reporting step | CV to reach one step above the account best |
+|---|---|---|---|
+| frozen OLS base | +1.8327 | 5.46e-6 | **+10.4e-6** |
+| frozen OLS era | +1.4425 | 6.93e-6 | +13.2e-6 |
+| GLS refit on the same 93 | +0.9582 | 10.44e-6 | **+19.8e-6** |
+
+## 🎯 HELD-OUT MODEL COMPARISON — OLS WINS INSIDE, LOSES OUTSIDE, AND THE SPLIT IS THE POINT
+
+`w66c_attrib.py` refits w53a's design by GLS on the **same 93 rows**, then scores both on the 19
+files held out of both:
+
+| held-out sample | frozen OLS RMSE | GLS(93) RMSE |
+|---|---|---|
+| the 16 inside the fitted range | **11.28e-6** | 19.52e-6 |
+| all 19 (3 sit ~400e-6 outside) | 147.48e-6 | **36.22e-6** |
+
+⛔ **DO NOT "fix" the pricer by refitting it under GLS.** It would make every in-range prediction
+73% worse. The defect is confined to the counterfactual query.
+
+## ⚠⚠ `w30b_corrterm.json`'s STANDARD ERRORS ARE MEANINGLESS — THE FIT IS OLS ON ONE SLICE DRAW
+
+All 93 LB values are one draw of one public slice and w64 measured those errors correlating at
+~0.9999. `lstsq` treats them as independent. Refit under `Sxx + R` over 112 scored files:
+
+    const    OLS se  2.32  ->  GLS se 557.10   ratio 3.925   (the INTERCEPT is unidentified)
+    cv6      OLS se  0.054 ->  GLS se   0.130  ratio 0.127   (+1.8327 -> +0.7181)
+    fam[logit] +145.28 -> +24.33 ;  std -21.11 -> -0.37 ;  corr +13.72 -> +3.73
+
+The coefficients are **not identified separately** — cv6 trades against the family dummies and
+the std/corr flags — so any statement of the form "family X is worth Y e-6" from `w30b` is a
+statement about one arbitrary point in a ridge. The FIT is fine; the ATTRIBUTION is not.
+
+## ⚠ A `member` ROW WAS THE ARGMAX OF `w26d`'s CV LEADER, AND w60d DID NOT CATCH IT
+
+`LEADER = max(q.cv.max(), _fit.cv.max())` took the max over the whole queue, and the argmax is
+`w48_cal_hboyang_mix` at CV 0.9701815536 — a calibration vector. Effect **2.72e-6** (next
+non-member `w42_ad217stdcorr` at 0.9701788311). `w60d_memberguard` proves the label is correct
+and that the **sender** honours it; four other modules read the same frame and none was checked.
+Fixed at the point of use with an assert that the filter removes something; `w66d` checks the
+exclusion is load-bearing and **rejects** the pre-w66 rule.
+
+## THE GUARD SUITE IS NOW THIRTEEN, AND IT DOES NOT FIT IN A 120s SHELL
+
+    w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d
+
+`w65c` and `w66d` load the full member matrix / the live queue and take minutes under load. Run
+them in the background or split the loop; a 120s timeout kills the last two silently.

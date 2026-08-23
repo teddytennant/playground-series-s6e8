@@ -294,19 +294,41 @@ need = (BEST_LB + STEP / 2) * 1e6
 # The CV leader is read LIVE off the queue, never quoted -- it was hard-coded at 0.9701150809
 # (the w23 leader) for three waves after two better files existed, so every "vs leader" figure
 # printed here between w27 and w29 was stale by 3.0e-6.
-LEADER = float(max(q.cv.max(), _fit.cv.max()))
+# ⚠⚠ w66: THIS WAS `max(q.cv.max(), _fit.cv.max())` AND THE MAX WAS A `member` ROW.
+# `w48_cal_hboyang_mix` is a CALIBRATION vector, not a candidate, and at CV 0.9701815536 it was
+# the argmax of the whole queue — so every `gap` printed below was measured against a file that
+# can never be selected. The measured effect is small (the next non-member is
+# `w42_ad217stdcorr` at 0.9701788311, so every gap was 2.7e-6 too pessimistic) and that is
+# exactly why it survived: a wrong number that is nearly right is the kind nobody checks. It is
+# ONE member row today and the error scales with whatever calibration file is built next.
+# The standing rule has been in the journal since w48 ("never let a calibration/`member` row
+# into a `max(CV)`") and w60d enforces
+# the label in the SENDER; nothing enforced it here. Now it is enforced at the point of use, and
+# w66d checks that the exclusion is load-bearing rather than incidental.
+_cand = q[q.fam != "member"]
+assert len(_cand) < len(q), "no member rows in the queue -- the filter below is not load-bearing"
+LEADER = float(max(_cand.cv.max(), _fit.cv.max()))
 print(f"\nCV needed for an even-money shot at {BEST_LB:.5f}, BY FAMILY AND BY SCALING")
 print(f"  (leader {LEADER:.10f})")
-print(f"  {'family':>7s}  {'unstd':>16s}  {'std':>16s}  {'std+corr':>16s}   {'gap':>10s}")
+print(f"  {'family':>7s}  {'unstd':>16s}  {'std':>16s}  {'std+corr':>16s}   {'gap':>10s}"
+      f"   {'outside fit':>11s}")
 for fam in ("h3", "ens4", "hybrid", "rankraw", "rescale", "logit"):
     base = (need - C["const"] - C.get(f"fam[{fam}]", 0.0)) / C["cv_e6"] * 1e-6 + MU
     std = base - C["std"] / C["cv_e6"] * 1e-6
     stdc = std - C["corr"] / C["cv_e6"] * 1e-6
+    # ⚠ w66: the fitted CV range tops out at PR.FIT_CV_MAX, which IS the best CV on record, so
+    # every row of this table is an extrapolation by construction. w66c measured the frozen
+    # model's held-out error growing 13x once outside the range. The flag is printed AT the
+    # number rather than described in the paragraph below it.
     print(f"  {fam:>7s}  {base:16.10f}  {std:16.10f}  {stdc:16.10f}   "
-          f"{(stdc - LEADER)*1e6:+8.1f}e-6")
+          f"{(stdc - LEADER)*1e6:+8.1f}e-6   {PR.out_of_range(stdc):+9.1f}e-6")
 print("  Every file this workspace builds is standardised, and the ones worth building are")
 print("  ALSO corrected -- read the std+corr column. `gap` is what a NEW build must add to")
 print("  the CV leader to be an even-money shot at the board; negative means already there.")
+print(f"  `outside fit` is how far the std+corr CV sits beyond the range this model was fitted")
+print(f"  on ({PR.FIT_CV_MIN:.10f} .. {PR.FIT_CV_MAX:.10f}). NON-ZERO MEANS THE NUMBER TO ITS")
+print(f"  LEFT IS AN EXTRAPOLATION: w66c's held-out test puts the two defensible slopes 1.9x")
+print(f"  apart out there (+1.8327 vs +0.9582), so read the gap as a RANGE, not a target.")
 
 # ⚠⚠ GUARDS ADDED w39 (2026-08-20). READ BEFORE RUNNING THIS FILE.
 #

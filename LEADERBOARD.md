@@ -1943,3 +1943,55 @@ by 42%, not the 86% w60 priced — see JOURNAL w62 §4.
 - Board shape unchanged: auto-selection is still DETERMINED at the `w36_ad199stdcorr_ens4` +
   `w38_ad202stdcorr_ens4` pair, and the CV pick is still reachable only by the click, still
   blocked — **eighth run with no browser MCP attached.**
+
+## 2026-08-23 14:15 UTC (w65, build run — no submission, day was at 10/10)
+
+- **Account best 0.97119, rank 64 of 2,662.** Unchanged from w64 ten minutes of board time
+  earlier; the field added 2 teams. **21 teams still tied with us** at 0.97119.
+- **THE MEDAL CUTS, COMPUTED RATHER THAN EYEBALLED** (Kaggle's rule at n=2,662: gold = top
+  10 + 0.2%·n = 15, silver = top 5% = 133, bronze = top 10% = 266):
+
+  | medal | cut rank | cut score | gap to us |
+  |---|---|---|---|
+  | gold | 15 | 0.97126 | **+70e-6 above us** |
+  | silver | 133 | 0.97115 | **−40e-6 below us** |
+  | bronze | 266 | 0.97100 | −190e-6 below us |
+
+  ⚠ This is the number that should govern how the last eight days are spent, and it has not
+  been written down before. **We are 40e-6 clear inside silver and 70e-6 short of gold.** The
+  ENTIRE CV ladder this workspace has argued over since 08-20 — ad187 through ad217, every
+  transform family, both WANTED slots — spans **22.5e-6 of CV and ~5e-6 of LB**. Gold is
+  fourteen times the width of everything still under discussion. No selection decision
+  available here can reach it; the only thing selection can do is lose the silver.
+- Leader MILANFX 0.97144 (+250e-6 on us), Changye Li 0.97142, then 0.97134 ×3.
+- ⚠ Field growth continues: 2,047 (08-22) → 2,660 → **2,662**. The silver cut moves with n, so
+  the 40e-6 cushion is a score cushion, not a rank cushion.
+
+## 2026-08-23 14:38 UTC (w66) — we slipped three places without the score moving
+
+- **Account best 0.97119, rank 67 of 2,661** (w64, ~35 minutes of board time earlier: rank 64 of
+  2,662). The score did not move; **three teams passed us**, and the tie group shrank from 21 to
+  **19**. That is the shape of the last four days — the field converges on 0.97119 and then
+  walks past it.
+- Top of board **0.97152 (Chris Deotte)**, then MILANFX 0.97144, Changye Li 0.97142, 0.97134 ×2.
+  ⚠ The leader moved **+8e-6** since w64 (MILANFX 0.97144 → Deotte 0.97152).
+- Medal cuts, on Kaggle's `n > 1000` rule (gold = top 10 + 0.2%·n = 15, silver = top 5% = 133,
+  bronze = top 10% = 266):
+
+  | medal | cut rank | cut score | gap to us |
+  |---|---|---|---|
+  | gold | 15 | 0.97126 | **+70e-6 above us** |
+  | silver | 133 | 0.97116 | **−30e-6 below us** |
+
+  ⚠ The silver cushion has narrowed from **40e-6 (w64) to 30e-6** in half an hour of board time,
+  with our score fixed. It is a score cushion, not a rank cushion, and it is closing.
+- ⚠⚠ **w66 measured what that 70e-6 costs in CV, and it is the first time this has been priced
+  rather than asserted.** The in-range CV→LB transfer is calibrated 1:1 on the frozen pricer
+  (w66b: beta_total 0.987 on 16 held-out files, 1.136 on the ten 08-23 sends), and the pricer's
+  slope is +1.83 per e-6 of CV inside the fitted range. So **70e-6 of LB is 38e-6 of CV at the
+  optimistic slope and 73e-6 at the GLS one.** The entire 187→211 pack ladder bought **22.5e-6
+  of CV across 24 members** with a transfer slope indistinguishable from zero (w64 §3).
+  **Gold is not reachable by adding members**, and the honest reading of the remaining eight
+  days is that they are about not losing the silver.
+- ⚠ `10 + 0.2%·(n−1000)` is NOT Kaggle's rule and gives rank 13 / 0.97127. w66's journal §9 used
+  it once and corrected it. Use `10 + 0.2%·n`.

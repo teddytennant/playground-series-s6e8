@@ -442,8 +442,22 @@ ok = True
 for i, stem in enumerate(ORDER, 1):
     f = os.path.join(SUB, f"{stem}.csv")
     prob = []
+    # ⚠⚠ w66: this loop used to append "NOT IN QUEUE" and then dereference `r.cv` unconditionally
+    # eighty lines later, so a registered stem missing from the queue raised
+    # `AttributeError: 'NoneType' object has no attribute 'cv'` INSTEAD of reporting itself. It
+    # was latent because the only way to leave the queue is to be SENT, and nothing re-ran
+    # `w23b_sendqueue.py` between a send and the next import. w66 refreshed that CSV -- it was
+    # ten rows stale -- and every importer of this module went red, `w63b_setguard` included.
+    # A row that left the queue BECAUSE IT WAS SENT is not a defect: it cannot be written into
+    # a plan, so there is nothing to verify. A row that left for any other reason still is.
     if stem not in idx.index:
-        prob.append("NOT IN QUEUE")
+        if stem in LIVE_SENT:
+            print(f"  {i:2d}. {stem:24s} {'already sent — out of the queue, nothing to verify':>40s}")
+            continue
+        prob.append("NOT IN QUEUE (and NOT sent — the queue lost a registered file)")
+        print(f"  {i:2d}. {stem:24s} ⛔ {'; '.join(prob)}")
+        ok = False
+        continue
     if not os.path.exists(f):
         prob.append("no CSV")
     else:

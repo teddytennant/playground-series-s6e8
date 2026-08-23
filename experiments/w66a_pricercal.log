@@ -1,0 +1,120 @@
+live board: 121 distinct scored files, coupling beta -0.247722
+
+================================================================================================
+GATE P1 — the frozen pricer must be reproducible from w52b_cvlb93.csv IN THIS PROCESS
+================================================================================================
+  93 rows, 12 columns, dof 81
+  max |re-derived BETA - PR.BETA| = 0.000e+00
+  |re-derived resid_sd - PR.RESID_SD| = 0.000e+00   (both 7.720036)
+  frozen cv6 = +1.8327/e-6   BASE_SLOPE +1.8327   ERA_SLOPE +1.4425 (78.7% of base)
+  ✅ P1    max coef diff 0.00e+00, sd diff 0.00e+00
+
+================================================================================================
+PART A — OUT-OF-SAMPLE CALIBRATION OF THE FROZEN PRICER
+================================================================================================
+
+  19 scored stems absent from the 93-row fit table and carrying an OOF
+  of which 10 were sent 2026-08-23 with their prediction recorded BEFORE the score existed
+  pred spread -629.3 .. +182.4 e-6 (sd 260.1); rounding sd 2.887e-6
+
+  stem                               fam                 CV      pred        LB     z e-6
+  w36_ad199stdcorr_ens4              ens4      0.9701365875  0.971189   0.97119     +0.52
+  w38_ad202stdcorr_ens4              ens4      0.9701349001  0.971187   0.97119     +2.95
+  w36_ad197stdcorr                   h3        0.9701286299  0.971165   0.97117     +5.40
+  w27_ad188raw_logit                 logit     0.9700387329  0.971159   0.97116     +0.71
+  w40_ad211std_h3                    h3        0.9701331846  0.971157   0.97116     +2.56
+  w38_ad202std_h3                    h3        0.9701330214  0.971157   0.97115     -7.21
+  w36_ad197std                       ens4      0.9701210589  0.971153   0.97116     +6.64
+  w38_ad202std_hybrid                hybrid    0.9701232618  0.971147   0.97113    -17.27
+  w36_ad197std_h3                    h3        0.9701244431  0.971145   0.97115     +5.17
+  w34_ad195std_h3                    h3        0.9701205753  0.971139   0.97115    +10.75
+  w14a_repro159av_logit              logit     0.9699648698  0.971045   0.97106    +14.97
+  blend159av_logit                   logit     0.9699647645  0.971045   0.97106    +15.16
+  blend159_logit                     logit     0.9699646622  0.971045   0.97106    +15.35
+  blend158_logit                     logit     0.9699613899  0.971039   0.97106    +21.35
+  blend150sx_logit                   logit     0.9699553832  0.971028   0.97104    +12.36
+  blend150fx_logit                   logit     0.9699498371  0.971017   0.97103    +12.52
+  stack_pub88_mine_logit             logit     0.9696599465  0.970486   0.97081   +323.81
+  stack_pub74_logit                  logit     0.9696413516  0.970452   0.97081   +357.89
+  stack_pub86_hybrid                 hybrid    0.9696778004  0.970378   0.97080   +422.23
+
+  chi2 = 28.9 on 17 dof (chi2/dof 1.698) => intervals scaled by 1.303
+  alpha (mean OOS residual) = +162.315 e-6, se 725.885
+  c     = -0.5479  se 0.0777 -> 0.1013 scaled
+  beta_total = 1 + c = 0.4521   95% CI [0.2536, 0.6506]
+  ✅ P2a   beta_total = 0.4521 < 1.0
+  🔴 P2b   beta_total 0.4521 in [0.55, 1.2]? 
+  ✅ P2c   CI [0.2536, 0.6506] excludes 0
+  🔴 P2d   CI [0.2536, 0.6506] contains 1.0
+  🔴 P3    |alpha| = 162.315 <= 12.0 e-6
+
+  P6 POWER CONTROL — inject a known calibration deviation, re-fit, must recover it:
+    injected -0.45  ->  recovered -0.9979  (error -2.22e-16)  detected at 2sigma: True
+    injected +0.00  ->  recovered -0.5479  (error +0.00e+00)  detected at 2sigma: True
+    injected +0.45  ->  recovered -0.0979  (error +9.71e-17)  detected at 2sigma: False
+  ✅ P6    recovery exact and the -0.45 injection is detected
+
+  P7 NEGATIVE CONTROL — 2000 permutations of the pred column:
+    null centre -0.0001, null sd 0.0075, observed |c| = 0.5479, permutation p = 0.0000
+  ✅ P7    permutation null is centred at -0.0001 (|.| < 0.05)
+
+  P9 SENSITIVITY (Sp not exported by w63a.fit -- the whole of Sxx is scaled, which is STRICTLY more conservative than scaling only its transfer part):
+    c = -0.5506  se 0.1409   (base c -0.5479, se 0.1013)
+  ✅ P9    sign preserved and se widened (0.1409 > 0.1013)
+
+================================================================================================
+PART B — DO w30b's STANDARD ERRORS MEAN ANYTHING? THE SAME DESIGN, UNDER Sxx + R
+================================================================================================
+
+  112 scored files with an OOF and a family in the fitted design (8 families)
+  chi2 = 106.1 on 100 dof (chi2/dof 1.061) => scale 1.030
+
+  term            frozen OLS   w30b se         GLS        se   OLS(here)        se  se ratio
+  const          +971068.8513    2.3182 +971110.1826  557.0988 +971063.1254  141.9298     3.925
+  cv6                +1.8327    0.0537     +0.7181    0.1262     +0.8278    0.9940     0.127
+  fam[ens4]         +13.4084    2.6783     +2.3589    1.8171    +12.9896  159.5887     0.011
+  fam[hybrid]        +4.1367    3.6747    -18.7999    9.3827     -7.5369  201.3380     0.047
+  fam[logit]       +145.2814    5.5057    +24.3336   10.5200    +76.5316  241.5782     0.044
+  fam[rankraw]      +13.7549    3.2973    +17.9745   10.1220     +2.4264  205.3048     0.049
+  fam[rescale]      +32.9730    3.1969     +3.8775    9.6344    +16.3660  201.2029     0.048
+  fam[w]             -0.4527    5.0311     +4.2240    3.4566     -4.8150  351.8186     0.010
+  fam[wh3]           -4.4047    8.0868     +7.3431    3.6066     -6.6001  575.6917     0.006
+  std               -21.1060    3.6124     -0.3740    4.4601    +35.6644  162.7867     0.027
+  corr              +13.7231    4.0720     +3.7262    2.1690    +34.1025  189.6279     0.011
+  era:cv6            -0.3902         -     -0.0490    0.0968     -0.1548    2.5582     0.038
+
+  GLS cv6 - frozen cv6 = -1.1146 per e-6
+  ✅ P4a   se ratio on const = 3.925 > 2.0
+  ✅ P4b   se ratio on cv6 = 0.1270 in [0.01, 0.5]
+  🔴 P5    |GLS cv6 - 1.8327| = 1.1146 < 0.3
+
+  R2: refit-under-GLS required?  YES  (|dcv| 1.1146 > 0.3: True; se ratio 0.1270 > 1.0: False)
+
+================================================================================================
+R1 — THE SELECTION IS UNCHANGED BY THIS RUN, BY CONSTRUCTION
+================================================================================================
+  check_selection.WANTED = ['w23_ad187stdcorr.csv', 'w36_ad199stdcorr.csv']
+  ✅ R1    WANTED is the locked pair ['w23_ad187stdcorr.csv', 'w36_ad199stdcorr.csv']
+  Predicted LB is strictly increasing in CV within a family, so no recalibration of the pricer
+  can reorder a CV ranking. R2 is about PRICES, not about SELECTION.
+
+================================================================================================
+REGISTERED PREDICTIONS: 9 of 13 confirmed
+================================================================================================
+  ✅ P1
+  ✅ P2a
+  🔴 P2b
+  ✅ P2c
+  🔴 P2d
+  🔴 P3
+  ✅ P6
+  ✅ P7
+  ✅ P9
+  ✅ P4a
+  ✅ P4b
+  🔴 P5
+  ✅ R1
+
+FAILURES 0
+
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w66a_pricercal.json
