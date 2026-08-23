@@ -1,6 +1,65 @@
 # Research — playground-series-s6e8
 
 
+# ✅ THE 2×2 MEMBER FACTORIAL IS COMPLETE — BOTH FLAGGED DECISIONS TAKEN (w70, 2026-08-23)
+
+`w69a_factorial.py`, four seeds, **`provisional: false`, FAILURES 0**, finished 17:58:29Z.
+
+    P5 replication  E_A_lo/h3 -1.058e-6 vs w65a's -1.058e-6      -> CONFIRMED
+    P6 resolution   sd(E_B_hi/h3) 1.379e-6 vs the 5.095e-6 floor -> CONFIRMED  (3.7x sharper)
+    P7 interaction  INTER/h3 -1.651e-6 (t -1.89), negative       -> CONFIRMED
+    P8 ARM 208 (208-199) worst |rankraw| 4.840 vs bar 4.0        -> OVER
+    R1 in-process E_B_hi worst |rankraw| 1.800 vs bar 4.0        -> inside
+    P9 power        injected +4.0e-6, recovered +4.000, 13.91 se -> CONFIRMED
+
+🎯 **P6 IS THE LOAD-BEARING ONE. AN IN-PROCESS PAIRED CONTRAST HAS sd 1.379e-6 WHERE A COMPARISON
+BETWEEN TWO SHIPPED FILES CARRIES 5.095e-6.** Any arm question at the 1–5e-6 scale must be asked
+this way; a ladder of stored CVs cannot answer it.
+
+## ✅ `w40_ad211`'s RETIREMENT STANDS — RE-DERIVED ON AN INSTRUMENT THAT RESOLVES THE BAR
+
+w61a retired it on **between-file** (211−202) deltas against ±4e-6 whose own noise w68 later
+measured at **5.095e-6 — larger than the bar**. The same estimand in-process (`E_B_hi`) reads
+h3 −0.594, ens4 +0.233, rescale −1.070, rankraw −1.800: **worst 1.800e-6, all four inside**, and
+P9 shows a 4e-6 effect would be seen at 13.91 se, so the null is **absence, not blindness**.
+⚠ **A DECISION CAN BE RIGHT AND ITS REASONING UNSOUND** — the weaker basis is kept in the dict
+entry, not deleted.
+
+## ⛔ ARM 208 STAYS `WANTED_INELIGIBLE` — 4.840e-6 ON rankraw AGAINST A 4.0 BAR
+
+Registered as *"within ±4e-6 on all four criterion bases"*; `E_B_lo` reads h3 +1.056, ens4
++1.096, rescale −0.497, **rankraw +4.840**. Applied as written.
+⚠⚠ **IT FAILS ON MAGNITUDE, NOT DIRECTION**: `E_B_lo` is positive 4/4 seeds on h3 (t +3.67) and
+ens4 (t +5.85) — ARM 208 measures **~1.1e-6 BETTER than ARM 199 in-process**, the **OPPOSITE
+SIGN** to the between-file stdcorr ladder. The in-process contrast is the measurement.
+🎯 Only **more seeds on rankraw, pre-registered before they are drawn**, can lift this.
+✅ So the 08-25 ten's omission of `w69_ad208stdcorr` stands; no re-derivation needed.
+
+
+# ⛔⛔ NEVER `assert` AT MODULE SCOPE IN A MODULE OTHER MODULES IMPORT — DEGRADE THE FEATURE (w70)
+
+This is w70's most expensive lesson because **it happened twice in one run, ~90 minutes apart.**
+
+1. `stdflag.require_corr_registered()` is an import-time assert reached by `w26d_queueprice`. One
+   unregistered `*corr` CSV took down `w26d`, `w48e_order` AND `w26g_send` — **the whole send
+   path, with all fourteen standing guards passing.**
+2. Fixing that, I wired `assert _P25["failures"] == 0` into `w48e_order.py` at module scope. It
+   then **DEADLOCKED**: `w70c` wrote `failures: 1`, `w48e` refused at import, and **`w70c`
+   imports `w48e`**, so w70c could never run again to fix the file it had just written.
+
+**THE RULE:** a missing/stale/failing artefact must **degrade the feature** — here it unregisters
+the day, and the loud failure happens at the local, correct place (`DAY not in ORDERS`, exit 2).
+**And never persist a plan that failed its own gates**; leave the last good artefact alone.
+⚠ **A gate goes SELF-REFERENTIAL the moment its own output is plugged into what it checks
+against** (w70c's "already registered for another day" check fired on all ten of its own files).
+Keep it, inverted into a **drift check**: what is registered must equal what the pricer derives.
+⚠ **And `w70d_chainguard` did NOT catch mine** — it imports the chain, and my artefact was valid
+at the moment I ran it. **A guard that only fires in the broken state cannot warn you that you
+have just built a route to it.** The structural fix holds; the guard is only the backstop.
+
+
+
+
 # 🎯 A TRAIN↔TEST DUPLICATE LEAK WORTH +1.62e-6, FREE AND SAFE (w70, 2026-08-23)
 
 **EXACTLY 2 of the 296,302 test rows match a train row on the full 12-feature vector**, and both
