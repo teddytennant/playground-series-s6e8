@@ -1,0 +1,87 @@
+w62 PRE-REGISTRATION — 2026-08-23, slot 1 of 10 (all ten sent before this file was written)
+==========================================================================================
+
+WHAT CHANGED IN THE WORLD, AND WHY THAT MAKES THIS RUN ENTITLED TO PRICE IT
+--------------------------------------------------------------------------
+The 08-23 ten went out at 12:41 UTC and TWO of them — `w36_ad199stdcorr_ens4` and
+`w38_ad202stdcorr_ens4`, w60's build, "the lever" — both scored 0.97119, STRICTLY above the
+0.97118 auto-selection tier they were built to clear. They are the only two files on the board
+at that score.
+
+That is not a small move. Auto-selection takes the best two by PUBLIC score, and the public
+board now holds exactly two files above every other file. **The auto-selected pair is no longer
+a draw. It is DETERMINED.** `w57a_tierprice2.py` priced a uniform draw over the 10 two-subsets
+of a five-file tier 1 and got +7.855e-6; that quantity no longer exists.
+
+`w57a` refused to run, on its own assertion:
+
+    assert PICK in TIER1, "the WANTED pick has fallen OUT of tier 1 -- reprice from scratch"
+
+⚠ THE ASSERTION IS CORRECT AND IS NOT BEING SOFTENED. `w36_ad199stdcorr` (WANTED slot 1, the
+CV leader, the pick) sits at 0.97118 and is now in TIER 2. Its probability of being auto-selected
+has gone from 0.400 to **ZERO**. The lever bought a better guaranteed pair and, in the same
+motion, gave up the 40% chance of drawing the pick itself. Whether that trade was net good is
+exactly what this run measures, and it is a number nobody here has computed.
+
+⚠⚠ THIS IS AN AUDIT, NOT A BLIND TEST, AND IT IS SAID HERE SO NO LATER RUN CAN READ IT AS ONE.
+The tier membership below was read off the API BEFORE this file was written — P1 restates an
+observation, not a forecast, and carries no evidential weight. What is pre-fixed is the
+CRITERION (P3/P4/P5 bands and their mechanisms) and the CONTROL (P2). w61 §1 established that a
+prereg must say plainly which of its predictions were already on disk.
+
+⚠⚠ AND w61 §8.6 SAYS: "Do NOT re-tune anything on that reading — it is a coin that was priced
+before it was flipped." Honoured. This run measures the outcome and moves NOTHING: not WANTED,
+not the pick, not the hijack bar, not the sender's constants. No pick moves out of this file.
+
+WHAT IS BUILT: experiments/w62a_autopair.py
+-------------------------------------------
+The estimator is w57a's, COPIED VERBATIM and only parameterised (w57a's own words: "Reusing the
+math verbatim is the point: a re-price that also re-derived the estimator could not be compared
+against the number it supersedes"). `w57a_tierprice2.py` is NOT edited — it is a registered
+artefact against a board configuration that no longer exists, and re-pointing its R1–R7 at a new
+board would destroy the record it exists to be.
+
+GATE V — THE VERBATIM CONTROL, and a REFUSE if it fails.
+`w62a` first runs its estimator on the board state RECORDED IN `w57a_tierprice2.json` (its
+NAMES, its LB, CV recomputed from the raw OOF vectors) and must reproduce **every** `limit1`
+cost and **every** one of the 10 `model_b` pair prices to < 1e-9. A copied estimator that does
+not reproduce the number it supersedes is a different estimator wearing its name.
+
+THE REGISTERED PREDICTIONS
+--------------------------
+P1  (OBSERVED, NOT FORECAST — stated for the record only) TIER1 = exactly
+    {`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`} at 0.97119; the pick `w36_ad199stdcorr`
+    is in TIER2 at 0.97118.
+
+P2  GATE V reproduces all 5 `limit1` costs and all 10 `model_b` pair prices from
+    `w57a_tierprice2.json` to < 1e-9. FAIL => REFUSE, print nothing else as a price.
+
+P3  The determined-pair cost of NOT clicking is STRICTLY POSITIVE and at most +6.0e-6:
+        0 < cost(auto pair) <= 6.0e-6.
+    Mechanism fixing the sign IN ADVANCE: both auto files sit BELOW the pick on CV
+    (-3.42e-6 and -5.11e-6) and the click would install {w23_ad187stdcorr, w36_ad199stdcorr},
+    so E[max over WANTED] should exceed E[max over the pair]. Strictly positive, not >= 0.
+
+P4  STRICT: cost(auto pair) < 7.855203984805849e-6, w57a's MODEL B mean — i.e. the send
+    IMPROVED the standing exposure rather than merely moving it.
+
+P5  cost(auto pair) > 1.127e-6, w60's price for `w36_ad199stdcorr_ens4` landing above the tier.
+    Mechanism: w60 priced the pair {that file, one uniform draw from the OLD five-file tier 1},
+    and that draw was the PICK ITSELF with probability 1/4. Today's second slot is
+    `w38_ad202stdcorr_ens4`, which is strictly below the pick on CV and can never be the pick.
+    Removing a 25% chance of drawing the pick must make the pair WORSE, not better.
+    ⚠ If P5 is FALSIFIED that is the interesting outcome, not a bug: it would mean the pair's
+    joint structure matters more than the identity of the second file, and it must be reported
+    as a falsification, not explained away.
+
+P6  P(pick inside the auto 2) = 0.000 exactly. It was 0.400 under w57a. The pick is now
+    reachable ONLY by the click.
+
+P7  The tau sweep (0.0 .. 5.0) does not flip the SIGN of the determined-pair cost.
+
+WHAT THIS RUN MAY NOT DO
+------------------------
+⛔ May not edit `w57a_tierprice2.py`, or re-point its R1-R7.
+⛔ May not change `check_selection.WANTED`, the pick, the w59 hijack CV bar, or any sender
+   constant, on the strength of any number produced here. w61 §8.6.
+⛔ May not pass `--allow-above-tier`. THE FIX IS THE CLICK, NOT THE FLAG.

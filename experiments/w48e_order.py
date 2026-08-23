@@ -301,13 +301,26 @@ q["corr"] = q.stem.map(QP.is_corr)
 # each calibrated on this account's own landed history) and registers a point estimate below.
 _has = q.cv.notna()
 q["pred_lb"] = np.nan
-q.loc[_has, "pred_lb"] = [QP.predict(r.cv, r.fam, r.std, r.corr, r.stem)
-                          for r in q[_has].itertuples()]
+# ⚠⚠ w62: PRICE THROUGH `QP._price`, NOT `QP.predict`. w60 moved the `member` label out of this
+# file and into `stdflag.family()` so a reprice could not lose it — which means `q["fam"]` above
+# now reads "member" for `w48_cal_hboyang_mix` BEFORE this line instead of after it, and
+# `w53a_pricer` rightly REFUSES an unfitted family. That made this script raise KeyError, and
+# because w60 skipped running it the break stayed invisible until the queue needed re-stamping.
+# `QP._price` is w26d's own branch — the builder's registered instrument for a member row, the
+# cv→LB line for everything else — so both writers of this CSV now price by ONE rule.
+# ⛔ Do NOT "fix" this by moving the CAL_ROWS override earlier or by mapping member→h3: the
+# override below sets the SAME number from the SAME json, and h3 is exactly the silent collapse
+# w53a refuses. The label must reach the pricer, and the pricer must branch on it.
+q.loc[_has, "pred_lb"] = [QP._price(r) for r in q[_has].itertuples()]
 from scipy.stats import norm as _norm                            # noqa: E402
 q["p_beat"] = np.nan
 q.loc[_has, "p_beat"] = 1.0 - _norm.cdf(
     (QP.BEST_LB + QP.STEP / 2 - q.loc[_has, "pred_lb"])
     / np.array([QP.resid_sd(s) for s in q.loc[_has, "stem"]]))
+# a MEASUREMENT never sorts, or is promoted, on a probability of beating anyone. w26d blanks
+# this by FAMILY; the CAL_ROWS override below blanks it only for the stems it enumerates, so a
+# member row outside CAL_ROWS (`stdflag.MEMBER_FILES` is the wider set) would keep a p_beat.
+q.loc[q.fam == "member", "p_beat"] = np.nan
 # ⚠ A CALIBRATION FILE MUST NOT CARRY A STACK PRICE. QP.predict is the cv->LB line fitted on
 # CROSS-FITTED STACKS; applied to a raw member vector it produced `pred 0.97129, P(beat) 1.00`
 # for w48_cal_hboyang_mix -- i.e. it announced that a single imported member is CERTAIN to beat
