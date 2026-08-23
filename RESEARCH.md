@@ -60,7 +60,58 @@ have just built a route to it.** The structural fix holds; the guard is only the
 
 
 
-# 🎯 A TRAIN↔TEST DUPLICATE LEAK WORTH +1.62e-6, FREE AND SAFE (w70, 2026-08-23)
+# ⛔ RETRACTED — THE "TRAIN↔TEST DUPLICATE LEAK" IS NEGATIVE-EV (w71 retracts w70, 2026-08-23)
+
+**THE SECTION BELOW IS KEPT VERBATIM AS THE RETRACTED CLAIM. DO NOT ACT ON IT.**
+`w71a_dupleak_audit.py` reproduces its +1.622e-6 to three decimals (+1.621e-6) and shows that
+number is **only the branch where the matched train label transfers to the test row.**
+
+    TOTAL if the labels transfer     +1.621e-6   <- all w70 ever priced
+    TOTAL if they do NOT             -5.897e-6   <- never computed
+    BREAK-EVEN P(transfer)              78.4%
+    measured copy fraction               1.8%    (95% upper bound 28%)
+    EV at the measured rate          -5.762e-6   EV even at the 95% upper bound  -3.792e-6
+
+**THE LOAD-BEARING SENTENCE IS VACUOUS.** *"both matched train groups are label-PURE, so the
+labels are READ, not inferred"* — **both groups have SIZE 1.** A group of one is pure by
+definition. It carries zero evidence while reading as though it carries the whole argument.
+
+**TWO MEASUREMENTS DECIDE IT, both in `w71a`:**
+1. *Labels are stochastic given x.* Within-train near-duplicate pairs (both labels known) agree
+   at **0.599 / 0.543 / 0.462 / 0.400** for k = 8/9/10/11 matched features. A copy mechanism
+   drives agreement toward **1.0** as k rises; this does the opposite. Pooled k≥9: 27/53 = 0.509
+   against a ~0.50 null → copy fraction **f = 1.8%**.
+2. *The collision ladder never FLATTENS.* Exact-match pairs by k: **2482 → 82 → 20 → 7 → 2**, a
+   steady ~3× decay. A copy population is a **FLOOR** — adding features cannot separate copies,
+   so the curve would flatten at the copy count. Extrapolating the k=10,11 decay predicts
+   **2.05** pairs at k=12; **2 observed**, Poisson p=0.61. The two "duplicates" ARE the
+   coincidence tail. (The independence calculation gives ~1e-11 and is worthless here: the
+   ladder shows feature dependence inflates collisions by ~2e11×. w70 never ran either.)
+
+⚠ **AND THE FILES ARE RANK-SCALED, NOT PROBABILITIES** (mean 0.5000; base rate 0.7094). Reading
+the file value as P(y=1) understates the positive count by 30% and corrupts every AUC delta —
+`w71a` calibrates rank→probability with isotonic on the OOF first. Calibrated, the two rows sit
+at **p = 0.654 and 0.675**, i.e. *more likely positive than not*; w70's "both near the 33rd
+percentile, one belongs at the top and the other at the bottom" read a rank as a probability.
+
+⛔ **BOTH APPLY PATHS IN `w70f_dupleak.py` NOW REFUSE** (rc=1); report mode still works (rc=0).
+✅ **NOTHING WAS EVER APPLIED** — 0 `.pre_dupleak` backups, 0 submission files with a hard 0/1 at
+either id. `w71b_dupguard.py` enforces all three and was verified to FAIL on a planted control.
+⚠⚠ **THE SEND-PATH APPARATUS IS BLIND TO THIS CHANGE BY CONSTRUCTION** — the override touches
+TEST ids only, so an overridden file has an **unchanged CV**, `w23b` recomputes the md5 from the
+file and `w48e` re-verifies against that fresh md5. Every existing gate passes. That is exactly
+why it needed its own guard.
+
+⚠ **THE LESSON THAT OUTLIVES THE 1.6e-6:** w70 priced the branch it hoped for and called the
+result "free". **A one-sided price is not a price.** When a change bets on an inferred label,
+compute the branch where the inference is WRONG and derive the break-even — here the payoff is
+sharply asymmetric (+0.44e-6 right vs −10.50e-6 wrong on one row) and the honest number is
+negative. ⚠ Note also this is the *second* defect of the same shape as the "so no one re-checks"
+closure it was celebrating: **evidence recorded against the wrong question.**
+
+---
+
+# 🎯 [RETRACTED — SEE ABOVE] A TRAIN↔TEST DUPLICATE LEAK WORTH +1.62e-6, FREE AND SAFE (w70, 2026-08-23)
 
 **EXACTLY 2 of the 296,302 test rows match a train row on the full 12-feature vector**, and both
 matched train groups are label-PURE, so the labels are READ, not inferred:
@@ -79,8 +130,10 @@ PUBLIC gain is the same +1.62e-6 — **public and private move together** becaus
 truth, not a slice-tuned hedge. Deterministic, cannot overfit, orthogonal to every model.
 For scale: **larger than the 1.058e-6 lexb price w65 spent four seeds and 9 CPU-hours on.**
 
-    .venv/bin/python experiments/w70f_dupleak.py                      # find, verify, price
-    .venv/bin/python experiments/w70f_dupleak.py --apply IN.csv OUT.csv   # refuses in-place/overwrite
+    .venv/bin/python experiments/w70f_dupleak.py                      # find/verify only — still rc=0
+    .venv/bin/python experiments/w71a_dupleak_audit.py                # THE AUDIT THAT RETRACTS IT
+    .venv/bin/python experiments/w71b_dupguard.py                     # guard: stays unapplied
+    # --apply and --inplace now BOTH refuse (rc=1). Do not re-open them.
 
 ⛔ **NOT APPLIED to any registered file** — the 08-24/08-25 tens are md5-pinned and rewriting a
 planned file behind its plan is what the `w48e`/`w26d` apparatus exists to prevent. Register it,

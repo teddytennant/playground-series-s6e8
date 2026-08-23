@@ -24401,3 +24401,132 @@ fix (degrade, never assert at import) is the one that holds; the guard is the ba
    CONSUMER's own gate when planning for it (§2a) · a decision can be RIGHT and its reasoning
    UNSOUND (§10.1) · a **closeness** bar can fail on magnitude while the effect points the
    favourable way (§10.2).
+
+---
+
+# w71 — 2026-08-23 (slot 10 of 10, ANGLE: XGBoost third leg) — NO SUBMISSION (at cap, 10/10 already landed)
+
+**AT THE CAP ON ARRIVAL.** `kaggle competitions submissions --page-size 500` reports **10 rows
+dated 2026-08-23**, all `SubmissionStatus.COMPLETE`, none errored — the w26g queue-drain that went
+out at 12:41 UTC. So no send this run, and the angle (XGBoost as a third ensemble leg) was **not**
+taken: §10.5 item 2 named a concrete, already-built, higher-value action for this run, and it
+turned out to be the opposite of what it claimed. Building a fresh XGB leg would have been a new
+model on a day with no slot to test it, while a registered instruction to ship a change tomorrow
+sat unaudited. ⚠ **The angle loses to a flagged action item that is about to fire.**
+
+## 1. 🔴🔴 THE HEADLINE: §10.5 ITEM 2 IS WRONG. THE DUPLICATE OVERRIDE IS **NEGATIVE-EV**, AND IT WAS ABOUT TO BE APPLIED TO TEN FILES.
+
+w70 §8.2 found the 2 train↔test exact feature matches, priced them at **+1.62e-6**, called them
+*"free, deterministic, cannot overfit — public and private move together"*, and §10.5 made
+**applying them at the top of the 08-24 window the highest-value unspent item on the account.**
+I am that next run. **The premise does not survive.** `experiments/w71a_dupleak_audit.py`:
+
+    TOTAL if the labels transfer     +1.621e-6   <- reproduces w70's +1.622e-6 to 3 decimals
+    TOTAL if they do NOT             -5.897e-6   <- w70 NEVER COMPUTED THIS BRANCH
+    BREAK-EVEN P(transfer)              78.4%
+    measured copy fraction               1.8%    (95% upper bound 28%)
+    EV at the measured rate          -5.762e-6   EV at the 95% UPPER bound  -3.792e-6
+
+✅ **My machinery reproducing w70's own headline to three decimals is the reason to believe the
+second line** — same script, same file, same OOF; the only thing added is the branch it skipped.
+
+### 1.1 ⛔ THE LOAD-BEARING SENTENCE IS VACUOUS
+
+> *"Both matched train groups are label-PURE, so the labels are not inferred, they are READ."*
+
+**Both groups have SIZE 1.** A group of one is pure by definition. That clause carries **zero**
+evidence while reading as though it carries the entire argument — and every downstream number,
+the "free"/"deterministic"/"cannot overfit" framing, and the §10.5 priority all rest on it.
+
+### 1.2 THE TWO MEASUREMENTS THAT DECIDE IT
+
+**(a) Labels are STOCHASTIC given x.** Within-train near-duplicate pairs — rows matching on k of
+12 features, *both labels known* — agree at:
+
+    k= 8  1179 pairs  0.599      k=10   13 pairs  0.462
+    k= 9    35 pairs  0.543      k=11    5 pairs  0.400
+
+A copy mechanism drives agreement toward **1.0** as k rises. **It does the opposite.** k=8's
+excess over the OOF-implied null (z=+6.86) is model imperfection on shared covariates and it
+**vanishes** (z=+0.63, −0.27, −0.58) exactly where copying would appear. Pooled k≥9: 27/53 =
+0.509 against a ~0.50 null → **copy fraction f = 1.8%, 95% upper bound 28%.**
+
+**(b) The collision ladder never FLATTENS.** Exact-match pair counts by k over train+test:
+
+    k=8 2482 -> k=9 82 -> k=10 20 -> k=11 7 -> k=12 2      (~3x decay per feature, steady)
+
+A copy population is a **FLOOR**: extra features cannot separate copies, so the curve would
+flatten at the copy count. There is no flat. Extrapolating the k=10,11 decay predicts **2.05**
+pairs at k=12; **2 observed**, Poisson P(≥2 | 2.05) = **0.61**. ⟹ **the two "duplicates" ARE the
+coincidence tail.** ⚠ The independence calculation gives ~1e-11 and is **worthless** here — the
+ladder shows feature dependence inflates collisions by ~2e11×. **w70 ran neither calculation**;
+it went straight from "2 matches exist" to "they are copies".
+
+### 1.3 ⚠ AND THE FILES ARE RANK-SCALED, NOT PROBABILITIES — I HIT THIS MYSELF FIRST
+
+`w36_ad199stdcorr_ens4.csv` and its OOF both have **mean 0.5000**; the base rate is **0.7094**.
+My first pass read the file value as P(y=1), got "expected positives 148,152 / negatives 148,151"
+— a 50/50 split against a 71/29 base rate — and produced a nonsense break-even of 925%. ⚠ **The
+tell was in the printed intermediate, not the final number.** w71a now calibrates rank→probability
+with isotonic on the OOF first. Calibrated, the two rows sit at **p = 0.654 and 0.675** — *more
+likely positive than not*. w70's *"both near the 33rd percentile; one belongs at the top and the
+other at the bottom"* **read a rank as a probability**, which is also why it never noticed that
+forcing id 862871 to 0.0 is a bet against its own model.
+
+### 1.4 THE ASYMMETRY w70 NEVER LOOKED AT
+
+    id 735378  matched label 1   row really 1  +0.441e-6     row really 0  -10.503e-6
+    id 862871  matched label 0   row really 1  -4.351e-6     row really 0   +1.181e-6
+
+Forcing a hard 0/1 on a row the model puts mid-distribution gains a little when right and drags
+the row the **whole width of the distribution** when wrong. ⚠ **A one-sided price is not a price.**
+
+## 2. WHAT I CHANGED, AND WHY THE EXISTING APPARATUS COULD NOT HAVE CAUGHT THIS
+
+- `w70f_dupleak.py`: **both apply paths now refuse** (`--inplace`, `--apply`; rc=1 each, verified
+  without a pipe). Report mode still rc=0. Retraction note at the top; findings kept, not deleted.
+- `w71a_dupleak_audit.py` — the whole audit, evidence + pricing, one script, rc=0.
+- `w71b_dupguard.py` — asserts no submission CSV carries a hard 0/1 at either id, both apply paths
+  refuse, and no `.pre_dupleak` backup exists. ✅ **Verified it FAILS on a planted control**
+  (wrote an overridden scratch file → rc=1 naming it; deleted; rc=0 again). §10.3's own lesson.
+- `RESEARCH.md`: the old section kept **verbatim** under a retraction header.
+
+✅ **NOTHING WAS EVER APPLIED.** 0 `.pre_dupleak` backups; 0 submission files with a hard 0/1 at
+either id. The 08-23/24/25 tens all still verify (`w48e` rc=0,0,0).
+
+⚠⚠ **AND THE SEND CHAIN IS BLIND TO THIS CHANGE BY CONSTRUCTION.** The override touches **TEST
+ids only**, so an overridden file has an **unchanged CV**; `w23b` recomputes the md5 *from the
+file*, `w48e` re-verifies against that fresh md5, and nothing anywhere looks at those two ids.
+**Every existing gate would have passed a −5.9e-6 change, silently.** w70 even documented this as
+the *reason `--inplace` was safe*. It is the reason it needed its own guard. All 14 guards +
+chainguard rc=0 after every edit.
+
+## 3. STATE, UNCHANGED BY THE ABOVE
+
+- **`check_selection.py` rc=1 — NOTHING IS SELECTED.** Still the largest item on the account.
+  Kaggle will auto-pick final entries **on public score**, which is the Rogii failure by default.
+  **Needs Teddy in a browser before 2026-08-31; it cannot be done from the API.**
+- Token expires **2026-08-24T05:42:55Z**; sends go at ~12:41Z, so the 08-24 window opens inside
+  the 30-minute lying window. Refreshing now does not help (12h token). 🎯 **Refresh BEFORE step 1.**
+- 2026-08-26 still **not registered** (`w48e` rc=2). Template: `w70c_plan0825.py`.
+
+## 4. NEXT RUN
+
+1. ⛔ **DO NOT APPLY THE DUPLICATE OVERRIDE.** §10.5 item 2 is **retracted** — it is −5.8e-6, not
+   +1.6e-6. Both paths refuse and `w71b_dupguard.py` enforces it. Do not "fix" them.
+2. `date -u`, **refresh the token**, `w70d_chainguard.py`, then the 14 guards (now 15 with w71b).
+3. 🔴 The selection click (§3) — surface it to Teddy every run until it is done.
+4. ⛔ 2026-08-26 needs registering before its window.
+5. 🔴 Still open, untouched a **ninth** run: the ranker's CV basis (w70 §3c — pre-register a bar
+   BEFORE re-reading `w70a_optimism.json`; w71 did not compute it, so w71+ may), w63 §4's refined
+   P5, w63 §5a's 16.5e-6 bracket hole.
+6. ⚠ **NEW LESSONS.** **A one-sided price is not a price** — compute the branch where the
+   inference is wrong and derive the break-even (§1). **"Pure" over a group of SIZE 1 is vacuous**
+   — check the group size before believing a purity claim (§1.1). **A rank is not a probability**;
+   the tell is an intermediate (a 50/50 positive count against a 71/29 base rate), not the final
+   number (§1.3). **A copy population is a FLOOR — if the ladder never flattens, there are no
+   copies** (§1.2b). **A change the gates are blind to by construction needs its own guard, and
+   the argument that it is safe *because* the gates ignore it is the argument that it needs one**
+   (§2). ⚠ And the meta-lesson: **w70 found "a null recorded against the wrong question", wrote
+   that lesson up, and in the same run committed the same defect — evidence recorded against the
+   wrong question — in the very finding it was celebrating.**

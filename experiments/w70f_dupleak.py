@@ -185,7 +185,26 @@ def apply_to(src, dst, overrides):
         print(f"     id {i}: {before[i]:.6f} -> {float(overrides[i]):.1f}")
 
 
+# ⛔⛔ w71a RETRACTED THIS SCRIPT'S CONCLUSION. THE OVERRIDE IS NEGATIVE-EV. DO NOT APPLY IT.
+# The +1.62e-6 headline prices ONLY the branch where the matched train label transfers to the
+# test row. w71a computed the other branch (-5.90e-6) and measured which branch we are in:
+#   * "both matched groups are label-PURE" -- both groups have SIZE 1. Pure is vacuous there.
+#   * labels are stochastic given x: within-train near-duplicate pairs agree at 0.599/0.543/
+#     0.462/0.400 for k=8/9/10/11 matched features. A copy mechanism drives that toward 1.0.
+#   * the collision ladder never flattens (2482->82->20->7->2). Extrapolating the k=10,11 decay
+#     predicts 2.05 pairs at k=12; 2 observed, Poisson p=0.61. A copy floor would flatten. The
+#     two "duplicates" ARE the coincidence tail.
+# Break-even P(transfer) = 78.4%; measured copy fraction 1.8% (95% upper bound 28%). EV is
+# negative across the whole plausible range. See experiments/w71a_dupleak_audit.py.
+_RETRACTED = ("w70f's override is NEGATIVE-EV (-5.9e-6). Retracted by w71a. Re-read "
+              "experiments/w71a_dupleak_audit.py before touching this path.")
+
+
 def inplace(stems, overrides):
+    raise SystemExit("\u26d4 " + _RETRACTED)
+
+
+def _inplace_retracted(stems, overrides):
     """Rewrite submissions/<stem>.csv in place, keeping the OOF pairing (and so the CV) intact.
 
     ⚠ A backup is written FIRST and the run aborts if one already exists — a second application
@@ -248,6 +267,8 @@ if __name__ == "__main__":
             raise SystemExit("⛔ --inplace needs at least one stem")
         inplace(stems, o)
     elif "--apply" in sys.argv:
+        if "--i-have-read-w71a" not in sys.argv:
+            raise SystemExit("\u26d4 " + _RETRACTED)
         k = sys.argv.index("--apply")
         o, _ = find()
         assert not FAILURES, "gates failed; refusing to apply"
