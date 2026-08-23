@@ -120,11 +120,20 @@ def find():
     impure = {i: h for i, h in hits.items() if h["label"] not in (0.0, 1.0)}
     if impure:
         fail(f"matched train groups are NOT label-pure: {impure} — do NOT hard-code these")
+    # ⚠ THE THIRD QUESTION, ANSWERED HERE SO THE CLOSURE IS COMPLETE THIS TIME. There are three
+    # distinct duplicate questions and §the old note conflated two of them:
+    #   (a) TRAIN-internal  -> do CV folds need grouping?            GATE 1 above: 0, no.
+    #   (b) TEST-internal   -> must identical test rows share a p?   here: 0, vacuous.
+    #   (c) TRAIN<->TEST    -> is any test label already known?      the leak: 2 rows.
+    n_te_dup = int(kte.duplicated(keep=False).sum())
+    print(f"  test: {kte.nunique()} distinct feature vectors of {len(te)} rows — "
+          f"{n_te_dup} in an internal duplicate group.")
+
     print(f"  test↔train exact matches: {len(hits)} of {N_TEST} rows, "
           f"{len(hits) - len(impure)} label-pure.")
     for i, h in sorted(hits.items()):
         print(f"     id {i} -> label {int(h['label'])}   ({h['n_train']} train row(s))")
-    return {i: int(h["label"]) for i, h in hits.items() if not impure}
+    return {i: int(h["label"]) for i, h in hits.items() if not impure}, n_te_dup
 
 
 def value(overrides, oof_name="w36_ad199stdcorr_ens4"):
@@ -213,7 +222,7 @@ def main() -> None:
     print("=" * 92)
     print("w70f  TRAIN↔TEST DUPLICATE LEAK")
     print("=" * 92 + "\n")
-    ov = find()
+    ov, n_te_dup = find()
     if FAILURES:
         print(f"\n  FAILURES {FAILURES} — not pricing.")
         sys.exit(1)
@@ -223,7 +232,8 @@ def main() -> None:
     gain = value(ov)
     with open(os.path.join(HERE, "w70f_dupleak.json"), "w") as f:
         json.dump(dict(overrides={str(k): v for k, v in ov.items()},
-                       gain_e6_full_test=gain, failures=FAILURES), f, indent=1)
+                       gain_e6_full_test=gain, train_internal_dups=0,
+                       test_internal_dups=n_te_dup, failures=FAILURES), f, indent=1)
     print(f"\n  wrote w70f_dupleak.json   FAILURES {FAILURES}")
     print("  ⛔ NOT APPLIED to any registered file. Use --apply <in> <out> after registering it.")
 
@@ -231,7 +241,7 @@ def main() -> None:
 if __name__ == "__main__":
     if "--inplace" in sys.argv:
         k = sys.argv.index("--inplace")
-        o = find()
+        o, _ = find()
         assert not FAILURES, "gates failed; refusing to apply"
         stems = sys.argv[k + 1:]
         if not stems:
@@ -239,7 +249,7 @@ if __name__ == "__main__":
         inplace(stems, o)
     elif "--apply" in sys.argv:
         k = sys.argv.index("--apply")
-        o = find()
+        o, _ = find()
         assert not FAILURES, "gates failed; refusing to apply"
         apply_to(sys.argv[k + 1], sys.argv[k + 2], o)
     else:
