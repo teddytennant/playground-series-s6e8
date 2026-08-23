@@ -23765,3 +23765,42 @@ unit-test a calibration routine on synthetic data before spending an hour of com
 **a partial artefact must be UNABLE to state a verdict** (§8.3) · a gate suite over the INPUTS
 says nothing about the REPORTING layer (§8.3) · register the SHARPEST comparison the design
 supports — a mean-vs-mean bar threw away an exact per-seed identity (§8.1).
+
+## 9. ADDENDUM (17:10 UTC) — BOTH FIXES VERIFIED ON REAL DATA; ARM 208's `stdcorr` LANDED
+
+**P9 works now, and the `FAILURES` list is empty**, so the bracket-straddle assertion and the
+0.10e-6 landing assertion both passed on the live 691,369-row problem:
+
+    inject_recovered  +4.000004e-6   (target +4.000000e-6, error 4e-9)
+    inject_coef        4.229333e-05
+    E_B_lo            +1.9111e-6  ->  E_B_lo_injected +5.9111e-6   shift +4.000004e-6
+
+The shift in `E_B_lo` is **exactly** the injected effect, which is what P9 has to establish
+before any null in this design can be read as absence rather than blindness.
+
+**The provisional gate works too.** After seed 42 the run now prints
+`[PROVISIONAL — 1 of 4 seeds ...]` and `registered readings NOT evaluated — partial seed set`,
+and writes `"provisional": true` into the JSON. **No verdict string is produced.** Seed 42's
+`A208 h3` also reproduced the killed run's value exactly (`0.970134154`), so the relaunch is
+deterministic and the fixes touched only the reporting and injection layers.
+`w69a_oof_h3_seed42.npz` is on disk — the six h3 OOF vectors, re-analysable without refitting.
+
+**ARM 208's corrected file completed at 16:52 UTC** (`w69b done`):
+
+    w69_ad208stdcorr   base 0.9701342350  +  nested_delta 3.2315e-6  ≈  0.9701374665
+    submissions/w69_ad208stdcorr.csv   296,302 rows   range [3.375e-06, 1.000]   all distinct
+    nested picks: rule, rule, rule, decile, rule   (5-arm, all schemes)
+
+⛔ **This CONFIRMS §1 on the corrected base as well.** The `stdcorr` ladder reads 199
+**0.9701400060** · 202 **0.9701375891** · 211 **0.9701374733** · **208 ≈0.9701374665** — ARM 208
+is **tied with 202 and 211 to well inside the floor** and **2.54e-6 below ARM 199**. It does not
+approach `FIT_CV_MAX`. **ARM 208 is not a leader on either base, and w67 §7 item 3's route to the
+above-range slope stays shut.** ⚠ Between-file again; a ladder, not a measurement.
+
+⛔ **`git push` still blocked** (no `gh`, no ssh, no token) — **twelfth run in a row**. Commits
+`39843c6` (prereg) and `86322cd` (the run) are **local only**. Nothing is lost, but the remote is
+twelve runs stale and only a credential fixes it.
+
+**Still running at the close of this run:** `w69a_factorial.py` pid **435856**, seeds 101/13/7
+remaining, ~17 min each, **expected complete ~18:00 UTC**. Next run: read
+`experiments/w69a_factorial.json`, check `provisional` is `false`, then act on §7 items 2 and 3.
