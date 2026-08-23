@@ -24104,3 +24104,102 @@ under *both* models. Only the *within-corrected variation* can move `D_SD`, and 
 cannot shift a 7.72e-6 residual. **Registering that mechanism in advance is what makes the null
 readable** — otherwise a small number invites the reading "the optimism is not real", which is
 the opposite of what §3b measured.
+
+## 8. ADDENDUM (17:40 UTC) — I STEPPED BACK AND LOOKED AT THE BOARD, AND FOUND A REAL EDGE AND A REAL RISK
+
+Nine of this run's hours went to instrument repair at the 1–5e-6 scale. **We are 33e-6 off the
+lead.** So I did step 2 of the standard sequence properly, which the last several runs skipped.
+
+**Board, 17:35 UTC, verified against the API (`--page-size 2000`, 201 rows returned):**
+our **0.97119 is rank 73**; leader Chris Deotte **0.97152**; **37 teams at or above 0.97123.**
+
+### 8.1 THE PUBLIC FIELD PASSED US, BUT NOT WITH A METHOD — AND THAT MATTERS
+
+The journal's standing conclusion (line ~4397) is *"top public notebook 0.97101 < our 0.97106 …
+**we have everything in the forum.** Ruled out"*. **The numbers in that sentence are both stale**
+— the best public notebooks now read **0.97123**, above our 0.97119. I pulled the two highest and
+read them in full (`notebooks/w70_amanatar_97123/`, `notebooks/w70_itzzomkar_97123/`).
+
+⚠ **NEITHER IS A METHOD. BOTH ARE RE-BLENDS OF A CIRCULATING CSV.**
+- `amanatar` loads a pre-made `ULTIMATE_0.97123_SOTA.csv` dataset and rank-averages it **95/5**
+  with a throwaway 5-fold LGBM whose OOF is never even compared. The 0.97123 is the *teacher
+  file's* score; the notebook contributes the 5%.
+- `itzzomkar` globs `/kaggle/input/**/submission.csv` and rank-gauss blends whatever the author
+  attached, with **weights assigned by substring-matching the filename** (`'elite'`/`'public'`/
+  `'psa'`/`'would'` → 0.35, else 0.15).
+
+✅ **SO THE OLD CONCLUSION SURVIVES ON ITS MERITS AND ITS NUMBERS DO NOT.** The 4e-6 we are behind
+is **a file in circulation, not a technique**, and the 37-team cluster at 0.97123 is largely that
+one CSV's distribution list. Copying it is precisely the Rogii failure the brief names, and it is
+**unusable under our own rules anyway** — submission-only, no OOF, so no cross-fitted CV, so
+`fam=member` and the sender blocks it as a final entry. ⛔ **Do not chase it.** But ⚠ **update the
+stale sentence**: "we have everything in the forum" is now true of *methods* only.
+
+### 8.2 🎯 THE ONE REAL METHOD IN THOSE NOTEBOOKS IS A TRAIN↔TEST LEAK, AND IT IS WORTH +1.62e-6
+
+`amanatar` hard-codes two test ids as "duplicate magic". I rediscovered them from the data rather
+than trusting it (`experiments/w70f_dupleak.py`, FAILURES 0 on two gates):
+
+    train: 691,369 distinct feature vectors of 691,369 rows — no internal duplicates
+    EXACTLY 2 of 296,302 test rows match a train row on the FULL feature vector:
+        id 735378 -> label 1        id 862871 -> label 0        both groups label-PURE
+
+Priced off our own OOF and our own test ranks, not assumed — our stacks put **both rows at the
+~33rd percentile**, and one belongs at the top and the other at the bottom:
+
+    id 735378  true 1  @33.16%  (beats 90.7% of negatives)  -> +0.441e-6
+    id 862871  true 0  @33.79%  (above 10.2% of positives)  -> +1.181e-6
+    TOTAL, full test set                                     **+1.622e-6**
+
+✅ **AND IT IS SAFE IN THE ONE WAY THAT MATTERS HERE.** Each row is in the public slice w.p. 0.20,
+so the expected **public** gain is the same +1.62e-6 — **public and private move together**,
+because this is ground truth, not a slice-tuned hedge. It is deterministic, it cannot overfit,
+and it is orthogonal to every model. For scale: **larger than the 1.058e-6 lexb price w65 spent
+four seeds and 9 CPU-hours measuring**, and ~5% of the gap to the leader.
+
+### 8.3 ⚠⚠ AND HERE IS WHY IT SAT UNFOUND — A NULL RECORDED AGAINST THE WRONG QUESTION
+
+JOURNAL line 19481 records, **as a closure**:
+
+> Train has **no exact feature duplicates** (691,369 rows → 691,369 distinct on NUM+CAT), so
+> duplicate-group leakage tests are unavailable here. Checked this run, **recorded so no one
+> re-checks.**
+
+**That measurement is correct — I reproduced it exactly as `w70f` GATE 1 — and it closes a
+DIFFERENT QUESTION FROM THE ONE IT APPEARS TO CLOSE.** Train-internal duplicates are about
+leakage *within* train, i.e. whether CV folds need grouping. **Train↔test overlap is about
+whether any test label is already known**, and nothing in that note tested it. The trailing
+"so no one re-checks" then closed the untested question too.
+
+⛔ **A NULL RECORDED AGAINST THE WRONG QUESTION CLOSES THE RIGHT ONE.** This is the same shape as
+§3 (two bases, neither labelled) and §1 (a guard suite that covers no send-path module): the
+workspace's failures are consistently **coverage** failures dressed as settled results. ⚠ **When
+closing a line, write down WHICH QUESTION the measurement answers, not just the number** — and be
+suspicious of any closure whose last clause is "so no one re-checks".
+
+### 8.4 ⛔ NOT APPLIED, AND WHY
+
+`w70f --apply <in> <out>` writes a **new** file and refuses both in-place and overwrite
+(both refusals verified). Applied to a scratch copy it changes **exactly 2 rows**, leaves 296,302
+rows, no NaN. ⛔ **It has NOT been applied to any registered file**: the 08-24 and 08-25 tens are
+registered and md5-pinned, and rewriting a planned file behind its plan's back is the exact
+failure the whole `w48e`/`w26d` apparatus exists to prevent. **The next run should register it,
+then apply it at the top of its window.** ⚠ Note it breaks the pricer's CV↔LB relation very
+slightly: an overridden file has an unchanged CV and a ~1.6e-6 better LB.
+
+### 8.5 🔴🔴 THE LARGEST UNMANAGED RISK IS STILL OPEN, AND ITS EXIT CODE NOW LIES
+
+    *** NOTHING IS SELECTED for playground-series-s6e8. ***
+    auto-slot 1: public 0.97119, 2-way tie — w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4
+    auto-slot 2: public 0.97118, 5-way tie — w21_ad187corr_ens4, w27_ad190stdcorr, ...
+
+**Nothing is selected**, so Kaggle will auto-select **on best PUBLIC score** — choosing final
+entries by the public slice is exactly the Rogii failure, and the brief's central instruction is
+to select on CV. **This needs Teddy, in his own browser, before 2026-08-31.** It cannot be done
+from the API.
+
+⚠⚠ **AND `check_selection.py` NOW EXITS 0 WHILE PRINTING THAT BANNER.** The journal (line 19477)
+records it as *"exits 1"*. I read the exit code first and briefly concluded the risk had been
+resolved. It has not. ⛔ **READ THE BANNER, NOT THE EXIT CODE** — the same lesson as w69 §2's
+"read the dict VALUE, not the key's membership", now with a second instance. A later run
+following the journal's "exits 1" as a liveness test will read 0 and mark this closed.
