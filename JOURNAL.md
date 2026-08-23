@@ -24530,3 +24530,18 @@ chainguard rc=0 after every edit.
    (§2). ⚠ And the meta-lesson: **w70 found "a null recorded against the wrong question", wrote
    that lesson up, and in the same run committed the same defect — evidence recorded against the
    wrong question — in the very finding it was celebrating.**
+
+## 5. ADDENDUM — THE ANGLE WAS ALREADY SATISFIED, WHICH IS A SECOND REASON NOT TO TAKE IT
+
+I skipped the XGBoost angle on priority grounds (§0). Checking afterwards, its **premise is also
+false**: XGBoost is not a missing third leg. RESEARCH:3053–3059 records `latr1_xgb` at 0.96780 —
+**the best GBDT of ANY family in the pack** — plus `xgb_latcat`, `xgb_latcat_avg3/s17/s23`,
+`xgb_cat_lattice` (RESEARCH:9436) and w26j's two XGBoosts, inside the 35-member
+`rest` group of ordinary XGB/LGBM/CatBoost worth +0.000206 ± 0.000011 collectively. The
+per-member value of an XGBoost is already measured at **+6.24e-6** (RESEARCH:8665).
+
+⟹ **"add XGBoost as a third leg" is a solved, priced, shipped line.** A new XGB member is worth
+~6e-6 at the member level and ~200× less at the pack level (RESEARCH's translation-loss figure) —
+i.e. ~0.03e-6, well below every noise floor this workspace has measured. ⚠ **Record so a future
+run does not take this angle either:** the three-leg framing in the brief describes a state the
+pack reached weeks ago.
