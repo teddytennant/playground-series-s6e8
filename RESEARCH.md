@@ -11449,3 +11449,45 @@ exclusion is load-bearing and **rejects** the pre-w66 rule.
 
 `w65c` and `w66d` load the full member matrix / the live queue and take minutes under load. Run
 them in the background or split the loop; a 120s timeout kills the last two silently.
+
+## w67 (2026-08-23) — the pricer's fitted range can never grow, and the clock is not UTC
+
+### ⛔ THE ABOVE-RANGE CV→LB SLOPE IS NOT MEASURABLE FROM THIS SEND QUEUE
+`w53a_pricer.FIT_CV_MAX = 0.9701400060` equals the best CV on record **because of the veto, not
+by accident**. The fit table can only contain SENT files; `w48e_order.VETO` removes every
+high-CV file (ARM 216/217 — CV inflated by `hboyang_mix`) from the sendable set; therefore:
+
+    sendable, non-vetoed, non-`member` files above FIT_CV_MAX ....... 0
+    already-sent files above FIT_CV_MAX ............................. 0
+
+All ten unsent above-range files are `priority = -1` (vetoed) or `member`. **Every `cv_needed`
+and "gap to gold" number is an extrapolation into a region the send path is structurally
+incapable of observing.** `out_of_range()` flags it; the flag can never be discharged from the
+queue. The only honest route to the answer is a clean file above `FIT_CV_MAX` that is NOT ARM
+216/217 — a modelling problem. **Do not lift the veto to enable a measurement.**
+
+The two candidate era slopes remain **+1.4425 (frozen OLS)** and **+0.9028 (GLS-93)**, separation
+0.5398/e-6. Quote extrapolations as a RANGE, never a target.
+
+### THE BOX IS EDT (UTC−4). `ls`/`stat` PRINT LOCAL TIME; EVERYTHING ELSE HERE IS UTC.
+Send windows, the daily cap and the `plan_day` stamp are all UTC. `date -u` and `ls -la` differ
+by four hours, so **comparing a file mtime to `date -u` makes every artefact look 4h staler than
+it is.** Use `TZ=UTC stat -c %y <f>`, or `stat -c %Y` and compare epochs. (w67 misdiagnosed a
+healthy background job as starved on exactly this.)
+
+### GUARD-SUITE MECHANICS
+- Full suite (14): `w54a_vetoexpiry w55a_unpriced w56b_wantedguard w57c_muguard w59b_barguard
+  w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard w64b_hedgeguard
+  w65b_pinguard w65c_subsetcheck w66d_rangeguard w67b_slopeguard`.
+- ⚠ **Clear `OMP_NUM_THREADS`/`OPENBLAS_NUM_THREADS`/`MKL_NUM_THREADS` before running it** —
+  `w65b_pinguard` reads the environment and returns rc=1 spuriously under an exported shell.
+- ⚠ `w65c` and `w66d` need ~4 min under load. Background them; a 120s shell will time out.
+
+### STATISTICS NOTES THAT COST A RUN TO LEARN
+- **Correlation among units HELPS when the estimand is a CONTRAST.** Nine files correlated at
+  ρ = 0.9996 gave se(slope) = 0.1305 against an IID foil of 0.2046 — the shared component
+  cancels out of a difference. "Correlated units are worth less" is about estimating a LEVEL.
+- **A noiseless MODEL se is an UPPER BOUND on resolution.** `gls`'s `sqrt(max(chi2/dof,1))` is
+  one-sided, so real data can only widen it. Always print the misfit that demotes the verdict.
+- **`w53a.RESID_SD` (7.7200) is ALREADY in e-6.** `w52b_cvlb93.csv` stores `lb6`/`cv6`
+  pre-scaled (`lb6 = 971040.0`). Multiplying by 1e6 is a live trap; `w67a` now asserts the units.

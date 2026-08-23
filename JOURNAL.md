@@ -23004,3 +23004,236 @@ w65c, w66d — all thirteen exit 0, FAILURES 0.** The 2026-08-24 dry plan is unc
 **Also modified by this addendum:** `experiments/w48e_order.py` (the None dereference),
 `w23b_sendqueue.csv` and `w26d_queueprice.{csv,json}` (regenerated; `best_lb` 0.97118 → 0.97119,
 which is w63's live-read working as designed).
+
+---
+
+# w67 — 2026-08-23, slot 6 of 10. ZERO slots (the UTC day was at 10/10 on arrival).
+
+**Angle issued:** *"Foundation: confirm the metric, build the fixed-fold CV harness, and get one
+honest GBDT baseline scored."* Closed on all three counts and has been for weeks — the metric is
+AUC, the folds are `StratifiedKFold(5, shuffle, seed)` shared by every experiment since w14, the
+GBDT line is 202 members deep, and w58 §9.7 forbids re-opening it. Substituted w66 §9 item 3,
+the 🎯 item, which is the only registered OPEN question on the list.
+
+## 0. 🔴 THE HEADLINE: R2's INSTRUMENT IS EMPTY. IT IS NOT UNDERPOWERED — IT IS **VOID**.
+
+w66 §9 item 3 registered: *"the open question is narrower: is the +1.83 or the +0.96 slope right
+ABOVE the fitted range? The only clean instrument is a file built above `FIT_CV_MAX` and sent,
+which is what every ad>195 build already is — **so this answers itself from the 08-24 sends
+onward if someone keeps score.**"*
+
+**That is false, and it is false for a reason that was sitting in the sender the whole time.**
+
+    SENDABLE, NON-VETOED, NON-`member` FILES ABOVE FIT_CV_MAX:  0
+    ALREADY-SENT FILES ABOVE FIT_CV_MAX:                        0
+
+Ten unsent queue files sit above `FIT_CV_MAX`. **Nine of them carry an explicit entry in
+`w48e_order.VETO`** — the ARM 216/217 pack, *"CV inflated by `hboyang_mix`; WANTED-ineligible by
+w42b_prereg"* — and the tenth is `w48_cal_hboyang_mix`, a `member` row that can never be sent.
+Every one is `priority = -1`, behind even `blend153_logit` at CV 0.96995. The 2026-08-24 plan
+sends ten files and **every one of them is below `FIT_CV_MAX`**; no later day can differ while
+the veto binds.
+
+⚠⚠ **NEW: `FIT_CV_MAX` == THE BEST CV ON RECORD IS NOT A COINCIDENCE — IT IS A FIXED POINT OF
+THE VETO.** w66 §5 found the equality and read it as an awkward accident of construction
+("by construction, any target above the account best lands outside the fitted range"). It is
+stronger and worse than that: the fit table can only ever contain SENT files, the veto removes
+every high-CV file from the sendable set, so **the pricer's fitted range can never extend above
+the veto boundary, and every `cv_needed` figure this workspace prints is an extrapolation into a
+region the send queue is structurally incapable of observing.** The +1.83-vs-+0.96 question is
+not merely open; it is **not answerable from this competition's send path at all**.
+
+⚠ This does not impugn the veto, which is correct and protective — the ARM 216/217 CVs *are*
+contaminated, and w48/w51 vetoed them precisely so nothing would auto-select them. The defect is
+that a *measurement* was registered against a sample the *sender* had already made unobservable,
+and neither side knew about the other.
+
+## 1. THE INSTRUMENT WAS BUILT AND MEASURED ANYWAY, AND IT HAS CLEAN RESOLUTION
+
+Worth recording because it is counter-intuitive and it is the one thing that would matter if the
+veto were ever lifted. Estimand (`w67_prereg` §2): above `FIT_CV_MAX` the two models differ in
+ONE quantity, so hold everything else at what w53a already says —
+
+    lb_hat(k) = ANCHOR(k) + s·excess(k),  ANCHOR = frozen pricer at cv CLAMPED to FIT_CV_MAX
+
+All nine above-range files are era, so the contrast is the ERA slope: **H_OLS +1.4425 vs H_GLS
++0.9028, separation 0.5398/e-6.**
+
+| | se(ŝ) | |
+|---|---|---|
+| IID at the pricer's own residual sd (8.242e-6) | 0.2046 | the foil |
+| **correlated, `Sxx` from `w63a_setprice.fit` + rounding** | **0.1305** | the answer |
+
+**R = 0.5398 / 0.1305 = 4.136 → bucket (c) CLEAN.** Both registered power predictions FAILED,
+and both failed in the same direction, for the same reason:
+
+⚠⚠ **NEW: CORRELATION AMONG THE UNITS *HELPS* WHEN THE ESTIMAND IS A CONTRAST.** P5 registered
+`se_corr/se_iid ∈ [1.0, 6.0]` at FULL WEIGHT — I expected nine variants of two packs, correlated
+at **ρ = 0.9996**, to behave like far fewer than nine independent files. The ratio came back
+**0.638**: the correlated se is *smaller*. A slope is a difference, the shared component cancels
+out of a difference, and what survives is the 0.04% that differs. The intuition "correlated units
+are worth less" is a statement about estimating a **LEVEL**, and I applied it to a **SLOPE**.
+P6 (predicted bucket (a), NO RESOLUTION) failed as a direct consequence.
+
+⚠ **AND THE VERDICT IS RAZOR-THIN, WHICH IS WHY THE MARGIN IS NOW PRINTED WITH IT.** `se_corr` is
+the *noiseless MODEL* se — the response was synthesised on the line, so `chi2 = 0` and `gls`'s
+one-sided `sqrt(max(chi2/dof, 1))` clamps to 1. Real data cannot make it smaller. **A `chi2/dof`
+of just 1.113 (se ×1.055) demotes (c) → (b)**; 4.454 demotes (b) → (a). R is an UPPER BOUND on
+the resolution and is now reported as one.
+
+## 2. 🔴 A UNITS DEFECT I INTRODUCED, CAUGHT BY THE FIRST RUN'S OWN OUTPUT
+
+First run printed `per-point IID sd 7720036.371e-6` and se_iid **191642.16**. `PR.RESID_SD` is
+**already in e-6** — w53a fits `lb6`/`cv6`, and `w52b_cvlb93.csv` stores them pre-scaled
+(`lb6 = 971040.0`, not 0.97104) — and I multiplied by 1e6. It silently flipped P4 (🔴→✅ after
+the fix, 0.2046) and P5. `se_corr` was never affected: it comes from `Sxx`, which is correctly
+scaled at source. Now an assert (`1.0 < RESID_SD < 100.0`) with a negative control, so it cannot
+return. ⚠ **NEW: A CONSTANT THAT IS ALREADY SCALED IS THE EASIEST ONE TO SCALE TWICE — assert the
+UNITS at the point of use, not the value.**
+
+## 3. 🔴 I MISDIAGNOSED w65a AS STARVED. IT WAS A TIMEZONE ERROR.
+
+Orientation read `ls -la experiments/w65a_armpair.log` → `Aug 23 10:51`, compared it to
+`date -u` → `14:53`, and concluded the job had written nothing for four hours and was being
+thrashed by the foreign `gaten.py` fleet. **The box is EDT (UTC−4).** `ls` and `stat -c %y` print
+LOCAL time; `date -u` prints UTC. The log was current to the second.
+
+    local: Sun Aug 23 11:11:23 AM EDT 2026     utc: Sun Aug 23 03:11:23 PM UTC 2026
+
+⚠⚠ **NEW: `ls`/`stat` PRINT LOCAL TIME; THIS WORKSPACE REASONS ENTIRELY IN UTC.** Every send
+window, `plan_day` stamp and daily cap in this competition is UTC, and the machine is four hours
+behind it. A run that compares a file mtime to `date -u` will judge every artefact **four hours
+staler than it is** — which could get a healthy background job killed, or make a fresh artefact
+look expired. Use `TZ=UTC stat -c %y`, or `stat -c %Y` and compare epochs.
+
+**w65a is healthy and is 3 of 4 seeds in** (42, 101, 13 complete; seed 7 running), 56 log lines,
+~6.3 CPU-hours burned, ~12 cells left. It is still the oldest open measurement and w65 is still
+unwritten. Next run: `TZ=UTC` its log first.
+
+## 4. THE REGISTERED PREDICTIONS (`experiments/w67_prereg.txt`, committed 822d0f0 BEFORE the build)
+
+| | prediction | outcome |
+|---|---|---|
+| P1 | GATE: frozen BETA re-derives from its own table to <1e-9 | ✅ **0.00e+00** |
+| P2 | exactly 9 sendable above-range files, all era | ✅ **9, all era** |
+| P3 | separation = 0.5397 ± 1e-4 | ✅ **0.5398** |
+| V1 | *(not registered — added mid-run, see §5)* | ✅ **0 sendable; VOID** |
+| P4 | IID se ∈ [0.15, 0.35] (WEAK, contamination declared) | ✅ **0.2046** |
+| P5 | se_corr/se_iid ∈ [1.0, 6.0] (**FULL WEIGHT**) | 🔴 **0.638 — correlation HELPS a slope** |
+| P6 | bucket (a) NO RESOLUTION (WEAK) | 🔴 **bucket (c) CLEAN, R = 4.136** |
+| P7 | POWER CONTROL: both slopes recovered to <1e-9 | ✅ **2.2e-16** |
+| P8 | NEGATIVE CONTROL: permutation null centred at 0 | ✅ **+0.0035, sd 0.215, \|t\| 0.73** |
+| P9 | the send path does not move; WANTED unchanged | ✅ **locked pair intact, plan_day 2026-08-24** |
+
+**FAILURES 0.** 8 of 10 confirmed. The two that failed were the two about power, and they failed
+because of §1's contrast-vs-level error — a real update, not a mis-set bar.
+
+## 5. ⚠⚠ THE PREREG'S OWN DEFECT: IT REGISTERED **POWER** AND NEVER ASKED ABOUT **VALIDITY**
+
+`w67_prereg` §3 is nine predictions about how *precisely* the slope could be estimated. Not one
+of them asks whether the sample can be **observed**. I wrote a careful power analysis, complete
+with an injection control and a permutation null, for nine files that **cannot be sent**. Had the
+veto not been noticed, this run would have shipped "bucket (c) CLEAN — the 08-24 sends will
+settle R2" as its result, and it would have been confidently, verifiably wrong.
+
+⚠⚠ **NEW: A POWER CALCULATION ON AN UNOBSERVABLE SAMPLE IS NOT A POWER CALCULATION. ASK
+VALIDITY FIRST — *can this sample be observed?* — AND REGISTER IT AS A GATE, NOT AS A CAVEAT.**
+`w67a` now runs §V **before** the power section and prints a GOVERNING VERDICT that overrides it.
+
+⚠ **NEW: THE MEASUREMENT SIDE AND THE SEND SIDE HELD CONTRADICTORY BELIEFS FOR THREE RUNS.**
+w48 (2026-08-21) vetoed ARM 217. w51 vetoed ARM 216. w66 (this morning) registered a measurement
+whose entire sample is those two arms. Nothing connected them because the veto lives in
+`w48e_order` and the pricer reasoning lives in `w53a`/`w66c`, and **no artefact asks whether a
+proposed sample is sendable.** `w67a.validity()` is that artefact, and it IMPORTS the veto rather
+than re-listing it (w66 §6).
+
+## 6. VERIFICATION, END TO END
+
+**All fourteen standing guards exit 0, FAILURES 0**: `w54a w55a w56b w57c w59b w60b w60d w62b
+w63b w64b w65b w65c w66d` + the new `w67b`.
+
+⚠ `w65b_pinguard` returned **rc=1 on my first sweep** and it was **my own fault**: I had exported
+`OMP_NUM_THREADS=2` for the whole shell and w65b guards the BLAS pin state. Re-run under
+`env -u OMP_NUM_THREADS …` → **rc=0**. **NEW: a guard that reads the ENVIRONMENT is not
+reproducible under a shell you have exported into — clear the pins before running the suite.**
+
+`w67b_slopeguard.py` is new: **33 checks, every one negative-controlled.** The units assert must
+reject an absolute-AUC `RESID_SD`; the member filter must have had something to remove; ANCHOR
+must equal the frozen pricer at `FIT_CV_MAX`; the two hypotheses must diverge *exactly* linearly
+and agree exactly at zero; `gls` must recover a −3.0 decoy; the `chi2/dof` scaling must be
+one-sided and must never go below 1; the bucket rule must map 1.0/3.0/5.0 → a/b/c with STRICT
+inequalities at both boundaries; the demotion thresholds must land R exactly on the boundaries;
+w67a must not import `w26d_queueprice`; and **V1 must not be vacuous** — injecting one fabricated
+un-vetoed above-range row must raise `n_free` to 1.
+
+⚠ **G25 fired on its first run and it was the GUARD that was wrong**, not the code: it tested
+`"w26d_queueprice" not in src` and matched w67a's own *docstring*. Rewritten to read the **AST**.
+**NEW: a guard that greps TEXT where the rule names a STRUCTURE tests the wrong object** — the
+sibling of w66's "a guard that names the artefact's PATH is testing a different file."
+
+✅ **The 2026-08-24 send chain is untouched**: `plan_day` reads `2026-08-24` across all 74 rows,
+the dry plan still lists the same ten pinned files, and `check_selection.WANTED` is the locked
+pair. w67 imported `w48e_order` and `w26d_queueprice` was never run as a script (w66 §10).
+
+## 7. NEXT RUN, IN ORDER
+
+1. `date -u` FIRST, then **`TZ=UTC stat -c %y`** on any log before judging it stale (§3), then
+   the `/proc` scan per-pid with `tr` (**never** `ps`/`pgrep`), then **`tail
+   experiments/w65a_armpair.log`** — it should be DONE. **w65 is still unwritten** and w65a's
+   four-arm partition result is now the oldest open measurement by three runs.
+2. **THE SEND IS FOUR COMMANDS**: `w23b_sendqueue.py` → `w48e_order.py --day <TODAY> --write` →
+   `w26g_send.py --n 10` dry → `--go`. **2026-08-24 IS REGISTERED** and re-verified dry today.
+   **2026-08-25 IS NOT and w48e will exit 2.** Re-run `w23b_sendqueue.py` AFTER the window too.
+3. ⛔ **R2 IS CLOSED AS UNANSWERABLE (§0), not as answered.** Do NOT register another measurement
+   against the ARM 216/217 files without first lifting the veto, and **the veto should not be
+   lifted to enable a measurement** — that is the tail wagging the dog, and w48d's contamination
+   argument is untouched by anything this run found. If a future run wants the above-range slope,
+   the only honest route is to **build a clean file above `FIT_CV_MAX` that is not ARM 216/217**,
+   which is a modelling problem, not a pricing one.
+4. ⚠ **Every `cv_needed` / "gap to gold" figure is an extrapolation into a region the send queue
+   cannot observe (§0).** `w53a.out_of_range()` already flags it; §0 is the reason the flag can
+   never be discharged. Say "RANGE, not target" whenever one of these is quoted.
+5. ⛔ **SLOT 2 IS CLOSED** (w64 §1–§6). ⛔ **WANTED must not move on a pricing result** (R1/w56b).
+6. ⚠ Still untouched, fourth run running: **the refined P5 from w63 §4** and **the break-even's
+   16.5e-6 bracket hole** (w63 §5a).
+7. Run **w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b** on any run that
+   sends or touches `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`, `w48e_order.py`,
+   `w26g_send.py` or `w53a_pricer.py`. ⚠ `w65c`/`w66d` need ~4 min — background them, and
+   **clear `OMP_NUM_THREADS` first or w65b returns rc=1 spuriously** (§6).
+8. ⛔ **Do NOT** re-open w58 §9.7's list, **the original dataset** (×4), **LightGBM tuning** (×3),
+   **CatBoost tuning** (w61), **feature engineering** (w62), **blending / OOF weight search**
+   (w63), **seed and fold diversity** (w64), or **error analysis** (w65).
+9. ⚠ **NEW this run:** a power calculation on an UNOBSERVABLE sample is not a power calculation —
+   ask VALIDITY first, as a GATE (§5) · the measurement side and the send side can hold
+   contradictory beliefs indefinitely; nothing asks "is this sample sendable?" (§5) · correlation
+   among units HELPS when the estimand is a CONTRAST — "correlated units are worth less" is about
+   a LEVEL (§1) · a noiseless MODEL se is an UPPER BOUND on resolution; print the misfit that
+   demotes the verdict (§1) · a constant that is ALREADY SCALED is the easiest to scale twice —
+   assert UNITS at the point of use (§2) · `ls`/`stat` print LOCAL time and this workspace is
+   UTC — the box is UTC−4 (§3) · a guard that greps TEXT where the rule names a STRUCTURE tests
+   the wrong object (§6) · a guard that reads the ENVIRONMENT is not reproducible under an
+   exported shell (§6).
+   ⚠ Carried: a rule enforced in ONE consumer is not enforced · a wrong number that is nearly
+   right is the kind nobody checks · a decision rule on a COEFFICIENT does not say which QUERY is
+   broken · register a background job in the journal AT LAUNCH · a decision rule must name its
+   condition BY REFERENCE · a null is evidence of absence only with a POWER CONTROL · register an
+   INTERVAL, not a one-sided bar · our board name is `Teddy Tennant`, not `thtennant` · a prereg
+   quoting a NUMBER and a DESCRIPTION that differ has registered neither · a per-file price is not
+   additive — price the SET · a GATE and a PRIORITY are not the same mechanism · a STAMP is not a
+   comparison · retirement is a third state · a run with an interest in retiring a rule must not
+   retire it · register STRICT inequalities · a POINT PREDICTION IS NOT A GATE · `w25a_cvlb_full.py`
+   is NOT read-only · a hard-coded tier goes stale every send day · a rule in a PARAGRAPH is not a
+   rule · never use in-sample residuals to test extrapolation · never lower the `cv >= 0.97` floor
+   · never let a `member` row into a `max(CV)` · always pass `--page-size` · to read a printout
+   from a module that writes under `__main__`, IMPORT it, never run it.
+
+**Files added:** `experiments/w67_prereg.txt`, `w67a_aboveslope.py` + `.json` + `.log`,
+`w67b_slopeguard.py`. **Modified:** `RESEARCH.md`, `LEADERBOARD.md`, `JOURNAL.md`.
+**Nothing on the send path was edited.**
+
+**Board at 15:11 UTC: 0.97119, rank 67, top 0.97152 (Chris Deotte). Unchanged from w66.**
+
+**Submitted 0 — the 2026-08-23 UTC day was already at 10/10 when this run began (12:41 UTC).**
+
+⛔ `git push` still blocked (no `gh`, no ssh, no token) — tenth run in a row. Commits are
+**local only**.

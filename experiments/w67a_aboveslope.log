@@ -1,0 +1,119 @@
+================================================================================================
+P1 GATE — re-derive the frozen pricer's BETA from its own 93-row table, in-process
+================================================================================================
+  rows 93   max |re-derived BETA - PR.BETA| = 0.000e+00
+  ✅ P1: BETA re-derives to 0.000e+00 < 1e-09
+
+================================================================================================
+P2/P3 — THE SAMPLE ABOVE FIT_CV_MAX, AND WHAT THE TWO MODELS DISAGREE ABOUT
+================================================================================================
+  queue 74 unsent; 10 above FIT_CV_MAX (0.9701400060); 1 dropped as family `member`: ['w48_cal_hboyang_mix']
+
+  stem                       fam                 CV  excess e-6   era
+  w42_ad217stdcorr           h3        0.9701788311       38.83  True
+  w42_ad217std               ens4      0.9701764909       36.48  True
+  w42_ad217std_h3            h3        0.9701748950       34.89  True
+  w42_ad217std_hybrid        hybrid    0.9701644072       24.40  True
+  w42_ad217std_rankraw       rankraw   0.9701540299       14.02  True
+  w50_ad216stdcorr           h3        0.9701500880       10.08  True
+  w42_ad217std_rescale       rescale   0.9701472358        7.23  True
+  w50_ad216std_h3            h3        0.9701459152        5.91  True
+  w50_ad216std               ens4      0.9701438208        3.81  True
+  ✅ P2: 9 sendable above-range files (need exactly 9), all era: True
+
+  H_OLS era slope +1.4425   H_GLS era slope +0.9028   SEPARATION 0.5398 per e-6
+  ✅ P3: separation 0.5398, registered 0.5397, |diff| 5.62e-05
+
+================================================================================================
+V — VALIDITY: is this sample OBSERVABLE? (asked before power, not after)
+================================================================================================
+  9 above-range candidates; 9 carry an explicit VETO in w48e_order.VETO (19 vetoed overall)
+    ⛔ w42_ad217stdcorr           cv 0.9701788311 VETOED — w48d: ARM 217. CV inflated by hboyang_mix; WANTED-in
+    ⛔ w42_ad217std               cv 0.9701764909 VETOED — w48d: ARM 217, as above.
+    ⛔ w42_ad217std_h3            cv 0.9701748950 VETOED — w48d: ARM 217, as above.
+    ⛔ w42_ad217std_hybrid        cv 0.9701644072 VETOED — w48d: ARM 217, as above.
+    ⛔ w42_ad217std_rankraw       cv 0.9701540299 VETOED — w48d: ARM 217, as above.
+    ⛔ w50_ad216stdcorr           cv 0.9701500880 VETOED — w51: ARM 216. WANTED-ineligible by w50_prereg Sec.5.
+    ⛔ w42_ad217std_rescale       cv 0.9701472358 VETOED — w48d: ARM 217, as above.
+    ⛔ w50_ad216std_h3            cv 0.9701459152 VETOED — w51: ARM 216, as above.
+    ⛔ w50_ad216std               cv 0.9701438208 VETOED — w51: ARM 216, as above.
+
+  SENDABLE, NON-VETOED, NON-member files above FIT_CV_MAX: 0
+  ✅ V1: the above-range sample is EMPTY of sendable files (0 free) — the instrument is VOID, not underpowered
+
+================================================================================================
+P4/P5/P6 — POWER. Would keeping score decide anything?
+================================================================================================
+  per-point IID sd 8.242e-6 (RESID_SD 7.720 + rounding 2.887)
+  correlated Omega: mean diag 310009.31, mean off-diag corr 0.9996
+
+  se(s_hat)  IID 0.2046   CORRELATED 0.1305   ratio 0.638
+  ✅ P4: IID se 0.2046 in [0.15, 0.35] (WEAK — declared contamination)
+  🔴 P5: se ratio 0.638 in [1.0, 6.0] (FULL WEIGHT)
+
+  R = SEPARATION / se_corr = 0.5398 / 0.1305 = 4.136  ->  bucket (c) CLEAN
+  95% CI half-width on s_hat = 0.256; the two hypotheses are 0.540 apart
+  🔴 P6: bucket (c) CLEAN, predicted (a) (WEAK)
+
+  ⚠ R is an UPPER BOUND — se_corr is the noiseless MODEL se and `gls` scales it by
+    sqrt(max(chi2/dof, 1)), which is ONE-SIDED. Margin on the verdict:
+      chi2/dof >= 1.113 (se x 1.055) demotes (c) -> (b)
+      chi2/dof >= 4.454 (se x 2.110) demotes (b) -> (a)
+
+================================================================================================
+P7/P8 — POWER CONTROL AND NEGATIVE CONTROL
+================================================================================================
+  P7 inject s_true +1.4425  ->  recovered +1.4425451925  (error 2.22e-16)
+  P7 inject s_true +0.9028  ->  recovered +0.9027889862  (error 1.11e-16)
+  ✅ P7: both slopes recovered to 2.22e-16 < 1e-09
+  P8 permutation null over 2000: mean +0.00349  sd 0.21497  |t| 0.73
+  ✅ P8: null centred at 0 (|t| 0.73 < 3.0)
+
+================================================================================================
+P9 — THE SEND PATH DOES NOT MOVE
+================================================================================================
+  check_selection.WANTED = ['w23_ad187stdcorr.csv', 'w36_ad199stdcorr.csv']
+  ✅ P9: WANTED is the locked pair ['w23_ad187stdcorr.csv', 'w36_ad199stdcorr.csv']
+
+================================================================================================
+FROZEN PER-FILE PREDICTIONS (scored by a run AFTER the 08-24 window)
+================================================================================================
+  stem                         excess   H_OLS lb   H_GLS lb  gap e-6  steps
+  w42_ad217stdcorr              38.83   0.971237   0.971216    20.96   2.10
+  w42_ad217std                  36.48   0.971233   0.971214    19.69   1.97
+  w42_ad217std_h3               34.89   0.971218   0.971199    18.83   1.88
+  w42_ad217std_hybrid           24.40   0.971207   0.971193    13.17   1.32
+  w42_ad217std_rankraw          14.02   0.971201   0.971194     7.57   0.76
+  w50_ad216stdcorr              10.08   0.971196   0.971190     5.44   0.54
+  w42_ad217std_rescale           7.23   0.971211   0.971207     3.90   0.39
+  w50_ad216std_h3                5.91   0.971176   0.971173     3.19   0.32
+  w50_ad216std                   3.81   0.971186   0.971184     2.06   0.21
+
+  4 of 9 files have the two hypotheses more than ONE LB reporting step (10e-6) apart.
+
+================================================================================================
+THE GOVERNING VERDICT
+================================================================================================
+  The instrument has bucket (c) resolution (R = 4.136) and NO VALIDITY.
+  All 9 above-range files are vetoed or `member`; ZERO can be sent.
+  w66 section 9 item 3 — "this answers itself from the 08-24 sends onward" — is FALSE.
+  The 2026-08-24 plan sends ten files, every one BELOW FIT_CV_MAX, and no later
+  day can differ while the veto binds. R2 is NOT answerable from the send queue.
+
+================================================================================================
+REGISTERED PREDICTIONS: 8 of 10 confirmed
+================================================================================================
+  ✅ P1
+  ✅ P2
+  ✅ P3
+  ✅ V1
+  ✅ P4
+  🔴 P5
+  🔴 P6
+  ✅ P7
+  ✅ P8
+  ✅ P9
+
+FAILURES 0
+
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w67a_aboveslope.json

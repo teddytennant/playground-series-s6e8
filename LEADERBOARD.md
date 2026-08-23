@@ -1995,3 +1995,11 @@ by 42%, not the 86% w60 priced — see JOURNAL w62 §4.
   days is that they are about not losing the silver.
 - ⚠ `10 + 0.2%·(n−1000)` is NOT Kaggle's rule and gives rank 13 / 0.97127. w66's journal §9 used
   it once and corrected it. Use `10 + 0.2%·n`.
+
+## 2026-08-23 15:11 UTC (w67)
+- **Teddy Tennant — 0.97119, rank 67.** Unchanged from w66. Top: Chris Deotte 0.97152.
+- 10/10 submissions used for the UTC day at 12:41; best of the ten 0.97119. w67 sent nothing.
+- Gold cut ~0.97126 (rank 15, Kaggle's n>1000 rule is `10 + 0.2%·n`); silver ~0.97116 (rank 133).
+- ⚠ The +70e-6 of LB to gold is ~14x the entire CV ladder the 187→211 pack has bought. w67 adds
+  that the CV→LB conversion rate out there is **unmeasurable** from this send queue (RESEARCH.md),
+  so the gap cannot even be priced honestly — only bracketed by the +1.4425/+0.9028 slope pair.
