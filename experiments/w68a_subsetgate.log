@@ -1,0 +1,49 @@
+== loading the 202 pack ==
+202 members, dtype float32
+  hybrid: repaired 55 of 202 members
+  transform hybrid       9s
+  transform rankraw     28s
+  transform rescale     11s
+  202 pack scaled at 53s
+
+== loading the 199 pack NATIVELY (ext_members14 omitted) ==
+199 members, dtype float32
+  hybrid: repaired 54 of 199 members
+  transform hybrid      12s
+  transform rankraw     27s
+  transform rescale     15s
+  199 pack scaled at 111s
+
+== P1 GATE: the 202 name list minus lexb vs the native 199 name list ==
+  |202 minus lexb| = 199   |native 199| = 199
+  same SET   : True
+  same ORDER : True
+
+== P2: subsetted 202 vs natively loaded 199, BITWISE ==
+  hybrid   max|diff| 0.000000e+00   bitwise equal: True
+  rankraw  max|diff| 0.000000e+00   bitwise equal: True
+  rescale  max|diff| 0.000000e+00   bitwise equal: True
+  P2 -> CONFIRMED (bitwise equal)
+
+== P5 negative control: delete PLA1's three columns instead ==
+  hybrid   max|diff| vs native 199: 1.601996e+02
+  rankraw  max|diff| vs native 199: 5.707768e+00
+  rescale  max|diff| vs native 199: 4.872022e+01
+  P5 -> CONFIRMED (detectable)
+
+== P6 determinism control: crossfit twice on the SAME array (hybrid) ==
+  0.970122360 vs 0.970122360  diff +0.000e+00e-6  -> CONFIRMED
+  (106s)
+
+== P3: seed-42 AUCs, subsetted arm vs natively loaded arm ==
+  hybrid   subset 0.970122360  native 0.970122360    +0.000e-6  (106s)
+  rankraw  subset 0.970104703  native 0.970104703    +0.000e-6  (96s)
+  rescale  subset 0.970118000  native 0.970118000    +0.000e-6  (141s)
+  h3       subset 0.970132243  native 0.970132243    +0.000e-6
+  P3: worst |diff| 0.000e-6, bar 0.5 -> CONFIRMED
+
+== P4 (prereg section 4), the branch is chosen by P2/P3, not by me ==
+  R-M11f SURVIVES. The subsetted arm IS the native pack, bitwise. The -5.095e-6 is NOT subsetting -- it is the cross-process rebuild floor, w65a's 4e-6 P2 bar is too tight for it, and w65a's gate failure is a FLOOR failure, not a LOAD failure. w29d's 190/194 promotions untouched.
+
+FAILURES 0
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w68a_subsetgate.json

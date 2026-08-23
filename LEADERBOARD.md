@@ -2003,3 +2003,22 @@ by 42%, not the 86% w60 priced — see JOURNAL w62 §4.
 - ⚠ The +70e-6 of LB to gold is ~14x the entire CV ladder the 187→211 pack has bought. w67 adds
   that the CV→LB conversion rate out there is **unmeasurable** from this send queue (RESEARCH.md),
   so the gap cannot even be priced honestly — only bracketed by the +1.4425/+0.9028 slope pair.
+
+## 2026-08-23 16:05 UTC (w68)
+- **Teddy Tennant — 0.97119, rank ~67.** Unchanged from w66/w67. Top: Chris Deotte 0.97152
+  (submitted 14:26 UTC today). Board behind him: MILANFX 0.97144, Changye Li 0.97142,
+  cstdy 0.97137, Maher el Ouahabi 0.97134.
+- 50 submissions on record; **10 on each of 08-20, 08-21, 08-22, 08-23**. The day was at 10/10
+  at 12:41 UTC, before w68 began — **w68 sent nothing, correctly.**
+- ⚠⚠ **THE BOARD CORROBORATED w65 FOR FREE.** `w36_ad199stdcorr_ens4` and
+  `w38_ad202stdcorr_ens4` both went out on 08-23 and both scored **exactly 0.97119**, despite a
+  1.69e-6 stored-CV gap. At the LB's 1e-5 reporting resolution a 1.69e-6 difference is invisible,
+  so this is not independent confirmation of *equality* — but it is exactly what w65's paired
+  instrument predicts, and it is the first time the 202-vs-199 question has had any LB reading
+  at all. Both tie our account best.
+- ⚠ **This is why the 0.97119 best is held by TWO files.** Neither is `WANTED` slot 1
+  (`w36_ad199stdcorr`, the `stdcorr` layer, 0.97118 on 08-21). Final selection stays on CV per
+  the brief; the public tie changes nothing about that and must not be read as a reason to move.
+- The gold cut (~0.97126) and silver cut (~0.97116) are unchanged from w67. **The +70e-6 to gold
+  remains unpriceable** from this send queue (w67 §0) — only bracketed by the +1.4425/+0.9028
+  slope pair. The silver cushion is ~30e-6 of score and still closing while our score is fixed.

@@ -23237,3 +23237,223 @@ pair. w67 imported `w48e_order` and `w26d_queueprice` was never run as a script 
 
 ⛔ `git push` still blocked (no `gh`, no ssh, no token) — tenth run in a row. Commits are
 **local only**.
+
+---
+
+# w68 — 2026-08-23, slot 7 of 10. ZERO slots (the UTC day was at 10/10 on arrival, confirmed).
+
+**Angle issued:** *"Original dataset: find the real source dataset this synthetic data was
+generated from and concatenate it as extra training rows."* **CLOSED FOUR TIMES** and carried in
+w58 §9.7's do-not-reopen list (×4). The nine `ext_members*` directories already in the stack ARE
+the public work built on that search. Substituted w67 §7 item 1 — **w65a finished this run and
+its GATE FAILED**, and diagnosing a failed gate outranks a new angle (playbook step 1).
+
+**Two results: w65 is CLOSED after three runs, and its gate failure is a FLOOR failure, not a
+LOAD failure.** Preregs `w65_prereg.txt` (7193479) and `w68_prereg.txt` (4621590), both
+committed before their instruments existed.
+
+## 0. 🔴 THE HEADLINE: THE THREE lexb MEMBERS ARE THE WORST TRIO TESTED — R2 DID NOT FIRE
+
+w65a ran all four seeds (~9 CPU-hours). `WANTED` slot 1 stays `w36_ad199stdcorr` — but **not for
+the reason three runs of journal have been quoting.**
+
+    arm delta (202 - arm) on identical partitions, h3, e-6.  POSITIVE = deleting those 3 HURT.
+      199 = drop the three lexb   mean -1.058  sd 2.230  se 1.115  pos 1/4  t -0.95
+      PLA1 = drop 3 others        mean +2.742  sd 1.952  se 0.976  pos 4/4  t +2.81
+      PLA2 = drop 3 others        mean +7.808  sd 2.317  se 1.158  pos 4/4  t +6.74
+
+**R1 DOES NOT FIRE on BOTH clauses** (positive 1/4, needs ≥3; mean −1.058e-6, needs ≥ +2.0).
+**R2 DOES NOT FIRE**: lexb −1.058 is OUTSIDE the placebo range [+2.742, +7.808]. P8's power
+control passed at spread 5.066e-6, so the interval was WIDE and lexb fell below it anyway.
+
+**Deleting either placebo trio COSTS 2.7–7.8e-6. Deleting the three `zhukovoleksiy` lexb members
+GAINS 1.06e-6.** They are not neutral padding; they are worse than an ordinary member trio.
+
+⚠⚠ **NEW: R2's INTERVAL RULE THREW AWAY THE PAIRING THAT PRODUCED IT.** Both arm deltas share
+the 202 term, so `(202−PLAj) − (202−199)` **cancels it exactly** and is a direct paired
+arm-vs-arm contrast. Formed properly the result is far sharper than "outside a range of two
+means":
+
+    199 vs PLA1   mean +3.800  sd 0.985  se 0.492  pos 4/4  t +7.72
+    199 vs PLA2   mean +8.865  sd 3.207  se 1.603  pos 4/4  t +5.53
+
+The sd falls from 2.23/1.95 to **0.985** because the shared 202 arm and most of the partition
+term cancel. **An interval rule stated over DERIVED MEANS discards the pairing that produced
+them — form the contrast directly and keep the se.** The honest claim is not "lexb is below the
+distribution of random trios" (two draws cannot support that) but the stronger, exactly-paired
+one: **lexb < PLA1 and lexb < PLA2, 4/4 partitions each.**
+
+⚠⚠ **NEW: NAME WHICH BRANCH A POWER CONTROL PROTECTS.** P8 was registered to stop a degenerate
+placebo interval making "inside" meaningless — that protects the **FIRE** branch. R2 did *not*
+fire, and for the NON-FIRE branch a wide interval works the **opposite** way: falling outside a
+5.07e-6-wide interval is stronger evidence than falling outside a narrow one. The same control
+reads in opposite directions on the two branches and the prereg only reasoned about one.
+
+## 1. 🔴 w65a's GATE FAILED 7/8 — AND THE OFFSETS ARE SIGN-CONSISTENT WITHIN ARM
+
+    arm 202 (NOT subsetted):  +1.02 +1.64 +1.87 +1.47   mean +1.500e-6, 4/4 positive
+    arm 199 (SUBSETTED):      -0.77 -6.49 -3.94 -3.18   mean -3.595e-6, 4/4 negative
+    differential                                              -5.095e-6
+
+`arm 199 rankraw` is off the shipped OOF by **−6.49e-6**, over the 4e-6 bar, under the 2e-5 VOID
+bar so nothing voided. A second, independent estimate of the same quantity: w65a's seed-42 h3
+delta is **+2.25e-6** where the STORED delta is **−2.406e-6** — a **SIGN FLIP**, discrepancy
++4.656e-6. **The two agree to 0.44e-6.**
+
+## 2. w68a: THE MATRICES ARE BITWISE EQUAL. R-M11f SURVIVES.
+
+w65a's R-M11f says the 199 arm (202 minus three columns) is *exactly* a native 199 load. Reading
+`agent/stack.py`, the mathematical half holds — `rankraw` is a per-j loop, `hybrid`'s `bad` mask
+and its `s = B[:, bad].std(0)` are per-column, `rescale`'s lo/hi are `.min(0)/.max(0)`. So the
+−5.095e-6 should not exist. `w68a_subsetgate.py` loads the 202 pack AND the 199 pack natively in
+ONE process and compares the **matrices, not the AUCs** — an AUC gap confounds the data question
+with the lbfgs question, and the data question is answerable exactly.
+
+| | | |
+|---|---|---|
+| P1 | 202-minus-lexb vs native 199: same SET and same ORDER | ✅ |
+| **P2** | **all three transforms BITWISE equal, max\|diff\| exactly 0.0** | ✅ |
+| P3 | seed-42 AUCs, subsetted vs native, all four cells | ✅ **+0.000e-6** |
+| P5 | NEGATIVE CONTROL: deleting PLA1's three instead must differ | ✅ 1.60e2 / 5.71 / 4.87e1 |
+| P6 | DETERMINISM: crossfit twice on the same array | ✅ diff exactly 0.0 |
+
+**FAILURES 0.** P4's branch was chosen by the data, not by me: **the −5.095e-6 is NOT subsetting.
+It is the cross-process rebuild floor; w65a's 4e-6 bar is too tight for it; the gate failure is a
+FLOOR failure, not a LOAD failure. w29d's 190-over-188 and 194-over-190 promotions are untouched.**
+
+## 3. ⚠⚠ THE CROSS-PROCESS OFFSET IS A PER-FILE CONSTANT, NOT PER-CELL NOISE
+
+This is the durable result and it reaches past w65. Every cell of a shipped file is built in ONE
+process under ONE BLAS thread state, so **they share that process's draw** — which is exactly why
+all four cells of arm 202 read positive and all four of arm 199 read negative. Consequences:
+
+1. **Averaging cells does NOT reduce it.** `h3` is a rank-average of three cells from the SAME
+   process and inherits the offset in full.
+2. **A comparison BETWEEN two shipped files carries the DIFFERENCE of two draws** — here
+   **5.095e-6**, larger than the 4e-6 rebuild floor this workspace uses as a bar and **2.5× the
+   2.0e-6 bar R1 decides on.**
+3. Therefore **the stored-level gap of −2.417e-6 that has been quoted for slot 1 all week is
+   BELOW the noise separating the two files.** `check_selection.py`'s own sentence — *"Ranking
+   these three files by their stored levels is not a measurement"* — is now **MEASURED, at
+   5.095e-6**, and the paired within-process design was necessary rather than merely tidy.
+
+✅ **Independent corroboration from the board:** `w36_ad199stdcorr_ens4` and
+`w38_ad202stdcorr_ens4` went out together on 08-23 and scored **exactly 0.97119 both**. Their
+stored CVs differ by 1.69e-6 — invisible at the LB's 1e-5 resolution, and consistent with w65's
+finding that the two arms are the same object.
+
+## 4. ⚠ MY OWN GUARD CAUGHT ME OVERSTATING §2's ARGUMENT
+
+`w68b_floorguard.py` pins R-M11f in milliseconds on a synthetic matrix so a future cross-member
+step in `stack.py` cannot silently break every arm instrument. Writing it falsified a claim I had
+just made in this entry: **`np.std(axis=0)` is NOT bitwise invariant to the COLUMN COUNT** —
+8.9e-16 (float64) and **3.0e-7 (float32)** on a 12-vs-9 synthetic. So per-column purity licenses
+the **transforms** bitwise but **not the scaling**. w68a's exact equality on the real 202/199
+matrices is an **empirical fact about those matrices, not a theorem**, and the guard now asserts
+the transforms bitwise and the scaling to within 1 ulp, with the gap named.
+⚠ **NEW: "STRICTLY PER-COLUMN" IS A STATEMENT ABOUT THE MATH, NOT ABOUT THE REDUCTION ORDER.**
+A float reduction's blocking depends on the ARRAY SHAPE, so a per-column formula is not a
+per-column computation. This matters here precisely because §3 shows lbfgs at `tol=1e-4` in
+float32 is sensitive at ~1e-7 — the exact size of the ulp.
+⚠ Two of w68b's 19 checks failed on first run and **both were the guard's fault**: `keep` dropped
+every column `hybrid` repairs, so the repaired branch was never exercised on a kept column; and
+the std check asserted bitwise where only 1 ulp is true. **A vacuity check is worth as much as
+the assertion it guards** — the first failure was found only by asking whether the mask had
+anything to catch.
+
+## 5. THE REGISTERED PREDICTIONS
+
+**w65** (`w65_prereg.txt`): P2 🔴 **7/8 FALSIFIED** (§1, diagnosed in §2 — a FLOOR failure) ·
+P3 ✅ mean < 0 · P3b ✅ **−1.058 in [−3.9, −0.9]**, the one that could actually fail ·
+P4 ✅ sd 2.230 in [0.5, 3.0] · P5 ✅ R1 does not fire · P6 🔴 **FALSIFIED — R2 did not fire**
+(§0, the substantive result) · P7 ✅ worst +9.46e-6 > +8.0, load integrity confirmed ·
+P8 ✅ spread 5.066e-6. **FAILURES 1, 6 of 8 confirmed.**
+
+**w68** (`w68_prereg.txt`): P1 ✅ · P2 ✅ · P3 ✅ · P4 branch chosen by the data · P5 ✅ · P6 ✅.
+**FAILURES 0, 6 of 6.**
+
+Note the two falsifications point the same way and neither threatens the conclusion: P2 failed
+because the *bar* was set from a floor that does not apply cross-process, and P6 failed because
+the lexb members are *worse* than predicted, not better. **R1's non-firing is robust to the whole
+defect under test** — the subsetting bias, had it been real, ran +5.095e-6 **in 202's favour**,
+so removing it makes the lexb delta *more* negative.
+
+## 6. VERIFICATION
+
+**All eleven fast standing guards exit 0**: `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b
+w65b` + the new **`w68b` (19 checks, FAILURES 0)**. `w65c`/`w66d` not re-run — this run touched
+no send-path file. Cleared `OMP_NUM_THREADS` inline via `env -u` throughout, so w65b returned 0
+first time (w67 §6).
+
+🔴 **`plan_day` IS EMPTY ACROSS ALL 74 QUEUE ROWS, AND w67'S OWN NEW RULE IS WHY.** w67 §0
+established "re-run `w23b_sendqueue.py` AFTER every send window". `w23b` regenerates the queue;
+**`w48e_order.py:525` is what writes `plan_day`**; so the post-window re-run **wiped the 08-24
+stamp w67 recorded as present.** ✅ **Not a send-path break** — `ORDER_0824` is intact in
+`w48e_order.py:207` and step 2 of the four-command chain rewrites the stamp. Dry-run confirms the
+**same ten files, all validated** (296,302 rows, no NaN, md5 matches the queue, CV reproduces
+from the OOF vector), nothing written. ⚠ **NEW: A FRESHNESS RULE ON A DERIVED ARTEFACT CAN
+DESTROY A STAMP A LATER STAGE WROTE INTO IT.** Do not read `plan_day` as evidence the day is
+registered — read `w48e_order.ORDER_<DAY>`.
+
+**Board at 15:11 UTC: best public 0.97119 (two files tied), rank ~67, top 0.97152 (Chris Deotte).
+Unchanged from w66/w67.** 50 submissions on record; 10 on each of 08-20, 08-21, 08-22, 08-23.
+
+**Submitted 0 — the UTC day was at 10/10 before this run began (verified from the API, 12:41
+UTC).**
+
+## 7. NEXT RUN, IN ORDER
+
+1. **`date -u` FIRST**, then `TZ=UTC stat -c %y` before judging any log stale (the box is
+   **UTC−4**), then the `/proc` scan per-pid with `tr` (never `ps`/`pgrep`).
+2. **THE SEND IS FOUR COMMANDS**: `w23b_sendqueue.py` → `w48e_order.py --day <TODAY> --write` →
+   `w26g_send.py --n 10` dry → `--go`. **2026-08-24 IS REGISTERED** (`ORDER_0824`, re-verified
+   dry this run). **2026-08-25 IS NOT and w48e will exit 2** — register it before the window.
+   ⚠ Do NOT read `plan_day` from the CSV as proof of registration (§6).
+3. ✅ **w65 IS CLOSED.** `WANTED` slot 1 stays `w36_ad199stdcorr`, now on a paired instrument
+   rather than a stored-level gap that §3 shows is below the noise. **Do not re-open it** on any
+   stored-level comparison; only a paired within-process contrast can move it.
+4. 🎯 **THE OPEN ITEM w65 CREATED:** the lexb trio is *negative*, at −1.058e-6 and 3.80e-6 worse
+   than PLA1. **`ext_members14` is in every `ad202`/`ad211`/`ad216` build.** Nothing has priced
+   what removing it does to the packs *above* 202 — ARM 211 already reads BELOW 199 on every
+   stored base, and this is a candidate mechanism. That is a **modelling** question and it is
+   also **exactly the "clean file above `FIT_CV_MAX` that is not ARM 216/217"** w67 §7 item 3
+   says is the only honest route to the above-range slope. Two open items, one build.
+5. ⛔ **R2/above-range slope IS CLOSED AS UNANSWERABLE** (w67 §0) — the ARM 216/217 files are
+   veto-barred and unsendable. Do not register another measurement against them, and **do not
+   lift the veto to enable a measurement.**
+6. ⛔ **SLOT 2 IS CLOSED** (w64). ⛔ **WANTED must not move on a pricing result** (R1/w56b).
+   ⛔ Do NOT re-open w58 §9.7's list: **the original dataset (×5 now)**, LightGBM tuning (×3),
+   CatBoost tuning, feature engineering, blending/OOF weight search, seed and fold diversity,
+   error analysis.
+7. ⚠ Still untouched, **fifth** run running: the refined P5 from w63 §4 and the break-even's
+   16.5e-6 bracket hole (w63 §5a).
+8. Run `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b` on any run
+   that sends or touches `check_selection.py`, `stdflag.py`, `w26d_queueprice.py`,
+   `w48e_order.py`, `w26g_send.py` or `w53a_pricer.py`. `w65c`/`w66d` need ~4 min — background
+   them, and **clear `OMP_NUM_THREADS` first** or w65b returns rc=1 spuriously.
+9. ⚠ **NEW this run:** the cross-process offset is a PER-FILE CONSTANT, so averaging cells does
+   not reduce it and a between-file comparison carries the difference of two draws — 5.095e-6,
+   above the 4e-6 floor and 2.5× R1's bar (§3) · an interval rule over DERIVED MEANS discards the
+   pairing that produced them — form the contrast, keep the se (§0) · NAME WHICH BRANCH a power
+   control protects; it can read in opposite directions on fire vs non-fire (§0) · "strictly
+   per-column" is about the MATH, not the REDUCTION ORDER — float blocking depends on array
+   SHAPE (§4) · a vacuity check is worth as much as the assertion it guards (§4) · a freshness
+   rule on a derived artefact can destroy a stamp a later stage wrote into it (§6) · compare the
+   MATRICES, not the AUCs, when the data question is answerable exactly (§2).
+   ⚠ Carried: ask VALIDITY before POWER — can this sample be observed? · correlation among units
+   HELPS when the estimand is a CONTRAST · a noiseless MODEL se is an UPPER BOUND on resolution ·
+   a constant that is ALREADY SCALED is the easiest to scale twice · `ls`/`stat` print LOCAL time
+   · a guard that greps TEXT where the rule names a STRUCTURE tests the wrong object · a guard
+   that reads the ENVIRONMENT is not reproducible under an exported shell · a rule enforced in
+   ONE consumer is not enforced · a decision rule must name its condition BY REFERENCE · a null
+   is evidence of absence only with a POWER CONTROL · our board name is `Teddy Tennant`, not
+   `thtennant` · a per-file price is not additive — price the SET · never let a `member` row into
+   a `max(CV)` · always pass `--page-size` · to read a printout from a module that writes under
+   `__main__`, IMPORT it, never run it.
+
+**Files added:** `experiments/w68_prereg.txt`, `w68a_subsetgate.py` + `.json` + `.log`,
+`w68b_floorguard.py`, `w65a_armpair.json` (w65a completed). **Modified:** `RESEARCH.md`,
+`LEADERBOARD.md`, `JOURNAL.md`. **Nothing on the send path was edited.**
+
+⛔ `git push` still blocked (no `gh`, no ssh, no token) — eleventh run in a row. Commits are
+**local only**.

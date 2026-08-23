@@ -1,0 +1,58 @@
+{
+ "prereg": "experiments/w68_prereg.txt",
+ "failures": [],
+ "P1": {
+  "same_set": true,
+  "same_order": true,
+  "n_sub": 199,
+  "n_native": 199
+ },
+ "P2": {
+  "hybrid": {
+   "max_abs_diff": 0.0,
+   "bitwise_equal": true
+  },
+  "rankraw": {
+   "max_abs_diff": 0.0,
+   "bitwise_equal": true
+  },
+  "rescale": {
+   "max_abs_diff": 0.0,
+   "bitwise_equal": true
+  }
+ },
+ "P5": {
+  "hybrid": 160.19964599609375,
+  "rankraw": 5.707768440246582,
+  "rescale": 48.72022247314453
+ },
+ "P6": {
+  "a1": 0.9701223599978201,
+  "a2": 0.9701223599978201,
+  "identical": true
+ },
+ "P3": {
+  "hybrid": {
+   "subset": 0.9701223599978201,
+   "native": 0.9701223599978201,
+   "diff_e6": 0.0
+  },
+  "rankraw": {
+   "subset": 0.970104702757817,
+   "native": 0.970104702757817,
+   "diff_e6": 0.0
+  },
+  "rescale": {
+   "subset": 0.9701180002998044,
+   "native": 0.9701180002998044,
+   "diff_e6": 0.0
+  },
+  "h3": {
+   "subset": 0.9701322433399291,
+   "native": 0.9701322433399291,
+   "diff_e6": 0.0
+  }
+ },
+ "P3_worst_abs_e6": 0.0,
+ "P4_verdict": "R-M11f SURVIVES. The subsetted arm IS the native pack, bitwise. The -5.095e-6 is NOT subsetting -- it is the cross-process rebuild floor, w65a's 4e-6 P2 bar is too tight for it, and w65a's gate failure is a FLOOR failure, not a LOAD failure. w29d's 190/194 promotions untouched."
+}

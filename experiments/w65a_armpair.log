@@ -1,0 +1,142 @@
+202 members, dtype float32
+  hybrid: repaired 55 of 202 members
+  transform hybrid      15s
+  transform rankraw     32s
+  transform rescale     15s
+  PLA1 drops ['imp_lgbm', 'naji04', 'bolt_cat_pair_evidence']
+  PLA2 drops ['pub_tabnet', 'xgb_tuned', 'ad_lgbte']
+202 members, loaded in 71s; arms [202, 199, 'PLA1', 'PLA2']
+  seed  42 arm  202 hybrid   0.9701243 (60s)
+  seed  42 arm  202 rankraw  0.9701084 (56s)
+  seed  42 arm  202 rescale  0.9701219 (72s)
+  seed  42 arm  202 h3       0.9701345
+  seed  42 arm  199 hybrid   0.9701224 (63s)
+  seed  42 arm  199 rankraw  0.9701047 (65s)
+  seed  42 arm  199 rescale  0.9701180 (171s)
+  seed  42 arm  199 h3       0.9701322
+  seed  42 arm PLA1 hybrid   0.9701178 (151s)
+  seed  42 arm PLA1 rankraw  0.9701042 (164s)
+  seed  42 arm PLA1 rescale  0.9701160 (184s)
+  seed  42 arm PLA1 h3       0.9701293
+  seed  42 arm PLA2 hybrid   0.9701181 (139s)
+  seed  42 arm PLA2 rankraw  0.9701009 (131s)
+  seed  42 arm PLA2 rescale  0.9701116 (170s)
+  seed  42 arm PLA2 h3       0.9701267
+  seed 101 arm  202 hybrid   0.9701437 (141s)
+  seed 101 arm  202 rankraw  0.9701238 (129s)
+  seed 101 arm  202 rescale  0.9701350 (156s)
+  seed 101 arm  202 h3       0.9701499
+  seed 101 arm  199 hybrid   0.9701447 (136s)
+  seed 101 arm  199 rankraw  0.9701200 (157s)
+  seed 101 arm  199 rescale  0.9701395 (180s)
+  seed 101 arm  199 h3       0.9701518
+  seed 101 arm PLA1 hybrid   0.9701417 (125s)
+  seed 101 arm PLA1 rankraw  0.9701230 (124s)
+  seed 101 arm PLA1 rescale  0.9701316 (171s)
+  seed 101 arm PLA1 h3       0.9701479
+  seed 101 arm PLA2 hybrid   0.9701380 (156s)
+  seed 101 arm PLA2 rankraw  0.9701189 (147s)
+  seed 101 arm PLA2 rescale  0.9701256 (154s)
+  seed 101 arm PLA2 h3       0.9701442
+  seed  13 arm  202 hybrid   0.9701356 (125s)
+  seed  13 arm  202 rankraw  0.9701198 (114s)
+  seed  13 arm  202 rescale  0.9701337 (149s)
+  seed  13 arm  202 h3       0.9701458
+  seed  13 arm  199 hybrid   0.9701387 (122s)
+  seed  13 arm  199 rankraw  0.9701217 (68s)
+  seed  13 arm  199 rescale  0.9701375 (89s)
+  seed  13 arm  199 h3       0.9701485
+  seed  13 arm PLA1 hybrid   0.9701326 (58s)
+  seed  13 arm PLA1 rankraw  0.9701218 (59s)
+  seed  13 arm PLA1 rescale  0.9701308 (111s)
+  seed  13 arm PLA1 h3       0.9701452
+  seed  13 arm PLA2 hybrid   0.9701273 (92s)
+  seed  13 arm PLA2 rankraw  0.9701159 (85s)
+  seed  13 arm PLA2 rescale  0.9701239 (87s)
+  seed  13 arm PLA2 h3       0.9701391
+  seed   7 arm  202 hybrid   0.9701298 (64s)
+  seed   7 arm  202 rankraw  0.9701181 (54s)
+  seed   7 arm  202 rescale  0.9701288 (81s)
+  seed   7 arm  202 h3       0.9701419
+  seed   7 arm  199 hybrid   0.9701331 (68s)
+  seed   7 arm  199 rankraw  0.9701159 (58s)
+  seed   7 arm  199 rescale  0.9701269 (85s)
+  seed   7 arm  199 h3       0.9701439
+  seed   7 arm PLA1 hybrid   0.9701288 (63s)
+  seed   7 arm PLA1 rankraw  0.9701152 (66s)
+  seed   7 arm PLA1 rescale  0.9701263 (66s)
+  seed   7 arm PLA1 h3       0.9701387
+  seed   7 arm PLA2 hybrid   0.9701175 (61s)
+  seed   7 arm PLA2 rankraw  0.9701087 (50s)
+  seed   7 arm PLA2 rescale  0.9701175 (76s)
+  seed   7 arm PLA2 h3       0.9701308
+
+== P2 GATE: seed-42 cells of BOTH real arms vs the shipped OOF vectors ==
+  arm 202 hybrid   got 0.9701243  shipped 0.9701233    +1.02e-6  OK
+  arm 202 rankraw  got 0.9701084  shipped 0.9701068    +1.64e-6  OK
+  arm 202 rescale  got 0.9701219  shipped 0.9701200    +1.87e-6  OK
+  arm 202 h3       got 0.9701345  shipped 0.9701330    +1.47e-6  OK
+  arm 199 hybrid   got 0.9701224  shipped 0.9701231    -0.77e-6  OK
+  arm 199 rankraw  got 0.9701047  shipped 0.9701112    -6.49e-6  *** OVER 4e-6 ***
+  arm 199 rescale  got 0.9701180  shipped 0.9701219    -3.94e-6  OK
+  arm 199 h3       got 0.9701322  shipped 0.9701354    -3.18e-6  OK
+  P2: 7/8 cells inside 4e-06  -> FALSIFIED
+  !! P2 falsified: 7/8
+
+== paired 202 - arm delta on identical partitions (e-6) ==
+    arm  seed     hybrid    rankraw    rescale         h3
+    199    42      +1.92      +3.69      +3.91      +2.25
+    199   101      -1.05      +3.80      -4.48      -1.86
+    199    13      -3.03      -1.89      -3.76      -2.62
+    199     7      -3.33      +2.21      +1.93      -2.00
+    199  h3 mean -1.058  sd 2.229  se 1.114  positive 1/4
+
+   PLA1    42      +6.47      +4.23      +5.89      +5.21
+   PLA1   101      +2.00      +0.72      +3.43      +2.01
+   PLA1    13      +3.01      -2.02      +2.87      +0.59
+   PLA1     7      +0.94      +2.87      +2.55      +3.16
+   PLA1  h3 mean +2.742  sd 1.952  se 0.976  positive 4/4
+
+   PLA2    42      +6.17      +7.49     +10.30      +7.74
+   PLA2   101      +5.71      +4.90      +9.49      +5.70
+   PLA2    13      +8.37      +3.86      +9.82      +6.74
+   PLA2     7     +12.31      +9.41     +11.30     +11.05
+   PLA2  h3 mean +7.808  sd 2.318  se 1.159  positive 4/4
+
+== R1 (prereg section 3) ==
+  (i)  positive in 1/4, needs >= 3: False
+  (ii) mean -1.058e-6, needs >= +2.0: False
+  R1 DOES NOT FIRE -- WANTED slot 1 stays w36_ad199stdcorr
+
+== P8 power control: |PLA1 - PLA2| = 5.066e-6, needs > 0.5: CONFIRMED
+== R2: placebo h3 means PLA1 +2.742  PLA2 +7.808  range [+2.742, +7.808]; lexb -1.058
+  R2 DOES NOT FIRE -- the lexb drop is outside the placebo range
+
+== registered predictions ==
+  P3  mean < 0                 CONFIRMED
+  P3b mean in [-3.9,-0.9]      CONFIRMED
+  P4  sd in [0.5,3.0]          CONFIRMED
+  P5  R1 does not fire         CONFIRMED
+  P6  R2 fires                 FALSIFIED
+
+== P7 off-seed mean minus seed 42 (w14c's mechanism) ==
+  arm  202 hybrid     +12.08e-6
+  arm  202 rankraw    +12.14e-6
+  arm  202 rescale    +10.62e-6
+  arm  202 h3         +11.38e-6
+  arm  199 hybrid     +16.47e-6
+  arm  199 rankraw    +14.46e-6
+  arm  199 rescale    +16.63e-6
+  arm  199 h3         +15.79e-6
+  arm PLA1 hybrid     +16.57e-6
+  arm PLA1 rankraw    +15.85e-6
+  arm PLA1 rescale    +13.56e-6
+  arm PLA1 h3         +14.67e-6
+  arm PLA2 hybrid      +9.46e-6
+  arm PLA2 rankraw    +13.57e-6
+  arm PLA2 rescale    +10.72e-6
+  arm PLA2 h3         +11.29e-6
+  P7: worst cell +9.46e-6 over 16, needs > +8.0: CONFIRMED
+
+FAILURES 1
+wrote /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w65a_armpair.json

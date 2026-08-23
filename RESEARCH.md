@@ -1,5 +1,98 @@
 # Research — playground-series-s6e8
 
+# 🔴 THE CROSS-PROCESS OFFSET IS A **PER-FILE CONSTANT**, NOT PER-CELL NOISE (w68, 2026-08-23)
+
+**Every cell of a shipped file is built in ONE process under ONE BLAS thread state, so all its
+cells share that process's draw.** Measured on the two arms w65a rebuilt against their shipped
+OOF vectors — note the sign consistency, which is the whole tell:
+
+    arm 202 (NOT subsetted):  +1.02 +1.64 +1.87 +1.47   mean +1.500e-6, 4/4 positive
+    arm 199 (SUBSETTED):      -0.77 -6.49 -3.94 -3.18   mean -3.595e-6, 4/4 negative
+    differential                                              -5.095e-6
+
+Confirmed independently at **+4.656e-6** by w65a's seed-42 h3 delta (+2.25e-6) against the stored
+delta (−2.406e-6) — **a SIGN FLIP**. The two estimates agree to 0.44e-6.
+
+⚠⚠ **THREE CONSEQUENCES, ALL LOAD-BEARING.**
+1. **Averaging cells does NOT reduce it.** `h3` is a rank-average of three cells from the SAME
+   process and inherits the offset in full.
+2. **A comparison BETWEEN two shipped files carries the DIFFERENCE of two draws** — 5.095e-6 here,
+   **larger than the 4e-6 rebuild floor** this workspace uses as a bar and **2.5× the 2.0e-6 bar**
+   w65's R1 decides on.
+3. ⛔ **THEREFORE A STORED-LEVEL RANKING IS NOT A MEASUREMENT, AND THE SIZE IS NOW KNOWN.** The
+   −2.417e-6 stored gap that had been quoted for `WANTED` slot 1 all week is **below the noise
+   separating the two files**. `check_selection.py` already said this in prose; it is now measured
+   at 5.095e-6. **Only a paired within-process contrast can rank two packs.**
+
+✅ **The board agrees:** `w36_ad199stdcorr_ens4` and `w38_ad202stdcorr_ens4` went out together on
+08-23 and scored **exactly 0.97119 both**, their 1.69e-6 stored-CV gap being invisible at the LB's
+1e-5 resolution.
+
+## R-M11f SURVIVES — SUBSETTING IS EXACT (`w68a_subsetgate.py`, FAILURES 0)
+
+The 199 arm served by deleting three columns from the 202 load **is** a natively loaded 199 pack:
+same member set AND same ORDER, all three transforms **BITWISE equal (max|diff| exactly 0.0)**,
+and seed-42 AUCs identical to **+0.000e-6** in all four cells. Negative control (deleting three
+OTHER columns) differs by 1.60e2/5.71/4.87e1; determinism control exact. So the −5.095e-6 is a
+**FLOOR** failure, not a **LOAD** failure, and w29d's 190-over-188 / 194-over-190 promotions are
+untouched. **Compare the MATRICES, not the AUCs** — an AUC gap confounds the data question with
+the lbfgs question, and the data question is answerable exactly.
+
+⚠ **BUT "STRICTLY PER-COLUMN" IS ABOUT THE MATH, NOT THE REDUCTION ORDER.** `np.std(axis=0)` is
+**not** bitwise invariant to the COLUMN COUNT — 8.9e-16 (float64), **3.0e-7 (float32)** on a
+12-vs-9 synthetic. The transforms in `agent/stack.py` are bitwise per-column; **the scaling is
+only per-column to within 1 ulp**, and w68a's exact equality on the real 202/199 matrices is an
+empirical fact about those matrices, not a theorem. This matters because lbfgs at `tol=1e-4` in
+float32 is sensitive at ~1e-7 — the exact size of that ulp, and the mechanism behind the whole
+cross-process floor above. `w68b_floorguard.py` (19 checks) pins both halves in milliseconds.
+
+
+# 🔴 THE THREE `ext_members14` (lexb) MEMBERS ARE NEGATIVE (w65, 2026-08-23)
+
+`w65a_armpair.py`, four seeds, four arms, one process, identical partitions. Delta = (202 − arm)
+on h3; **positive means deleting those three HURT.**
+
+    199 = drop the three lexb   mean -1.058  sd 2.230  se 1.115  pos 1/4  t -0.95
+    PLA1 = drop 3 others        mean +2.742  sd 1.952  se 0.976  pos 4/4  t +2.81
+    PLA2 = drop 3 others        mean +7.808  sd 2.317  se 1.158  pos 4/4  t +6.74
+
+**Deleting either placebo trio COSTS 2.7–7.8e-6; deleting the lexb trio GAINS 1.06e-6.** R1 does
+not fire (both clauses) → **`WANTED` slot 1 stays `w36_ad199stdcorr`**. R2 does not fire → the
+lexb trio **is** distinguishable from an arbitrary three, in the *worse* direction.
+
+⚠⚠ **FORM THE CONTRAST, DO NOT COMPARE DERIVED MEANS.** Both arm deltas share the 202 term, so
+`(202−PLAj) − (202−199)` cancels it **exactly** and is a direct paired arm-vs-arm comparison. The
+sd falls from 2.23/1.95 to **0.985** because the shared arm and most of the partition term cancel:
+
+    199 vs PLA1   mean +3.800  sd 0.985  se 0.492  pos 4/4  t +7.72
+    199 vs PLA2   mean +8.865  sd 3.207  se 1.603  pos 4/4  t +5.53
+
+Two placebo draws cannot support "lexb is below the distribution of random trios"; they fully
+support the exactly-paired **lexb < PLA1 and lexb < PLA2, 4/4 partitions each.**
+
+🎯 **THE OPEN ITEM THIS CREATES.** `ext_members14` is in every `ad202`/`ad211`/`ad216` build, and
+ARM 211 already reads BELOW 199 on every stored base — a candidate mechanism nobody has priced.
+Removing it from the packs above 202 is *also* **exactly the "clean file above `FIT_CV_MAX` that
+is not ARM 216/217"** w67 §7 names as the only honest route to the above-range slope. **Two open
+items, one build.**
+
+⚠ **NAME WHICH BRANCH A POWER CONTROL PROTECTS.** w65's P8 (placebo spread > 0.5e-6, read
+5.066e-6) was registered to stop a degenerate interval making "inside" meaningless — that guards
+the **FIRE** branch. R2 did *not* fire, and for the NON-FIRE branch a **wide** interval makes the
+result **stronger**, not weaker. The same control reads oppositely on the two branches.
+
+
+# ⚠ A FRESHNESS RULE ON A DERIVED ARTEFACT CAN DESTROY A LATER STAGE'S STAMP (w68, 2026-08-23)
+
+w67 §0 established "re-run `w23b_sendqueue.py` AFTER every send window". `w23b` regenerates the
+queue; **`w48e_order.py:525` is what writes `plan_day`**. So the post-window re-run **wiped the
+08-24 stamp w67's own journal recorded as present** — all 74 rows read empty.
+✅ **Not a send-path break:** `ORDER_0824` is intact at `w48e_order.py:207` and step 2 of the
+four-command chain rewrites it (dry-run re-verified: same ten files, 296,302 rows, no NaN, md5
+matches, CV reproduces). ⛔ **Never read `plan_day` from the CSV as proof a day is registered —
+read `w48e_order.ORDER_<DAY>`.**
+
+
 # ⛔ WANTED SLOT 2 IS SETTLED — THE WHOLE DECISION IS WORTH 0.14e-6 (w64, 2026-08-23)
 
 Deferred as "a PACK HEDGE whose value is not its CV" by **w61 §8.7, w62 §7.7 and w63 §10.8** —
