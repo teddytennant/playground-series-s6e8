@@ -24051,3 +24051,56 @@ accurate; no `NOT FOUND`. Plus the new `w70b_basisguard` (FAILURES 0) and `w70a_
 `w48e_order.py` (the 08-25 registration only), `w23b_sendqueue.csv`, `w26d_queueprice.{csv,json}`
 (regenerated), `RESEARCH.md`, `JOURNAL.md`.
 **No model was refitted and no submission was sent.**
+
+## 7. ADDENDUM (17:35 UTC) — TWO MORE ARTEFACTS, AND THE LB CANNOT ADJUDICATE THE BASIS
+
+### 7.1 ✅ `w70d_chainguard.py` — THE COVERAGE FIX FOR §1, AND IT CATCHES THE REAL DEFECT
+
+§1's lesson was not "write a cleverer assertion", it was **coverage**: no standing guard imports
+`w26d`, `w48e_order` or `w26g_send`, so all fourteen passed with the send path dead. `w70d`
+imports every module the four-command chain executes, **in the order it executes them**, and
+fails on the first that raises — which subsumes every import-time assert those modules already
+carry (`require_corr_registered`, `stdflag.gate`, w26d's two pricer GATEs, w48e's veto and length
+asserts) for free. 8 of 8 reached, FAILURES 0.
+
+**NEGATIVE CONTROL — the real defect, replayed.** Deleting the `w69_ad208stdcorr` line from
+`CORR_MAP` (exactly §1's state) makes it print `🔴 w26d_queueprice` with the true
+`AssertionError: unregistered *corr files ... ['w69_ad208stdcorr']` and stop, since everything
+after it is unreachable. Restored; back to 8 of 8. ⚠ It is a **smoke test, not a dry run** — the
+docstring says so, because a module can import cleanly and still be wrong at call time. Pair it
+with `w48e_order.py --day <DAY>` before a window. **The standing suite is now SIXTEEN.**
+
+### 7.2 🔴 THE LEADERBOARD CANNOT TELL THE TWO BASES APART — REGISTERED NULL, WITH POWER
+
+`experiments/w70_prereg.txt` (committed **d3d680c, before `w70e_basisfit.py` existed**) asked one
+narrow question the disinterested-run rule *does* permit: not *which basis should we rank on* —
+w70 computed the table and is barred from that (§3c) — but ***is a later run even allowed to cite
+the LB when it decides?*** Refit w53a twice, identically, changing only the corrected rows' `cv`.
+
+    P1 VALIDITY   model S vs w53a itself: max|dBETA| 0.000e+00, |dRESID_SD| 0.000e+00 ✅ exact
+    P2 POWER      10 of 93 fit rows corrected (6 with non-zero optimism), sd 1.476e-6, max 3.523
+                  paired bootstrap se of D_SD, 2000 resamples seed 70:      0.0641e-6
+    READING       RESID_SD(S) 7.7200e-6   RESID_SD(H) 7.7319e-6
+                  D_SD +0.0119e-6   =  0.19 se        -> **UNINFORMATIVE**, the PREDICTED outcome
+    P4 SHUFFLE    200 arbitrary relabellings of the same magnitudes: mean +0.0283, sd 0.0737,
+                  range [-0.167, +0.202]e-6.  The TRUE D_SD sits at the **41.5th percentile** ✅
+
+⚠⚠ **THIS IS A STRONG NULL, NOT A BLIND ONE, AND THAT DISTINCTION IS THE WHOLE POINT OF P2.** The
+se is **0.064e-6** against a registered 0.5e-6 threshold, so a real 0.5e-6 effect would have read
+at **~8 se**. The design had ample power and found +0.012e-6. P4 bounds it independently: no
+relabelling of these magnitudes, true or arbitrary, moves the residual sd by more than 0.21e-6.
+
+⛔ **CONSEQUENCE, AND IT BINDS THE NEXT RUN.** The public LB **cannot adjudicate the corrected-CV
+basis**, so a later run deciding §3c's open question **may not cite it in either direction**. The
+decision rests entirely on the CV-comparison argument of §3b — that the optimism is a real
+selection term of up to 3.5e-6 between two files, additive to w68's floor and not removed by a
+paired contrast. ✅ **And §3c's hand-wave is now a number**: the basis moves the pricer's residual
+sd by **0.15%**, so the pricer itself is genuinely unaffected. I asserted that before measuring
+it; it happened to be right, which is not the same as having known it.
+
+⚠ **WHY THE EFFECT IS THIS SMALL, STATED IN THE PREREG BEFORE THE READING**: w53a's design
+already carries a `corr` **dummy**, so the MEAN optimism (1.771e-6) is absorbed by a level term
+under *both* models. Only the *within-corrected variation* can move `D_SD`, and 10 rows of it
+cannot shift a 7.72e-6 residual. **Registering that mechanism in advance is what makes the null
+readable** — otherwise a small number invites the reading "the optimism is not real", which is
+the opposite of what §3b measured.

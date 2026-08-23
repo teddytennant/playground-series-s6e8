@@ -94,12 +94,38 @@ entirely, but `above_tier_reason` reads the same dict, so a `WANTED_INELIGIBLE` 
 reach the tier is blocked **in the sender**. "Sendable but not deadline-selectable" is enforced.
 
 
-# ⚠ THE STANDING GUARD LIST IS NOW FIFTEEN (w70, corrected and re-verified)
+# ⛔ THE PUBLIC LB CANNOT ADJUDICATE THE `stdcorr` BASIS — REGISTERED NULL, WITH POWER (w70)
+
+`w70e_basisfit.py` (prereg `w70_prereg.txt`, committed d3d680c BEFORE the file existed) refits
+`w53a_pricer` twice, identically, changing only the corrected rows' `cv` between the SHIPPED and
+HONEST bases.
+
+    P1 VALIDITY  model S reproduces w53a EXACTLY (max|dBETA| 0.0, |dRESID_SD| 0.0)
+    P2 POWER     10 of 93 fit rows corrected; optimism sd 1.476e-6; bootstrap se of D_SD 0.0641e-6
+    READING      RESID_SD(S) 7.7200e-6  RESID_SD(H) 7.7319e-6   D_SD +0.0119e-6 = 0.19 se
+    P4 SHUFFLE   true D_SD at the 41.5th percentile of 200 arbitrary relabellings ✅
+
+⚠⚠ **A STRONG NULL, NOT A BLIND ONE.** se 0.064e-6 vs a registered 0.5e-6 threshold — a real
+0.5e-6 effect would have read at ~8 se. ⛔ **A LATER RUN DECIDING THE BASIS MAY NOT CITE THE LB
+IN EITHER DIRECTION.** The decision rests on the CV-comparison argument alone.
+✅ The basis moves the pricer's residual sd by **0.15%** — the pricer is genuinely unaffected.
+⚠ WHY IT IS THIS SMALL, and it was registered before the reading: w53a's design already carries
+a `corr` DUMMY, so the MEAN optimism is absorbed by a level term under BOTH models and only the
+within-corrected VARIATION can move `D_SD`. Without that stated in advance, a small number
+invites the reading "the optimism is not real", which is the opposite of what was measured.
+
+
+# ⚠ THE STANDING GUARD LIST IS NOW SIXTEEN (w70, corrected and re-verified)
 
     w54a_vetoexpiry  w55a_unpriced  w56b_wantedguard  w57c_muguard  w59b_barguard
     w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard w64b_hedgeguard
     w65b_pinguard  w66d_rangeguard  w67b_slopeguard  w68b_floorguard  w70b_basisguard
-    + w65c_subsetcheck (~4 min, background it)
+    **w70d_chainguard**  + w65c_subsetcheck (~4 min, background it)
+
+🎯 **RUN `w70d_chainguard` FIRST.** It imports every module the four-command send chain executes,
+in order, and fails on the first that raises — the coverage gap that let the send path sit dead
+while all fourteen others passed. Verified against the real defect. **A SMOKE TEST, NOT A DRY
+RUN:** still dry-run `w48e_order.py --day <DAY>` before a window.
 
 All fifteen verified present and exit 0 (w70, twice — before and after that run's edits).
 **Clear `OMP_NUM_THREADS` first** (`env -u`) or `w65b_pinguard` returns rc=1 spuriously.
