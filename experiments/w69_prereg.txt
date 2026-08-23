@@ -1,0 +1,165 @@
+w69 PREREG -- 2026-08-23, slot 8 of 10 (ZERO slots; the UTC day was at 10/10 on arrival,
+verified from the API at 16:00 UTC: ten submissions stamped 2026-08-23 12:41).
+Committed BEFORE experiments/w69a_factorial.py and experiments/w69b_run.sh exist. Nothing
+below is chosen from a number this run produced. Numbers already on disk are declared as
+GIVEN in section 1 and are not predicted.
+
+================================================================================
+0. WHY THIS TEST, AND WHY IT IS NOT THE ISSUED ANGLE
+================================================================================
+Issued angle: "LightGBM: tune it properly against the fixed folds -- learning rate, leaves,
+regularisation, categorical handling."
+
+CLOSED THREE TIMES and carried in w58 section 9.7's do-not-reopen list (LightGBM tuning x3),
+re-affirmed by w68 section 7 item 6. The stack is 211 members deep and the live question is
+which MEMBERS belong in the pack, not which hyperparameters a single member uses; a tuned
+lgbm enters as one more column and the pack instruments price columns at ~1e-6 each. There
+is no slot today to test one with either.
+
+Substituted the item w68 section 7 ranks 4 and flags with a target: "the lexb trio is
+negative, at -1.058e-6 and 3.80e-6 worse than PLA1. `ext_members14` is in every ad202/ad211/
+ad216 build. Nothing has priced what removing it does to the packs ABOVE 202 -- ARM 211
+already reads BELOW 199 on every stored base, and this is a candidate mechanism."
+
+================================================================================
+1. GIVEN, NOT PREDICTED (all on disk before this file was written)
+================================================================================
+(a) w65a_armpair.json: (202 - 199) on h3, four seeds, one process, identical partitions:
+    mean -1.058e-6, sd 2.230, se 1.115, positive 1/4. Deleting the three ext_members14
+    (lexb) members GAINS 1.058e-6. The two placebo trios COST +2.742 and +7.808e-6.
+(b) w61a_armctl.json: (211 - 202) recomputed from the shipped OOF vectors, four criterion
+    bases: h3 +0.163, ens4 +0.381, rescale +0.946, rankraw -2.353 e-6. Worst |delta|
+    2.353e-6 against a +-4e-6 bar. On that reading w61 RETIRED `w40_ad211` from
+    check_selection.WANTED_INELIGIBLE.
+(c) w68 section 3 / RESEARCH: the cross-process rebuild offset is a PER-FILE CONSTANT, and
+    a comparison BETWEEN two shipped files therefore carries the DIFFERENCE of two draws,
+    measured at 5.095e-6.
+(d) w68a_subsetgate.json: subsetting the 202 load down to 199 columns is BITWISE exact
+    (max|diff| 0.0, all three transforms; seed-42 AUCs identical to +0.000e-6).
+(e) w68b_floorguard: `np.std(axis=0)` is NOT bitwise invariant to the COLUMN COUNT --
+    8.9e-16 in float64 and 3.0e-7 in float32 on a 12-vs-9 synthetic. So (d) is an EMPIRICAL
+    fact about those two matrices and a 3-column drop, NOT a theorem, and it does not
+    transfer to a 9- or 12-column drop without being tested again.
+(f) check_selection.WANTED_RETIRED["w40_ad211"], final clause, verbatim: "If a future arm
+    ADDS weight to these streams -- a different pack, a different combiner, a re-weighting
+    -- this retirement does not carry over and the bar must be re-derived on that arm's own
+    matched control."
+
+================================================================================
+2. THE TWO THINGS THIS RUN ASSERTS BEFORE MEASURING ANYTHING
+================================================================================
+2.1 ARM 208 ARRIVES BARRED. ARM 208 is ARM 211 minus ext_members14 -- a DIFFERENT PACK, and
+    deleting three columns necessarily re-weights every remaining column including the nine
+    `yadoy666` streams. That is precisely the case 1(f) names. Therefore, registered here
+    BEFORE ARM 208's CV exists and independent of what it turns out to be:
+
+        ARM 208 IS NOT ELIGIBLE FOR check_selection.WANTED, WHATEVER ITS CV.
+
+    It may be built, queued, priced and sent; it may not become a deadline pick. The only
+    thing that lifts this is ARM 208's OWN matched control -- (208 - 199), the group delta
+    of the same nine streams in the lexb-free pack -- within +-4e-6 on all four criterion
+    bases, quoted in the dict value in the same commit, per w60_prereg's retirement clause.
+    THIS RUN DOES NOT LIFT IT. A run that builds an arm has an interest in its eligibility;
+    the carried rule "a run with an interest in retiring a rule must not retire it" binds.
+
+2.2 THE BAR w61a DECIDED ON IS INSIDE ITS OWN NOISE, AND NOBODY HAS CONNECTED 1(b) TO 1(c).
+    w61a's deltas are differences between two SHIPPED files. By 1(c) such a difference
+    carries the difference of two per-file draws, 5.095e-6 -- LARGER than the +-4e-6 bar
+    w61a's criterion is stated in. "All four bases inside +-4e-6" is then partly a statement
+    about a floor rather than about the nine streams. w68 measured 1(c) one run AFTER w61
+    decided on 1(b), so this is not a criticism anyone could have made at the time; it is an
+    inference that becomes available only now, and it is what makes a within-process
+    re-derivation worth building rather than merely tidy.
+
+================================================================================
+3. THE INSTRUMENT (w69a_factorial.py) -- A 2x2, NOT A LADDER
+================================================================================
+ONE process, ONE load of the 211 pack, FOUR arms formed by deleting columns, every arm on
+the SAME fold partition for a given seed. Factors: A = the three ext_members14 (lexb)
+members present/absent; B = the nine ext_members15 (`yadoy666`) streams present/absent.
+
+    A199 = -A -B      A202 = +A -B      A208 = -A +B      A211 = +A +B
+
+The estimands, every one of them exactly paired because the shared arm and most of the
+partition term cancel (w65 section 0's lesson: FORM THE CONTRAST, do not compare derived
+means):
+
+    E_A_lo  = A202 - A199      lexb's effect WITHOUT the nine   [replicates 1(a)]
+    E_A_hi  = A211 - A208      lexb's effect WITH the nine
+    E_B_lo  = A208 - A199      the nine's effect WITHOUT lexb   [ARM 208's matched control]
+    E_B_hi  = A211 - A202      the nine's effect WITH lexb      [re-derives 1(b) in-process]
+    INTER   = E_A_hi - E_A_lo  = E_B_hi - E_B_lo                [the new quantity]
+
+A ladder of pack sizes cannot separate INTER from the two main effects; only the 2x2 can,
+and the missing cell (208) is the one nobody has built. INTER is the candidate mechanism
+w68 section 7 item 4 names for "ARM 211 reads BELOW 199 on every stored base".
+
+Seeds 42,101,13,7 -- w65a's, unchanged, so E_A_lo is a like-for-like replication and not a
+new draw. Per-seed results are written to disk as they complete so a partial run is
+readable by a later run; w65a's all-or-nothing artefact cost three runs of waiting.
+
+================================================================================
+4. BLIND PREDICTIONS
+================================================================================
+P1  GATE. The 211 load returns exactly 211 members; the four arms carry exactly 211, 208,
+    202 and 199 columns; and the lexb/yadoy name lists partition as the build scripts say
+    (w40f_run.sh vs w38d_run.sh vs w36b_run.sh). A mismatch VOIDS the run.
+P2  LOAD INTEGRITY, THE ONE THAT IS GENUINELY NEW. Subsetting the 211 load down to 202
+    columns (a 9-column drop) and to 199 columns (a 12-column drop) is BITWISE equal to
+    loading those packs natively -- max|diff| EXACTLY 0.0 on all three transforms, both
+    arms. By 1(e) this is NOT implied by w68a's 3-column result. If it FAILS, the factorial
+    is run on NATIVE loads instead and the failure is the headline.
+P3  NEGATIVE CONTROL, so P2 cannot pass vacuously: deleting nine OTHER columns (a fixed
+    placebo draw, seed 69, drawn before any number is seen) must NOT equal the native 202
+    matrix -- max|diff| STRICTLY > 0 on all three transforms.
+P4  DETERMINISM CONTROL: crossfit twice on the same array in this process returns a
+    bit-identical AUC, diff exactly 0.0. If this fails every e-6 number here is void.
+P5  REPLICATION: E_A_lo on h3 lands within +-1.5e-6 of 1(a)'s -1.058e-6. Same seeds, same
+    arms, same estimator, but reached through a 211 load rather than a 202 load, so this
+    tests the load path and nothing else.
+P6  THE RESOLUTION CLAIM, which is the whole justification for section 2.2. The sd across
+    seeds of the within-process E_B_hi contrast is STRICTLY BELOW 3.0e-6 -- materially
+    inside the 5.095e-6 between-file floor of 1(c), and so an instrument that can actually
+    resolve the +-4e-6 bar its criterion is written in. Registered as an INTERVAL and not a
+    direction (w64 lesson 3): predicted sd in [0.3, 3.0]e-6. Below 0.3e-6 is as much a
+    warning as above 3.0 -- it would mean the arms are barely distinguishable at all.
+P7  THE INTERACTION. Predicted NEGATIVE (lexb hurts MORE in the presence of the nine --
+    w68 section 7 item 4's stated mechanism), and small in absolute terms: INTER in
+    [-6.0, +1.0]e-6.
+P8  ARM 208's matched control E_B_lo, reported on all four criterion bases (h3, ens4,
+    rescale, rankraw). Predicted worst |E_B_lo| < 4e-6 across the four. REPORTED, NOT
+    DECIDED ON -- section 2.1 forbids this run lifting the bar it registers.
+P9  POWER CONTROL (w64's lesson: a null is evidence of absence only with one). An effect
+    injected at the DECISION size -- 4.0e-6, the bar itself -- into the same arm matrices
+    must be recovered and detected at >= 2 se. Without this, "INTER is null with a tight
+    interval" and "this design cannot see INTER" are indistinguishable and have opposite
+    meanings.
+
+================================================================================
+5. DECISION RULES, STATED BY REFERENCE TO SECTION 4 AND NOT RE-STATED IN PROSE
+================================================================================
+R1  If P6 holds AND the within-process E_B_hi EXCEEDS 4e-6 in absolute value on any of the
+    four criterion bases, then 1(b)'s reading was taken below its own noise floor and
+    `w40_ad211`'s retirement REST ON AN UNRESOLVED COMPARISON. The finding is recorded and
+    the key is NOT moved this run: re-imposing a bar is as much a decision as lifting one
+    and this run built the arm that benefits. It goes to the next run as a flagged item
+    with the numbers attached.
+R2  ARM 208's WANTED-ineligibility (section 2.1) is NOT lifted by any number this run
+    produces. P8 is reported so a later disinterested run can act on it.
+R3  `check_selection.WANTED` DOES NOT MOVE this run, on any reading. Slot 1 stays
+    `w36_ad199stdcorr` (w65, closed) and slot 2 is closed (w64).
+R4  Nothing on the send path is edited: not w23b_sendqueue.py, not w48e_order.py, not
+    w26g_send.py, not w53a_pricer.py, not stdflag.py, not w26d_queueprice.py.
+    check_selection.py IS edited, for section 2.1's key only, and the full standing guard
+    suite is run because of it.
+
+================================================================================
+6. WHAT THIS RUN DOES NOT DO
+================================================================================
+- No submission. The 2026-08-23 UTC day was at 10/10 before this run began.
+- Does not re-open the original dataset (x5), LightGBM tuning (x3), CatBoost tuning,
+  feature engineering, blending/OOF weight search, seed and fold diversity, or error
+  analysis -- w58 section 9.7's list.
+- Does not re-open WANTED slot 1 (w65, closed) or slot 2 (w64, closed).
+- Does not touch ARM 216/217, whose above-range slope is CLOSED AS UNANSWERABLE (w67), and
+  does not lift a veto to enable a measurement.
