@@ -1,0 +1,133 @@
+w66 PREREG -- 2026-08-23, slot 5 of 10 (ZERO slots available; the UTC day is at 10/10, stamped
+12:41:06 .. 12:41:34). Committed BEFORE experiments/w66a_pricercal.py exists. Nothing below is
+chosen from a number this run produced.
+
+================================================================================
+0. THE ANGLE IS TAKEN AS ISSUED -- FOR THE FIRST TIME IN NINE RUNS
+================================================================================
+Issued: "Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check the
+CV-to-LB gap across every experiment so far, and make sure the strongest submission is the one
+selected."
+
+Every one of the eight preceding angles was closed by measurement and substituted. This one is
+NOT closed and it is not a modelling idea at all, so nothing in the closure list touches it.
+It was last issued on 2026-08-19 (w28a_cvlb_refresh.py, 71 -> 89 stems) and the send history
+has grown by FORTY files since, across three pricer versions. Taken as issued, in three parts:
+
+  (a) re-verify end-to-end  -> the twelve guards, and the 2026-08-24 dry send chain
+  (b) the CV-to-LB gap      -> PART A and PART B below
+  (c) the strongest is selected -> `check_selection.WANTED` is verified UNCHANGED (R1)
+
+================================================================================
+1. GIVEN, NOT PREDICTED (declared, because it was seen during orientation)
+================================================================================
+⚠ HONESTY DECLARATION. During orientation this run read `kaggle competitions submissions -v`
+and therefore SAW fourteen (description-`pred`, realised `publicScore`) pairs -- the ten sent
+2026-08-23 and four of the ten sent 2026-08-22. The eyeball impression from those fourteen was
+that realised LB tracks predicted LB at roughly 1:1, which is NOT what the pricer's own
+coefficient implies. Sections 4-5 are registered anyway and in the direction the MECHANISM
+gives, not the direction the eyeball gave, precisely so that the two can be scored against each
+other afterwards. Any prediction below that agrees with the eyeball must be read as weak.
+
+Also given, all of it already on disk before this file was written:
+  * w53a_pricer fits 93 rows from `w52b_cvlb93.csv` by plain `np.linalg.lstsq`, coefficients
+    frozen in `w30b_corrterm.json`: cv6 +1.8563 (se 0.0537), era:cv6 such that ERA_SLOPE is
+    79% of BASE_SLOPE, std -23.09, corr +12.61, fam[logit] +147.14.
+  * The account has 121 COMPLETE submissions over 121 unique stems. 28 are NOT in the 93-row
+    fit table; 19 of those 28 carry an `oof_<stem>.npy`, and TEN of the 19 are the 2026-08-23
+    sends, whose predictions were written into the submission descriptions BEFORE the scores
+    existed. Families of the 19: logit 9, h3 5, ens4 3, hybrid 2. No `member` rows.
+  * Only 10 of the 42 description-recorded predictions reproduce under the LIVE pricer to
+    <=0.6e-6 (all ten from 08-23); 08-21's four are off by -28e-6. The recorded strings were
+    written by three different pricer versions. ⛔ THIS RUN THEREFORE DOES NOT REGRESS ON THE
+    RECORDED STRINGS. Every `pred` below is RECOMPUTED in-process from the LIVE frozen model
+    and a CV RECOMPUTED from the `.npy` on disk (w64: a stamp is not a comparison).
+
+================================================================================
+2. THE INSTRUMENT (w66a_pricercal.py)
+================================================================================
+PART A -- THE OUT-OF-SAMPLE CALIBRATION SLOPE. n = the 19 scored stems that are absent from
+`w52b_cvlb93.csv` and carry an OOF. For each, pred = `w53a_pricer.predict_lb(cv, stem)` with cv
+recomputed from the OOF; z = (LB - pred)/1e-6. GLS of z on [1, (pred - mean pred)/1e-6] under
+Omega = Sxx + R, where Sxx = St + Sp is built by `w63a_setprice.fit` (NOT re-implemented) and
+R = I * (1e-5)^2/12 is the LB reporting-rounding term. The calibration slope is
+beta_total = 1 + c, c the fitted slope. Intervals scaled by sqrt(max(chi2/dof, 1)), one-sided.
+
+⚠ Omega is the covariance of (LB - CV), not of (LB - pred), and pred applies a slope >1 to CV,
+so Omega UNDERSTATES the true dispersion. That is the conservative direction here -- chi2/dof
+then exceeds 1 and the one-sided scaling widens every interval. A sensitivity arm refits with
+Omega' = Sp + s^2 (Sxx - Sp) + R at s = BASE_SLOPE and the SIGN of every verdict must survive.
+
+PART B -- THE FULL CV<->LB TABLE UNDER THE RIGHT COVARIANCE. All scored stems with an OOF and
+a family in w53a's fitted design. GLS of z = (LB - CV)/1e-6 on w53a's OWN design row
+[1, cv6, fam dummies, std, corr, era:cv6] under the same Omega, against OLS on the same design
+with the same variance scale. The question is not "what are the coefficients" -- OLS already
+answers that and is unbiased. It is whether the SES in `w30b_corrterm.json` mean anything, given
+that all 93 LB values are one draw of ONE public slice and w64 measured those errors correlating
+at ~0.9999. An se computed as if they were independent is a different number from the truth.
+
+================================================================================
+3. THE DECISION RULES, FIXED HERE
+================================================================================
+R1 (SELECTION). `check_selection.WANTED` DOES NOT MOVE IN THIS RUN UNDER ANY OUTCOME BELOW, and
+   the run asserts it unchanged. Reason, fixed before any number: the brief selects on CV, and
+   predicted LB is a strictly increasing function of CV within a family, so no recalibration of
+   the pricer can reorder a CV ranking. A consolidation run that moved the selection would be
+   doing exactly what it exists to prevent.
+R2 (THE PRICER). w53a must be REFITTED UNDER GLS by a later run, and a guard added, IF EITHER
+   |GLS cv6 - OLS cv6| > 0.30  OR  SE_GLS(cv6)/SE_OLS(cv6) > 1.0.
+   Otherwise the OLS fit is recorded as adequate for the coefficient and the question CLOSES.
+   No clause below re-states R2 in prose (w64 section 4: name the condition BY REFERENCE).
+R3 (REPORTED ONLY, MOVES NOTHING). Part A's intercept alpha is the mean out-of-sample residual.
+   It is dominated by the common public-slice draw, which is a property of the slice and not of
+   the pricer, so it is an audit number and no rule keys on it.
+
+================================================================================
+4. BLIND PREDICTIONS
+================================================================================
+P1  GATE. Re-deriving w53a's design from `w52b_cvlb93.csv` in this process reproduces the frozen
+    BETA and RESID_SD to < 1e-9. A comparison against a recomputation, never against a literal.
+P2a beta_total < 1.0 -- the pricer OVER-SPREADS out of sample. (Mechanism: it applies 1.856 per
+    e-6 of CV base / 1.466 era; the LB is a one-slice estimate of the same ranking quantity and
+    cannot amplify a true difference, so anything the model attributes to CV beyond ~1:1
+    transfer must shrink. Against the section-1 eyeball, which said ~1.)
+P2b THE INTERVAL: beta_total lands in [0.55, 1.20]. Centre 0.85; the two mechanisms bracketing
+    it are "true transfer 1.466, model right" -> 1.00 and "true transfer 1.0, model applies
+    1.466" -> 0.68.
+P2c the 95% CI for beta_total EXCLUDES 0 -- the pricer has real out-of-sample resolution at
+    n=19. This is the prediction that makes P2a worth having: a slope indistinguishable from
+    zero would mean the instrument saw nothing, not that the pricer over-spreads.
+P2d the 95% CI for beta_total CONTAINS 1.0 -- i.e. P2a's point reading is NOT significant at
+    n=19. Registered as a prediction, not as an escape hatch: if the CI does exclude 1.0 the
+    over-spread is a measured fact and R2's follow-up is worth more than it looks.
+P3  |alpha| <= 12e-6.  (R3: audit only.)
+P4a SE_GLS(const)/SE_OLS(const) > 2.0 in PART B. (w64 P4a read 3.34 on the same structure.)
+P4b THE INTERVAL, replacing w64's one-sided bar that was cleared 50x over: the ratio for cv6
+    lands in [0.01, 0.50]. A common slice shift is orthogonal to a within-design slope, so GLS
+    should be TIGHTER on cv6 and LOOSER on const; w64 measured 0.030 for its slope, and the
+    interval spans that and two orders of magnitude of room above it.
+P5  |GLS cv6 - 1.8563| < 0.30, i.e. R2's first limb does NOT fire. Both estimators are unbiased
+    for the same coefficient; only their variances differ.
+P6  POWER CONTROL. Injecting a known calibration deviation of -0.45 (and 0.0, and +0.45) into
+    PART A's z and re-fitting recovers it to < 1e-9, and the -0.45 injection is DETECTED at
+    2 sigma. Without this, P2d is indistinguishable from "n=19 cannot see anything".
+P7  NEGATIVE CONTROL. With the pred column permuted across the 19 rows, |c| exceeds the observed
+    |c| in more than 5% of 2000 permutations ONLY IF the observed effect is not real; the script
+    reports the permutation p and requires the permutation null's centre to be within 0.05 of 0.
+P8  END-TO-END. The twelve guards (w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c)
+    all exit 0 with FAILURES 0, and the four-command 2026-08-24 send chain still plans EXACTLY
+    ten files with slots 1-10 unchanged and the bar live.
+P9  The sensitivity arm (Omega' at s = BASE_SLOPE) leaves the SIGN of c unchanged and widens
+    its se -- ratio of ses > 1.0.
+
+HONESTY CLAUSE. Section 1 is an audit and is declared contaminated to the extent stated there.
+Sections 4 and 5 are blind: no number in them exists on disk at the moment this file is
+committed, and w66a_pricercal.py has not been written.
+
+================================================================================
+5. WHAT WOULD MAKE THIS RUN WRONG
+================================================================================
+If P2c fails (the CI contains 0) then PART A measured nothing and P2a/P2b/P2d must all be
+reported as VOID rather than as confirmations -- an instrument with no resolution confirms a
+point prediction by accident. If P1 fails, everything below it is void. If P6's -0.45 injection
+is not detected, P2d is uninformative and must be written up as such.
