@@ -1,0 +1,122 @@
+w63 PRE-REGISTRATION — 2026-08-23, written AFTER all ten of the day's slots were spent
+======================================================================================
+
+⚠ NO SUBMISSION IS POSSIBLE THIS RUN. The Kaggle API reports 10/10 for the 2026-08-23 UTC day
+(12:41:06 .. 12:41:34, all COMPLETE). Nothing below sends anything. This is a BUILD run.
+
+⚠ THE ISSUED ANGLE IS SUBSTITUTED, WITH NUMBERS. Issued: "Blending: rank-average or weight the
+tuned models by out-of-fold performance. Search blend weights on OOF predictions." That is
+CLOSED here TWICE, 36 members apart, with a mechanism and a measured price:
+  - 2026-08-13, `experiments/transform_weights.py`, 1,771-point simplex on the 159av pack: the
+    search "does not beat `h3`, it *rediscovers* `h3`".
+  - 2026-08-20 (w36d), Nelder-Mead at 195 members, weights fitted INSIDE the frozen folds:
+    equal-weight h3 0.9701205753 vs honestly cross-fitted 0.9701196117 — the fitted weights are
+    **0.96e-6 WORSE**, and the measured price of a top-level search is **+0.45e-6 of optimism
+    per free parameter**. RESEARCH.md: "⛔ Do not fit the top-level blend weights. This is now
+    settled twice, 36 members apart. Do not re-open this a third time."
+  - Hill-climbing is closed with its own mechanism (a climber can only ADD; the linear stack
+    needs negative coefficients and loses −0.00104 by the time the last one is gone).
+This is the SIXTH angle closed by measurement, after the original dataset (×4), LightGBM tuning
+(×3), CatBoost tuning (w61) and feature engineering (w62 §0). Substituted for next-run item 3 of
+w62 §7, which is the only thing on that list that is BLOCKING a send path.
+
+WHAT IS BLOCKED, AND WHY A SUCCESSOR IS THE ONLY FIX
+----------------------------------------------------
+The 08-23 sends moved auto-slot 1 from five files at 0.97118 to TWO at 0.97119. In consequence:
+  `w57a_tierprice2.py` refuses (`assert PICK in TIER1`), `w58a_tiergate.py` exits 2,
+  `w59a_hijackprice.py` refuses on its own GATE T, and `w26g_send.hijack_cv_bar` therefore
+  returns None and `above_tier_reason` BLOCKS EVERY ABOVE-TIER FILE.
+⛔ w62 §7.4 forbids softening the assertion, editing w57a, or making the bar pass by any route
+other than re-deriving it. THE FIX IS THE PRICER. This registers that successor.
+
+Two things the successor must do that w59a does not:
+  1. Price against a **DETERMINED** pair. w59a's counterfactual is "X takes auto-slot 1 and the
+     second pick is one uniform draw from the tie X left behind" against a status quo that was
+     itself a uniform draw over C(5,2) pairs. Auto-slot 1 now holds exactly two files, so the
+     status quo is a SINGLE pair, priced exactly, not averaged.
+  2. Price **THE SET BEING SENT**, not each file alone. w62 §4: w60 applied `cost_hijack(X)`
+     independently to two files and sent both on the same day; the realised gain was +1.235e-6
+     against a registered +6.730e-6, because the second clearer took the slot the first one
+     would have drawn from the tie. A per-file price is not additive and its sign can invert.
+
+WHAT IS BUILT: experiments/w63a_setprice.py  (does not exist as this file is committed)
+--------------------------------------------------------------------------------------
+The estimator is w59a's — the unscored-capable variant, because a candidate for a FUTURE send
+has no LB and w62a's `build()` requires one for every name. It is copied, not re-derived, and
+GATE W is what proves that rather than asserting it.
+
+THE REGISTERED PREDICTIONS
+--------------------------
+P1  GATE W — the verbatim control. Run on w62a's OWN eight-file board, the successor's
+    estimator reproduces `w62a_autopair.json`'s `cost_auto_pair`, all 3 `solo` costs and all 6
+    `ladder` entries to < 1e-9. FAIL => REFUSE and price nothing. (A copied estimator that does
+    not reproduce the number it supersedes is a different estimator wearing its name — w62 §GATE V.)
+
+P2  GATE R — on the ENLARGED live design (auto tier ∪ tier 2 ∪ WANTED ∪ the 08-24 candidates),
+    the determined price stays within 1.0e-6 of w62a's 4.522768563707359. Mechanism: adding
+    names changes Sxx and hence the GLS common gap, so this cannot be registered at 1e-9; w59a
+    used the same 1e-6 bar for the same reason. FAIL => REFUSE.
+
+P3  GATE J — the generalised dilution identity, registered as a THEOREM and checked numerically
+    to < 1e-9 for every candidate outside the tier, at the LIVE tier size n:
+
+        delta_dilution(X)  =  n * (cost_hijack(X) - base) / C(n+1, 2)
+
+    ⚠⚠ AND THE CONSEQUENCE, REGISTERED STRICTLY: with n = 2 the leverage ratio
+    C(n+1,2)/n is **1.5, NOT 3**. w59a measured 3 at n = 5 and both RESEARCH.md and
+    `w26g_send.above_tier_reason`'s user-facing reason string record "3x the leverage" as
+    though it were a constant of the problem. It is a function of the tier size. If the measured
+    ratio comes back 3.0 the theorem is wrong and must be reported as falsified.
+    ⚠ The break-even is unchanged by n: delta_dilution = 0 <=> cost_hijack = base for every n.
+    "One bar governs both landings" SURVIVES; "3x" does not.
+
+P4  H_det < 12.97e-6, STRICTLY — the determined-pair bar is TIGHTER than w59a's H_binding, so
+    the CV a hijacker must clear goes UP. Mechanism fixed in advance: the status quo a hijacker
+    has to beat improved from 7.855e-6 to 4.523e-6 when the two lever files cleared, and
+    cost_hijack is decreasing in the candidate's CV, so the crossing moves UP the CV ladder.
+    ⚠ Not a foregone conclusion: the DRAW SET improved too (the old five-file tie averaged
+    -16.4e-6 of dCV, the new pair averages -4.26e-6), which pushes cost_hijack(X) down at fixed
+    X and works AGAINST this prediction. P4 is the claim that the first effect dominates.
+
+P5  🎯 THE HEADLINE — NON-ADDITIVITY IS SIGNED, AND THE PER-FILE PRICE IS OPTIMISTIC.
+    For candidates X != Y define, all against the live determined pair {A, B}:
+        base        = price([A, B])                                  (nothing clears)
+        only(X)     = mean_d in {A,B} price([X, d])                  (X clears alone)
+        add(X, Y)   = base + (only(X) - base) + (only(Y) - base)     (w60's error, exactly)
+        joint(X, Y) = price([X, Y])                                  (BOTH clear)
+    REGISTERED: joint(X, Y) > add(X, Y) for **EVERY** pair in the candidate set — one
+    counterexample falsifies it. Mechanism, which is why it is registered strictly rather than
+    on a fraction: the difference reduces algebraically to
+
+        joint - add  =  1/2 [ M(X,A) + M(X,B) + M(Y,A) + M(Y,B) ] - M(X,Y) - M(A,B),
+        where M(S) = E[max over S]
+
+    i.e. CROSSED pairings against MATCHED pairings of the same four files. E[max] pays almost
+    nothing for pairing two strong files together, so crossing beats matching whenever the four
+    have any spread, and the additive price double-counts the one displacement that was
+    available. The sign of that gap is the whole of w62 §4, stated as a property of the
+    instrument instead of an autopsy of one day.
+    ⚠ A NEGATIVE mean gap FALSIFIES this and must be reported as a falsification.
+
+P6  P(at least one file of the registered 08-24 ten lands strictly above the new tier) < 0.05,
+    under the sender's own PRED_SD = 8.77e-6 and threshold t1 + STEP/2 = 0.971195. Mechanism:
+    the tier went UP a full display step on 08-23 and the best pred_lb left in the queue is
+    0.971173. ⚠ This is a forecast about files whose scores do not exist yet, and it is the one
+    prediction here that is not a property of the estimator.
+
+P7  The 08-24 registered ten, re-run through `w26g_send.py --n 10` DRY after the wiring, fills
+    to ten and blocks `w48_cal_hboyang_mix` on `fam=member` as it has every day since w53.
+    ⚠ Reported as the sender's own output, not re-typed.
+
+WHAT THIS RUN MAY NOT DO
+------------------------
+⛔ May not send anything. The day is at 10/10.
+⛔ May not edit `w57a_tierprice2.py`, `w58a_tiergate.py`, `w59a_hijackprice.py`, or
+   `w62a_autopair.py`, or re-point any of their registered predictions. They are records of
+   boards that no longer exist. The successor SUPERSEDES; it does not patch.
+⛔ May not soften `assert PICK in TIER1`, and may not make `hijack_cv_bar` return a number by
+   any route other than an artefact derived on the LIVE tier.
+⛔ May not move `check_selection.WANTED`, the pick, or `PRED_SD` on the strength of any number
+   produced here. The WANTED slot-2 question stays OPEN (w62 §7.7) and is not touched.
+⛔ May not pass `--allow-above-tier`. THE FIX IS THE CLICK, AND THE CLICK IS STILL BLOCKED —
+   no `mcp__brave__*` tool is attached to this session (checked, seventh run running).
