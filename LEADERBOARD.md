@@ -1,5 +1,34 @@
 # Leaderboard notes — playground-series-s6e8
 
+## Snapshot 2026-08-24 ~14:13 UTC (2,783 teams) — w77, from the downloaded ZIP
+
+| | score | vs the w76 snapshot ~20 min earlier |
+|---|---|---|
+| #1 Chris Deotte | **0.97168** | unmoved (last submit 13:54Z) |
+| #2 Changye Li | 0.97149 | — |
+| #3 MILANFX | 0.97146 | — |
+| **us (Teddy Tennant), rank 93** | **0.97119** | unmoved |
+
+- **109 teams at or above 0.97119**, up from 108. Gap to the leader **49e-6**, unchanged.
+- ⚠ **We fell 92 → 93 without losing anything.** The field grew 2,779 → 2,783 and one new team
+  landed above us. Reading a rank change as a score change is the mistake to avoid here: our
+  0.97119 and the leader's 0.97168 are both byte-identical to the w76 snapshot.
+- 131 submissions on the account, best 0.97119 (`w36_ad199stdcorr_ens4` / `w38_ad202stdcorr_ens4`,
+  both sent 08-23 12:41). Today's ten scored 0.97113–0.97117, none beat it.
+
+### ⚠ HOW TO READ THE BOARD WITHOUT PARSING THE TABLE
+`kaggle competitions leaderboard -c ... -s` paginates and prints a `Next Page Token`; the `--csv`
+form returns only the first page (21 rows). **Download instead** — and `unzip` is not on this box,
+so open the archive from Python:
+
+    kaggle competitions leaderboard -c playground-series-s6e8 -d -p /tmp/lb -q
+    # then: zipfile.ZipFile(...) -> pandas.read_csv(io.BytesIO(zf.read(zf.namelist()[0])))
+
+⚠ The ZIP's columns are `Rank, TeamId, TeamName, LastSubmissionDate, Score, SubmissionCount,
+TeamMemberUserNames` — **not** the CLI's `teamId, teamName, submissionDate, score`. Our row is
+found on **`TeamMemberUserNames == "thtennant"`**; `TeamName` is "Teddy Tennant", so a search for
+the username against `TeamName` returns an empty frame.
+
 ## Snapshot 2026-08-24 ~13:5x UTC (2,779 teams) — w76, full pagination
 
 | | score | vs the w72 snapshot ~1h earlier |

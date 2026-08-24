@@ -1,3 +1,75 @@
+# ✅ THE 16.5e-6 BRACKET HOLE IS CLOSED — the hole fills, but the GLS fit is what breaks (w77, 2026-08-24)
+
+    .venv/bin/python experiments/w77a_bracket.py       # ~8 min, GATE A 0.000e+00 over 51 quantities
+    .venv/bin/python experiments/w77c_glssweep.py      # ~7 min once, then seconds (w77c_gls.npz)
+    .venv/bin/python experiments/w77d_holefill.py      # ~3 min, EXPLORATORY, registers nothing
+    .venv/bin/python experiments/w77b_bracketguard.py  # standing guard, 5 controls, no refit
+
+w63 §5a: the hijack break-even is interpolated across a 16.49e-6-wide hole in w63a's 15-file
+design. w63 §10.5 named the fix — *"price against EVERY scored file on the board, a set nobody
+chose … but that is 121 files and the LAW-IF assertion may not survive it. Check that first."*
+
+## THE ANSWER, IN ONE LINE
+**The hole fills (13 files). The enlargement was never the problem. The GLS COMMON-GAP FIT is.**
+
+| | ARM S = w63a's 18 | ARM L = 122, every scored file | ARM M = 31, fillers withheld from `LB` |
+|---|---|---|---|
+| scored in the GLS | 8 | 112 | **8** |
+| `gh` | +1024.16e-6 | **−4598.34e-6** | +1024.16e-6 (5e-11) |
+| `base` | +4.5227686 | +4.5227545 | +4.5227686 (**1.3e-8**) |
+| crossings | 1, across an EMPTY bracket | 11 (⛔ artefact) | **1**, brackets 0.70 / 2.24e-6 wide |
+| H binding | 11.144e-6 interpolated | — | **5.255e-6 measured** |
+
+## ⛔ `fit` USES ONE DICT FOR TWO THINGS, AND THAT IS THE WHOLE BUG
+`w63a_setprice.fit` derives its GLS set as `scored = [k for k in NAMES if k in LB]`. **Design
+membership and GLS membership are the same switch only because they are fed the same dict.**
+Pass a file in `NAMES` but withhold it from `LB` and it becomes exactly what w63a already makes of
+an unsent candidate: `xh0 = 0`, priced through the coupling, contributing nothing to the gap.
+For a HIJACK that is arguably the *right* treatment — the question is "what if X had landed a step
+higher", so conditioning on the public score X actually got conditions on the branch that did not
+happen. **No change to `fit` is needed. Only to what you hand it.**
+
+## 🔴 WHY THE FULL-BOARD GLS BLOWS UP
+`gh = Vg·(1'S⁻¹z)` is a weighted mean whose weights sum to 1 and are **not constrained
+non-negative**. The board is 122 near-duplicate ranking vectors — **median max-pairwise-correlation
+to an earlier file 0.999924, min 0.9948**. On an estimated near-singular covariance the weights
+explode while `z` never leaves `[+966, +1169]`:
+
+    k        2      8     14     44      45     112
+    Σ|w|   2.4   29.3  148.6  312   1,263   2,001
+    gh    1045   1071   1187   705  −3,228  −4,598     ← cliff = one file, w23_ad187std_h3_rankraw
+
+`corr(log Σ|w|, log|gh − mean(z)|) = +0.957` over 111 points. `sqrt(Vg)` moves only **11.2%**
+(556.9 → 494.7), so **Vg shrinkage is NOT the mechanism** — that was w77's registered guess and the
+sweep refutes it.
+
+- ⚠ **OUT-OF-HULL IS NOT AN ALARM. Σ|w| IS.** GLS leaves the hull at **k = 2** and stays out
+  harmlessly. **The LIVE 8-file fit is itself out of hull** — `gh` +1024.16 against
+  `z ∈ [+1039.99, +1076.07]`, `Σ|w| = 4.98`, `min w = −0.874` — and is fine. A later run must not
+  cite the live estimator as in-hull (`w77b` C3).
+
+## 🎯 THE LIVE BAR IS TOO LOOSE BY 5.889e-6 OF CV — MEASURED, NOT ADOPTED
+w63a's straight line across the hole read H_cond 11.144e-6 → bar 0.9701288617. Measured on the
+filled bracket it is **5.255e-6 → 0.9701347511**. The interpolation was off by 5.89e-6 (cond) /
+6.36e-6 (uncond), more than a third of the hole.
+⛔ **NOT ADOPTED.** w59a: a run may not enlarge the bracket and persist a bar derived from it.
+`w77b` C5 fails if `w63a.cv_bar_new` moves off 0.9701288617 without a pre-registration.
+**Send impact today: ZERO on non-vetoed rows.** Two queue rows would newly block
+(`w42_ad217std_logit`, `w50_ad216std_rescale`) and **both are already `priority = −1`**. But the
+nearest non-vetoed row above the measured bar, `w69_ad208stdcorr`, clears it by only **4.2e-6**.
+
+## ⛔ `w77a_bracket.json` READS `falsified: ["P6", "P7"]` AND P6 IS VOID
+ARM L's "11 sign changes" is the scored/unscored `xh0` crevasse (unscored rows read `only() ≈
+−496`, scored rows +1.5…+5.6) opened by the pathological `gh`. **It is NOT evidence the cost curve
+is non-monotone and NOT evidence the live bar is under-specified.** `w77c_glssweep.json` carries
+`p6_void: true` with the reason and `w77b` C2 fails if the two ever disagree. **P7 is a real
+falsification; P6 is an instrument failure.**
+
+## STANDING CHECK SCRIPTS — 22, THE LIST IS THE ARTEFACT, NEVER THE INTEGER
+`w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b w74b
+w75b w76b w77b` — all rc=0. Run each via command substitution, never a pipe.
+
+---
 # ⛔ w63 §4's REFINED P5 IS **HALF FALSIFIED** — the SIDE is the wrong cut, the DISTANCE is right
 # (w76, 2026-08-24)
 

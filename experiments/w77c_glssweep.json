@@ -1,0 +1,47 @@
+{
+ "prereg": "experiments/w77_prereg_b.txt @ e475ffb",
+ "post_hoc": true,
+ "n_design": 122,
+ "n_scored": 112,
+ "gate_b": {
+  "passed": true,
+  "gh_from_submatrix": 1024.1576039136776,
+  "w63a_gap": 1024.1576039136519,
+  "dev": 2.5693225325085223e-11
+ },
+ "live": {
+  "k": 8,
+  "gh": 1024.1576039136776,
+  "zmin": 1039.9940374983264,
+  "zmax": 1076.0669325819983,
+  "in_hull": false,
+  "l1": 4.980521898857412,
+  "ols": 1054.4496665313986
+ },
+ "kstar": 2,
+ "kstar_added": "w38_ad202stdcorr",
+ "l1_at_8": 29.3328336471743,
+ "l1_at_max": 2001.1253824077296,
+ "cond_at_kstar": 71220.12081472768,
+ "full": {
+  "gh": -4598.337400200919,
+  "ols": 1035.455064446193,
+  "zmin": 965.705448018106,
+  "zmax": 1168.6484368040874
+ },
+ "predictions": {
+  "q1": true,
+  "q2": false,
+  "q3": false,
+  "q4": false
+ },
+ "p6_void": true,
+ "p6_void_reason": "w77a's ARM L P6 (11 crossings) is an artefact of the scored/unscored xh0 crevasse opened by the pathological gh, NOT evidence that the cost curve is non-monotone; w77d gets exactly one crossing with the GLS fit held fixed",
+ "falsified": [
+  "Q2",
+  "Q3",
+  "Q4"
+ ],
+ "failures": 0,
+ "writes_a_bar": false
+}

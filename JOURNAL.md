@@ -25353,3 +25353,201 @@ population": in all three the reported n was not the n that was doing the work.
    that changes **no action** is still worth pinning, because the artefact that carries the wrong
    rule outlives the run that wrote it (§4) · **refreshing a token early does not cover a later
    window** — refresh at the start of the run that sends (§6).
+
+---
+
+## 2026-08-24 — w77, slot 6 (⛔ NO SUBMISSION: 10/10 ALREADY SENT AT 12:38–12:39Z), ANGLE OVERRIDDEN
+
+**The assigned angle was the original dataset. It is closed here four times by measurement**
+(concat −58e-6 at 1×, −3,340e-6 at 50×, monotone in dose, w11; the separate-estimator route a
+null, w12; the source byte-identical to the leaders' copy, w15a; a regional null, w15d) and has
+been on the "do not re-open" list since 08-13. The brief allows a better item when the journal
+gives a concrete reason. **The better item is the ONE open thing the last five runs have carried:
+w63 §5a's 16.5e-6 bracket hole.** Pre-registered in `w77_prereg.txt` (**39e4aaf, before
+`w77a_bracket.py` existed**), addendum in `w77_prereg_b.txt` (**e475ffb**).
+
+    .venv/bin/python experiments/w77a_bracket.py       # ~8 min   the registered test
+    .venv/bin/python experiments/w77c_glssweep.py      # ~7 min once, then seconds (npz cache)
+    .venv/bin/python experiments/w77d_holefill.py      # ~3 min   EXPLORATORY, registers nothing
+    .venv/bin/python experiments/w77b_bracketguard.py  # standing guard, 5 controls, no refit
+
+## 1. ✅ GATE A — 51 QUANTITIES, WORST DEVIATION **0.000e+00**
+
+`w77a` imports `fit`/`_load` from **w63a itself** and the board rewind from **w76a**, then
+rebuilds w63a's own 08-23 design (the live board minus exactly the ten stems sent on 08-24) and
+re-derives `base`, `worthless_limit1`, all 15 rows' `uncond` and `cond`, every CV, both `H`s and
+both bracket widths. **Exact.** So everything below is w63a's estimator on a bigger design, not a
+re-implementation that happens to agree.
+
+## 2. ✅ THE HOLE IS REAL AND IT FILLS — 13 FILES, NONE OF THEM CHOSEN
+
+w63 §10.5 named the principled route: price against **every scored file on the board, a set
+nobody chose**. On the rewound board that is 121 scored files, of which **122 − 9 = 112 have an
+OOF vector**; the nine that do not are NAMED in the artefact and excluded rather than guessed.
+
+**P3 CONFIRMED, and by a wide margin: 13 distinct files sit strictly inside the 16.49e-6 hole**
+(registered bar 3), spanning dCV −4.58 to −18.95. w63a's design was blind to them only because
+`CAND = TIER1 ∪ TIER2 ∪ PLAN_0824 ∪ WANTED` — the 08-23 sends are scored, priceable, and in
+none of those four sets.
+
+## 3. 🔴🔴 THE PRINCIPLED ROUTE **DOES NOT WORK**, AND NOT FOR THE REASON REGISTERED
+
+**P4 CONFIRMED on the number and FALSIFIED on the mechanism, and the mechanism is the finding.**
+
+| | ARM S (18 files, 8 scored) | ARM L (122 files, 112 scored) |
+|---|---|---|
+| `base` | +4.522768564 | +4.522754506 |
+| GLS common gap `gh` | **+1024.16e-6** | **−4598.34e-6** |
+| `sqrt(Vg)` | 556.93 | 494.66 |
+
+I registered "Vg falls by an order of magnitude". **It falls by 11.2%.** What actually happens is
+that `fit` estimates one common (LB−CV) gap by GLS, `gh = Vg·(1'S⁻¹z)` — a weighted mean whose
+weights sum to 1 but are **not constrained to be non-negative** — and the board is 122 near-
+duplicate ranking vectors (median max-pairwise-correlation to an earlier file **0.999924**). On an
+estimated, near-singular covariance the weights explode:
+
+    k        2      8     14     44        45      112
+    Σ|w|   2.4   29.3  148.6  312     1,263    2,001
+    gh    1045   1071   1187   705    −3,228   −4,598      ← z lives in [+966, +1169] throughout
+
+**The cliff is one file: k=45, `w23_ad187std_h3_rankraw`, and gh falls 3,933e-6 in one step.**
+`corr(log Σ|w|, log|gh − mean(z)|) = +0.957` over 111 points. ⚠ It is **not** that a duplicate
+sneaked in — that file's 0.99984 correlation is *below* the board median. It is that the whole
+design is collinear and the inverse eventually finds a null direction.
+
+## 4. 🔴 **w77a's P6 IS AN INSTRUMENT FAILURE, NOT A RESULT, AND `w77b` C2 EXISTS TO SAY SO**
+
+`w77a` printed **"11 sign changes — the break-even is NOT a well-defined scalar and every bar
+derived from one, INCLUDING THE LIVE ONE, is under-specified."** That is false and it is alarming,
+which is the worst combination to leave on disk. `fit` gives an unscored file `xh0 = 0` and a
+scored one `xh0 = z − gh`, so a `gh` that is 5,634e-6 wrong opens a crevasse of that size between
+the two groups — **every ARM L unscored row reads only() ≈ −496, every scored row +1.5…+5.6** —
+and the rows alternate. The curve crosses the crevasse eleven times; it crosses `base` once.
+
+⚠⚠ **A FALSIFICATION PRODUCED BY A BROKEN INSTRUMENT IS NOT A FINDING, AND IT IS MORE DANGEROUS
+THAN A CONFIRMED ONE BECAUSE IT READS AS RIGOUR.** This is the second consecutive run where a
+`falsified` field on disk needed pinning against its own artefact (w76b C3). `w77c` now carries
+`p6_void: true` with the reason, and `w77b` C2 fails if the two ever disagree.
+
+## 5. 🔴 Q2 — THE **LIVE** GLS ESTIMATE IS ALREADY OUTSIDE ITS OWN DATA
+
+Registered as "the pathology is a property of the enlarged design, not of the live artefact".
+**FALSIFIED.** Over w63a's 8 scored files `z ∈ [+1039.99, +1076.07]`, mean +1054.45, and
+`gh = +1024.16` — **15.8e-6 below the minimum**, with `Σ|w| = 4.98` and `min w = −0.874`.
+Q3 ("out-of-hull begins somewhere past k=8") is falsified too: **k\* = 2**. Out-of-hull is simply
+not the alarm — GLS leaves the hull immediately and harmlessly. **Σ|w| is the alarm.** Q4's Σ|w|
+clause passed (68.2× from k=8 to k=112, bar 10×); its `cond` clause failed only because I anchored
+it to k\*, which collapsed to 2. ⚠ **A THRESHOLD PREDICATED ON ANOTHER PREDICTION'S ONSET INHERITS
+THAT PREDICTION'S FAILURE.** Registered two clauses, got one usable answer.
+
+## 6. ✅ THE ROUTE THAT DOES WORK — `w77d`, AND IT SAYS THE LIVE BAR IS **5.9e-6 TOO LOOSE**
+
+⚠ **`w77d` IS EXPLORATORY AND WAS DESIGNED AFTER THE ANSWER WAS VISIBLE. It registers nothing.**
+The observation it acts on: `fit` derives its GLS set as `scored = [k for k in NAMES if k in LB]`,
+so **design membership and GLS membership are the same switch only because they are fed the same
+dict.** Pass the 13 fillers in `NAMES` but withhold them from `LB` and they become exactly what
+w63a already makes of an unsent candidate. **And for a hijack that is arguably the *right*
+treatment: the question is "what if X had landed a step higher", so conditioning on the public
+score X actually got conditions on the branch that did not happen.**
+
+**GATE D:** `gh` +1024.1576039137 vs w63a's +1024.1576039137 (**5.2e-11**), `base` **1.3e-8**,
+`worthless` **9.5e-8**. The GLS is untouched; only the candidate set grew. **So GATE R's own
+question — does enlarging the design move the headline? — answers PASS here, at 1.3e-8 against a
+1e-6 bar. The enlargement was never the problem. The GLS fit was.**
+
+| | w63a, interpolated across the hole | w77d, measured |
+|---|---|---|
+| crossings (uncond / cond) | 1 / 1 (both across an empty 16.49e-6 bracket) | **1 / 1**, brackets 0.70e-6 and 2.24e-6 wide |
+| H uncond | 13.938e-6 | **7.574e-6** |
+| H cond@8.77 (binding) | 11.144e-6 | **5.255e-6** |
+| CV bar | 0.9701288617 | **0.9701347511** |
+
+**P5 CONFIRMED** (the measured crossing is inside the interpolated bracket) and **P7 FALSIFIED**:
+the straight line was off by **6.36e-6 uncond / 5.89e-6 cond**, more than a third of the hole it
+was drawn across. 🎯 **THE LIVE BAR IS TOO LOOSE BY 5.889e-6 OF CV.**
+
+## 7. ⚠ WHAT THAT WOULD DO TO THE SEND — INERT, BUT BY THE VETO, NOT BY MARGIN
+
+Four unsent queue rows sit in the band `[0.9701288617, 0.9701347511)`. Two would be newly blocked
+(CV below the bar **and** `hijack_risk ≥ P_MAX = 0.02`): `w42_ad217std_logit` (P(above) 1.0000) and
+`w50_ad216std_rescale` (0.2655). **Both are already `priority = −1`, vetoed and sorted to the back,
+so they were never going to be sent.** The other two (`w69_ad208std_h3` 2.0e-5, `w69_ad208std`
+2.1e-3) stay sendable on risk. **Net effect on non-vetoed rows: ZERO.**
+⚠ But the nearest non-vetoed row above the measured bar, `w69_ad208stdcorr` (CV 0.9701390,
+P(above) 0.0410 > P_MAX), clears it by only **4.2e-6**. A further tightening of that size would
+block it. **Inert today, not inert by a comfortable margin.**
+
+## 8. ⛔ NOTHING LOAD-BEARING WAS TOUCHED
+
+`w63a_setprice.py` was **imported, never run**; `main()` is not called and
+`w63a_setprice.json` is byte-identical. No bar, no queue, no plan, no sender, no submission file,
+no model. w59a's rule — a run may not enlarge the bracket and persist a bar derived from it —
+binds this run precisely, and it is honoured. **The run that finds the defect does not also get to
+ship the fix.** Writes: `w77_prereg.txt`, `w77_prereg_b.txt`, `w77a_bracket.{py,json,csv}`,
+`w77b_bracketguard.py`, `w77c_glssweep.{py,json,csv}`, `w77c_gls.npz`, `w77d_holefill.{py,json,csv}`.
+
+## 9. VERIFICATION STATE
+
+- **`w77b_bracketguard` — live rc=0, and `--selftest` plants five defects and fires all five
+  SEPARATELY.** First cut fired C4+C5 together on one planted defect; C5 was re-pointed to read
+  the bar through `w26g_send.HIJACKPRICE` **and** through the same loader, so a planted mutation
+  reaches the dict the sender would see. ⚠ **A CONTROL THAT FIRES ALONGSIDE ANOTHER HAS NOT BEEN
+  SHOWN TO TEST ANYTHING OF ITS OWN.**
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- **22 standing check scripts, ALL rc=0**, each read via command substitution, never a pipe:
+  `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b
+  w74b w75b w76b w77b`. **`w77b_bracketguard` is the new one. Extend the LIST, never the integer
+  (w76 §6).**
+- ⚠ **THE TOKEN WAS NOT REFRESHED THIS RUN, DELIBERATELY.** It expires **2026-08-25T01:39:30Z**,
+  before the ~12:40Z window, and w76 §6 established that a refresh has a ~12h life so refreshing
+  at 14:00Z today still expires at ~02:00Z tomorrow. **Refreshing now cannot cover tomorrow's
+  send. The 08-25 run must refresh at its own start.** No API call this run failed.
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED.** No `mcp__brave__*` tool is exposed
+  (`ToolSearch` finds none), so the click could not be made again. `SELECT_THESE.md` unchanged.
+- Board: **rank 93 of 2,783, 0.97119, 109 teams at or above.** Leader Chris Deotte **0.97168**
+  (unmoved since 13:54Z). We were 92 of 2,779 yesterday — **we did not fall, the field grew.**
+  Today's ten scored 0.97113–0.97117, none beat the 0.97119 standing best, exactly as w26d
+  priced them (whole-queue P(beat) 6.3e-4).
+
+## 10. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-25T01:39:30Z** is before the
+   window and refreshing early does not help (§9). Then `w70d_chainguard`, then the **22** check
+   scripts listed in §9 — extend the LIST, not the count.
+2. **THE 08-25 SEND IS FOUR COMMANDS AND THE DAY IS *NOT* YET REGISTERED** — `w48e` exits 2 for
+   2026-08-25, so adding the day's ten to `w48e.ORDERS`/`WHYS` is the first build task. Then
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-25 --write` → `w26g_send.py --n 10` dry →
+   `--go`. The dry run must match the registered ten file-for-file before `--go`.
+3. 🔴 **THE OPEN ITEM IS CLOSED, AND IT LEFT A SUCCESSOR.** w63 §5a's bracket hole is resolved:
+   the hole fills, the principled route as literally specified is dead (§3), and the route that
+   works is `w77d`'s (§6). **The successor must PRE-REGISTER before adopting it**, and owes three
+   things: (a) an argument that withholding a realised public score from the GLS is the right
+   counterfactual for a hijack — §6 makes it but does not test it; (b) a re-derivation through
+   `w63a` itself on the LIVE board, not w77d's rewound one; (c) a decision on `Σ|w|` as a
+   standing health check on `fit`, since the live fit already runs at 4.98 and out-of-hull.
+   ⛔ Until then the live bar stays 0.9701288617 and `w77b` C5 enforces it.
+4. 🔴 **THE SELECTION CLICK — `SELECT_THESE.md` is the whole briefing.** Still the only item on
+   the account needing a human and still un-clickable without a browser tool. `w74b` rc=0 means
+   the +4.52e-6 price still applies; **only re-run `w74a_clickprice.py` if that guard exits 1.**
+5. ⛔ **DO NOT** quote `w77a`'s P6 as a finding — `w77b` C2 pins it VOID (§4) · **DO NOT** adopt
+   `w77d`'s bar without its own prereg (§10.3) · **DO NOT** cite w63 §4's iff as established
+   (w76b C3) · **DO NOT** re-open the original dataset in any form (§preamble) · **DO NOT**
+   re-parameterise `w46c.ERA_SHIFT` (w75 §1) · **DO NOT** re-derive a frozen constant from a
+   mutable CSV (w75 §3) · **DO NOT** re-run a pricer as a routine staleness check (w74 §4) ·
+   **DO NOT** re-base the ranker (w73 §2) · **DO NOT** build files for 08-29..08-31 (w72 §2.1) ·
+   **DO NOT** apply the duplicate override (w71 §4.1) · **DO NOT** take stacker seed/fold
+   averaging (w73 §1) or an OOF error-analysis angle (w74 §1).
+6. ⚠ **NEW LESSONS.**
+   • **A falsification produced by a broken instrument is worse than no result, because it reads
+     as rigour.** Pin it in the artefact where the next reader will look, not only in the journal
+     (§4). Second run running.
+   • **Out-of-hull is not an alarm; Σ|w| is.** A GLS weighted mean leaves the convex hull of its
+     data almost immediately and harmlessly; what tracks the breakdown is the L1 mass of the
+     weights (r = +0.957 in logs, §3/§5).
+   • **A registered threshold anchored to another prediction's onset inherits that prediction's
+     failure** — Q4's `cond` clause was unanswerable once k\* collapsed to 2 (§5).
+   • **Two things being controlled by one switch is not the same as them being the same thing.**
+     `fit` used one dict for design membership and GLS membership; separating them was the entire
+     fix, and it needed no change to `fit` at all (§6).
+   • **A control that fires alongside another has not been shown to test anything of its own** —
+     the selftest caught it, not review (§9).
