@@ -24545,3 +24545,195 @@ per-member value of an XGBoost is already measured at **+6.24e-6** (RESEARCH:866
 i.e. ~0.03e-6, well below every noise floor this workspace has measured. ⚠ **Record so a future
 run does not take this angle either:** the three-leg framing in the brief describes a state the
 pack reached weeks ago.
+
+---
+
+# w72 — 2026-08-24 (slot 1 of 10, ANGLE: blending / OOF weight search) — **10 OF 10 SENT**
+
+**All ten of the registered 08-24 ten went out at 12:38–12:39 UTC and all ten scored.** Token
+refreshed first (§1), chainguard + 14 guards rc=0 before and after every edit, dry run matched
+the registered ten file-for-file, `--go` confirmed `10 submissions today (was 0). 0 slots left`.
+
+    w29_ad194std_h3      0.97115     w34_ad195std_w        0.97115
+    w27_ad188stdcorr     0.97117     w34_ad195std_wh3      0.97115
+    w34_ad195std         0.97116     w34_ad196std_h3       0.97115
+    w34_ad196std         0.97116     w38_ad202std_rescale  0.97115
+    w40_ad211std_hybrid  0.97113     w40_ad211std_rescale  0.97116
+
+**None beat the account best; none was expected to.** The largest `P(beat 0.97119)` in the ten
+was 5.71e-3 and the sum over all ten was ~1.0e-2. Account best stays **0.97119**. ✅ The pricer
+was right again: predicted 0.971133–0.971173, observed 0.97113–0.97117.
+
+## 1. THE TOKEN. w70's warning was correct and the fix took ten seconds.
+
+Expiry was **2026-08-24T05:42:55Z**; the window opens ~12:40Z, i.e. **7 hours past expiry and
+well outside the 30-minute lying window**, so this would have been a hard 401 on the first send,
+not a silent one. Refreshed before touching the chain; new expiry **2026-08-25T00:40:26Z**.
+⚠ That new expiry is again BEFORE tomorrow's ~12:40Z window. **Refresh first, every run.**
+
+## 2. 🔴🔴 THE HEADLINE: THE QUEUE RUNS DRY ON 2026-08-29, AND NOBODY HAD MEASURED THAT.
+
+After today's send there are **34 sendable files** — unsent, with a stored OOF vector, not
+vetoed, not member-family, and surviving `w26g_send`'s own two-part refusal test — against
+**60 slots** (08-26..08-31, ten a day). `experiments/w72a_planday.py --audit`:
+
+    unregistered days 08-26..08-31 : 6  ->  60 slots
+    SENDABLE files remaining       : 34
+    refused by the sender's own gate:  3      (w69_ad208stdcorr, w69_ad208std_logit,
+    unsent but VETOED              : 19       w34_ad196std_logit — all above_tier + hijack)
+    SHORTFALL +26 slot(s).  Covers 3 full days; DRY FROM 2026-08-29.
+
+The brief says an unused slot is pure waste, so the instinct is to build files to fill 26 of
+them. ⚠ **I priced that instinct before acting on it, and it is wrong.**
+
+### 2.1 THE 26 UNFILLABLE SLOTS ARE WORTH APPROXIMATELY ZERO
+
+The whole remaining sendable pool (44 files, i.e. the 34 plus the ten already registered for
+08-25) carries a **summed `P(beat 0.97119)` of 3.33e-2**, and `P(at least one)` = 3.29e-2 under
+independence — an OVERSTATEMENT, as always. The slots that cannot be filled are drawn from the
+**tail** of that pool, where the number is not small but **exactly 0.00e+00**:
+
+    blend150sx_rescale  pred 0.97103  P 0.00e+00      blend160origm_logit pred 0.97104  P 0.00e+00
+    blend153_hybrid     pred 0.97100  P 0.00e+00      blend153_logit      pred 0.97103  P 0.00e+00
+
+⟹ **The shortfall costs nothing measurable.** "An unused slot is pure waste" is a statement about
+*opportunity cost*, and here the opportunity is priced at zero. ⛔ **DO NOT BUILD FILES TO FILL
+08-29..08-31.** A new member is worth ~6e-6 at member level and ~0.03e-6 at pack level (w71 §5)
+— below every noise floor this workspace has measured — and it would go out at the bottom of a
+queue whose bottom already prices at 0.
+
+### 2.2 BUT THE SHORTFALL IS A SECOND, INDEPENDENT ARGUMENT FOR THE SELECTION CLICK
+
+**19 unsent files sit in `w48e_order.VETO`, and that veto is binding *only while
+`check_selection` reports nothing selected*.** The click dissolves the premise and returns
+~2 days of supply — including `w42_ad217stdcorr` (CV 0.9701788311, the highest on disk after
+the ad216 pack) and the rest of the ARM 217/216 families that currently top the predicted-LB
+table at 0.97120–0.97130. ⚠ **This is a NEW argument for a click that was already the largest
+item on the account, and it arrives from a completely different direction than the Rogii one.**
+Recorded so it is not mistaken for a restatement.
+
+## 3. THE ANGLE — DECLINED, AND THIS IS THE SEVENTH TIME
+
+ANGLE: *"rank-average or weight the tuned models by out-of-fold performance; search blend weights
+on OOF."* ⛔ **Closed by measurement, twice, 36 members apart** (RESEARCH:744):
+`transform_weights.py` (08-13, 1,771-point simplex on the 159av pack) — the search *"does not
+beat `h3`, it rediscovers `h3`"*; and w36d (08-20, Nelder-Mead at 195 members, weights fitted
+INSIDE the frozen folds) — equal-weight h3 **0.9701205753** vs honestly cross-fitted
+**0.9701196117**, i.e. the fitted weights land **0.96e-6 WORSE**, at a measured **+0.45e-6 of
+optimism per free parameter**. `ens4` and `h3`, which every file in the pack already goes
+through, ARE the rank-average the angle asks for. ⟹ Nothing to take.
+
+## 4. WHAT I BUILT
+
+- **`w72a_planday.py`** — w70c's derivation with the **day as an argument**. Registers any
+  remaining window under identical filters (all of them READ from the module that owns them:
+  `VETO` from w48e, `P_MAX`/`above_tier_reason`/`hijack_risk` from w26g) and writes
+  `w72a_plan_<day>.json`. Also carries `--audit` (§2). **Registered 08-26, 08-27, 08-28**;
+  08-29 and 08-30 correctly **refuse** (`rc=1`, "only 4 sendable file(s) remain"). w48e now
+  reports **rc=0 for 08-25/26/27/28**, each verifying all ten end-to-end (296,302 rows, no NaN,
+  md5 matched, CV reproduced), and **rc=2 for 08-29**. ⚠ **Four windows of cover, so a missed
+  run can no longer brick one.**
+- **`w48e_order.py`** — a generic loader for `w72a_plan_*.json`, in the **degrade-never-assert**
+  shape w70 §10.3 cost a deadlock to learn: a missing/stale/failed/vetoed artefact leaves the day
+  unregistered (which already has a loud LOCAL failure, `DAY not in ORDERS` → exit 2) instead of
+  raising at import and taking w26d, w26g and w48e down together. A hand-written day always wins
+  over an artefact.
+- **`w72b_dayguard.py`** — the first check that looks **ACROSS** days. w48e's own
+  `set(ORDER) & set(VETO)` assert only ever sees the one day it was invoked for. **Verified it
+  FAILS on a planted control** (an 08-30 artefact carrying an already-sent file → rc=1 naming it;
+  deleted → rc=0). ✅ Result on the real chain: **131 submissions, 131 distinct files — nothing
+  has ever been sent twice.**
+
+## 5. ⚠ THREE THINGS I GOT WRONG FIRST, ALL WORTH THE SPACE
+
+### 5.1 `w48e_order.py` READS `sys.argv` AT MODULE SCOPE, SO IT IS NOT IMPORTABLE
+
+`w72a --day 2026-08-26` exited **2, silently**. Cause: w48e scans `sys.argv` for `--day` at
+import (line ~271), adopted MY argument as the day it was ordering for, found it unregistered
+and `sys.exit(2)` — with its explanation swallowed by my own `redirect_stdout`. ⛔ **A MODULE
+THAT READS `sys.argv` AT IMPORT IS A SCRIPT WEARING A MODULE'S CLOTHES.** This is w70 §10.3's
+lesson in a second costume: same defect class (import-time side effect in a module the whole
+chain imports), different mechanism. Fixed **locally** — argv is neutralised across the import
+in `w72a._load()` and `w72b` — because restructuring w48e on a send day is not a maintenance
+edit. ⚠ **And note the compounding: the redirect I added to silence w48e's pricing report is
+what made the exit silent.** A quieting measure hid the diagnostic for the failure it caused.
+
+### 5.2 `w23b_sendqueue.csv` CONTAINS **ONLY UNSENT FILES** — EVERY ROW READS `sent = False`
+
+My first `w72b` took the sent set from that column and fired **six failures on a sound chain**.
+The column is a **filter that has already been applied, not a flag to test**: reading it yields
+the EMPTY SET, which silently vacates every check that uses it while every check that inverts it
+fires on all 121 sent files. ⚠ **A boolean column with one value is a filter, not a predicate —
+and it fails in BOTH directions at once, one of them silently.** The authoritative sent history
+is the live API (`w26g_send.api_submissions()`).
+
+### 5.3 CROSS-DAY REGISTRATION OVERLAP IS **LEGITIMATE**, AND I NEARLY "FIXED" IT
+
+`w38_ad202std_rescale` and `w40_ad211std_rescale` are registered for **both 08-23 and 08-24**.
+That is not a defect: the sender REFUSED them on 08-23 at the P_MAX hijack gate, so they carried
+over and went out today — **exactly once each**, confirmed against the API. ⚠ **A REGISTRATION
+IS AN INTENTION; ONLY A SEND IS AN EVENT.** The guard is now on the sent history, and overlap is
+printed as information. (Also: `w48e.CAL_ROWS` are member-family by design, so the member check
+must exempt them or it fires on `w48_cal_hboyang_mix` every run.)
+
+⚠⚠ **The meta-point: my guard fired on a sound chain, and had I trusted it I would have "fixed"
+three things that were already right.** w71 verified its guard fails on a planted control; the
+missing half is verifying it PASSES on a state known to be good. **A guard needs both controls.**
+
+## 6. AND I HIT THE `$?`-AFTER-A-PIPE TRAP, WHICH RESEARCH §9.1 DOCUMENTS
+
+`... | tail -16; echo "rc=$?"` reported **rc=0** for the 08-29 planner, which had exited **1**.
+`$?` after a pipeline is the LAST STAGE's status — `tail` always succeeds. Caught it because the
+printed text said `1 failure(s)` while the rc said 0. ⛔ **Command substitution or redirect,
+never a pipe.** Documented, still stepped in it.
+
+## 7. THE BOARD — WE ARE DRIFTING DOWN WHILE STANDING STILL
+
+**Rank 92 of 2,774** at 0.97119 (paginated in full, not the first page). Yesterday w70 recorded
+**rank 73**. Our score did not move; **the field did**. 91 teams strictly above us and **17 tied
+at 0.97119**. Leader Chris Deotte **0.97168**, up from 0.97152 yesterday — a 49e-6 gap.
+⚠ The brief's "~1,326 teams" is stale; it is **2,774**.
+
+## 8. NEXT RUN
+
+1. **`date -u` FIRST, THEN REFRESH THE TOKEN** — it expires **2026-08-25T00:40:26Z**, again
+   before the ~12:40Z window. RESEARCH has the copy-paste. Then `w70d_chainguard.py`, then the
+   14 guards, then **`w72b_dayguard.py`** (now 16 in the sweep).
+2. **The send chain is READY for 08-25** and `w48e --day 2026-08-25` is rc=0. Four commands,
+   dry run must match the registered ten before `--go`.
+3. 🔴 **THE SELECTION CLICK.** Nothing is selected; Kaggle auto-picks on **public** score, which
+   is the Rogii failure by default. **It now has a second, independent justification** (§2.2:
+   it is also the supply fix, worth ~2 days and the highest-CV files on disk). **Needs Teddy in
+   a browser before 08-31 — it cannot be done from the API.** Verify with
+   `check_selection.py > f 2>&1; echo $?` — **never through a pipe.**
+4. ⛔ **DO NOT BUILD FILES TO FILL 08-29..08-31** (§2.1). Those slots price at **exactly 0**.
+   If you want supply, the click is the lever; building is not.
+5. ⛔ **DO NOT APPLY THE DUPLICATE OVERRIDE** (w71 §4.1) — retracted, −5.8e-6, both paths refuse.
+6. ⛔ Do NOT re-open w58 §9.7's list. **Blending / OOF weight search is now declined a seventh
+   time** (§3) — and `ens4`/`h3` already ARE the rank-average it asks for.
+7. 🔴 Still open, untouched a **tenth** run: the ranker's CV basis (w70 §3c — pre-register a bar
+   BEFORE re-reading `w70a_optimism.json`; **w72 did not compute it, so w72+ may**), w63 §4's
+   refined P5, w63 §5a's 16.5e-6 bracket hole.
+8. ⚠ **NEW LESSONS.** A module that reads `sys.argv` at import is not importable (§5.1) · a
+   quieting measure can hide the diagnostic for the failure it causes (§5.1) · **a boolean column
+   with one value is a filter, not a predicate — and it fails in both directions at once, one of
+   them silently** (§5.2) · a registration is an intention, only a send is an event (§5.3) · **a
+   guard needs BOTH controls — fails-when-broken AND passes-when-sound** (§5.3) · price the
+   instinct before acting on it: "an unused slot is waste" is about opportunity cost, and the
+   opportunity here is measured at zero (§2.1) · a constraint can have two independent
+   justifications arriving from different directions — say which is new (§2.2).
+
+## 9. ADDENDUM — THE SELECTION CHECK'S PATH, AND ITS STATE
+
+⚠ **`check_selection.py` lives in `experiments/`, not `agent/`.** Prior entries name it without
+a path and I typed `agent/check_selection.py`, which exits **2** — Python's "no such file",
+indistinguishable at a glance from a real gate failure. ⛔ **A missing-file rc is not a verdict.**
+The correct invocation, and its state, unchanged this run:
+
+    .venv/bin/python experiments/check_selection.py > /tmp/cs.txt 2>&1; echo $?     # -> 1
+
+**rc=1: NOTHING IS SELECTED.** Still the largest item on the account, now with §2.2's second
+justification behind it.
+
+✅ **FINAL STATE THIS RUN:** chainguard rc=0 · all **16** guards rc=0 (w72b joins the sweep) ·
+`w48e --day` rc=0 for 08-25/26/27/28, rc=2 for 08-29 · 10/10 slots used, 0 remaining.

@@ -1,5 +1,24 @@
 # Leaderboard notes — playground-series-s6e8
 
+## Snapshot 2026-08-24 12:5x UTC (2,774 teams) — w72, full pagination
+
+| | score |
+|---|---|
+| #1 Chris Deotte | 0.97168 |
+| #2 Changye Li | 0.97149 |
+| #3 MILANFX | 0.97146 |
+| #4 cstdy | 0.97137 |
+| **us (Teddy Tennant), rank 92** | **0.97119** |
+
+- **91 teams strictly above us; 17 tied at 0.97119.** Gap to the leader **49e-6**.
+- ⚠ **We went 73 → 92 in a day WITHOUT our score moving.** The field moved; we did not. Expect
+  this to continue — the drain sends files priced below the account best by construction.
+- ⚠ The brief's "~1,326 teams" is stale. It is **2,774**, and the 08-10 snapshot below (1,331)
+  is two weeks old.
+- ⛔ Paginate. `kaggle competitions leaderboard -s --csv` returns only the first page and prints
+  `Next Page Token = …` as a line ABOVE the header, which must be stripped before parsing. The
+  first page alone reports "20 teams at or above 0.97119"; the true count is 108.
+
 ## Snapshot 2026-08-10 (1,331 teams)
 
 | | score |

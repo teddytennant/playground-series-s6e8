@@ -42,7 +42,7 @@ not be reachable accidentally either.
 """
 from __future__ import annotations
 
-import hashlib, json, os, sys
+import glob, hashlib, json, os, sys
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
@@ -262,6 +262,40 @@ WHYS   = {"2026-08-22": WHY_0822,           "2026-08-23": WHY_0823,
           "2026-08-24": WHY_0824}
 if ORDER_0825:                       # only a VERIFIED artefact registers the day
     ORDERS["2026-08-25"], WHYS["2026-08-25"] = ORDER_0825, WHY_0825
+
+# ---- 08-26 and beyond: registered from w72a's per-day artefacts --------------------------------
+# ⚠ SAME CONVENTION, GENERALISED. w70c hardcodes one day per file; `w72a_planday.py --day D`
+# derives any day under the identical filters and writes `w72a_plan_<D>.json`. Every artefact
+# found here that verifies gets registered, so a remaining window costs a flag, not a file.
+# ⛔ DEGRADE, NEVER ASSERT (w70 §10.3). A missing, stale or failed artefact simply leaves the day
+# unregistered — which already has a loud, LOCAL failure (`DAY not in ORDERS` -> exit 2) — rather
+# than raising at import and taking w26d, w26g and this module down together.
+# ⚠ An artefact NEVER overwrites a day registered above; the hand-written days win.
+_WHY_W72A = ("DRAIN. Highest-CV unsent non-vetoed non-member file left in the queue after every "
+             "earlier registered day, derived by w72a_planday.py under the sender's own refusal "
+             "test and sent in ascending CV order so the best of the ten goes LAST and wins any "
+             "public tie (w46b §5).")
+for _f in sorted(glob.glob(os.path.join(HERE, "w72a_plan_*.json"))):
+    try:
+        _p = json.load(open(_f))
+        _d = _p.get("day")
+        if not isinstance(_d, str) or os.path.basename(_f) != f"w72a_plan_{_d}.json":
+            print(f"  ⚠ {os.path.basename(_f)} names day {_d!r} — NOT registered.")
+        elif _d in ORDERS:
+            pass                                     # a hand-written day always wins
+        elif _p.get("failures"):
+            print(f"  ⚠ {_d} is NOT registered: artefact reports {_p['failures']} failures.")
+        elif len(_p.get("plan", [])) != 10 or len(set(_p["plan"])) != 10:
+            print(f"  ⚠ {_d} is NOT registered: artefact carries "
+                  f"{len(_p.get('plan', []))} files, not ten distinct.")
+        elif set(_p["plan"]) & set(VETO):
+            print(f"  ⚠ {_d} is NOT registered: artefact contains VETOED files "
+                  f"{sorted(set(_p['plan']) & set(VETO))}.")
+        else:
+            ORDERS[_d] = list(_p["plan"])
+            WHYS[_d] = {s: _WHY_W72A for s in _p["plan"]}
+    except Exception as _e:                                                    # noqa: BLE001
+        print(f"  ⚠ {os.path.basename(_f)} is unreadable ({_e}) — day NOT registered.")
 
 # calibration files have no entry in w23b_sendqueue (no stack CV to rank on) and must be
 # injected, exactly as w37c_prereg.py did for the w37 batch. stem -> (builder json, note).

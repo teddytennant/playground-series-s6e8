@@ -163,6 +163,101 @@ and the above-tier sends on the literal condition *"once `check_selection` exits
 fourteen-guard `rc=` sweep is sound.
 
 
+# 🔴🔴 THE QUEUE RUNS DRY ON 2026-08-29 — AND THE EMPTY SLOTS ARE WORTH ZERO (w72, 2026-08-24)
+
+After the 08-24 send there are **34 sendable files** (unsent · stored OOF vector · not in
+`w48e_order.VETO` · not member-family · surviving `w26g_send`'s two-part refusal test) against
+**60 slots**, 08-26..08-31. Measure it any run with:
+
+    .venv/bin/python experiments/w72a_planday.py --audit
+
+    SHORTFALL +26 slot(s).  Covers 3 full days; DRY FROM 2026-08-29.
+
+⛔ **DO NOT BUILD FILES TO FILL THOSE SLOTS.** The whole remaining pool of 44 sendable files
+carries a summed `P(beat 0.97119)` of **3.33e-2**, and the 26 unfillable slots come off the
+**tail**, where the number is **exactly 0.00e+00** (`blend153_logit` pred 0.97103, etc.). The
+brief's "an unused slot is pure waste" is a claim about **opportunity cost**, and the opportunity
+here is priced at zero. A new member is ~6e-6 at member level and **~0.03e-6 at pack level**
+(w71 §5) — below every noise floor measured here.
+
+🎯 **THE ONE LEVER THAT DOES RETURN SUPPLY IS THE SELECTION CLICK.** 19 unsent files sit in
+`VETO`, which is binding **only while `check_selection` reports nothing selected**. The click
+dissolves the premise and returns ~2 days of supply, including the ARM 217/216 families that top
+the predicted-LB table at 0.97120–0.97130 and `w42_ad217stdcorr` (CV 0.9701788311). ⚠ **This is
+a SECOND, INDEPENDENT argument for that click, arriving from a different direction than the
+Rogii one.** Do not read it as a restatement.
+
+---
+
+# REGISTERING A SEND DAY: `w72a_planday.py --day D` (w72, supersedes one-file-per-day)
+
+`w48e_order.py` exits 2 for an unregistered day, so an unregistered window fails at step 2 of the
+four-command chain. w70c fixed 2026-08-25 with a script hardcoded to that day; w72a takes the day
+as an argument under identical filters and writes `w72a_plan_<D>.json`, which `w48e_order.py`
+picks up generically.
+
+    .venv/bin/python experiments/w72a_planday.py --day 2026-08-27
+    .venv/bin/python experiments/w72a_planday.py --day 2026-08-27 --rewrite   # only on DRIFT
+    .venv/bin/python experiments/w72b_dayguard.py                             # cross-day guard
+
+**Registered and verified rc=0: 08-25, 08-26, 08-27, 08-28** (each verifying all ten end-to-end).
+**08-29+ correctly refuse** — the queue is dry, not the tooling.
+
+- ⛔ **DRIFT MUST NOT DEADLOCK.** w70c fails on drift and then refuses to write, so a stale
+  registration can never be corrected by re-running it — the w70 §10.3 deadlock one layer up.
+  w72a reports drift loudly and `--rewrite` resolves it; every other failure still refuses.
+- ⛔ **DEGRADE, NEVER ASSERT.** A missing/stale/failed/vetoed artefact leaves the day
+  unregistered (loud LOCAL failure: `DAY not in ORDERS` → exit 2), never raises at import.
+  A hand-written day always wins over an artefact.
+
+---
+
+# ⚠⚠ `w48e_order.py` READS `sys.argv` AT MODULE SCOPE — IT IS NOT SAFELY IMPORTABLE (w72)
+
+Line ~271 scans `sys.argv` for `--day`, adopts the value as the day it is ordering for, and
+`sys.exit(2)`s if unregistered. **So importing it from any script that also takes `--day` hands
+it your argument and it exits 2** — silently, if you have redirected its (very long) pricing
+report. ⛔ **A MODULE THAT READS `sys.argv` AT IMPORT IS A SCRIPT WEARING A MODULE'S CLOTHES.**
+Same defect class as w70 §10.3's module-scope assert, different mechanism. Neutralise argv across
+the import rather than restructuring the send chain:
+
+    saved = sys.argv
+    try:
+        sys.argv = [saved[0]]
+        import w48e_order as W
+    finally:
+        sys.argv = saved
+
+⚠ And note the compounding: the `redirect_stdout` added to silence w48e's report is what made the
+exit silent. **A quieting measure can hide the diagnostic for the failure it causes.**
+
+---
+
+# ⚠⚠ `w23b_sendqueue.csv` CONTAINS **ONLY UNSENT FILES** — `sent` IS ALWAYS `False` (w72)
+
+Every row reads `sent = False`; the column is a **filter that has already been applied, not a
+flag to test**. Deriving a sent set from it yields the **EMPTY SET**, which silently vacates
+every check that uses it *while* every check that inverts it fires on all 121 sent files — a
+guard built on it produced six failures against a provably sound chain. ⛔ **The authoritative
+sent history is the live API: `w26g_send.api_submissions()`.**
+
+⚠ **A boolean column with one value is a filter, not a predicate, and it fails in BOTH
+directions at once — one of them silently.**
+
+Related, and also learned the hard way: **CROSS-DAY REGISTRATION OVERLAP IS LEGITIMATE.**
+`w38_ad202std_rescale` / `w40_ad211std_rescale` are registered for both 08-23 and 08-24 because
+the sender REFUSED them on 08-23 at the P_MAX hijack gate and they carried over — each sent
+**exactly once**. ⚠ **A registration is an intention; only a send is an event.** And
+`w48e.CAL_ROWS` are member-family by design, so any member check must exempt them.
+
+✅ Guard result on the real chain: **131 submissions, 131 distinct files — nothing has ever been
+sent twice.**
+
+⚠ **A GUARD NEEDS BOTH CONTROLS.** w71 verified its guard FAILS on a planted bad state; the
+missing half is verifying it PASSES on a state known good. w72b was checked both ways.
+
+---
+
 # ⚠⚠ REFRESH THE KAGGLE TOKEN **BEFORE** THE SEND CHAIN, NOT AFTER THE FIRST 401 (w70)
 
 The token expired **17:41:21Z** mid-run and every call returned `Authentication required`. This
