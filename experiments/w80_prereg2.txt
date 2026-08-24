@@ -1,0 +1,85 @@
+w80 PRE-REGISTRATION #2 — the FOLD-SIGNATURE partition test for ext_members17
+written 2026-08-24 AFTER w80a's post-hoc numbers were read, and that is stated up front.
+TO BE RUN BY THE SUCCESSOR. This run registers it and does NOT run it.
+
+WHY THIS EXISTS
+---------------
+w80a screened szymonkapiski's 50-weakest pack and it survived: G50 = +10.14e-6 on BASE_A,
++10.36e-6 on BASE_B, against a registered REFUSE cut of +200e-6 and a floor of +4e-6. Net of
+the stack wrapper that is **+7.98e-6 above the account's best sent CV (0.9701400060)** — the
+first candidate in weeks that could move CV above the account best.
+
+It cannot be adopted, because w38c's gate 4 is unrunnable on it: the author publishes solo
+OVERALL AUC per column and nothing per fold. ⚠ And note precisely what w80a's P2 did and did
+not do. P2 reproduced all 50 solo AUCs to 4.9e-7 — that tests **ROW ALIGNMENT ONLY**.
+`roc_auc_score(y, oof[:, j])` over the full train set is invariant to which partition produced
+the OOF, so P2 carries no information whatsoever about the fold scheme. The declaration in the
+README is still just a declaration.
+
+⚠⚠ THIS PREREG IS WRITTEN AFTER A FAVOURABLE NUMBER. That is the exact circumstance in which
+a test gets designed to pass. It is registered rather than run for that reason: the thresholds
+and the controls below are fixed now, in a commit, and whoever runs it does not get to move
+them. If the successor finds them wrong, the honest move is to say so in the journal and
+register a replacement — not to edit this file.
+
+THE IDEA
+--------
+An OOF column built under partition P carries a per-fold CALIBRATION SIGNATURE: the rows in
+P-fold k were predicted by model_k, and model_k has its own bias. So the fold means of the
+column differ across P by more than sampling noise. Under a partition that is NOT P, the fold
+labels are random with respect to those models and the fold means are equal up to noise.
+
+Both our folds and (per the README) theirs are stratified on y, so the y-mix is equal across
+folds by construction and cannot produce the signal. What is left is model-to-model bias,
+which is what we want to detect. n is ~138k per fold, so the test has real power.
+
+THE STATISTIC — fixed here
+--------------------------
+For a column c and a partition F with folds f_1..f_5 over n rows:
+
+    z    = (c - mean(c)) / sd(c)
+    S(c,F) = sum_k  n_k * (mean of z over f_k)^2          # ~ chi2(4) under "F is random wrt c"
+
+Scale-free, no rank transform (a rank transform destroys the calibration the test reads).
+
+THE CONTROLS ARE THE TEST — without them S is an uncalibrated number
+--------------------------------------------------------------------
+POS: 20 of this workspace's own OOF stems from submissions/oof_*.npy, chosen as the 20
+     lexicographically first, evaluated under OUR agent/common.get_folds(y). KNOWN MATCHED.
+NEG: the SAME 20 stems evaluated under StratifiedKFold(5, shuffle=True, random_state=1234).
+     KNOWN MISMATCHED. Same columns both times, so the only thing varied is the partition.
+TEST: the 50 pack columns under OUR get_folds(y).
+
+PREDICTIONS
+-----------
+Q1 GATING (POWER). The controls separate: AUC of S as a discriminator between the 20 POS and
+   the 20 NEG values is >= 0.90. If it is below 0.90 the instrument cannot tell a matched
+   partition from a foreign one on data where we KNOW the answer, and nothing it says about
+   the pack means anything.
+   FAIL => VOID. Report no verdict on the pack. Do NOT fall back to a weaker cutoff.
+Q2 RECORDED. median S over POS  >  median S over NEG.  (Direction check; Q1 is the real gate.)
+Q3 THE READ, and it is registered as a three-way outcome with no discretion:
+     let  t = median S over the 50 pack columns.
+     t >= min(POS)                    -> MATCHED. The partition is ours.
+     t <= max(NEG)                    -> FOREIGN. REFUSE the pack outright.
+     otherwise (strictly between)     -> INDETERMINATE. The pack stays un-adoptable and the
+                                         successor must NOT adopt it on the strength of
+                                         w80a's +10.14e-6.
+   ⚠ If min(POS) <= max(NEG) the two control sets overlap, Q1 has already failed, and Q3 is
+     not evaluated at all.
+Q4 GATING. Nothing on the send path is touched. md5 of experiments/w79a_barfill.json,
+   experiments/w63a_setprice.json, experiments/w26d_queueprice.csv byte-identical.
+
+WHAT EACH BRANCH LICENSES — fixed here so the successor cannot widen it
+-----------------------------------------------------------------------
+  VOID or INDETERMINATE -> nothing. The pack is not built with, not queued, not sent.
+  FOREIGN               -> REFUSE. Close the thread. Record it in RESEARCH so it is not
+                           reopened, the way w51 closed ext_members16.
+  MATCHED               -> gate 4 is discharged BY SUBSTITUTE, and ONLY then does the pack
+                           become eligible for the full vetting a build would need. Even
+                           then MATCHED is not an adoption: a matched partition rules out
+                           the leak, it does not establish the +10.14e-6 survives a real
+                           pack refit, and it says nothing about the es-on-val clause that
+                           w51 convicted ext_members16 on.
+
+⛔ MATCHED does NOT license a send, a queue edit, or a HIJACKPRICE change on its own.
