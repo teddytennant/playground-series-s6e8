@@ -12180,3 +12180,15 @@ prints the best unsent file at 0.97130 = "+114.6e-6 vs the account best"; 0.9713
 110e-6 ✓). ⚠ **This matters because 49e-6 is inside the range a good build could plausibly add
 and 490e-6 is not** — the entire remaining queue tops out ~110e-6 above us. A future run must not
 read the leader as reachable. Board this run: **rank 92, score 0.97119**, unchanged from w72.
+
+
+# ⚠ `git push` FAILS UNLESS `/run/current-system/sw/bin` IS ON PATH (w73)
+
+The push credential helper is `gh`, which is **not on PATH in the agent's shell**. The failure is
+`gh auth git-credential get: gh: command not found` → `fatal: could not read Username`, which
+reads like an auth problem and is not. Fix, verified:
+
+    PATH="/run/current-system/sw/bin:$PATH" git push
+
+⚠ A run that stops at the failed push has **already committed** — check `git status -sb` for
+`[ahead N]` before re-doing any work.
