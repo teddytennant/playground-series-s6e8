@@ -1,5 +1,29 @@
 # Leaderboard notes — playground-series-s6e8
 
+## Snapshot 2026-08-24 ~14:55 UTC — w78, top-200 page
+
+| | score | vs the w77 snapshot ~40 min earlier |
+|---|---|---|
+| #1 Chris Deotte | **0.97168** | unmoved (last submit 08-24 13:54:30Z) |
+| #2 Changye Li | 0.97149 | — |
+| #3 MILANFX | 0.97146 | — |
+| **us (Teddy Tennant), rank 95** | **0.97119** | unmoved |
+
+- **94 teams strictly above 0.97119, and 16 teams TIED with us at it** (a 17-wide tie block,
+  ranks 95–110). Gap to the leader **49e-6**, unchanged for three snapshots.
+- ⚠ **We fell 93 → 95 without losing anything.** `林木子吖` and `Wang H2O` both reached **0.97120**,
+  exactly one reporting step above us, and passed us. Our 0.97119 is byte-identical to w76/w77.
+- ⚠ **The tie block is the thing to understand here.** 16 teams share our displayed score, so a
+  single reporting step (1e-5) is worth ~16 places. That is the whole case for the hijack pricer:
+  the bar is about which side of a display step a file lands on, not about CV distance.
+
+### ⚠ THE `-v` FLAG PREPENDS A `Next Page Token` LINE TO THE CSV
+`kaggle competitions leaderboard -c ... -s --page-size 500 -v` writes a `Next Page Token = ...`
+line BEFORE the header, so `pd.read_csv` picks it up as the only column. Strip line 1 first
+(`tail -n +2`). Max page size is 200 rows regardless of what `--page-size` asks for, so the
+board below rank 200 is not reachable this way. Our team name is **"Teddy Tennant"**, not
+`thtennant` — grep for the former.
+
 ## Snapshot 2026-08-24 ~14:13 UTC (2,783 teams) — w77, from the downloaded ZIP
 
 | | score | vs the w76 snapshot ~20 min earlier |

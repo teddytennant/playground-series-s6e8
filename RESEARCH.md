@@ -1,3 +1,86 @@
+# 🎯 THE BAR CORRECTION IS THE HOLE, NOT THE GLS — 4 CONSTRUCTIONS, 28.9e-6 OF GAP, 0.36e-6 OF BAR
+# (w78, 2026-08-24)
+
+    .venv/bin/python experiments/w78a_treatment.py     # ~4 min, GATE A 0.000e+00 over 51 quantities
+    .venv/bin/python experiments/w78b_treatguard.py    # standing guard, 5 controls, no refit
+
+w77 §10.3 owed w77d three things before its 5.9e-6 stricter bar could be adopted: (a) an argument
+that withholding a realised public score from the GLS is the right counterfactual for a hijack,
+(b) a re-derivation through w63a on the LIVE board, (c) a decision on Sum|w| as a health check.
+All three are answered. **10 of 13 pre-registered predictions were FALSIFIED and that is the
+result** — `w78_prereg.txt`, committed 637a6c1 before `w78a_treatment.py` existed.
+
+## THE ANSWER, IN ONE TABLE
+
+| construction | GLS k | gh | hole | H_binding |
+|---|---|---|---|---|
+| w63a, the live bar | 8 | +1024.16 | EMPTY | **11.144** |
+| ARM LIVE — all 18 scored | 18 | +1042.70 | EMPTY | **10.810** |
+| w77d — fillers withheld | 8 | +1024.16 | FILLED | **5.255** |
+| ARM U — every candidate unscored | 2 | +1053.10 | FILLED | **4.895** |
+
+**A 28.9e-6 spread in the GLS common gap buys 0.36e-6 of bar. Filling the 16.5e-6 hole buys
+5.56e-6.** ~80x attenuation. ⟹ w77d does not need to win the counterfactual argument; at the
+resolution that matters the counterfactual does not move the answer. **This is the argument a
+successor needs to adopt w77d's ~0.9701347 bar — and R3 forbade this run from shipping it.**
+
+## ⛔ THE LIVE BAR IS **NOT** STALE, THOUGH ITS DESIGN TURNED OVER OVERNIGHT
+All ten `PLAN_0824` files were sent 08-24 and are now scored, so **all 18 of w63a's design files
+are in `LB` on the live board** and every candidate flipped from the UNSCORED to the SCORED
+treatment. `gh` +1024.16 -> +1042.70 (18.55e-6) and the bar 0.9701288617 -> **0.9701291958**,
+**+0.334e-6 of CV**. The tier is unchanged (0.97119 / 0.97118, same members) so `thresh` still
+describes the board; `w78a` refuses if it ever stops doing so.
+
+## ⛔⛔ w77 §5's "OUT-OF-HULL IS NOT THE ALARM; Sum|w| IS" **DOES NOT GENERALISE**
+w77c got `corr(log Sum|w|, log|gh - mean z|) = +0.957` over 111 NESTED sub-designs. Re-tested on
+a different family (17 fits, k in {2, 8, 9, 18}) it is **-0.335**, and the counterexample is flat:
+
+    arm        k   Sum|w|   |gh - mean z|
+    uniform_2  2     1.37            1.15     <- smallest Sum|w|
+    live_8     8     4.98           30.29     <- the LIVE fit, and the WORST deviation
+    live_18   18    45.68            0.55     <- LARGEST Sum|w|, SMALLEST deviation
+
+🎯 **DECISION (requirement c): NO Sum|w| HEALTH CHECK IS ADOPTED.** w78's own registered fallback
+rule mechanically outputs `Sum|w| <= 2.74`, **below the live fit's own 4.98** — it would refuse
+every send from day one, on a statistic that tracks nothing. `w78b` C2 fires if one is installed.
+⚠ Second run running of *"a threshold anchored to another prediction's onset inherits that
+prediction's failure"* — and this time I wrote the rule knowing the lesson.
+
+## ⛔ w63a's BRACKET **IS** TREATMENT-MIXED, AND THAT IS INERT — DO NOT RE-DERIVE THE BAR FOR IT
+`fit` gives a candidate in `LB` the residual `xh0 = (LB-cv)/U - gh` and one outside it `xh0 = 0`.
+Of w63a's 15 candidate rows **5 are SCORED, 10 UNSCORED**; the only two rows off the `worthless`
+ceiling are **both SCORED**; the 16.49e-6 bracket has a **SCORED hi end (`w40_ad211stdcorr`) and
+an UNSCORED lo end (`w40_ad211std_rescale`)**. All true. **The measured offset between the two
+treatments is 0.153e-6 (bar 1.0e-6) with signs 5+/8-**, measured over 13 one-filler-at-a-time GLS
+arms with a matched control isolating the `gh` channel. It explains **-0.073e-6** of w77d's
+6.364e-6 interpolation error. **The error is curvature across an empty bracket.** `w78b` C3 pins
+this so a later run that notices the mixture does not call the bar broken on the strength of it.
+
+## THE ALTERNATIVE TREATMENT IS ONLY MILDLY UNSTABLE — 20.06e-6, NOT 50
+One filler at a time into the GLS: `range(gh_f) = 20.06e-6`, `max |gh_f - gh0| = 21.88e-6`.
+So the case for withholding a realised score **cannot** rest on the alternative blowing up.
+
+## STANDING CHECK SCRIPTS — 23, THE LIST IS THE ARTEFACT, NEVER THE INTEGER
+`w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b w74b
+w75b w76b w77b w78b` — all rc=0. Run each via command substitution, never a pipe.
+⚠ `w78b` C1 is new in kind: it recomputes **all thirteen** recorded verdicts from the artefact's
+own `stats` table. After w76b C3, w77b C2 and this, verdict-pinning is mechanical, not editorial.
+
+## ✅ THE 08-25 SEND DAY IS ALREADY REGISTERED — w77 §10.2 IS WRONG ABOUT THIS
+`w48e_order.py --day 2026-08-25` **exits 0** and verifies the ten file-for-file.
+`w70c_plan0825.json` (08-23 14:02, `failures: 0`) registers the day through the `_P25` block at
+w48e:220 — no hand edit to `ORDERS`/`WHYS` is needed or wanted. **Tomorrow is THREE commands:**
+
+    .venv/bin/python experiments/w23b_sendqueue.py
+    .venv/bin/python experiments/w48e_order.py --day 2026-08-25 --write
+    .venv/bin/python experiments/w26g_send.py --n 10        # dry, must match, then --go
+
+The registered ten: `w29_ad194std_hybrid w69_ad208std_rankraw w36_ad197std_rescale
+w36_ad199std_rankraw w27_ad190std_h3 w27_ad188raw_h3 w69_ad208std_rescale w69_ad208std_hybrid
+w69_ad208std w69_ad208std_h3`. ⚠ `w69_ad208stdcorr` is omitted CONDITIONALLY — if ARM 208's key
+lifts, re-run `w70c_plan0825.py`.
+
+---
 # ✅ THE 16.5e-6 BRACKET HOLE IS CLOSED — the hole fills, but the GLS fit is what breaks (w77, 2026-08-24)
 
     .venv/bin/python experiments/w77a_bracket.py       # ~8 min, GATE A 0.000e+00 over 51 quantities
