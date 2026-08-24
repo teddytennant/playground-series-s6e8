@@ -1,0 +1,99 @@
+w77 PRE-REGISTRATION — 2026-08-24, slot 6 (AT THE 10/DAY CAP, NO SUBMISSION POSSIBLE)
+Written and committed BEFORE experiments/w77a_bracket.py exists.
+
+ANGLE OVERRIDE, STATED UP FRONT
+------------------------------
+The run's assigned angle is "find the original dataset and concatenate it as extra training
+rows". THAT ANGLE IS CLOSED HERE, FOUR TIMES, BY MEASUREMENT: concatenation is -58e-6 at 1x
+and -3,340e-6 at 50x, monotone in dose (w11, 2026-08-11); the separate-estimator route is a
+null (w12); the source is byte-identical to the copy the leaders have (w15a); and it is a
+regional null too (w15d). JOURNAL 2026-08-13 and every entry since list it under "do not
+re-open". The brief permits picking something better when the journal gives a concrete reason.
+The something better is the ONE open item the last five runs have carried forward.
+
+THE OPEN ITEM (w63 section 5a, restated by w76 section 7.5)
+-----------------------------------------------------------
+w63a's hijack break-even is INTERPOLATED across a hole in its design:
+
+    w40_ad211stdcorr        dCV  -2.5327   only() +2.2764   < base -> HELPS
+    ...................... 16.4916e-6 of dCV WITH NO CANDIDATE IN IT ......................
+    w40_ad211std_rescale    dCV -19.0243   only() +5.5246   > base -> HURTS
+
+base = +4.522769.  H_uncond = 13.9378 comes from a straight line drawn across that hole, and
+H_cond_predsd = 11.1443 sets the sender's live CV bar 0.9701288617. The hole exists because
+w63a's design is only 15 files: TIER1 u TIER2 u PLAN_0824 u WANTED.
+
+w63 section 10.5 named the principled fix and forbade the cheap one:
+  "Do NOT close it by hand-picking candidates. The principled route is to price against EVERY
+   scored file on the board -- a set nobody chose -- but that is 121 files and the LAW-IF
+   assertion max|M - wI| < 1e-6 may not survive it. Check that before building it."
+
+THIS RUN IS THAT CHECK. It is a FEASIBILITY TEST of the enlarged design, not a new bar.
+
+THE DESIGN, FIXED HERE BEFORE ANY NUMBER IS READ
+------------------------------------------------
+Both arms run on the SAME board: the live board with exactly the ten stems of
+w63a.plan_0824 removed, i.e. w63a's own 08-23 board, reconstructed mechanically (w76a's move).
+Same TIER1, same TIER2, same WANTED, same beta, same estimator. ONLY THE DESIGN SIZE CHANGES.
+
+  ARM S  NAMES = w63a's 15 = sorted(TIER1 u TIER2 u WANTED u plan_0824).
+  ARM L  NAMES = ARM S  u  every stem scored on that board that has an OOF vector on disk.
+         Mechanically defined. No file is chosen for where it sits. Files with no OOF vector
+         are EXCLUDED and NAMED in the output -- w59a: "cannot price them, do not guess".
+
+  Candidates (the bracket population) = NAMES \ TIER1 in each arm. TIER1 is the status quo
+  pair and cannot hijack itself.
+
+  THE ESTIMATOR IS IMPORTED FROM w63a_setprice, NEVER RE-IMPLEMENTED.
+
+PREDICTIONS
+-----------
+P1  GATE A. ARM S re-derives w63a_setprice.json's stored base, worthless_limit1 and all 15
+    row uncond/cond values to < 1e-9. A COMPARISON, not a `passed: true` read. If GATE A
+    fails this is not w63a's instrument and the run claims NOTHING and exits 1.
+
+P2  GATE C, NUMERICAL. cond(Sxx) for ARM L < 1e12 and every |only(x)| < 1e4. If ARM L's
+    covariance is singular the principled route is dead for numerical reasons, which is
+    itself a legitimate answer to w63 section 10.5.
+
+P3  HOLE FILL. ARM L's candidate set contains >= 3 files with dCV strictly inside
+    (-19.0243, -2.5327). If it contains ZERO the principled route does not exist and P5/P6
+    are void. Registered at 3 because two 08-23 sends are known from their submission
+    messages to have CV near 0.970133, and a bar should not rest on exactly those two.
+
+P4  GATE R SURVIVAL -- THE REGISTERED QUESTION. |base_L - base_S| > 1e-6 in e-6 units, i.e.
+    GATE R AS CODED FAILS on the enlarged design. Mechanism, fixed in advance: `fit` estimates
+    the common gap by GLS over the SCORED files and folds Vg = (1'Sxx^-1 1)^-1 into every
+    variance via cov = Cpri + Kmap 1 Vg 1' Kmap'. ARM S has 7 scored files, ARM L has ~100, so
+    Vg falls by an order of magnitude, every sd falls with it, and both expected-max terms
+    contract. base is a DIFFERENCE of two contracting expected maxima, so it moves.
+    ⚠ FALSIFIED-IS-INTERESTING: if it PASSES, `base` is design-invariant and the enlarged
+    design can be adopted wholesale, which is a strictly better outcome than the one predicted.
+
+P5  BRACKETING. ARM L's measured break-even H_L (uncond) falls STRICTLY INSIDE w63a's
+    recorded bracket (-19.0243, -2.5327). If it falls outside, the interpolated bar is not
+    merely imprecise -- it is on the wrong side of a file that was already in the design.
+
+P6  UNIQUENESS. Walking ARM L's candidates DOWN in CV, only(x) - base changes sign EXACTLY
+    ONCE. If it changes sign more than once, "the break-even" is not a well-defined scalar and
+    every bar derived from one, including the live one, is under-specified.
+
+P7  INTERPOLATION ERROR, THE HEADLINE NUMBER. |H_L - 13.9378| < 5.0e-6, i.e. w63a's straight
+    line across the hole was right to within a third of the hole's width.
+
+RESOLUTION BAR: differences <= 1e-9 in e-6 units are TIES and count for neither side.
+
+WHAT THIS RUN MAY AND MAY NOT WRITE
+-----------------------------------
+⛔ IT MAY NOT PERSIST A BAR. w59a's assertion is that a run may not enlarge the bracket and
+   persist a bar derived from it in the same run -- that is choosing the bar by choosing the
+   bracket. This run enlarges the bracket. It therefore writes ONLY experiments/w77a_bracket.
+   {json,csv} and NEVER w63a_setprice.json, w59a_hijackprice.json, the queue, the plan, the
+   sender or any submission file. w63a.main() is never called.
+   If P4 is CONFIRMED and P5/P7 show the live bar is materially wrong, the correct successor
+   is a SEPARATE, PRE-REGISTERED run that adopts the enlarged design through the normal path
+   -- not an edit made inside the run that discovered the discrepancy.
+
+⚠ NOTE ON P3's OWN CREDIBILITY, applying w76's lesson to this run in advance: the count that
+  matters is the number of DISTINCT files inside the hole, and it is reported with their names
+  and dCVs so a later run can see whether the fill is broad or is two files wearing a crowd.
