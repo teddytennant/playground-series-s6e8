@@ -1,0 +1,126 @@
+w78 PRE-REGISTRATION — THE TREATMENT BOUNDARY INSIDE w63a's COST CURVE
+=====================================================================
+Written 2026-08-24 ~14:40Z, BEFORE experiments/w78a_treatment.py exists. Committed first.
+
+WHY THIS RUN EXISTS
+-------------------
+w77 §10.3 left the ONE open item a successor: w77d's route (fill the bracket hole by enlarging
+the CANDIDATE set while holding the GLS fit at w63a's 8 scored files) measured the binding
+break-even at 5.255e-6 against the live interpolated 11.144e-6, i.e. THE LIVE BAR IS 5.889e-6
+TOO LOOSE. w77d is EXPLORATORY and registers nothing. It was owed three things and this file
+registers all three:
+
+  (a) an argument that withholding a realised public score from the GLS is the right
+      counterfactual for a hijack — w77d asserts it, nothing tests it;
+  (b) a re-derivation through w63a itself on the LIVE board, not w77d's rewound one;
+  (c) a decision on Sum|w| as a standing health check on `fit`.
+
+WHAT IS ALREADY ON DISK AND IS NOT A PREDICTION
+-----------------------------------------------
+Read out of w63a_setprice.json, w77d_holefill.json, w17d_coupling.json and w63a_setprice.py
+before this file was written. These are the SETUP, not results:
+
+ 1. `fit(NAMES, LB, cv, V, y, beta)` gives a candidate x in LB the residual xh0[x] = (LB-cv)/U - gh
+    and a candidate NOT in LB the residual xh0[x] = 0. Call these the SCORED and UNSCORED
+    treatments. Design membership is NAMES; GLS membership is LB. w77 §6 separated them.
+ 2. w63a's 15-row curve is a MIXTURE of the two treatments. Of its 15 candidate rows, 5 are
+    SCORED (tier2, incl. PICK) and 10 are UNSCORED (PLAN_0824, unsent on 08-23).
+ 3. THE INFORMATIVE PART OF THAT CURVE IS TWO POINTS AND BOTH ARE SCORED. Every row at
+    dcv <= -19.02 sits within 0.05e-6 of `worthless_limit1` = 5.5712 — saturated. Only
+    w36_ad199stdcorr (dcv 0.0000, uncond -0.0510) and w40_ad211stdcorr (dcv -2.5327,
+    uncond +2.2764) are off the ceiling, and both are tier2, i.e. SCORED.
+ 4. THE 16.4916e-6 BRACKET STRADDLES THE TREATMENT BOUNDARY. hi = w40_ad211stdcorr (SCORED),
+    lo = w40_ad211std_rescale (PLAN_0824, UNSCORED on the 08-23 board).
+ 5. w77d's two measured brackets are treatment-UNIFORM: all four endpoints
+    (w38_ad202std_h3 / w36_ad199std ; w36_ad199std_h3 / w40_ad211std_h3) are hole-fillers,
+    hence all four are UNSCORED under its construction.
+ 6. beta = -0.24772151396659794 (NEGATIVE). Kmap = beta*I + (1-beta)*Mm, so the DIRECT channel
+    of a positive xh0 LOWERS mu while the (1-beta)*Mm channel raises it. Which dominates is
+    NOT known to me and P2c is registered on it.
+ 7. THE LIVE BOARD: 131 scored stems; tier1 0.97119 = {w36_ad199stdcorr_ens4,
+    w38_ad202stdcorr_ens4} and tier2 0.97118 = the same five as w63a. THE TIER IS UNCHANGED.
+    ALL TEN PLAN_0824 FILES ARE NOW SCORED, so ALL 18 of w63a's design files are in LB on the
+    live board and every candidate flips to the SCORED treatment.
+
+THE HYPOTHESIS
+--------------
+w77d's 6.364e-6 (uncond) / 5.889e-6 (cond) discrepancy is not only curvature across an empty
+hole. w63a reads its crossing across a TREATMENT BOUNDARY, and a treatment boundary is not a
+place a linear interpolation may be drawn.
+
+PREDICTIONS. Every bar below is a number, and every one can fail.
+-----------------------------------------------------------------
+Notation: gh0 = 1024.1576039136519 (w63a's stored gap). BAR0 = 0.9701288616800509 (live CV bar).
+U = 1e-6. `Sum|w|` = L1 mass of the GLS weights w = Vg * (1' iS), which sum to 1.
+
+P1  THE LIVE REFIT MOVES THE BAR, FOR A REASON NOTHING REGISTERED.
+    Run w63a's design rule and candidate rule verbatim on the LIVE board (18/18 scored).
+    P1a  |gh_live - gh0| > 20e-6.
+    P1b  |bar_live - BAR0| > 2.0e-6 of CV, where bar_live is the binding (cond) crossing.
+    P1c  Sum|w| at the 18-file GLS > 10.0.
+
+P2  THE TREATMENT OFFSET IS REAL, AND IT IS MEASURED WITH A MATCHED CONTROL.
+    Design = w77d's 31 names. Base arm LB0 = w63a's 8 scored. For each of the 13 fillers f,
+    arm_f uses LB0 + {f} and NOTHING ELSE CHANGES. Define, in cost units,
+        D(f)      = uncond_f(f) - uncond_0(f)                        own + gh channel
+        C(f)      = median over g in fillers, g != f, of
+                    [ uncond_f(g) - uncond_0(g) ]                    gh channel ONLY
+        offset(f) = D(f) - C(f)                                      own treatment, matched
+    P2a  median |offset| over the 13 fillers > 1.0e-6.
+    P2b  at least 11 of the 13 offsets share one sign.
+    P2c  (SECONDARY, mechanism) that sign is POSITIVE — the scored treatment makes a candidate
+         look like it HURTS more. Registered on setup item 6 and I do not know which channel
+         of Kmap dominates. A negative sign falsifies P2c and NOT P2a/P2b.
+
+P3  THE MIXTURE CANNOT BE REMOVED BY MAKING THE DESIGN UNIFORM.
+    ARM U = the same 31 names with LB restricted to tier1's 2 files, so EVERY candidate is
+    UNSCORED. That is the only way to make the treatment uniform, because the scored
+    candidates ARE the GLS.
+    P3a  |gh_U - gh0| > 10e-6.
+    P3b  |H_binding(ARM U) - 5.254881093054007| > 1.0e-6.
+    ==> the fix cannot be "one treatment for every candidate". It has to be a constraint on
+        the BRACKET.
+
+P4  "INCLUDE THE REALISED SCORE" IS NOT A WELL-DEFINED TREATMENT.
+    Over the 13 arm_f GLS fits:
+    P4a  range(gh_f) > 50e-6.
+    P4b  max_f |gh_f - gh0| > 20e-6.
+    ==> this is the ARGUMENT owed by (a), turned into a measurement: the alternative to
+        withholding is not merely different, it is unstable in the choice of which scored
+        files you happen to name, and nothing in the construction picks them.
+
+P5  Sum|w| IS THE HEALTH VARIABLE (w77 §5), RE-TESTED OUT OF SAMPLE.
+    Over EVERY GLS fit this run performs (8-file base, 13 x 9-file, 2-file ARM U, 18-file live):
+    P5a  corr(log Sum|w|, log|gh - mean(z)|) > +0.5. w77c measured +0.957 on a nested sweep;
+         this is a different family of designs, so it is a real re-test.
+    P5b  the 8-file live fit's Sum|w| (4.98) is the SMALLEST of every fit performed.
+
+P6  THE OFFSET ACCOUNTS FOR w77d's INTERPOLATION ERROR (WEAKEST PREDICTION HERE).
+    Convert the cost offset to a dCV-equivalent using the local slope of the UNSCORED curve at
+    w77d's uncond bracket, slope = (uncond(lo) - uncond(hi)) / (dcv(hi) - dcv(lo)) measured in
+    THIS run's base arm, and compare with the measured uncond interpolation error
+    13.937812608870207 - 7.573629230554151 = 6.364183378316056 e-6.
+    P6   | offset_median/slope - 6.364183 | < 3.0e-6.
+    ! This assumes local linearity over 6.4e-6 of a curve that is visibly saturating. It is
+      registered as the weakest of the six and a failure here does not touch P1..P5.
+
+THE DECISION RULE, REGISTERED BEFORE THE NUMBERS EXIST
+------------------------------------------------------
+ R1  If P2a AND P2b confirm: adopt a standing GUARD that refuses to read a crossing whose two
+     bracket endpoints are on different treatments, and record that w63a's live H_uncond and
+     H_cond are both read across such a bracket. If P2a or P2b fails: record that the offset is
+     below 1e-6 and that w77d's 6.364e-6 is curvature, not treatment, and adopt NO guard.
+ R2  Adopt `Sum|w| <= 10.0` as the standing health bar on `fit`'s GLS IFF P5b confirms. If P5b
+     fails, adopt `Sum|w| <= 2 x (the smallest fit measured)` and say so explicitly.
+ R3  ! THE BAR DOES NOT MOVE THIS RUN, WHATEVER THE NUMBERS SAY. w59a's rule: a run may not
+     enlarge the bracket and persist a bar derived from it. w77 §8: the run that finds the
+     defect does not also get to ship the fix. `w63a.main()` is NEVER called; w63a_setprice.json
+     must be byte-identical at the end of this run; w77b C5 keeps enforcing BAR0.
+ R4  If P1a and P1b confirm, the finding is that BAR0 is stale — NOT that bar_live replaces it.
+     A live refit that gives every candidate the scored treatment is a THIRD construction, and
+     P2/P3 are about whether that construction is sound. Do not ship it either.
+
+WHAT THIS RUN WRITES
+--------------------
+w78_prereg.txt, w78a_treatment.{py,json,csv}, w78b_treatguard.py. NOTHING ELSE.
+No bar, no queue, no plan, no sender, no submission file, no model, no w63a_setprice.json.
