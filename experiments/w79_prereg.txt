@@ -1,0 +1,91 @@
+w79 — PRE-REGISTRATION: ADOPT THE HOLE-FILLED HIJACK BAR, OR REFUSE TO
+2026-08-24, written and committed BEFORE experiments/w79a_barfill.py exists.
+
+WHY THIS RUN EXISTS
+-------------------
+w63a's hijack break-even is interpolated across a 16.4916e-6 hole in its own 15-candidate
+design (bracket hi `w40_ad211stdcorr` dCV -2.5327, lo `w40_ad211std_rescale` dCV -19.0243,
+NOTHING inside it). w77a showed 13 files sit inside that hole. w77d filled it and measured
+H_binding 5.255e-6 -> bar 0.9701347511, 5.889e-6 STRICTER than the live 0.9701288617 — but
+w77d was designed after the answer was visible and disclaims itself. w78 answered the three
+things w77 §10.3 owed it and produced the argument that matters:
+
+    a 28.9e-6 spread in the GLS common gap buys 0.36e-6 of bar; filling the hole buys 5.56e-6.
+
+~80x attenuation, so the counterfactual argument about withholding a realised public score
+does not have to be won at the resolution that decides anything. w78 §11.3 named what a
+successor still owes and this file is it: (a) a mechanical filler rule fixed BEFORE the live
+board is read, (b) a re-derivation through w63a's own main(), (c) the send impact.
+
+⛔ WHAT THIS RUN MAY NOT DO
+   * No submission. The API reports 10 sends today (12:38-12:39Z); the cap is 10.
+   * `w63a_setprice.json` is NOT overwritten. Its md5 is checked before and after and asserted
+     identical. Every GATE A / pin in w76a, w77a, w77b C1, w77c, w77d, w78a, w78b compares
+     against that artefact and must keep working. The adopted bar goes in a NEW artefact.
+   * `w62a` is not re-run, the queue/plan/ORDERS/WHYS are not edited, no model is refit.
+
+THE FILLER RULE — MECHANICAL, AND FIXED HERE BEFORE THE BOARD IS READ
+---------------------------------------------------------------------
+Let BASE = sorted(set(TIER1 + TIER2 + WANTED + PLAN_0824)) — w63a's own design, unchanged.
+Let dcv(k) = (cv[k] - cv[PICK]) / 1e-6, cv recomputed from the OOF vectors as w63a always does.
+Let (LO, HI) = w63a_setprice.json["bracket"]["uncond"]["lo_dcv"], ["hi_dcv"]  (READ, never typed).
+
+    FILL   = { k : oof_{k}.npy exists  AND  k scored on the LIVE board  AND  k not in BASE
+                   AND  LO < dcv(k) < HI }                                    <- PRIMARY ARM
+    FILLA  = { k : oof_{k}.npy exists  AND  k not in BASE  AND  LO < dcv(k) < HI }  <- ROBUSTNESS
+
+FILL is w77a's rule stated mechanically. FILLA drops the scored condition, which is the one
+arbitrary ingredient in it: a filler is withheld from the GLS anyway, so whether it happens to
+carry a public score is irrelevant to its role as an abscissa on the cost curve. If the bar
+depends on that choice, the bar is not identified and this run must refuse.
+
+THE TREATMENT — WITHHELD FROM THE GLS, WHICH IS w77d's OBSERVATION AND NOT A CHANGE TO `fit`
+--------------------------------------------------------------------------------------------
+`fit` derives its GLS set as `scored = [k for k in NAMES if k in LB]`. Fillers enter NAMES and
+are withheld from LB, so they get xh0 = 0 and are priced through the coupling — exactly what
+w63a already does with an unsent plan candidate. No line of `fit` changes.
+w78 measured the offset between the two treatments at 0.153e-6 against a 5.56e-6 effect.
+
+PREDICTIONS — bars stated here, verdicts computed mechanically from the artefact's own stats
+--------------------------------------------------------------------------------------------
+P1  |FILL| >= 10 on the live board.                                     [RECORDED, NOT GATING]
+P2  GATE D — the enlargement does not touch the GLS:
+    |gap(FILL) - gap(fill=())| < 1e-9, both computed in THIS run on THIS board.        [GATING]
+P3  |base(FILL) - base(fill=())| < 1.0e-6 AND |worthless(FILL) - worthless(fill=())| < 1.0e-6,
+    i.e. w63a's own GATE R tolerance, applied to the enlargement.                      [GATING]
+P4  The hole closes: the BINDING bracket width under FILL < 5.0e-6 (w63a's is 16.4916).[GATING]
+P5  The bar moves STRICTER: bar(FILL) > 0.9701288617.                                  [GATING]
+P6  |bar(FILL) - 0.9701347511| < 3.0e-6, i.e. the live-board re-derivation lands near w77d's
+    rewound-board proposal.                                            [RECORDED, NOT GATING]
+P7  |bar(FILLA) - bar(FILL)| < 2.0e-6 — the bar does not depend on the arbitrary half of the
+    population rule.                                                                   [GATING]
+P8  Send impact: the number of unsent, NON-VETOED (priority >= 0) queue rows that the stricter
+    bar newly BLOCKS and the looser one admits.                        [RECORDED, NOT GATING]
+P9  The registered 2026-08-25 ten is UNCHANGED under the adopted bar: `w26g_send.py --n 10`
+    dry, with HIJACKPRICE pointed at the new artefact, yields the same ten stems in the same
+    order as w70c_plan0825.json.                                                       [GATING]
+
+⚠ P6 and P8 are deliberately NOT gating, and the reason is registered here so it cannot be
+  read as a convenience later. P6: reproducing a post-hoc number is not what makes a bar right,
+  and a live board that has turned over since w77d SHOULD move it. P8: blocking a weak row is
+  the INTENDED effect of a stricter bar, so making "blocks nothing" a condition of adoption
+  would be registering a rule that only ever adopts a bar that does nothing. This is w78 §6's
+  lesson — a threshold anchored to another prediction's onset inherits its failure — applied
+  before the fact instead of after.
+
+THE ADOPTION RULE, FIXED BEFORE ANY NUMBER IS SEEN
+--------------------------------------------------
+ADOPT  iff  P2 and P3 and P4 and P5 and P7 and P9 all hold.
+ON ADOPT:
+   1. write experiments/w79a_barfill.json in w63a_setprice.json's schema;
+   2. repoint `w26g_send.HIJACKPRICE` at it — ONE line, and the sender's bar-reading code is
+      untouched, so w59b/w62b/w63b keep testing the live path;
+   3. update the basename pin in w63b_setguard and control C5 in w77b_bracketguard, each with
+      a source comment naming THIS file as the licence;
+   4. add w79b_fillguard.py to the standing list, pinning the new bar, the filler rule, the
+      byte-identity of w63a_setprice.json, and the fact that FILL and FILLA agree.
+ON REFUSE: nothing on the send path moves, w79a_barfill.json is written with adopted=false and
+the failing prediction named, and the journal says which one and why.
+
+⚠ If GATE T2 refuses (the live auto-slot-1 pair has moved off w62a's), this run adopts nothing
+  and says so: the bar and the tier are the same object and w62a must be re-run first.
