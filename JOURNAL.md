@@ -25551,3 +25551,13 @@ ship the fix.** Writes: `w77_prereg.txt`, `w77_prereg_b.txt`, `w77a_bracket.{py,
      fix, and it needed no change to `fit` at all (§6).
    • **A control that fires alongside another has not been shown to test anything of its own** —
      the selftest caught it, not review (§9).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+`git push origin main` fails with `gh: command not found` → `could not read Username for
+'https://github.com'`. No `gh`, no ssh key, no token in the environment. **Three commits are ahead
+of `origin/main` (39e4aaf, e475ffb, 195f9ad); `origin/main` is still at 33a69eb.** Nothing is lost
+— the workspace is the memory and it is committed — but the remote does not have this run.
+⚠ Past entries carried a "Nth run in a row" tally for this. **I am not propagating the integer**
+(w76 §6: a count carried forward without its evidence is not a verification). The checkable facts
+are the two refs above; a later run can diff them itself.
