@@ -24870,3 +24870,137 @@ loop cap, so I make no claim about the team total; w72 measured 2,774. ⚠ Our b
    arithmetic on a headline gap, a 10× unit error survives a run and reframes what looks
    reachable (§4) · the same words at different levels of a hierarchy can have opposite verdicts
    (§1: seed-averaging a member +138e-6, seed-averaging the stacker a structural null).
+
+---
+
+# w74 — 2026-08-24 (slot 3 of 10, ANGLE: OOF error analysis) — **NO SUBMISSION: AT CAP**
+
+`date -u` **13:10 UTC**. The API reports **10 submissions today**, all sent 12:38–12:39Z by w72,
+scoring 0.97113–0.97117 — none beat the account best. **The cap is 10 and it is spent; no
+submission was attempted and none should have been.** Token alive (expires 2026-08-25T00:40:26Z);
+**not refreshed, deliberately** — a refresh yields ~12h, so refreshing now expires ~01:10Z, still
+before tomorrow's ~12:40Z window. It buys nothing. **Tomorrow's run must refresh as action one.**
+
+## 1. THE ANGLE IS CLOSED ON THE RECORD AND I DECLINED IT — RESEARCH:10197 SAYS SO IN TERMS
+
+ANGLE: *"segment the out-of-fold errors and look for structure a feature could capture."*
+⛔ **RESEARCH:10197: "the error-analysis line is closed on all seven axes … Do not spend another
+slot on OOF error analysis in any framing."** The axes: data segments (errormap), generator rule
+cells, per-cell isotonic, cell-local LightGBM, `resid_boost2` in both modes, per-cell member
+weights, the ceiling-from-our-own-OOF tautology, row identity, ensemble dispersion. Three of
+those are the angle verbatim, each with a **matched control** and each null; RESEARCH:7292 then
+**priced the untested remainder at ≤4.9% of the total AUC deficit** and said not to spend a slot
+there. ⟹ Nothing to take. Redirected, with the reason stated here as the playbook requires.
+
+## 2. 🎯 THE HEADLINE: THE CLICK PRICE HAD GONE STALE TWICE BEFORE — AND THIS TIME IT HAD NOT MOVED AT ALL
+
+The click price is the number in front of the one action the account still needs a human for. It
+**went void on 08-22** (w45a's hard-coded tier) and **again on 08-23** (w57a's ≥3-file tier-1
+assumption), both times discovered a day late with RESEARCH still quoting the dead figure. Two
+send days have passed since w62a priced it. Nobody had re-checked. So I did.
+
+`experiments/w74a_clickprice.py` — w62a's body, output path changed, one tau added, **plus a new
+GATE W**. Board grown **121 → 131** scored files. **FAILURES 1** (P5, §3).
+
+    GATE V  reproduce w57a_tierprice2.json on w57a's board       worst 0.000e+00
+    GATE W  reproduce w62a_autopair.json  on w62a's board        worst 0.000e+00   <- NEW
+    P2  live tier 1 still exactly {w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4}   CONFIRMED
+    P3  |live - w62a| < 1.0e-6                    drift +0.0000e-6                 CONFIRMED
+    P4  cost > 0 at tau=0 AND at the fresh upper  +4.5228 / +3.0704e-6             CONFIRMED
+
+**GATE W is the piece w62a did not have.** GATE V proves the estimator is *w57a's* — it passes
+for anything descended from w57a. ⚠ **A RE-PRICE MUST BE PINNED TO THE ARTEFACT IT IS RE-PRICING,
+NOT TO THAT ARTEFACT'S ANCESTOR.** GATE W re-derives w62a's cost, all five ladder rows, all three
+solo costs and all seven tau rows on w62a's own 121-file board. Worst deviation **0.000e+00**.
+
+## 3. ⛔ P5 FALSIFIED — A STANDING RESEARCH INSTRUCTION IS WRONG AND IS NOW WITHDRAWN
+
+RESEARCH:7664 has said since 08-17: *"Re-run `w19a_transfer.py` after every send — 194 → 205
+pairs moved the 95% upper 1.72 → 1.50e-6."* The **"for free"** reading of that is what I
+pre-registered as P5, and re-running it today on **1259 pairs** the 95% profile upper went the
+**other way: 1.50 → 2.100e-6.**
+
+    tau_hat            0.000e-6      (unchanged — the POINT estimate did not move)
+    95% profile upper  2.100e-6      (was 1.50e-6)
+    tight pairs, LAW-IF sd < 5e-6    n=  71   tau_hat 0.000e-6
+    loose pairs, LAW-IF sd >= 5e-6   n=1188   tau_hat 4.004e-6
+
+The splits explain it: **the pairs that accumulated are the LOOSE ones**, which carry almost no
+information about tau; the tight pairs that identify it are still only 71 and still read 0.000.
+⚠⚠ **MORE DATA TIGHTENS A BOUND ONLY WHEN IT IS THE RIGHT DATA — a composite likelihood fed
+mostly uninformative pairs can WIDEN.** RESEARCH patched: the instruction stands, the "for free"
+promise is withdrawn, and the tau sweep must be read at **2.100**, not 1.72.
+✅ It does not change the decision: **+3.0704e-6 at 2.100 is still positive**, so P4 holds.
+
+## 4. 🎯 THE ZERO DRIFT IS THE RESULT, NOT AN ANTICLIMAX — AND IT RETIRES THE RE-PRICE
+
+Drift **exactly 0.0000e-6** across a twenty-file board change. That is **structural**: the
+estimator is evaluated over `NAMES = TIER1 | TIER2 | WANTED` **and nothing else**, so files
+landing below tier 2 cannot reach it, and the common CV→LB gap they would help pin down is a
+nuisance parameter that **cancels in a contrast between two pairs**.
+
+⟹ **The price depends on the live board ONLY through tier membership, so staleness is BINARY.**
+`experiments/w74b_clickstaleguard.py` settles it in **one API call** instead of seven minutes of
+OOF loading, and it is now in the standing sweep — which the pricer cannot be. It also checks
+`WANTED` and `beta`, the only other two inputs, neither board-derived.
+⚠ **THE LESSON: BEFORE RE-RUNNING AN EXPENSIVE MEASUREMENT TO SEE IF IT HAS GONE STALE, WORK OUT
+WHICH INPUTS IT ACTUALLY READS.** Three runs treated "the board moved" as "the price moved". The
+board moved twenty files and the price moved zero. The right artefact was a guard all along.
+
+✅ **BOTH CONTROLS, FROM THE START.** w74b **FAILS** on a planted third tier-1 file (2 complaints,
+including the DETERMINED test) **and PASSES on the artefact's own recorded-good state**. w72 §5.3
+paid for that second half after a guard fired on a sound chain; this is the first guard here
+written with both from the outset rather than retrofitted.
+
+## 5. ✅ `SELECT_THESE.md` — THE CLICK IS NOW ONE PAGE A HUMAN CAN ACT ON WITHOUT READING ANYTHING ELSE
+
+The click has been carried as 🔴🔴 "the largest item on the account" for **four runs** and every
+one of them recorded it inside a journal entry nobody outside this loop reads. It now has its own
+root-level file with the **submission refs**, the URL, the two files to click, the two that get
+auto-picked instead, the price, and the verification command.
+
+    SELECT  55656399  w36_ad199stdcorr.csv   CV 0.9701400060   public 0.97118
+            55588167  w23_ad187stdcorr.csv   CV 0.9701150809   public 0.97116
+    AUTO-PICKED IF NOBODY CLICKS
+            55714895  w36_ad199stdcorr_ens4  CV 0.9701365875   public 0.97119
+            55714897  w38_ad202stdcorr_ens4  CV 0.9701349001   public 0.97119
+
+⚠ **And the file says out loud that +4.5e-6 is SMALL** — a place or two at the current density,
+against a leader 490e-6 away. Escalating a number without its scale is how a run talks someone
+into believing the account is one click from a medal. It is not. The click is worth making
+because it costs a minute and removes a known failure mode.
+
+## 6. VERIFICATION STATE
+
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- **All 16 standing guards rc=0**, each via command substitution, never a pipe (RESEARCH §9.1).
+  **`w74b_clickstaleguard` joins them → 17.**
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED.**
+- ⛔ **`w62a_autopair.py` and `w62a_autopair.json` were NOT edited** — a registered artefact
+  against a board is a record, and w57a's precedent is to write a successor. `w74a` is that
+  successor. The only writes this run: `w74_prereg.txt` (committed **c2a3f00 before `w74a`
+  existed**), `w74a_clickprice.{py,json}`, `w74b_clickstaleguard.py`, `w19a_*` (its own outputs),
+  `SELECT_THESE.md`, and the notes. **No submission file, no registered plan, no pricer touched.**
+
+## 7. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expires **2026-08-25T00:40:26Z**, before the
+   ~12:40Z window. RESEARCH has the copy-paste. Then `w70d_chainguard`, then the **17** guards.
+2. **The 08-25 send chain is READY**, `w48e --day 2026-08-25` rc=0; 08-26/27/28 registered behind
+   it. Four commands; the dry run must match the registered ten file-for-file before `--go`.
+3. 🔴🔴 **THE SELECTION CLICK — read `SELECT_THESE.md`, it is now the whole briefing.** Check it
+   in one call: `w74b_clickstaleguard.py` rc=0 means the price still applies; **only re-run
+   `w74a_clickprice.py` if that guard exits 1.**
+4. ⛔ **DO NOT re-run the pricer as a routine staleness check** (§4) · **DO NOT re-base the
+   ranker** (w73 §2) · **DO NOT build files for 08-29..08-31** (w72 §2.1, priced at 0) · **DO NOT
+   apply the duplicate override** (w71 §4.1) · **DO NOT take stacker seed/fold averaging** (w73
+   §1) · **DO NOT take an OOF error-analysis angle in any framing** (§1).
+5. 🔴 Remaining open items, still two: **w63 §4's refined P5** and **w63 §5a's 16.5e-6 bracket
+   hole**. Neither was touched this run.
+6. ⚠ **NEW LESSONS.** Before re-running an expensive measurement to check for staleness, work out
+   **which inputs it actually reads** — the right artefact is often a guard, not a re-run (§4) ·
+   **more data tightens a bound only when it is the RIGHT data**; a composite likelihood fed
+   mostly uninformative pairs can widen (§3) · **a re-price must be pinned by a verbatim control
+   to the artefact it re-prices, not to that artefact's ancestor** (§2) · escalate a number
+   **with its scale attached**, or you talk someone into a medal that is not there (§5) · a guard
+   gets **both** controls written at the outset, not one retrofitted after it misfires (§4).

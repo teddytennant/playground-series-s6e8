@@ -163,6 +163,46 @@ and the above-tier sends on the literal condition *"once `check_selection` exits
 fourteen-guard `rc=` sweep is sound.
 
 
+# ✅ THE CLICK PRICE IS **+4.52e-6**, RE-VERIFIED ON THE 131-FILE BOARD, AND IT IS NOW GUARDED (w74, 2026-08-24)
+
+    .venv/bin/python experiments/w74b_clickstaleguard.py     # rc 0 = the price is live. ONE API call.
+    .venv/bin/python experiments/w74a_clickprice.py          # the pricer itself, ~7 min. Only on rc=1 above.
+
+**The cost of not clicking is `+4.5228e-6` at tau=0 and `+3.0704e-6` at the 95% upper tau of
+2.100.** Positive on both, so the click is worth making; **it is also NOT a large number** —
+about a place or two at the current board density, against a leader 490e-6 away. Say that to
+whoever is being asked to click, rather than only the headline.
+
+## 🎯 THE PRICE DEPENDS ON THE BOARD **ONLY THROUGH TIER MEMBERSHIP** — SO STALENESS IS BINARY
+
+w74a re-priced w62a's headline on a board grown **121 → 131** scored files and the drift is
+**EXACTLY 0.0000e-6**. That zero is structural, not luck: the estimator is evaluated over
+`NAMES = TIER1 | TIER2 | WANTED` **and nothing else**, so files landing below tier 2 cannot
+reach it, and the common CV→LB gap they would help pin down is a nuisance parameter that
+**cancels in a contrast between two pairs**. ⟹ The two-day-old worry that the number had gone
+stale (it went void on 08-22 and again on 08-23) has a **cheap binary answer**, and re-running
+a seven-minute pricer to learn it was never the right instrument. **`w74b_clickstaleguard.py`
+is, and it is in the standing sweep.** It also checks `WANTED` and `beta`, which are the only
+other inputs, and neither is board-derived.
+
+⚠ **THE GENERALISATION: before re-running an expensive measurement to check it has not gone
+stale, work out which inputs it actually reads.** Three runs treated "the board moved" as
+"the price moved". The board moved twenty files and the price moved zero.
+
+## BOTH CONTROLS, AND THE SECOND ONE IS THE NEW HABIT
+
+`w74b` is verified to **FAIL** on a planted third tier-1 file (2 complaints, including the
+DETERMINED test) **and to PASS on the artefact's own recorded-good state**. w72 §5.3 paid for
+that second half; this is the first guard written with it from the start.
+
+## THE VERBATIM-CONTROL CHAIN IS NOW TWO DEEP
+
+`w74a` carries **GATE V** (w62a's: reproduce `w57a_tierprice2.json` on w57a's board) **and a
+new GATE W** (reproduce `w62a_autopair.json` — cost, all five ladder rows, all three solo
+costs and all seven tau rows — on w62a's recorded 121-file board). **Both 0.000e+00.**
+⚠ GATE V alone passes for *anything descended from w57a*; a re-price must be pinned to the
+artefact it is re-pricing, not to that artefact's ancestor.
+
 # 🔴🔴 THE QUEUE RUNS DRY ON 2026-08-29 — AND THE EMPTY SLOTS ARE WORTH ZERO (w72, 2026-08-24)
 
 After the 08-24 send there are **34 sendable files** (unsent · stored OOF vector · not in
@@ -7662,6 +7702,13 @@ off-scalar residual of `M = S_t (S_t+S_p)^{-1}` is 1.06e-10 at tau = 0 and **0.2
 - Prefer ships that are **tight pairs in a populated family**: that is where `tau` is identified,
   and after §C `tau` is where the marginal value of a submission now lives. Re-run
   `w19a_transfer.py` after every send — 194 → 205 pairs moved the 95% upper 1.72 → 1.50e-6.
+  ⛔ **THE "FOR FREE" HALF OF THAT IS WITHDRAWN (w74, 2026-08-24).** Re-run today on **1259
+  pairs** the 95% profile upper went **1.50 → 2.100e-6**. `tau_hat` is still **0.000e-6**, so
+  the point estimate has not moved — the *bound* loosened as evidence accumulated, which the
+  splits explain: the pairs that grew are the LOOSE ones (`LAW-IF sd ≥ 5e-6`, n=1188,
+  `tau_hat` 4.004e-6) while the tight pairs that actually identify tau are still only n=71 and
+  still read 0.000. ⚠ **More data tightens a bound only when it is the RIGHT data; a composite
+  likelihood fed mostly uninformative pairs can widen.** Read the sweep at **2.100**, not 1.72.
 
 ---
 
