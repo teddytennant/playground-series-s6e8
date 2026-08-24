@@ -1,0 +1,80 @@
+w75 PRE-REGISTRATION — 2026-08-24, slot 4 of 10, ANGLE: consolidation
+Written BEFORE experiments/w75a_erarefresh.py exists. Committed before the script.
+
+================================================================================
+WHAT I HAVE ALREADY SEEN THIS RUN (disclosed, so no bar below can be laundered)
+================================================================================
+* All 17 standing guards rc=0; w70d_chainguard rc=0; check_selection rc=1 (nothing selected).
+* 131 submissions on the live board; 10 sent today 12:38-12:39Z, so the cap is spent.
+* A table of CV values PARSED OUT OF SUBMISSION DESCRIPTIONS for 120 of the 131, in which
+  w36_ad199stdcorr (0.9701400060) is the raw-CV argmax and w38_ad202stdcorr (0.9701375891)
+  is second. 11 sent files carry no CV in their description and were NOT in that table.
+* RESEARCH:2110's era-deflated check (argmax survives, margin +5.7e-6, quartered).
+* w46c_predlb's docstring: era term -29.82e-6, se 4.37e-6, ESTIMATED ON n=5 (2026-08-21).
+I have NOT recomputed any CV from a stored OOF vector this run, have NOT computed a residual
+against any predictor, and have NOT looked at any file sent after 08-21 in residual terms.
+
+================================================================================
+WHY THIS QUESTION AND NOT ANOTHER (decision-relevance, w73's rule)
+================================================================================
+The era term is the ONE input to the WANTED slot-1 argmax that is still estimated on five
+points. The era-deflated margin is +5.7e-6 = 21.7e-6 of raw CV lead minus era/slope. It goes
+to ZERO at era = -40.3e-6, which is 2.4 se from the n=5 estimate. Three send days have added
+~30 held-out ad>=195 files that nobody has folded in. If the refreshed term is materially
+larger, THE CV-PREFERRED FINAL ENTRY MOVES. That is the largest live item on the account.
+
+================================================================================
+GATES — if either fails, nothing below is readable and the run reports the failure
+================================================================================
+GATE A  (pinned to the artefact being EXTENDED, not to its ancestor -- w74's rule)
+        Reproduce w46c_predlb's own five ERA_ROWS from my pipeline:
+          - CV recomputed from submissions/oof_<stem>.npy matches the hardcoded CV, |d| < 1e-9
+          - predicted LB from w30b matches the docstring pred, |d| < 0.5e-6, all five
+          - mean residual  -29.82e-6 +/- 0.05 ; sd 9.76e-6 +/- 0.05
+GATE B  (independent second anchor) On the FROZEN w28a_cvlb_full.csv board with the FROZEN
+        w26e_famfix.json coefficients, reproduce w28a_cvlb_refresh.json:
+        mu, gate_resid_sd, oos_n, oos_mean, oos_sd, best_sent_cv to |rel| < 1e-6;
+        best_sent_stem exactly.
+
+================================================================================
+PREDICTIONS
+================================================================================
+P1  ERA TERM, REFRESHED ON THE FULL HELD-OUT SAMPLE.
+    Population: every sent stem with a stored OOF and cv >= 0.97 and wave >= 195, first sent
+    AFTER the last date in w30b's fit board, EXCLUDING the five ERA_ROWS.
+    Statistic: mean residual against the era-UNAWARE w30b prediction.
+    BAR: |mean - (-29.82)| <= 8.74e-6  (2 x the n=5 se of 4.37).
+    FIRES otherwise -> the term must be re-estimated and every downstream figure re-read.
+    I will report the count, and I will state that these residuals are NOT independent
+    (one fixed public slice, heavily shared member sets) so the honest n is far below it.
+
+P2  DOES THE REFRESHED TERM MOVE WANTED SLOT 1?
+    Deflate cv by era_new/slope for wave >= 195 only; leave wave <= 194 and wave-less alone.
+    BAR: argmax over ALL sent stems with an OOF is still w36_ad199stdcorr.
+    FIRES -> SELECT_THESE.md and check_selection.WANTED are publishing the wrong slot 1.
+    A fire is PUBLISHED LOUDLY this run; WANTED is NOT edited without its own registered
+    successor argument, because a pick is a registered decision and this is a measurement.
+
+P3  THE MARGIN, AND WHERE IT DIES.
+    BAR: era-deflated margin of slot 1 over its nearest challenger is > 0.
+    Also report the era value at which the margin crosses zero and how many se of the
+    REFRESHED estimate that is. No bar on that second number; it is context.
+
+P4  COMPLETENESS -- THE HOLE THIS ANGLE EXISTS TO CLOSE.
+    (a) raw-CV argmax over ALL sent stems, CV RECOMPUTED FROM OOF and never parsed from a
+        description, == w36_ad199stdcorr.
+    (b) every sent stem with NO stored OOF has public LB <= 0.97110, i.e. cannot be a
+        contender for a pick decided on CV.
+    FIRES if either fails.
+
+P5  DETERMINISM. Zero stems sent more than once with DIFFERING public scores.
+    (Scores are deterministic here; any nonzero count is a defect in the board or the join.)
+
+================================================================================
+WHAT THIS RUN WILL NOT DO
+================================================================================
+* No submission -- the cap of 10 is spent. Not attempted.
+* No edit to WANTED, check_selection.py, SELECT_THESE.md's picks, any registered send plan,
+  any submission csv, w46c_predlb.py, w25a_cvlb_full.csv or w28a_*.  w75a WRITES ONLY
+  w75a_erarefresh.{json,csv}.
+* No re-run of w74a_clickprice.py (w74 section 4: staleness is binary and w74b answers it).
