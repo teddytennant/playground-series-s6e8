@@ -309,6 +309,18 @@ WORKSPACE RANKS ON `SHIPPED`**: `w23b_sendqueue`, `w26d_queueprice`, `w53a.FIT_C
 send plan, and every ladder in the journal. `w21a` has stored `scheme_optimism` on every build
 since w21 and **nobody had read it across files until `w70a_optimism.py`.**
 
+⚠ **w73 CORRECTS THIS SENTENCE:** the two bases do **not** differ by `scheme_optimism` alone.
+Median residual is +0.126e-6, but it SPANS 1.194e-6 (−0.590 .. +0.604), and all **6 files whose
+optimism is exactly 0.000 still have HONEST > SHIPPED** by 0.06–0.60e-6. A second, unnamed term
+exists. It is sub-bar and changes no decision (see w73's closure below), but do not quote the
+identity as exact.
+
+⛔⛔ **AND `opt` IS STORED IN RAW AUC UNITS WHILE `opt_max`/`opt_mean` ARE IN e-6.** Reading the
+column without dividing by 1e-6 prints **0.000 on all 20 rows** — which reads exactly like
+"optimism is zero everywhere" and silently vacates any test built on it. w73 hit this and caught
+it only because the summary said 3.523 while every row said 0.000. `w73a_cvbasis.py` GATE 1
+asserts the two agree so it cannot recur.
+
 **Measured over all 20 corrected files on disk** (`experiments/w70a_optimism.json`):
 **min 0.000 · max 3.523e-6 · mean 1.771e-6 · zero on 6, non-zero on 14 (those mean 2.529e-6).**
 
@@ -12107,3 +12119,64 @@ healthy background job as starved on exactly this.)
   one-sided, so real data can only widen it. Always print the misfit that demotes the verdict.
 - **`w53a.RESID_SD` (7.7200) is ALREADY in e-6.** `w52b_cvlb93.csv` stores `lb6`/`cv6`
   pre-scaled (`lb6 = 971040.0`). Multiplying by 1e6 is a live trap; `w67a` now asserts the units.
+
+
+# ✅ CLOSED — THE RANKER'S CV BASIS IS DECISION-IRRELEVANT (w73, 2026-08-24)
+
+Open since w70 §3c and **untouched for ten runs**. Settled against bars fixed in
+`experiments/w73_prereg.txt` BEFORE the 20-file table was re-read. Reproduce any time with
+
+    .venv/bin/python experiments/w73a_cvbasis.py        # rc=0 iff FAILURES 0
+
+**A BASIS IS WORTH ONLY WHAT IT CHANGES.** It feeds exactly three actions, and it moves none:
+
+| test | question | measured | bar | verdict |
+|---|---|---|---|---|
+| P1 | is `SHIPPED − HONEST == scheme_optimism`? | median resid +0.126e-6 | 0.25e-6 | no |
+| P2 | does the basis change **WANTED**? | slot 1 rank **1/14 on BOTH**; slot 2 **11/14 on both** | any reorder > 5.095e-6 | **no** |
+| P3 | does it move `FIT_CV_MAX`? | +0.575e-6 | 2.0e-6 | no |
+
+🎯 **P2 IS THE ONE THAT MATTERS — IT IS THE ROGII LEVER.** Over the **14 corrected files that are
+actually SENT** (a final entry must be a submitted entry), `w36_ad199stdcorr` is **argmax on both
+bases**. The only reorder anywhere in the eligible set is the single adjacent swap
+`w38_ad202stdcorr` ↔ `w40_ad211stdcorr`, **1.904e-6 apart on HONEST against w68's 5.095e-6
+between-file floor — inside it, indistinguishable.**
+
+⛔ **DO NOT RE-BASE `w53a`/`w23b`/`w26d`.** The term is smaller than the noise floor of the
+comparison it would feed. And on action (a), the send order: of the 6 unsent corrected files
+**4 are VETOed**, leaving `w69_ad208stdcorr` (which the sender refuses anyway on above_tier +
+hijack) and `w29_ad194stdcorr_rankraw`. **At most ONE file in the whole sendable pool re-orders,
+by 1.53e-6, into slots w72 priced at exactly 0.00e+00.**
+
+## ⚠ THE PREREG HAD A SCOPE FLAW, AND HERE IS WHY IT DID NOT LAUNDER THE RESULT
+
+P2 was written over "all 20 corrected files". As literally written **it would have FIRED** —
+`w42_ad217stdcorr` tops the honest ladder by 37e-6. But it is **unsent and VETOed and can never
+be a final entry**, so the population governing WANTED is the 14 sent ones. ⛔ **Restricting a
+population after seeing the data is exactly how a pre-registration gets laundered**, so it is
+settled the only way that is not a judgement call — `w73a` **GATE 4**:
+
+    argmax(SHIPPED) == argmax(HONEST) == w42_ad217stdcorr    on the UNRESTRICTED population too
+
+**The basis moves NEITHER argmax.** `ad199` is displaced by **ELIGIBILITY, not by basis**, so the
+restriction is **not load-bearing** and P2 fails to fire on **both** populations. ⚠ The flaw was
+in the *operationalisation*, not the estimand — the estimand ("does it change WANTED?") was
+pre-registered correctly, and a final entry being a submitted entry is a Kaggle rule, not a call.
+🎯 **THE GENERAL LESSON: when you must narrow a population mid-analysis, do not argue that the
+narrowing is fair — find the test that makes the narrowing IRRELEVANT.**
+
+✅ Both `w73a` gates verified in **both** directions per w72 §5.3 (fails-when-broken AND
+passes-when-sound): planted `opt_max=99` → GATE 1 rc=1; planted honest-argmax flip → GATE 4 rc=1;
+restored → rc=0 and `w70a_optimism.json` **md5 unchanged** (`2475d594…`).
+⚠ `w73a` is **not** added to the standing guard sweep — it hits the live API, and it settles a
+question rather than protecting an invariant. Run it if you reopen the basis; otherwise cite it.
+
+
+# ⛔ THE LEADER GAP IS **490e-6**, NOT 49e-6 — w72 §7 IS OFF BY A FACTOR OF TEN (w73)
+
+JOURNAL:24694 records *"Leader Chris Deotte 0.97168 … a 49e-6 gap."* **0.97168 − 0.97119 =
+0.00049 = 490e-6.** Confirmed by arithmetic and against `w26d`, whose own units are right (it
+prints the best unsent file at 0.97130 = "+114.6e-6 vs the account best"; 0.97130 − 0.97119 =
+110e-6 ✓). ⚠ **This matters because 49e-6 is inside the range a good build could plausibly add
+and 490e-6 is not** — the entire remaining queue tops out ~110e-6 above us. A future run must not
+read the leader as reachable. Board this run: **rank 92, score 0.97119**, unchanged from w72.

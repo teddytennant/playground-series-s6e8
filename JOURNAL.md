@@ -24737,3 +24737,136 @@ justification behind it.
 
 ✅ **FINAL STATE THIS RUN:** chainguard rc=0 · all **16** guards rc=0 (w72b joins the sweep) ·
 `w48e --day` rc=0 for 08-25/26/27/28, rc=2 for 08-29 · 10/10 slots used, 0 remaining.
+
+---
+
+# w73 — 2026-08-24 (slot 2 of 10, ANGLE: seed/fold diversity) — **NO SUBMISSION: AT CAP**
+
+**The API reports 10 submissions today and I confirmed it** — all ten went out at 12:38–12:39Z
+under w72, the same run that registered them. The cap is 10 and it is spent. ⛔ **No submission
+was attempted and none should have been.** This run is research and verification, which is what
+the playbook prescribes at cap. Token NOT refreshed: it expires 2026-08-25T00:40:26Z and a
+refresh yields ~12h, so refreshing at 13:00Z would expire ~01:00Z, still before tomorrow's
+~12:40Z window. **It buys nothing today. Tomorrow's run must refresh as its first action.**
+
+## 1. THE ANGLE IS A STRUCTURAL NULL AND IS PERMANENTLY CLOSED — DECLINED ON THE RECORD
+
+ANGLE: *"same models across multiple seeds and fold splits, averaged."* ⛔ **RESEARCH:2824 closes
+exactly this and says "do not re-open it."** Averaging the stack over stacker fold seeds is not a
+weak idea, it is **worse than useless in both directions**: `blend_lab.build()` takes the test
+prediction from a full fit on all 691,369 rows, so `h3`/`ens4` fit zero parameters above the
+stacks and have **ZERO dependence on the stacker partition** — the test side cannot move — while
+the CV side gains **~+10e-6 of pure optimism**, because under any non-42 partition a validation
+row's member prediction comes from a model trained mostly on the stacker's training half. Seed 42
+is not an unlucky draw; it sits **−6.9 sd** below the off-seed mean and is the minimum on 6/6
+metrics, i.e. **drawn from a different distribution — it is the only clean partition.**
+⟹ Taking the angle would have moved no file and inflated every CV. Declined.
+⚠ Note the distinction the angle blurs: **seed-averaging a MEMBER is worth ~+138e-6**
+(RESEARCH:2739/9052) and is already done; seed-averaging the **STACKER** is the null. Same words,
+opposite verdicts, different level of the hierarchy.
+
+## 2. 🎯 THE HEADLINE: THE RANKER'S CV BASIS IS **CLOSED** AFTER TEN RUNS OPEN
+
+w70 §3c found that every corrected file has two stored, defensible CVs — `SHIPPED` (what
+everything ranks on) and `HONEST` (arm choice cross-fitted) — and correctly declined to decide,
+since the run that computes a number should not also take the decision it feeds. It has been
+carried as 🔴 in "NEXT RUN" **ten times** without being taken. I took it, and it resolves cleanly.
+
+Bars were written to `experiments/w73_prereg.txt` **before** the 20-file table was re-read, with
+what I had already seen disclosed in the file. `experiments/w73a_cvbasis.py`, FAILURES 0:
+
+    P1  is SHIPPED-HONEST == scheme_optimism?   median resid +0.126e-6  vs 0.25  -> no
+    P2  does the basis change WANTED?           slot1 1/14 BOTH bases   vs 5.095 -> NO
+    P3  does it move FIT_CV_MAX?                +0.575e-6               vs 2.0   -> no
+
+**P2 is the one that could have cost a medal.** Over the **14 corrected files that are actually
+SENT** — a final entry must be a submitted entry — `w36_ad199stdcorr` is **argmax on both bases**,
+and `w23_ad187stdcorr` is 11/14 on both. The only reorder in the eligible set is one adjacent
+swap (`ad202` ↔ `ad211`), **1.904e-6 apart on HONEST against w68's 5.095e-6 floor — inside it.**
+
+⛔ **DO NOT RE-BASE `w53a`/`w23b`/`w26d`.** The term is smaller than the noise floor of the
+comparison it feeds. On the send order: 6 unsent corrected files, **4 VETOed**; of the remaining
+two the sender already refuses `w69_ad208stdcorr` on above_tier + hijack. **At most ONE file in
+the entire sendable pool re-orders, by 1.53e-6, into slots w72 priced at exactly 0.00e+00.**
+
+## 3. ⚠⚠ TWO THINGS I GOT WRONG, BOTH WORTH MORE THAN THE RESULT
+
+### 3.1 THE `opt` COLUMN IS IN RAW AUC UNITS AND MY FIRST TABLE READ 0.000 ON ALL TWENTY ROWS
+
+My first pass printed `opt` with `{:7.3f}` and got **0.000 for every file** — while the summary in
+the same JSON said `opt_max 3.523`. `opt` is stored in **raw AUC units**; `opt_max`/`opt_mean` are
+in **e-6**. ⛔ **A UNIT SLIP THAT ROUNDS TO ZERO READS AS A SUBSTANTIVE FINDING** — "optimism is
+zero everywhere" — and it silently vacates every test built on the column. I published a P1
+"residual" off it (median −1.742e-6) that was pure artefact before catching it. **The only reason
+I caught it: the summary and the rows disagreed, and I had both on screen.** `w73a` GATE 1 now
+asserts `max(rows.opt)/1e-6 == opt_max`, verified to fail on a planted `opt_max=99`.
+⚠ This is the same family as w72 §5.2's one-valued boolean column: **a column read on the wrong
+convention fails silently and in the shape of an answer.**
+
+### 3.2 MY PRE-REGISTRATION WAS SCOPED TO THE WRONG POPULATION, AND WOULD HAVE FIRED
+
+P2 as written ranged over "all 20 corrected files". On that population it **FIRES** —
+`w42_ad217stdcorr` tops the honest ladder by 37e-6. But it is unsent and VETOed and **can never
+be a final entry**, so the population that governs WANTED is the 14 sent ones. ⛔ **Narrowing a
+population after seeing the data is exactly how a pre-registration gets laundered, and "but my
+narrowing is fair" is what everyone who launders one says.** So I did not argue it. GATE 4
+settles it in a way that needs no judgement:
+
+    argmax(SHIPPED) == argmax(HONEST) == w42_ad217stdcorr    on the UNRESTRICTED population too
+
+**The basis moves neither argmax.** `ad199` is displaced by **ELIGIBILITY, not by basis** — so the
+restriction is **not load-bearing** and P2 fails to fire on **both** populations. The flaw was in
+the operationalisation, not the estimand.
+🎯 **THE LESSON THAT GENERALISES: when you must narrow a population mid-analysis, don't argue the
+narrowing is fair — find the test that makes the narrowing IRRELEVANT.** If no such test exists,
+the prereg is broken and you say so instead of proceeding.
+
+## 4. ⛔ THE LEADER IS **490e-6** AHEAD, NOT 49e-6 — CORRECTING w72 §7
+
+w72 §7 wrote *"Leader Chris Deotte 0.97168 … a 49e-6 gap."* **0.97168 − 0.97119 = 0.00049 =
+490e-6.** Off by a factor of ten. Cross-checked against `w26d`, whose units are right (best unsent
+file 0.97130 = "+114.6e-6 vs the account best"; 0.97130 − 0.97119 = 110e-6 ✓). ⚠ **This is not
+pedantry: 49e-6 is inside what a good build could plausibly add, 490e-6 is not, and our entire
+remaining queue tops out ~110e-6 above us.** A future run must not read the leader as reachable.
+Board unchanged: **rank 92, score 0.97119**, leader 0.97168. (Pagination cut at 800 rows on a
+loop cap, so I make no claim about the team total; w72 measured 2,774. ⚠ Our board name is
+`Teddy Tennant`, not `thtennant` — RESEARCH §"4.")
+
+## 5. VERIFICATION STATE — EVERYTHING GREEN, NOTHING SHIPPED
+
+- `w70d_chainguard` **rc=0** (8 of 8 modules import; every import-time assert ran).
+- **All 17 standing guards rc=0** — the sixteen in RESEARCH's list plus `w72b_dayguard`.
+  Each invoked via command substitution, never through a pipe (RESEARCH §9.1).
+- `w48e_order --day 2026-08-25` **rc=0** — the ten are registered and verify end-to-end.
+  08-26/27/28 also registered; `w72a --audit` reproduces w72's shortfall exactly:
+  **4 sendable files, 3 unregistered days, SHORTFALL +26, dry from 08-29.**
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED.**
+- ⛔ **NOTHING WAS EDITED.** No submission file, no registered plan, no pricer. `w73a` is
+  descriptive; the only writes this run are `w73_prereg.txt`, `w73a_cvbasis.py`, and the notes.
+  `w70a_optimism.json` is byte-identical after the planted-control tests (md5 `2475d594…`).
+
+## 6. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expires **2026-08-25T00:40:26Z**, before the
+   ~12:40Z window. Then `w70d_chainguard`, then the 17 guards.
+2. **The 08-25 send chain is READY and rc=0.** Four commands; the dry run must match the
+   registered ten file-for-file before `--go`. 08-26/27/28 are registered behind it.
+3. 🔴🔴 **THE SELECTION CLICK — still the largest item on the account, and now the ONLY one.**
+   `check_selection` rc=1: nothing is selected, so **Kaggle will auto-pick final entries on
+   PUBLIC score, which is the Rogii failure by default.** It also returns ~2 days of supply
+   (w72 §2.2). **Needs Teddy in a browser before 2026-08-31; it cannot be done from the API.**
+   ⚠ w73 has now removed the one analytical doubt about *what* to select: `w36_ad199stdcorr` is
+   argmax on **both** CV bases, so the CV-preferred slot 1 is not basis-dependent.
+4. ⛔ **DO NOT re-base the ranker** (§2) · **DO NOT build files for 08-29..08-31** (w72 §2.1,
+   those slots price at 0) · **DO NOT apply the duplicate override** (w71 §4.1) · **DO NOT take
+   the stacker seed/fold-averaging angle** (§1, structural null).
+5. 🔴 Remaining open items, now just two: **w63 §4's refined P5** and **w63 §5a's 16.5e-6 bracket
+   hole**. ✅ The ranker's CV basis is **CLOSED** and should not appear in this list again.
+6. ⚠ **NEW LESSONS.** A unit slip that rounds to zero reads as a substantive finding and vacates
+   every test built on the column — **cross-check a column against its own summary** (§3.1) ·
+   **when you must narrow a population mid-analysis, find the test that makes the narrowing
+   irrelevant rather than arguing it is fair** (§3.2) · **a basis/parameter question is worth
+   only what it CHANGES — enumerate the actions it feeds before measuring it** (§2) · check the
+   arithmetic on a headline gap, a 10× unit error survives a run and reframes what looks
+   reachable (§4) · the same words at different levels of a hierarchy can have opposite verdicts
+   (§1: seed-averaging a member +138e-6, seed-averaging the stacker a structural null).

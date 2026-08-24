@@ -1,0 +1,61 @@
+w73 PRE-REGISTRATION — THE RANKER'S CV BASIS
+written 2026-08-24 ~13:05Z, BEFORE opening w70a_optimism.json's 20-file table.
+Open item since w70 §3c; untouched for ten runs. w70's own instruction: fix a bar FIRST.
+
+WHAT I HAVE ALREADY SEEN (disclosed, so the prereg is not fitted to unseen data):
+  - RESEARCH:312 summary stats: optimism min 0.000, max 3.523e-6, mean 1.771e-6,
+    zero on 6 of 20, non-zero on 14 (those mean 2.529e-6).
+  - The FOUR-ARM ladder (199/208/202/211), shipped + honest + optimism, RESEARCH:322-327.
+  - check_selection.py:247 WANTED = {w36_ad199stdcorr, w23_ad187stdcorr}, and the comment
+    above it records ad199's optimism as +0.000e-6 with 5/5 nested stability.
+NOT SEEN: the per-file table for the other 16 corrected files; w23_ad187stdcorr's optimism.
+
+--------------------------------------------------------------------------------------
+THE ESTIMAND. Everything in this workspace ranks files on
+    SHIPPED = fast_auc(y, submissions/oof_<name>.npy)
+and there exists a second stored, defensible basis
+    HONEST  = w21a base_auc + nested_delta.
+The basis feeds exactly three ACTIONS. The basis question is worth only what it changes:
+  (a) send-queue ORDER  (w23b/w26d)  -- now decision-bearing, because w72 measured a
+      26-slot shortfall: the bottom of the order never goes out at all.
+  (b) FIT_CV_MAX        (w53a:111)   -- the pricer's clamp + the eligibility tier.
+  (c) WANTED            (check_selection:247) -- THE FINAL DEADLINE SELECTION. This is the
+      Rogii lever and it is the only one of the three that can cost a medal.
+
+--------------------------------------------------------------------------------------
+P1  IS THE STATED IDENTITY TRUE?  RESEARCH:308 asserts "They differ by scheme_optimism",
+    i.e. SHIPPED - HONEST == optimism. On the four arms I can already see it is FALSE on
+    all four (199 -0.575 vs 0.000; 208 +1.667 vs 1.876; 202 +1.491 vs 1.707; 211 -0.529
+    vs 0.000). PRE-REGISTERED BAR: if |median residual| over all 20 files exceeds 0.25e-6,
+    the identity in RESEARCH is WRONG AS WRITTEN and must be corrected there, and a third
+    unnamed term exists. If under 0.25e-6, the four arms are a small-sample artefact.
+    -> This is a claim about the NOTES, not about a file. It cannot change a submission.
+
+P2  DOES THE BASIS CHANGE WANTED?  (the only question that can cost a medal)
+    BAR, fixed now:
+      - Compute HONEST for all 20 corrected files. Let A = w36_ad199stdcorr.
+      - IF A is argmax(HONEST): the basis is DECISION-IRRELEVANT for slot 1. Change nothing.
+      - IF some file B has HONEST > HONEST(A):
+          * by LESS than w68's between-file floor 5.095e-6 -> INSIDE THE FLOOR.
+            Indistinguishable. KEEP A (it also leads on SHIPPED, so it leads on both
+            bases up to noise). Record, do not act.
+          * by MORE than 5.095e-6 -> WANTED slot 1 MUST BE RE-DERIVED. Act.
+      - Same test for slot 2 against w23_ad187stdcorr.
+    ASYMMETRY NOTED IN ADVANCE: optimism >= 0 on all 20, and UNCORRECTED files have no arm
+    choice, so their SHIPPED *is* their HONEST. A basis switch can therefore only move
+    corrected files DOWN relative to uncorrected ones, never up. If P1's residual is real
+    this asymmetry may not hold exactly -- I will re-check it rather than assume it.
+
+P3  DOES THE BASIS CHANGE FIT_CV_MAX?  BAR: a shift of more than 2.0e-6 (the bar w65's R1
+    decides on) is a real perturbation to the clamp and must be recorded in RESEARCH; under
+    2.0e-6 it is cosmetic and the frozen pricer stays frozen.
+
+--------------------------------------------------------------------------------------
+STOP RULES, fixed now so this cannot become a fishing trip:
+  * NO CHANGE IS MADE TO ANY SHIPPED OR REGISTERED FILE THIS RUN. The 08-25/26/27/28 tens
+    are md5-pinned and today's ten are already sent. This is an analysis, not an edit.
+  * NO CHANGE to w53a/w23b/w26d unless P2 fires at >5.095e-6. Re-basing a frozen pricer
+    seven days out, to chase a term smaller than its own noise floor, is the failure mode
+    this workspace has documented most often.
+  * If P2 does not fire, the correct outcome is to CLOSE the item as decision-irrelevant
+    and say so, not to keep it open an eleventh run.
