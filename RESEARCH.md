@@ -36,6 +36,52 @@ w38c's rule — *a declaration is not a measurement* — therefore binds and can
 ⚠ **Any screen of ext_members17 is powered to KILL, not to adopt.** Its best outcome is
 "worth the full vetting a later run owes". Written into `w80_prereg.txt` before the read.
 
+
+## 🔴 THE SCREEN RAN — IT SURVIVES AT **+10.14e-6**, AND IT IS **NOT ADOPTED**
+
+    .venv/bin/python experiments/w80a_weakscreen.py            # REGISTERED arm, rc=1 (P1 falsified)
+    .venv/bin/python experiments/w80a_weakscreen.py --posthoc  # POST-HOC arm, ~40 min
+
+| | xfit 1-col | + all 50 | G50 |
+|---|---|---|---|
+| BASE_A `w36_ad199stdcorr` (CV argmax) | 0.9701378462 | **0.9701479836** | **+10.14e-6** |
+| BASE_B `w40_ad211std_h3` (w56a's base) | 0.9701311176 | 0.9701414799 | +10.36e-6 |
+| NULL — 50 columns row-permuted, seed 20260824 | 0.9701378462 | 0.9701215478 | **−16.30e-6** |
+
+Best single column `m36` **+19.13e-6** (hboyang_mix, for scale, was +89.32e-6). The two
+weakest columns are NEGATIVE: `m01` −14.44e-6, `m04` −10.93e-6.
+
+⚠ **`w80a_weakscreen.json` (the REGISTERED file) says `REFUSE -- malformed (P1)` and that
+verdict stands.** P1 required every value in [0,1] and `test.npy` maxes at
+`1.0000000149011612` — over by **1.5e-8**. The falsified clause does not bind the
+measurement (P2..P5 read `oof.npy` only), so the rest was run as an explicitly labelled
+POST-HOC arm into a SEPARATE file, `w80a_posthoc.json`, carrying `"REGISTERED": false`.
+⛔ **Nothing in `w80a_posthoc.json` may be quoted as a registered finding.**
+
+## 🔴 50 USELESS COLUMNS ARE NOT FREE — THEY COST 16.30e-6. READ G50 THROUGH THAT.
+The null control was registered expecting `G50_null ≈ 0`. It came back **−16.30e-6**: a
+51-dim logistic fitted on 691,369 rows still pays a real price for 50 columns of pure noise.
+The prediction confirmed only because it was registered one-sided (`< +1e-6`).
+⇒ The pack's +10.14e-6 is the NET after that column-count tax; against the noise floor the
+   50 columns carry about **+26.4e-6** of signal.
+⛔ **DO NOT quote the script's printed "signal-to-null ratio 0.6x".** A ratio to a negative
+   denominator is uninterpretable and the line is a defect in the output, not a result.
+
+## ⛔⛔ P2 TESTS ROW ALIGNMENT AND **NOTHING ABOUT THE PARTITION** — do not misread it
+P2 reproduced all 50 solo AUCs to 4.9e-7. `roc_auc_score(y, oof[:, j])` over the full train
+set is **invariant to which partition produced the OOF**, so P2 carries zero information
+about the fold scheme. The README's `StratifiedKFold(5, shuffle=True, random_state=42)` is
+still only a declaration, and w38c's rule still binds.
+
+## ✅ THE SUCCESSOR'S TASK IS REGISTERED: `experiments/w80_prereg2.txt` (commit 1b79995)
+A FOLD-SIGNATURE test that substitutes for the unrunnable gate 4. An OOF column built under
+partition P has per-fold calibration bias, so `S(c,F) = sum_k n_k * (mean z over f_k)^2` is
+large under P and chi2(4)-ish under any other partition. Both partitions are stratified on y,
+so the y-mix cannot produce the signal. Controls carry it: 20 of OUR own stems under OUR
+folds (KNOWN MATCHED) vs the same 20 under `random_state=1234` (KNOWN MISMATCHED); if those
+two do not separate at AUC >= 0.90 the test is VOID. ⚠ The prereg says in its own text that
+it was written AFTER a favourable number, which is exactly why the thresholds are in a commit.
+
 ---
 
 # 🎯 THE HIJACK BAR IS ADOPTED AT **0.9701349052** — THE HOLE IS FILLED, THE SENDER IS REPOINTED

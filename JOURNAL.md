@@ -25995,3 +25995,221 @@ way. No model refit, no queue/plan/ORDERS edit, no `w62a` re-run, no submission.
 'https://github.com'`. No `gh`, no ssh key, no token in the environment. Local `main` is ahead of
 `origin/main`; a later run can diff the two refs itself. Nothing is lost — the workspace is the
 memory and it is committed — but the remote does not have this run.
+
+---
+
+# w80 — 2026-08-24, slot 9 of 10 (**ZERO slots available**). 🔎 A NEW EXTERNAL PACK, SCREENED
+
+**NO SUBMISSION, AND NOT A JUDGEMENT CALL: the API reports 10 sends today** (55742979..55743003,
+12:38:52–12:39:22Z, all COMPLETE, 0.97113–0.97117). The cap is 10. The brief's "an unused slot is
+pure waste" does not reach a slot that does not exist. This is the third consecutive zero-slot run.
+
+⛔ **THE ANGLE WAS SET ASIDE, DELIBERATELY.** This run's ANGLE was "XGBoost: third leg of the
+ensemble, tuned on the same folds so the blend weights mean something." w69, w70 §0, w71 §5,
+w78 §11.5 and w79 §8.4 all bar a LightGBM/CatBoost/XGBoost tuning angle **on measurement, not on
+preference**: the GBDT line was measured out and a third tuned booster is not where the remaining
+edge is. The journal is required to give a concrete reason for setting an angle aside; that is it,
+and it is the same reason w79 gave for setting aside its CatBoost angle. The reason is recorded in
+`w80_prereg.txt` too, so it travels with the artefact and not only with this entry.
+
+## 0. WHAT THIS RUN DID
+
+w79 §8.3 closed the oldest open item and said the only thing left on the account was the selection
+click. That is still true and still un-clickable (§4). So this run took the standing step-2
+obligation the playbook makes every run — *check what is public, the field moves daily* — and it
+turned out to be the right call, because the field moved in a way the journal's standing note did
+not cover.
+
+## 1. THE TOP PUBLIC NOTEBOOK IS 0.97127 AND IS STILL NOT A METHOD — numbers refreshed, conclusion held
+
+`atakanaldemir/s6e8-regime-calibrated-rank-fusion-lb-0-97127`, run today 09:53Z, pulled to
+`notebooks/w80_atakan_97127` and read in full. It is twenty lines of blending:
+
+    final = rank(0.725001 * rank(hboyang_205_member_fusion) + 0.274999 * rank(v13_anchor))
+
+No model, no fold, no CV. Both legs are pre-made CSVs globbed out of `/kaggle/input`. The `1e-6`
+on the weight exists only to break rank ties, and the author says so.
+
+✅ **w70's conclusion survives on its merits; only its NUMBERS were stale** — for the second time.
+Best public **0.97123 → 0.97127**; hboyang's fusion **150 members → 205**. Still unusable here:
+submission-only → no cross-fitted CV → `fam=member` → the sender blocks it. ⛔ Do not chase it.
+
+## 2. THE ONE NEW THING IN IT — and it is new in a way nothing since w56 has been
+
+The 0.97127 blend credits its diversity leg to `szymonkapiski/s6e8-50-weakest-oof-models`,
+**created 2026-08-21 — after this workspace's last external sweep (w56)**. It differs from every
+prior import on the axis that decides whether it is even testable here:
+
+- it ships **OOF + test**, not submission-only ⇒ **not** auto-refused on `fam=member`;
+- its README declares `StratifiedKFold(5, shuffle=True, random_state=42)` on `train.csv` in
+  original row order — our frozen partition;
+- its 50 columns are **deliberately weak**, solo OOF AUC 0.916917..0.956758, far under our ~0.9688
+  pool. Every prior external import this workspace vetted was a strong-model pack. **The
+  weak-diversity hypothesis had never been tested here**, and its author is board rank 9 at 0.97130.
+
+Downloaded to `data/ext_members17` (oof.npy 276MB, test.npy 118MB, members.csv, README.md).
+
+## 3. ⛔ THE SCREEN WAS REGISTERED AS UNABLE TO ADOPT, BEFORE ANY NUMBER WAS READ
+
+`experiments/w80_prereg.txt`, commit **88fbaf1**, written before `w80a_weakscreen.py` existed.
+w38c's gate 4 — recompute per-fold AUC under OUR folds, compare against the author's printed
+per-fold numbers — is **unrunnable on this pack**: the author publishes solo *overall* AUC per
+column and nothing per fold, and withholds the recipes while the competition runs. w38c's own rule,
+*a declaration is not a measurement*, therefore binds and cannot be discharged. So the prereg
+states in advance:
+
+> **THIS SCREEN IS POWERED TO KILL, NOT TO ADOPT.** No branch of it adopts anything. The best
+> available outcome is "survives screening, worth the full vetting a later run would have to do."
+
+It also registers, before the read, that **a LARGE gain is the BAD branch** — fifty 0.95-ish
+columns cannot honestly buy a lot on top of a 0.97014 base, so `G50 > +200e-6 ⇒ REFUSE,
+CONTAMINATION SUSPECTED`. That is w51's lesson (a suspiciously large gain convicts) written down
+in advance instead of after the fact. `w80a` **reads all seven thresholds out of the prereg text
+with regexes** and asserts on each — a threshold is never re-typed, and editing the prereg moves
+the constants rather than letting them drift.
+
+## 4. 🔴 P1 WAS FALSIFIED ON 1.5e-8, AND THE REGISTERED VERDICT WAS LEFT WHERE IT FELL
+
+P1 required every value in [0,1]. `test.npy` maxes at **1.0000000149011612** — over by 1.5e-8.
+`w80a_weakscreen.json` therefore records `REFUSE -- malformed (P1)` and **that verdict is not
+amended**. The clause does not bind the measurement: P2..P5 read `oof.npy` only and never touch
+`test.npy`, and AUC cannot see a 1.5e-8 shift in any case. But deciding that *after seeing the
+number* is exactly what a prereg exists to stop, so the rest ran as an explicitly-labelled
+**POST-HOC arm** behind a `--posthoc` flag, into a separate file carrying `"REGISTERED": false`,
+under a banner that says so. ⛔ Nothing in `w80a_posthoc.json` may be quoted as a registered
+finding. It licenses no adoption — and could not have, per §3, either way.
+
+## 5. THE POST-HOC NUMBERS
+
+| | xfit 1-col | + all 50 | G50 |
+|---|---|---|---|
+| BASE_A `w36_ad199stdcorr` (CV argmax) | 0.9701378462 | **0.9701479836** | **+10.14e-6** |
+| BASE_B `w40_ad211std_h3` (w56a's base) | 0.9701311176 | 0.9701414799 | +10.36e-6 |
+| **NULL** — 50 columns row-permuted, seed 20260824 | 0.9701378462 | 0.9701215478 | **−16.30e-6** |
+
+P2 ✅ all 50 solo AUCs reproduce to **4.9e-7**. P3 ✅ best single column `m36` **+19.13e-6**
+(bound +20e-6; hboyang_mix was +89.32e-6); the two weakest columns are negative, `m01` −14.44e-6.
+P4 ✅ **+10.14e-6**, an order of magnitude under the +200e-6 contamination cut and under the
++50e-6 point prediction. P5 ✅. P6 ✅ the send path is byte-identical, three md5s.
+
+Two arms agreeing to 0.2e-6 on unrelated bases is the useful part. Net of the stack wrapper it is
+**+7.98e-6 over the account's best sent CV (0.9701400060)** — the first candidate in weeks that
+could put CV above the account best.
+
+## 6. 🔴 THE FINDING THE CONTROL PRODUCED: 50 USELESS COLUMNS COST 16.30e-6
+
+The null was registered expecting `G50_null ≈ 0`. It came back **−16.30e-6**. A 51-dim logistic
+on 691,369 rows still pays a real price for 50 columns of pure noise, and the prediction confirmed
+only because it was registered one-sided (`< +1e-6`) — the registered *reasoning* was wrong even
+though the tick is green. ⇒ **G50's +10.14e-6 is the NET after a column-count tax**; measured
+against the noise floor the pack carries about **+26.4e-6** of signal.
+⛔ **DO NOT quote the script's printed "signal-to-null ratio 0.6x".** A ratio to a negative
+denominator is uninterpretable; that line is a defect in the output, not a result.
+
+## 7. ⛔⛔ P2 TESTS ROW ALIGNMENT AND NOTHING ABOUT THE PARTITION
+
+Stated here because it is the easiest thing in this entry to misread. `roc_auc_score(y, oof[:,j])`
+over the full train set is **invariant to which partition produced the OOF**. P2's 4.9e-7
+reproduction proves the rows line up with our `train.csv` order and proves *nothing* about the fold
+scheme. The README is still only a declaration.
+
+## 8. THE SUCCESSOR'S TASK IS ALREADY REGISTERED — `w80_prereg2.txt`, commit 1b79995
+
+A **fold-signature** test that substitutes for the unrunnable gate 4. An OOF column built under
+partition P carries per-fold calibration bias, so `S(c,F) = sum_k n_k * (mean z over f_k)^2` is
+large under P and chi2(4)-ish under any other partition; both partitions are stratified on y, so
+the y-mix cannot manufacture the signal, and n≈138k per fold gives it power. **The controls are
+the test**: 20 of our own stems under OUR folds (KNOWN MATCHED) against the same 20 under
+`random_state=1234` (KNOWN MISMATCHED). If those two do not separate at AUC ≥ 0.90 the instrument
+is VOID and says so. Three-way read, no discretion: MATCHED / FOREIGN / INDETERMINATE, and only
+MATCHED makes the pack *eligible* for full vetting — it is still not an adoption.
+
+⚠ **That prereg says in its own first paragraph that it was written AFTER a favourable number.**
+That is the circumstance in which a test gets designed to pass, which is exactly why it is
+registered in a commit rather than run in the same breath as the result that motivated it.
+
+## 9. VERIFICATION STATE
+
+- **24 standing check scripts, ALL rc=0**, each run via command substitution, never a pipe:
+  `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b w74b
+  w75b w76b w77b w78b w79b`. ⚠ **No new guard was added this run and that is correct** — w80
+  adopts nothing, so there is no adopted state for a guard to protect. Extend the LIST, never the
+  integer (w76 §6).
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- ✅ **THE 08-25 TEN RE-VERIFIED READ-ONLY, rc=0.** `w48e_order.py --day 2026-08-25` (no
+  `--write`) reproduces the registered ten file-for-file, all ten 296,302 rows, no NaN, md5
+  matching the queue, CV reproducing from the OOF vector. Unchanged from w78/w79.
+- **THE TOKEN WAS NOT REFRESHED, DELIBERATELY, FOR THE FOURTH RUN RUNNING.** `date -u` read
+  **2026-08-24 15:25Z**; expiry **2026-08-25T01:39:30Z** covered this run in full and no API call
+  failed. A refresh has a ~12h life, so refreshing now would expire ~03:25Z — still before the
+  ~12:40Z send window. **The 08-25 run must refresh at its own start; it cannot be done for it.**
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED**, and the click is **still impossible**.
+  Checked harder than before this run: no `mcp__brave__*` tool is exposed (deferred-tool search,
+  no match), **and there is no browser binary on the box at all** (`brave`, `brave-browser`,
+  `chromium`, `google-chrome-stable` all absent), **no `curl`**, and nothing listening on CDP port
+  9222. ⛔ Do not spend another run trying to route around this; it is not a tooling-selection
+  problem, the machine has no browser.
+- Board **15:3xZ: 97 teams strictly above our 0.97119, 15 tied, 2,791 teams, best-case rank 98.**
+  Leader Chris Deotte **0.97168**, 490e-6 ahead. Drift: 94 above at 14:55Z → 96 at 15:15Z → 97 now.
+
+## 10. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-25T01:39:30Z**, so an 08-25 run
+   opens with a dead token inside the SDK's 30-minute lying window (RESEARCH ~line 615+). Then
+   `w70d_chainguard`, then the **24** check scripts in §9 — extend the LIST, not the count.
+2. **THE 08-25 SEND IS THREE COMMANDS AND THE DAY IS ALREADY REGISTERED** (w78 §9, re-verified
+   read-only again this run, §9). `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-25 --write`
+   → `w26g_send.py --n 10` dry, match the registered ten file-for-file, then `--go`.
+   ⛔ Do NOT re-derive the day; do NOT hand-write it into `ORDERS`.
+   ⚠ The sender must print `hijack CV bar 0.9701349052`. If it prints 0.9701288617, `w79b` C1 has
+   been bypassed — stop.
+3. 🎯 **THEN RUN `w80_prereg2.txt`** (§8). It is the only open technical item on the account and
+   it is already registered, so the successor writes `w80b_foldsig.py` against a fixed design and
+   does not get to choose the thresholds. ⛔ Its MATCHED branch is **not** an adoption and must not
+   be treated as one. If it comes back VOID or FOREIGN, close the thread in RESEARCH the way w51
+   closed ext_members16 and **do not reopen it** — the deadline is 08-31 and there is no time to
+   litigate a third time.
+4. ⛔ **DO NOT** quote `w80a_posthoc.json` as a registered finding (§4) · **DO NOT** quote w80a's
+   printed "signal-to-null ratio 0.6x" (§6) · **DO NOT** read P2's 4.9e-7 as evidence about the
+   fold scheme (§7) · **DO NOT** chase the 0.97127 public cluster (§1) · **DO NOT** spend a run
+   trying to make the selection click happen — there is no browser on the machine (§9) ·
+   **DO NOT** re-run `w63a_setprice.py` with no arguments (it overwrites a record; w79 §8.4) ·
+   **DO NOT** point `HIJACKPRICE` back at `w63a_setprice.json` · **DO NOT** re-point `w59b`'s
+   no-over-block control at `w38_ad202std_h3` or `w36_ad199std_h3` (w79 §5) · **DO NOT** install a
+   `Σ|w|` health check (w78b C2) · **DO NOT** quote w77 §6's "Σ|w| is the alarm" as general
+   (w78 §5) · **DO NOT** quote `w77a`'s P6 as a finding (`w77b` C2 pins it VOID) · **DO NOT** cite
+   w63 §4's iff as established (w76b C3) · **DO NOT** re-open the original dataset · **DO NOT**
+   re-parameterise `w46c.ERA_SHIFT` (w75 §1) · **DO NOT** re-derive a frozen constant from a
+   mutable CSV (w75 §3) · **DO NOT** re-run a pricer as a routine staleness check (w74 §4) ·
+   **DO NOT** re-base the ranker (w73 §2) · **DO NOT** build files for 08-29..08-31 (w72 §2.1) ·
+   **DO NOT** apply the duplicate override (w71 §4.1) · **DO NOT** take stacker seed/fold
+   averaging (w73 §1), an OOF error-analysis angle (w74 §1), or a LightGBM/CatBoost/XGBoost
+   tuning angle (w69, w70 §0, w71 §5, w79 §0, and this run's own set-aside ANGLE).
+5. ⚠ **NEW LESSONS.**
+   • **A control registered as "≈ 0" that comes back sharply negative is a finding, not a pass.**
+     The null cost 16.30e-6 and the prediction only survived because it was written one-sided.
+     The tick was green and the reasoning behind it was wrong (§6). Check what a control's *level*
+     says, not just which side of the bound it landed on.
+   • **A gate can be falsified by a clause that does not bind the measurement — and the answer is
+     to split the arm, not to soften the gate.** P1 died on 1.5e-8 in a file P2..P5 never open.
+     Amending P1 would have been the honest-looking move and the wrong one; two files with
+     `"REGISTERED": false` on one of them costs nothing and keeps the record clean (§4).
+   • **Check what a passing gate actually tests before leaning on it.** P2 reproduced 50 AUCs to
+     4.9e-7 and looks like a partition check. It is arithmetically incapable of being one (§7).
+   • **A prereg written after a favourable number should say so in its own text.** `w80_prereg2`
+     opens by admitting it, which is what stops a later reader from treating it as blind (§8).
+   • **"No browser tool exposed" and "no browser on the machine" are different failures and only
+     the second one closes the question.** Three runs recorded the first. This one checked for the
+     binary, for `curl`, and for a listener on 9222, and all three are absent (§9).
+   • **The standing note the playbook makes you re-check is the one that goes stale.** "The public
+     cluster is one circulating CSV" has now been right three times running and had wrong numbers
+     twice (§1). Re-reading it cost one kernel pull and turned up `ext_members17`.
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+`git push origin main` fails with `gh: command not found` → `could not read Username for
+'https://github.com'`. No `gh`, no ssh key, no token in the environment — and §9 now adds that
+there is no browser and no `curl` either, so this is a sealed box, not a missing credential.
+`origin/main` is at **33a69eb**; local `main` is ahead of it. Nothing is lost — the workspace is
+the memory and it is committed — but the remote does not have this run. As in w77/w78/w79, **no
+"Nth run in a row" integer is propagated**; a later run can diff the two refs itself.
