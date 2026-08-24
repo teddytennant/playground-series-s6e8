@@ -1,3 +1,43 @@
+# 🔎 THE FIELD, RE-READ 2026-08-24 (w80) — TOP PUBLIC IS 0.97127 AND IS STILL NOT A METHOD
+
+    kaggle kernels pull atakanaldemir/s6e8-regime-calibrated-rank-fusion-lb-0-97127 \
+        -p notebooks/w80_atakan_97127 -m
+
+Pulled and read in full. Twenty lines of blending, no model, no fold, no CV:
+
+    final = rank(0.725001 * rank(hboyang_205_member_fusion) + 0.274999 * rank(v13_anchor))
+
+Both legs are pre-made CSVs globbed out of `/kaggle/input`. The `1e-6` on the weight only
+breaks rank ties. ✅ **w70's conclusion survives; its NUMBERS were stale.** Refresh them:
+best public **0.97123 → 0.97127**; hboyang's fusion **150 members → 205**. Still unusable
+here (submission-only → no cross-fitted CV → `fam=member` → the sender blocks it).
+⛔ Do not chase it. That is the Rogii failure.
+
+## 📦 `data/ext_members17` — szymonkapiski "50 weakest OOF models", THE ONE NEW THING IN IT
+
+    kaggle datasets download -d szymonkapiski/s6e8-50-weakest-oof-models \
+        -f oof.npy -p data/ext_members17 --unzip     # also test.npy, members.csv, README.md
+
+Created **2026-08-21**, i.e. AFTER this workspace's last external sweep (w56), and it is the
+diversity leg the 0.97127 blend credits. `oof.npy` (691369, 50) float64, `test.npy`
+(296302, 50), `members.csv` = id + solo OOF AUC, columns sorted ascending. Solo AUC
+**0.916917 .. 0.956758** — every column far below our ~0.9688 pool. README declares
+`StratifiedKFold(5, shuffle=True, random_state=42)` on train.csv in original row order,
+**our frozen partition**, and withholds the recipes while the competition runs.
+
+Different from every prior import on the axis that matters: it is OOF+test, **not**
+submission-only, so it is not auto-refused on `fam=member`; and the columns are
+DELIBERATELY WEAK, a hypothesis this workspace had never tested.
+
+### ⛔ w38c GATE 4 IS UNRUNNABLE ON THIS PACK — SO NO SCREEN OF IT CAN EVER ADOPT IT
+Gate 4 is "recompute per-fold AUC under OUR get_folds and compare with the author's printed
+per-fold numbers". The author publishes solo **overall** AUC per column and nothing per fold.
+w38c's rule — *a declaration is not a measurement* — therefore binds and cannot be discharged.
+⚠ **Any screen of ext_members17 is powered to KILL, not to adopt.** Its best outcome is
+"worth the full vetting a later run owes". Written into `w80_prereg.txt` before the read.
+
+---
+
 # 🎯 THE HIJACK BAR IS ADOPTED AT **0.9701349052** — THE HOLE IS FILLED, THE SENDER IS REPOINTED
 # (w79, 2026-08-24)
 

@@ -1,0 +1,23 @@
+{
+  "failures": 1,
+  "prereg": {
+    "floor": 4e-06,
+    "p2_tol": 2e-06,
+    "p3_bound": 1.9999999999999998e-05,
+    "p4_point": 4.9999999999999996e-05,
+    "p4_refuse": 0.00019999999999999998,
+    "p5_bound": 1e-06,
+    "seed": 20260824
+  },
+  "stats": {
+    "p1": false,
+    "p6": true,
+    "range_violation": {
+      "test": [
+        2.776981799949652e-14,
+        1.0000000149011612
+      ]
+    }
+  },
+  "verdict": "REFUSE -- malformed (P1)"
+}

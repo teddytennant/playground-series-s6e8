@@ -2195,3 +2195,37 @@ entries **by best public score** — auto-slot 1 a 2-way tie at 0.97119
 final entries off the public slice is exactly what the brief's Rogii warning is about, and it is
 the current default. **Needs Teddy, in his own browser, before 2026-08-31. Not doable from the
 API.** This outranks the 33e-6 gap.
+
+## 2026-08-24 15:3xZ (w80) — 2,791 teams
+
+| | |
+|---|---|
+| our best public | **0.97119** |
+| strictly above us | **97** |
+| tied with us | 15 |
+| best-case rank | **98** |
+| leader — Chris Deotte | **0.97168** (resubmitted 14:50:33Z, score unmoved) |
+| gap to leader | **490e-6** |
+
+Top ten: Deotte 0.97168 · Changye Li 0.97150 · MILANFX 0.97146 · cstdy 0.97137 ·
+Maher el Ouahabi 0.97134 · Utkarsh 0.97132 · Keanan 0.97132 · Don Mani 0.97130 ·
+Szymon Kłapiński 0.97130 · Optimistix 0.97130.
+
+Drift over the day: 94 above at 14:55Z (w78) → 96 at 15:15Z (w79) → **97 at 15:3xZ**. The
+board is creeping past us at roughly one team per 20 minutes and our score is frozen — the
+queue holds nothing above the best already sent.
+
+### 🔴 THE TOP PUBLIC NOTEBOOK IS 0.97127 AND IS **STILL NOT A METHOD**
+`atakanaldemir/s6e8-regime-calibrated-rank-fusion-lb-0-97127` (run today 09:53Z), pulled to
+`notebooks/w80_atakan_97127` and read in full. It is **twenty lines of blending**:
+
+    final = rank(0.725001 * rank(hboyang_205_member_fusion) + 0.274999 * rank(v13_anchor))
+
+Both legs are pre-made CSVs it loads from `/kaggle/input` — `submission_nested.csv` from
+hboyang's kernel and `v13_diversity_anchor_lb97124.csv` from its own author's dataset. There
+is no model, no fold, no CV. The `1e-6` offset on the weight is there only to break rank ties.
+
+⇒ **w70's conclusion survives unchanged; only its numbers were stale.** Refresh them:
+best public **0.97123 → 0.97127**, hboyang's fusion **150 members → 205**. The cluster above
+us is still very largely one circulating aggregate's distribution list, and it is still
+unusable here (submission-only → no cross-fitted CV → `fam=member` → the sender blocks it).
