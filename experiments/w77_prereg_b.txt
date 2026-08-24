@@ -1,0 +1,53 @@
+w77b PRE-REGISTRATION (ADDENDUM) — 2026-08-24. A POST-HOC DIAGNOSTIC, LABELLED AS ONE.
+
+⚠ THIS IS NOT AN INDEPENDENT TEST. It was prompted by w77a's ARM L output and I already know
+the headline before writing it. Registering it anyway, with what is ALREADY KNOWN separated
+from what is genuinely OPEN, so a later run can see which is which.
+
+ALREADY KNOWN FROM w77a (not predicted here, not evidence for anything here)
+---------------------------------------------------------------------------
+  * ARM S (18 files, 8 scored)  GLS common gap gh = +1024.1576e-6.  LB-CV is about +1050e-6,
+    so that is the right order.
+  * ARM L (122 files, 112 scored) gh = -4598.3374e-6. A weighted mean of quantities all near
+    +1050 cannot be -4598 unless the weights are enormous and of both signs.
+  * Every UNSCORED file in ARM L reads only() ~ -496; every SCORED one reads +1.5..+5.6.
+    `fit` sets xh0 = z - gh on scored files and 0 on unscored, so a gh that is 5,600e-6 wrong
+    opens a 5,600e-6 crevasse between the two groups. w77a's P6 "11 sign changes" is that
+    crevasse being crossed eleven times, NOT a non-monotone cost curve.
+    ⛔ w77a's P6 FALSIFICATION IS THEREFORE VOID AS EVIDENCE ABOUT THE COST CURVE, and the
+    journal must record it as an instrument failure, not as "the live bar is under-specified".
+
+WHY THE SWEEP IS EXACT AND CHEAP
+--------------------------------
+St and Sp are built entrywise from C1 = cov(A), C0 = cov(B) whose (i,j) entry depends only on
+files i and j. So Sxx[js,js] for ANY subset of a larger design IS the Sxx that design would
+have had on its own. One 122-file fit therefore yields every sub-design's GLS exactly, with no
+refit. Q1 is the gate that proves this rather than assuming it.
+
+PREDICTIONS
+-----------
+Q1  GATE B. GLS on ARM S's 8 scored files, using the submatrix of the 122-file Sxx, reproduces
+    w63a_setprice.json's stored `gap` = 1024.1576039136519 to < 1e-6. If it does not, the
+    submatrix identity is false, the sweep means nothing, and the run exits 1.
+
+Q2  THE OPERATIONAL ONE. w63a's LIVE gh = +1024.1576 lies INSIDE [min z, max z] over its own 8
+    scored files. ⚠ If it does NOT, the bar the sender reads today already rests on a
+    pathological GLS estimate, and that is an operational finding about a live artefact rather
+    than an epistemic one about an enlarged design.
+
+Q3  ONSET. There is a design size k* with 8 < k* <= 112 at which gh first leaves [min z, max z].
+    Files are added in a FIXED MECHANICAL ORDER — descending CV over ARM L's scored stems — so
+    no subset is chosen for its effect.
+
+Q4  MECHANISM. The L1 mass of the GLS weights, sum|w| (which is 1 exactly when all weights are
+    non-negative), is > 10x larger at k = 112 than at k = 8, and cond(Sxx[js,js]) at k* exceeds
+    1e6. If sum|w| stays near 1 the diagnosis is wrong and something else is producing gh.
+
+Q5  RESCUE. The equal-weight estimator gh_ols = mean(z) stays inside the hull at EVERY k by
+    construction, so the question is whether the pricer is usable with it. Reported, NOT
+    adopted: swapping the estimator inside `fit` would change the live bar, and this run does
+    not get to do that (w59a). Registered so the successor knows the option was measured.
+
+WHAT THIS RUN MAY WRITE: experiments/w77c_glssweep.{py,json,csv} and w77c_gls.npz only.
+⛔ Never w63a_setprice.json, w59a_hijackprice.json, the queue, the plan, the sender, a
+   submission, or `fit` itself.
