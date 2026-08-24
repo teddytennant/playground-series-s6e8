@@ -1,3 +1,100 @@
+# ✅ THE ERA TERM, REFRESHED ON n=27: **−23.77e-6** (w75, 2026-08-24) — AND NOT APPLIED
+
+    .venv/bin/python experiments/w75a_erarefresh.py     # ~2 min, FAILURES 0, writes only its own two files
+    .venv/bin/python experiments/w75b_muguard.py        # standing guard, one file read
+
+`w46c_predlb.ERA_SHIFT` is **−29.82e-6, se 4.37, n=5**, fitted 08-21. Refreshed on the **27**
+held-out ad≥195 files sent 08-22..08-24 that are not in w30b's fit board and not among the five:
+
+| read | value |
+|---|---|
+| mean residual vs the era-UNAWARE w30b prediction | **−23.773e-6** (sd 11.677, naive se 2.247) |
+| by first-sent day | 08-22 **−22.46** (n 10) · 08-23 **−26.35** (n 9) · 08-24 **−22.51** (n 8) |
+| day-mean-of-means | **−23.774e-6**, se over 3 days **1.289** |
+
+⚠ The residuals are **NOT independent** — one fixed public slice, heavily shared member sets —
+so the naive se is far too small and **the day-level read is the honest unit**. Both agree.
+✅ The era shift is **real, slightly smaller than the five-point estimate, and much tighter**:
+three day-means span 3.9e-6 against a claimed per-file sd of 9.76e-6.
+
+⛔ **`ERA_SHIFT` WAS DELIBERATELY NOT CHANGED, AND MUST NOT BE.** Enumerate what it feeds before
+touching it: predicted LB → send ordering (w72 prices the remaining slots at **0.00e+00**) and
+the build bars (nothing is being built). **It does NOT feed the click price** — `w74a_clickprice`
+and `w57a_tierprice2` run on `beta`, OOF ranks and test ranks and import no part of w46c.
+So the refresh changes **no action**, while changing the constant would stale every stored
+predicted LB and force a re-verification of the send chain for nothing. `w75b_muguard` **C4**
+pins the n=5 value: a later run that changes it must re-read the downstream, not inherit it.
+
+## 🎯 THE WANTED MARGIN IS NOW **ERA-INVARIANT** — A STRONGER RESULT THAN "IT SURVIVED"
+
+    era term    -29.82 (n=5)   -23.77 (n=27)   -23.77 (day-mean)
+    argmax      w36_ad199stdcorr, all three
+    margin      +2.417e-6,      all three      <- IDENTICAL. That is the finding.
+
+The nearest era-deflated challenger is **`w38_ad202stdcorr`** (sent 08-23, CV 0.9701375891),
+which is **also pack ≥ 195**, so both files take the same deflation and **the era term cancels
+in the contrast.** ⚠⚠ **RESEARCH's "+5.7e-6 over `w29_ad194stdcorr`" (§"The WANTED pick,
+re-derived three ways") IS STALE — not wrong.** It named the binding challenger correctly on the
+board it ran on and a file sent since displaced it. Under the refreshed term that era-sensitive
+contrast now reads **+8.91e-6** (was +5.7), and slot 1 stops being the argmax only at
+**era = −40.35e-6, i.e. 7.4 naive se away** (it was 2.4 se under the five-point estimate).
+🎯 **A MARGIN QUOTED AGAINST A NAMED CHALLENGER GOES STALE WHEN THE BOARD GROWS, EVEN THOUGH
+NEITHER ITS FORMULA NOR ITS INPUTS CHANGED. Re-derive the challenger every time.** Same family
+as w69's "a bar and its instrument's resolution live in different files", and the mirror of
+w64's "a deferral copied forward copies its candidate forward too".
+
+## ⛔ `w28a_cvlb_refresh.py` CANNOT REPRODUCE ITS OWN OUTPUT — AND w46c HAS THE SAME LATENT BUG
+
+`w28a` re-derives its centring `MU` from `w25a_cvlb_full.csv` and asserts it equals
+`w26e_famfix.json`'s stored `mu`. **That CSV was regenerated afterwards** (60 → 78 rows above the
+`cv >= 0.97` floor, for w30b's fit); the centring moved **+4.91e-6** and w28a's own assert would
+now FIRE. Proven, not asserted: with the **frozen** mu read from the model JSON, `gate_resid_sd`
+and `oos_mean` reproduce to **1e-9** and every stored per-row `pred` to **3.3e-16**. The centring
+is the only drifted input.
+
+⚠⚠ **`w46c_predlb.py:59` DOES THE SAME THING** — MU re-derived from that mutable CSV while the
+coefficients are frozen in `w30b_corrterm.json`. They agree **today only by luck of ordering**.
+Nothing in w46c checks it, and the next regeneration shifts every prediction by `slope × d(mu)`
+at once — **which looks exactly like a real era step**, i.e. it would be misread as the finding
+above. `w75b_muguard` closes it: C1 live MU == w30b's fitted mu · C2 the board still holds
+w30b's 78 rows · C3 w28a reproduces under the frozen mu (3 checks) · C4 ERA_SHIFT unchanged.
+✅ **Both controls from the outset:** passes on the live state, fails on each of three planted
+defects separately (grown board → C1+C2; perturbed frozen mu → all three C3s; changed era → C4).
+
+⛔ **A CONSTANT RE-DERIVED FROM A MUTABLE FILE IS NOT FROZEN, however loudly the file says it is**
+— w28a's own docstring warns *"do NOT overwrite `w25a_cvlb_full.csv`"* about the very file a
+later wave then overwrote. **Read a frozen constant from the artefact that froze it.**
+
+## ✅ THE BRIEF'S NUMBER: **Spearman(CV, LB) = +0.820 OVER 122 SENT FILES**
+
+Whole send history, CV **recomputed from the stored OOF vector** and never parsed from a
+submission description (`experiments/w75a_erarefresh.csv`):
+
+| population | n | Spearman(CV, LB) | mean gap |
+|---|---|---|---|
+| all with a stored OOF | 122 | **+0.820** (p 6.9e-31) | +1035e-6 |
+| cv ≥ 0.97 | 113 | +0.813 | +1029e-6 |
+| cv ≥ 0.97, pack ≥ 195 | 32 | +0.754 | +1032e-6 |
+| cv ≥ 0.97, pack ≤ 194 | 81 | +0.792 | +1028e-6 |
+
+✅ **Selecting on CV is not an act of faith here.** ⚠ **The era shift is a LEVEL finding, not a
+RANK one** — ad≥195 files sit ~24e-6 below prediction as a group while still ranking correctly
+among themselves. A run that confuses the two concludes CV has stopped working above ad194. It
+has not.
+
+## ✅ THE SELECTION ARGMAX, CHECKED OVER THE WHOLE SENT POPULATION FOR THE FIRST TIME
+
+Every earlier check ran on the 20 *corrected* files (w73) or on CVs **parsed out of submission
+descriptions** (120 of 131 carry one). w75a P4 recomputes CV from OOF for all **122** sent stems
+that have one: **argmax is `w36_ad199stdcorr` (0.9701400060)**. The **9** stems with no stored
+OOF — `w15e_antistudent`, `w15f_antistudent_avg`, `w16b_cellweight`, `w16f_armavg` and the five
+`w37_cal_*` raw-member reads — all score **≤ 0.97107 public**, so none is a contender for a pick
+decided on CV. ⚠ **An argmax checked on a PARSED field is not checked on the population.**
+Also verified: **0** stems sent more than once with differing public scores (scores here are
+deterministic; any nonzero count would be a defect in the board or the join).
+
+---
+
 # Research — playground-series-s6e8
 
 
@@ -467,7 +564,12 @@ invites the reading "the optimism is not real", which is the opposite of what wa
     w54a_vetoexpiry  w55a_unpriced  w56b_wantedguard  w57c_muguard  w59b_barguard
     w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard w64b_hedgeguard
     w65b_pinguard  w66d_rangeguard  w67b_slopeguard  w68b_floorguard  w70b_basisguard
-    **w70d_chainguard**  + w65c_subsetcheck (~4 min, background it)
+    **w70d_chainguard**  w72b_dayguard  w74b_clickstaleguard  **w75b_muguard**
+    + w65c_subsetcheck (~4 min, background it)
+
+⚠ **THE LIST IS EIGHTEEN as of w75 (2026-08-24)**, all rc=0. `w72b_dayguard` joined at w72,
+`w74b_clickstaleguard` at w74 and `w75b_muguard` at w75; the "sixteen" in the heading above is
+the count at w70 and is left as written so the growth is visible.
 
 🎯 **RUN `w70d_chainguard` FIRST.** It imports every module the four-command send chain executes,
 in order, and fails on the first that raises — the coverage gap that let the send path sit dead
@@ -2107,7 +2209,7 @@ across the ad194/ad195 boundary ever since.
 | ranking | argmax | WANTED's margin |
 |---|---|---|
 | raw CV (the rule as written) | `w36_ad199stdcorr` | +21.7e-6 over `w29_ad194stdcorr` |
-| **era-deflated CV** | **`w36_ad199stdcorr`** | **+5.7e-6** — survives, margin quartered |
+| **era-deflated CV** | **`w36_ad199stdcorr`** | ~~**+5.7e-6**~~ — ⚠ **STALE, see w75**: the binding challenger is now `w38_ad202stdcorr` (same era, so the term CANCELS, margin **+2.417e-6** and era-INVARIANT); against `w29_ad194stdcorr` it is **+8.91e-6** under the refreshed −23.77e-6 term |
 | CV-REGION-capped | five-way tie at the cap, WANTED among them | 0.0 |
 
 ✅ **WANTED is unchanged: `w36_ad199stdcorr` (CV 0.9701400060), 2nd `w23_ad187stdcorr`.**

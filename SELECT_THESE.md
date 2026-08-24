@@ -52,3 +52,23 @@ Selection here is on CV, and the CV ordering is stable — `w36_ad199stdcorr` is
 
 ⛔ Read the status through a redirect or `$(...)`, never through a pipe — `$?` after a pipeline
 is `tail`'s status and has already produced one fabricated finding in this workspace.
+
+---
+
+## Re-verified 2026-08-24 (w75) — the pick is unchanged and now stands on a wider check
+
+- `w74b_clickstaleguard` **rc=0**: tier membership did not move on the 08-24 sends, so the
+  **+4.52e-6** price above is live and exactly two files still sit at 0.97119.
+- The slot-1 argmax was re-run over the **whole sent population** — all 122 of the 131 stems
+  that have a stored OOF vector, with **CV recomputed from that vector**, not parsed from a
+  submission description. `w36_ad199stdcorr` is the argmax. The 9 stems without an OOF all
+  score ≤ 0.97107 public and cannot contend for a pick decided on CV.
+- The CV→LB **era term** was refreshed from n=5 to n=27 (**−29.82 → −23.77e-6**). The pick does
+  not move, and its binding margin is **era-INVARIANT**: the nearest era-deflated challenger,
+  `w38_ad202stdcorr`, is in the same era, so the deflation cancels. Slot 1 would only lose the
+  argmax at era = −40.35e-6, which is 7.4 se from the refreshed estimate.
+- Slot 2 remains `w23_ad187stdcorr` on w64's settled reasoning: the whole slot-2 decision is
+  worth **0.14e-6**, and if it is ever re-opened the candidate is `w38_ad202stdcorr`, not
+  `w40_ad211stdcorr`.
+- Across the 122 sent files, **Spearman(CV, public LB) = +0.820**. Selecting on CV here is
+  supported by the data, not just by the Rogii precedent.

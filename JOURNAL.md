@@ -25004,3 +25004,180 @@ because it costs a minute and removes a known failure mode.
    to the artefact it re-prices, not to that artefact's ancestor** (§2) · escalate a number
    **with its scale attached**, or you talk someone into a medal that is not there (§5) · a guard
    gets **both** controls written at the outset, not one retrofitted after it misfires (§4).
+
+---
+
+# w75 — 2026-08-24 (slot 4 of 10, ANGLE: consolidation) — **NO SUBMISSION: AT CAP**
+
+`date -u` **13:23 UTC**. The live board reports **131 submissions, 10 of them today**, sent
+12:38–12:39Z by w72 and scoring 0.97113–0.97117. **The cap is 10 and it is spent; no submission
+was attempted and none should have been.** Token alive to **2026-08-25T00:40:26Z**; **not
+refreshed, deliberately** — a refresh yields ~12h, so refreshing at 13:23Z expires ~01:23Z,
+still before tomorrow's ~12:40Z window. It buys nothing. **Tomorrow's run must refresh first.**
+
+The angle is consolidation, and I took all three of its parts: re-verify the best pipeline
+end-to-end, check the CV↔LB gap across the whole history, and confirm the strongest submission
+is the one selected. Bars in `experiments/w75_prereg.txt`, committed **5244407 before
+`w75a_erarefresh.py` existed**, with everything I had already seen disclosed in the file.
+
+## 1. 🎯 THE HEADLINE: THE ERA TERM WAS ESTIMATED ON **FIVE** POINTS AND THE WANTED PICK SAT **2.4σ** FROM FLIPPING ON IT. REFRESHED ON **27**, IT IS **−23.77e-6** AND THE PICK IS NOW SAFE
+
+`w46c_predlb.ERA_SHIFT = −29.82e-6, se 4.37, n=5` has been the CV→LB predictor's era correction
+since 08-21. It is also the only input to the **WANTED slot-1 argmax** still resting on five
+points: RESEARCH:2110's era-deflated margin is `21.7e-6 of raw CV lead − era/slope`, which
+**crosses zero at era = −40.3e-6 — 2.4 se away.** Three send days have added held-out ad≥195
+files and nobody had folded them in. `experiments/w75a_erarefresh.py`, **FAILURES 0**:
+
+    P1  era on 27 held-out ad>=195 files not in w30b's fit, not among the five
+          mean residual  -23.773e-6   sd 11.677   naive se 2.247      BAR |d| <= 8.74 -> 6.05 PASS
+          by first-sent day  08-22 -22.46 (10) · 08-23 -26.35 (9) · 08-24 -22.51 (8)
+          day-mean-of-means -23.774e-6, se over 3 days 1.289
+    P2  era-deflated argmax over all 122 sent stems with an OOF   w36_ad199stdcorr   PASS
+    P3  margin > 0                                                +2.417e-6          PASS
+    P4a raw-CV argmax, CV RECOMPUTED FROM OOF, over all 122       w36_ad199stdcorr   PASS
+    P4b all 9 OOF-less sent stems have LB <= 0.97110 (max 0.97107)                   PASS
+    P5  stems sent >1x with DIFFERING public scores               0                  PASS
+
+**The era shift is real, it is smaller than the five-point estimate, and it is far tighter than
+that estimate suggested.** The three day-means span 3.9e-6 against a claimed per-file sd of
+9.76e-6. ⚠ These residuals are **not independent** — one fixed public slice, heavily shared
+member sets — so the naive se of 2.247 is far too small and the day-level read is the honest
+unit. Both are reported; neither changes the verdict.
+
+⛔ **`w46c_predlb.ERA_SHIFT` WAS DELIBERATELY NOT RE-PARAMETERISED.** Enumerate what it feeds
+before touching it (w73's rule): predicted LB → send ordering, and the build bars. The send days
+are registered and w72 priced the remaining slots at **0.00e+00**; nothing is being built. It
+does **not** feed the click price — `w74a`/`w57a_tierprice2` run on `beta`, OOF ranks and test
+ranks, and import no part of w46c (checked). So the refresh changes **no action**, and changing
+the constant would invalidate every stored predicted-LB and force a re-verification of the whole
+send chain for nothing. Recorded, not applied. `w75b_muguard` C4 pins the old value so that a
+later run that *does* change it must re-read the downstream rather than inherit it silently.
+
+## 2. 🎯 THE MARGIN IS NOW **ERA-INVARIANT**, WHICH IS A STRONGER RESULT THAN "IT SURVIVED"
+
+    era term        -29.82 (n=5)   -23.77 (n=27)   -23.77 (day-mean)
+    argmax          w36_ad199stdcorr, all three
+    margin          +2.417e-6, all three          <- IDENTICAL, and that is the finding
+
+The nearest era-deflated challenger is no longer `w29_ad194stdcorr`. It is **`w38_ad202stdcorr`**
+(sent 08-23, CV 0.9701375891), which is **also pack ≥ 195**, so both files take the same
+deflation and **the era term cancels in the contrast.** ⟹ The binding margin does not depend on
+the era estimate at all. The era-sensitive contrast still exists but is now the *second* one:
+against `w29_ad194stdcorr` it reads **+8.91e-6** under the refreshed term, up from **+5.7e-6**
+under the five-point one, and slot 1 stops being the argmax only at **era = −40.35e-6 — 7.4
+naive se from the refreshed estimate** (it was 2.4 se from the old one).
+⚠ **RESEARCH:2110's "+5.7e-6 over `w29_ad194stdcorr`" is STALE, not wrong** — it named the
+binding challenger correctly on the board it ran on, and a file sent since displaced it.
+🎯 **THE LESSON: A MARGIN QUOTED AGAINST A NAMED CHALLENGER GOES STALE WHEN THE BOARD GROWS,
+EVEN THOUGH NEITHER THE MARGIN'S FORMULA NOR ITS INPUTS CHANGED.** Same family as w69's "a bar
+and its instrument's resolution live in different files". Re-derive the challenger, never carry
+it forward — which is exactly what w64 said about the slot-2 candidate, in the other direction.
+
+## 3. ⛔ GATE B FAILED AND THE FAILURE IS REAL: `w28a_cvlb_refresh.py` CANNOT REPRODUCE ITS OWN OUTPUT
+
+I registered two gates. GATE A (reproduce `w46c`'s five ERA_ROWS end-to-end, CV recomputed from
+the stored OOF vectors) passed on all twelve checks. **GATE B failed on three of seven.**
+
+    mu 0.9700571395217   vs w28a's stored 0.9700522254313      FAIL
+    gate_resid_sd 13.37  vs 8.35                               FAIL
+    oos_mean +12.43      vs +2.90                              FAIL
+
+Diagnosed before anything was changed. `w28a` re-derives its centring constant `MU` from
+`w25a_cvlb_full.csv` and **asserts it matches `w26e_famfix.json`'s stored `mu`** — true when it
+ran. **That CSV has since been regenerated** (60 → 78 rows above the `cv >= 0.97` floor, for
+w30b's fit) and the centring moved **+4.91e-6**. So w28a's own assert would now fire.
+✅ **The diagnosis is proven, not asserted:** with the frozen `mu` read from the model's own
+JSON, `gate_resid_sd` and `oos_mean` reproduce to **1e-9** and **every stored per-row `pred` in
+`w28a_cvlb_full.csv` reproduces to 3.3e-16.** The centring is the *only* drifted input.
+GATE B was then repaired to read the constant **from the model artefact instead of from a
+mutable CSV**, with the drift printed and asserted-nonzero so it can never be silently absorbed.
+⚠ **The change of gate is disclosed here because changing a gate after it fires is exactly how a
+pre-registration gets laundered.** What makes it legitimate: the repair is pinned by a *stronger*
+control (3.3e-16 on stored predictions) and the drift itself is now a checked assertion.
+⚠⚠ **A CONSTANT RE-DERIVED FROM A MUTABLE FILE IS NOT FROZEN, however loudly the file says it
+is** — and w28a's own docstring warns *"⚠ do NOT overwrite w25a_cvlb_full.csv"* about the very
+file that was then overwritten by a later wave.
+
+### ✅ THE LIVE HAZARD THIS EXPOSES, AND THE GUARD FOR IT — `experiments/w75b_muguard.py`
+
+`w46c_predlb.py:59` re-derives `MU` from that same mutable CSV while its coefficients are frozen
+in `w30b_corrterm.json`. **They agree today only by luck of ordering** — w30b was fitted on the
+board the CSV currently holds. Nothing in w46c checks it. The next regeneration shifts every
+prediction by `slope × d(mu)` at once, **which looks exactly like a real era step** — i.e. it
+would be misread as the very finding this run is refreshing.
+
+    .venv/bin/python experiments/w75b_muguard.py             # rc 0, one file read, no refit
+    .venv/bin/python experiments/w75b_muguard.py --selftest  # BOTH controls
+
+C1 live MU == w30b's fitted mu · C2 the fit board still holds w30b's 78 rows · C3 w28a still
+reproduces under the frozen mu (3 checks) · C4 ERA_SHIFT is still the n=5 value.
+✅ **Both controls from the outset** (w74's habit, second time): PASSES on the live state, and
+FAILS on each of three planted defects separately — a grown fit board (C1+C2), a perturbed
+frozen mu (all three C3s), and a re-parameterised era term (C4). **The guard list is now 18.**
+
+## 4. THE BRIEF'S NUMBER: **Spearman(CV, LB) = +0.820 OVER 122 SENT FILES**
+
+The brief says the CV-to-LB gap is the most useful number to collect. Consolidated over the
+whole send history, CV recomputed from stored OOF vectors and never parsed from a description:
+
+    all with a stored OOF   n=122  Spearman(CV,LB) +0.820 (p 6.9e-31)  mean gap +1035e-6
+    cv >= 0.97              n=113                  +0.813              mean gap +1029e-6
+    cv >= 0.97, pack >= 195 n= 32                  +0.754
+    cv >= 0.97, pack <= 194 n= 81                  +0.792
+
+✅ **Selecting on CV is not an act of faith here — CV ranks the public slice at rho +0.82, and
+the rank relation is essentially the same inside and across the era boundary** (0.754 vs 0.792).
+⚠ **That is exactly why the era shift is a LEVEL finding and not a rank one.** The ad≥195 files
+sit ~24e-6 below prediction as a group while still ranking correctly among themselves; a run
+that confuses the two would conclude CV has stopped working above ad194, and it has not.
+
+## 5. COMPLETENESS — THE HOLE THE ANGLE EXISTS TO CLOSE IS SHUT
+
+Every previous argmax check ran on the 20 *corrected* files (w73) or on CVs **parsed out of
+submission descriptions** (120 of 131 carry one). **P4 is the first check over the whole sent
+population with CV recomputed from the stored OOF vector.** 122 of 131 stems have one; the 9
+that do not are `w15e_antistudent`, `w15f_antistudent_avg`, `w16b_cellweight`, `w16f_armavg`
+and the five `w37_cal_*` raw-member calibration reads, and **all nine score ≤ 0.97107 public**,
+so none can be a contender for a pick decided on CV. Nothing displaces slot 1.
+
+## 6. VERIFICATION STATE
+
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- **All 17 standing guards rc=0**, each via command substitution, never a pipe (RESEARCH §9.1).
+  **`w75b_muguard` joins them → 18.**
+- `w48e_order.py --day 2026-08-25` **rc=0, read-only, no `--write`** — the registered ten verify
+  end-to-end: 296,302 rows each, no NaN, md5 matches the queue, CV reproduces from the OOF
+  vector. The 08-25 chain is ready; 08-26/27/28 registered behind it.
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED.**
+- `w74b_clickstaleguard` rc=0, so **the +4.52e-6 click price is live** and today's ten did not
+  move tier membership. Exactly **two** files sit at 0.97119 and the auto pair is still
+  DETERMINED — `SELECT_THESE.md` is accurate as written.
+- ⛔ **NOTHING LOAD-BEARING WAS EDITED.** No submission file, no registered plan, no pricer, no
+  model, no pick. `w46c_predlb.py`, `w25a_cvlb_full.csv` and both `w28a_*` are byte-identical.
+  Writes this run: `w75_prereg.txt` (committed **5244407 before `w75a` existed**),
+  `w75a_erarefresh.{py,json,csv}`, `w75b_muguard.py`, and the notes.
+
+## 7. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expires **2026-08-25T00:40:26Z**, before the
+   ~12:40Z window. RESEARCH has the copy-paste. Then `w70d_chainguard`, then the **18** guards.
+2. **The 08-25 send chain is READY**, re-verified read-only this run. Four commands; the dry run
+   must match the registered ten file-for-file before `--go`.
+3. 🔴🔴 **THE SELECTION CLICK — read `SELECT_THESE.md`, it is the whole briefing.** Still the
+   only item on the account that needs a human. `w74b_clickstaleguard` rc=0 means the price
+   still applies; **only re-run `w74a_clickprice.py` if that guard exits 1.**
+4. ⛔ **DO NOT re-parameterise `w46c.ERA_SHIFT`** (§1 — measured, decision-irrelevant, and
+   `w75b` C4 pins it) · **DO NOT re-derive a frozen constant from a mutable CSV** (§3) · **DO
+   NOT re-run the pricer as a routine staleness check** (w74 §4) · **DO NOT re-base the ranker**
+   (w73 §2) · **DO NOT build files for 08-29..08-31** (w72 §2.1) · **DO NOT apply the duplicate
+   override** (w71 §4.1) · **DO NOT take stacker seed/fold averaging** (w73 §1) · **DO NOT take
+   an OOF error-analysis angle in any framing** (w74 §1).
+5. 🔴 Remaining open items, still two: **w63 §4's refined P5** and **w63 §5a's 16.5e-6 bracket
+   hole**. Neither was touched this run.
+6. ⚠ **NEW LESSONS.** A margin quoted against a **named challenger** goes stale when the board
+   grows, though neither its formula nor its inputs changed — re-derive the challenger every
+   time (§2) · a constant **re-derived from a mutable file is not frozen**, and it de-calibrates
+   in a shape that mimics a real finding (§3) · when a registered gate fires, **diagnose to
+   proof before repairing it**, and disclose the repair (§3) · **a level finding and a rank
+   finding are different claims** — the era shift is a level shift and CV still ranks at +0.82
+   (§4) · an argmax checked on a *parsed* field is not checked on the population (§5).
