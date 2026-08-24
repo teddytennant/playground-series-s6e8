@@ -1,0 +1,56 @@
+w74 pre-registration — written 2026-08-24 ~13:35 UTC, BEFORE w19a_transfer.py or any
+successor to w62a_autopair.py was re-run on the live 131-file board.
+
+WHAT I HAVE ALREADY SEEN (disclosed, per w73 §3.2's discipline):
+  * The live board: 131 scored submissions, 131 distinct files. Tier 1 = 0.97119 holding
+    EXACTLY TWO files (w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4); tier 2 = 0.97118
+    holding five. Both memberships are IDENTICAL to what w62a_autopair.json records at
+    n_scored = 121, so the DETERMINED-pair mechanism is intact and w62a is not void the
+    way w57a was.
+  * w62a's published headline: cost of NOT clicking = +4.5228e-6 at tau = 0, decaying to
+    +3.479e-6 at tau = 1.72 and to -0.502e-6 at tau = 5.0 (its P7 sign-flip, FALSIFIED).
+  * RESEARCH:7664 standing instruction: "re-run w19a_transfer.py after every send" —
+    194 -> 205 pairs already moved the 95% profile upper on tau from 1.72e-6 to 1.50e-6.
+    TWENTY further sends have landed since (08-23 and 08-24), and nobody has re-run it.
+  * tau_hat itself was 0.000e-6; 1.72 is an UPPER bound, not an estimate.
+
+THE DECISION THIS FEEDS, stated first so the bars are not reverse-engineered:
+  How hard to escalate the selection click to Teddy, and with what number attached. The
+  click cannot be made from the API; it is the one action the account still needs a human
+  for, and the deadline is 2026-08-31.
+
+BARS, all registered before the numbers exist:
+
+P1  GATE V, verbatim control. My copied estimator, run on the board state RECORDED in
+    w62a_autopair.json, must reproduce w62a's cost_auto_pair and all six ladder rows to
+    worst absolute deviation < 1e-9 e-6-units. Binary. If it fails I have a lookalike, not
+    w62a's estimator, and NOTHING downstream may be quoted.
+
+P2  MECHANISM. On the live 131-file board, tier 1 still holds exactly two files and both
+    are strictly above every tier-2 file, so the auto-selected pair is DETERMINED and equal
+    to w62a's auto_pair. PREDICT: holds. If it fails, w62a is void exactly as w57a was and
+    the headline must be withdrawn, not adjusted.
+
+P3  REPORTING BAR on the re-price. |live cost_auto_pair(tau=0) - 4.5228e-6| < 1.0e-6.
+    PREDICT: holds; the only input that moved is the beta/gamma/gap regression, refit on
+    ten extra points that all sit in a band (0.97113-0.97117) the fit already covers.
+    If it FAILS I must republish the headline in RESEARCH.md rather than restamp it.
+    1.0e-6 is a REPORTING bar (~22% of the headline), deliberately tighter than w68's
+    5.095e-6 between-file floor, which is the DECISION bar and is not what this tests.
+
+P4  DECISION BAR, the one that actually governs the escalation. The live cost of not
+    clicking is > 0 at tau = 0 AND at the fresh 95% profile upper on tau from w19a.
+    PREDICT: holds. If it FAILS at the fresh upper, the honest advice to Teddy changes from
+    "click, it is worth ~4.5e-6" to "the click is inside its own error bar", and I must say
+    so plainly instead of escalating.
+
+P5  TAU DIRECTION. The fresh 95% profile upper on tau, refit on the live board, is <= 1.50e-6
+    (the last recorded value). PREDICT: holds — pairs only accumulate, and RESEARCH:7664
+    records the bound tightening monotonically as they do. A LOOSER bound is a real result
+    and must be reported as one, not smoothed: it would widen the tau range over which P4
+    has to survive.
+
+NOT REGISTERED, and deliberately so: I am NOT re-choosing WANTED, NOT re-basing the ranker
+(w73 §2 closed it), NOT touching any registered plan artefact, and NOT editing w62a — a
+registered artefact against a board is a record, and w57a's precedent is to write a
+successor, never to re-point the original.
