@@ -1,0 +1,96 @@
+w80 PRE-REGISTRATION — the szymonkapiski "50 weakest OOF models" pack (ext_members17)
+written 2026-08-24, slot 9 of 10 (ZERO slots: the API reports 10 sends today, 12:38:52-12:39:22Z)
+COMMITTED BEFORE experiments/w80a_weakscreen.py EXISTS.
+
+WHY THIS PACK AND WHY NOW
+-------------------------
+The top public kernel is now atakanaldemir/s6e8-regime-calibrated-rank-fusion-lb-0-97127
+(pulled to notebooks/w80_atakan_97127, run today 09:53Z). Read in full: it is a 72.5/27.5
+percentile-rank blend of two pre-made CSVs — hboyang's 205-member fusion and a
+"v13_diversity_anchor_lb97124.csv" shipped as a dataset. It is NOT a method, which is the
+standing conclusion (w70) with stale numbers refreshed: best public 0.97123 -> 0.97127,
+hboyang's fusion 150 members -> 205.
+
+What IS new is the source it credits for its diversity leg:
+szymonkapiski/s6e8-50-weakest-oof-models, created 2026-08-21 — AFTER this workspace's last
+external sweep (w56). It is the first genuinely new external signal in weeks and it differs
+from every prior import on the one axis that matters here:
+
+  * it is OOF + test, not submission-only, so it is NOT auto-refused on `fam=member`;
+  * its README declares StratifiedKFold(5, shuffle=True, random_state=42) on train.csv in
+    original row order — our frozen partition (the one w38c measured as ours);
+  * its 50 columns are DELIBERATELY WEAK, solo OOF AUC 0.916917..0.956758. Every prior
+    external import this workspace vetted was a strong-model pack. The weak-diversity
+    hypothesis has never been tested here, and its author is board rank 9 at 0.97130.
+
+WHAT THIS RUN CAN AND CANNOT CONCLUDE — stated before any number is read
+-----------------------------------------------------------------------
+w38c's gate 4 (foreign-partition test: recompute per-fold AUC under OUR get_folds and
+compare to the author's printed per-fold numbers) is UNRUNNABLE on this pack. The author
+publishes solo overall AUC per column and nothing per fold, and states outright that the
+recipes are withheld while the competition runs. w38c's own rule — "a declaration is not a
+measurement" — therefore binds and cannot be discharged this run.
+
+==> THIS SCREEN IS POWERED TO KILL, NOT TO ADOPT. No branch of it adopts anything. The best
+    available outcome is "survives screening, worth the full vetting a later run would have
+    to do". Recorded here so no later run can quote a pass as a clearance.
+
+FIXED BEFORE THE DATA IS READ
+-----------------------------
+BASE_A = submissions/oof_w36_ad199stdcorr.npy   (the CV-argmax sent file, CV 0.9701400060;
+                                                 w73: argmax on BOTH defensible CV bases)
+BASE_B = submissions/oof_w40_ad211std_h3.npy    (w56a's base, so the number is comparable
+                                                 with w56a's +89.32e-6 for hboyang_mix)
+FOLDS  = agent/common.get_folds(y), the frozen partition. NOT re-derived.
+STACK  = w56a.xfit_cv verbatim: LogisticRegression(C=1.0, max_iter=2000, lbfgs) on
+         logit(rank01(col)) columns, cross-fitted on FOLDS, pooled OOF AUC.
+SEED   = 20260824 for the P5 null control only.
+FLOOR  = 4e-6, the rebuild floor RESEARCH cites at line ~1658.
+
+PREDICTIONS
+-----------
+P1  GATING. oof.npy is (691369, 50) float64 and test.npy is (296302, 50) float64; both
+    all-finite; every value in [0, 1].
+P2  GATING. Row alignment. max_j |roc_auc_score(y, oof[:,j]) - members.csv[j]| < 2e-6
+    over all 50 columns. This is the one integrity claim the pack's own metadata makes
+    that we can check, and it tests exactly what we need: that the rows line up with our
+    train.csv order. FAIL => REFUSE, misaligned, stop.
+P3  RECORDED. best single column: max_j [xfit_cv([BASE_A, c_j]) - xfit_cv([BASE_A])] < +20e-6.
+    Reason: hboyang_mix, a 0.9701815536 aggregator of essentially our own quality, was worth
+    +89.32e-6. These top out at 0.9568 solo, ~130e-4 under our pool.
+P4  GATING, AND ITS LARGE BRANCH IS THE BAD ONE. G50 := xfit_cv([BASE_A] + all 50 columns)
+    - xfit_cv([BASE_A]). Registered point prediction: G50 < +50e-6.
+    ** A LARGE G50 IS A LEAK SIGNATURE, NOT VALUE. ** Fifty columns topping out at 0.9568,
+    fitted by a 51-dim logistic against 691,369 rows, cannot honestly buy a lot on top of a
+    0.97014 base. If it does, the likeliest cause is a partition that is not ours or a
+    column that saw its own validation rows — and gate 4, the instrument that would tell
+    those apart, is unrunnable here (above). So the cut is registered NOW, before the number:
+        G50 > +200e-6  ==>  REFUSE THE PACK. Record CONTAMINATION SUSPECTED.
+    This is w51's lesson (a suspiciously large gain convicts) written down in advance
+    instead of after the fact.
+P5  GATING for P4's interpretability. NULL CONTROL. Re-run G50 with each of the 50 columns
+    independently permuted by rng(SEED) — identical marginals, destroyed row alignment.
+    G50_null < +1e-6. If the null control also gains, the instrument is fitting noise and
+    P3/P4 mean nothing.
+P6  GATING. NOTHING ON THE SEND PATH IS TOUCHED. md5 of experiments/w79a_barfill.json,
+    experiments/w63a_setprice.json and experiments/w26d_queueprice.csv are byte-identical
+    before and after. No pack refit, no queue edit, no ORDERS edit, no HIJACKPRICE change.
+    No submission is possible today and none is attempted.
+
+DECISION RULE — fixed here, applied in this order, no discretion at read time
+----------------------------------------------------------------------------
+  1. P1 or P2 fails            -> REFUSE. Misaligned or malformed. Stop.
+  2. P5 fails                  -> VOID. The instrument is broken; report no P3/P4 number.
+  3. G50 > +200e-6             -> REFUSE. CONTAMINATION SUSPECTED (P4's own cut).
+  4. G50 < FLOOR (+4e-6)       -> REFUSE. Inside the rebuild floor; the pack is worthless
+                                  to this stack and the thread is closed.
+  5. otherwise                 -> RECORD "survives screening, worth full vetting".
+                                  DO NOT ADOPT (gate 4 unrunnable). The successor owes a
+                                  partition measurement before anything is built with it.
+
+⛔ Branch 5 does NOT license adding the pack to a build, editing the queue, or sending.
+⛔ The ANGLE issued for this run ("XGBoost: third leg of the ensemble, tuned on the same
+   folds") is set aside. w69, w70 §0, w71 §5, w78 §11.5 and w79 §0 all bar a
+   LightGBM/CatBoost/XGBoost tuning angle on measurement, not on preference: the GBDT line
+   was measured out and a third tuned booster is not where the remaining edge is. The
+   journal is required to give a concrete reason for setting an angle aside; that is it.
