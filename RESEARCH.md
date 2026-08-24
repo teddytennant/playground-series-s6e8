@@ -1,3 +1,120 @@
+# 🔴 ext_members17 — THE FOLD-SIGNATURE THREAD, RUN TO THE END. THREE INSTRUMENTS, NO ADOPTION.
+# (w81, 2026-08-24, slot 10 of 10 — ZERO slots, no submission)
+
+    .venv/bin/python experiments/w80b_foldsig.py        # REGISTERED (prereg2)  -> INDETERMINATE
+    .venv/bin/python experiments/w80c_foldsig_diag.py   # POST-HOC diagnosis
+    .venv/bin/python experiments/w80d_poscalib.py       # POST-HOC — the design defect, priced
+    .venv/bin/python experiments/w80e_permsig.py        # REGISTERED (prereg3)  -> VOID, rc=1
+    .venv/bin/python experiments/w80f_packguard.py      # standing guard #25, 14 controls
+    .venv/bin/python experiments/w80f_packguard.py --selftest   # 5 mutations, all caught
+
+**THE PACK IS NOT ADOPTED AND THE THREAD SHOULD NOW BE CLOSED.** Three registered instruments,
+three verdicts that license nothing:
+
+| artefact | registered? | verdict |
+|---|---|---|
+| `w80a_weakscreen.json` | ✅ | `REFUSE -- malformed (P1)` |
+| `w80b_foldsig.json` | ✅ | **INDETERMINATE** |
+| `w80e_permsig.json` | ✅ | **VOID** (G2 power 0.450 < 0.500), rc=1 |
+
+## 1. w80b RAN THE REGISTERED prereg2 TEST — AND ITS CONTROL SET WAS THE FINDING
+
+Control AUC **1.0000**, complete separation (POS blends 46.9–921.3, NEG 1.19–1.97). Pack median
+S = 2.736, strictly between max(NEG) 1.966 and min(POS) 46.913 ⇒ **INDETERMINATE**. Q4 gating:
+send path byte-identical. rc=0.
+
+⚠ **Then look at WHICH 20 columns prereg2's control rule selected.** "The 20 lexicographically
+first stems in `submissions/oof_*.npy`" returns `blend150fx / blend150sx / blend153 / blend156`
+× five transforms — **four blend bases, every one a blend of 150+ members, and not one single
+model.** The pack is fifty SINGLE weak models.
+
+## 2. 🔴 THE DEFECT, PRICED: 20 OF 20 OF OUR OWN KNOWN-MATCHED SINGLES FAIL prereg2's OWN BAR
+
+`w80d` ran the control prereg2 should have used — this workspace's own 20 individual models in
+`oof/oof_*.npy`, every one built by `agent/` under `common.get_folds`, i.e. **known matched**:
+
+| population | n | min | median | max |
+|---|---|---|---|---|
+| prereg2 POS — blends, matched | 20 | 46.913 | 167.602 | 921.270 |
+| **OUR single models, matched** | 20 | **0.468** | **3.992** | **21.596** |
+| the 50 pack columns | 50 | 0.000 | 2.736 | 486.172 |
+
+**Every single one of our own known-matched single models scores below min(POS) = 46.913** — the
+bar Q3 required the pack's *median* to clear. Blend median / single median = **42×**: a
+150-member blend averages 150 per-fold biases that agree in sign within a fold; one member does
+not. ⇒ **Q3's MATCHED branch was unreachable for a single-model pack before any pack byte was
+read.** w80b's INDETERMINATE stands, unamended, and is simply uninformative about the pack.
+
+⚠ **Q1's AUC of 1.0000 gave no protection.** Q1 asks whether the instrument can tell matched from
+foreign; it can, overwhelmingly. Q3's bar is a MAGNITUDE, and Q1 says nothing about magnitude.
+(Same shape as w80 §7 on P2. **Check what a passing gate actually tests.**)
+
+## 3. ⛔ TWO NUMBERS THAT ARE VOID — DO NOT QUOTE EITHER
+
+- ⛔ **`w80c`'s chi2(4) null is WRONG.** S under a foreign partition does *not* follow chi2(4).
+  Pooled foreign S over 90 columns of three unrelated kinds: min 0.813, **median 1.762**, max
+  3.106 — against chi2(4)'s median 3.36 and 95th of 9.49. Both partitions are stratified on y and
+  these columns are strongly predictive of y, so stratification removes the y-attributable
+  between-fold variance; the finite-population correction removes more. **`w80c`'s q05/q95
+  thresholds and its "SCRUBBED" class (which found zero members) are void.** The empirical null is
+  the NEG arm, and prereg2 registered it. `w80f` C5 fires if a live script quotes 9.4877/0.7107.
+- ⛔ **A LOW S IS NOT EVIDENCE OF A FOREIGN PARTITION.** Our own known-matched singles reach as
+  low as 0.468 (`xgb_cat_lattice`), *below* prereg2's max(NEG) of 1.966. Low S means the
+  instrument is UNINFORMATIVE on that column, in **both** directions. Only the high tail carries
+  information. Any future per-column design must therefore be **one-sided** and must not register
+  a per-column FOREIGN branch.
+
+## 4. prereg3 REPLACED IT PROPERLY — AND THE REPLACEMENT CAME BACK **VOID**
+
+`experiments/w80_prereg3.txt`, commit **5315bc3**, committed before `w80e_permsig.py` existed;
+`w80e` reads all **11** constants out of it by regex and asserts on each. Design: within-column
+permutation, M=199 foreign stratified partitions (`random_state = 90000 + m`), p = (1+#{S_perm ≥
+S_obs})/(1+M), DETECTED ⟺ p ≤ 0.01. **Both controls gating, both measured on single models** —
+the population the pack belongs to.
+
+| gate | measured | bound | |
+|---|---|---|---|
+| G1 VALIDITY — FPR on 20 known-MISMATCHED | **0.000** | ≤ 0.10 | ✅ |
+| G2 POWER — on 20 known-MATCHED singles | **0.450** | ≥ 0.50 | ❌ **VOID** |
+
+**Nine of twenty. It needed ten.** G3 was therefore NOT EVALUATED and the script returns rc=1.
+
+⛔ **THE VOID WAS NOT WORKED AROUND, AND prereg3 SAW THIS COMING.** Its own text warned "VOID on
+G2 is a REAL possibility ... and must be reported as one, not worked around", and forbade
+retuning ALPHA, M or the seed block by name. A 0.05 miss is exactly when that temptation peaks.
+`w80f` C3a–C3d pin FPR 0.000, POWER 0.450, ALPHA/M/seed, and the strict inequality `POWER <
+g2_power`, so the VOID cannot be quietly repaired later.
+
+⚠ **G4 (RECORDED, decides nothing, and it is the tempting number):** 16 of 50 pack columns were
+detected against a measured FPR of 0.000. Had the instrument been valid that would have been
+overwhelming. **It was not valid.** Do not quote the 16.
+
+## 5. 🎯 WHY THE APPROACH ITSELF IS LOW-POWERED — the durable finding
+
+Across our own 20 **known-matched** single models the signature spans **0.468 → 21.596, a ~46×
+range, and roughly half carry none at all** (`cat_raw` 0.950, `xgb_raw_nan` 0.753,
+`xgb_cat_lattice` 0.468, `orig_binm` 1.505 …). A well-regularised model trained on ~553k rows
+has near-identical calibration across folds, so there is no per-fold bias for the instrument to
+read. **The fold signature is a property of the MODEL, not of the partition**, and a pack of
+unknown models therefore cannot be partition-tested this way with reliable power.
+
+⇒ **w38c's gate 4 has no substitute for this pack.** Its rule — *a declaration is not a
+measurement* — binds, and after three instruments it cannot be discharged. The README's
+`StratifiedKFold(5, shuffle=True, random_state=42)` remains a declaration.
+
+⛔ **DO NOT register a prereg4 that restricts the POS controls to the models that happened to be
+detected.** That is choosing the control population after seeing which ones passed, and it is the
+same class of error as prereg2's blends — worse, because it would be knowing.
+
+## 6. 🎯 RECOMMENDATION, STATED AS A JUDGEMENT AND NOT AS A REGISTERED MANDATE
+
+prereg3's VOID branch licenses nothing but does not itself say "close the thread" (only its
+NO-EVIDENCE branch does). So this is a recommendation, not a rule: **close it.** The chain from
+here to a sendable file is full vetting (w51's es-on-val clause, which no fold-signature
+instrument can see) → a real cross-fitted build → the CV bar → the queue; the deadline is
+**08-31**; and the prize is w80a's **+10.14e-6**, which lives in a `"REGISTERED": false` file
+whose registered counterpart says REFUSE. Starting that chain now is the Rogii failure in a new
+costume. ⛔ Do not reopen ext_members17.
 # 🔎 THE FIELD, RE-READ 2026-08-24 (w80) — TOP PUBLIC IS 0.97127 AND IS STILL NOT A METHOD
 
     kaggle kernels pull atakanaldemir/s6e8-regime-calibrated-rank-fusion-lb-0-97127 \

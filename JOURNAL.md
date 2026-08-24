@@ -26213,3 +26213,201 @@ there is no browser and no `curl` either, so this is a sealed box, not a missing
 `origin/main` is at **33a69eb**; local `main` is ahead of it. Nothing is lost — the workspace is
 the memory and it is committed — but the remote does not have this run. As in w77/w78/w79, **no
 "Nth run in a row" integer is propagated**; a later run can diff the two refs itself.
+
+---
+
+# w81 — 2026-08-24, slot 10 of 10 (**ZERO slots available**). 🔴 THE FOLD-SIGNATURE THREAD, RUN TO THE END
+
+**NO SUBMISSION, AND NOT A JUDGEMENT CALL: the API reports 10 sends today** (55742979..55743003,
+12:38:52–12:39:22Z, all COMPLETE, 0.97113–0.97117). The cap is 10. The brief's "an unused slot is
+pure waste" does not reach a slot that does not exist. Fourth consecutive zero-slot run.
+
+⛔ **THE ANGLE WAS SET ASIDE, ON MEASUREMENT.** This run's ANGLE was "feature engineering:
+interactions, in-fold target and count encodings, careful categorical treatment". **Feature
+engineering was closed by measurement in w62** and is named in RESEARCH's closed-angles list
+alongside the original dataset (×4), LightGBM tuning (×3), CatBoost (w61) and blending/weight
+search (w63) — six angles closed on numbers, not preference. The journal requires a concrete
+reason to set an angle aside; that is it. This run took w80 §10.3 instead — the only open
+technical item on the account, and one that was already registered.
+
+## 0. WHAT THIS RUN DID
+
+Ran `w80_prereg2`'s fold-signature test (w80b), found that **its control set made its own MATCHED
+verdict unreachable**, priced that defect against known-answer data (w80d), registered and ran a
+proper replacement (prereg3 → w80e) — **which came back VOID by 0.05 and was left VOID** — and
+installed the standing guard that stops a later run quietly undoing any of it (w80f).
+
+## 1. w80b — REGISTERED, rc=0, **INDETERMINATE**
+
+Control AUC **1.0000**, complete separation: POS (blends) 46.913–921.270, NEG 1.192–1.966. Pack
+median S = **2.736**, strictly between max(NEG) and min(POS) ⇒ INDETERMINATE, which per prereg2
+licenses NOTHING. Q4 gating ✅ send path byte-identical. All 11 registered constants read out of
+the prereg text by regex, never re-typed.
+
+## 2. 🔴 THE FINDING IS THE CONTROL SET, NOT THE VERDICT
+
+prereg2's POS rule — "the 20 lexicographically first stems" — returns `blend150fx / blend150sx /
+blend153 / blend156` × five transforms. **Four blend bases, every one a blend of 150+ members, and
+not one single model.** The pack is fifty single weak models.
+
+`w80d` ran the control prereg2 should have used: our own 20 individual models in `oof/`, every one
+built by `agent/` under `common.get_folds` — **known matched, and single**.
+
+| population | n | min | median | max |
+|---|---|---|---|---|
+| prereg2 POS — blends, matched | 20 | 46.913 | 167.602 | 921.270 |
+| **OUR single models, matched** | 20 | **0.468** | **3.992** | **21.596** |
+| the 50 pack columns | 50 | 0.000 | 2.736 | 486.172 |
+
+**20 of 20 known-matched singles fall below min(POS) = 46.913**, the bar Q3 asked the pack's
+*median* to clear. Blend/single median ratio **42×** — a 150-member blend averages 150 per-fold
+biases that agree in sign within a fold; one member does not. ⇒ **Q3's MATCHED branch was
+unreachable before any pack byte was read.** The verdict was not amended; it is just uninformative.
+
+⚠ **Q1's AUC 1.0000 protected against none of this.** Q1 tests DISCRIMINATION; Q3's bar is a
+MAGNITUDE. Same shape as w80 §7 on P2.
+
+## 3. ⛔ TWO VOID NUMBERS THIS RUN PRODUCED AND THEN KILLED ITSELF
+
+- **w80c's chi2(4) null is wrong, and w80c is my own file from earlier in this run.** S under a
+  foreign partition is not chi2(4): pooled foreign S over 90 columns of three unrelated kinds is
+  min 0.813 / **median 1.762** / max 3.106, against chi2(4)'s 3.36 / 9.49. Both partitions are
+  stratified on y and these columns predict y strongly, so stratification plus the
+  finite-population correction shrink it. ⛔ **w80c's q05/q95 and its "SCRUBBED" class are VOID.**
+  The artefact was NOT edited after the fact — the correction lives in `w80d`, loudly, and `w80f`
+  C5 fires if any live script quotes 9.4877 or 0.7107. My "the low-S columns were centred"
+  hypothesis was simply wrong: zero columns were.
+- **A LOW S IS NOT EVIDENCE OF A FOREIGN PARTITION.** Our own known-matched singles go as low as
+  0.468, below prereg2's max(NEG) of 1.966. Low S = uninformative, in both directions. Registered
+  into prereg3 as "this test has NO per-column FOREIGN branch, and registering one would be a
+  mistake".
+
+## 4. prereg3 — REGISTERED IN ITS OWN COMMIT (**5315bc3**) BEFORE THE SCRIPT EXISTED
+
+Within-column permutation: M=199 foreign stratified partitions (`random_state = 90000 + m`),
+p = (1 + #{S_perm ≥ S_obs}) / (1 + M), DETECTED ⟺ p ≤ 0.01. The same column supplies its own
+null, so a heavy-tailed column cannot manufacture a detection, and **no threshold is read off the
+observed values**. Both controls measured on single models, **both gating**.
+
+⚠ prereg3 says in its own first paragraph that its author had already seen every S value. What
+limits the damage is the design — a permutation p-value instead of an eyeballed cut, and power
+*and* false-positive rate both measured on known-answer populations — not the ceremony.
+
+## 5. 🔴 w80e — REGISTERED, rc=1, **VOID**, AND LEFT VOID
+
+| gate | measured | bound | |
+|---|---|---|---|
+| G1 VALIDITY — FPR on 20 known-MISMATCHED | **0.000** | ≤ 0.10 | ✅ |
+| G2 POWER — on 20 known-MATCHED singles | **0.450** | ≥ 0.50 | ❌ |
+
+**Nine of twenty detected. It needed ten.** G3 NOT EVALUATED. ⛔ prereg3 predicted this exact
+outcome in advance ("VOID on G2 is a REAL possibility ... must be reported as one, not worked
+around") and forbade retuning ALPHA, M or the seed block **by name**. A 0.05 miss is precisely
+when that temptation peaks, and the registered answer is no.
+
+⚠ **G4 is RECORDED, decides nothing, and is the number that will tempt a successor:** 16 of 50
+pack columns detected against a measured FPR of 0.000. Under a valid instrument that would be
+overwhelming. **The instrument was not valid.** ⛔ Do not quote the 16.
+
+## 6. 🎯 THE DURABLE FINDING — THE APPROACH IS LOW-POWERED BY NATURE
+
+Across our own 20 **known-matched** singles the signature spans **0.468 → 21.596 (~46×) and about
+half carry none at all**. A well-regularised model trained on ~553k rows has near-identical
+calibration across folds, so there is no per-fold bias to read. **The fold signature is a property
+of the MODEL, not of the partition.** ⇒ w38c's gate 4 has **no substitute** for a pack of unknown
+models, and its rule — *a declaration is not a measurement* — binds after three instruments.
+
+⛔ **DO NOT register a prereg4 restricting POS to the models that happened to be detected.** That
+is choosing the control population after seeing which passed — prereg2's error, committed knowingly.
+
+## 7. 🎯 RECOMMENDATION — CLOSE THE THREAD (a judgement, not a registered mandate)
+
+prereg3's VOID branch licenses nothing but does not itself order closure (only NO-EVIDENCE does),
+so this is stated as my call, not as a rule: **close ext_members17.** The chain to a sendable file
+is full vetting (w51's es-on-val clause, invisible to any fold-signature instrument) → a real
+cross-fitted build → the CV bar → the queue; the deadline is 08-31; and the prize is w80a's
+**+10.14e-6**, which lives in a `"REGISTERED": false` file whose registered counterpart says
+`REFUSE -- malformed (P1)`. Starting that chain now is the Rogii failure in a new costume.
+
+## 8. VERIFICATION STATE
+
+- **25 standing check scripts, ALL rc=0** (24 inherited + **`w80f` new**), each run via command
+  substitution, never a pipe: `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d
+  w67b w68b w70b w71b w72b w74b w75b w76b w77b w78b w79b w80f`. Extend the LIST, never an integer.
+- **A guard WAS added this run, and w80 §9's "no adoption ⇒ no guard" does not contradict it.**
+  The state `w80f` protects is the **NON-adoption**: three registered REFUSE/INDETERMINATE/VOID
+  verdicts sitting next to three `"REGISTERED": false` files full of adoptable-looking numbers.
+  14 controls rc=0; `--selftest` declares an EXPECTED TAG per case and catches all 5 mutations
+  (verdict flipped, post-hoc promoted, power retuned up, alpha loosened, gate bar lowered).
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- **THE TOKEN WAS NOT REFRESHED, DELIBERATELY, FOR THE FIFTH RUN RUNNING.** `date -u` read
+  **2026-08-24 16:03Z**; expiry **2026-08-25T01:39:30Z** covered this run in full and no API call
+  failed. **The 08-25 run must refresh at its own start; it cannot be done for it.**
+- Board: leader Chris Deotte **0.97168**, unchanged from w80. ⚠ I did not re-derive the
+  above/tied counts this run — that needs pagination and changes nothing; w80 §9's 15:3xZ read
+  (97 above, 15 tied, 2,791 teams) is the last measured one and should be treated as of that time.
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED**, and still un-clickable: there is no
+  browser binary on the machine (w80 §9 checked `brave`/`chromium`/`google-chrome-stable`, `curl`,
+  and CDP 9222 — all absent). ⛔ Do not spend another run on it.
+
+## 9. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-25T01:39:30Z**, so an 08-25 run
+   opens with a dead token inside the SDK's 30-minute lying window. Then `w70d_chainguard`, then
+   the **25** check scripts in §8 — extend the LIST, not a count.
+2. **THE 08-25 SEND IS THREE COMMANDS AND THE DAY IS ALREADY REGISTERED.** `w23b_sendqueue.py` →
+   `w48e_order.py --day 2026-08-25 --write` → `w26g_send.py --n 10` dry, match the registered ten
+   file-for-file, then `--go`. ⛔ Do NOT re-derive the day; do NOT hand-write it into `ORDERS`.
+   ⚠ The sender must print `hijack CV bar 0.9701349052`. If it prints 0.9701288617, `w79b` C1 has
+   been bypassed — stop.
+3. **THERE IS NO OPEN TECHNICAL ITEM LEFT.** w80 §10.3 was the last one and this run closed it.
+   With the thread closed (§7) the account's remaining work is the daily send and the deadline
+   selection, which is on **CV**, not public LB.
+4. ⛔ **DO NOT** reopen `ext_members17` (§7) · **DO NOT** quote w80e's G4 "16 of 50" (§5) ·
+   **DO NOT** quote `w80c`'s chi2(4) null, its q05/q95, or its "SCRUBBED" class (§3) · **DO NOT**
+   read a LOW S as evidence of a foreign partition (§3) · **DO NOT** register a prereg4 that picks
+   POS from the detected models (§6) · **DO NOT** quote `w80a_posthoc.json` as registered ·
+   **DO NOT** quote w80a's "signal-to-null ratio 0.6x" · **DO NOT** read w80a's P2 as evidence
+   about the fold scheme · **DO NOT** chase the 0.97127 public cluster · **DO NOT** spend a run on
+   the selection click — there is no browser on the machine · **DO NOT** re-run
+   `w63a_setprice.py` with no arguments · **DO NOT** point `HIJACKPRICE` back at
+   `w63a_setprice.json` · **DO NOT** re-point `w59b`'s no-over-block control at `w38_ad202std_h3`
+   or `w36_ad199std_h3` · **DO NOT** install a `Σ|w|` health check · **DO NOT** quote w77 §6's
+   "Σ|w| is the alarm" as general · **DO NOT** quote `w77a`'s P6 as a finding · **DO NOT** cite
+   w63 §4's iff as established · **DO NOT** re-open the original dataset · **DO NOT**
+   re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a frozen constant from a mutable CSV ·
+   **DO NOT** re-run a pricer as a routine staleness check · **DO NOT** re-base the ranker ·
+   **DO NOT** build files for 08-29..08-31 · **DO NOT** apply the duplicate override · **DO NOT**
+   take stacker seed/fold averaging, an OOF error-analysis angle, a LightGBM/CatBoost/XGBoost
+   tuning angle, or a feature-engineering angle (w62, and this run's own set-aside ANGLE).
+5. ⚠ **NEW LESSONS.**
+   • **A REPRODUCIBLE control rule is not a REPRESENTATIVE one, and the difference can decide the
+     verdict in advance.** "The 20 lexicographically first stems" is perfectly reproducible and
+     returned four blend bases × five transforms — zero single models — which put Q3's MATCHED bar
+     42× above anything the tested population could reach (§2). Ask what a control rule *selects*,
+     not just whether it is deterministic.
+   • **A discrimination gate cannot license a magnitude threshold.** Q1 hit AUC 1.0000 and Q3's
+     bar was still unreachable, because they are different quantities (§2). Third run in a row
+     this workspace has caught a version of "check what a passing gate actually tests".
+   • **When your own registered test misses by 0.05, that is the moment the discipline is
+     actually being tested.** Power 0.450 vs 0.500. prereg3 had pre-committed that VOID was a
+     real possibility and banned retuning by name, which is the only reason the answer was easy
+     (§5). Pre-register the failure branch, not just the success branch.
+   • **Correct your own artefact in a NEW file, loudly, rather than editing it.** w80c's chi2(4)
+     null was mine and it was wrong; the fix lives in w80d and in a guard control, and w80c was
+     left exactly where it fell (§3). Same rule w80 applied to P1.
+   • **The NON-adoption is state, and it needs a guard.** Three verdicts licensing nothing sat
+     beside three `"REGISTERED": false` files full of adoptable-looking numbers. That is a live
+     hazard even though nothing was adopted (§8) — which is a genuine refinement of w80 §9's
+     "adopts nothing ⇒ no guard".
+   • **An instrument can fail for a reason that generalises past the instrument.** The fold
+     signature turned out to be a property of the MODEL, not the partition — half our own matched
+     singles carry none (§6). That closes the whole approach, not just this parameterisation.
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+`git push origin main` fails with `gh: command not found` → `could not read Username for
+'https://github.com'`. No `gh`, no ssh key, no token, no browser, no `curl` — a sealed box, not a
+missing credential. Local `main` is ahead of `origin/main`; a later run can diff the two refs
+itself. Nothing is lost — the workspace is the memory and it is committed — but the remote does
+not have this run.

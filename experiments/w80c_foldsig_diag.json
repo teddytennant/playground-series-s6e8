@@ -1,0 +1,373 @@
+{
+  "script": "w80c_foldsig_diag.py",
+  "REGISTERED": false,
+  "note": "POST-HOC. w80b's registered verdict is INDETERMINATE and is not amended. Nothing here may be quoted as a registered finding or license any adoption.",
+  "chi2_4": {
+    "mean": 4.0,
+    "q05": 0.7107,
+    "q95": 9.4877
+  },
+  "counts": {
+    "NOSIG": 39,
+    "OURS": 11
+  },
+  "per_col": [
+    {
+      "col": "m01",
+      "solo_auc": 0.916917,
+      "S_ours": 10.242503263134218,
+      "S_foreign": 2.193857319328223,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m02",
+      "solo_auc": 0.924224,
+      "S_ours": 2.160284399251876,
+      "S_foreign": 1.316196354571055,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m03",
+      "solo_auc": 0.927796,
+      "S_ours": 3.6691355014899614,
+      "S_foreign": 0.9165991547742985,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m04",
+      "solo_auc": 0.929342,
+      "S_ours": 2.013149549833146,
+      "S_foreign": 2.6081204098387496,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m05",
+      "solo_auc": 0.931914,
+      "S_ours": 2.350933839448375,
+      "S_foreign": 1.6118881420873323,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m06",
+      "solo_auc": 0.932287,
+      "S_ours": 2.89824810171017,
+      "S_foreign": 2.5331622476582596,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m07",
+      "solo_auc": 0.935584,
+      "S_ours": 4.514076018246234,
+      "S_foreign": 1.7577703536322278,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m08",
+      "solo_auc": 0.93666,
+      "S_ours": 6.873996652530609,
+      "S_foreign": 1.324566764301707,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m09",
+      "solo_auc": 0.936929,
+      "S_ours": 11.092740225824103,
+      "S_foreign": 1.7664680546229496,
+      "class": "OURS"
+    },
+    {
+      "col": "m10",
+      "solo_auc": 0.93706,
+      "S_ours": 6.904441494391379,
+      "S_foreign": 1.7122878793509324,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m11",
+      "solo_auc": 0.937204,
+      "S_ours": 6.139912131743746,
+      "S_foreign": 1.3342106842251418,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m12",
+      "solo_auc": 0.937224,
+      "S_ours": 2.3898186990510606,
+      "S_foreign": 3.0061390173913343,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m13",
+      "solo_auc": 0.937426,
+      "S_ours": 2.388797032512633,
+      "S_foreign": 1.6930328171861284,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m14",
+      "solo_auc": 0.937694,
+      "S_ours": 4.162943982310247,
+      "S_foreign": 1.5528239106893982,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m15",
+      "solo_auc": 0.938454,
+      "S_ours": 486.1717524235736,
+      "S_foreign": 1.729773293402853,
+      "class": "OURS"
+    },
+    {
+      "col": "m16",
+      "solo_auc": 0.939972,
+      "S_ours": 260.6477570595033,
+      "S_foreign": 1.5785817916966487,
+      "class": "OURS"
+    },
+    {
+      "col": "m17",
+      "solo_auc": 0.940771,
+      "S_ours": 9.106486168125574,
+      "S_foreign": 1.9249222251180187,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m18",
+      "solo_auc": 0.94172,
+      "S_ours": 4.2882216768131265,
+      "S_foreign": 2.558617585712645,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m19",
+      "solo_auc": 0.942039,
+      "S_ours": 9.122594232832258,
+      "S_foreign": 1.3797540938117439,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m20",
+      "solo_auc": 0.942256,
+      "S_ours": 1.0401109647847273,
+      "S_foreign": 1.7671757758533544,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m21",
+      "solo_auc": 0.942511,
+      "S_ours": 5.694581668052055,
+      "S_foreign": 1.825413799057197,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m22",
+      "solo_auc": 0.944199,
+      "S_ours": 0.40577163014398143,
+      "S_foreign": 2.270081094835888,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m23",
+      "solo_auc": 0.944436,
+      "S_ours": 1.2651869733737,
+      "S_foreign": 2.4386811896758727,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m24",
+      "solo_auc": 0.944442,
+      "S_ours": 1.9531363048703765,
+      "S_foreign": 3.1064955648708104,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m25",
+      "solo_auc": 0.945489,
+      "S_ours": 17.181448858725386,
+      "S_foreign": 1.313303765000585,
+      "class": "OURS"
+    },
+    {
+      "col": "m26",
+      "solo_auc": 0.945944,
+      "S_ours": 1.838558563238537,
+      "S_foreign": 3.043033974991322,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m27",
+      "solo_auc": 0.945944,
+      "S_ours": 1.3866695253611316,
+      "S_foreign": 2.511233774659738,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m28",
+      "solo_auc": 0.946522,
+      "S_ours": 1.4423811868903076,
+      "S_foreign": 2.5929652350202574,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m29",
+      "solo_auc": 0.946871,
+      "S_ours": 1.5014163572062773,
+      "S_foreign": 2.6813978937402756,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m30",
+      "solo_auc": 0.94701,
+      "S_ours": 1.6505822877403158,
+      "S_foreign": 2.872629481477547,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m31",
+      "solo_auc": 0.947057,
+      "S_ours": 1.5715349600443085,
+      "S_foreign": 2.779237988571097,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m32",
+      "solo_auc": 0.948831,
+      "S_ours": 7.875503485197177,
+      "S_foreign": 1.5601191755411192,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m33",
+      "solo_auc": 0.949444,
+      "S_ours": 0.3473866188872624,
+      "S_foreign": 2.3272988623095707,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m34",
+      "solo_auc": 0.950924,
+      "S_ours": 17.668956649529445,
+      "S_foreign": 1.433697520843351,
+      "class": "OURS"
+    },
+    {
+      "col": "m35",
+      "solo_auc": 0.95243,
+      "S_ours": 16.95167270388183,
+      "S_foreign": 2.1769087992448024,
+      "class": "OURS"
+    },
+    {
+      "col": "m36",
+      "solo_auc": 0.95256,
+      "S_ours": 17.703975296554496,
+      "S_foreign": 2.681987822631386,
+      "class": "OURS"
+    },
+    {
+      "col": "m37",
+      "solo_auc": 0.952607,
+      "S_ours": 0.31692545056717775,
+      "S_foreign": 1.9192268678784354,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m38",
+      "solo_auc": 0.952725,
+      "S_ours": 4.749229081148689,
+      "S_foreign": 0.8132853053092702,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m39",
+      "solo_auc": 0.953058,
+      "S_ours": 66.82384142267212,
+      "S_foreign": 1.5649083086839979,
+      "class": "OURS"
+    },
+    {
+      "col": "m40",
+      "solo_auc": 0.953671,
+      "S_ours": 1.3445706064360252,
+      "S_foreign": 1.9296928115658252,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m41",
+      "solo_auc": 0.954316,
+      "S_ours": 1.7120238932863627,
+      "S_foreign": 2.385158223924328,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m42",
+      "solo_auc": 0.955148,
+      "S_ours": 2.5734799852275128,
+      "S_foreign": 1.758293223638098,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m43",
+      "solo_auc": 0.955363,
+      "S_ours": 1.1046622467603524,
+      "S_foreign": 1.9161000130575323,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m44",
+      "solo_auc": 0.955429,
+      "S_ours": 1.766669498810631,
+      "S_foreign": 2.1498433387687497,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m45",
+      "solo_auc": 0.955617,
+      "S_ours": 1.995247124227111,
+      "S_foreign": 1.4483077580231336,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m46",
+      "solo_auc": 0.955959,
+      "S_ours": 1.1000912706454797,
+      "S_foreign": 1.5500271272260333,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m47",
+      "solo_auc": 0.955968,
+      "S_ours": 23.033593699425065,
+      "S_foreign": 1.7066831879171853,
+      "class": "OURS"
+    },
+    {
+      "col": "m48",
+      "solo_auc": 0.955991,
+      "S_ours": 33.20162044990862,
+      "S_foreign": 1.25687818497521,
+      "class": "OURS"
+    },
+    {
+      "col": "m49",
+      "solo_auc": 0.956752,
+      "S_ours": 1.57733766910094e-31,
+      "S_foreign": 2.610904294622965,
+      "class": "NOSIG"
+    },
+    {
+      "col": "m50",
+      "solo_auc": 0.956758,
+      "S_ours": 30.509506402311356,
+      "S_foreign": 1.070423771764547,
+      "class": "OURS"
+    }
+  ],
+  "summary": {
+    "n_ours": 11,
+    "n_scrubbed": 0,
+    "n_nosig": 39,
+    "median_S_ours_all": 2.7358640434688413,
+    "median_S_foreign_all": 1.7962947874552757
+  }
+}

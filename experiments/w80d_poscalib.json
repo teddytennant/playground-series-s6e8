@@ -1,0 +1,144 @@
+{
+  "script": "w80d_poscalib.py",
+  "REGISTERED": false,
+  "note": "POST-HOC instrument calibration. w80b's registered verdict INDETERMINATE is NOT amended. Corrects w80c's chi2(4) null, which is wrong.",
+  "corrects": {
+    "file": "w80c_foldsig_diag.json",
+    "what": "its chi2(4) null, q05/q95 thresholds and SCRUBBED class are void"
+  },
+  "singles": [
+    {
+      "model": "cat_lat",
+      "S_ours": 21.595651535810713,
+      "S_foreign": 1.616958862916643
+    },
+    {
+      "model": "cat_native",
+      "S_ours": 2.16615508849877,
+      "S_foreign": 2.3197525305412614
+    },
+    {
+      "model": "cat_raw",
+      "S_ours": 0.9504858782889607,
+      "S_foreign": 0.9819184161842082
+    },
+    {
+      "model": "et_lat_frac",
+      "S_ours": 1.5857484949367349,
+      "S_foreign": 1.9061977908066734
+    },
+    {
+      "model": "lgbm_fixed_lat",
+      "S_ours": 2.3492232556410344,
+      "S_foreign": 1.6232617722592515
+    },
+    {
+      "model": "lgbm_fixed_lat_frac",
+      "S_ours": 7.134548026209894,
+      "S_foreign": 1.6313099498543144
+    },
+    {
+      "model": "lgbm_stump_lat_frac",
+      "S_ours": 10.364126957533516,
+      "S_foreign": 1.6356659141289442
+    },
+    {
+      "model": "lgbm_tuned_lat",
+      "S_ours": 2.0609896978946853,
+      "S_foreign": 1.5818350185422776
+    },
+    {
+      "model": "lgbm_tuned_lat_frac",
+      "S_ours": 8.620705147849032,
+      "S_foreign": 1.5856184894816754
+    },
+    {
+      "model": "linlat",
+      "S_ours": 4.796190436345421,
+      "S_foreign": 2.279751123491262
+    },
+    {
+      "model": "orig_bin",
+      "S_ours": 2.999826464636882,
+      "S_foreign": 1.328117886899565
+    },
+    {
+      "model": "orig_binm",
+      "S_ours": 1.5045781609477682,
+      "S_foreign": 0.9252491690061923
+    },
+    {
+      "model": "w15d_origrep_r",
+      "S_ours": 3.3170433781838304,
+      "S_foreign": 1.9723410073644572
+    },
+    {
+      "model": "xgb_cat_lattice",
+      "S_ours": 0.4677622907584467,
+      "S_foreign": 1.683294783016099
+    },
+    {
+      "model": "xgb_lat",
+      "S_ours": 4.6661398986852305,
+      "S_foreign": 1.5367321494278576
+    },
+    {
+      "model": "xgb_latcat",
+      "S_ours": 6.5494114945953745,
+      "S_foreign": 1.5973448050280172
+    },
+    {
+      "model": "xgb_latcat_avg3",
+      "S_ours": 6.063745623417593,
+      "S_foreign": 1.4927490880360033
+    },
+    {
+      "model": "xgb_latcat_s17",
+      "S_ours": 8.726631967534727,
+      "S_foreign": 1.412616554110511
+    },
+    {
+      "model": "xgb_latcat_s23",
+      "S_ours": 6.5035886149133315,
+      "S_foreign": 1.4761637281947464
+    },
+    {
+      "model": "xgb_raw_nan",
+      "S_ours": 0.7533657176464492,
+      "S_foreign": 1.0733482572695987
+    }
+  ],
+  "scales": {
+    "blend_pos": {
+      "n": 20,
+      "min": 46.912980536826936,
+      "median": 167.60248945286423,
+      "max": 921.2697820776698
+    },
+    "single_pos": {
+      "n": 20,
+      "min": 0.4677622907584467,
+      "median": 3.9915916384345307,
+      "max": 21.595651535810713
+    },
+    "pack": {
+      "n": 50,
+      "min": 1.57733766910094e-31,
+      "median": 2.7358640434688413,
+      "max": 486.1717524235736
+    },
+    "null_pooled": {
+      "n": 90,
+      "min": 0.8132853053092702,
+      "median": 1.762380639130524,
+      "max": 3.1064955648708104
+    }
+  },
+  "singles_below_minPOS": 20,
+  "blend_over_single_ratio": 41.988886798699816,
+  "pack_vs_single_scale": {
+    "above_max_single": 6,
+    "inside_single_range": 17,
+    "at_or_below_maxNEG": 18
+  }
+}

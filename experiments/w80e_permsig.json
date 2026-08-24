@@ -1,0 +1,496 @@
+{
+  "script": "w80e_permsig.py",
+  "prereg": "experiments/w80_prereg3.txt (commit 5315bc3)",
+  "REGISTERED": true,
+  "supersedes": "w80b_foldsig.py (prereg2 control set was blends only; see w80d)",
+  "registered_design": {
+    "M": 199,
+    "alpha": 0.01,
+    "seed_base": 90000,
+    "neg_seed": 1234,
+    "n_splits": 5,
+    "g1_fpr": 0.1,
+    "g2_power": 0.5,
+    "g3_pagg": 0.001,
+    "g3_dmin": 5,
+    "g3_noev": 0.05,
+    "n_col": 50
+  },
+  "G1_fpr": 0.0,
+  "G2_power": 0.45,
+  "G1_G2_void": true,
+  "D": 16,
+  "p_agg": 3.5705527172608474e-20,
+  "binom_rate": 0.01,
+  "verdict": "VOID",
+  "licenses": "NOTHING. The pack is not built with, not queued, not sent.",
+  "detected": [
+    "m01",
+    "m09",
+    "m10",
+    "m15",
+    "m16",
+    "m17",
+    "m19",
+    "m25",
+    "m32",
+    "m34",
+    "m35",
+    "m36",
+    "m39",
+    "m47",
+    "m48",
+    "m50"
+  ],
+  "G4_subset_of_w80c_OURS": false,
+  "controls": [
+    {
+      "model": "cat_lat",
+      "S_ours": 21.595651535810994,
+      "p_ours": 0.005,
+      "S_foreign": 1.6169588629166372,
+      "p_foreign": 0.28
+    },
+    {
+      "model": "cat_native",
+      "S_ours": 2.166155088498785,
+      "p_ours": 0.185,
+      "S_foreign": 2.3197525305412716,
+      "p_foreign": 0.155
+    },
+    {
+      "model": "cat_raw",
+      "S_ours": 0.9504858782889437,
+      "p_ours": 0.615,
+      "S_foreign": 0.981918416184212,
+      "p_foreign": 0.605
+    },
+    {
+      "model": "et_lat_frac",
+      "S_ours": 1.5857484949366571,
+      "p_ours": 0.365,
+      "S_foreign": 1.9061977908067014,
+      "p_foreign": 0.275
+    },
+    {
+      "model": "lgbm_fixed_lat",
+      "S_ours": 2.3492232556410038,
+      "p_ours": 0.12,
+      "S_foreign": 1.6232617722592866,
+      "p_foreign": 0.265
+    },
+    {
+      "model": "lgbm_fixed_lat_frac",
+      "S_ours": 7.134548026209888,
+      "p_ours": 0.005,
+      "S_foreign": 1.63130994985433,
+      "p_foreign": 0.25
+    },
+    {
+      "model": "lgbm_stump_lat_frac",
+      "S_ours": 10.364126957533415,
+      "p_ours": 0.005,
+      "S_foreign": 1.6356659141289747,
+      "p_foreign": 0.245
+    },
+    {
+      "model": "lgbm_tuned_lat",
+      "S_ours": 2.060989697894652,
+      "p_ours": 0.145,
+      "S_foreign": 1.5818350185422685,
+      "p_foreign": 0.275
+    },
+    {
+      "model": "lgbm_tuned_lat_frac",
+      "S_ours": 8.620705147849074,
+      "p_ours": 0.005,
+      "S_foreign": 1.585618489481698,
+      "p_foreign": 0.26
+    },
+    {
+      "model": "linlat",
+      "S_ours": 4.796190436345403,
+      "p_ours": 0.02,
+      "S_foreign": 2.279751123491215,
+      "p_foreign": 0.13
+    },
+    {
+      "model": "orig_bin",
+      "S_ours": 2.999826464636833,
+      "p_ours": 0.395,
+      "S_foreign": 1.3281178868995545,
+      "p_foreign": 0.825
+    },
+    {
+      "model": "orig_binm",
+      "S_ours": 1.5045781609477669,
+      "p_ours": 0.655,
+      "S_foreign": 0.9252491690061826,
+      "p_foreign": 0.795
+    },
+    {
+      "model": "w15d_origrep_r",
+      "S_ours": 3.3170433781838566,
+      "p_ours": 0.18,
+      "S_foreign": 1.9723410073644434,
+      "p_foreign": 0.455
+    },
+    {
+      "model": "xgb_cat_lattice",
+      "S_ours": 0.4677622907584481,
+      "p_ours": 0.865,
+      "S_foreign": 1.6832947830161205,
+      "p_foreign": 0.295
+    },
+    {
+      "model": "xgb_lat",
+      "S_ours": 4.6661398986852545,
+      "p_ours": 0.01,
+      "S_foreign": 1.5367321494278479,
+      "p_foreign": 0.295
+    },
+    {
+      "model": "xgb_latcat",
+      "S_ours": 6.549411494595371,
+      "p_ours": 0.005,
+      "S_foreign": 1.597344805028039,
+      "p_foreign": 0.275
+    },
+    {
+      "model": "xgb_latcat_avg3",
+      "S_ours": 6.063745623417699,
+      "p_ours": 0.005,
+      "S_foreign": 1.4927490880359913,
+      "p_foreign": 0.31
+    },
+    {
+      "model": "xgb_latcat_s17",
+      "S_ours": 8.726631967534725,
+      "p_ours": 0.005,
+      "S_foreign": 1.412616554110539,
+      "p_foreign": 0.35
+    },
+    {
+      "model": "xgb_latcat_s23",
+      "S_ours": 6.503588614913186,
+      "p_ours": 0.005,
+      "S_foreign": 1.4761637281947881,
+      "p_foreign": 0.315
+    },
+    {
+      "model": "xgb_raw_nan",
+      "S_ours": 0.753365717646462,
+      "p_ours": 0.69,
+      "S_foreign": 1.0733482572696103,
+      "p_foreign": 0.555
+    }
+  ],
+  "pack": [
+    {
+      "col": "m01",
+      "S_ours": 10.242503263134154,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m02",
+      "S_ours": 2.160284399251852,
+      "p": 0.42,
+      "detected": false
+    },
+    {
+      "col": "m03",
+      "S_ours": 3.66913550148994,
+      "p": 0.135,
+      "detected": false
+    },
+    {
+      "col": "m04",
+      "S_ours": 2.0131495498331002,
+      "p": 0.515,
+      "detected": false
+    },
+    {
+      "col": "m05",
+      "S_ours": 2.3509338394483503,
+      "p": 0.44,
+      "detected": false
+    },
+    {
+      "col": "m06",
+      "S_ours": 2.8982481017101884,
+      "p": 0.205,
+      "detected": false
+    },
+    {
+      "col": "m07",
+      "S_ours": 4.514076018246259,
+      "p": 0.065,
+      "detected": false
+    },
+    {
+      "col": "m08",
+      "S_ours": 6.87399665253065,
+      "p": 0.015,
+      "detected": false
+    },
+    {
+      "col": "m09",
+      "S_ours": 11.092740225824127,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m10",
+      "S_ours": 6.904441494391712,
+      "p": 0.01,
+      "detected": true
+    },
+    {
+      "col": "m11",
+      "S_ours": 6.139912131743628,
+      "p": 0.02,
+      "detected": false
+    },
+    {
+      "col": "m12",
+      "S_ours": 2.389818699051162,
+      "p": 0.39,
+      "detected": false
+    },
+    {
+      "col": "m13",
+      "S_ours": 2.3887970325126697,
+      "p": 0.285,
+      "detected": false
+    },
+    {
+      "col": "m14",
+      "S_ours": 4.162943982310196,
+      "p": 0.075,
+      "detected": false
+    },
+    {
+      "col": "m15",
+      "S_ours": 486.17175242356933,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m16",
+      "S_ours": 260.6477570594916,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m17",
+      "S_ours": 9.106486168125567,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m18",
+      "S_ours": 4.288221676813996,
+      "p": 0.05,
+      "detected": false
+    },
+    {
+      "col": "m19",
+      "S_ours": 9.122594232832478,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m20",
+      "S_ours": 1.0401109647847229,
+      "p": 0.695,
+      "detected": false
+    },
+    {
+      "col": "m21",
+      "S_ours": 5.694581668051996,
+      "p": 0.03,
+      "detected": false
+    },
+    {
+      "col": "m22",
+      "S_ours": 0.40577163014412915,
+      "p": 0.905,
+      "detected": false
+    },
+    {
+      "col": "m23",
+      "S_ours": 1.2651869733736767,
+      "p": 0.725,
+      "detected": false
+    },
+    {
+      "col": "m24",
+      "S_ours": 1.9531363048703747,
+      "p": 0.485,
+      "detected": false
+    },
+    {
+      "col": "m25",
+      "S_ours": 17.181448858726178,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m26",
+      "S_ours": 1.8385585632385077,
+      "p": 0.51,
+      "detected": false
+    },
+    {
+      "col": "m27",
+      "S_ours": 1.3866695253611692,
+      "p": 0.665,
+      "detected": false
+    },
+    {
+      "col": "m28",
+      "S_ours": 1.4423811868902965,
+      "p": 0.65,
+      "detected": false
+    },
+    {
+      "col": "m29",
+      "S_ours": 1.501416357206285,
+      "p": 0.625,
+      "detected": false
+    },
+    {
+      "col": "m30",
+      "S_ours": 1.6505822877402798,
+      "p": 0.58,
+      "detected": false
+    },
+    {
+      "col": "m31",
+      "S_ours": 1.5715349600442758,
+      "p": 0.61,
+      "detected": false
+    },
+    {
+      "col": "m32",
+      "S_ours": 7.875503485197198,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m33",
+      "S_ours": 0.34738661888726496,
+      "p": 0.9,
+      "detected": false
+    },
+    {
+      "col": "m34",
+      "S_ours": 17.66895664952962,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m35",
+      "S_ours": 16.951672703882267,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m36",
+      "S_ours": 17.703975296554507,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m37",
+      "S_ours": 0.31692545056718324,
+      "p": 0.935,
+      "detected": false
+    },
+    {
+      "col": "m38",
+      "S_ours": 4.749229081148789,
+      "p": 0.03,
+      "detected": false
+    },
+    {
+      "col": "m39",
+      "S_ours": 66.82384142267225,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m40",
+      "S_ours": 1.344570606436164,
+      "p": 0.47,
+      "detected": false
+    },
+    {
+      "col": "m41",
+      "S_ours": 1.7120238932863396,
+      "p": 0.345,
+      "detected": false
+    },
+    {
+      "col": "m42",
+      "S_ours": 2.5734799852276025,
+      "p": 0.15,
+      "detected": false
+    },
+    {
+      "col": "m43",
+      "S_ours": 1.1046622467602265,
+      "p": 0.565,
+      "detected": false
+    },
+    {
+      "col": "m44",
+      "S_ours": 1.7666694988107663,
+      "p": 0.325,
+      "detected": false
+    },
+    {
+      "col": "m45",
+      "S_ours": 1.995247124226798,
+      "p": 0.295,
+      "detected": false
+    },
+    {
+      "col": "m46",
+      "S_ours": 1.1000912706454438,
+      "p": 0.54,
+      "detected": false
+    },
+    {
+      "col": "m47",
+      "S_ours": 23.033593699424948,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m48",
+      "S_ours": 33.20162044990906,
+      "p": 0.005,
+      "detected": true
+    },
+    {
+      "col": "m49",
+      "S_ours": 1.362987031362214e-28,
+      "p": 1.0,
+      "detected": false
+    },
+    {
+      "col": "m50",
+      "S_ours": 30.509506402311466,
+      "p": 0.005,
+      "detected": true
+    }
+  ],
+  "send_path_md5": {
+    "w79a_barfill.json": "671b11e6529db59931fec3d3251051d1",
+    "w63a_setprice.json": "4fd6820e59217fbe0dfa44bffb820057",
+    "w26d_queueprice.csv": "2d32914530bd93fab1262e21f53b0a9f"
+  },
+  "FAILURES": 1
+}
