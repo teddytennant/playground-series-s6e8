@@ -1,0 +1,78 @@
+w76 PRE-REGISTRATION — 2026-08-24, slot 5 of 10 (ZERO slots available: 10 already sent 12:38-12:39Z)
+
+COMMITTED BEFORE experiments/w76a_addtest.py EXISTS. Nothing below was written after seeing a
+number from the new design.
+
+WHY THIS RUN TAKES THIS ANGLE
+The prompt's angle ("confirm the metric, build the fixed-fold CV harness, one honest GBDT
+baseline") was completed in w1-w5 and is recorded in RESEARCH. The cap is reached, so nothing
+can be sent. The oldest open item on the ledger is w63 section 4's REFINED P5, deferred by
+w64 section 9.4, w65, w66 and w75 without being touched. This run tests it.
+
+WHAT IS BEING TESTED — w63 section 4, verbatim
+    "the additive price is optimistic iff the two candidates fall on the SAME side of the
+     status quo, and pessimistic iff they straddle it"
+
+Operationalised in w63a_setprice.py's own terms and NOT re-derived here:
+    base      = price([A, B])            A, B = the determined auto-slot-1 pair
+    only(X)   = mean over d in TIER1, d != X of price([X, d])
+    helps(X)  = only(X) < base
+    add(X,Y)  = only(X) + only(Y) - base
+    gap(X,Y)  = price([X, Y]) - add(X,Y)          gap > 0  <=>  additive price is OPTIMISTIC
+
+WHY THE EXISTING EVIDENCE IS NOT EVIDENCE
+w63a's partition was written AFTER the strict P5 came back falsified, on ONE 15-file design,
+and its decisive cell is n = 1:
+    neither helps       78   gap>0 78/78
+    exactly one helps   26   gap>0  0/26
+    both help            1   gap>0  1/1     <- the whole "same side" half rests on this
+A rule fitted post-hoc to 105 pairs and carrying one observation in the cell that distinguishes
+it from the simpler rule "optimistic iff NEITHER helps" has not been tested at all.
+
+THE DESIGN — mechanical, fixed here, chosen without reference to base or to any gap
+    NAMES = TIER1 u TIER2 u WANTED u {the 24 highest-CV stems that have a stored OOF vector}
+Every C(k,2) pair among the NAMES not in TIER1 is priced. The population rule is stated before
+the board is read; no file is added or dropped after a gap is seen. The 24 is chosen to keep
+the fit under memory, not to hit a cell count.
+
+PREDICTIONS
+
+P1  GATE A / CONTROL. w63a's 08-23 design is rebuilt from its own artefact (tiers + plan_0824 +
+    wanted) with the live LB MINUS the ten stems sent on 08-24, and this file's only/add/gap
+    must reproduce w63a's stored base, every rows[*].uncond, and the whole nonadditivity block
+    (n_pairs 105, n_joint_gt_add 79, mean_gap, min_gap, max_gap) to < 1e-9, AND the partition
+    counts exactly 78/78, 0/26, 1/1.
+    >>> IF P1 FAILS THIS FILE IS NOT w63a's INSTRUMENT AND EVERYTHING BELOW IS VOID. It will
+        exit nonzero and claim nothing.
+
+P2  POWER. On the fresh design the "both help" cell has n >= 10. Without this the run has no
+    resolution in the only cell that separates the registered rule from its rival, and I will
+    report the test as UNDERPOWERED rather than as a confirmation.
+
+P3  THE REGISTERED CLAIM, OUT OF SAMPLE. On the fresh design, gap > 0 for EVERY pair with
+    helps(X) == helps(Y), and gap < 0 for EVERY pair with helps(X) != helps(Y).
+    FALSIFIED by a single counterexample with |gap| > 1e-9. Ties (|gap| <= 1e-9) are reported
+    in their own column and counted against neither side.
+
+P4  RESOLUTION. min |gap| over the straddling cell > 0.01e-6, i.e. the negative sign is a
+    reading and not floating-point noise. A confirmed P3 with a knife-edge P4 is a weaker
+    result and will be reported as one.
+
+P5  THE RIVAL IS SEPARATED. If P3 holds in the straddle and "neither" cells but the "both help"
+    cell comes back NEGATIVE, the correct refinement is "optimistic iff NEITHER helps" and the
+    registered claim is FALSIFIED IN ITS DISTINCTIVE HALF. That outcome is interesting, not a
+    bug, and will be recorded as the finding.
+
+WRITE RULE, FIXED NOW SO THE FALSIFICATION CANNOT BE PUNISHED
+w63 section 8's lesson: coupling the artefact write to every registered reading gives a run a
+motive to register only safe predictions. w76a writes its JSON/CSV whenever P1 passes, whatever
+P2-P5 do, and records the falsified list in the artefact.
+
+WHAT THIS RUN WILL NOT DO
+- No submission. The cap is reached; the API reports ten today.
+- w63a_setprice.py is NOT re-run with write and is NOT edited. Its artefact is the live send
+  bar. w76a only READS it and imports fit/_load.
+- ERA_SHIFT is not re-parameterised (w75 section 1). No frozen constant is re-derived from a
+  mutable CSV (w75 section 3). The ranker is not re-based. No file is built for 08-29..08-31.
+- No modelling angle is re-opened: original dataset, LightGBM/CatBoost tuning, feature
+  engineering, blending, seed/fold diversity, error analysis and stacker averaging all stay shut.
