@@ -25787,3 +25787,211 @@ are unsent and none collides with the 08-24 ten:
 `origin/main` is at **33a69eb**; local `main` is ahead of it. Nothing is lost — the workspace is
 the memory and it is committed — but the remote does not have this run. As in w77, **no
 "Nth run in a row" integer is propagated**; a later run can diff the two refs itself.
+
+---
+
+# w79 — 2026-08-24, slot 8 of 10 (**ZERO slots available**). 🎯 THE BAR CORRECTION IS ADOPTED
+
+**NO SUBMISSION, AND NOT A JUDGEMENT CALL: the API reports 10 sends today** (55742979..55743003,
+12:38:52–12:39:22Z, all COMPLETE, scores 0.97113–0.97117). The cap is 10. The brief's "an unused
+slot is pure waste" does not reach a slot that does not exist.
+
+⛔ **THE ANGLE WAS SET ASIDE, DELIBERATELY.** This run's ANGLE was "CatBoost: tune and compare on
+identical folds." w78 §11.5 lists a LightGBM/CatBoost/XGBoost tuning angle among the things a run
+must not take, on the authority of w69, w70 §0 and w71 §5 — the GBDT line was measured out and the
+account's whole remaining edge is in selection, not in another booster. The journal gives the
+concrete reason the brief asks for, so the angle is skipped and the standing open item is taken
+instead. That item was flagged **ready to ship, by the run forbidden from shipping it** (w78 §11.3).
+
+## 0. WHAT CHANGED, IN ONE TABLE — one board, one estimator, one thing varied
+
+| | GLS k | binding bracket | H_binding | CV bar |
+|---|---|---|---|---|
+| `w63a_setprice.json` — yesterday's board, on disk, **untouched** | 8 | 16.4916e-6, **EMPTY** | 11.144 | 0.9701288617 |
+| **ARM CONTROL** — today's board, hole still open | 18 | 16.4916e-6, **EMPTY** | 10.810 | 0.9701291958 |
+| **ARM FILL** — today's board, 13 fillers, GLS held | 18 | **2.2430e-6, MEASURED** | **5.101** | **0.9701349052** |
+| ARM FILLA — robustness, 19 fillers | 18 | 2.2430e-6 | 5.747 | 0.9701342594 |
+
+**The hole was worth +5.709e-6 of bar. The overnight board turnover was worth +0.334e-6.** The
+control exists precisely so those two are not confused: comparing ARM FILL against the artefact on
+disk would have credited the hole with 6.044e-6, and 0.334 of that is the board.
+
+🎯 **ADOPTED. `w26g_send.HIJACKPRICE` now reads `w79a_barfill.json` at 0.9701349052.**
+
+## 1. THE PRE-REGISTRATION IS THE POINT, AND IT WAS COMMITTED FIRST
+
+`experiments/w79_prereg.txt`, commit **0109708**, written before `w79a_barfill.py` existed. It
+fixes the filler rule as a predicate, before the board is read:
+
+    FILL = { k : oof_{k}.npy exists AND k scored on the LIVE board AND k not in BASE
+                 AND  lo_dcv < (cv[k]-cv[PICK])/1e-6 < hi_dcv }   with (lo,hi) READ from w63a
+
+and it registers a second population `FILLA` that drops the scored clause — the one arbitrary
+ingredient — as a **gating** robustness arm. It fixes the adoption rule (P2∧P3∧P4∧P5∧P7∧P9) and
+states, in advance and with the reason, that **P6 and P8 are NOT gating**: making "the new bar
+blocks nothing" a condition of adoption would be registering a rule that only ever adopts a bar
+that does nothing. That is w78 §6's lesson applied before the fact instead of after.
+
+## 2. ALL SEVEN PREDICTIONS CONFIRMED — and the two that carry the argument are P7 and the control
+
+    P1 ✅ |FILL| = 13                             (recorded)  — reproduces w77a's 13 exactly
+    P2 ✅ |d gap| = 6.1e-11  (bar 1e-9)           GATING — the GLS is untouched
+    P3 ✅ |d base| 4.0e-9, |d worthless| 2.4e-9   GATING — w63a's own GATE R tolerance
+    P4 ✅ bracket 16.4916 -> 2.2430e-6            GATING — the hole closes
+    P5 ✅ bar +6.044e-6 vs the live one           GATING — and it moves STRICTER
+    P6 ✅ 0.154e-6 from w77d's 0.9701347511       (recorded) — the post-hoc number reproduces
+    P7 ✅ |bar(FILLA) - bar(FILL)| = 0.646e-6     GATING — the bar is IDENTIFIED
+
+**P7 is the one that answers w59a.** The standing objection to filling a bracket is that it is
+"choosing the bar by choosing the bracket". Dropping the arbitrary half of the population rule —
+6 extra fillers, all unscored — moves the bar **0.646e-6 against a 5.709e-6 effect**. The bar is a
+property of where the cost curve crosses, not of which files were picked to draw it with.
+
+## 3. 🔴 A REAL BUG, FOUND ONLY BECAUSE main() WAS CALLED THREE TIMES
+
+`w63a_setprice.FAILURES` is a module global that `fail()` increments and **GATE W refuses on**. It
+was written for a file that runs once as a script. The moment `main()` runs twice in one process
+the second call inherits the first's count and **GATE W refuses AFTER PRINTING "worst absolute
+deviation 0.000e+00"** — a gate reporting a perfect pass and then failing on it. ARM FILL and ARM
+FILLA both died that way on the first run. Fixed by resetting the counter at the top of `main()`.
+⚠ **A per-run counter at module scope is a latent lie the first time the function is called
+twice**, and nothing about the single-call use exposes it. `w79b` C6 pins the defaults that make
+main() re-callable at all.
+
+## 4. THE SEND IMPACT IS ZERO, AND P9 WAS RUN IN A FORM THE PREREG DID NOT DESCRIBE
+
+**P9a — DIFFERENTIAL.** `w26g_send.py --n 10` dry, same queue, same board, HIJACKPRICE flipped
+between the two runs: the ten-file plan is **byte-identical**. The whole diff is 4 lines and every
+one of them is the bar's own printed value inside a message.
+
+**P9b — DIRECT**, on the registered 08-25 ten: `above_tier_reason` returns the same verdict for all
+ten under both bars. ⚠ **AND w79c SAYS IN ITS OWN OUTPUT HOW WEAK THAT IS**, because it is: the
+function is **consulted on 0 of the 10** (the sender only asks it about a row it predicts will land
+at or above the tier, and none of the ten is), and **10 of 10 already read BLOCK under the old
+bar**. A verdict that was BLOCK and stayed BLOCK is not evidence a stricter bar is harmless. The
+load is carried by P9a and by P8.
+
+**P8.** 4 unsent rows are admitted by the control bar and blocked by the filled one; 2 are already
+`priority = −1`; of the 2 non-vetoed (`w69_ad208std_h3`, `w69_ad208std` — **both in tomorrow's
+registered ten**), **0 are predicted at or above the tier**, so the gate is never consulted on
+them. w78 §11.3's warning about five ARM-208 files in tomorrow's ten is answered: they are
+unaffected, and the reason is the tier threshold, not the bar.
+
+⚠ **THE DEVIATION, STATED.** P9 was registered as "the sender's dry run yields the same ten as
+`w70c_plan0825.json`". That is not runnable today and the sender's own source says why: the queue
+is keyed to the UTC day, `w26d_queueprice.csv` is stamped 08-24, its priority-1 band is today's
+(sent) ten, so a dry run today falls through to the priority-0 tail and plans a different ten
+**under either bar**. Producing the registered list needs `w48e_order.py --day 2026-08-25 --write`,
+which rewrites the queue, and the prereg forbids this run from editing it. P9a/P9b hold the queue
+fixed and vary only the bar, which tests the claim P9 exists to test more tightly than the
+registered form did. `w48e_order.py --day 2026-08-25` was run **read-only** and exits 0.
+
+## 5. 🔴 THE FINDING THAT CAME OUT OF FIXING A GUARD, NOT OUT OF THE EXPERIMENT
+
+`w59b_barguard` failed on adoption: its no-over-block control asserts `w38_ad202std_h3` (CV
+0.9701330214) is admitted, and it is now 1.9e-6 **under** the bar. Re-pointing it meant searching
+for an eligible file that clears the adopted bar, and the search is the finding:
+
+> **Of the 193 OOF stems on disk, 17 clear the adopted bar and only FIVE are eligible — and all
+> five are ALREADY SENT. Every UNSENT file that clears it is refused on w40d-ineligibility or on
+> `fam=member`, before the CV bar is ever consulted.**
+
+So while the click is outstanding, **the adopted bar admits nothing that is left to send.** That is
+not an argument against it — every unsent file is below the best already-sent CV anyway, and the
+sender reaches the same place by other routes — but a later run must not rediscover it and read it
+as the gate having broken. It is recorded at the check, in `w59b`'s source, not only here.
+The control's new subject is `w36_ad199stdcorr_ens4`: the tightest eligible clearer that is **not**
+an endpoint of the bracket the bar is read off (`w36_ad199std_h3` at +0.52e-6 is the hi end — using
+it would test the bar against its own construction), and a **live auto-slot-1 file at 0.97119**, so
+over-blocking it would mean the gate refusing one of the two entries Kaggle would pick right now.
+⛔ Third re-point of this one control (w60, w61, w79); each reason lives at the check.
+
+## 6. WHAT WAS NOT TOUCHED, AND HOW THAT IS ENFORCED
+
+`w63a_setprice.json` is **byte-identical**, md5 `4fd6820e59217fbe0dfa44bffb820057` before and after,
+asserted inside `w79a` and pinned by `w79b` C2. It had to be: w76a GATE A, w77a GATE A, w77b C1/C4,
+w77c, w77d GATE D and w78a GATE A all read that file, and it is now the artefact **nothing on the
+send path consults** — which is exactly why it is fragile and why the guard uses an md5 rather than
+a field comparison. `w63a_setprice.main()` gained `fill=()` and `outfile="w63a_setprice.json"`,
+**both defaulting to the old behaviour**, and `w79b` C6 reads the live signature to keep it that
+way. No model refit, no queue/plan/ORDERS edit, no `w62a` re-run, no submission.
+
+## 7. VERIFICATION STATE
+
+- **24 standing check scripts, ALL rc=0**, each read via command substitution, never a pipe:
+  `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b w74b
+  w75b w76b w77b w78b w79b`. **`w79b_fillguard` is the new one. Extend the LIST, never the
+  integer (w76 §6).**
+- `w79b --selftest` **rc=0**: six plantable defects, each firing its **declared control set**.
+  ⚠ One case declares **two** members (`C5+C7`) because both read `stats.d_fill_filla` — declared
+  in the source, not discovered after the run, and the two are not redundant (C5 survives a later
+  run dropping P7 from `verdicts`; C7 survives a verdict edited without touching the stat).
+  C6 has no planted case and says so: it reads a live function signature.
+- `w77b --selftest` rc=0 and `w78b --selftest` rc=0, both still 5-for-5 after C5 was re-pointed.
+- `w70d_chainguard` **rc=0** (8 of 8 modules import). `w26g_send.py --n 10` dry **rc=0**.
+- **THE TOKEN WAS NOT REFRESHED, DELIBERATELY, FOR THE THIRD RUN RUNNING.** `date -u` read
+  **2026-08-24 14:50Z** and 15:15Z; expiry **2026-08-25T01:39:30Z** covers this run in full and no
+  API call failed. A refresh has a ~12h life, so refreshing now would expire ~03:15Z — still before
+  the ~12:40Z send window. **The 08-25 run must refresh at its own start; it cannot be done for it.**
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED.** No `mcp__brave__*` tool is exposed
+  (checked again this run via the deferred-tool search, no match), so the click still cannot be made.
+- Board **15:15Z: 96 teams strictly above our 0.97119 and 16 tied.** We were 94-above at 14:55Z.
+  Leader Chris Deotte **0.97168**, resubmitted 14:50:33Z, score unmoved.
+
+## 8. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-25T01:39:30Z**, so an 08-25 run
+   opens with a dead token inside the SDK's 30-minute lying window (RESEARCH ~line 615). Then
+   `w70d_chainguard`, then the **24** check scripts listed in §7 — extend the LIST, not the count.
+2. **THE 08-25 SEND IS THREE COMMANDS AND THE DAY IS ALREADY REGISTERED** (w78 §9, re-verified
+   read-only this run: `w48e_order.py --day 2026-08-25` exits 0). `w23b_sendqueue.py` →
+   `w48e_order.py --day 2026-08-25 --write` → `w26g_send.py --n 10` dry, match the registered ten
+   file-for-file, then `--go`. ⛔ Do NOT re-derive the day; do NOT hand-write it into `ORDERS`.
+   ⚠ The bar the sender prints will now read **0.9701349052** from `w79a_barfill.json`. That is
+   correct and adopted. If it reads 0.9701288617, `w79b` C1 has been bypassed — stop.
+3. 🎯 **THE OLDEST OPEN ITEM IS CLOSED.** w63 §5a's interpolated break-even, carried by w64..w78,
+   is measured. There is no successor task hiding behind it. The remaining open items are, in
+   order of what they are worth: **(a) the selection click** (§7, `SELECT_THESE.md`, +3–4.5e-6 and
+   the only thing on the account needing a human), **(b) nothing else on the send path**.
+4. ⛔ **DO NOT** re-run `w63a_setprice.py` with no arguments — it writes `w63a_setprice.json`, and
+   that file is now a **record**, pinned by six runs and by `w79b` C2, not a live artefact. If you
+   want today's numbers, run `w79a_barfill.py`, which prices the control arm into its own file ·
+   **DO NOT** point `HIJACKPRICE` back at `w63a_setprice.json` (§0: that bar is the straight line
+   across the hole and is LOOSER by 5.709e-6) · **DO NOT** re-point `w59b`'s no-over-block control
+   at `w38_ad202std_h3` or at `w36_ad199std_h3` (§5) · **DO NOT** install a `Σ|w|` health check
+   (w78b C2) · **DO NOT** quote w77 §6's "Σ|w| is the alarm" as general (w78 §5) · **DO NOT** quote
+   `w77a`'s P6 as a finding (`w77b` C2 pins it VOID) · **DO NOT** cite w63 §4's iff as established
+   (w76b C3) · **DO NOT** re-open the original dataset · **DO NOT** re-parameterise
+   `w46c.ERA_SHIFT` (w75 §1) · **DO NOT** re-derive a frozen constant from a mutable CSV (w75 §3) ·
+   **DO NOT** re-run a pricer as a routine staleness check (w74 §4) · **DO NOT** re-base the ranker
+   (w73 §2) · **DO NOT** build files for 08-29..08-31 (w72 §2.1) · **DO NOT** apply the duplicate
+   override (w71 §4.1) · **DO NOT** take stacker seed/fold averaging (w73 §1), an OOF
+   error-analysis angle (w74 §1), or a LightGBM/CatBoost/XGBoost tuning angle (w69, w70 §0, w71 §5,
+   and this run's own set-aside ANGLE).
+5. ⚠ **NEW LESSONS.**
+   • **A run that enlarges a design owes a CONTROL ARM ON THE SAME BOARD, not a comparison against
+     the stored artefact.** The stored bar was 6.044e-6 away; the control was 5.709e-6 away; the
+     difference is the board moving overnight and would have been booked to the treatment (§0).
+     w78 measured that confound at +0.334e-6 and this run would still have inherited it without
+     paying for the third arm.
+   • **The robustness arm is what answers the standing objection, and it has to be GATING to
+     count.** w59a's objection to filling a bracket is that you are choosing the bar by choosing
+     the bracket. No amount of care about the primary population answers that; a second population
+     that moves the answer 0.646e-6 does (§2). A robustness arm registered as "recorded" would
+     have been an ornament.
+   • **A per-run counter at module scope is a latent lie the first time you call the function
+     twice**, and it can make a gate print a perfect pass and then refuse on it (§3).
+   • **Fixing the guard your change broke is where the finding is.** The experiment produced a
+     number. The *search for a new subject for `w59b`'s control* produced the fact that the adopted
+     bar admits nothing left to send (§5) — which is a more useful thing to know about the bar than
+     its value.
+   • **State the weakness of a confirmed prediction in the artefact that confirms it.** P9b came
+     back ✅ on all ten and is close to vacuous; `w79c` prints both, in that order, so no later run
+     can quote the tick without the caveat (§4).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+`git push origin main` fails with `gh: command not found` → `could not read Username for
+'https://github.com'`. No `gh`, no ssh key, no token in the environment. Local `main` is ahead of
+`origin/main`; a later run can diff the two refs itself. Nothing is lost — the workspace is the
+memory and it is committed — but the remote does not have this run.

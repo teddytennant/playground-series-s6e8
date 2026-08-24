@@ -1,0 +1,155 @@
+==============================================================================================
+GATE W — the unscored-capable estimator must reproduce w62a_autopair.json EXACTLY
+==============================================================================================
+  8 files, 10 recorded prices re-derived
+  worst absolute deviation from w62a's artefact: 0.000e+00   (bar 1e-9)
+  ✅ GATE W PASSED — P1 CONFIRMED. The copy is faithful; now price the new board.
+
+==============================================================================================
+LIVE BOARD: 131 scored submissions, 131 distinct files
+==============================================================================================
+  auto-slot tier  public 0.97119: 2 files ['w36_ad199stdcorr_ens4', 'w38_ad202stdcorr_ens4']
+  next tier down  public 0.97118: 5 files ['w21_ad187corr_ens4', 'w27_ad190stdcorr', 'w29_ad194stdcorr', 'w36_ad199stdcorr', 'w40_ad211stdcorr']
+
+  ✅ GATE T2: determined pair w36_ad199stdcorr_ens4 + w38_ad202stdcorr_ens4, unmoved since w62a.
+
+=== the enlarged design: 37 files (2 tier1 + 5 tier2 + 10 candidates + WANTED + 19 FILL) ===
+  GLS common gap G = +1042.70e-6 over 18 scored; gamma = -0.091758
+  19 hole-fillers withheld from the GLS: ['w34_ad195stdcorr', 'w36_ad197std', 'w36_ad197std_h3', 'w36_ad197stdcorr', 'w36_ad199std', 'w36_ad199std_h3', 'w36_ad199std_hybrid', 'w36_ad199std_rescale', 'w38_ad202std', 'w38_ad202std_h3', 'w38_ad202std_hybrid', 'w40_ad211std', 'w40_ad211std_h3', 'w42_ad217std_logit', 'w50_ad216std_hybrid', 'w50_ad216std_rescale', 'w69_ad208std', 'w69_ad208std_h3', 'w69_ad208std_hybrid']
+
+  GATE R: determined price on the enlarged design 4.522768531926 vs w62a 4.522768563707
+          |d| = 3.178e-08   (bar 1.0e-6)
+          -- PASS. P2 CONFIRMED.
+
+  status quo (nothing clears, the DETERMINED pair): +4.5228e-6
+  worthless-hijacker limit (X contributes nothing):  +5.5712e-6
+  the whole usable range is therefore 1.0484e-6 wide — it was much wider at n = 5
+
+=== HIJACK, one file at a time (this is the price w60 applied TWICE) ===
+  candidate                     dCV    uncond      cond  P(above)  verdict
+  w36_ad199stdcorr            +0.00    -0.051    -0.180       nan  HELPS  tier2
+  w40_ad211stdcorr            -2.53    +2.276    +3.470       nan  HELPS  tier2
+  w50_ad216std_hybrid         -3.45    +1.536    +2.510       nan  HELPS  fill
+  w36_ad199std_h3             -4.58    +3.486    +4.377       nan  HELPS  fill
+  w42_ad217std_logit          -5.55    +2.218    +3.079       nan  HELPS  fill
+  w69_ad208std_h3             -5.77    +3.969    +4.706       nan  HELPS  fill
+  w40_ad211std_h3             -6.82    +4.409    +5.004       nan  HELPS  fill
+  w38_ad202std_h3             -6.98    +4.584    +5.132       nan  HURTS  fill
+  w50_ad216std_rescale        -7.45    +3.247    +3.979       nan  HELPS  fill
+  w69_ad208std                -7.52    +5.095    +5.433       nan  HURTS  fill
+  w36_ad199std                -7.68    +5.165    +5.456       nan  HURTS  fill
+  w40_ad211std                -9.05    +5.367    +5.529       nan  HURTS  fill
+  w38_ad202std                -9.43    +5.470    +5.558       nan  HURTS  fill
+  w36_ad197stdcorr           -11.38    +5.264    +5.462       nan  HURTS  fill
+  w69_ad208std_hybrid        -15.13    +5.422    +5.522       nan  HURTS  fill
+  w34_ad195stdcorr           -15.21    +5.493    +5.551       nan  HURTS  fill
+  w36_ad197std_h3            -15.56    +5.480    +5.546       nan  HURTS  fill
+  w38_ad202std_hybrid        -16.74    +5.514    +5.557       nan  HURTS  fill
+  w36_ad199std_hybrid        -16.88    +5.495    +5.550       nan  HURTS  fill
+  w36_ad199std_rescale       -18.07    +5.550    +5.567       nan  HURTS  fill
+  w36_ad197std               -18.95    +5.567    +5.571       nan  HURTS  fill
+  w40_ad211std_rescale       -19.02    +5.547    +5.567    0.0057  HURTS  plan0824
+  w38_ad202std_rescale       -19.97    +5.557    +5.570    0.0036  HURTS  plan0824
+  w34_ad196std_h3            -20.09    +5.541    +5.568    0.0000  HURTS  plan0824
+  w34_ad195std_wh3           -20.39    +5.548    +5.569    0.0000  HURTS  plan0824
+  w34_ad195std_w             -20.50    +5.557    +5.570    0.0000  HURTS  plan0824
+  w40_ad211std_hybrid        -20.51    +5.493    +5.566    0.0000  HURTS  plan0824
+  w34_ad196std               -21.46    +5.569    +5.571    0.0000  HURTS  plan0824
+  w29_ad194stdcorr           -21.72    +5.564    +5.568       nan  HURTS  tier2
+  w34_ad195std               -21.84    +5.570    +5.571    0.0000  HURTS  plan0824
+  w27_ad190stdcorr           -21.87    +5.561    +5.566       nan  HURTS  tier2
+  w27_ad188stdcorr           -23.20    +5.559    +5.567    0.0029  HURTS  plan0824
+  w29_ad194std_h3            -26.00    +5.565    +5.570    0.0000  HURTS  plan0824
+  w21_ad187corr_ens4         -36.07    +5.571    +5.571       nan  HURTS  tier2
+
+=== GATE J: delta_dilution(X) == n*(only(X)-base)/C(n+1,2) at the LIVE n = 2 ===
+  max |delta_dilution - n*(only-base)/C(n+1,2)| over 34 files = 7.761e-11
+  -- PASS. The break-even is UNCHANGED by n (delta=0 <=> only(X)=base for every n),
+     so 'one bar governs both landings' SURVIVES. The LEVERAGE does not: C(n+1,2)/n = 1.5x
+     at n = 2, against the 3x w59a measured at n = 5 and the sender still prints.
+
+=== THE DETERMINED-PAIR BREAK-EVEN (adjacent brackets only) ===
+  UNCONDITIONAL    H =   6.93e-6  -> HELPS iff CV >= 0.9701330788   [bracket w40_ad211std_h3 -6.82 .. w38_ad202std_h3 -6.98]
+    ⚠ FURTHER crossing at 7.01e-6 (w38_ad202std_h3..w50_ad216std_rescale) — the cost curve is not monotone
+    ⚠ FURTHER crossing at 7.50e-6 (w50_ad216std_rescale..w69_ad208std) — the cost curve is not monotone
+  CONDITIONAL@8.77 H =   5.75e-6  -> HELPS iff CV >= 0.9701342594   [bracket w42_ad217std_logit -5.55 .. w69_ad208std_h3 -5.77]
+    ⚠ FURTHER crossing at 7.23e-6 (w38_ad202std_h3..w50_ad216std_rescale) — the cost curve is not monotone
+    ⚠ FURTHER crossing at 7.48e-6 (w50_ad216std_rescale..w69_ad208std) — the cost curve is not monotone
+
+  BINDING (the stricter of the two): H = 5.75e-6, CV bar 0.9701342594
+  ✅ THE BRACKET IS 0.217e-6 WIDE AND THE HOLE IS FILLED. 19 candidates were added
+     to the design INSIDE it, so the crossing is MEASURED between adjacent files rather than
+     interpolated across a gap. The GLS is untouched — the fillers are withheld from `LB`
+     and carry xh0 = 0 — and the population came from a rule registered in w79_prereg.txt
+     BEFORE the board was read. That last clause is what separates this from w59a's
+     'choosing the bar by choosing the bracket'.
+
+=== P4, like-for-like against w59a's OWN columns ===
+  column              w59a (n=5 tie)  w63a (n=2 pair)      move
+  UNCONDITIONAL                12.97             6.93     -6.04  TIGHTER
+  CONDITIONAL@8.77             10.59             5.75     -4.84  TIGHTER
+  superseded CV bar 0.9701294160 -> 0.9701342594 (+4.84e-6)
+
+==============================================================================================
+P5 — IS THE PER-FILE PRICE ADDITIVE? (w62 §4, as a property of the instrument)
+==============================================================================================
+  105 candidate pairs.  joint - add:  min -0.9971  mean +9.0342  max +18.9809 e-6
+  joint > add for 79/105 pairs
+  tightest pair: w36_ad199stdcorr + w21_ad187corr_ens4  add +0.9974  joint +0.0003  gap -0.9971
+
+  POST-HOC partition by whether a member BEATS the status quo pair (only(X) < base) —
+  written after the falsification, registered for a later run, evidence for nothing here:
+    both help            n    1   gap>0    1/1     min  +2.2285  mean  +2.2285
+    exactly one helps    n   26   gap>0    0/26    min  -0.9971  mean  -0.7623
+    neither helps        n   78   gap>0   78/78    min  +8.5125  mean +12.3869
+
+  ⚠ THE ADDITIVE PRICE IS OPTIMISTIC. add() credits each file with the full benefit
+    of displacing a tier-1 file, but there is only ONE such displacement to sell: the
+    second clearer displaces the OTHER tier-1 file and cannot re-earn it. Algebraically
+    joint - add = ½[M(X,A)+M(X,B)+M(Y,A)+M(Y,B)] - M(X,Y) - M(A,B), i.e. CROSSED minus
+    MATCHED pairings of the same four files, and E[max] pays almost nothing for pairing
+    two strong files together. w60 registered +6.730e-6 and realised +1.235e-6 (w62 §4).
+
+==============================================================================================
+THE SET PRICE — the whole 2026-08-24 ten priced as ONE day, not ten files
+==============================================================================================
+  file                                 cv   pred_lb  P(above)    P(at)  P_MAX gate
+  w40_ad211std_rescale     0.9701209816  0.971173    0.0057   0.0766  pass
+  w38_ad202std_rescale     0.9701200354  0.971171    0.0036   0.0575  pass
+  w27_ad188stdcorr         0.9701168076  0.971171    0.0029   0.0501  pass
+  w29_ad194std_h3          0.9701140064  0.971152    0.0000   0.0001  pass
+  w34_ad196std             0.9701185506  0.971150    0.0000   0.0000  pass
+  w34_ad195std             0.9701181649  0.971149    0.0000   0.0000  pass
+  w40_ad211std_hybrid      0.9701194945  0.971142    0.0000   0.0000  pass
+  w34_ad196std_h3          0.9701199173  0.971138    0.0000   0.0000  pass
+  w34_ad195std_w           0.9701195043  0.971137    0.0000   0.0000  pass
+  w34_ad195std_wh3         0.9701196117  0.971133    0.0000   0.0000  pass
+
+  P(no file of the ten clears the tier) = 0.987801   P(at least one) = 0.012199
+
+  status quo, nothing sent                 +4.5228e-6
+  SET price of the registered ten (cond)   +4.6843e-6   delta +0.1616
+  SET price of the registered ten (uncond) +4.6833e-6   delta +0.1605
+  the ADDITIVE price of the same ten       +4.5354e-6   delta +0.0126   <-- w60's arithmetic
+  additive error on the day                +0.1479e-6
+
+==============================================================================================
+THE REGISTERED PREDICTIONS (w63_prereg.txt)
+==============================================================================================
+  ✅ CONFIRMED            P1 GATE W reproduces w62a's 10 prices to < 1e-9      [worst 0.000e+00]
+  ✅ CONFIRMED            P2 GATE R: enlarged design within 1.0e-6 of 4.522769 [|d| 3.178e-08]
+  ✅ CONFIRMED            P3 GATE J holds and the leverage is 1.5x, not 3x     [worst 7.761e-11, C(n+1,2)/n = 1.500]
+  ✅ CONFIRMED            P4 the bar TIGHTENS, like-for-like on BOTH columns   [cond 5.75 vs 10.59, uncond 6.93 vs 12.97]
+  ❌ *** FALSIFIED ***    P5 STRICT joint > add for EVERY candidate pair       [79/105, mean gap +9.0342e-6]
+  *** FAILURE: P5 STRICT joint > add for EVERY candidate pair
+  ✅ CONFIRMED            P6 P(any of the registered ten clears) < 0.05        [0.012199]
+  (P4 as LITERALLY registered — H_binding < 12.97 — reads TRUE, and is not the claim: it compares
+   this run's CONDITIONAL bar against w59a's UNCONDITIONAL one. Not scored.)
+  (P7 is checked by re-running w26g_send.py --n 10 dry AFTER the artefact is wired.)
+
+FAILURES: 1
+
+⚠ WRITING ANYWAY, with ['P5 STRICT joint > add for EVERY candidate pair'] recorded in the artefact: every GATE passed,
+  so the BAR is sound; what failed are readings about the instrument's shape and the
+  direction of the move. See the write-rule note in the source.
+wrote experiments/w79a_fillall.json

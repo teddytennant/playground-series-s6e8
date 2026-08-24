@@ -1,5 +1,25 @@
 # Leaderboard notes — playground-series-s6e8
 
+## Snapshot 2026-08-24 ~15:15 UTC — w79, top-200 page
+
+| | |
+|---|---|
+| us | **0.97119**, unmoved (best of `w36_ad199stdcorr_ens4` / `w38_ad202stdcorr_ens4`, both sent 08-23) |
+| teams strictly above us | **96** (was 94 at 14:55Z, w78) |
+| teams tied with us | **16** |
+| leader | Chris Deotte **0.97168**, resubmitted 14:50:33Z — **score unmoved**, so the resubmit did not land |
+| 2nd / 3rd | Changye Li 0.97149 · MILANFX 0.97146 |
+
+**Two more places lost in twenty minutes, and none of today's ten moved us.** All ten 08-24 sends
+came back 0.97113–0.97117, every one at or below our standing 0.97119 — which is what the queue's
+own pricing said would happen (`w26d` priced the whole queue at 6.3e-4 of beating the board). The
+0.97121 band directly above us now holds 14 teams; the 0.97120 step holds at least 6 more.
+
+⚠ The public board is not where the remaining value is. Nothing in the queue is expected to beat
+0.97119, the drain continues only because the brief makes an unused slot pure waste, and the one
+action still worth expected private AUC is the **selection click** (`SELECT_THESE.md`, +3–4.5e-6).
+
+
 ## Snapshot 2026-08-24 ~14:55 UTC — w78, top-200 page
 
 | | score | vs the w77 snapshot ~40 min earlier |

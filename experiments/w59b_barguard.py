@@ -99,7 +99,30 @@ def main() -> None:
     # eligibility half of the two-part test, before the CV bar is ever consulted. The property
     # under test is unchanged ("a file that clears the bar is still admitted"); only the subject
     # moved, to an es-CLEARED pack. ⛔ Do not point it back at ad211 to make this pass.
-    for stem, cv in (("w38_ad202std_h3", 0.9701330214),):
+    # ⚠ RE-POINTED AGAIN w79, NOT SOFTENED, and the reason lives here at the check — the third
+    # time this one subject has moved and the second time the reason is a bar change rather than
+    # an eligibility change. w79 adopted the hole-filled bar (0.9701288617 -> 0.9701349052,
+    # +6.04e-6; prereg experiments/w79_prereg.txt, committed 0109708 before the measurement),
+    # and `w38_ad202std_h3` at 0.9701330214 is 1.9e-6 UNDER the new bar. Keeping it here would
+    # assert the adoption did not happen. The property under test is unchanged: "a file that
+    # clears the bar is still admitted", i.e. the gate does not OVER-block.
+    #
+    # 🔴 AND THE SEARCH FOR A REPLACEMENT TURNED UP THE FACT THAT MATTERS MOST ABOUT THIS BAR,
+    # so it is recorded at the check rather than only in the journal: of the 193 OOF stems on
+    # disk, 17 clear the adopted bar and only FIVE of those are eligible — and ALL FIVE ARE
+    # ALREADY SENT. Every UNSENT file that clears it is refused on w40d-ineligibility or on
+    # fam=member, before the CV bar is ever consulted. So while the click is outstanding, the
+    # adopted bar admits NOTHING that is left to send. That is not an argument against the bar
+    # — every unsent file is below the best already-sent CV anyway — but a later run must not
+    # discover it by surprise and read it as the gate having broken.
+    #
+    # The subject is `w36_ad199stdcorr_ens4`, the tightest eligible clearer that is not itself
+    # an endpoint of the bracket the bar is read off (`w36_ad199std_h3`, +0.52e-6, is the hi end
+    # — using it here would test the bar against its own construction). It clears by 1.68e-6 and
+    # it is a LIVE AUTO-SLOT-1 FILE at public 0.97119: over-blocking it would mean the gate
+    # refusing a file that is at this moment one of the two final entries Kaggle would pick.
+    # ⛔ Do not point it back at w38_ad202std_h3, and do not point it at w36_ad199std_h3.
+    for stem, cv in (("w36_ad199stdcorr_ens4", 0.9701365875),):
         check(f"still admits {stem} (eligible, over the bar)",
               SND.above_tier_reason(row(cv, stem), bar) is None, f"cv {cv:.10f}")
     # ⚠ RE-POINTED AGAIN w61, NOT SOFTENED, and the reason lives here. w60 pointed this at

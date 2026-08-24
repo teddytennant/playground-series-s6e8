@@ -1,0 +1,136 @@
+{
+ "prereg": "experiments/w79_prereg.txt @ 0109708",
+ "deviation": "registered form needs `w48e_order --day 2026-08-25 --write`, which rewrites the queue; the prereg forbids that. Run as P9a (differential, caller-captured) + P9b (direct, this file).",
+ "p9b": true,
+ "p9b_vacuous_on": 10,
+ "p9b_already_blocked_under_old_bar": 10,
+ "old_bar": 0.9701288617,
+ "new_bar": 0.970134905249569,
+ "w48e_0825_rc": 0,
+ "threshold_public": 0.971195,
+ "registered_ten": [
+  "w29_ad194std_hybrid",
+  "w69_ad208std_rankraw",
+  "w36_ad197std_rescale",
+  "w36_ad199std_rankraw",
+  "w27_ad190std_h3",
+  "w27_ad188raw_h3",
+  "w69_ad208std_rescale",
+  "w69_ad208std_hybrid",
+  "w69_ad208std",
+  "w69_ad208std_h3"
+ ],
+ "rows": [
+  {
+   "stem": "w29_ad194std_hybrid",
+   "in_queue": true,
+   "cv": 0.9701056245229752,
+   "pred_lb": 0.9711407409341786,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "cv 0.9701056245 < the hijack bar 0.9701349052 \u2014 above the tier it would take auto-slot 1 from a tier-1 draw and make E[max] WORSE, at 1.5x the leverage of an in-tier landing (w63a GATE J)"
+  },
+  {
+   "stem": "w69_ad208std_rankraw",
+   "in_queue": true,
+   "cv": 0.9701073320136436,
+   "pred_lb": 0.9711339051229364,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "w40d-ineligible arm \u2014 w69_prereg \u00a72.1, keyed before the arm was built and before its CV existed \u2014 ARM 208 is ARM 211 minus the three ext_members14 members, a DIFFERENT PACK, so w40_ad211's retirement "
+  },
+  {
+   "stem": "w36_ad197std_rescale",
+   "in_queue": true,
+   "cv": 0.9701085984575708,
+   "pred_lb": 0.9711549501625218,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "cv 0.9701085985 < the hijack bar 0.9701349052 \u2014 above the tier it would take auto-slot 1 from a tier-1 draw and make E[max] WORSE, at 1.5x the leverage of an in-tier landing (w63a GATE J)"
+  },
+  {
+   "stem": "w36_ad199std_rankraw",
+   "in_queue": true,
+   "cv": 0.9701111921519866,
+   "pred_lb": 0.9711394735469456,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "cv 0.9701111922 < the hijack bar 0.9701349052 \u2014 above the tier it would take auto-slot 1 from a tier-1 draw and make E[max] WORSE, at 1.5x the leverage of an in-tier landing (w63a GATE J)"
+  },
+  {
+   "stem": "w27_ad190std_h3",
+   "in_queue": true,
+   "cv": 0.9701133391214056,
+   "pred_lb": 0.9711507428472888,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "cv 0.9701133391 < the hijack bar 0.9701349052 \u2014 above the tier it would take auto-slot 1 from a tier-1 draw and make E[max] WORSE, at 1.5x the leverage of an in-tier landing (w63a GATE J)"
+  },
+  {
+   "stem": "w27_ad188raw_h3",
+   "in_queue": true,
+   "cv": 0.9701136018891744,
+   "pred_lb": 0.9711512244243308,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "cv 0.9701136019 < the hijack bar 0.9701349052 \u2014 above the tier it would take auto-slot 1 from a tier-1 draw and make E[max] WORSE, at 1.5x the leverage of an in-tier landing (w63a GATE J)"
+  },
+  {
+   "stem": "w69_ad208std_rescale",
+   "in_queue": true,
+   "cv": 0.9701192358913664,
+   "pred_lb": 0.9711702951415044,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "w40d-ineligible arm \u2014 w69_prereg \u00a72.1, keyed before the arm was built and before its CV existed \u2014 ARM 208 is ARM 211 minus the three ext_members14 members, a DIFFERENT PACK, so w40_ad211's retirement "
+  },
+  {
+   "stem": "w69_ad208std_hybrid",
+   "in_queue": true,
+   "cv": 0.9701248767237036,
+   "pred_lb": 0.971149595976582,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "w40d-ineligible arm \u2014 w69_prereg \u00a72.1, keyed before the arm was built and before its CV existed \u2014 ARM 208 is ARM 211 minus the three ext_members14 members, a DIFFERENT PACK, so w40_ad211's retirement "
+  },
+  {
+   "stem": "w69_ad208std",
+   "in_queue": true,
+   "cv": 0.970132488570564,
+   "pred_lb": 0.971169848120259,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "w40d-ineligible arm \u2014 w69_prereg \u00a72.1, keyed before the arm was built and before its CV existed \u2014 ARM 208 is ARM 211 minus the three ext_members14 members, a DIFFERENT PACK, so w40_ad211's retirement "
+  },
+  {
+   "stem": "w69_ad208std_h3",
+   "in_queue": true,
+   "cv": 0.9701342349514506,
+   "pred_lb": 0.9711589589366736,
+   "at_or_above_tier": false,
+   "old_blocked": true,
+   "new_blocked": true,
+   "unchanged": true,
+   "new_reason": "w40d-ineligible arm \u2014 w69_prereg \u00a72.1, keyed before the arm was built and before its CV existed \u2014 ARM 208 is ARM 211 minus the three ext_members14 members, a DIFFERENT PACK, so w40_ad211's retirement "
+  }
+ ],
+ "artefact": "w79a_barfill.json"
+}

@@ -67,7 +67,21 @@ from check_selection import WANTED as _WANTED, WANTED_INELIGIBLE            # no
 # board it was derived on, and `cv_bar_superseded` in the new one carries its bar.
 # ⛔ Do not point this back at w59a to make a blocked file send: that bar prices a tie that no
 # longer exists, and `hijack_cv_bar`'s live SET check would void it anyway.
-HIJACKPRICE = os.path.join(HERE, "w63a_setprice.json")
+# ⚠⚠ w79: THE ARTEFACT MOVED AGAIN, AND THIS TIME THE BOARD DID NOT — THE DESIGN DID. w63a's
+# break-even was interpolated across a 16.4916e-6 hole in its own 15-candidate design with
+# nothing inside it (w63 §5a). w77a found 13 scored files sitting in that hole; w79a puts them
+# in the DESIGN and withholds them from the GLS, which is the treatment w63a already gives an
+# unsent candidate, and the crossing stops being interpolated: bracket 16.4916 -> 2.2430e-6,
+# H_binding 10.8102 -> 5.1007e-6, bar 0.9701291958 -> 0.9701349052 on one and the same board.
+# The filler population came from a rule fixed in `w79_prereg.txt` (committed 0109708) BEFORE
+# the board was read, and the bar moves 0.646e-6 when the one arbitrary clause in that rule is
+# dropped — so it is not "choosing the bar by choosing the bracket" (w59a), and w79a records
+# that robustness arm. `w79a_barfill.json` is written by `w63a_setprice.main()` itself, in the
+# same schema, so every reader below and every guard keeps working unchanged.
+# ⛔ Do not point this back at `w63a_setprice.json` to make a blocked file send: that bar is the
+# straight line across the hole, it is LOOSER by 5.709e-6, and the file it names is kept only as
+# the record every w76/w77/w78 pin compares against.
+HIJACKPRICE = os.path.join(HERE, "w79a_barfill.json")
 
 
 def wanted_cv_bar():

@@ -244,7 +244,22 @@ def gate_w(y, beta):
     return worst, ncheck
 
 
-def main() -> None:
+def main(fill=(), outfile="w63a_setprice.json") -> dict:
+    """Price the day. `fill` and `outfile` were added by w79 (prereg experiments/w79_prereg.txt,
+    committed 0109708 before the caller existed) and BOTH DEFAULT TO THE ORIGINAL BEHAVIOUR:
+    main() with no arguments prices w63a's own design and writes w63a_setprice.json, exactly as
+    before. ⚠ That does NOT mean the file it writes today is byte-identical to the one on disk —
+    the board has moved since, and w78 measured the move as +0.334e-6 of bar. The stored artefact
+    is what w76a/w77a/w77b/w78a pin against, so w79 does not overwrite it: it passes an `outfile`
+    instead, and `w79b_fillguard` checks the stored file's md5 is untouched. See the FILL note at
+    the design block for what the fillers do and, more to the point, what they do not touch."""
+    # ⚠⚠ w79. `FAILURES` is a MODULE global that `fail()` increments and GATE W refuses on. It
+    # was written for a file that runs once as a script; the moment main() is callable twice in
+    # one process — which w79a does, three arms on one board — the second call inherits the
+    # first's count and GATE W refuses AFTER PRINTING "worst deviation 0.000e+00". Reset it here
+    # so the counter means what its name says: failures in THIS pricing run.
+    global FAILURES
+    FAILURES = 0
     write = "--no-write" not in sys.argv
     beta = float(json.load(open(os.path.join(HERE, "w17d_coupling.json")))["coupling_beta_median"])
     tr, _ = load_raw()
@@ -298,17 +313,29 @@ def main() -> None:
 
     # ------------------------------------------------------------------ the enlarged design
     CAND = [c for c in PLAN_0824 if c not in TIER1]
-    NAMES = sorted(set(TIER1 + TIER2 + list(WANTED) + CAND))
+    BASE_NAMES = sorted(set(TIER1 + TIER2 + list(WANTED) + CAND))
+    # ⚠ w79. FILL joins the DESIGN and is WITHHELD FROM THE GLS. `fit` reads its scored set as
+    # `[k for k in NAMES if k in LB]`, so a name that is in NAMES but absent from the dict handed
+    # to it gets xh0 = 0 and is priced through the coupling -- which is already exactly what this
+    # file does with an unsent plan candidate. NO LINE OF `fit` CHANGES; only what it is handed.
+    # The fillers exist to put candidates INSIDE the 16.5e-6 bracket hole the break-even is
+    # otherwise interpolated across (w63 §5a, w77a, w78). FILL is empty by default.
+    FILL = sorted(set(fill) - set(BASE_NAMES))
+    NAMES = sorted(set(BASE_NAMES) | set(FILL))
+    LB_FIT = {k: v for k, v in LB.items() if k not in set(FILL)}
     missing = [k for k in NAMES if not os.path.exists(os.path.join(SUB, f"oof_{k}.npy"))]
     assert not missing, f"no OOF vector for {missing} -- cannot price them, do not guess"
     V, cv = _load(NAMES, y)
-    E = fit(NAMES, LB, cv, V, y, beta)
+    E = fit(NAMES, LB_FIT, cv, V, y, beta)
     price, gap, gamma = E["price"], E["gap"], E["gamma"]
     base = price([A, Bf])
     print(f"\n=== the enlarged design: {len(NAMES)} files "
-          f"({len(TIER1)} tier1 + {len(TIER2)} tier2 + {len(CAND)} candidates + WANTED) ===")
-    print(f"  GLS common gap G = {gap:+.2f}e-6 over {sum(k in LB for k in NAMES)} scored; "
+          f"({len(TIER1)} tier1 + {len(TIER2)} tier2 + {len(CAND)} candidates + WANTED"
+          f"{f' + {len(FILL)} FILL' if FILL else ''}) ===")
+    print(f"  GLS common gap G = {gap:+.2f}e-6 over {sum(k in LB_FIT for k in NAMES)} scored; "
           f"gamma = {gamma:+.6f}")
+    if FILL:
+        print(f"  {len(FILL)} hole-fillers withheld from the GLS: {FILL}")
 
     # ------------------------------------------------------------------ GATE R
     dR = abs(base - W62A_COST)
@@ -342,7 +369,7 @@ def main() -> None:
     print("\n=== HIJACK, one file at a time (this is the price w60 applied TWICE) ===")
     print(f"  {'candidate':24s} {'dCV':>8s} {'uncond':>9s} {'cond':>9s} {'P(above)':>9s}  verdict")
     rows = []
-    for x in sorted(set(CAND + TIER2 + [PICK]), key=lambda k: -cv[k]):
+    for x in sorted(set(CAND + TIER2 + [PICK] + FILL), key=lambda k: -cv[k]):
         cu = only(x)
         cc = only(x, E["cond_price"]([x], thresh))
         pl = float(PRED[f"{x}.csv"]) if x in CAND else float("nan")
@@ -350,7 +377,8 @@ def main() -> None:
               if pl == pl else float("nan"))
         rows.append(dict(stem=x, cv=cv[x], dcv=(cv[x] - cv[PICK]) / U, uncond=cu, cond=cc,
                          pred_lb=pl, p_above=pa, where=("tier2" if x in TIER2 else "")
-                         + (" plan0824" if x in CAND else ""), helps=bool(cu < base)))
+                         + (" plan0824" if x in CAND else "")
+                         + (" fill" if x in FILL else ""), helps=bool(cu < base)))
         print(f"  {x:24s} {rows[-1]['dcv']:+8.2f} {cu:+9.3f} {cc:+9.3f} "
               f"{pa if pa == pa else float('nan'):9.4f}  {'HELPS' if cu < base else 'HURTS'}"
               f"  {rows[-1]['where'].strip()}")
@@ -425,13 +453,22 @@ def main() -> None:
         bw = max(b["width"] for b in brackets.values())
         print(f"\n  BINDING (the stricter of the two): H = {H_bind:.2f}e-6, "
               f"CV bar {bar_new:.10f}")
-        print(f"  ⚠⚠ THE BRACKET IS {bw:.1f}e-6 WIDE AND NOTHING SITS INSIDE IT. The crossing is "
-              f"linearly\n     interpolated across a hole in the design: every file between "
-              f"dCV {brackets['cond']['hi_dcv']:+.1f}\n     and {brackets['cond']['lo_dcv']:+.1f} "
-              f"was SENT on 08-23 and is now scored, and every unsent file is\n     below the "
-              f"hole. This is the dominant uncertainty in the bar and it is NOT reduced by\n"
-              f"     adding files to the candidate set by hand — w59a: 'persisting a bar derived "
-              f"from\n     EXTRA_CAND would be choosing the bar by choosing the bracket.'")
+        if FILL:
+            print(f"  ✅ THE BRACKET IS {bw:.3f}e-6 WIDE AND THE HOLE IS FILLED. {len(FILL)} "
+                  f"candidates were added\n     to the design INSIDE it, so the crossing is "
+                  f"MEASURED between adjacent files rather than\n     interpolated across a gap. "
+                  f"The GLS is untouched — the fillers are withheld from `LB`\n     and carry "
+                  f"xh0 = 0 — and the population came from a rule registered in w79_prereg.txt\n"
+                  f"     BEFORE the board was read. That last clause is what separates this from "
+                  f"w59a's\n     'choosing the bar by choosing the bracket'.")
+        else:
+            print(f"  ⚠⚠ THE BRACKET IS {bw:.1f}e-6 WIDE AND NOTHING SITS INSIDE IT. The crossing is "
+                  f"linearly\n     interpolated across a hole in the design: every file between "
+                  f"dCV {brackets['cond']['hi_dcv']:+.1f}\n     and {brackets['cond']['lo_dcv']:+.1f} "
+                  f"was SENT on 08-23 and is now scored, and every unsent file is\n     below the "
+                  f"hole. This is the dominant uncertainty in the bar and it is NOT reduced by\n"
+                  f"     adding files to the candidate set by hand — w59a: 'persisting a bar derived "
+                  f"from\n     EXTRA_CAND would be choosing the bar by choosing the bracket.'")
 
     # ⚠ LIKE-FOR-LIKE, and NOT what w63_prereg.txt registered. See W59A_H_BINDING above.
     print("\n=== P4, like-for-like against w59a's OWN columns ===")
@@ -627,6 +664,10 @@ def main() -> None:
         tiers=dict(slot1=list(TIER1), slot2=list(TIER2),
                    slot1_public=float(t1v), slot2_public=float(t2v)),
         determined=True, auto_pair=list(TIER1), pick=PICK, pick_cv=cv[PICK],
+        # w79: what the design was, and which part of it fed the GLS. A reader has to be able to
+        # tell a MEASURED bar from an INTERPOLATED one without re-running anything.
+        fill=list(FILL), base_names=list(BASE_NAMES), n_design=len(NAMES),
+        gls_scored=sorted(k for k in NAMES if k in LB_FIT), hole_filled=bool(FILL),
         wanted=list(WANTED), beta=beta, gamma=gamma, gap=gap,
         base=base, worthless_limit1=worthless, threshold_public=thresh,
         # ⚠ the key is `H_cond_predsd`, w59a's name for the same quantity, NOT a tidier one.
@@ -644,9 +685,13 @@ def main() -> None:
         predictions=dict(p1=p1, p2=p2, p3=p3, p4=p4, p4_literal=p4_literal, p5=p5, p6=p6),
         falsified=[nm for nm, ok, _ in checks if not ok], failures=FAILURES,
         bracket=brackets, caveats=[
-            "the break-even is interpolated across a hole in the design "
-            f"({max((b['width'] for b in brackets.values()), default=0):.1f}e-6 wide, nothing "
-            "inside it)",
+            (f"the break-even is MEASURED across a "
+             f"{max((b['width'] for b in brackets.values()), default=0):.3f}e-6 bracket; "
+             f"{len(FILL)} hole-fillers sit in the design and are withheld from the GLS (w79)")
+            if FILL else
+            ("the break-even is interpolated across a hole in the design "
+             f"({max((b['width'] for b in brackets.values()), default=0):.1f}e-6 wide, nothing "
+             "inside it)"),
             "every above-tier landing is pooled into one bucket in the set price, so two "
             "clearers are treated as tied rather than ordered; since gamma < 0 the finer model "
             "would select the WORSE private posterior, so this pooling is mildly ANTI-conservative",
@@ -678,9 +723,10 @@ def main() -> None:
         print(f"\n⚠ WRITING ANYWAY, with {out['falsified']} recorded in the artefact: every GATE "
               f"passed,\n  so the BAR is sound; what failed are readings about the instrument's "
               f"shape and the\n  direction of the move. See the write-rule note in the source.")
-    with open(os.path.join(HERE, "w63a_setprice.json"), "w") as f:
+    with open(os.path.join(HERE, outfile), "w") as f:
         json.dump(out, f, indent=1, default=float)
-    print("wrote experiments/w63a_setprice.json")
+    print(f"wrote experiments/{outfile}")
+    return out
 
 
 if __name__ == "__main__":

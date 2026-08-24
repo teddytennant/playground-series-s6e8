@@ -1,3 +1,72 @@
+# 🎯 THE HIJACK BAR IS ADOPTED AT **0.9701349052** — THE HOLE IS FILLED, THE SENDER IS REPOINTED
+# (w79, 2026-08-24)
+
+    .venv/bin/python experiments/w79a_barfill.py       # ~12 min, 3 arms through w63a.main()
+    .venv/bin/python experiments/w79c_p9.py            # P9, the send impact, read-only
+    .venv/bin/python experiments/w79b_fillguard.py     # standing guard, 7 controls, no refit
+
+**`w26g_send.HIJACKPRICE` now reads `experiments/w79a_barfill.json`.** Prereg
+`experiments/w79_prereg.txt`, committed **0109708** before the measurement code existed.
+
+## THE ANSWER, IN ONE TABLE — one board, one estimator, one thing varied
+
+| | GLS k | binding bracket | H_binding | CV bar |
+|---|---|---|---|---|
+| `w63a_setprice.json` — yesterday's board, **untouched, now a RECORD** | 8 | 16.4916e-6 **EMPTY** | 11.144 | 0.9701288617 |
+| ARM CONTROL — today's board, hole still open | 18 | 16.4916e-6 **EMPTY** | 10.810 | 0.9701291958 |
+| **ARM FILL — 13 fillers, GLS held. ADOPTED.** | 18 | **2.2430e-6 MEASURED** | **5.101** | **0.9701349052** |
+| ARM FILLA — robustness, 19 fillers | 18 | 2.2430e-6 | 5.747 | 0.9701342594 |
+
+**The hole was worth +5.709e-6. The overnight board turnover was worth +0.334e-6.** ⚠ A run that
+enlarges a design owes a CONTROL ARM ON THE SAME BOARD — comparing against the stored artefact
+books the board's movement to the treatment.
+
+## THE FILLER RULE, AND WHY IT ANSWERS w59a
+Fixed in the prereg BEFORE the board was read:
+`FILL = { k : oof_{k}.npy exists AND k scored live AND k not in BASE AND lo_dcv < dcv(k) < hi_dcv }`
+with `(lo,hi)` READ from `w63a_setprice.json["bracket"]["uncond"]`, never re-typed. Gives 13,
+reproducing w77a's 13 exactly. **`FILLA` drops the `scored` clause — the one arbitrary ingredient —
+and was registered as GATING: it moves the bar 0.646e-6 against a 5.709e-6 effect.** That is the
+answer to "you are choosing the bar by choosing the bracket": the bar is identified.
+
+## THE TREATMENT — NO LINE OF `fit` CHANGED
+`fit` reads its GLS set as `[k for k in NAMES if k in LB]`. Fillers enter `NAMES` and are withheld
+from `LB`, so they carry `xh0 = 0` — the treatment w63a already gives an unsent candidate (w77d's
+observation; w78 priced the choice at 0.153e-6 against a 5.56e-6 effect). `w63a_setprice.main()`
+gained `fill=()` and `outfile="w63a_setprice.json"`, **both defaulting to the old behaviour**.
+
+## ⛔ `w63a_setprice.json` IS NOW A RECORD, NOT A LIVE ARTEFACT — md5 `4fd6820e59217fbe0dfa44bffb820057`
+Nothing on the send path reads it, which is exactly why it is fragile: **w76a GATE A, w77a GATE A,
+w77b C1/C4, w77c, w77d GATE D and w78a GATE A all pin against it.** `w79b` C2 checks the md5.
+⛔ **DO NOT run `w63a_setprice.py` with no arguments** — it overwrites that file. For today's
+numbers run `w79a_barfill.py`, which prices the control arm into `w79a_control.json`.
+
+## 🔴 THE ADOPTED BAR ADMITS NOTHING THAT IS LEFT TO SEND — know this before rediscovering it
+Of 193 OOF stems, **17 clear 0.9701349052 and only FIVE are eligible; all five are already sent.**
+Every UNSENT file that clears it is refused on w40d-ineligibility or `fam=member` before the CV bar
+is consulted. Not a fault — every unsent file is below the best already-sent CV — but a later run
+must not read it as the gate having broken. Recorded at the check in `w59b_barguard.py`.
+Send impact measured: the dry-run plan is **byte-identical** under both bars, and of the 2 non-
+vetoed rows the stricter bar newly blocks, **0 are predicted at or above the tier**.
+
+## 🔴 `w63a_setprice.FAILURES` WAS A CROSS-CALL LEAK — GATE W PRINTED 0.000e+00 AND THEN REFUSED
+A module-global per-run counter. Fine for a script; the second `main()` call in one process
+inherits the first's count and GATE W fails on a perfect pass. Reset at the top of `main()` by w79.
+⚠ **A per-run counter at module scope is a latent lie the first time the function is called twice.**
+
+## STANDING CHECK SCRIPTS — 24, THE LIST IS THE ARTEFACT, NEVER THE INTEGER
+`w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b w74b
+w75b w76b w77b w78b w79b` — all rc=0. Run each via command substitution, never a pipe.
+⚠ `w79b --selftest` declares an EXPECTED SET per case, not a single tag: `C5+C7` both read
+`stats.d_fill_filla` and both must fire. Declared in source, not discovered after the run.
+
+## ✅ THE 08-25 SEND IS UNCHANGED — three commands, day already registered
+`w48e_order.py --day 2026-08-25` re-run READ-ONLY this run, exits 0. The ten are unchanged under
+the adopted bar (P9b: same verdict on all ten; the gate is consulted on 0 of them).
+⚠ The sender will now print `hijack CV bar 0.9701349052`. If it prints 0.9701288617, `w79b` C1
+has been bypassed — stop.
+
+---
 # 🎯 THE BAR CORRECTION IS THE HOLE, NOT THE GLS — 4 CONSTRUCTIONS, 28.9e-6 OF GAP, 0.36e-6 OF BAR
 # (w78, 2026-08-24)
 

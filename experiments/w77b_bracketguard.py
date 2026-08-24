@@ -22,10 +22,17 @@ C4  w77d STAYS EXPLORATORY. It measures a bar 5.889e-6 STRICTER than the sender'
     construction designed after the answer was visible. Nobody may adopt it without its own
     pre-registration, so this asserts w77d still disclaims itself and still records that bar.
 
-C5  THE LIVE BAR STAYS PUT, read through `w26g_send.HIJACKPRICE` — NEVER by re-typing the path
-    (w63 §9: a guard that names the artefact's path instead of the constant the code reads is
-    testing a different file the moment the code moves). If a later run adopts w77d's number,
-    this fires and points at the missing pre-registration.
+C5  ⚠⚠ FIRED AND WAS ANSWERED, 2026-08-24 (w79). As written, C5 said "the live bar stays put,
+    read through `w26g_send.HIJACKPRICE` — if a later run adopts w77d's number, this fires and
+    points at the missing pre-registration." w79 supplied the pre-registration
+    (`experiments/w79_prereg.txt`, committed 0109708 before the measurement existed), re-derived
+    the bar through `w63a_setprice.main()` on a filler population fixed by a mechanical rule
+    BEFORE the board was read, and adopted 0.9701349052. So C5 now guards the NEW bar, and it
+    guards it harder than it guarded the old one: the artefact must be the FILLED one, it must
+    say so in its own `hole_filled` field, and `w63a_setprice.json` must still carry the OLD bar
+    untouched, because that file is what w76a/w77a/w77c/w77d/w78a all pin against.
+    ⛔ THE POINT OF C5 IS UNCHANGED. It is not "this number", it is "nobody moves this number
+    without a registered argument". Anyone moving it again owes the same thing w79 owed.
 
     .venv/bin/python experiments/w77b_bracketguard.py
     .venv/bin/python experiments/w77b_bracketguard.py --selftest
@@ -40,7 +47,10 @@ sys.path.insert(0, HERE)
 
 W63A_BRACKET_WIDTH = 16.491624447501074
 W63A_HI, W63A_LO = "w40_ad211stdcorr", "w40_ad211std_rescale"
-LIVE_BAR = 0.9701288617          # displayed form; compared at 1e-9
+# w79. The adopted bar, and the superseded one — BOTH pinned, because the whole content of C5
+# is that they are different files and the old one must not drift either.
+LIVE_BAR = 0.9701349052          # w79a_barfill.json, the FILLED bar; compared at 1e-9
+W63A_INTERPOLATED_BAR = 0.9701288617   # w63a_setprice.json, kept as the record, must not move
 W77D_BAR = 0.9701347511
 Q2_HULL = (1039.99, 1076.07)
 
@@ -100,13 +110,17 @@ def run(mut=None) -> int:
     # and then through `load` so a planted defect reaches the same dict the sender would see.
     import w26g_send as SEND                                    # noqa: E402
     sender_file = os.path.basename(SEND.HIJACKPRICE)
-    read = load(sender_file) if sender_file == "w63a_setprice.json" else json.load(
+    read = load(sender_file) if sender_file == "w79a_barfill.json" else json.load(
         open(SEND.HIJACKPRICE))
-    chk("C5", sender_file == "w63a_setprice.json"
-        and abs(float(read["cv_bar_new"]) - LIVE_BAR) < 1e-9,
-        f"the sender reads {sender_file} at bar {float(read.get('cv_bar_new', float('nan'))):.10f}, "
-        f"not the {LIVE_BAR:.10f} w77 measured against. If the bar moved on purpose, the run that "
-        f"moved it owed a pre-registration and this constant an update.")
+    chk("C5", sender_file == "w79a_barfill.json"
+        and abs(float(read["cv_bar_new"]) - LIVE_BAR) < 1e-9
+        and read.get("hole_filled") is True
+        and abs(float(w63a["cv_bar_new"]) - W63A_INTERPOLATED_BAR) < 1e-9,
+        f"the sender reads {sender_file} at bar {float(read.get('cv_bar_new', float('nan'))):.10f} "
+        f"(hole_filled {read.get('hole_filled')}), against the adopted {LIVE_BAR:.10f}; and "
+        f"w63a_setprice.json reads {float(w63a['cv_bar_new']):.10f} against the superseded "
+        f"{W63A_INTERPOLATED_BAR:.10f}. If a bar moved on purpose, the run that moved it owed a "
+        f"pre-registration and this constant an update — w79_prereg.txt is what that looks like.")
     return len(FAILURES)
 
 
@@ -118,7 +132,7 @@ def main() -> None:
             ("C2", {"w77c_glssweep.json": [(["p6_void"], False)]}),
             ("C3", {"w77c_glssweep.json": [(["predictions", "q2"], True)]}),
             ("C4", {"w77d_holefill.json": [(["exploratory"], False)]}),
-            ("C5", {"w63a_setprice.json": [(["cv_bar_new"], W77D_BAR)]}),
+            ("C5", {"w79a_barfill.json": [(["cv_bar_new"], W77D_BAR)]}),
         ]
         bad = 0
         for want, mut in cases:

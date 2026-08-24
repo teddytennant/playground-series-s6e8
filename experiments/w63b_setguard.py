@@ -44,8 +44,14 @@ def main():
     print("=" * 96)
 
     # ---- 1. THE ARTEFACT THE SENDER READS IS THE SUCCESSOR, AND IT CARRIES WHAT THE SENDER NEEDS
-    check("the sender reads w63a_setprice.json",
-          os.path.basename(SND.HIJACKPRICE) == "w63a_setprice.json",
+    # ⚠ w79 MOVED THIS PIN, and the licence is experiments/w79_prereg.txt (committed 0109708
+    # before the measurement existed). The artefact is still WRITTEN BY `w63a_setprice.main()`
+    # in the same schema — only the candidate design differs, by 13 files that fill the 16.5e-6
+    # bracket hole the old bar was interpolated across. So every field check below is unchanged
+    # and still meaningful. What this control now says is "the sender reads a w63a-SCHEMA
+    # artefact and it is the FILLED one", which is strictly more than it said before.
+    check("the sender reads w79a_barfill.json (w79; was w63a_setprice.json)",
+          os.path.basename(SND.HIJACKPRICE) == "w79a_barfill.json",
           os.path.basename(SND.HIJACKPRICE))
     art = json.load(open(SND.HIJACKPRICE))
     need = ["cv_bar_new", "gate_t", "tiers", "H_binding", "H_uncond", "H_cond_predsd",
@@ -91,7 +97,7 @@ def main():
               SND.hijack_cv_bar() is None and bool(SND.above_tier_reason(row, None)))
     finally:
         SND.HIJACKPRICE = keep
-    check("restored", os.path.basename(SND.HIJACKPRICE) == "w63a_setprice.json")
+    check("restored", os.path.basename(SND.HIJACKPRICE) == "w79a_barfill.json")
 
     # ---- 4. THE SET PRICE IS NOT THE ADDITIVE PRICE
     # The whole reason the successor exists. If these two ever agree to the last digit, the set
