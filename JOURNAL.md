@@ -25181,3 +25181,175 @@ so none can be a contender for a pick decided on CV. Nothing displaces slot 1.
    proof before repairing it**, and disclose the repair (§3) · **a level finding and a rank
    finding are different claims** — the era shift is a level shift and CV still ranks at +0.82
    (§4) · an argmax checked on a *parsed* field is not checked on the population (§5).
+
+---
+
+# w76 — 2026-08-24, slot 5 of 10 (**ZERO slots available**). THE OLDEST OPEN ITEM, TESTED AND HALF FALSIFIED
+
+**No submission. The API reports ten today** (12:38:52–12:39:22Z, all `COMPLETE`), which is the
+cap. Nothing was sent and nothing was built to send.
+
+⚠ **THE PROMPT'S ANGLE IS OBSOLETE AND I DID NOT FOLLOW IT.** It reads *"confirm the metric,
+build the fixed-fold CV harness, get one honest GBDT baseline scored"* — that is the w1–w5 brief
+and it is done and recorded in RESEARCH. The brief says to honour the angle unless the journal
+gives a concrete reason not to; the reason is that the harness has existed for ~70 runs, 131
+files are sent, and re-doing it would overwrite live artefacts. Substituted: **the oldest open
+item on the ledger — w63 §4's refined P5** — deferred untouched by w64 §9.4, w65, w66 and w75.
+
+Pre-registered in `experiments/w76_prereg.txt`, **committed 97486e1 BEFORE `w76a_addtest.py`
+existed.** The population rule, the tie band, the resolution bar and the write rule were all
+fixed in that commit.
+
+## 1. ✅ GATE A REPRODUCED w63a EXACTLY — **0.000e+00 OVER 27 QUANTITIES**
+
+The test imports `fit` and `_load` from `w63a_setprice` itself, never re-implements them, and
+then rebuilds **w63a's own 08-23 design** — reconstructed as *the live board minus exactly the
+ten stems sent on 08-24*, which is a mechanical rewind, not a guess. It re-derives `base`, every
+`rows[*].uncond`, the whole `nonadditivity` block and the partition counts.
+
+    worst absolute deviation over 27 recorded quantities   0.000e+00   (bar 1e-9)
+    partition re-derived                                   78/78, 0/26, 1/1   exact
+
+✅ So the `only`/`add`/`gap` below **are** w63a's, running on a board w63a never saw. GATE A is a
+comparison, not a stamp — it re-derives the numbers rather than reading a `passed: true` field.
+
+## 2. ⛔ THE CLAIM IS HALF CONFIRMED AND HALF FALSIFIED — AND NOT IN THE HALF ANYONE WOULD BET ON
+
+    claim (w63 §4): additive price is optimistic iff SAME side of the status quo,
+                    pessimistic iff they STRADDLE it
+
+| cell | w63a post-hoc (08-23) | w76a out of sample (08-24) |
+|---|---|---|
+| both help | **n 1**, 1/1 positive | **n 15**, 15/15 positive |
+| exactly one helps | n 26, 0/26 positive | n 120, **41/120 positive** |
+| neither helps | n 78, 78/78 positive | n 190, 190/190 positive |
+
+- **P1 GATE A** — PASS, 0.000e+00.
+- **P2 POWER** — PASS. The decisive `both help` cell holds **15** pairs against the registered
+  bar of 10; w63a had **1**. Without this the run would have had no resolution in the only cell
+  that separates the registered rule from its rival, and I would have reported it as underpowered.
+- **P3 THE CLAIM** — 🔴 **FALSIFIED.** Same side: **205/205** positive, zero counterexamples.
+  Straddle: **41 of 120 positive**, where the rule requires zero.
+- **P4 RESOLUTION** — PASS. min |gap| in the straddling cell **0.0856e-6** against the registered
+  0.01e-6 bar, so the negative sign is a reading and the 41 positives are not floating-point dust.
+- **P5 THE RIVAL** — the registered rule wins its distinctive half. The simpler rival
+  *"optimistic iff NEITHER helps"* predicts the `both help` cell is negative; it is **15/15
+  positive, min +0.7414e-6**. Both the rival and the registered iff are now refuted.
+
+🎯 **THE HALF THAT RESTED ON n=1 SURVIVED AND THE HALF THAT RESTED ON n=26 BROKE.** The 26 were
+not 26 independent facts — they were 26 pairs drawn from the same handful of files.
+
+## 3. 🎯 WHY IT BROKE: `helps` CUTS A CONTINUUM, AND IT CUTS IT IN THE WRONG PLACE
+
+Inside the straddle cell the sign tracks the **helping member's own price**, monotonically.
+Grouped by helper, 20 pairs each, `base` = +4.5228e-6:
+
+    only(helper)   -0.051   1.502   2.276   2.418   3.501   3.777
+    gap > 0          0/20    0/20    0/20    1/20   20/20   20/20
+
+**The flip is at only(helper) ≈ 2.4–3.5e-6 — 1.0 to 2.1e-6 BELOW `base`, not at it.** w63 put the
+boundary at `base` because `helps` was the variable already on the table, not because anything
+said the boundary was there. Same side is **sufficient** for gap > 0; it is not **necessary**.
+⚠ And the successor is not "move the cut": no threshold on `only(helper)` alone separates the
+cell either (`w36_ad199std_h3` sits on the boundary at 19 neg / 1 pos). It is a two-argument
+function of both members, which is exactly what w63a's own crossed-minus-matched algebra says —
+`gap = ½[M(X,A)+M(X,B)+M(Y,A)+M(Y,B)] − M(X,Y) − M(A,B)`. The algebra was right; the *binary
+summary* of it was not.
+
+## 4. ✅ NOTHING ON THE SEND PATH CHANGES, AND THAT IS A CONCLUSION, NOT AN EXCUSE
+
+**The sender never enters the straddle cell.** Every file the drain queues is weaker than the
+auto pair by construction, so the governing cell is `neither helps` — and there the additive
+price is optimistic **190/190, median |gap| 7.19e-6, max 18.77e-6**. That is the direction and
+the scale of the w60 autopsy (registered +6.730e-6, realised +1.235e-6). ⛔ **`w63a` already
+prices the SET rather than the sum, so no bar moves, no queue re-orders, and no artefact on the
+send path was touched.** The falsification is epistemic. It would have been operational only in
+the direction the sender is already protected against.
+
+### ✅ THE GUARD — `experiments/w76b_addguard.py`, TWO FILE READS, NO REFIT
+
+C1 the `neither helps` cell is all-positive on **both** boards (78/78 and 190/190) — the regime
+the sender queues into · C2 `w63a.additive_error` is positive, the same direction read off an
+**independent field**, so a disagreement between C1 and C2 means one artefact is wrong · C3
+`w76a` still records **P3 as FALSIFIED**, so no later run can cite it as having confirmed w63 §4
+· C4 `w63a`'s `nonadditivity` block is unmoved, so C1 and C3 are about the numbers still on disk.
+✅ **Both controls from the outset** (third run running): rc=0 live, and `--selftest` plants four
+defects and **fires on all four separately** — a flipped sender regime (C1), a pessimistic
+additive error (C2), the falsification laundered into a confirmation (C3), and a regenerated
+nonadditivity block (C4). **The enumerated check-script list is now 21 (JOURNAL w76 §6).**
+
+⚠ **C3 is the one that matters and it is the w75b-C4 move applied to a FINDING instead of a
+CONSTANT.** The live hazard this run exposes is not arithmetic — it is that `w63a_setprice.json`
+carries a post-hoc partition that reads like 105/105 perfect separation, and a later run reading
+it has nothing on disk telling it the rule was tested and broke.
+
+## 5. ⚠⚠ THE METHOD LESSON, WHICH IS THE REAL OUTPUT OF THIS RUN
+
+w63a's partition was written **after** its strict P5 came back falsified — w63 §8 disclosed that
+plainly and registered the refinement for a later run rather than claiming it, which is why this
+test was possible at all. The refinement still broke. What the pair counts hid:
+
+    w63a   105 pairs  from  15 files      decisive cell n = 1
+    w76a   325 pairs  from  28 files      decisive cell n = 15
+
+🎯 **A POST-HOC PARTITION'S CREDIBILITY IS SET BY ITS SMALLEST CELL AND BY HOW MANY DISTINCT
+FILES POPULATE IT — NOT BY ITS PAIR COUNT.** C(k,2) pairs from k files are k(k−1)/2 numbers and
+nothing like that many facts. Same family as w68's "an instrument's resolution and its bar live
+in different files" and w75's "an argmax checked on a PARSED field is not checked on the
+population": in all three the reported n was not the n that was doing the work.
+
+## 6. VERIFICATION STATE
+
+- Token refreshed at 13:39Z. ⚠ **NEW EXPIRY 2026-08-25T01:39:30Z — STILL BEFORE THE ~12:40Z
+  SEND WINDOW.** The refresh has a ~12h life, so refreshing at the end of a run can never cover
+  the next day's window. **The 08-25 run must refresh at its own start**; RESEARCH's "refresh
+  first" note is right and this run adds why doing it *early* does not help.
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- **21 standing check scripts run, ALL rc=0**, each read via command substitution, never a pipe:
+  `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b
+  w74b w75b w76b`. **`w76b_addguard` is the new one.**
+  ⚠ **THE RUNNING COUNT IN PAST ENTRIES IS NOT RECONCILABLE AND I AM NOT PROPAGATING IT.** w75
+  said "17 → 18" without listing them; the enumeration above is 21 and every one exits 0. Three
+  of them (`w54a`, `w55a`, `w65c`) are checks that are not named `*guard*`, which is the likely
+  source of the drift. **A COUNT CARRIED FORWARD WITHOUT ITS LIST IS NOT A VERIFICATION** — the
+  list is the artefact, so it is written out here and a later run should extend the list, not
+  the integer.
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED.** No `mcp__brave__*` tool is exposed to
+  this session (`ToolSearch` returns no match), so **the click could not be made again today.**
+  `SELECT_THESE.md` is unchanged and still accurate.
+- Board: **rank 92 of 2,779**, 0.97119, leader Chris Deotte **0.97168** (was 0.97152 on 08-23),
+  **108 teams at or above us.** We did not move; the leader did, by 16e-6.
+- ⛔ **NOTHING LOAD-BEARING WAS EDITED.** `w63a_setprice.py` was **imported, never run** — its
+  `main()` is not called and `w63a_setprice.json` is byte-identical. No submission file, no
+  registered plan, no pricer, no model, no pick. Writes this run: `w76_prereg.txt` (committed
+  **97486e1 before `w76a` existed**), `w76a_addtest.{py,json,csv}`, `w76b_addguard.py`, notes.
+
+## 7. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN** — it expires **2026-08-25T01:39:30Z**, *before* the
+   window, and refreshing early does not help (§6). Copy-paste is in RESEARCH. Then
+   `w70d_chainguard`, then the **21** check scripts listed in §6 — extend the LIST, not the count.
+2. **THE 08-25 SEND IS FOUR COMMANDS** and the day is registered: `w23b_sendqueue.py` →
+   `w48e_order.py --day 2026-08-25 --write` → `w26g_send.py --n 10` dry → `--go`. The dry run
+   must match the registered ten file-for-file before `--go`. 08-26/27/28 are registered behind it.
+3. 🔴🔴 **THE SELECTION CLICK — `SELECT_THESE.md` is the whole briefing.** Still the only item on
+   the account that needs a human, and still un-clickable from here without a browser tool.
+   `w74b_clickstaleguard` rc=0 means the +4.52e-6 price still applies; **only re-run
+   `w74a_clickprice.py` if that guard exits 1.**
+4. ⛔ **DO NOT** cite w63 §4's iff as established — `w76b` C3 pins it FALSIFIED (§2) · **DO NOT**
+   re-parameterise `w46c.ERA_SHIFT` (w75 §1) · **DO NOT** re-derive a frozen constant from a
+   mutable CSV (w75 §3) · **DO NOT** re-run a pricer as a routine staleness check (w74 §4) ·
+   **DO NOT** re-base the ranker (w73 §2) · **DO NOT** build files for 08-29..08-31 (w72 §2.1) ·
+   **DO NOT** apply the duplicate override (w71 §4.1) · **DO NOT** take stacker seed/fold
+   averaging (w73 §1) or an OOF error-analysis angle in any framing (w74 §1).
+5. 🔴 **ONE open item remains, down from two:** w63 §5a's **16.5e-6 bracket hole**, still the
+   dominant uncertainty in the hijack bar. ⛔ Do not close it by hand-picking bracket files
+   (w59a: choosing the bar by choosing the bracket). Check `max|M − wI| < 1e-6` before attempting
+   the 121-file version. w63 §4's refined P5 is **CLOSED** by this run.
+6. ⚠ **NEW LESSONS.** A post-hoc partition's credibility is set by its **smallest cell and the
+   number of distinct files in it**, never by its pair count — C(k,2) pairs are not C(k,2) facts
+   (§5) · a **binary summary of a continuous mechanism** puts its boundary where the available
+   variable is, not where the mechanism is, and here that was 1–2e-6 off (§3) · a falsification
+   that changes **no action** is still worth pinning, because the artefact that carries the wrong
+   rule outlives the run that wrote it (§4) · **refreshing a token early does not cover a later
+   window** — refresh at the start of the run that sends (§6).

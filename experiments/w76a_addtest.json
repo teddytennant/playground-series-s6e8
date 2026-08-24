@@ -1,0 +1,117 @@
+{
+ "prereg": "experiments/w76_prereg.txt (97486e1)",
+ "gate_a": {
+  "passed": true,
+  "worst": 0.0,
+  "n_checks": 27,
+  "against": "w63a_setprice.json"
+ },
+ "design": {
+  "names": [
+   "w21_ad187corr_ens4",
+   "w23_ad187stdcorr",
+   "w27_ad190stdcorr",
+   "w29_ad194stdcorr",
+   "w34_ad195std_h3",
+   "w34_ad195std_w",
+   "w34_ad195std_wh3",
+   "w34_ad195stdcorr",
+   "w34_ad196std_h3",
+   "w36_ad197std",
+   "w36_ad197std_h3",
+   "w36_ad197stdcorr",
+   "w36_ad199std",
+   "w36_ad199std_h3",
+   "w36_ad199std_hybrid",
+   "w36_ad199std_rescale",
+   "w36_ad199stdcorr",
+   "w36_ad199stdcorr_ens4",
+   "w38_ad202std",
+   "w38_ad202std_h3",
+   "w38_ad202std_hybrid",
+   "w38_ad202std_rescale",
+   "w38_ad202stdcorr",
+   "w38_ad202stdcorr_ens4",
+   "w40_ad211std",
+   "w40_ad211std_h3",
+   "w40_ad211std_rescale",
+   "w40_ad211stdcorr"
+  ],
+  "n": 28,
+  "tier1": [
+   "w36_ad199stdcorr_ens4",
+   "w38_ad202stdcorr_ens4"
+  ],
+  "n_tier2": 5,
+  "top_cv": 24,
+  "tier1_public": 0.97119,
+  "base": 4.522768481983803,
+  "gls_gap": 1181.5215565338574,
+  "gamma": -0.09175782162159227
+ },
+ "helps": {
+  "w36_ad199stdcorr": true,
+  "w38_ad202stdcorr": true,
+  "w40_ad211stdcorr": true,
+  "w36_ad199std_h3": true,
+  "w40_ad211std_h3": true,
+  "w38_ad202std_h3": true,
+  "w36_ad199std": false,
+  "w40_ad211std": false,
+  "w38_ad202std": false,
+  "w36_ad197stdcorr": false,
+  "w34_ad195stdcorr": false,
+  "w36_ad197std_h3": false,
+  "w38_ad202std_hybrid": false,
+  "w36_ad199std_hybrid": false,
+  "w36_ad199std_rescale": false,
+  "w36_ad197std": false,
+  "w40_ad211std_rescale": false,
+  "w34_ad195std_h3": false,
+  "w38_ad202std_rescale": false,
+  "w34_ad196std_h3": false,
+  "w34_ad195std_wh3": false,
+  "w34_ad195std_w": false,
+  "w29_ad194stdcorr": false,
+  "w27_ad190stdcorr": false,
+  "w23_ad187stdcorr": false,
+  "w21_ad187corr_ens4": false
+ },
+ "cells": {
+  "both help": {
+   "n": 15,
+   "n_pos": 15,
+   "n_neg": 0,
+   "min_gap": 0.7414139426546171,
+   "mean_gap": 1.5083958438520009,
+   "max_gap": 2.9271779591217637
+  },
+  "exactly one helps": {
+   "n": 120,
+   "n_pos": 41,
+   "n_neg": 79,
+   "min_gap": -0.9970846683136187,
+   "mean_gap": -0.19481313881891157,
+   "max_gap": 0.9205599266570061
+  },
+  "neither helps": {
+   "n": 190,
+   "n_pos": 190,
+   "n_neg": 0,
+   "min_gap": 0.8537605557939969,
+   "mean_gap": 7.074322102729562,
+   "max_gap": 18.771249362907838
+  }
+ },
+ "predictions": {
+  "p1": true,
+  "p2": true,
+  "p3": false,
+  "p4": true,
+  "p5": true
+ },
+ "falsified": [
+  "P3 the same-side/straddle iff"
+ ],
+ "note": "tests w63 \u00a74's refined P5 out of sample. w63a's own partition was post-hoc with n=1 in the decisive cell; this design populates it. Nothing here feeds the sender: the live bar is w63a_setprice.json, untouched."
+}

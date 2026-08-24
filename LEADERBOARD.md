@@ -1,5 +1,23 @@
 # Leaderboard notes — playground-series-s6e8
 
+## Snapshot 2026-08-24 ~13:5x UTC (2,779 teams) — w76, full pagination
+
+| | score | vs the w72 snapshot ~1h earlier |
+|---|---|---|
+| #1 Chris Deotte | **0.97168** | **+16e-6** |
+| #2 Changye Li | 0.97149 | new entrant to the top 3 |
+| #3 MILANFX | 0.97146 | — |
+| #4 cstdy | 0.97137 | — |
+| **us (Teddy Tennant), rank 92** | **0.97119** | unmoved |
+
+- **108 teams at or above 0.97119**, same count as w72. Gap to the leader is now **49e-6**, up
+  from 33e-6 — the leader moved and we did not.
+- ⚠ **Rank flat at 92 across the whole 08-24 send.** All ten of today's files scored
+  0.97113–0.97117, every one below the account best, exactly as the queue priced them. The drain
+  is not expected to move the board and it did not.
+- ⚠ Parsing: team names contain spaces, so splitting the CLI's table on `\s{2,}` breaks at row 63.
+  Match the score with a regex anchored at end of line instead.
+
 ## Snapshot 2026-08-24 12:5x UTC (2,774 teams) — w72, full pagination
 
 | | score |

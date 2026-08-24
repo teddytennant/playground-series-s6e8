@@ -1,3 +1,65 @@
+# ⛔ w63 §4's REFINED P5 IS **HALF FALSIFIED** — the SIDE is the wrong cut, the DISTANCE is right
+# (w76, 2026-08-24)
+
+    .venv/bin/python experiments/w76a_addtest.py       # ~3 min, GATE A 0.000e+00, writes its own 2 files
+    .venv/bin/python experiments/w76b_addguard.py      # standing guard, two file reads, no refit
+
+The registered claim, deferred by w64/w65/w66/w75 and finally tested: *"the additive price is
+optimistic iff the two candidates fall on the SAME side of the status quo, and pessimistic iff
+they straddle it."* Tested on the live 08-24 board over a population fixed in `w76_prereg.txt`
+before the board was read (28 files, 325 pairs, vs w63a's 15 and 105).
+
+| cell | w63a (post-hoc, 08-23) | w76a (out of sample, 08-24) |
+|---|---|---|
+| both help | **1**, 1/1 positive | **15**, 15/15 positive |
+| exactly one helps (straddle) | 26, 0/26 positive | 120, **41/120 positive** |
+| neither helps | 78, 78/78 positive | 190, 190/190 positive |
+
+✅ **The SAME-SIDE half is CONFIRMED and strengthened: 205/205 out of sample, 284/284 over both
+boards, and the decisive `both help` cell went from n=1 to n=15.** The rival refinement
+("optimistic iff NEITHER helps") is refuted with it — that cell is 15/15 *positive*.
+⛔ **The STRADDLE half is FALSIFIED. 41 of 120 straddling pairs have gap > 0**, min |gap| in the
+cell 0.0856e-6 against a registered 0.01e-6 resolution bar, so the sign is read, not noise.
+
+## 🎯 WHY IT BROKE: THE BINARY `helps` CUTS A CONTINUUM IN THE WRONG PLACE
+
+Inside the straddle cell the sign is governed almost entirely by the *helping* member's own
+price, monotonically — grouped by helper (20 pairs each, `base` = +4.5228e-6):
+
+    only(helper)   -0.051   1.502   2.276   2.418   3.501   3.777
+    gap > 0          0/20    0/20    0/20    1/20   20/20   20/20
+
+**The sign flips at only(helper) ≈ 2.4–3.5e-6, i.e. 1.0–2.1e-6 BELOW `base`, not at it.** w63's
+rule put the boundary at `base` because `helps` was the variable already on the table. Being on
+the same side is *sufficient* to keep `gap` positive; it is not *necessary*.
+⚠ No threshold on `only(helper)` alone separates the whole cell (`w36_ad199std_h3` sits on the
+boundary at 19 neg / 1 pos), so the successor is not "move the cut" either — it is a two-argument
+function, which is what the crossed-minus-matched algebra already says it is.
+
+## ✅ WHAT DOES **NOT** CHANGE — READ THIS BEFORE LOOSENING ANYTHING
+
+**The sender never operates in the straddle cell.** Every file the drain queues is weaker than
+the auto pair by construction, so the governing cell is `neither helps`, and there the additive
+price is optimistic **190/190, median |gap| 7.19e-6, max 18.77e-6** — the direction and the scale
+of w60's realised +1.235e-6 against a registered +6.730e-6. **w63a's set price already prices the
+SET, not the sum, so nothing on the send path changes and no bar moves.** The falsification is
+epistemic. `w76b_addguard` C1/C2 pin the direction on both boards from two independent fields.
+
+## ⚠⚠ THE METHOD LESSON, WHICH IS THE REAL FINDING
+
+w63a's partition was **written after the strict P5 was falsified**, and its distinguishing cell
+held **one observation**. It read as 105/105 perfect separation. Out of sample the half that
+rested on n=1 survived and the half that rested on n=26 broke — *the opposite way round from what
+the sample sizes suggest*, because the 26 were 26 pairs of the **same two-ish files**, not 26
+independent facts.
+🎯 **A POST-HOC PARTITION'S CREDIBILITY IS SET BY ITS SMALLEST CELL AND BY HOW MANY DISTINCT
+FILES POPULATE IT, NOT BY ITS PAIR COUNT.** 105 pairs came from 15 files; 325 came from 28.
+Same family as w68's "an instrument's resolution and its bar live in different files" and w75's
+"an argmax checked on a PARSED field is not checked on the population".
+⚠ `w76b` **C3** pins P3 as FALSIFIED in the artefact so no later run can cite `w76a` as having
+confirmed w63 §4 — the w75b-C4 move applied to a finding instead of a constant.
+
+---
 # ✅ THE ERA TERM, REFRESHED ON n=27: **−23.77e-6** (w75, 2026-08-24) — AND NOT APPLIED
 
     .venv/bin/python experiments/w75a_erarefresh.py     # ~2 min, FAILURES 0, writes only its own two files
