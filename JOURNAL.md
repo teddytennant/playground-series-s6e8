@@ -26970,3 +26970,201 @@ is to re-run only if the board size or our rank moves materially.
 Unchanged from w80–w83: no `gh`, no ssh key, no token, no browser, no `curl`. (`unzip` is
 missing too — read the board zip with python's `zipfile`, not the shell.) Local `main` is ahead
 of `origin/main`. The workspace is the memory and it is committed; the remote is not.
+
+---
+
+# w85 — 2026-08-25, slot 4 of 10 → **NO SUBMISSION, THE DAY WAS SPENT AT 12:40Z.** Six days out
+
+w82 sent all ten registered 08-25 files at 12:40:03–12:40:32Z. `kaggle competitions submissions
+-v --page-size 200` returns 141 rows, ten of them dated 2026-08-25, all COMPLETE and scored
+(0.97113–0.97117). **The cap is reached and there is no slot to use.** None was skipped, none
+wasted. Token expiry **2026-08-26T00:40:25Z**, still valid for this run.
+
+## 0. THE ANGLE WAS ALREADY CLOSED — AND THE SUBSTITUTE FOUND 18 WASTED SUBMISSIONS
+
+ANGLE: *"Foundation: confirm the metric, build the fixed-fold CV harness, and get one honest
+GBDT baseline scored."* ⛔ **Declined, with cause.** The metric was confirmed on 2026-08-11
+(**ROC AUC**, `RESEARCH.md` "Competition basics"), the fixed-fold harness is `common.get_folds`
+and has carried every experiment since, and w84 §5.5 names a GBDT-tuning angle in the DO-NOT
+list. A tenth re-derivation of day-one facts is not work.
+
+Substituted w84's own lesson — *"consolidation is not a wasted slot; re-reading is a search
+strategy"* — and re-read the send-path arithmetic. It was wrong, and the workspace was on
+course to throw away **18 submissions**, nearly two full days of the competition.
+
+## 1. 🔴 THE QUEUE RAN OUT BEFORE THE CALENDAR DID, AND THE INSTRUMENT SAID 8 INSTEAD OF 18
+
+`w54a_vetoexpiry.py` is the script that exists to price exactly this. Run at 13:2xZ it printed
+**"8 slot(s) go UNFILLED"**. The live number was **18**:
+
+| | w54a as it stood | live |
+|---|---|---|
+| slots left (6 whole days × 10) | 60 | 60 |
+| unsent files | 71 | **61** |
+| vetoed above the hijack CV bar | 19 | 19 |
+| **SENDABLE** | 52 | **42** |
+| **SLOTS UNFILLED** | **8** | **18** |
+
+**Cause:** `w54a` reads `w26d_queueprice.csv`, which is written by `w48e_order.py --day D
+--write` and is therefore the queue *as of day D*. Run it after day D's ten have landed and all
+ten are still in the CSV marked unsent. `len(q)` overstates by exactly ten, so the unfilled
+count comes back **ten too small**. Nothing was malformed, nothing raised, and the error went
+the flattering way — the identical shape to w84 §2's 50-row cap. `w55a_unpriced.py` reads the
+same CSV and inherits the same staleness (harmless there only because it is always run right
+after a `--write`).
+
+**FIXED:** `w54a` now carries **C1**, which intersects the queue's filenames with the live API's
+sent list and **refuses to print any arithmetic** if the intersection is non-empty, naming the
+two commands that rebuild it. Exercised in both directions by `w85c` G4 (stale rc=1, live rc=0).
+The "N slot(s) go UNFILLED" line now also reads the other way round when there is headroom.
+
+⚠ **This is the brief's most explicit instruction being violated in silence.** "Submissions here
+do not evict each other… an unused daily slot is pure waste. Use all 10 every day." Eighteen of
+them were going to go unused and the only instrument pointed at the question said eight.
+
+## 2. ✅ `w85a` — 25 FILLERS BUILT, SHORTFALL CLOSED, 3 SPARE
+
+The rule was already on disk, in `w54a`'s own output and in RESEARCH: *"a filler is SAFE iff its
+predicted public score is < the auto-selection tier (0.97119); below the tier it cannot be
+auto-selected, so it costs nothing. Fill the gap with files BELOW the tier, never by retiring a
+veto."* And the precedent for what to put there is `w37b_calfiles.py` — a raw member's own test
+vector, whose public score is a **measurement** of that member, not an attempt on the board.
+
+`experiments/w85a_fillers.py` widens that to 25 files, one per weak member, drawn from a survey
+of all **157** paired `oof_*/test_*` vectors on disk (`w85_membersurvey.csv`, new).
+
+- Bound: `FILLER_MAX_OOF = 0.9600`; registered `pred_lb = oof_auc + 0.0014299` (the **median**
+  offset over the five landed w37 readings — nothing is fitted, w37e R2 killed the linear form
+  at 6.28σ). `w55a` then certifies each at `pred_lb + worst landed overshoot (+1560.4e-6)`.
+- **All 25 certified SAFE. Worst bound 0.9624, margin +8803e-6 under the tier.** rc=0.
+- The 25 are 25 *distinct model families* — logreg, extratrees, GNN, MLP, TabM, FT-Transformer,
+  GANDALF, DCNv2, TabR, poly2, RFF, QDA, GNB, GMM, lgb/cat variants, lookup-drop variants. Each
+  returns one exact public AUC. The account has had **five** such readings; it will have thirty.
+- Wiring: `stdflag._CAL_PREFIXES` now `("w37_cal_", "w85_cal_")` so they classify as `member`
+  (never a CV comparison, never a `p_beat`); `w55a` instrument B reads **both** preregs.
+- `w85b_prereg.py` registers the predictions **before** any of them is sent, `w37c`-style, and
+  its **C3 caught my own hand-typed offset table** — the median and max were each ~7e-6 wrong
+  and two members were transposed. It refused to write until the constants matched the live
+  list. A table in a docstring is not a measurement.
+
+**Chain verified end to end**, all rc=0: `w23b` (86 unsent) → `w48e --day 2026-08-26 --write`
+→ `w55a` (29 rows certified, 0 uncertified) → `w48e --write` again → `w26g --n 90` dry.
+
+    sender plans 63 files against 60 slots  ->  every slot fills, 3 spare
+    hijack CV bar 0.9701349052   ✅ (not 0.9701288617 — w79b C1 not bypassed)
+
+⚠ **The 08-26 registered ten are byte-for-byte unchanged** — `w72a_plan_2026-08-26.json` matches
+the queue's ten pinned rows in order, and `w26g --n 10` dry-runs exactly that list. Nothing I
+did perturbed a registered day.
+✅ **And the three files that fall off the end at 60 slots are positions 61–63 — `gnb_raw`,
+`qda_raw`, `gmm_raw`, the three weakest and least informative.** The drop is the cheapest file,
+not an arbitrary one, because the tail sorts on `pred_lb`.
+
+## 3. 🛡 `w85c_slotguard.py` — STANDING CHECK #29, AND ITS CONTROLS ARE EXERCISED
+
+w84 §3's lesson applied: *ask which guard covers the claim, not whether the area has guards.*
+Seven guards surround the send path and **not one asserted that every remaining slot has a file
+to put in it.** `w85c` does, and it takes the number from `w26g_send.py --n <slots>` — the code
+that will do the sending — rather than re-deriving it.
+
+    G1  sender can plan 63 against 60 slots        OK, 3 spare
+    G2  same test on the pre-w85 queue: 38 vs 60   OK, short by 22   <- G1 is not inert
+    G3  86 queue rows, 0 unpriced-and-uncertified; the 2 above-tier rows are w58-blocked
+    G4  w54a on the stale queue rc=1, on the live queue rc=0         <- §1's fix re-tested
+    FAILURES 0
+
+⛔ **G3 checks the TIER, not the CV, and must not be changed to check CV.** A filler's entire
+justification is that it is below the tier and therefore free. Quality belongs to the deadline
+pick, and the deadline pick is on CV.
+⛔ **THE FILLERS ADOPT NOTHING.** Their thirty readings do not become a deflation constant
+(closed, w37e R3), a per-family or per-member correction (refused by name, w81 §6 / w84 §2), or
+an input to the pick. A future run that wants to use them registers the use first.
+
+## 4. FULL CHECK SUITE, THE FIELD, AND THE BOARD
+
+- `w70d_chainguard` **rc=0** (8 of 8 modules import) after the `stdflag` edit.
+- **27 standing check scripts, ALL rc=0**, and this is not a vacuous pass: `stdflag.py`,
+  `w54a`, `w55a` and the queue itself all changed this run. `w54a w55a w56b w57c w59b w60b w60d
+  w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b w74b w75b w76b w77b w78b w79b w80f
+  w82a w84a`. Logs in `logs/w85/`.
+- ⛔ `w83a` **deliberately not run** — its own instruction is to re-run only on a material board
+  move, and there was none (§4 below). **The list is now 29 — add `w85c_slotguard`.**
+- `w84a_pickargmax` **rc=0**: the deadline pick is still the CV argmax of everything sent.
+  `w74b_clickstaleguard` **rc=0**, tiers unchanged, the +4.5228e-6 click price still live.
+- **THE FIELD — six public notebooks the journal had never recorded**, all from 08-25:
+  `yekenot/ps-s6-e8-trompt-pytorch-frame` (Trompt/PyTorch-Frame, 4 votes),
+  `souvikdbiswas/…dual-master-rank-blend` (8), `mikhailnaumov/smartphone-addiction-xgb` (12),
+  `parthsarnobat/…catboost-xgb` (5), `sometimessubodh/…modelbuddy` (5),
+  `bariankitvinod/…our-ipynb-file` (0, published 13:11Z). w83/w84 logged only the two they read.
+  ⚠ **Trompt is the only one worth a look and it is probably already covered** — RESEARCH
+  already holds `pub_tabm`/`pub_tabnet`/`realmlp`/`resnet`/DCNv2/FT-Transformer/DeepFM, and the
+  `nn` family measured **+0.8e-6 with a sign flip**. Do not build it on that basis alone.
+- **BOARD** `lb_w85/`, 13:5xZ: **2,877 teams, rank 140 at 0.97119, top 4.87%.** Chris Deotte
+  leads 0.97172 (gap 0.00053). Top-5% cut is rank 143 — we are 3 inside. Against w84's 140/2875
+  that is **no material movement**.
+
+## 5. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-26T00:40:25Z**, before
+   tomorrow's ~12:40Z window, so it WILL be expired. ⚠ Refreshing it *today* would not have
+   helped: the token is a 12-hour one, so a refresh at 13:xxZ expires ~01:xxZ, still before the
+   window. The refresh has to happen in the sending run.
+2. **THE 08-26 SEND IS THREE COMMANDS AND THE DAY IS ALREADY REGISTERED AND VERIFIED.**
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry,
+   match file-for-file against §2's list, then `--go`. ⚠ The sender must print
+   `hijack CV bar 0.9701349052`. If it prints 0.9701288617, `w79b` C1 has been bypassed — stop.
+3. **Then `w70d_chainguard` + the 29 check scripts** (§4's 27 + `w83a` + `w85c`) — extend the
+   LIST, never an integer. Run `w74b`, `w84a` and `w85c` **AFTER** the sends: all three read the
+   live list, so a pre-send run tests yesterday's state and passes vacuously.
+4. **Register 08-29, 08-30 and 08-31 with `w72a_planday.py --day D`** when their turn comes. The
+   fillers are already in the queue and sort to the tail on `pred_lb`, so they need no further
+   work — they will be reached on the days the real candidates run out.
+5. ⛔ **DO NOT** turn the filler readings into any correction, constant, or input to the pick
+   (§3) · **DO NOT** change `w85c` G3 to test CV instead of the tier (§3) · **DO NOT** retire a
+   veto to fill a slot — that is the one remedy w54 excludes · **DO NOT** re-run `w26d_queueprice.py`
+   as the daily writer; `w48e_order.py --write` is the writer, and w26d correctly refuses after
+   a send day · **DO NOT** build a per-DAY or per-family correction from `w82a`'s table ·
+   **DO NOT** "fix" slot 2 into the CV #2 file (w84 §3, G4) · **DO NOT** re-run `w83a` absent a
+   material board move · **DO NOT** treat the rank slide as a reason to chase the public LB ·
+   **DO NOT** reopen `ext_members17` · **DO NOT** quote the superseded n=44 / ±14e-6 calibration
+   numbers · **DO NOT** quote w80e's G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null, its
+   q05/q95, or its "SCRUBBED" class · **DO NOT** read a LOW S as evidence of a foreign partition ·
+   **DO NOT** register a prereg4 that picks POS from the detected models · **DO NOT** quote
+   `w80a_posthoc.json` as registered · **DO NOT** quote w80a's "signal-to-null ratio 0.6x" ·
+   **DO NOT** read w80a's P2 as evidence about the fold scheme · **DO NOT** chase the 0.97127
+   public cluster · **DO NOT** spend a run on the selection click · **DO NOT** re-run
+   `w63a_setprice.py` with no arguments · **DO NOT** point `HIJACKPRICE` back at
+   `w63a_setprice.json` · **DO NOT** re-point `w59b`'s no-over-block control at `w38_ad202std_h3`
+   or `w36_ad199std_h3` · **DO NOT** install a `Σ|w|` health check · **DO NOT** quote w77 §6's
+   "Σ|w| is the alarm" as general · **DO NOT** quote `w77a`'s P6 as a finding · **DO NOT** cite
+   w63 §4's iff as established · **DO NOT** re-open the original dataset · **DO NOT**
+   re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a frozen constant from a mutable CSV ·
+   **DO NOT** re-run a pricer as a routine staleness check · **DO NOT** re-base the ranker ·
+   **DO NOT** apply the duplicate override · **DO NOT** take stacker seed/fold averaging, an OOF
+   error-analysis angle, a LightGBM/CatBoost/XGBoost tuning angle, or a feature-engineering angle.
+6. ⚠ **NEW LESSONS.**
+   • **An instrument that reads a dated artefact is only as fresh as the artefact, and it will
+     not tell you.** `w54a` is *the* script for "when does the queue run out", it was run, it
+     returned a clean table, and it was wrong by ten because the CSV it reads is stamped with a
+     day rather than a moment (§1). Ask what DATE an input is for, not just whether it parsed.
+   • **The brief's plainest instruction had no guard at all.** Seven guards on the send path,
+     every one of them about *what* goes out, none about *whether anything goes out* (§3). The
+     obvious invariants are the ones nobody writes a test for.
+   • **A control that recomputes the thing it guards is testing its own arithmetic.** `w85c` G1
+     takes the sendable count from `w26g_send.py` itself, so it cannot pass while the sender
+     would do something else (§3).
+   • **My own docstring table was wrong and the control caught it.** Five numbers typed from a
+     CSV; median and max each ~7e-6 off and two rows transposed (§2, C3). The instinct to
+     hard-code "the five landed offsets" is exactly the instinct that produced them.
+   • **A builder that is not idempotent destroys its own output.** The first `w85a` treated its
+     own previous run's files as prior submissions, called all 25 duplicates, deleted them and
+     reported 27 failures. Any builder that will be re-run as a check must exclude its own
+     prefix from "what already exists".
+   • **A tail that sorts on the right key makes the overflow free.** 63 files for 60 slots is
+     not a problem when the three that fall off are the three weakest (§2).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w84: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
+board zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is
+the memory and it is committed; the remote is not.

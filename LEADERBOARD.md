@@ -2275,3 +2275,17 @@ Account best **unchanged at 0.97119** (`w36_ad199stdcorr_ens4`, `w38_ad202stdcor
 **±14e-6**, against deadline margins of 1.9–4.5e-6 — the public slice cannot arbitrate. The
 honest read is that every unsent file is priced below the account best and six angles are closed
 on measurement, so nothing in the pipeline moves this number before 08-31.
+
+## 2026-08-25 ~13:55Z (w85)
+
+2,877 teams · **rank 140 · 0.97119 · top 4.87%** · Chris Deotte leads 0.97172 (gap 0.00053).
+Top-5% cut rank 143 (0.97119) — we are 3 places inside it; top-10% cut rank 287 (0.97106).
+Against w84's 140/2875 at 13:05Z this is **no material movement**, so `w83a_reproject` was not
+re-run (its own instruction: re-run only on a material board or rank move). Board in `lb_w85/`.
+
+Public field, 08-25: six notebooks the journal had never recorded —
+`yekenot/ps-s6-e8-trompt-pytorch-frame` (Trompt/PyTorch-Frame, 4 votes) is the only
+methodologically new one, and the workspace already holds TabM/TabNet/RealMLP/ResNet/DCNv2/
+FT-Transformer/DeepFM with the `nn` family measured at +0.8e-6 and a sign flip. Others:
+`souvikdbiswas` rank blend (8), `mikhailnaumov` XGB (12), `parthsarnobat` cat+xgb (5),
+`sometimessubodh` (5), `bariankitvinod` (0).

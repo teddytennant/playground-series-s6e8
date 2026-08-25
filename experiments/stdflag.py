@@ -186,13 +186,17 @@ MEMBER_FILES = {
 # The `w37_cal_*` calibration sends are member vectors by construction — `w37b_calfiles.py`
 # writes one per quarantined member to price the es-on-val bias — so they are matched by rule
 # rather than enumerated, and the rule is anchored on the builder's own prefix.
-_CAL_PREFIX = "w37_cal_"
+# `w85_cal_*` is the same thing, widened: `w85a_fillers.py` writes one per weak member to fill
+# the 18 send slots the queue cannot reach before the deadline. Each prefix is anchored on its
+# own builder, so a file only gets the `member` label if a builder that only writes raw member
+# vectors put it there.
+_CAL_PREFIXES = ("w37_cal_", "w85_cal_")
 
 
 def is_member(stem: str) -> bool:
     """True iff this file is a raw MEMBER prediction vector rather than a cross-fitted stack."""
     stem = str(stem).replace(".csv", "")
-    return stem in MEMBER_FILES or stem.startswith(_CAL_PREFIX)
+    return stem in MEMBER_FILES or stem.startswith(_CAL_PREFIXES)
 
 
 def family(stem: str) -> str:

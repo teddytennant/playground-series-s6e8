@@ -11,6 +11,15 @@ one and it will send it without comment.  This script computes the date that hap
 live submission list and the written queue, rather than asserting it.
 
 Run with no arguments.  Prints a table and exits 1 if the veto expires before the deadline.
+
+⚠⚠ IT READ A STALE QUEUE FOR A DAY AND THE SHORTFALL WAS WRONG (w85, 2026-08-25).
+`w26d_queueprice.csv` is written by `w48e_order.py --day D --write`, i.e. it is the queue AS OF
+day D.  Run this script after day D's ten have landed and every one of them is still in the CSV
+marked unsent, so `len(q)` overstates the queue by ten and the printed "N slot(s) go UNFILLED"
+comes back TEN TOO SMALL.  On 2026-08-25 it printed 8; the live number was 18.  Nothing was
+malformed and nothing raised -- the same silent-and-flattering shape as the 50-row cap w84 §2
+found in `w82a`.  C1 below now cross-checks the CSV against the live API and refuses to print
+an arithmetic it cannot trust.
 """
 import csv, io, os, subprocess, sys, datetime as dt
 import pandas as pd
@@ -61,9 +70,31 @@ def sent_today(comp="playground-series-s6e8"):
     return n
 
 
+def sent_files(comp="playground-series-s6e8"):
+    """Every filename the live API has ever accepted, for the C1 freshness check."""
+    rows = api_rows(comp)
+    fi = rows[0].index("fileName")
+    return {r[fi].strip() for r in rows[1:] if len(r) > fi}
+
+
 def main():
     t = today_utc()
     q = pd.read_csv(QUEUE)
+
+    # ---- C1: THE QUEUE MUST NOT CONTAIN ANYTHING THE API SAYS IS ALREADY SENT ----------
+    # This is the freshness test, not a spelling test: it fails only when the CSV genuinely
+    # describes a queue that no longer exists, and the remedy it names is the one command that
+    # rebuilds it.  See the note in the docstring.
+    stale = sorted(set(q.file) & sent_files()) if "file" in q else []
+    if stale:
+        print(f"⛔ STALE QUEUE -- {len(stale)} row(s) in {os.path.basename(QUEUE)} have already "
+              f"been sent:\n     " + ", ".join(stale[:6])
+              + (f" ... and {len(stale)-6} more" if len(stale) > 6 else ""))
+        print("   Every number below would be computed on a queue that no longer exists, and the\n"
+              "   unfilled-slot count would come out LOW BY EXACTLY THIS MANY. Refusing.\n"
+              "   Rebuild first:  .venv/bin/python experiments/w23b_sendqueue.py\n"
+              "                   .venv/bin/python experiments/w48e_order.py --day <UTC day> --write")
+        return 1
     n_pin = int((q.priority == 1).sum())
     n_tail = int((q.priority == 0).sum())
     n_veto = int((q.priority == -1).sum())
@@ -117,7 +148,10 @@ def main():
 
     sendable = n_pin + n_tail
     print(f"slack (slots - unsent)   {slots - len(q):+d}")
-    print(f"SENDABLE if the veto binds {sendable}  ->  {slots - sendable} slot(s) go UNFILLED")
+    _gap = slots - sendable
+    print(f"SENDABLE if the veto binds {sendable}  ->  "
+          + (f"{_gap} slot(s) go UNFILLED  ⛔ build fillers (w85a)" if _gap > 0
+             else f"{-_gap} file(s) spare, every slot fills"))
     if tier is not None:
         print(f"auto-selection tier      {tier:.5f}  (2nd-best public of {len(sc)} scored)")
         print(f"  a filler is SAFE iff its predicted public score is < {tier:.5f}; below the tier "

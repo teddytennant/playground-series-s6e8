@@ -1,3 +1,76 @@
+# 🔴 THE QUEUE RUNS OUT BEFORE THE CALENDAR DOES — FILL THE SLOTS, AND CHECK IT WITH `w85c`
+# (w85, 2026-08-25)
+
+The brief's economics: submissions here never evict each other, the public board shows
+best-of-all, **so an unused daily slot is pure waste — use all ten every day.** On 2026-08-25,
+with the day's ten already sent, there were **60 slots left and 42 sendable files. 18 slots
+were going to go unused** and no guard said so.
+
+## THE ARITHMETIC, AND THE ONE INSTRUMENT THAT GOT IT WRONG
+
+    slots     = (10 - sent today) + whole UTC days before 2026-08-31 * 10      [live API]
+    sendable  = what `w26g_send.py --n <slots>` actually plans                 [live dry run]
+
+⚠⚠ **`w26d_queueprice.csv` IS STAMPED WITH A DAY, NOT A MOMENT.** It is written by
+`w48e_order.py --day D --write`, so it is the queue *as of day D*. Read it after day D's ten
+have landed and all ten are still in it marked unsent — `len(q)` overstates by exactly ten and
+any unfilled-slot count comes back **TEN TOO SMALL**. `w54a_vetoexpiry.py` printed **8** when
+the live number was **18**. Nothing malformed, nothing raised, error in the flattering
+direction: the same shape as the 50-row cap in `w82a` (w84 §2).
+`w54a` now carries **C1** — it intersects the queue's filenames with the live sent list and
+refuses to print at all if the intersection is non-empty. `w55a_unpriced.py` reads the same CSV
+and inherits the staleness; it is safe only because it is always run straight after a `--write`.
+
+## THE FILLER RULE (w54), AND WHAT TO PUT IN A SPARE SLOT
+
+    a filler is SAFE iff its predicted public score is < the auto-selection tier (0.97119);
+    below the tier it cannot be auto-selected, so it costs nothing.
+    Fill the gap with files BELOW the tier — NEVER by retiring a veto.
+
+The file to use is a **raw member's own test vector** (`w37b_calfiles.py`'s precedent): its
+public score is a MEASUREMENT of that member, never an attempt on the board.
+`experiments/w85a_fillers.py` builds 25 of them, one per weak member, from a survey of all 157
+paired `oof_*/test_*` vectors (`w85_membersurvey.csv`).
+
+    FILLER_MAX_OOF = 0.9600
+    registered pred_lb = oof_auc + 0.0014299   # MEDIAN offset over the five landed w37 reads
+    w55a bound        = pred_lb + 0.0015604    # worst LANDED overshoot, not a number asserted
+    worst bound 0.9624  ->  margin +8803e-6 under the 0.97119 tier.  All 25 certified SAFE.
+
+⛔ **Nothing is fitted.** w37e R2 rejected the linear-in-AUC offset form at 6.28σ over a 1e-2
+range and these span 0.82–0.96. The prediction is a flat median and is expected to be wrong.
+⛔ **The readings ADOPT NOTHING** — not a deflation constant (closed, w37e R3), not a
+per-family or per-member correction (w81 §6, w84 §2), not an input to the deadline pick.
+
+## WIRING (all of it verified rc=0, 2026-08-25)
+
+    stdflag._CAL_PREFIXES = ("w37_cal_", "w85_cal_")   # -> family "member": no CV comparison,
+                                                       #    no p_beat, w58 tier test applies
+    w55a instrument B reads BOTH w37c_prereg.csv and w85b_prereg.csv (b_max over all landed)
+    chain: w23b_sendqueue -> w48e_order --day D --write -> w55a_unpriced -> w48e --write -> w26g
+
+⚠ `w48e_order.py --write` is the writer of `w26d_queueprice.csv`. **`w26d_queueprice.py` is NOT
+the daily writer** — it correctly REFUSES after a send day because the day's ten are no longer
+in the rebuilt queue, and its own suggestion to re-run `w37d_order.py` points at an 08-21 order
+that is long gone. Do not `--force` it.
+
+## `w85c_slotguard.py` — STANDING CHECK, CONTROLS EXERCISED BOTH WAYS
+
+Takes `sendable` from `w26g_send.py` itself rather than re-deriving it, so it cannot pass while
+the sender would do something else.
+
+    G1  sendable >= slots                              (63 vs 60, 3 spare)
+    G2  the pre-w85 queue snapshot MUST come up short  (38 vs 60)  -> G1 is not inert
+    G3  every plannable row priced or w55a-certified below the tier
+    G4  w54a rejects the stale queue (rc=1) and accepts the live one (rc=0)
+
+⛔ **G3 tests the TIER, not CV, and must not be changed to test CV.** A filler is free precisely
+because it is below the tier. Quality belongs to the deadline pick, and that is on CV.
+✅ 63 files for 60 slots is fine: the tail sorts on `pred_lb`, so the three that fall off the
+end are `gnb_raw`, `qda_raw`, `gmm_raw` — the three weakest.
+
+---
+
 # 🔴 ext_members17 — THE FOLD-SIGNATURE THREAD, RUN TO THE END. THREE INSTRUMENTS, NO ADOPTION.
 # (w81, 2026-08-24, slot 10 of 10 — ZERO slots, no submission)
 

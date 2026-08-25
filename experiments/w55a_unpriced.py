@@ -158,13 +158,22 @@ def main():
                 return env[g], g
         return float(ds.max()), 0.0
 
-    # ---- INSTRUMENT B: the w37 calibration prereg, validated on its landed five ---------
-    pre = pd.read_csv(os.path.join(HERE, "w37c_prereg.csv"))
+    # ---- INSTRUMENT B: the calibration preregs, validated on their landed rows ----------
+    # ⚠ TWO FILES NOW. `w85b_prereg.csv` registers the 25 w85 slot fillers in the SAME schema
+    # and for the same reason -- a pred_lb written down before the score exists. The overshoot
+    # `b_max` stays a single number measured over every LANDED prereg row on the account, so a
+    # w85 row is bounded by residuals that were earned, not by one asserted here. While only
+    # the w37 rows have landed, b_max is exactly what it was before this file changed.
+    _pres = [pd.read_csv(os.path.join(HERE, f)) for f in
+             ("w37c_prereg.csv", "w85b_prereg.csv")
+             if os.path.exists(os.path.join(HERE, f))]
+    pre = pd.concat(_pres, ignore_index=True)
+    assert pre.file.is_unique, "a file is registered in more than one prereg"
     act = dict(zip(sc.fileName, sc.publicScore))
     pre["actual"] = pre.file.map(act)
     landed = pre.dropna(subset=["actual"])
     b_max = float((landed.actual - landed.pred_lb).max())
-    print(f"\nINSTRUMENT B — w37c_prereg, {len(landed)} of {len(pre)} landed. "
+    print(f"\nINSTRUMENT B — {len(_pres)} prereg(s), {len(landed)} of {len(pre)} landed. "
           f"residuals (actual - pred), e-6:")
     for r in landed.itertuples():
         print(f"   {r.file:28s} pred {r.pred_lb:.6f}  actual {r.actual:.5f}  "
@@ -184,7 +193,7 @@ def main():
                               "valid": g > 0.0}}
         if r.file in PRE:
             cands["prereg"] = {"bound": PRE[r.file] + b_max, "point": PRE[r.file],
-                               "anchor": "w37c_prereg", "overshoot": b_max, "valid": True}
+                               "anchor": "prereg", "overshoot": b_max, "valid": True}
         ok = {k: v for k, v in cands.items() if v["valid"]}
         print(f"\n  {r.file}")
         for k, v in cands.items():
