@@ -27,6 +27,12 @@ sound chain. Recorded because each is a fact about the workspace, not a typo:
 Also: `w48e_order.CAL_ROWS` are member-family BY DESIGN (a calibration file has no stack CV), so
 the member check must exempt them or it fires on `w48_cal_hboyang_mix` every run.
 
+⚠ WIDENED 2026-08-25 (w87). From 08-29 the supply IS members: w85's 25 fillers, each certified
+below the auto-selection tier by `w55a_unpriced.json`. Check 4 exempted only CAL_ROWS and so
+failed all three of those days the moment they were registered — an outdated rule, not a real
+fault. It now reads `w72a.certified_members`, the same function the registrar admits on. A
+member in neither set still fails, which is the case the check is for.
+
     .venv/bin/python experiments/w72b_dayguard.py     # rc=0 sound, rc=1 with the reason
 
 ⛔ Read `$?` from a command substitution or a redirect, never after a pipe (RESEARCH §9.1).
@@ -66,7 +72,15 @@ def main() -> None:
         sys.argv = saved
 
     orders = {d: list(o) for d, o in W.ORDERS.items() if o}
-    cal = set(getattr(W, "CAL_ROWS", {}))
+    # ⚠ CAL_ROWS ALONE IS NO LONGER THE WHOLE LICENCE (w87). w85 built 25 raw-member fillers
+    # and had every one certified below the auto-selection tier by `w55a_unpriced.json`; from
+    # 08-29 they ARE the supply, and a member certified there is exactly as admissible as a
+    # CAL_ROW. Read the ruling from `w72a.certified_members`, which is the same function the
+    # registrar admits on, so this guard and the thing it guards cannot drift apart.
+    # ⛔ This is a WIDENING, not a removal: a member in NEITHER set still fails below, which is
+    # the case that matters — an uncertified member has no bound and could be auto-selected.
+    import w72a_planday as P                                             # noqa: E402
+    cal = P.certified_members(W)
 
     # THE AUTHORITATIVE SENT HISTORY — the live API, not the queue CSV (see the docstring).
     api = S.api_submissions()
@@ -110,13 +124,14 @@ def main() -> None:
             fail(f"{d} plans file(s) that are neither unsent nor sent — absent from the "
                  f"queue entirely: {gone}")
 
-    # 4. no vetoed file on any day; no member-family file except the registered CAL_ROWS.
+    # 4. no vetoed file on any day; no member-family file that nothing has certified.
     for d, o in sorted(orders.items()):
         if set(o) & set(W.VETO):
             fail(f"{d} plans VETOED file(s): {sorted(set(o) & set(W.VETO))}")
         mem = sorted(s for s in o if is_member(s) and s not in cal)
         if mem:
-            fail(f"{d} plans member-family file(s) that are not registered CAL_ROWS: {mem}")
+            fail(f"{d} plans member-family file(s) certified by neither w48e.CAL_ROWS nor "
+                 f"w55a_unpriced.json — no stack CV and no bound below the tier: {mem}")
 
     for d, o in sorted(orders.items()):
         n_sent = sum(1 for s in o if s in hist)

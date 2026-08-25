@@ -1,3 +1,85 @@
+# 🔴 THE REGISTRAR AND THE SENDER DISAGREED, AND ONLY THE REGISTRAR HAD A VOTE — `w87a`
+# (w87, 2026-08-25)
+
+    w54a_vetoexpiry.py   67 sendable, "every slot fills"       <- reads the queue
+    w85c_slotguard.py    63 planned by the SENDER vs 60 slots  <- reads the sender
+    w72a_planday.py       4 sendable vs 30 slots               <- THE ONE THAT REGISTERS DAYS
+
+`w48e_order.py --day D --write` exits 2 for a day it has no registration for, and only
+`w72a_planday.py` writes registrations. **26 of the last 30 slots (08-29, 08-30, 08-31) had no
+registrable file**, and every other instrument said the calendar was covered, because every
+other instrument asks the sender.
+
+## THREE DEFECTS, ALL FIXED, ALL ON THE PATH TO THE LAST THREE DAYS
+
+**1. `is_member` was a blanket exclusion in `w72a.pool`.** It predates w85, which built 25 raw
+member fillers *for those days*, certified below the tier by `w55a`. All 30 member rows in the
+queue were invisible to the registrar. A member is now admissible on the send path's own terms.
+
+**2. `w72a.pool`'s `sent` set was ALWAYS EMPTY.** It read `w23b_sendqueue.csv`, which contains
+only UNSENT rows — every one of its 86 `sent` values is False. Demonstrated on the real pre-w85
+snapshot: the old code's top ten were **ten already-sent files**. `sent` now comes from the live
+API, which `pool` already fetches. ⚠ `w72b_dayguard`'s docstring records this exact trap; w72a,
+written by the same run, kept it.
+
+**3. 🔴 `w48e --day 2026-08-29|30|31 --write` COULD NOT RUN AT ALL.** It verifies every
+registered file against `submissions/oof_<stem>.npy`, and **a certified member has no OOF vector
+and never will** — that is what family `member` means. Ten `⛔ no OOF` per day, then
+`AssertionError ... nothing written`. The check was right for 08-22..08-28 and fatal after.
+
+    the OOF requirement is skipped IFF  is_member(stem) AND stem in certified_members()
+    the CSV checks (296,302 rows, no NaN, md5 vs the queue) still run on it, unchanged
+
+## ⛔ `w48e_order.certified_members()` IS THE ONE OWNER — `w72a` AND `w72b` DELEGATE
+
+    cert = set(CAL_ROWS) | {rows certified `safe` in w55a_unpriced.json}     # 30 today
+
+My first cut re-implemented it in `w72a` and the registrar and the verifier disagreed **within
+the hour**: w72a registered thirty certified fillers, w48e refused all thirty. **Two copies of a
+ruling is how that happens.** Certifying a new member is a `w55a` run, not an edit.
+
+✅ A STALE `tier` inside `w55a_unpriced.json` cannot harm us, and this is why no guard was added
+for it: the tier is the second-best PUBLIC score this account holds, which is monotone
+non-decreasing, so a certification made below an older tier is still below today's.
+
+## EVERY REMAINING DAY IS REGISTERED, DRY-RUN AND VERIFIED (2026-08-25)
+
+    08-26 rc=0  08-27 rc=0  08-28 rc=0  08-29 rc=0  08-30 rc=0  08-31 rc=0
+    `w48e_order.py --day D` writes NOTHING — verified by the queue CSV's unchanged mtime.
+
+60 registered files for 60 slots, 3 spare (`gnb_raw`, `qda_raw`, `gmm_raw`). ⛔ **Do not re-run
+`w72a_planday.py --day D` for any of them.** Drift is reported by `w87a` C1/C7; `--rewrite` is
+the remedy, after reading why it moved.
+
+⚠ The 08-26/27/28 plans record `cv_bar 0.9701288617`, written 08-24 before the bar moved to
+0.9701349052. **Harmless direction** — the live bar is the stricter one — and `w87a` C7 re-tests
+all 60 files against the live bar every run. 0 refusals.
+
+ℹ `w48_cal_hboyang_mix` is registered for the PAST day 08-23, was refused there (pred_lb
+0.97123, above the tier), and is therefore permanently out of re-registration. It is the only
+unsent file in that state and the sender would refuse it anyway.
+
+## `w87a_registrarguard.py` — STANDING CHECK #31
+
+    C1   every REGISTERED file is one the sender would plan, and the 60 cover the 60 slots
+    C2   headroom REPORTED, never asserted to be zero
+    C3 +- the vacuous-`sent` regression, FIRED on the real pre-w85 snapshot, both directions
+    C4 +- the member admission, FIRED: blind to the certification the pool collapses to 0
+    C5   every planned member certified strictly below the LIVE tier
+    C6   nothing registered has been sent; no file on two pending days
+    C7   the sender's two-part refusal test replayed at the LIVE bar over all 60
+    C8 +- w48e's OOF exemption DISCRIMINATES, and w72a/w48e report the same certified set
+
+⛔ **C5 checks the TIER, never the CV** — same ruling as `w85c` G3.
+⚠ **"Pending" is `d > today or (d == today and sent_today < cap)`, read live.** The first cut
+used `d >= today` and failed three controls on today's own ten, which had already gone out.
+
+**THE LESSONS.** When instruments disagree, ask which one has a VOTE — the reassuring majority
+here had no authority over the outcome. A guard that documents a trap does not protect the code
+written alongside it. A rule correct for every case you have run is not correct: the only way to
+find #3 was to RUN THE LAST DAY, and the last day can be run six days early for free.
+
+---
 # 🔴 A PAGE SIZE IS A DEADLINE. `--page-size 200` EXPIRES ON 2026-08-31 — CHECK IT WITH `w86a`
 # (w86, 2026-08-25)
 

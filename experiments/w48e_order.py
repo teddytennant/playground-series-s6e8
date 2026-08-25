@@ -52,7 +52,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(ROOT, "agent"))
 from common import SUB, TARGET                                  # noqa: E402
 import stdflag                                                  # noqa: E402
-from stdflag import family, is_std                              # noqa: E402
+from stdflag import family, is_member, is_std                   # noqa: E402
 import w26d_queueprice as QP                                    # noqa: E402  (import is side-effect free)
 import w46c_predlb as W46                                       # noqa: E402
 
@@ -511,6 +511,30 @@ if os.path.exists(_UP):
 else:
     print("  ⚠ w55a_unpriced.json absent — unpriceable rows stay NaN and w26g will block them")
 
+
+def certified_members() -> set:
+    """The member-family stems the send path is willing to send, and the ONE place that ruling
+    lives. `CAL_ROWS` are the calibration files with their own registered artefact; the rest are
+    the rows `w55a_unpriced.json` certifies BELOW the auto-selection tier, which is the whole of
+    a member's licence to occupy a slot — it cannot be auto-selected, so it costs nothing.
+
+    ⛔ Certifying a new one is a `w55a` run, not an edit here. A stem in neither set is simply
+    not admissible; that is the fail-safe, not an error.
+    ⛔ Do not re-implement this anywhere else. `w72a_planday.certified_members` and
+    `w72b_dayguard` both delegate to it, so the registrar, the guard and the verification below
+    cannot drift apart — which is exactly how the last three days ended up registrable by w72a
+    and unwritable by this file on the same afternoon (w87).
+    """
+    cert = set(CAL_ROWS)
+    if os.path.exists(_UP):
+        _d = json.load(open(_UP))
+        cert |= {f[:-4] if f.endswith(".csv") else f
+                 for f, r in _d["rows"].items() if r.get("safe")}
+    return cert
+
+
+_CERTIFIED = certified_members()
+
 q["vetoed"] = q.stem.isin(VETO)
 print(f"  {int((~_has).sum())} row(s) carry no CV and are left unranked: "
       f"{', '.join(q[~_has].stem)}")
@@ -558,7 +582,26 @@ for i, stem in enumerate(ORDER, 1):
         m = hashlib.md5(open(f, "rb").read()).hexdigest()
         if stem in idx.index and isinstance(idx.loc[stem, "md5"], str) and idx.loc[stem, "md5"] != m:
             prob.append("md5 drift")
+    # ⚠⚠ A CERTIFIED MEMBER HAS NO OOF VECTOR AND NEVER WILL — DEMANDING ONE KILLED THE LAST
+    # THREE DAYS (w87, found 2026-08-25 by dry-running 08-31 six days early). `oof_<stem>.npy`
+    # is the artefact that makes a stack CV reproducible, and a member row is precisely the row
+    # that HAS no stack CV: w85's 25 fillers are raw member test vectors, certified below the
+    # auto-selection tier by `w55a` instead of ranked by CV. Every one of them failed here with
+    # "no OOF" and the assert below refused to write, so `--day 2026-08-29|30|31 --write` could
+    # not run at all and 30 slots had no path to the board.
+    # ⛔ THE EXEMPTION IS NARROW AND IT IS NOT A WEAKENING. It applies only to a stem that is
+    # BOTH family `member` AND certified by `w55a`/`CAL_ROWS`; the CSV checks above (row count,
+    # NaN, md5 against the queue) still run on it, unchanged. A member with no certification —
+    # the row that could actually hurt us, because nothing bounds its public score — still
+    # fails, and so does any ranked file whose OOF is missing.
     o = os.path.join(SUB, f"oof_{stem}.npy")
+    _cert_member = is_member(stem) and stem in _CERTIFIED
+    if not os.path.exists(o) and _cert_member:
+        print(f"  {i:2d}. {stem:24s} cv {'  (member, no stack CV)':>22s}  "
+              f"pred {idx.loc[stem, 'pred_lb']:.5f}  "
+              f"{'OK' if not prob else '⛔ ' + '; '.join(prob)}")
+        ok &= not prob
+        continue
     if not os.path.exists(o):
         prob.append("no OOF")
     elif stem in idx.index:
@@ -570,8 +613,13 @@ for i, stem in enumerate(ORDER, 1):
           f"{'OK' if not prob else '⛔ ' + '; '.join(prob)}")
     ok &= not prob
 assert ok, "⛔ at least one registered file failed verification -- nothing written"
-print("\n  all ten: 296,302 rows, no NaN, md5 matches the queue, CV reproduces from the OOF "
-      "vector. OK")
+# ⚠ Say which check actually ran. A member-only day has no CV to reproduce, and printing that
+# it did would be the same species of lie as the stamp `hijack_cv_bar` used to trust (w62).
+_nmem = sum(1 for _s in ORDER if is_member(_s) and _s in _CERTIFIED)
+print(f"\n  all ten: 296,302 rows, no NaN, md5 matches the queue"
+      + (", CV reproduces from the OOF vector" if _nmem < len(ORDER) else "")
+      + (f"; {_nmem} of the ten are certified members with no stack CV to reproduce"
+         if _nmem else "") + ". OK")
 
 # ------------------------------------------------------------------ write
 for c in ("send_rank", "msg", "why"):

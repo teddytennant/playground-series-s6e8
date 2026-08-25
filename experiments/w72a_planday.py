@@ -9,10 +9,28 @@ an argument, so the remaining windows cost a flag instead of a file.
     .venv/bin/python experiments/w72a_planday.py --day 2026-08-26 --rewrite   # only on drift
     .venv/bin/python experiments/w72a_planday.py --audit                      # supply only
 
-THE FILTERS ARE w70c's, UNCHANGED, and every one of them is READ from the module that owns it:
-  unsent · has a stored OOF vector · not in `w48e_order.VETO` · `stdflag.family() != "member"` ·
+THE FILTERS ARE READ FROM THE MODULE THAT OWNS EACH ONE:
+  unsent (the LIVE API — see below) · has a stored OOF vector · not in `w48e_order.VETO` ·
   not registered for another day · and NOT one `w26g_send.py` will refuse, which is
   `above_tier_reason(r) is not None AND hijack_risk(pred_lb, tier) >= P_MAX` — both halves.
+Family `member` is NO LONGER a blanket exclusion (w87): a member certified below the auto-
+selection tier by `w55a_unpriced.json`, or listed in `w48e.CAL_ROWS`, is admissible and sorts
+below every ranked row. See `certified_members` and `sort_key`.
+
+⚠⚠ TWO BUGS FOUND IN THIS FILE ON 2026-08-25 (w87), BOTH SILENT, BOTH IN THE FLATTERING
+DIRECTION, NEITHER EVER FIRED BY A TEST:
+  1. the `sent` set was read from `w23b_sendqueue.csv`, whose `sent` column is False on every
+     row, so it was ALWAYS EMPTY. On a stale queue the pool put ten already-sent files at the
+     top — a whole day of duplicate sends, which score identically and waste the slot.
+  2. the blanket `is_member` skip hid all 30 certified filler rows, leaving 4 sendable files
+     for the 30 slots of 08-29..08-31. w54a said 67 sendable and w85c said the SENDER plans
+     63; only this script said 4, and this script is the one that registers the day.
+`w87a_registrarguard.py` now cross-checks this pool against the sender's own plannable set on
+every run, which is the check that would have caught both.
+
+⛔ SUPERSEDED BY w87 — KEPT FOR THE RECORD, DO NOT QUOTE THE NUMBERS. The shortfall below
+was real when written and was closed by w85's 25 certified fillers plus the bug fix above; the
+live reading on 2026-08-25 is 33 sendable against 30 slots. The three levers still stand.
 
 ⚠⚠ THE SUPPLY IS SHORT, AND THIS IS THE FIRST RUN TO MEASURE IT. After the 08-24 send there are
 **34 sendable files** against **60 slots** (08-26..08-31, ten a day). The drain covers three
@@ -47,6 +65,7 @@ from stdflag import is_member                                            # noqa:
 N = 10
 FAILURES = 0
 DRIFT = False
+_API = None          # the live submission list, memoised by `pool` for `_vetoed_sent`
 
 
 def fail(msg: str) -> None:
@@ -86,18 +105,54 @@ def _load():
     return S, W
 
 
+def sort_key(cv, pred_lb, member: bool):
+    """The one ordering used to SELECT a day's ten, and the one GATE 3 re-checks.
+
+    Two populations, and they do not share a scale. A ranked row has a cross-fitted stack CV
+    and is ordered on it. A certified member has no CV at all and is ordered on its `w55a`
+    point estimate, which is the only quantity it owns. Every ranked row outranks every member
+    — a member is a MEASUREMENT, not a candidate, so it fills a slot only after the candidates
+    are gone. Returned as a tuple so the two never get compared numerically to each other.
+    """
+    return (0, float(pred_lb)) if member else (1, float(cv))
+
+
+def certified_members(W):
+    """Members the SEND PATH is willing to send. ⛔ DELEGATED — `w48e_order.certified_members`
+    is the single owner of this ruling, because that module already holds `CAL_ROWS`, reads
+    `w55a_unpriced.json` to price the rows, and VERIFIES the registered ten before writing.
+    When this file re-implemented it, the registrar and the verifier disagreed within the hour:
+    w72a registered 08-29..08-31 out of certified fillers and `w48e --write` then refused all
+    thirty of them for having no OOF vector (w87). One function, three callers, no drift.
+
+    ✅ A STALE `tier` IN `w55a_unpriced.json` CANNOT HARM US, and it is worth writing down why
+    rather than adding a guard that would never fire: the tier is the second-best PUBLIC score
+    this account holds, which is monotone non-decreasing, so a certification made below an older
+    tier is still below today's. The staleness is conservative in the only direction it moves.
+    """
+    return W.certified_members()
+
+
 def pool(S, W, day: str | None):
     """Everything still sendable, best CV first, excluding every OTHER day's registered ten."""
-    api = S.api_submissions()
+    global _API
+    api = _API = S.api_submissions()
     bar, tier = S.hijack_cv_bar(api), S.auto_tier(api)
 
     q = pd.read_csv(os.path.join(HERE, "w26d_queueprice.csv"))
     q["stem"] = q.file.str.replace(".csv", "", regex=False)
     # ⚠ `w26d_queueprice.csv` is written once a day by `w48e --write`, BEFORE that day's send,
-    # so its `sent` column is stale the moment the window drains. Take `sent` from the queue
-    # writer instead, which is refreshed from the live API by step 1 of the chain.
-    live = pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
-    sent = set(live[live.sent].file.str.replace(".csv", "", regex=False))
+    # so its `sent` column is stale the moment the window drains, and a run that registers a
+    # day without re-writing the queue first would plan files that have already gone out.
+    # ⚠⚠ THE OLD DEFENCE HERE WAS VACUOUS AND HAD BEEN SINCE THE DAY IT WAS WRITTEN. It read
+    # `sent` from `w23b_sendqueue.csv` — a file that CONTAINS ONLY UNSENT ROWS, so every one
+    # of its 86 `sent` values is False and the set came back EMPTY. `w72b_dayguard.py`'s own
+    # docstring records this exact trap ("the column is a filter that has already been
+    # applied, not a flag to test") after its first cut fell into it; w72a, written by the
+    # same run, kept it. Demonstrated live (w87): pointed at the pre-w85 queue snapshot, the
+    # old code put TEN ALREADY-SENT files at the top of a registrable pool. The authoritative
+    # sent list is the live API, which this function has already fetched.
+    sent = {r["fileName"].replace(".csv", "") for r in api if r.get("fileName")}
 
     # ⚠ SKIP OUR OWN DAY (w70c's lesson): once `day` is registered, its order is read back from
     # this script's own artefact, so excluding it here would empty the pool against itself.
@@ -106,18 +161,33 @@ def pool(S, W, day: str | None):
         if o and d != day:
             other |= set(o)
 
+    cert = certified_members(W)
+
     ok, refused = [], []
     for r in q.itertuples():
-        if r.stem in sent or r.stem in other or r.stem in W.VETO or is_member(r.stem):
+        if r.stem in sent or r.stem in other or r.stem in W.VETO:
             continue
-        if pd.isna(r.cv):
+        mem = is_member(r.stem)
+        # ⚠⚠ A BLANKET `is_member` SKIP HERE COST 26 OF THE LAST 30 SLOTS (w87). It predates
+        # w85, which built 25 raw-member fillers for exactly these days and had them certified
+        # below the tier by `w55a` and priced into the queue by `w48e`. The SENDER plans them
+        # (w85c G1: 63 files for 60 slots); the REGISTRAR could not see them, and since w48e
+        # exits 2 on a day it has no plan for, 08-29..08-31 were unregisterable — 30 slots with
+        # 4 candidates. A member is admissible on exactly the sender's terms: certified by
+        # `w55a_unpriced.json` or listed in `w48e.CAL_ROWS`, read from those modules, never
+        # re-derived here.
+        if mem and r.stem not in cert:
+            continue
+        # A member has NO cross-fitted stack CV and never will — that is what `member` MEANS.
+        # NaN CV is disqualifying only for a row that is supposed to have one.
+        if pd.isna(r.cv) and not mem:
             continue
         why = S.above_tier_reason(r, bar)
         risk = 1.0 if pd.isna(r.pred_lb) else S.hijack_risk(float(r.pred_lb), tier)
         (refused if (why and risk >= S.P_MAX) else ok).append(
-            (r.stem, float(r.cv), risk, why))
-    ok.sort(key=lambda t: -t[1])
-    refused.sort(key=lambda t: -t[1])
+            (r.stem, float(r.cv), risk, why, sort_key(r.cv, r.pred_lb, mem)))
+    ok.sort(key=lambda t: t[4], reverse=True)
+    refused.sort(key=lambda t: t[4], reverse=True)
     return ok, refused, tier, bar
 
 
@@ -143,14 +213,20 @@ def audit(S, W) -> None:
         print("  ⚠ An unused slot is pure waste under this brief. The shortfall is NOT fixable\n"
               "    by ranking the queue better — there is nothing further down it. See the\n"
               "    module docstring for the three levers; the selection click is the biggest.")
-    for s, c, k, _ in refused:
+    for s, c, k, _, _ in refused:
         print(f"    refused {s:<28} cv {c:.10f}  hijack {k:.2e}")
 
 
-def _vetoed_sent(W):
-    live = pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
-    live["stem"] = live.file.str.replace(".csv", "", regex=False)
-    return set(live[live.sent].stem) & set(W.VETO)
+def _vetoed_sent(W, api=None):
+    """Vetoed stems that have nevertheless been sent. ⚠ Same fix as `pool`: this used to read
+    `w23b_sendqueue.csv`, whose `sent` column is False on every row, so it always returned the
+    empty set and the audit's "unsent but VETOED" line overstated by however many vetoed files
+    had gone out. The live API is the only authority on what was sent."""
+    api = api if api is not None else _API
+    if api is None:
+        S, _ = _load()
+        api = S.api_submissions()
+    return {r["fileName"].replace(".csv", "") for r in api if r.get("fileName")} & set(W.VETO)
 
 
 def main() -> None:
@@ -183,7 +259,7 @@ def main() -> None:
 
     # SELECT on descending CV, SEND in ascending CV so the day's best goes out LAST and wins any
     # public-score tie under w46b §5's latest-first tiebreak. Same convention as every prior day.
-    plan = [s for s, _, _, _ in ok[:N]][::-1]
+    plan = [s for s, _, _, _, _ in ok[:N]][::-1]
 
     # GATE 1 — ten distinct, none vetoed, none registered for another day.
     if len(set(plan)) != N:
@@ -203,10 +279,23 @@ def main() -> None:
         if why and risk >= S.P_MAX:
             fail(f"{r.stem} would be REFUSED at the send: {str(why)[:80]} (hijack {risk:.2e})")
 
-    # GATE 3 — ascending-CV send order.
-    cvs = [float(q[q.stem == s].cv.iloc[0]) for s in plan]
-    if cvs != sorted(cvs):
-        fail(f"the plan is not in ascending-CV send order: {cvs}")
+    # GATE 3 — ascending send order, on the SAME key `pool` selected with. ⚠ It used to read
+    # `q.cv` directly, which is NaN on every certified member and makes `cvs != sorted(cvs)`
+    # true for reasons that have nothing to do with the order (NaN != NaN). The key is the one
+    # function so the gate cannot drift away from the selection it is checking.
+    cert = certified_members(W)
+    keys = [sort_key(q[q.stem == s].cv.iloc[0], q[q.stem == s].pred_lb.iloc[0],
+                     is_member(s)) for s in plan]
+    if keys != sorted(keys):
+        fail(f"the plan is not in ascending send order: {keys}")
+
+    # GATE 5 — every member in the plan is certified below the tier by the module that owns the
+    # ruling. GATE 2 replays the sender's tier test, but a member's whole licence to be sent is
+    # that certification, and a hand-edited plan is the case this catches.
+    for s in plan:
+        if is_member(s) and s not in cert:
+            fail(f"{s} is family `member` and is NOT certified by w55a/CAL_ROWS — it has no "
+                 f"stack CV and no certified bound, so nothing licenses sending it")
 
     # GATE 4 — drift. NOT a hard failure: a stale registration must stay fixable by re-running
     # this script, which is exactly what w70c's refuse-to-write made impossible.
@@ -220,7 +309,8 @@ def main() -> None:
             print("      Re-run with --rewrite to adopt the derived list, after reading WHY it moved.")
 
     print(f"\n  tier {tier}   bar {bar:.10f}   {len(ok)} sendable, {len(refused)} refused")
-    print(f"  (SEND order: ascending CV, the day's best LAST)")
+    print(f"  (SEND order: ascending on the selection key, the day's best LAST; a certified "
+          f"member has no CV and sorts below every ranked row)")
     print(f"  {'#':>2} {'stem':<28} {'cv':>14} {'pred_lb':>9} {'hijack':>9}")
     for i, s in enumerate(plan, 1):
         r = q[q.stem == s].iloc[0]
@@ -237,7 +327,7 @@ def main() -> None:
     with open(artefact(day), "w") as f:
         json.dump(dict(day=day, plan=plan, tier=tier, cv_bar=bar,
                        sendable_remaining=len(ok),
-                       refused=[dict(stem=s, cv=c, hijack=k, why=str(w)) for s, c, k, w in refused],
+                       refused=[dict(stem=s, cv=c, hijack=k, why=str(w)) for s, c, k, w, _ in refused],
                        failures=FAILURES), f, indent=1)
     print(f"\n  wrote {os.path.basename(artefact(day))}   FAILURES {FAILURES}")
 

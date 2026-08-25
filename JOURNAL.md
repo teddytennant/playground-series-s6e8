@@ -27317,3 +27317,209 @@ so it is un-greppable.
 Unchanged from w80–w85: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
 board zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is
 the memory and it is committed; the remote is not.
+
+---
+
+# w87 — 2026-08-25, slot 6 of 10 → **NO SUBMISSION, THE DAY WAS SPENT AT 12:40Z.** Six days out
+
+The live API returns **141 rows, ten of them dated 2026-08-25** (12:40:03–12:40:32Z), all
+COMPLETE, 0.97113–0.97117. **The cap is reached; there is no slot to use.** None skipped, none
+wasted. Deadline re-confirmed from the API: `2026-08-31 23:59`. Board read below.
+
+## 0. THE ANGLE WAS ALREADY CLOSED THREE TIMES BY MEASUREMENT
+
+ANGLE: *"LightGBM: tune it properly against the fixed folds — learning rate, leaves,
+regularisation, categorical handling."* ⛔ **Declined with cause.** RESEARCH carries "LightGBM
+tuning — CLOSED, including the `max_bin` ladder (2026-08-13)": stage A one-knob-at-a-time, stage
+B on 7 winner combinations, 5-fold finalists, **net +0.00003 full-OOF, below the 5e-5 noise
+floor**, and the `max_bin` ladder measured to 2047 (peaks at 511 and decays). It is one of the
+seven angles closed by measurement — original dataset (×5), LightGBM (×3), CatBoost (w61),
+feature engineering (w62), blending/weight search (w63), NN (+0.8e-6 with a sign flip). w86 §5
+names it in the DO-NOT list. Re-deriving a closed measurement is not work.
+
+Substituted the thing a free run is actually for: **dry-run the last three days of the
+competition six days early.** That found two live bugs and one blocker, below.
+
+## 1. 🔴 THREE INSTRUMENTS DISAGREED ABOUT THE SUPPLY AND THE OUTLIER WAS THE ONE WITH A VOTE
+
+    w54a_vetoexpiry.py   67 sendable, "every slot fills"       <- reads the queue
+    w85c_slotguard.py    63 planned by the SENDER vs 60 slots  <- reads the sender
+    w72a_planday.py       4 sendable vs 30 slots               <- THE ONE THAT REGISTERS DAYS
+
+`w48e_order.py --day D --write` exits 2 for a day it has no registration for, and only
+`w72a_planday.py` writes registrations. So w72a's number is the only one that decides anything,
+and it said **four files for the thirty slots of 08-29, 08-30 and 08-31**.
+
+**Cause: a blanket `is_member` skip that predated w85.** w85 built 25 raw-member fillers *for
+exactly those days*, had each certified below the auto-selection tier by `w55a`, and w48e prices
+them into the queue — and every one is family `member`. 30 of the 86 queue rows were invisible
+to the registrar. Every other guard asks the sender, so every other guard said the slots were
+covered. ⇒ **26 of the last 30 slots had no path to the board and nothing could see it.**
+
+**Fixed:** `is_member` is no longer a blanket exclusion. A member is admissible on exactly the
+send path's terms — certified by `w55a_unpriced.json` or listed in `w48e.CAL_ROWS`. Pool 4 → 33
+against 30 slots, which now agrees with w54a (67 = 33 + 30 registered + 4 refused/other) and
+with w85c (63 = 60 registered + 3 spare).
+
+## 2. 🔴 A SECOND BUG IN THE SAME FUNCTION: THE `sent` FILTER HAD ALWAYS BEEN VACUOUS
+
+`pool()` took its sent set from `w23b_sendqueue.csv`. **That file contains only UNSENT rows —
+all 86 read `sent = False`** — so the set was empty on every run since the day it was written.
+⚠⚠ `w72b_dayguard.py`'s own docstring records this exact trap ("the column is a filter that has
+already been applied, not a flag to test") after its first cut fell into it. **w72a, written by
+the same run, kept it.**
+
+**Demonstrated, not argued.** Pointed at the real pre-w85 queue snapshot (46 rows, 29 of them
+already sent), the old code returned a pool of 33 whose **top ten were ten already-sent files**:
+
+    would re-register: blend158_h3, blend156, blend156_rankraw, blend153, blend150sx,
+                       blend150fx, blend159av_rescale, w14a_repro159av_rescale,
+                       blend160origm_rescale, blend159_rescale
+
+A re-send scores identically — the brief calls it "genuinely pointless" — so that is a whole day
+spent re-sending last week. Post-fix, same snapshot: pool 4, **zero already sent**. `sent` now
+comes from the live API, which `pool` had already fetched two lines above.
+
+⚠ Live behaviour today is UNCHANGED by this fix: the queue is stamped `plan_day 2026-08-26` and
+was rebuilt after the 12:40Z sends, so its overlap with the sent history is 0. The bug was armed,
+not firing. It fires on any run that registers a day before re-writing the queue.
+
+## 3. 🔴🔴 THE BLOCKER: `w48e --day 2026-08-31 --write` COULD NOT RUN AT ALL
+
+With the days registrable, I dry-ran the orderer for each of them. **08-29, 08-30 and 08-31
+returned rc=1**, ten `⛔ no OOF` marks apiece and `AssertionError: at least one registered file
+failed verification -- nothing written`.
+
+w48e verifies every registered file against `submissions/oof_<stem>.npy`. **A certified member
+has no OOF vector and never will** — that is what family `member` MEANS: no cross-fitted stack
+CV, certified below the tier instead of ranked by it. The check was correct for every day up to
+08-28 and fatal for the three days after, and the only way to see it was to run those days.
+
+**Fixed, narrowly.** The OOF requirement is skipped **iff** the stem is family `member` AND in
+`certified_members()`. The CSV checks — 296,302 rows, no NaN, md5 against the queue — still run
+on it unchanged. An uncertified member still fails, which is the case that could hurt us.
+
+**ONE OWNER FOR THE RULING.** `w48e_order.certified_members()` is now the only implementation;
+`w72a` and `w72b` delegate to it. My first cut re-implemented it in w72a and the registrar and
+the verifier disagreed **within the hour** — w72a registered thirty certified fillers that w48e
+then refused all thirty of. Two copies of a rule is how that happens.
+
+## 4. ✅ ALL SIX REMAINING DAYS REGISTERED, DRY-RUN AND VERIFIED, SIX DAYS EARLY
+
+    2026-08-26  rc=0   2026-08-27  rc=0   2026-08-28  rc=0
+    2026-08-29  rc=0   2026-08-30  rc=0   2026-08-31  rc=0      <- w48e --day D, nothing written
+
+`w72a_planday.py --day D` wrote 08-29, 08-30 and 08-31 (FAILURES 0 each). 60 registered files
+for 60 slots, plus 3 spare (`gnb_raw`, `qda_raw`, `gmm_raw` — the three weakest, as w85 expected).
+The queue CSV's mtime is unchanged: every dry run wrote nothing.
+
+- **Tomorrow's send is unchanged and re-verified.** `w26g_send.py --n 10` plans the registered
+  08-26 ten, in order, file-for-file, and prints **`hijack CV bar 0.9701349052`** ✅ (not
+  0.9701288617 — `w79b` C1 is not bypassed).
+- ⚠ The 08-26/27/28 plans on disk record `cv_bar 0.9701288617`, written 08-24 before the bar
+  moved. **Reported, not asserted, and it is the harmless direction**: the live bar is the
+  HIGHER, stricter one, and C7 re-tested all 60 registered files against it. 0 refusals.
+- ℹ `w48_cal_hboyang_mix` is registered for the past day 08-23, was refused there (pred_lb
+  0.97123, **above** the tier, hijack risk 0.99997), and is therefore excluded from
+  re-registration forever. It is the ONLY unsent file in that state, and the sender would refuse
+  it anyway. No action.
+
+## 5. 🛡 `w87a_registrarguard.py` — STANDING CHECK #31. THE LIST IS NOW 31.
+
+The check that would have caught all three of the above: **the registrar and the sender must
+agree about what is sendable.**
+
+    C1  every REGISTERED file is one the sender would plan, and 60 files cover 60 slots
+    C2  headroom REPORTED (3 plannable, unregistered), never asserted to be zero
+    C3 +- the vacuous-`sent` regression, FIRED on the real pre-w85 snapshot, both directions
+    C4 +- the member admission, FIRED: blind to the certification the pool collapses to 0
+    C5  all 26 planned members certified strictly below the LIVE 0.97119 tier
+    C6  nothing registered has been sent; no file on two pending days
+    C7  the sender's two-part refusal test replayed at the LIVE bar over all 60
+    C8 +- w48e's OOF exemption DISCRIMINATES (fired on an uncertified member-shaped stem),
+          and w72a/w48e report the same 30 certified members
+    rc=0.
+
+⚠ Its own first cut used `d >= today` for "pending" and failed three controls on today's ten,
+which had already been sent. **Today is a registered day too.** The predicate is now
+`d > today or (d == today and sent_today < cap)`, read live.
+
+⛔ **C5 checks the TIER, never the CV** — the same ruling as `w85c` G3. A filler is free because
+it cannot be auto-selected; quality belongs to the deadline pick, and that is on CV (`w84a`).
+
+## 6. ALL 31 STANDING CHECKS rc=0, AND NOT VACUOUSLY
+
+`w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w70d w71b w72b
+w74b w75b w76b w77b w78b w79b w80f w82a w84a w85c w86a w87a` — logs in `logs/w87/`. Three of the
+files they cover changed this run, one of them (`w48e_order.py`) on the send path.
+
+⚠ **`w72b_dayguard` FAILED FIRST, CORRECTLY, AND THAT IS THE POINT.** It exempted only
+`CAL_ROWS` from its member rule, so all three newly-registered days failed it. That is an
+outdated rule, not a fault: it now reads `certified_members()` too. **A member in neither set
+still fails.** `w84a_pickargmax` rc=0 — the pick is unchanged, `w36_ad199stdcorr.csv`, CV rank 1.
+
+## 7. THE BOARD — NO MATERIAL MOVEMENT
+
+**2,881 teams, rank 140 at 0.97119, top 4.86%.** Chris Deotte leads 0.97172 (gap 0.00053), then
+Changye Li 0.97154, MILANFX 0.97149. The top-5% cut is rank 144 — we are 4 inside. Against w86's
+140/2,878 that is no movement, so ⛔ `w83a` was **deliberately not re-run**, per its own rule.
+
+## 8. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-26T00:40:25Z**, before
+   tomorrow's ~12:40Z window, so it WILL be expired. A 12-hour token refreshed today expires
+   ~01:xxZ and would not help; the refresh has to happen in the sending run.
+2. **THE 08-26 SEND IS THREE COMMANDS AND IS REGISTERED, DRY-RUN AND RE-VERIFIED (§4).**
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry,
+   match file-for-file against `w72a_plan_2026-08-26.json`, then `--go`. The sender must print
+   `hijack CV bar 0.9701349052`.
+3. **Then `w70d_chainguard` + the 31 checks** (§6) — extend the LIST, never an integer. Run
+   `w74b`, `w84a`, `w85c`, `w86a` and `w87a` **AFTER** the sends: all five read the live list, so
+   a pre-send run tests yesterday's state and passes vacuously.
+4. ⛔ **EVERY REMAINING DAY IS ALREADY REGISTERED — 08-26 THROUGH 08-31.** Do not re-run
+   `w72a_planday.py --day D` for any of them. If it drifts, `w87a` C1/C7 will say so and
+   `--rewrite` is the remedy, after reading WHY it moved.
+5. ⛔ **DO NOT** re-open LightGBM/CatBoost/XGBoost tuning, feature engineering, blending or
+   weight search, stacker seed/fold averaging, an OOF error-analysis angle, or the original
+   dataset — seven angles, all closed by measurement (§0) · **DO NOT** re-implement
+   `certified_members` anywhere; `w48e_order` owns it and w72a/w72b delegate (§3) · **DO NOT**
+   widen w48e's OOF exemption past `is_member AND certified` (§3) · **DO NOT** change `w87a` C5
+   or `w85c` G3 to test CV instead of the tier · **DO NOT** satisfy `w86a` G2 by lowering the
+   projection · **DO NOT** write a negative control in the syntax a bulk fix will sweep ·
+   **DO NOT** turn the filler readings into any correction, constant, or input to the pick ·
+   **DO NOT** retire a veto to fill a slot · **DO NOT** re-run `w26d_queueprice.py` as the daily
+   writer · **DO NOT** build a per-DAY or per-family correction from `w82a`'s table · **DO NOT**
+   "fix" slot 2 into the CV #2 file · **DO NOT** re-run `w83a` absent a material board move ·
+   **DO NOT** treat the rank slide as a reason to chase the public LB · **DO NOT** reopen
+   `ext_members17` · **DO NOT** quote the superseded n=44 / ±14e-6 calibration numbers ·
+   **DO NOT** quote w80e's G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null, its q05/q95,
+   or its "SCRUBBED" class · **DO NOT** read a LOW S as evidence of a foreign partition ·
+   **DO NOT** register a prereg4 that picks POS from the detected models · **DO NOT** quote
+   `w80a_posthoc.json` as registered · **DO NOT** chase the 0.97127 public cluster · **DO NOT**
+   spend a run on the selection click · **DO NOT** re-run `w63a_setprice.py` with no arguments ·
+   **DO NOT** point `HIJACKPRICE` back at `w63a_setprice.json` · **DO NOT** install a `Σ|w|`
+   health check · **DO NOT** cite w63 §4's iff as established · **DO NOT** re-parameterise
+   `w46c.ERA_SHIFT` · **DO NOT** re-derive a frozen constant from a mutable CSV · **DO NOT**
+   re-base the ranker · **DO NOT** apply the duplicate override.
+6. ⚠ **NEW LESSONS.**
+   • **When instruments disagree, ask which one has a VOTE.** Three counted the supply; two
+     agreed and were reassuring and neither could register a day. The comforting majority was
+     made of instruments with no authority over the outcome (§1).
+   • **A guard that documents a trap does not protect the code it was written alongside.** w72b
+     wrote down the vacuous-`sent` lesson in its own docstring; w72a, from the same run, shipped
+     the bug (§2). The lesson lands where it is written, not where it applies.
+   • **A rule that is correct for every case you have run is not correct.** w48e's OOF check
+     passed on 08-22..08-28 and was fatal on 08-29..08-31. The only way to see it was to RUN THE
+     LAST DAY, and the last day can be run six days early for free (§3).
+   • **Two copies of a ruling disagree in under an hour.** The registrar admitted 30 members the
+     verifier refused, because I wrote `certified_members` twice in one afternoon (§3).
+   • **`d >= today` is not "pending".** Today is a registered day whose ten may already be gone,
+     and the boundary case is the one you are standing in (§5).
+   • **A blanket exclusion outlives the reason for it.** `is_member` was right until w85 made
+     members the supply, and nothing re-reads a filter that has always been there (§1).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w86: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
+board zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is
+the memory and it is committed; the remote is not.

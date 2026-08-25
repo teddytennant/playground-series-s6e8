@@ -1,5 +1,19 @@
 # Leaderboard notes — playground-series-s6e8
 
+## Snapshot 2026-08-25 ~14:0x UTC — w87, FULL board download (`lb_w87/`, 2,881 rows)
+
+| | |
+|---|---|
+| us | **0.97119**, rank **140 of 2,881** = top **4.86%** |
+| leader | Chris Deotte **0.97172** — gap **0.00053**, unchanged since 08-24 |
+| 2nd / 3rd | Changye Li 0.97154 · MILANFX 0.97149 |
+| top 5% cut | rank **144** — we are 4 places inside it |
+
+**NO MATERIAL MOVEMENT** against w86 (140 of 2,878). The field grew by 3 teams and the top of
+the board did not move at all. ⛔ `w83a_privproj.py` deliberately NOT re-run — its own rule is
+to re-run only on a material board move. The slow rank slide is field growth, not a signal to
+chase the public LB.
+
 ## Snapshot 2026-08-25 12:52 UTC — w83, FULL board download (`lb_w83/`, 2,874 rows)
 
 | | |
