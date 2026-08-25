@@ -1,3 +1,103 @@
+# 🔴 THE FIELD SWEEP WAS READING ONE INDEX OF TWO — AND THE PACKS LIVE IN THE OTHER ONE
+# (w89, 2026-08-25)
+
+    kaggle kernels  list --competition playground-series-s6e8 --sort-by dateRun   <- w84/w86/w88
+    kaggle datasets list -s s6e8 --sort-by updated                                <- where the
+                                                                                     PACKS are
+
+Every external OOF pack this workspace has imported or dispositioned came from the **datasets**
+index: beicicc, najiama, szymonkapiski, ravi20076, stephentarter, adarsh1077. Three runs wrote
+"the field is unchanged" off the **kernels** index. Both statements were true; neither covered
+the claim. `szymonkapiski` reached the w81 ledger via the 0.97127 notebook's INPUT LIST, not a
+sweep.
+
+## ✅ THE FIELD SWEEP IS NOW ONE COMMAND — `w89b_fieldsweep.py`
+
+    .venv/bin/python experiments/w89b_fieldsweep.py            # 4 queries, new refs only
+    .venv/bin/python experiments/w89b_fieldsweep.py --all      # everything
+    .venv/bin/python experiments/w89b_fieldsweep.py --selftest # offline
+
+Membership is decided against **JOURNAL + RESEARCH + LEADERBOARD**, so the memory IS the
+manifest and nothing is "seen" without being written down. Two tiers on purpose:
+`>>>` unknown owner (the strong signal) and `~` known owner, unnamed slug (the weak one) —
+collapsing them lets a dispositioned author's new upload go unlooked-at.
+
+⚠⚠ **IT HID ITS OWN MOTIVATING FIND TWICE, BY TWO SUBSTRING BUGS.** Both are fixed and both are
+the kind that come back:
+1. the STRIPPED slug: `s6e8-addiction` → `addiction`, a word on nearly every line. Remainder
+   must now be ≥10 chars and contain a hyphen (keeps `150-fusion-local-members`).
+2. the SLUG ITSELF: `s6e8-addiction` is a literal substring of najiama's
+   `s6e8-addiction-lb-0-97092`, a different artefact by a different author. Names now need a
+   boundary match — not flanked by `[\w-]`.
+⛔ **Do not weaken either rule to satisfy a control.** `nobody/s6e8-beicicc` (an unknown owner
+re-hosting a known pack) SHOULD surface as new; that control was deleted, not accommodated,
+because accommodating it restores bug 1.
+
+## ✅ THE PUBLIC FIELD IS VERIFIABLY ON OUR PARTITION — `w89a_foldid.py`, STANDING CHECK #33
+
+Since w38 the workspace has taken every pack's `StratifiedKFold(5, shuffle=True,
+random_state=42)` claim on trust, because prose is all szymonkapiski shipped. Four packs ship
+the **vector**, and all four are our frozen partition:
+
+    our partition  n=691369  folds [138274,138274,138274,138274,138273]  pos [98095 x4, 98094]
+
+    nhtquyn/s6e8-addiction                       identical AS LABELLED       ✅
+    beicicc/fixed900-structural-lgbm             identical up to relabelling ✅
+    beicicc/sixmember-crossfit-logitlr           identical up to relabelling ✅
+    beicicc/fixed4000-catboost-screen-relation   identical up to relabelling ✅
+
+⛔ **THIS LICENSES NO IMPORT.** It prices no member and cannot see w51's es-on-val clause, which
+is what closed `ext_members17`. It is a read of the field.
+
+⚠⚠ **beicicc NUMBERS ITS FOLDS 1..5.** A `bincount`/`argmax` over `0..max` leaves an empty class
+0 that steals a label, the bijection fails, and all three beicicc packs print **NOT our
+partition** with **raw per-row agreement 0.000000 — BELOW the 0.2 chance rate**, the most
+alarming number the instrument can emit, produced by an indexing convention. The overlap
+diagnostic printed `[nan, 1.0, 1.0, 1.0, 1.0, 1.0]` underneath every wrong verdict. Empty
+classes must be dropped before the permutation is built. C1 (ours, +1) and C4 (a foreign split,
++1) are the pair that pin the tolerance to exactly a bijection.
+
+## ✅ 7 KB REFUSES 473 MB — `w89c_screen.py`, RUN IT BEFORE ANY DOWNLOAD
+
+    .venv/bin/python experiments/w89c_screen.py <pack>/members.csv
+
+w29g's registered rule, in full: `maxcorr` is **not** a screen, because noise decorrelates
+exactly like signal does — Spearman(maxcorr, solo AUC) = **+0.87** over the ten profiled
+members. A member is worth a pack refit only if it is decorrelated **AND** within ~0.005 of the
+pack median solo AUC, and the second clause binds. A published `members.csv` is enough to run
+it.
+
+    w29 floor = 0.966 - 0.005 = 0.9610
+
+    nhtquyn        120 members  0.853173..0.929956   0 clear   best 6.2x TOL below  ⛔ REFUSED
+    ext_members17   50 members  0.916917..0.956758   0 clear   best 0.8x TOL below  ⛔ REFUSED
+
+✅ **It reproduces w81's refusal of `ext_members17` from an independent route** — worth more
+than the verdict on nhtquyn. The margins are NOT alike: szymonkapiski misses by 0.8x TOL (a
+near-miss, which is why w81 rightly spent a slot) and nhtquyn by 6.2x.
+⛔ **The screen cannot ADMIT.** Passing means "worth the download", never "worth importing".
+
+⚠ **nhtquyn's 120 are families we already built and already priced.** `gmm` 36, `qda` 39, `gnb`
+20, `binned_nb` 15, `lda` 10. w29 built `qda_raw`/`qda_lat`/`gnb_raw`/`gmm_raw` on the frozen
+folds, found `gmm_raw`/`qda_raw` the **two most decorrelated members the pack has ever held**,
+and measured the four jointly at **+0.30 ± 0.67e-6 — registered null M14(b)5 FIRED**. Those same
+three are today the files that fall off the end of the 60-slot calendar as our weakest.
+
+## 📋 EXTERNAL DATASET DISPOSITIONS ADDED 2026-08-25 (w89) — do not re-open these
+
+| ref | published | disposition |
+|---|---|---|
+| `nhtquyn/s6e8-addiction` | 08-22 | ⛔ REFUSED on the w29 floor, 0/120. Partition ✅ verified. |
+| `hboyang/s6e8-catstrall-member` | 08-24 | 6 members oof+test, no `fold_id`, no `members.csv`. **ARM 217 veto** covers hboyang. |
+| `hboyang/s6e8-150-fusion-local-members` | 08-18 | artefacts behind the fusion **w56a already read as a kernel**. Same veto. |
+| `wellkilo/s6e8-evidence-first-soft-student-assets` | 08-20 | 3 MB, `champion_rank_signals.npz` + `contract.json`. Rank signals, no OOF matrix. |
+| `anthonytherrien/predicting-smartphone-addiction-vault` | re-uploaded **08-25 09:50Z** | two `submission*.csv`, still no OOF. Dispositioned 08-17; the refresh changes nothing. |
+| `qamrodz/prediction-smartphone-addiction-submission` | 08-18 | the competition's own train/test/sample plus one submission. Nothing. |
+
+**Net: one genuinely new OOF pack in eight days, and it is refused on a rule registered in w29.**
+
+---
+
 # 🔴 THE SEND GATE IS PER FILE AND RUNS 60 MORE TIMES — THE CALENDAR PRICES AT 0.21e-6 (`w88a`)
 # (w88, 2026-08-25)
 
@@ -71,7 +171,7 @@ unchanged either way.
 today mints a token expiring ~02:16Z and does not help. **Nothing to do.** The only run this
 bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication required" as dead.
 
-## THE 32 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 33 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -79,7 +179,7 @@ bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication 
     w70b_basisguard   w70d_chainguard    w71b_dupguard      w72b_dayguard     w74b_clickstaleguard
     w75b_muguard      w76b_addguard      w77b_bracketguard  w78b_treatguard   w79b_fillguard
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
-    w87a_registrarguard                  w88a_calexposure
+    w87a_registrarguard                  w88a_calexposure  w89a_foldid
 
 ⚠ The journal records these as bare PREFIXES (`w68b w70b w71b ...`). w88 expanded five of them
 from memory and got all five wrong; `.venv/bin/python experiments/<wrong>.py` exits **2** with

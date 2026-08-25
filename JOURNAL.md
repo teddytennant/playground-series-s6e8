@@ -27706,3 +27706,238 @@ not help either. **Nothing to do.** ⚠ The one time this bites is a run that la
 
 Unchanged from w80–w87: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip`. Local
 `main` is ahead of `origin/main`. The workspace is the memory and it is committed.
+
+---
+
+# w89 — 2026-08-25, slot 8 of 10 → **NO SUBMISSION, THE DAY WAS SPENT AT 12:40Z.** Six days out
+
+    date -u                            ->  2026-08-25 14:33Z
+    w26g_send.py --n 10                ->  "141 submissions on record; 10 already sent on
+                                            2026-08-25 (UTC); 0 of 10 slots left today"
+
+At the cap, second run running. Research and code only, as the brief requires. The dry run
+still printed tomorrow's plan and correctly flagged it — *"⚠ DRY RUN AGAINST A QUEUE FOR
+ANOTHER DAY: queue was written for 2026-08-26, not today"* — and `cap = min(a.n, max(left,0))`
+means a `--go` at zero slots plans nothing. ✅ Verified, not assumed.
+
+**All 32 standing checks rc=0** (`logs/w89/`), full stems copied from RESEARCH rather than
+reconstructed, per w88's lesson. `w84a_pickargmax` rc=0, the pick is unchanged:
+`w36_ad199stdcorr.csv`, CV rank 1 of 130.
+
+## 0. THE ANGLE IS CLOSED, AND I CHECKED THE CLOSURE INSTEAD OF INHERITING IT
+
+ANGLE: *"XGBoost: third leg of the ensemble, tuned on the same folds so the blend weights mean
+something."* ⛔ **Declined with cause — but not on the DO-NOT list's say-so.** w88's own lesson
+is that *a blanket exclusion outlives the reason for it*, and this is the fifth consecutive run
+to decline its angle, so the closure was re-read rather than quoted. It holds, specifically:
+
+- **2026-08-10 slot 3** took this exact angle and closed tuning.
+- **2026-08-11 slot 3** kept the angle and pointed it at the *upstream* instead of the knobs —
+  `run_xgb.py` grew `xgb_cat_lattice` (unordered lattice categoricals, decorrelation record
+  0.9746), `xgb_raw_nan`, `xgb_lat`, `xgb_latcat`. `xgb_latcat` (solo 0.967696) was worth
+  **+1e-6**; its `_s17`/`_s23` seed twins were a **null**.
+- The finding there was structural and is why more XGBoost cannot help: **where a member lands
+  is set by its upstream, not its knobs**, and `xgb_raw_nan`'s nearest neighbour was already
+  `bei_xgb_identity_digit_raw12` at 0.9947 — beicicc holds that pipeline.
+
+Substituted: **the field sweep the last three runs reported on was reading one index of two.**
+
+## 1. 🔴 "THE FIELD IS UNCHANGED" WAS WRITTEN ON A `kernels list` SWEEP. THE PACKS COME FROM `datasets`.
+
+w84, w86 and w88 each recorded the field as unchanged on the strength of
+`kernels list --sort-by dateRun`. Every external OOF pack this workspace has ever imported or
+dispositioned came from the **datasets** index — beicicc, najiama, szymonkapiski, ravi20076,
+stephentarter, adarsh1077. Those are different indices and the one that was swept is not the
+one the claim was about. The last recorded datasets read is the w81 ledger (08-24), and
+`szymonkapiski` reached that ledger via the 0.97127 *notebook's* input list, not via a sweep.
+
+Swept today, both indices, four queries: **`nhtquyn/s6e8-addiction`, published 2026-08-22, 56
+downloads, is named nowhere in JOURNAL, RESEARCH or LEADERBOARD** — and it is the artefact
+class this workspace has wanted since w38:
+
+    fold_id.npy    691,497 B   int8, 691,369 rows        <- THE VECTOR, not a prose assertion
+    members.csv      7,005 B   120 rows, id/family/view/transform/solo_oof_auc/seconds
+    oof.npy      331,857,248 B = 128 + 691,369 x 4 x 120  <- 120 members, float32
+    test.npy     142,225,088 B = 128 + 296,302 x 4 x 120
+
+## 2. ✅ FIRST HARD EVIDENCE THAT THE PUBLIC FIELD IS ON OUR PARTITION — `w89a_foldid.py`
+
+Every external pack asserts `StratifiedKFold(5, shuffle=True, random_state=42)` on train.csv in
+original row order **in prose**, and the workspace has taken that on trust since w38 because
+prose is all szymonkapiski shipped. Four packs ship the vector. A vector can be checked.
+
+    our frozen partition   n=691369   fold sizes [138274,138274,138274,138274,138273]
+                                      positives  [ 98095, 98095, 98095, 98095, 98094]
+
+    nhtquyn/s6e8-addiction                        identical AS LABELLED          ✅
+    beicicc/fixed900-structural-lgbm              identical up to relabelling    ✅
+    beicicc/sixmember-crossfit-logitlr            identical up to relabelling    ✅
+    beicicc/fixed4000-catboost-screen-relation    identical up to relabelling    ✅
+
+    packs failing the identity test: 0
+
+⛔ **This is a read of the field, NOT a step toward adoption.** w81 closed `ext_members17` on
+w51's es-on-val clause, which no fold instrument can see. Nothing here touches that.
+
+⚠⚠ **THE FIRST CUT CALLED THREE OF THE FOUR FOREIGN, AND ITS OWN DIAGNOSTIC SAID OTHERWISE.**
+beicicc numbers folds **1..5**. A plain `bincount`/`argmax` over `0..max` leaves an empty class
+0 that steals a label, the bijection test fails, and all three printed **⚠ NOT our partition**
+— while the overlap row printed underneath read `[nan, 1.0, 1.0, 1.0, 1.0, 1.0]`, i.e. every
+one of their folds mapping perfectly onto one of ours. **Raw per-row agreement was 0.000000,
+BELOW the 0.2 chance rate** — the single most alarming number the instrument can emit, produced
+by a labelling convention. A 1-based index is not a foreign split.
+
+Seven controls, all green, and C1/C4 are the pair that matter — the relabelling tolerance must
+admit a rotation of our partition and must **not** launder a repartition:
+
+    C1  ours, labels +1 (beicicc's convention)      -> relabelled  (must pass)
+    C2  ours, labels permuted [3,0,4,1,2]           -> relabelled  (must pass)
+    C3  StratifiedKFold(5, seed=999), foreign       -> NOT         (must fail)
+    C4  that same foreign split, 1-based            -> NOT         (must fail)
+    C5  ours with 200 of 691,369 rows moved         -> NOT         (a near-miss must not round)
+    C6  ours, row order shuffled                    -> NOT
+    C7  a 4-fold split (different K)                -> NOT         (fails, does not crash)
+
+## 3. ✅ AND THE PACK IS REFUSED WITHOUT DOWNLOADING 473 MB — `w89c_screen.py`
+
+`members.csv` is 7 KB and carries every member's solo OOF AUC, which is enough to run w29g's
+**binding** test. w29g's correction, in full: `maxcorr` is not a screen, because *noise
+decorrelates exactly like signal does* — Spearman(maxcorr, solo AUC) = **+0.87** across the ten
+profiled members. The rule that replaced it is *decorrelated AND within ~0.005 of the pack
+median solo AUC*, and the second clause is the one that binds.
+
+    w29 floor = 0.966 - 0.005 = 0.9610
+
+    nhtquyn      120 members   0.853173 .. 0.929956   0 clear the floor   best is 6.2x TOL below
+    ext_members17 50 members   0.916917 .. 0.956758   0 clear the floor   best is 0.8x TOL below
+
+✅ **The screen reproduces w81's refusal of `ext_members17` from a completely independent
+route**, and that agreement is worth more than the verdict on nhtquyn. Note the two margins are
+not alike: szymonkapiski's pack misses by **0.8x** the tolerance — a near-miss, which is exactly
+why w81 was right to spend a slot on it — and nhtquyn's misses by **6.2x**.
+
+⚠ **AND THE FAMILIES ARE ONES THIS WORKSPACE ALREADY BUILT AND ALREADY PRICED.** nhtquyn's 120
+are `gmm` (36), `qda` (39), `gnb` (20), `binned_nb` (15), `lda` (10) — generative and
+discriminant-analysis models. w29 built `qda_raw`, `qda_lat`, `gnb_raw` and `gmm_raw` against
+the frozen folds, found `gmm_raw`/`qda_raw` the two **most decorrelated members the pack has
+ever held**, and measured the four jointly at **+0.30 ± 0.67e-6 — the registered null M14(b)5
+fired.** `gnb_raw`, `qda_raw` and `gmm_raw` are, today, the three files that fall off the end of
+the 60-slot send calendar as the weakest we own. Importing 120 weaker copies of our own three
+worst members is not a supply problem being solved.
+
+⛔ The screen **cannot admit anything**. Passing it means "worth the download", never "worth
+importing" — w51's es-on-val clause still stands between any pack and a build, and six days is
+not the chain.
+
+## 4. 🛡 `w89b_fieldsweep.py` — BOTH INDICES IN ONE COMMAND, AND IT ATE ITS OWN FINDING TWICE
+
+Four queries (datasets ×2, kernels ×2), membership decided against JOURNAL + RESEARCH +
+LEADERBOARD so the workspace's own memory **is** the manifest and nothing can be "seen" without
+being written down. Reported in two tiers: `>>>` unknown owner (55) and `~` known owner but
+unnamed slug (40) — collapsing those is what lets a dispositioned author's new upload go
+unlooked-at, e.g. `hboyang/s6e8-catstrall-member` (08-24, 6 members, oof+test).
+
+⚠⚠ **IT HID `nhtquyn` FROM ME TWICE, BY TWO DIFFERENT SUBSTRING BUGS, AND I ONLY CAUGHT IT
+BECAUSE I HAD ALREADY FOUND THE PACK BY HAND.**
+
+1. **The stripped slug.** `s6e8-addiction` strips its prefix to `addiction` — a word on nearly
+   every line of the memory. Fixed by requiring the remainder to be ≥10 chars and contain a
+   hyphen, which keeps `150-fusion-local-members` and drops the bare word.
+2. **The slug itself.** `s6e8-addiction` is a literal substring of najiama's
+   `s6e8-addiction-lb-0-97092` — a different artefact by a different author. Fixed with a
+   boundary match: a name must not be flanked by `[\w-]`.
+
+Both times the tool said KNOWN and both times it was wrong. Had I trusted it instead of the
+hand sweep that produced it, this run would have reported "the field is unchanged" — which is
+the exact failure it was written to prevent, committed by the fix.
+
+⚠ **AND ONE CONTROL I WROTE ENCODED THE WRONG WANT.** `nobody/s6e8-beicicc` — an unknown owner
+re-hosting a known pack — was asserted KNOWN. It should surface as **new**; a re-upload is a
+thing to look at. Deleted the control rather than weaken the specificity rule to satisfy it.
+Weakening the rule would have restored bug 1.
+
+## 5. THE OTHER FIVE UNKNOWNS, DISPOSITIONED SO THE NEXT SWEEP DOES NOT RE-SURFACE THEM
+
+| ref | published | disposition |
+|---|---|---|
+| `nhtquyn/s6e8-addiction` | 08-22 | **⛔ REFUSED, w29 floor, 0/120, 6.2x TOL** (§3). Partition ✅ verified (§2). |
+| `hboyang/s6e8-catstrall-member` | 08-24 | 6 members oof+test, **no `fold_id`**. hboyang is under the **ARM 217 veto** (w56: `hboyang_mix` aggregates 138 un-es-clearable streams). No `members.csv`, so unscreenable without the download. |
+| `hboyang/s6e8-150-fusion-local-members` | 08-18 | the artefacts behind the fusion **w56a already pulled and read as a kernel**. Same veto. |
+| `wellkilo/s6e8-evidence-first-soft-student-assets` | 08-20 | 3 MB: `champion_rank_signals.npz` + `contract.json`. Rank **signals**, no OOF matrix. |
+| `anthonytherrien/predicting-smartphone-addiction-vault` | **re-uploaded 08-25 09:50Z** | two `submission*.csv`, still no OOF. **Already dispositioned 08-17** ("other people's submissions re-uploaded — see the md5 collisions"); the refresh changes nothing. |
+| `qamrodz/prediction-smartphone-addiction-submission` | 08-18 | a copy of the competition's own train/test/sample plus one submission. Nothing. |
+
+**Net: the datasets index had one genuinely new OOF pack in eight days, and it is refused on a
+rule this workspace registered in w29.** The three runs that said "the field is unchanged" were
+right on the merits and wrong about what they had looked at.
+
+## 6. THE BOARD — NOT RE-READ, DELIBERATELY
+
+⛔ `w83a_reproject` NOT re-run: its own rule is a material board move, and w88 read
+**140 of 2,881 at 0.97119** (Chris Deotte 0.97172, gap 0.00053) two hours ago. Nothing this run
+did could move it — no submission was possible.
+
+## 7. NEXT RUN
+
+1. **`date -u` FIRST.** If it is 08-26 and ~12:40Z has passed, check `w26g_send.py --n 10` for
+   "0 of 10 slots left today" before planning anything.
+2. **THE 08-26 SEND IS THREE COMMANDS, REGISTERED AND RE-VERIFIED TWICE.**
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry,
+   matched file-for-file against `w72a_plan_2026-08-26.json`, then `--go`. The sender must print
+   **`hijack CV bar 0.9701349052`**. Its ten are unchanged (w87 §4, re-seen in this run's dry).
+3. **Then the 33 checks, AFTER the sends** — the suite gained `w89a_foldid`. Full stems are in
+   RESEARCH; copy them, do not reconstruct them.
+4. **The field sweep is now ONE COMMAND: `.venv/bin/python experiments/w89b_fieldsweep.py`.**
+   It covers both indices. Anything it prints `>>>` must be dispositioned in the journal, which
+   is what makes it "seen" next time. Screen any pack carrying a `members.csv` with
+   `w89c_screen.py` **before** downloading its arrays.
+5. ⛔ **EVERY REMAINING DAY IS ALREADY REGISTERED — 08-26 THROUGH 08-31.** Do not re-run
+   `w72a_planday.py --day D`. Drift is reported by `w87a` C1/C7.
+6. ⛔ **DO NOT** re-open XGBoost (§0, re-checked this run — 08-10 and 08-11 both spent on it,
+   `xgb_latcat` +1e-6, seed twins null), CatBoost, LightGBM, feature engineering, blending or
+   weight search, stacker seed/fold averaging, an OOF error-analysis angle, or the original
+   dataset · **DO NOT** reopen `ext_members17` — and note `w89c` now refuses it from an
+   independent route (§3) · **DO NOT** read `w89a`'s ✅ as licensing an import: it prices no
+   member and cannot see w51's es-on-val clause (§2) · **DO NOT** weaken `w89b`'s boundary or
+   specificity rules to satisfy a control (§4) · **DO NOT** "fix" the 08-27 registration ·
+   **DO NOT** move `PRED_SD` to w82a's 13.00e-6 · **DO NOT** lower w88a's ceiling to make a
+   control fire · **DO NOT** re-implement `certified_members`; `w48e` owns it · **DO NOT**
+   widen w48e's OOF exemption past `is_member AND certified` · **DO NOT** change `w87a` C5 or
+   `w85c` G3 to test CV instead of the tier · **DO NOT** satisfy `w86a` G2 by lowering the
+   projection · **DO NOT** turn the filler readings into any correction, constant, or input to
+   the pick · **DO NOT** retire a veto to fill a slot · **DO NOT** re-run `w26d_queueprice.py`
+   as the daily writer · **DO NOT** build a per-DAY or per-family correction from `w82a`'s
+   table · **DO NOT** "fix" slot 2 into the CV #2 file · **DO NOT** re-run `w83a` absent a
+   material board move · **DO NOT** treat the rank slide as a reason to chase the public LB ·
+   **DO NOT** quote the superseded n=44 / ±14e-6 calibration numbers · **DO NOT** quote w80e's
+   G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null · **DO NOT** read a LOW S as evidence
+   of a foreign partition · **DO NOT** register a prereg4 that picks POS from the detected
+   models · **DO NOT** quote `w80a_posthoc.json` as registered · **DO NOT** chase the 0.97127
+   public cluster · **DO NOT** spend a run on the selection click · **DO NOT** re-run
+   `w63a_setprice.py` with no arguments · **DO NOT** point `HIJACKPRICE` back at
+   `w63a_setprice.json` · **DO NOT** install a `Σ|w|` health check · **DO NOT** cite w63 §4's
+   iff as established · **DO NOT** re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a
+   frozen constant from a mutable CSV · **DO NOT** re-base the ranker · **DO NOT** apply the
+   duplicate override.
+7. ⚠ **NEW LESSONS.**
+   • **An instrument that does not cover the claim can be right for three runs running.**
+     "The field is unchanged" was true each time and was read off the wrong index; the packs
+     live in `datasets` and the sweep was `kernels` (§1).
+   • **A labelling convention reads exactly like a foreign partition, and reads WORSE.**
+     beicicc's 1-based folds gave per-row agreement of **0.000000, below the 0.2 chance rate**,
+     on a partition that is bit-identical to ours (§2).
+   • **The diagnostic you print only on failure is the one that tells you the failure is
+     yours.** `[nan, 1.0, 1.0, 1.0, 1.0, 1.0]` was on screen underneath every wrong verdict (§2).
+   • **A screening tool will eat the finding that motivated it.** `w89b` marked `nhtquyn` KNOWN
+     twice, by two different substring bugs, and only the hand sweep caught it. Write the tool
+     against a find you already have, or you cannot tell it is broken (§4).
+   • **Delete a control that encodes the wrong want; do not weaken the rule to pass it.**
+     Satisfying `nobody/s6e8-beicicc` would have restored the bug that hid the pack (§4).
+   • **7 KB can refuse 473 MB.** A published `members.csv` carries enough to run w29's binding
+     test, and the rule was already registered — the screen only had to be applied (§3).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w88: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
+board zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is
+the memory and it is committed; the remote is not.

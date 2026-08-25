@@ -199,6 +199,11 @@ CV for ranking decisions, never as a leaderboard estimate.**
   the feature engineering and training private; the notebook is a prediction file plus a
   credits list. Their `naji0*` members are in the public OOF library and are the strongest
   individual members there (0.96881).
+- `nhtquyn` (`s6e8-addiction`, 08-22) publishes a **120-member OOF+test pack shipping its own
+  `fold_id.npy`** — the first external pack whose partition this workspace has VERIFIED rather
+  than taken on trust, and it is ours bit for bit (w89a). Its members are generative/DA models
+  at solo AUC 0.853–0.930, so all 120 fail w29's floor and it is refused (w89c). Useful as
+  evidence about the field, not as supply.
 - `szymonkapiski` publishes the 74-model OOF library that our stack is built on — so a
   meaningful share of the field is stacking the same arrays we are. Beating them requires
   members they do not have, not a better combiner over the ones they do.
