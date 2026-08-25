@@ -2321,3 +2321,24 @@ material board move is its own rule.
 ⚠ `kaggle competitions leaderboard -s --page-size 5000` returns **exactly 200 rows** and says
 nothing about it. Rank 140 is inside that window today; the read goes silently blind if the
 account ever slides past 200. Nothing on the send path depends on it.
+
+## 2026-08-25 (w90) — the first competitor CV we have ever been able to check
+
+Board not re-read this run (no submission possible; `w83a_reproject` is reserved for a material
+board move). Standing read from w88, this morning: **140 of 2,881 at 0.97119**, Chris Deotte
+0.97172, gap 0.00053.
+
+New and durable: `atakanaldemir` published the OOF vector behind their 0.97124 anchor, and it
+reproduces on our verified partition to 0.000e-6.
+
+| | CV (our folds) | public |
+|---|---|---|
+| our pick `w36_ad199stdcorr` | 0.9701400060 | 0.97118 |
+| `atakanaldemir` v13 anchor | **0.9701665486** | 0.97124 |
+
+They are **+26.54e-6 ahead on CV**, r = 0.998733 with our pick. Their own README attributes part
+of it to selecting the correction weight on the full OOF grid, and 50 of their 244 members are
+the szymonkapiski weak-50 this workspace refuses on w51's es-on-val clause. `w90b_gapcheck.py`
+tried to test whether that inflation is visible in their public score and **registered that it
+cannot** — the family-level term the comparison must assume away is +37.4e-6 wide against a
++38.3e-6 effect. Treat the CV gap as measured and its cause as open.

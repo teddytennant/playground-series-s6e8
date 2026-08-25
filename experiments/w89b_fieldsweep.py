@@ -7,6 +7,11 @@ szymonkapiski, ravi20076, stephentarter). Swept on 2026-08-25 it returned SIX re
 and RESEARCH have never named, the oldest published 2026-08-18. The conclusion was right and
 the instrument did not cover the claim.
 
+w90 found the same shape one level down: the DATASETS queries covered the spellings `s6e8` and
+`smartphone-addiction` but not `s06e08`, and `stephentarter/ps-s06e08-nn-tabular-predictions`
+(20.7 MB of NN OOF + test probabilities, uploaded 2026-08-25) is reachable by NO other query in
+the set. Right index, wrong spelling. `REACH` below is the standing regression test for it.
+
 Membership is decided by whether the ref's owner/slug appears anywhere in JOURNAL.md or
 RESEARCH.md -- the workspace's own memory is the manifest, so there is no third file to keep
 in sync and nothing can be "seen" without being written down.
@@ -90,21 +95,42 @@ def cli(args):
     return rows
 
 
+REACH = {
+    # Refs that are KNOWN TO EXIST and are each reachable only through one query in the set
+    # below. They are the sweep's own regression test: if the union of the queries stops
+    # returning one of these, the sweep's COVERAGE has narrowed and it will go on printing
+    # "nothing new" from a hole. w89 fixed the wrong INDEX; this catches the wrong SPELLING.
+    #
+    # ⛔ Do not delete a ref from this set to make the check pass. Confirm with
+    #    `kaggle datasets files <ref>` that the owner really removed it, and say so here.
+    "stephentarter/ps-s06e08-nn-tabular-predictions":
+        "reachable ONLY as s06e08; invisible to -s s6e8 and -s smartphone-addiction (w90)",
+    "nhtquyn/s6e8-addiction":
+        "the pack w89 had to find by hand; -s s6e8 (w89)",
+    "atakanaldemir/s6e8-v13-diversity-anchor-lb-0-97124":
+        "-s s6e8; the 0.97124 anchor behind the 0.97127 cluster (w90)",
+}
+
+
 def main():
     mem = memory_text()
     show_all = "--all" in sys.argv
     total_new = total_weak = 0
+    reached = set()
     for label, args in [
         ("DATASETS  (-s s6e8, by updated)", ["datasets", "list", "-s", "s6e8",
                                             "--sort-by", "updated", "--page-size", "50"]),
         ("DATASETS  (-s smartphone-addiction)", ["datasets", "list", "-s", "smartphone-addiction",
                                                  "--sort-by", "updated", "--page-size", "50"]),
+        ("DATASETS  (-s s06e08, THE OTHER SPELLING)", ["datasets", "list", "-s", "s06e08",
+                                                       "--sort-by", "updated", "--page-size", "50"]),
         ("KERNELS   (by dateRun)", ["kernels", "list", "--competition", COMP,
                                     "--sort-by", "dateRun", "--page-size", "50"]),
         ("KERNELS   (by voteCount)", ["kernels", "list", "--competition", COMP,
                                       "--sort-by", "voteCount", "--page-size", "50"]),
     ]:
         rows = cli(args)
+        reached.update(r[0] for r in rows)
         tier = {r[0]: seen(r[0], mem) for r in rows}
         fresh = [r for r in rows if tier[r[0]] is None]
         weak = [r for r in rows if tier[r[0]] == "owner"]
@@ -119,6 +145,15 @@ def main():
     print(f"\n>>> UNKNOWN OWNER: {total_new}    ~ known owner, unnamed slug: {total_weak}")
     print("A ref here is UNREAD, not USEFUL. Triage it in the journal either way, so the next"
           "\nsweep does not re-surface it -- writing it down is what makes it 'seen'.")
+
+    missing = [r for r in REACH if r not in reached]
+    print(f"\nCOVERAGE  {len(REACH) - len(missing)}/{len(REACH)} known-live refs returned by the query set")
+    for r in missing:
+        print(f"  ⛔ NOT REACHED  {r}\n                 {REACH[r]}")
+    if missing:
+        print("A ref that exists and is not returned means the QUERY SET has a hole, which reads"
+              "\nexactly like a quiet field. Widen the queries; do not shrink REACH.")
+        return 1
     return 0
 
 

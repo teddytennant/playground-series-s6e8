@@ -1,0 +1,57 @@
+{
+  "artifact": "v13_diversity_anchor_oof.csv",
+  "rows": 691369,
+  "columns": [
+    "id",
+    "prediction"
+  ],
+  "id_alignment": "original playground-series-s6e8 train.csv order",
+  "cv": {
+    "type": "StratifiedKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "all244_meta_model": {
+    "members": 244,
+    "frozen_base_members": 194,
+    "szymon_weak_members": 50,
+    "logistic_regression_C": 0.03,
+    "max_iter": 5000
+  },
+  "v13_correction_weight": 0.7,
+  "oof_auc": 0.9701665486177532,
+  "folds": [
+    {
+      "fold": 1,
+      "auc": 0.9695806134767466,
+      "delta_vs_pre_v13": 6.491136678365983e-05
+    },
+    {
+      "fold": 2,
+      "auc": 0.9702697128448972,
+      "delta_vs_pre_v13": 4.575300036635532e-05
+    },
+    {
+      "fold": 3,
+      "auc": 0.9702675232448154,
+      "delta_vs_pre_v13": 3.1164377526704534e-05
+    },
+    {
+      "fold": 4,
+      "auc": 0.9707933525329799,
+      "delta_vs_pre_v13": 5.002132506826129e-05
+    },
+    {
+      "fold": 5,
+      "auc": 0.9699633761625556,
+      "delta_vs_pre_v13": 5.750562438766593e-05
+    }
+  ],
+  "fold_wins_vs_pre_v13": 5,
+  "prediction_min": 7.232028048697584e-07,
+  "prediction_max": 0.9999992767971951,
+  "unique_predictions": 691369,
+  "sha256": "6914eef206a3cba8b0e225e1b2846939a89f5da637599309df2a12aa1495686e",
+  "contains_target_labels": false
+}

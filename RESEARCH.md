@@ -1,3 +1,98 @@
+# 🔴 THE SWEEP COVERED BOTH INDICES AND TWO OF THREE SPELLINGS — `s06e08` (w90, 2026-08-25)
+
+    kaggle datasets list -s s6e8     ->  20 rows   <- w89's fix
+    kaggle datasets list -s s06e08   ->   2 rows   <- BOTH stephentarter datasets, and they
+                                                      appear in NO other query in the set
+
+`stephentarter/ps-s06e08-nn-tabular-predictions` (20.7 MB, `nn_oof_probs.csv` +
+`nn_test_probs.csv`, uploaded 2026-08-25 02:53Z) was named nowhere in JOURNAL, RESEARCH or
+LEADERBOARD and was invisible to the instrument written eight hours earlier to catch exactly
+this. ⚠⚠ **A COVERAGE FIX THAT ENUMERATES THE CASES IN FRONT OF IT INHERITS THE BUG ONE LEVEL
+DOWN.** `ps-s06e08-artifacts` had been in this workspace's own ledger since w22 — the proof
+that the spelling was in use was already written down.
+
+## `w89b_fieldsweep.py` — THREE DATASET QUERIES AND A LIVE COVERAGE ASSERTION
+
+    .venv/bin/python experiments/w89b_fieldsweep.py            # rc=0 if COVERAGE is full
+    .venv/bin/python experiments/w89b_fieldsweep.py --all --selftest
+
+`REACH` is three refs known to exist, each reachable through one query, checked against the
+union of what the sweep returned. **rc=1 now means a hole in the QUERY SET, not a quiet field.**
+Read the `⛔ NOT REACHED` line before anything else. Control, exercised: delete the `s06e08`
+query and it prints `COVERAGE 2/3` and names the pack, rc=1.
+⛔ **Do not shrink `REACH` to make the check pass.** Confirm with `kaggle datasets files <ref>`
+that the owner really removed it, and say so in the dict value.
+⚠ The selftest was green through the whole hole. It tests the parser and the membership rule;
+the hole was in neither.
+
+## `w90a_extread.py` — SCREEN A PACK THAT SHIPS NO `members.csv`
+
+`w89c_screen.py` refuses 473 MB from a 7 KB `members.csv`. A pack without one needs the AUC
+computed here, on OUR labels and OUR frozen folds. `FLOOR` is imported from `w89c_screen`, so
+there is one owner of the constant.
+
+    stephentarter NN member   solo OOF AUC 0.9410357917   ⛔ REFUSED, 3.99x TOL below 0.9610
+                              `target` column agreement with our labels = 1.0000000000
+                              Pearson r with our pick's OOF = 0.866810
+
+✅ **A PUBLISHED `target` COLUMN IS A BETTER ALIGNMENT CHECK THAN A PUBLISHED `fold_id`.** w89a
+needed a seven-control bijection test to decide a foreign `fold_id.npy` was our partition, and
+its first cut called three of four packs foreign over a 1-based labelling convention.
+`mean(theirs == ours) == 1.0` settles order and alignment in one line and has nothing to get
+wrong. **Look for it first in any new pack.**
+
+⚠ The 39 MB of arrays are NOT kept — both are refused or unimportable and the numbers are the
+artefact — JOURNAL w90 §2/§3 carries them verbatim, and `logs/` is gitignored so the log is
+NOT the durable copy. Re-fetch commands are in the file's docstring; without
+the files it reports "not on disk; skipped" and still exits 0.
+
+---
+# 🔴 THE 0.97124 ANCHOR'S OOF REPRODUCES ON OUR FOLDS TO 0.000e-6 (w90, 2026-08-25)
+
+`atakanaldemir/s6e8-v13-diversity-anchor-lb-0-97124` ships `v13_diversity_anchor_oof.csv` and a
+1,413-byte audit json. **The first 0.9712x-cluster OOF vector this workspace has held on a
+partition it has verified.**
+
+    their published oof_auc      0.9701665486177532
+    computed on OUR labels       0.9701665486          diff -0.000e-6   REPRODUCES
+    per fold, OUR partition      0.969581 0.970270 0.970268 0.970793 0.969963
+    our pick w36_ad199stdcorr    0.9701400060          they are +26.54e-6 AHEAD
+    Pearson r with our pick      0.998733
+
+⚠ **REPRODUCING YOUR OWN PUBLISHED AUC IS A FACT ABOUT ARITHMETIC.** It establishes alignment
+and honest reporting and says nothing about contamination — and their README says the number is
+contaminated: *"the final correction weight was selected on the complete OOF comparison grid."*
+One free parameter, which w36d prices at **+0.45e-6**, not 26.54. The rest is w51's es-on-val
+clause: 50 of their 244 members are szymonkapiski's weak-50, refused by w81 and independently by
+w89c. ⛔ The 0.97127 cluster stays closed and nothing here imports anything.
+
+## ⛔ `w90b_gapcheck.py` — THE TEST OF THAT CANNOT BE RUN, AND SAYING SO IS THE OUTPUT
+
+es-on-val has a signature: the public advantage should land BELOW what the OOF advantage buys at
+our own fitted CV→LB rate.
+
+    CV gap, same verified partition                          +26.54e-6
+    observed public gap 0.97124 - 0.97118, AFTER ROUNDING    [+50.0, +70.0]e-6
+    predicted at the era slope +1.4425                       +38.3e-6
+    observed - predicted                                     [+1.07, +2.90] se   not rejected
+
+Read alone that is the opposite of contamination. **It is not readable.** Working in differences
+cancels `w53a`'s additive design terms **only if their file shares our pick's level**, and a
+foreign stack has no family in our design:
+
+    effect under test              +38.3e-6
+    our family levels span         -4.4 .. +33.0e-6 (ex the fam[logit] +145 outlier)
+    unmeasured level term, width   +37.4e-6      <- AS LARGE AS THE EFFECT
+
+**The sign of the answer flips inside the assumption.** ⛔ Registered as *cannot adjudicate*,
+which is not a null. What would fix it: several of their files at known CVs, which identifies the
+level; one file cannot. ⛔ **Do not price a foreign file through `w53a.predict_flags`** — w53a's
+own docstring calls a silent fallback to the h3 reference level "a price that looks real and is
+not", and a foreign stack has no family at all.
+⚠ Kaggle prints 5 decimals. Every public-score difference is an INTERVAL, ±5e-6 a side. Writing
+that gap as "50.0e-6" is fabricated precision.
+
+---
 # 🔴 THE FIELD SWEEP WAS READING ONE INDEX OF TWO — AND THE PACKS LIVE IN THE OTHER ONE
 # (w89, 2026-08-25)
 

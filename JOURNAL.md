@@ -27941,3 +27941,222 @@ did could move it — no submission was possible.
 Unchanged from w80–w88: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
 board zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is
 the memory and it is committed; the remote is not.
+
+---
+
+# w90 — 2026-08-25, slot 9 of 10 → **NO SUBMISSION, THE DAY WAS SPENT AT 12:40Z.** Six days out
+
+    date -u                            ->  2026-08-25 14:49Z
+    w26g_send.py --n 10                ->  "141 submissions on record; 10 already sent on
+                                            2026-08-25 (UTC); 0 of 10 slots left today"
+
+Third run today at the cap. Research and code only, as the brief requires. The dry run again
+flagged itself correctly — *"⚠ DRY RUN AGAINST A QUEUE FOR ANOTHER DAY: queue was written for
+2026-08-26"* — and printed `hijack CV bar 0.9701349052`, the live bar.
+
+**All 33 standing checks rc=0** (`logs/w90/`), stems copied from RESEARCH §"THE 33 STANDING
+CHECKS, FULL STEMS" rather than reconstructed, per w88's lesson. `w84a_pickargmax` rc=0; the
+pick is unchanged: `w36_ad199stdcorr.csv`, CV 0.9701400060, rank 1 of 130.
+
+## 0. THE ANGLE IS CLOSED, AND I CHECKED THE MECHANISM, NOT THE DO-NOT LIST
+
+ANGLE: *"Feature engineering: interactions, in-fold target and count encodings, and careful
+categorical treatment."* ⛔ **Declined with cause.** This angle has been handed at least six
+times (w16s, w22, w62 among them) and w62 closed it as the fifth angle closed by measurement.
+Per w88's rule — *a blanket exclusion outlives the reason for it* — I went to the code rather
+than the list. `agent/features.py:175` (`te_block`) **already target-encodes every exact single,
+pair and triple lattice key, fold-safely**; the pack holds it four more ways (`lookup`,
+`bolt_lookup_v2/v3`, `xgb_latcat`). The angle as written names a thing the stack has had since
+w15. Frequency-instead-of-count was priced separately (w62 §, journal 13934). Closed on merits.
+
+Substituted: **`w89b_fieldsweep.py` covers both INDICES and only two of the three SPELLINGS.**
+
+## 1. 🔴 w89 FIXED THE WRONG INDEX. THE SAME HOLE WAS STILL THERE ONE LEVEL DOWN, AS A SPELLING.
+
+w89's sweep queries `datasets -s s6e8` and `datasets -s smartphone-addiction`. The competition
+is also written **`s06e08`**, and `stephentarter/ps-s06e08-artifacts` — a ref already in this
+workspace's own ledger since w22 — is proof the spelling is in use.
+
+    kaggle datasets list -s s6e8      ->  20 rows, neither stephentarter dataset
+    kaggle datasets list -s s06e08    ->  2 rows, BOTH of them, reachable by no other query
+
+    stephentarter/ps-s06e08-nn-tabular-predictions   20.7 MB   uploaded 2026-08-25 02:53Z
+        predictions/nn_oof_probs.csv    33,407,379 B
+        predictions/nn_test_probs.csv   13,778,672 B
+
+**Named nowhere in JOURNAL, RESEARCH or LEADERBOARD** (`grep -c` = 0/0/0 on the slug). An OOF +
+test pack, uploaded the same day, invisible to the instrument written eight hours earlier to
+catch exactly this. ⚠⚠ **A COVERAGE FIX THAT ENUMERATES THE CASES IN FRONT OF IT INHERITS THE
+BUG ONE LEVEL DOWN** — w89 asked "which index?" and never asked "which spelling?".
+
+### ✅ FIXED, AND THE FIX HAS A CONTROL THAT FIRES
+
+`w89b_fieldsweep.py` gains the `s06e08` query **and** a standing `REACH` set: three refs known
+to exist, each reachable through one query, checked against the union of what the sweep
+returned. A ref that exists and is not returned is a **hole in the query set**, `rc=1`.
+
+    live       COVERAGE 3/3   rc=0
+    control    the same file with the s06e08 query deleted:
+               COVERAGE 2/3   rc=1
+               ⛔ NOT REACHED  stephentarter/ps-s06e08-nn-tabular-predictions
+
+⛔ The docstring says it in the file: **do not delete a ref from REACH to make the check pass.**
+Confirm with `kaggle datasets files <ref>` that the owner really removed it, and say so there.
+
+## 2. ✅ THE NN PACK IS REFUSED — AND ON A NUMBER WE COMPUTED, NOT ONE THEY PUBLISHED
+
+It ships no `members.csv`, so `w89c_screen.py` (7 KB refuses 473 MB) has nothing to read. New
+instrument `w90a_extread.py` computes the solo AUC here instead, on **our** labels and **our**
+frozen partition, importing `FLOOR` from `w89c_screen` so there is one owner of the constant.
+
+    nn_oof_probs.csv ships a `target` column: agreement with OUR labels = 1.0000000000  ✅
+    ids in our train.csv order: True
+    solo OOF AUC on OUR labels = 0.9410357917
+    w29 floor 0.966 - 0.005 = 0.9610   ->   REFUSED, 3.99x TOL below
+    Pearson r with our pick's OOF = 0.866810
+
+✅ **A PUBLISHED `target` COLUMN IS A BETTER ALIGNMENT CHECK THAN A `fold_id`.** w89a had to
+build a seven-control bijection test to decide whether a foreign `fold_id.npy` was our
+partition. This artefact carries the labels themselves, and `mean(theirs == ours) == 1.0`
+settles order and alignment in one line with nothing to get wrong. Cheap, and it should be the
+first thing looked for in any future pack.
+
+## 3. 🔴 THE 0.97124 ANCHOR PUBLISHES AN OOF, AND IT REPRODUCES ON OUR FOLDS TO 0.000e-6
+
+`atakanaldemir/s6e8-v13-diversity-anchor-lb-0-97124` (08-24, `-s s6e8`, owner named once in the
+0.97127 read, **slug never named**) ships `v13_diversity_anchor_oof.csv` + a 1,413-byte audit
+json. Screened on the small files first, per w89c's discipline.
+
+    their published oof_auc      0.9701665486177532
+    computed HERE on OUR labels  0.9701665486          ours - theirs = -0.000e-6   REPRODUCES
+    per fold, OUR partition      0.969581 0.970270 0.970268 0.970793 0.969963
+    Pearson r with our pick      0.998733
+
+**This is the first time this workspace has held a 0.9712x-cluster competitor's OOF vector on a
+partition it has verified.** Their stack reads **+26.54e-6 over our pick on the same folds.**
+
+⚠ And their README confesses the contamination in writing: *"The OOF AUC is reported for
+transparency, not as an unseen holdout estimate: the final correction weight was selected on the
+complete OOF comparison grid."* One free parameter. w36d measured optimism at **+0.45e-6 per
+free parameter** — that explains 0.45 of 26.54, not the rest. The rest is w51's es-on-val
+clause: 50 of their 244 members are szymonkapiski's weak-50, refused by w81 and independently by
+w89c.
+
+## 4. ⛔ AND THE OBVIOUS TEST OF THAT CANNOT BE RUN — `w90b_gapcheck.py` REFUSES TO READ ITSELF
+
+es-on-val contamination has a signature: a competitor's **public** advantage should come in
+BELOW what their OOF advantage buys at our own fitted CV→LB rate. We have the rate (`w53a`), we
+now have their CV, and their public score is known. So the test looked available.
+
+    CV gap on the SAME verified partition                    +26.54e-6
+    observed public gap 0.97124 - 0.97118, after rounding    [+50.0, +70.0]e-6
+    predicted at the era slope +1.4425                       +38.3e-6
+    observed - predicted                                     [+1.07, +2.90] se   not rejected
+
+Read alone that is the *opposite* of contamination — they land ABOVE the line, not below.
+**⚠⚠ IT IS NOT READABLE, AND THE POWER CONTROL IS WHAT SAYS SO.** Working in differences
+cancels every additive term of `w53a`'s design **only if their file shares our pick's level**,
+and a foreign stack has no family in our design at all — w53a's own docstring calls a silent
+fallback to the reference level "a price that looks real and is not".
+
+    effect under test                       +38.3e-6
+    our own family levels span              -4.4 .. +33.0e-6 (ex the fam[logit] outlier)
+    unmeasured level term, width            +37.4e-6
+
+**The sign of the answer flips inside the assumption.** At their level = ours they beat the
+line; at `fam[rescale]` they miss it. ⛔ Registered as *the instrument cannot adjudicate this*,
+which is not the same as a null. What would fix it: several of their files at known CVs, which
+identifies the level. One file cannot.
+
+⚠ I also did not price their file through `w53a.predict_flags` at all, deliberately, and the
+docstring says why. That call would have returned a confident number built on the h3 reference
+level, and it would have been the third instance in this workspace of a real-looking price for a
+quantity the model has never seen.
+
+## 5. DISPOSITIONS — everything the fixed sweep surfaced
+
+| ref | disposition |
+|---|---|
+| `stephentarter/ps-s06e08-nn-tabular-predictions` | **⛔ REFUSED**, w29 floor, solo 0.9410, 3.99x TOL below (§2). Labels verified 1.0000000000. |
+| `stephentarter/ps-s06e08-artifacts` | re-uploaded 08-25 13:24Z, **1,817 B** (was 1,829 in w22). Same 4 Optuna param JSONs + `selected_features_xgb.json`. No OOF. Unchanged disposition. |
+| `atakanaldemir/s6e8-v13-diversity-anchor-lb-0-97124` | **read, not imported** (§3/§4). The 0.97127 cluster stays closed. Its audit json + README are kept in `experiments/w90_probe/`; the 18.7 MB OOF is not. |
+| `sachin1228/playground-series-s6e8`, `abbasi1214/smartphone-addiction-dataset` | byte-for-byte the competition's own train/test/sample (44,855,546 / 18,672,999 / 7,703,870). Nothing. |
+| `nh2nam/…`, `prakharszn/…` (both 20,706,358 B) | the same comp-data mirror by size. Nothing. |
+| `deveshkadam969/smartphone-addiction` (1.1 MB), `manyachami/smartphone-usage` (7,919 B), `zaidshaikh203/…` (762 KB), `navazshfathi/myyyydataaa` | candidate **original-dataset** re-uploads. ⛔ Closed by measurement, not opinion: concatenation is **−58e-6 at 1x and −3,340e-6 at 50x** (2026-08-11), plus a regional null (w15d). The usual Playground edge is INVERTED here. |
+| `souvikdbiswas/smartphone-addiction-best-ot-datas` (08-25, 6.6 MB) | same size class as `anthonytherrien`'s vault, i.e. submissions, not OOF. Not opened. |
+| kernels tier: 52 unknown owners / 38 unnamed slugs | ordinary public notebooks. The tier that matters is DATASETS; the kernels index is swept for whether a pack is *announced*, and nothing new was. |
+
+## 6. THE BOARD — NOT RE-READ, DELIBERATELY
+
+⛔ `w83a_reproject` NOT re-run: its rule is a material board move, no submission was possible
+today, and w88 read **140 of 2,881 at 0.97119** (Chris Deotte 0.97172) this morning.
+
+## 7. NEXT RUN
+
+1. **`date -u` FIRST.** If it is 08-26 and ~12:40Z has passed, check `w26g_send.py --n 10` for
+   "0 of 10 slots left today" before planning anything.
+2. **THE 08-26 SEND IS THREE COMMANDS, REGISTERED AND RE-VERIFIED THREE TIMES NOW.**
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry,
+   matched file-for-file against `w72a_plan_2026-08-26.json`, then `--go`. The sender must print
+   **`hijack CV bar 0.9701349052`**. Its ten are unchanged (w87 §4, re-seen in w89's and this
+   run's dry runs).
+3. **Then the 33 checks, AFTER the sends.** Full stems are in RESEARCH; copy them, do not
+   reconstruct them. The count is still 33 — `w90a`/`w90b` are one-shot reads, not guards.
+4. **The field sweep is still ONE COMMAND and now has three queries plus a coverage assertion.**
+   `.venv/bin/python experiments/w89b_fieldsweep.py`. **rc=1 now means a hole in the QUERY SET,
+   not a quiet field** — read the `⛔ NOT REACHED` line before anything else. Screen any pack
+   with a `members.csv` using `w89c_screen.py`; one without, using `w90a_extread.py`, and look
+   for a published `target` column first (§2).
+5. ⛔ **EVERY REMAINING DAY IS ALREADY REGISTERED — 08-26 THROUGH 08-31.** Do not re-run
+   `w72a_planday.py --day D`. Drift is reported by `w87a` C1/C7.
+6. ⛔ **DO NOT** re-open feature engineering (§0, re-checked against `agent/features.py:175`
+   this run, not against the list) · **DO NOT** re-open XGBoost, CatBoost, LightGBM, blending or
+   weight search, stacker seed/fold averaging, an OOF error-analysis angle, or the original
+   dataset (§5 re-prices it at −58e-6) · **DO NOT** reopen `ext_members17` · **DO NOT** import
+   the 0.97124 anchor or any part of the 0.97127 cluster on the strength of §3 — it reproduces
+   its own number and that is a statement about arithmetic, not about es-on-val · **DO NOT**
+   quote §4 as a null; it is a registered refusal to read · **DO NOT** price a foreign file
+   through `w53a.predict_flags` · **DO NOT** shrink `w89b.REACH` to make its coverage check pass
+   · **DO NOT** weaken w89b's boundary or specificity rules to satisfy a control · **DO NOT**
+   re-open ARM 208's `WANTED_INELIGIBLE` key — w69 P8 read worst |E_B_lo| **4.840e-6 on rankraw
+   against a 4.0 bar** and a disinterested run already closed it · **DO NOT** "fix" the 08-27
+   registration · **DO NOT** move `PRED_SD` to w82a's 13.00e-6 · **DO NOT** lower w88a's ceiling
+   to make a control fire · **DO NOT** re-implement `certified_members`; `w48e` owns it ·
+   **DO NOT** widen w48e's OOF exemption past `is_member AND certified` · **DO NOT** change
+   `w87a` C5 or `w85c` G3 to test CV instead of the tier · **DO NOT** satisfy `w86a` G2 by
+   lowering the projection · **DO NOT** turn the filler readings into any correction, constant,
+   or input to the pick · **DO NOT** retire a veto to fill a slot · **DO NOT** re-run
+   `w26d_queueprice.py` as the daily writer · **DO NOT** build a per-DAY or per-family correction
+   from `w82a`'s table · **DO NOT** "fix" slot 2 into the CV #2 file · **DO NOT** re-run `w83a`
+   absent a material board move · **DO NOT** treat the rank slide as a reason to chase the
+   public LB · **DO NOT** quote the superseded n=44 / ±14e-6 calibration numbers · **DO NOT**
+   quote w80e's G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null · **DO NOT** read a LOW S
+   as evidence of a foreign partition · **DO NOT** register a prereg4 that picks POS from the
+   detected models · **DO NOT** quote `w80a_posthoc.json` as registered · **DO NOT** spend a run
+   on the selection click · **DO NOT** re-run `w63a_setprice.py` with no arguments · **DO NOT**
+   point `HIJACKPRICE` back at `w63a_setprice.json` · **DO NOT** install a `Σ|w|` health check ·
+   **DO NOT** cite w63 §4's iff as established · **DO NOT** re-parameterise `w46c.ERA_SHIFT` ·
+   **DO NOT** re-derive a frozen constant from a mutable CSV · **DO NOT** re-base the ranker ·
+   **DO NOT** apply the duplicate override.
+7. ⚠ **NEW LESSONS.**
+   • **A fix that enumerates the cases in front of it inherits the bug one level down.** w89
+     asked "which INDEX?" and shipped. It never asked "which SPELLING?", and the answer hid a
+     20.7 MB OOF pack uploaded the same day (§1).
+   • **A coverage instrument needs a live regression set, not a control.** `w89b`'s selftest was
+     green through the whole hole because the hole is in the QUERY, not in the parser or the
+     membership rule. `REACH` is the part that can fail (§1).
+   • **A published `target` column beats a published `fold_id`.** w89a needed seven controls to
+     decide a foreign partition was ours; `mean(theirs == ours) == 1.0` settles it in one line
+     and cannot be got wrong by a labelling convention (§2).
+   • **A competitor reproducing their own published AUC is a fact about arithmetic.** It proves
+     alignment and honest reporting. It says nothing about whether the number is contaminated —
+     their own README says it is (§3).
+   • **Price the assumption before reading the result.** The level term `w90b` has to assume
+     away is +37.4e-6 wide against a +38.3e-6 effect, and the sign flips inside it. "Cannot
+     adjudicate" and "null" are different outputs and only one of them is honest here (§4).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w89: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
+zips with python's `zipfile` — `w90a` does). Local `main` is ahead of `origin/main`. The
+workspace is the memory and it is committed; the remote is not.
