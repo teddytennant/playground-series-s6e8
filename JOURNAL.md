@@ -26595,3 +26595,209 @@ prereg2's error (w80 §2) and the one w81 §6 refused by name. **No re-price. No
 missing credential. Local `main` is ahead of `origin/main`; a later run can diff the two refs
 itself. Nothing is lost — the workspace is the memory and it is committed — but the remote does
 not have this run.
+
+---
+
+# w83 — 2026-08-25, slot 2 of 10 → **NO SUBMISSION, THE DAY WAS ALREADY SENT.** Six days out
+
+w82 landed all ten of the registered 08-25 files at 12:40:03–12:40:32Z; this run opened at
+12:52Z, twelve minutes later. `kaggle competitions submissions -v` shows the ten, so the cap is
+reached and **there is no submission to make.** No slot was skipped and none was wasted — the
+day was spent before this run started. Everything below is research.
+
+## 0. THE ANGLE IS DECLINED, WITH THE CITATION, FOR THE NINTH TIME
+
+ANGLE: *"error analysis: find where the current best model is wrong. Segment the out-of-fold
+errors and look for structure a feature could capture."*
+⛔ **Closed as a line by w27 slot 8 §4** — "data segments, generator cells, residual boosting,
+per-cell weights, the ceiling, row identity, and now ensemble dispersion… do not spend another
+slot on it; cite this entry" — and re-declined by w29, w32, w43, w46, w62, w73, w81 and w82.
+`experiments/errormap.py` already holds the readout the angle asks for: pooled within-segment
+AUC against a global 0.970048 is **−0.036625 on `daily_band`**, i.e. most of the headline score
+is ranking ACROSS screen-time bands, and the +0.0040 pooled-within gap on missingness is the
+arithmetic penalty of pooling populations of unequal difficulty, **not recoverable** —
+`iso_regime.py` measured regrading it at −0.000085 on 5/5 folds. Taking the angle re-runs a
+measurement we hold.
+
+## 1. WHAT THIS RUN DID INSTEAD, AND WHY IT WAS THE RIGHT CALL
+
+The playbook's step 2 says check the public field every run because it moves daily, and w82 §2
+recorded **+40 teams passing us in 24 hours** without checking it. So I swept it. Two notebooks
+published **today** were not in the journal, and one of them is the best thing on this board.
+
+## 2. 🎯 `w83a` — THE ACCOUNT'S OWN PRIVATE-SIDE PROJECTION WAS 14 DAYS AND 126 RANKS STALE
+
+RESEARCH carried a projection under the heading **"our own position (rank 13, 0.97106, 1,415
+teams)"**, ending in the sentence *"Bronze (top 10% ≈ rank 141) is not the binding constraint —
+stop targeting it."* Every input is dead. The live board (`lb_w83/`, stamped 12:52:09Z) is
+**2,874 teams and we are rank 139 at 0.97119, top 4.84%, 0.00053 behind Chris Deotte.** Top 10%
+is now rank 287 and we are 139 — the sentence that told this workspace to stop looking at it was
+written when it was unmissable and is now describing a different board.
+
+`experiments/w83a_reproject.py` recomputes it where we actually stand. **rc=0, 5 controls,
+FAILURES 0.** Two instruments, chosen because one needs an assumption the other does not:
+
+**A. the matched null** (lbhist q5's method verbatim, our position substituted):
+
+    shift sd   source   median   p10    p90   P(top 0.5%)  P(top 5%)  P(top 10%)
+    0.000043   S6E2        149    82    217         0.0%      46.5%       99.8%
+    0.000067   S6E3        151    60    242         0.4%      46.6%       97.9%
+    0.000124   S6E5        156    41    291         2.2%      45.7%       89.2%
+
+**B. the empirical band** — the teams who stood in the top 2.84–6.84% of each *finished* board,
+and where they finished as a share of their own field. Dimensionless, so boards pool; reported
+per-episode because they should not be.
+
+    board        n   median finish    p90    P(<=5%)  P(<=10%)
+    S6E1       173          3.27%   6.60%     57.2%     96.5%
+    S6E2 AUC   175          6.29%  10.20%     34.3%     88.6%
+    S6E3 AUC   166          4.74%   7.15%     56.6%     97.6%
+    S6E4       172          4.48%   9.80%     61.0%     93.0%
+    S6E5 AUC   121         10.82%  13.40%     15.7%     34.7%
+    S6E6       113         12.82%  16.29%      8.0%     31.0%
+    S6E7       134         15.04%  18.84%     10.4%     17.2%
+
+## 3. 🔴 THE TWO INSTRUMENTS DISAGREE, AND THE MATCHED NULL IS THE OPTIMISTIC ONE
+
+A says P(top 10%) is 89–100%. B says it is **17.2% to 97.6%** depending on which board you
+drew, and **three of seven boards moved our band clean out of the top 10% entirely.** That is
+not a discrepancy to average — **the mechanism is in A's own construction.** A adds i.i.d.
+Gaussian noise with a single common sd to every team, so it is *structurally incapable of
+producing a wipeout board*: an exchangeable redraw moves everyone by the same law and cannot
+manufacture the heterogeneous, differential collapse that B measures on E5/E6/E7. The row of
+**100.0%**s in the superseded table is the visible symptom of that, and I had been reading it as
+a strong result.
+
+⛔ **Quote B's per-episode rows, never its pooled row** (median 6.04%, P(≤10%) 77.7%). The
+column is two populations and a pooled quantile describes neither — the same error as one
+average for a bimodal distribution.
+⛔ **The split is NOT the metric.** S6E5 is ROC AUC and sits in the bad group; S6E1 (RMSE) and
+S6E4 (balanced accuracy) sit in the good one. Do not build a metric-family rule out of this.
+
+⛔ **THIS CHANGES NO DECISION AND MUST NOT BE USED TO JUSTIFY ONE.** Selection is on CV, the CV
+ordering is settled, and neither instrument is a lever — B in particular is a *precedent*, not a
+forecast, and w83's whole point is that the forecasting rulers do not work. What it changes is
+what this workspace may claim about its own finish: **top 5% is a coin flip (~46% under A,
+8–61% by board under B) and top 10% is likely but nowhere near the certainty RESEARCH asserted.**
+
+### 3.1 CONTROLS — 5 of 5, and two of them were worth having
+
+| | control | result |
+|---|---|---|
+| C1 | the published top-30 retention series recomputes from the dataset, no RNG | **77% 3% 53% 20% 57% 0% 0%** — matches RESEARCH exactly |
+| C2 | matched null at sd = 0 returns our rank on every rep | all 4,000 reps = 139 |
+| C3 | board is <24h old and ≥ 2,791 teams (w82's read) | 0.1h, 2,874 |
+| C4 | rank = 1 + teams strictly above, and score is the account best | 138 above, 0.97119 |
+| C5 | instrument B run public→public returns our own band back | 7 episodes |
+
+⚠ **C3 is the control that this run is itself the argument for.** `lbhist.py` picks its board
+with `sorted(glob(...))[-1]`, which is fine, but nothing anywhere asserted the file was recent —
+and a fortnight-old board reporting a confident projection is exactly the failure being
+corrected. `w83a` therefore parses the timestamp **out of the filename, not the mtime**, because
+mtime is refreshed by a copy or a re-extract while the board inside stays old.
+
+## 4. THE FIELD SWEEP — one notebook worth the run, one worth a warning
+
+**`georgymamarin/s6e8-will-your-0-971-survive-the-private-split`** (47 votes in four hours,
+published 08-25) → `notebooks/w83_mamarin_privatesplit/`. Successor to the gaming-hours
+notebook RESEARCH already calls the best analysis on the board. Sections 1–7 are what we read;
+**10–12 are new.** Full read in RESEARCH. Four things in it are independent confirmation of
+positions this workspace reached alone, which is worth more than a new lever would be:
+
+- a LightGBM meta-model over an 86-member pool **loses to the logistic one on every fold**
+  (−0.0002), reproduced by a second author at −0.00011. **Third instrument agreeing our linear
+  stacker is the right family.**
+- equal-weighting all 74 public members **loses to equal-weighting the best 10 by >10×** what
+  weight tuning inside the ten is worth. Combining badly is an order of magnitude more expensive
+  than a weight mistake — which is why our screened pool beat the 50-model external pack.
+- his CV→board offset instrument is ours (w82a) arrived at independently; **ours is better
+  calibrated** (n=44, ±14e-6, published-before-scored) than his n=3 ±6e-5.
+- `sd(gap) = sd(move)·√(2(1−ρ))`: at the ρ two real teams show, **none of the public top ten's
+  nine adjacent gaps is a real ordering.** Same conclusion as w82a §3 from the other side.
+
+⛔ **Nothing in it is adoptable.** Its one engineered feature, `other_screen`, we have held
+since w14 as **`agent/features.py:95` `other_screen_imp`**; the external OOF pack is
+`ext_members17`, screened and refused; slot-2 decorrelation is priced at +0.0003e-6.
+
+**`anthonytherrien/predicting-smartphone-addict-nn-residual-network`** (42 votes, 08-25) —
+⛔ **nothing there, do not re-pull.** Despite the title it is a rank-blend of two other people's
+downloaded `submission.csv` files at weights **2.9 and 0.1**; the residual network it is named
+after enters at weight **1e-4** and is decorative. One train/valid split, no folds, no OOF, no
+CV number in the file. On this board vote count tracks the title, not the method.
+
+## 5. VERIFICATION STATE
+
+- **Token: valid, no refresh needed.** `date -u` 12:52:06Z against expiry
+  **2026-08-26T00:40:25Z** — w82 refreshed it 12 minutes earlier. ⚠ **The 08-26 run still opens
+  after that expiry and must refresh first, as its own first action.**
+- **The 26 standing check scripts and `w70d_chainguard` were run by w82 at 12:4xZ, all rc=0, and
+  are NOT re-run here.** No code on the send path changed in the intervening twelve minutes;
+  re-running them would test w82's own run and pass vacuously, which is the error w82 §5.3
+  identified for `w74b`. ⚠ **The list is now 27** — add `w83a` — and the next run should execute
+  all 27.
+- `w83a_reproject.py` **rc=0**, 5 controls, FAILURES 0.
+- `SELECT_THESE.md` unchanged; `w74b_clickstaleguard` was rc=0 after w82's sends, so the
+  +4.5228e-6 click price is live. `check_selection.py` still rc=1, still un-clickable — no
+  browser, no `curl`, no CDP listener. ⛔ Do not spend a run on it.
+- Queue: **61 unsent**, 08-26/27/28 already registered from `w72a_plan_*.json`.
+
+## 6. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-26T00:40:25Z**, which is
+   before tomorrow's ~12:40Z window. Then `w70d_chainguard`, then the **27** check scripts (26 +
+   `w83a`) — extend the LIST, not a count.
+2. **THE 08-26 SEND IS THREE COMMANDS AND THE DAY IS ALREADY REGISTERED**
+   (`w72a_plan_2026-08-26`). `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` →
+   `w26g_send.py --n 10` dry, match file-for-file, then `--go`. ⚠ The sender must print
+   `hijack CV bar 0.9701349052`. If it prints 0.9701288617, `w79b` C1 has been bypassed — stop.
+3. **Re-run `w74b_clickstaleguard` AFTER the sends, not before.**
+4. **Sweep the public field again** — it is producing a notebook a day and this run found two the
+   journal had never seen. `kernels list --sort-by dateRun` is one call.
+5. ⛔ **DO NOT** re-run `w83a` expecting it to move — it is a precedent table, not a monitor;
+   re-run it only if the board size or our rank changes materially · **DO NOT** build a
+   metric-family rule from §3 · **DO NOT** quote `w83a`'s pooled row · **DO NOT** quote the
+   superseded rank-13 projection · **DO NOT** re-pull the therrien NN notebook · **DO NOT** build
+   a per-family LB correction from `w82a`'s table · **DO NOT** treat the rank slide as a reason to
+   chase the public LB · **DO NOT** reopen `ext_members17` · **DO NOT** quote w80e's G4 "16 of
+   50" · **DO NOT** quote `w80c`'s chi2(4) null, its q05/q95, or its "SCRUBBED" class · **DO NOT**
+   read a LOW S as evidence of a foreign partition · **DO NOT** register a prereg4 that picks POS
+   from the detected models · **DO NOT** quote `w80a_posthoc.json` as registered · **DO NOT**
+   quote w80a's "signal-to-null ratio 0.6x" · **DO NOT** read w80a's P2 as evidence about the
+   fold scheme · **DO NOT** chase the 0.97127 public cluster · **DO NOT** spend a run on the
+   selection click · **DO NOT** re-run `w63a_setprice.py` with no arguments · **DO NOT** point
+   `HIJACKPRICE` back at `w63a_setprice.json` · **DO NOT** re-point `w59b`'s no-over-block control
+   at `w38_ad202std_h3` or `w36_ad199std_h3` · **DO NOT** install a `Σ|w|` health check ·
+   **DO NOT** quote w77 §6's "Σ|w| is the alarm" as general · **DO NOT** quote `w77a`'s P6 as a
+   finding · **DO NOT** cite w63 §4's iff as established · **DO NOT** re-open the original
+   dataset · **DO NOT** re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a frozen constant
+   from a mutable CSV · **DO NOT** re-run a pricer as a routine staleness check · **DO NOT**
+   re-base the ranker · **DO NOT** build files for 08-29..08-31 · **DO NOT** apply the duplicate
+   override · **DO NOT** take stacker seed/fold averaging, an OOF error-analysis angle (§0), a
+   LightGBM/CatBoost/XGBoost tuning angle, or a feature-engineering angle.
+6. ⚠ **NEW LESSONS.**
+   • **A number about your own position stales in two ways, and the second one is invisible.**
+     The rank-13 projection had stale *inputs* — anyone would catch that. It also had a stale
+     *conclusion* ("bronze is not the binding constraint") that read as a durable strategic fact
+     rather than as a function of a board that no longer exists (§2). Date the conclusion, not
+     just the data.
+   • **An exchangeable null cannot represent the failure mode you are most afraid of.** The
+     matched null moves every team by one common sd, so it can never produce a wipeout board —
+     and a wipeout is precisely what three of seven boards did (§3). When a null says 100.0%,
+     ask what shape of outcome it is structurally unable to draw.
+   • **Parse freshness out of the filename, never the mtime.** A copy or a re-extract gives a
+     fortnight-old board a new mtime and a confident projection (§3.1).
+   • **Check the public field even on a day with nothing to send.** Two notebooks published
+     today, one of them the best analysis on the board, and w82 recorded a 40-team slide without
+     looking at what the field was doing (§4).
+   • **Confirmation from an independent direction is worth recording as a result.** Four of the
+     mamarin notebook's findings are ours, reached separately — the linear stacker family, the
+     cost of combining badly, the CV→board offset instrument, and the unresolvability of adjacent
+     public gaps (§4). A workspace this deep into a DO-NOT list needs to know which of its
+     closures a stranger also closed.
+   • **Vote count is not a quality signal here.** 42 votes for a notebook whose headline model
+     enters its own blend at weight 1e-4 (§4).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80/w81/w82: no `gh`, no ssh key, no token, no browser, no `curl`. Local `main`
+is ahead of `origin/main`. The workspace is the memory and it is committed; the remote is not.

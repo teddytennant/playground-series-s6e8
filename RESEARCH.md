@@ -4626,6 +4626,33 @@ row bootstrap and the 8 resampled fold splits. **This line is closed; do not re-
 - `mohankrishnathalla/s6e8-tabm-oof-saver` — **ERROR on three separate runs** (2026-08-11
   04:54 the latest). Stop checking it. The RealMLP sibling did land and is a measured null
   (parked in `oof_rejected/`).
+- `georgymamarin/s6e8-will-your-0-971-survive-the-private-split` (47 votes, published
+  2026-08-25) — **the successor to the gaming-hours notebook above and the best thing on the
+  board.** Pulled to `notebooks/w83_mamarin_privatesplit/`. Its sections 1–7 are the notebook
+  we already read; **sections 10–12 are new and are the reason to keep it.** What it says that
+  we can check: (a) hill-climbed blend weights carry a real but sub-millionth optimism premium
+  whose *ranking* moves with the draw, i.e. not a quantity to correct a score by; (b)
+  equal-weighting all 74 public OOF members loses to equal-weighting the best 10 by >10× what
+  weight tuning inside the ten is worth — combining badly costs an order of magnitude more than
+  a weight mistake; (c) a LightGBM meta-model over an 86-member pool loses to the logistic one
+  on every fold (−0.0002), independently reproduced by Rayk Kretzschmar at −0.00011 — **our
+  linear stacker is the right family and this is the third instrument to say so**; (d) the
+  CV→board offset is stable enough (±6e-5 over three of his stacks) to price a suspect library
+  with two submissions, which is his method and ours arrived at independently and better
+  calibrated (w82a, ±14e-6); (e) sd(gap) = sd(move)·√(2(1−ρ)) — decorrelation is the only lever
+  on the row-sampling part of a split, and at the ρ two real teams show, **none of the public
+  top ten's nine adjacent gaps is a real ordering**; (f) three of seven finished S6 boards
+  erased their public top ten and the kept-count never landed between one and four.
+  ⛔ **Nothing in it is adoptable here** — every lever it names is one this workspace has
+  already measured and closed (`other_screen_imp` is in `agent/features.py:95`; the external
+  pack is `ext_members17`, screened and not adopted; slot-2 decorrelation is priced at
+  +0.0003e-6). Its value is confirmation from an independent direction, plus the precedent
+  dataset w83 reprojects on.
+- `anthonytherrien/predicting-smartphone-addict-nn-residual-network` (42 votes, 2026-08-25) —
+  ⛔ **nothing to take, do not re-pull.** Despite the title it is a rank-blend of two other
+  people's downloaded `submission.csv` files at weights 2.9 and 0.1; the residual network it
+  is named after enters at weight **1e-4**. One train/valid split, no folds, no OOF, no CV
+  number anywhere. A reminder that vote count on this board tracks the title, not the method.
 
 ## What a public rank is empirically worth — `experiments/lbhist.py`, measured 2026-08-11
 
@@ -4661,7 +4688,13 @@ AUC episodes E2/E3/E5 are S6E8's reference class. Durable facts:
   the brief's "use all 10 slots"; Rogii's failure was fitting a hedge parameter to public
   feedback, not submitting often.
 
-### The private-side projection for our own position (rank 13, 0.97106, 1,415 teams)
+### ⛔ SUPERSEDED — the private-side projection below is the 08-11 board (rank 13, 1,415 teams)
+
+⚠ **Do not quote this table.** All three of its inputs are dead: we are **rank 139 of 2,874**
+as of 2026-08-25, not 13 of 1,415. Left in place because it is what the matched null says and
+w83 is a correction, not a deletion. The live numbers are `experiments/w83a_reproject.py`
+(rc=0, 5 controls) and w83 §2 — **and w83 also finds the instrument itself is optimistic at
+this position**, which the row of 100.0%s below is the visible symptom of.
 
 | assumed shift sd | median private rank | p10 | p90 | P(top 10) | P(top 10%) |
 |---|---|---|---|---|---|
@@ -4669,11 +4702,51 @@ AUC episodes E2/E3/E5 are S6E8's reference class. Durable facts:
 | 0.000067 | 15 | 5 | 38 | 32.2% | 100.0% |
 | 0.000124 | 26 | 5 | 90 | 24.2% | 98.8% |
 
-**Bronze (top 10% ≈ rank 141) is not the binding constraint — stop targeting it.** Top 10 is
-a 25–35% draw that public-LB chasing cannot improve.
+~~**Bronze (top 10% ≈ rank 141) is not the binding constraint — stop targeting it.**~~ ⛔ **That
+sentence is now false and it was the load-bearing one.** Top 10% on the live board is rank
+287 and we are at 139; on the three finished boards whose band matches ours the share of
+teams who held the top 10% runs **88.6% / 97.6% / 34.7%**, not ~100%. See w83 §3.
 
 ⚠ Historical `public_score` is a **selected** entry post-close; our live score is
 **best-of-all-submissions**. The projection is optimistically biased, not unbiased.
+
+### ✅ LIVE — where public rank 139 of 2,874 finishes (`experiments/w83a_reproject.py`, w83, 08-25)
+
+    .venv/bin/python experiments/w83a_reproject.py     # ~40 s, rc=0, 5 controls, FAILURES 0
+
+Two instruments on purpose, because they disagree and **the disagreement is the finding**.
+
+**A. matched null** (lbhist q5's method, unchanged, our position substituted): median private
+rank **149 / 151 / 156** under the S6E2/E3/E5 shift sds, P(top 10%) **99.8 / 97.9 / 89.2%**,
+P(top 5%) ~**46%** flat across all three, P(top 0.5%) **0.0–2.2%**.
+
+**B. empirical band, which assumes nothing** — the teams who stood in the top 2.84–6.84% of
+each finished board, and where they finished as a share of their own field:
+
+| board | n | median finish | p90 | P(≤5%) | P(≤10%) |
+|---|---|---|---|---|---|
+| S6E1 | 173 | 3.27% | 6.60% | 57.2% | 96.5% |
+| S6E2 (AUC) | 175 | 6.29% | 10.20% | 34.3% | 88.6% |
+| S6E3 (AUC) | 166 | 4.74% | 7.15% | 56.6% | 97.6% |
+| S6E4 | 172 | 4.48% | 9.80% | 61.0% | 93.0% |
+| **S6E5 (AUC)** | 121 | **10.82%** | 13.40% | 15.7% | **34.7%** |
+| **S6E6** | 113 | **12.82%** | 16.29% | 8.0% | **31.0%** |
+| **S6E7** | 134 | **15.04%** | 18.84% | 10.4% | **17.2%** |
+
+🔴 **The instruments do not agree and A is the optimistic one.** A says P(top 10%) ≈ 89–100%;
+B says it is 17–98% depending on which board you drew, and **three of seven boards moved our
+band clean out of the top 10%**. The mechanism is in A's own construction: its noise is
+i.i.d. with one common sd, so it is **incapable of producing a wipeout board** — the thing
+that actually happens is heterogeneous, and an exchangeable redraw cannot represent it. ⚠ Quote
+B's per-episode rows, never the pooled row (6.04% median, 77.7% P(≤10%)): the column is two
+populations and the pool describes neither. ⛔ The split is **not** the metric — S6E5 is AUC
+and sits in the bad group, S6E4/S6E1 are not AUC and sit in the good one.
+
+⛔ **This changes no decision and must not be used to justify one.** Final selection is on CV,
+the CV ordering is settled (`SELECT_THESE.md`), and nothing on either side of this table is a
+lever. It changes only what this workspace is allowed to claim about its own finish, which as
+of 08-25 is: **a coin-flip on top 5%, and a top-10% finish that is likely but not the ~100%
+the superseded table above asserted.**
 
 ### Pool status as of 2026-08-11 08:00 UTC
 

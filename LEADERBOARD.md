@@ -1,5 +1,31 @@
 # Leaderboard notes — playground-series-s6e8
 
+## Snapshot 2026-08-25 12:52 UTC — w83, FULL board download (`lb_w83/`, 2,874 rows)
+
+| | |
+|---|---|
+| us | **0.97119**, rank **139 of 2,874** = top **4.84%** — unmoved by all ten 08-25 sends |
+| teams strictly above us | **138** |
+| leader | Chris Deotte **0.97172** (was 0.97168 on 08-24), last submit 11:24:04Z |
+| 2nd / 3rd | Changye Li 0.97154 · (0.00053 is our gap to the leader) |
+| top 10% cut | rank **287** |
+| top 5% cut | rank **144** — we are 5 places inside it |
+
+**First full-board download since 08-19, and the first read that puts our rank against a cut
+rather than against the leader.** The 40-team slide w82 recorded has continued but slowed: 137
+strictly above at 12:4xZ, 138 now. What is new is the framing — we sit **5 places inside the top
+5%** and 148 clear of the top 10%, so the top-5% boundary is the live question and the top-10%
+one is not, which reverses the standing note from 08-11 that told this workspace to stop looking
+at the 10% line.
+
+⚠ **That is a PUBLIC cut and it is not the outcome.** `experiments/w83a_reproject.py` (w83 §2–3)
+prices what it is worth: on the three finished boards whose band matches ours, the share of teams
+who held a top-10% finish runs **88.6% / 97.6% / 34.7%**, and three of seven boards moved our band
+out of the top 10% entirely. **Top 5% is a coin flip.** Nothing on the board is a lever; the
+selection click (`SELECT_THESE.md`, +3–4.5e-6) is still the only action with expected private AUC
+attached, and it is un-clickable from this machine.
+
+
 ## Snapshot 2026-08-24 ~15:15 UTC — w79, top-200 page
 
 | | |
