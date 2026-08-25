@@ -127,7 +127,7 @@ def main() -> None:
 
     # ------------------------------------------------------------------ live board
     raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                          "--page-size", "200"], capture_output=True, text=True).stdout
+                          "--page-size", "500"], capture_output=True, text=True).stdout
     sub = pd.read_csv(io.StringIO(raw))
     sub = sub[sub["publicScore"].notna()]
     sub["stem"] = sub["fileName"].str.replace(r"\.csv$", "", regex=True)

@@ -53,7 +53,7 @@ LB_DP = 5                # Kaggle reports the public score to 5 decimal places
 # ⚠ THE CAP. Without --page-size the CLI returns 50 rows here and says nothing about it
 # (RESEARCH "The Kaggle submission list is PAGINATED"). This file shipped without it and
 # measured 44 sends over 5 days when 62 over 7 days existed. C4 below pins the argv.
-SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"]
+SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"]
 
 
 def fetch() -> pd.DataFrame:
@@ -109,7 +109,7 @@ def controls() -> list[str]:
     else:
         try:
             capped = subprocess.run(
-                [a for a in SUBS_ARGV if a not in ("--page-size", "200")],
+                [a for a in SUBS_ARGV if a not in ("--page-size", "500")],
                 capture_output=True, text=True, check=True).stdout
             n_capped = sum(1 for ln in capped.splitlines() if re.match(r"^\d+,", ln))
             n_full = len(fetch())

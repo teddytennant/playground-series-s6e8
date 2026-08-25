@@ -24,7 +24,7 @@ COMP = "playground-series-s6e8"
 CVMATCH = 5e-6          # pairs closer than this in CV have ~zero true gap
 SD_SINGLE = 0.0005673015477911883   # w15a, f=0.20 slice of 59,260 rows
 
-raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"],
+raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"],
                      capture_output=True, text=True).stdout
 sub = pd.read_csv(io.StringIO(raw))
 sub["stem"] = sub["fileName"].str.replace(r"\.csv$", "", regex=True)

@@ -11,7 +11,7 @@ import pandas as pd, numpy as np
 
 COMP = "playground-series-s6e8"
 
-raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"],
+raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"],
                      capture_output=True, text=True).stdout
 sub = pd.read_csv(io.StringIO(raw))
 sub["date"] = pd.to_datetime(sub["date"])

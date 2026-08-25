@@ -51,7 +51,7 @@ def pgrid(mean, sd, v):
 def main() -> None:
     j = json.load(open(os.path.join(HERE, "w17j_hybridpair.json")))
     raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                          "--page-size", "200"], capture_output=True, text=True).stdout
+                          "--page-size", "500"], capture_output=True, text=True).stdout
     sub = pd.read_csv(io.StringIO(raw))
     sub["stem"] = sub["fileName"].str.replace(r"\.csv$", "", regex=True)
     row = sub[sub["stem"] == SHIP]

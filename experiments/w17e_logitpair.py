@@ -74,7 +74,7 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=2000)
     a = ap.parse_args()
 
-    raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"],
+    raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"],
                          capture_output=True, text=True).stdout
     sub = pd.read_csv(io.StringIO(raw))
     LB = sub.groupby(sub["fileName"].str.replace(r"\.csv$", "", regex=True))["publicScore"].max()

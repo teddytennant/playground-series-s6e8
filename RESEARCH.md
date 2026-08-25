@@ -1,3 +1,70 @@
+# 🔴 A PAGE SIZE IS A DEADLINE. `--page-size 200` EXPIRES ON 2026-08-31 — CHECK IT WITH `w86a`
+# (w86, 2026-08-25)
+
+    live rows 141  +  slots left 60  =  PROJECTED FINAL 201 submissions on 2026-08-31
+
+Twenty-two call sites in `experiments/` asked for `--page-size 200`. **The account crosses 200
+on the deadline day and on no other day.** The CLI returns exactly `min(page_size, total)` and
+says nothing — re-measured live, `--page-size 140` → 140 rows, `--page-size 141` → 141.
+
+⚠⚠ **ONE OF THE TWENTY-TWO WAS `w84a_pickargmax.py`, THE GUARD THE DEADLINE PICK RESTS ON.**
+It runs on 08-31 after the sends, when the list is 201 long. That is the one day it decides
+anything, and it would have read 200 of 201.
+
+## THE PART THAT MATTERS: THE ANTI-TRUNCATION CONTROL PASSED WHILE TRUNCATED
+
+w84a's G2 compared the paginated fetch against the un-paginated one and passed when
+`paginated > capped`. At 201 rows that reads **200 > 50 → "✅ G2 pagination exercised"**.
+
+**Demonstrated, not argued.** The pre-fix w84a, forced to `--page-size 100` against a live
+141-row history — 41 rows invisible — returned:
+
+    sent rows 100   distinct files with a parseable CV 95
+    ✅ G2 pagination exercised: 100 paginated vs 50 capped
+    ✅ GUARDS 0 failures                                        rc=0
+
+⇒ **G2 tested that the cap beats 50. It never tested that the cap beats the history.** w84 wrote
+the lesson down — *"a sample-size floor cannot detect truncation, only a comparison against the
+un-capped call can"* — and then built the replacement with the same blind spot one level up.
+w84a's `MIN_SAMPLE = 60` is that floor and could not see this either.
+
+**THE ONLY TEST THAT DETECTS ITS OWN TRUNCATION IS SELF-REFERENTIAL**, comparing the row count
+against *its own page size*. Two sound idioms are on disk, and `w86a` G4 accepts both:
+
+    if len(rows) >= PAGE:  raise SystemExit(...)      # w55a, w54a, now w84a.fetch_raw
+    assert len(sub) < 500, "hit the page size"        # w74b
+
+## WHAT CHANGED (all 29 standing checks + `w70d` re-run rc=0 afterwards, NOT vacuously)
+
+- All 22 sites widened `200 → 500`. **Behaviour-identical today** (141 < 200 < 500), so this is
+  pure de-risking, not a result change. No send-path file touched (`w26g`/`w23b`/`w48e`/`w55a`
+  untouched); the registered 08-26 ten dry-run byte-identical, hijack bar still 0.9701349052.
+- `w84a` gained `PAGE = 500`, a raising `fetch_raw`, and **G2b** (`len(df) < PAGE`). The raise
+  is exercised: at `PAGE = 100` it returns rc=1 instead of a silent partial argmax.
+- The pick is unchanged and re-verified over the **full 141**: slot 1 `w36_ad199stdcorr.csv`,
+  **CV rank 1 of 130**, margin +2.417e-6.
+
+## `w86a_pagecap.py` — STANDING CHECK #30
+
+    G1   every kaggle list call site passes a page size at all
+    G2   every page size EXCEEDS the projected final row count, taken LIVE, with 1.2x margin
+    G3 - a planted call site at the old 200 MUST fail G2 -- the bar is fired, not just stated
+    G4   deadline-day scripts compare their row count against THEIR OWN page size
+    G5 + the silent-truncation premise is RE-MEASURED against the live API each run
+
+⛔ **DO NOT satisfy G2 by lowering the projection.** It is `(live rows) + (slots before the
+deadline)` and both terms come from outside the file.
+⛔ **DO NOT read this as covering row-count drift generally.** It bounds exactly one failure
+mode: a fixed cap outliving the history it reads.
+
+⚠ **G3 EARNED ITS KEEP TWICE IN ONE RUN.** It caught a parser false positive, and then it
+caught **its own disarming**: the repo-wide `sed 's/"--page-size", "200"/…"500"/'` rewrote the
+planted control's literal, because the control matched the pattern being swept. The planted
+string is now *assembled* from `OLD_CAP = 200` so it is un-greppable. **A negative control
+written in the syntax it guards against will be edited away by the fix.**
+
+---
+
 # 🔴 THE QUEUE RUNS OUT BEFORE THE CALENDAR DOES — FILL THE SLOTS, AND CHECK IT WITH `w85c`
 # (w85, 2026-08-25)
 

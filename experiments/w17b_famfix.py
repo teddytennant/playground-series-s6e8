@@ -66,7 +66,7 @@ def main() -> None:
     PR = pd.read_csv(os.path.join(HERE, "w17a_pairs.csv"))
     pooled = sim["pooled"]
 
-    raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"],
+    raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"],
                          capture_output=True, text=True).stdout
     sub = pd.read_csv(io.StringIO(raw))
     sub["stem"] = sub["fileName"].str.replace(r"\.csv$", "", regex=True)

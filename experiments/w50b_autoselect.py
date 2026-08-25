@@ -47,7 +47,7 @@ GAMMA_PASSTHROUGH = 1.09
 def live_submissions() -> pd.DataFrame:
     """page_size 200 -- RESEARCH's w17 pagination warning: the default 50 silently truncates."""
     out = subprocess.run(
-        ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"],
+        ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"],
         capture_output=True, text=True, timeout=300).stdout
     df = pd.read_csv(io.StringIO(out))
     df = df[df.publicScore.notna()].copy()

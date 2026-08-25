@@ -25,6 +25,8 @@ GUARDS
   G1    slot-1 WANTED is the strict CV argmax over every sent file with a parseable CV.
   G2 +- the fetch is PAGINATED and it is exercised both ways (the 50-row cap silently cost
         w82a 18 rows and two days; found 2026-08-25, w84).
+  G2b   the cap OUTLIVES THE HISTORY -- len(rows) < PAGE. G2 alone compared the cap against
+        50, which 200 beat while still truncating 201 rows on the deadline day (w86 §1).
   G3 -  a planted higher-CV send TRIPS G1 — the guard is fired, not just asserted.
   G4    slot 2 is the w64-settled hedge: its identity and the w64 marker are both pinned.
   G5    CVs parsed from the descriptions agree with the on-disk ledger where both carry a
@@ -46,7 +48,12 @@ CHECKSEL = os.path.join(HERE, "check_selection.py")
 
 # ⚠ Always paginated. Without it the CLI returns 50 rows here and says nothing (RESEARCH,
 # "The Kaggle submission list is PAGINATED"). G2 exercises this.
-SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"]
+# ⚠⚠ AND THE CAP MUST OUTLIVE THE HISTORY. This was 200; the account finishes at 201 on
+# 2026-08-31, so on the one day this guard decides anything it would have read 200 of 201 and
+# G2 would still have passed, because G2 only ever compared the cap against 50 (w86 §1).
+# `fetch_raw` now refuses at the cap itself -- the only test that detects its own truncation.
+PAGE = 500
+SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", str(PAGE)]
 
 CV_RE = re.compile(r"CV (0\.\d{6,})")
 SLOT1 = "w36_ad199stdcorr.csv"          # the CV pick
@@ -55,8 +62,13 @@ W64_MARKER = "SLOT 2 IS SETTLED AT A MEASURED SIZE"
 MIN_SAMPLE = 60                          # below this the list is not the account's history
 
 
-def fetch_raw(argv) -> str:
-    return subprocess.run(argv, capture_output=True, text=True, check=True).stdout
+def fetch_raw(argv, *, capped: bool = False) -> str:
+    raw = subprocess.run(argv, capture_output=True, text=True, check=True).stdout
+    if not capped and len(parse(raw)) >= PAGE:
+        raise SystemExit(f"submission list came back at the page size ({PAGE}); it is "
+                         f"TRUNCATED and the argmax below would be over a partial history. "
+                         f"Raise PAGE and re-run w86a_pagecap.py.")
+    return raw
 
 
 def parse(raw: str) -> pd.DataFrame:
@@ -138,7 +150,8 @@ def main() -> int:
     if "--page-size" not in SUBS_ARGV:
         bad.append("G2 the fetch has lost --page-size -- the history is capped at 50")
     else:
-        capped = parse(fetch_raw([a for a in SUBS_ARGV if a not in ("--page-size", "200")]))
+        capped = parse(fetch_raw([a for a in SUBS_ARGV if a not in ("--page-size", str(PAGE))],
+                                 capped=True))
         if len(df) < len(capped):
             bad.append(f"G2 paginated fetch returned FEWER rows ({len(df)}) than capped "
                        f"({len(capped)}) -- pagination is broken")
@@ -147,6 +160,14 @@ def main() -> int:
                   f"pagination untested this run, not passing")
         else:
             print(f"\n  ✅ G2 pagination exercised: {len(df)} paginated vs {len(capped)} capped")
+        # ⚠ G2b IS THE PART G2 WAS MISSING. Beating 50 says nothing about beating the history;
+        # only the cap compared against itself does (w86). This is what fetch_raw enforces, and
+        # asserting it here too makes the failure legible instead of an exception.
+        if len(df) >= PAGE:
+            bad.append(f"G2b the fetch is AT its own cap ({len(df)} >= {PAGE}) -- truncated")
+        else:
+            print(f"  ✅ G2b {len(df)} rows is strictly under the cap {PAGE}, headroom "
+                  f"{PAGE - len(df)}")
 
     # ---- G3: negative control -- a planted better send must TRIP G1 ---------------------
     planted = pd.concat([df, pd.DataFrame([{

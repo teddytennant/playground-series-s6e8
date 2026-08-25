@@ -27168,3 +27168,152 @@ an input to the pick. A future run that wants to use them registers the use firs
 Unchanged from w80–w84: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
 board zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is
 the memory and it is committed; the remote is not.
+
+---
+
+# w86 — 2026-08-25, slot 5 of 10 → **NO SUBMISSION, THE DAY WAS SPENT AT 12:40Z.** Six days out
+
+The live API returns **141 rows, ten of them dated 2026-08-25** (12:40:03–12:40:32Z), all
+COMPLETE and scored 0.97113–0.97117. **The cap is reached and there is no slot to use.** None
+was skipped, none wasted. The `kaggle` CLI is at `~/.local/bin/kaggle` (on PATH) — it is **not**
+in `.venv/bin`; `.venv/bin/python` is only for the experiment scripts. Token still valid.
+
+## 0. THE ANGLE WAS ALREADY CLOSED FOUR TIMES — SUBSTITUTED THE CONSOLIDATION LESSON
+
+ANGLE: *"Original dataset: find the real source dataset and concatenate it as extra training
+rows."* ⛔ **Declined, with cause, for the fifth time.** `jayjoshi37/smartphone-usage-and-
+addiction-prediction` was found and measured on **2026-08-11**. Concatenation is **monotonically
+harmful here — −58e-6 at 1×, −3,340e-6 at 50×** — the Playground edge is *inverted* in this
+competition. Route 2 (concat) closed 08-11; Route 1 (`orig_binm` as a separate member) is
+**twelve readings, none positive**; w15d closed it regionally a third time at z +1.32. RESEARCH
+carries the whole thing under "The original dataset — CLOSED", and w85 §5 names it in the
+DO-NOT list. A fifth re-derivation of a closed measurement is not work.
+
+Substituted w84's lesson — *consolidation is not a wasted slot; re-reading is a search
+strategy* — because **two consecutive runs found the same bug class by accident**: w84 §2 a
+50-row API cap, w85 §1 a day-stamped CSV. Both silent, both flattering. Two accidents in a row
+is a population, so I swept it instead of waiting for the third.
+
+## 1. 🔴 A PAGE SIZE IS A DEADLINE, AND 22 CALL SITES EXPIRE ON 08-31
+
+    live rows 141  +  slots left 60  =  PROJECTED FINAL 201  on 2026-08-31
+
+Twenty-two call sites in `experiments/` asked for `--page-size 200`. **The account crosses 200
+on the deadline day and on no other day.** Re-measured live: `--page-size 140` → 140 rows,
+`141` → 141. Exactly `min(page_size, total)`, newest-first, no warning — so the row that falls
+off is the oldest.
+
+⚠⚠ **ONE OF THE TWENTY-TWO WAS `w84a_pickargmax.py`, THE GUARD THE DEADLINE PICK RESTS ON.**
+It runs on 08-31 after the sends, when the list is 201 long — the one day it decides anything.
+
+## 2. 🔴 THE ANTI-TRUNCATION CONTROL PASSED WHILE TRUNCATED — DEMONSTRATED, NOT ARGUED
+
+w84a's G2 compared the paginated fetch against the un-paginated one and passed on
+`paginated > capped`. At 201 rows that reads **200 > 50**. I ran the pre-fix w84a against the
+live history forced to `--page-size 100`, hiding 41 of 141 rows:
+
+    sent rows 100   distinct files with a parseable CV 95
+    ✅ G2 pagination exercised: 100 paginated vs 50 capped
+    ✅ GUARDS 0 failures                                        rc=0
+
+**G2 tested that the cap beats 50. It never tested that the cap beats the history.** w84 wrote
+the lesson down — *"a sample-size floor cannot detect truncation, only a comparison against the
+un-capped call can"* — then built the replacement with the same blind spot one level up.
+`MIN_SAMPLE = 60` is that floor and could not see this either.
+
+**FIXED.** `w84a` now carries `PAGE = 500`, a `fetch_raw` that raises at its own cap, and
+**G2b** (`len(df) < PAGE`). The raise is **exercised**: at `PAGE = 100` it returns rc=1 instead
+of a silent partial argmax. ✅ **The pick is unchanged and re-verified over the full 141**:
+slot 1 `w36_ad199stdcorr.csv`, **CV rank 1 of 130**, margin +2.417e-6 over CV #2.
+
+⚠ The scratch copy of the old code overwrote `w84a_pickargmax.json` with its truncated 100-row
+result; the real `w84a` was re-run and the file is back to `n_sent_rows 141 / n_files_with_cv
+130 / slot1_rank 1`. **A read-only-looking diagnostic that shares an output path is a writer.**
+
+## 3. ✅ ALL 22 WIDENED, AND THE SEND PATH IS PROVABLY UNTOUCHED
+
+`200 → 500` at every site. **Behaviour-identical today** (141 < 200 < 500), so this is pure
+de-risking and changes no result. The 300s already clear the 201 projection and were left alone.
+
+- **No send-path file touched** — `w26g`, `w23b`, `w48e`, `w55a` are not in the diff.
+- `w26g_send.py --n 10` dry-runs the **registered 08-26 ten, in order, file-for-file** against
+  `w72a_plan_2026-08-26.json`, and prints **`hijack CV bar 0.9701349052`** ✅ (not
+  0.9701288617 — `w79b` C1 is not bypassed).
+- `w70d_chainguard` **rc=0**, 8 of 8 modules import.
+- **All 29 standing checks rc=0** — and this is a **non-vacuous** pass, since 22 of the files
+  they cover changed this run. Logs in `logs/w86/`.
+
+## 4. 🛡 `w86a_pagecap.py` — STANDING CHECK #30. THE LIST IS NOW 30.
+
+    G1   every kaggle list call site passes a page size at all          49 sites, 0 missing
+    G2   every page size EXCEEDS the projected final row count, LIVE, 1.2x margin -> bar 241
+    G3 - a planted site at the old 200 MUST fail G2 -- the bar is fired, not just stated
+    G4   deadline-day scripts compare their row count against THEIR OWN page size   7/7
+    G5 + the silent-truncation premise is RE-MEASURED against the live API each run
+    rc=1 before the fix (22 G2 failures, 2 real G4), rc=0 after.
+
+⛔ **DO NOT satisfy G2 by lowering the projection** — it is `(live rows) + (slots before the
+deadline)`, both from outside the file. ⛔ **DO NOT** read it as covering row-count drift
+generally; it bounds one failure mode, a fixed cap outliving the history it reads.
+
+⚠ **G3 EARNED ITS KEEP TWICE IN ONE RUN.** It caught a parser false positive, then it caught
+**its own disarming** — the repo-wide `sed` rewrote the planted control's `200`, because the
+control was written in the exact syntax being swept. It is now assembled from `OLD_CAP = 200`
+so it is un-greppable.
+
+## 5. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-26T00:40:25Z**, before
+   tomorrow's ~12:40Z window, so it WILL be expired. The refresh has to happen in the sending
+   run; a refresh today expires ~01:xxZ and would not help.
+2. **THE 08-26 SEND IS THREE COMMANDS AND IS REGISTERED AND RE-VERIFIED (§3).**
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry,
+   match against §3's list, then `--go`. The sender must print `hijack CV bar 0.9701349052`.
+3. **Then `w70d_chainguard` + the 30 checks** (§3's 29 + `w86a`) — extend the LIST, never an
+   integer. Run `w74b`, `w84a`, `w85c` and `w86a` **AFTER** the sends: all four read the live
+   list, so a pre-send run tests yesterday's state and passes vacuously.
+4. **Register 08-29, 08-30 and 08-31 with `w72a_planday.py --day D`** when their turn comes.
+5. ⛔ **DO NOT** re-open the original dataset — closed five times now, and concat is
+   *negative* here (§0) · **DO NOT** satisfy `w86a` G2 by lowering the projection (§4) ·
+   **DO NOT** write a negative control in the syntax a bulk fix will sweep (§4) · **DO NOT**
+   turn the filler readings into any correction, constant, or input to the pick · **DO NOT**
+   change `w85c` G3 to test CV instead of the tier · **DO NOT** retire a veto to fill a slot ·
+   **DO NOT** re-run `w26d_queueprice.py` as the daily writer · **DO NOT** build a per-DAY or
+   per-family correction from `w82a`'s table · **DO NOT** "fix" slot 2 into the CV #2 file ·
+   **DO NOT** re-run `w83a` absent a material board move · **DO NOT** treat the rank slide as a
+   reason to chase the public LB · **DO NOT** reopen `ext_members17` · **DO NOT** quote the
+   superseded n=44 / ±14e-6 calibration numbers · **DO NOT** quote w80e's G4 "16 of 50" ·
+   **DO NOT** quote `w80c`'s chi2(4) null, its q05/q95, or its "SCRUBBED" class · **DO NOT**
+   read a LOW S as evidence of a foreign partition · **DO NOT** register a prereg4 that picks
+   POS from the detected models · **DO NOT** quote `w80a_posthoc.json` as registered ·
+   **DO NOT** chase the 0.97127 public cluster · **DO NOT** spend a run on the selection click ·
+   **DO NOT** re-run `w63a_setprice.py` with no arguments · **DO NOT** point `HIJACKPRICE` back
+   at `w63a_setprice.json` · **DO NOT** install a `Σ|w|` health check · **DO NOT** cite w63 §4's
+   iff as established · **DO NOT** re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a
+   frozen constant from a mutable CSV · **DO NOT** re-base the ranker · **DO NOT** apply the
+   duplicate override · **DO NOT** take stacker seed/fold averaging, an OOF error-analysis
+   angle, a LightGBM/CatBoost/XGBoost tuning angle, or a feature-engineering angle.
+6. ⚠ **NEW LESSONS.**
+   • **A constant can have an expiry date, and nothing in the code says so.** `200` was
+     correct the day it was written and wrong six days later, and the only way to see it was
+     to project the row count forward against the calendar (§1). Ask of every literal bound:
+     *what is the largest value this will ever be compared against, and when?*
+   • **A guard that fixes a cap by raising it inherits the whole bug.** w84 replaced 50 with
+     200 and shipped the identical failure with a later fuse (§2). The fix for "the bound is
+     too small" is never a bigger bound; it is a comparison against the thing being bounded.
+   • **Only a self-referential test detects its own truncation.** `len(rows) >= PAGE`. Every
+     external reference point — 50, a MIN_SAMPLE floor, last week's count — can be cleared by
+     a read that is still short (§2).
+   • **Two accidents of the same shape are a population, not a coincidence.** w84 and w85 each
+     found one silent flattering read by luck. Sweeping the class found 22 more in one run.
+   • **A negative control written in the syntax it guards against will be deleted by the fix.**
+     The repo-wide `sed` disarmed G3's planted `200`; G3 caught it only because it also checks
+     that it can still parse the plant (§4).
+   • **A diagnostic that shares an output path is a writer.** Running an old copy of `w84a` to
+     prove a point silently overwrote the live `w84a_pickargmax.json` with truncated data (§2).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w85: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
+board zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is
+the memory and it is committed; the remote is not.

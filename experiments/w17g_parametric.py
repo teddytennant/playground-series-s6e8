@@ -66,7 +66,7 @@ def main() -> None:
           f"<- why this file exists")
 
     raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                          "--page-size", "200"], capture_output=True, text=True).stdout
+                          "--page-size", "500"], capture_output=True, text=True).stdout
     live = pd.read_csv(io.StringIO(raw))
     live["stem"] = live["fileName"].str.replace(r"\.csv$", "", regex=True)
     lb_live = live.groupby("stem")["publicScore"].max().to_dict()

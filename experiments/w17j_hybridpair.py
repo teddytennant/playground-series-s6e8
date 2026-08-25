@@ -84,7 +84,7 @@ def main() -> None:
     a = ap.parse_args()
 
     raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                          "--page-size", "200"], capture_output=True, text=True).stdout
+                          "--page-size", "500"], capture_output=True, text=True).stdout
     sub = pd.read_csv(io.StringIO(raw))
     LB = sub.groupby(sub["fileName"].str.replace(r"\.csv$", "", regex=True))["publicScore"].max()
     assert SHIP not in LB.index, f"{SHIP} already sent — an identical resend is forbidden"

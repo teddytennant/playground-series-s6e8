@@ -72,7 +72,7 @@ W37 = os.path.join(HERE, "w37c_prereg.csv")
 OUT = os.path.join(HERE, "w85b_prereg.csv")
 
 # ⚠ --page-size is NOT optional (RESEARCH: the CLI silently returns 50 rows).
-SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"]
+SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"]
 
 
 def main() -> int:

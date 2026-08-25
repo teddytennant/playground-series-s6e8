@@ -135,7 +135,7 @@ def main() -> None:
     a = ap.parse_args()
 
     raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                          "--page-size", "200"], capture_output=True, text=True).stdout
+                          "--page-size", "500"], capture_output=True, text=True).stdout
     sub = pd.read_csv(io.StringIO(raw))
     sub["stem"] = sub["fileName"].str.replace(r"\.csv$", "", regex=True)
     agg = sub.groupby("stem")["publicScore"].agg(["max", "min"])
