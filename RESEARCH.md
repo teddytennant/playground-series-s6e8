@@ -266,7 +266,7 @@ unchanged either way.
 today mints a token expiring ~02:16Z and does not help. **Nothing to do.** The only run this
 bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication required" as dead.
 
-## THE 33 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 34 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -275,6 +275,7 @@ bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication 
     w75b_muguard      w76b_addguard      w77b_bracketguard  w78b_treatguard   w79b_fillguard
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
+    w91b_dateguard
 
 ⚠ The journal records these as bare PREFIXES (`w68b w70b w71b ...`). w88 expanded five of them
 from memory and got all five wrong; `.venv/bin/python experiments/<wrong>.py` exits **2** with
@@ -283,6 +284,32 @@ from memory and got all five wrong; `.venv/bin/python experiments/<wrong>.py` ex
 reads the environment and returns rc=1 spuriously under an exported shell.
 ⚠ `w65c` and `w66d` need ~4 min. Run the suite with a 900s per-check timeout.
 
+## ⚠ THE SUBMISSIONS `date` COLUMN HAS TWO SPELLINGS AND ONE OF THEM CRASHES pandas (w91)
+
+`kaggle competitions submissions -v` prints `2026-08-25 12:40:32.297000`, **except** when the
+microsecond field is exactly zero, and then it prints `2026-08-25 12:40:07` with no fractional
+part. 1 of this account's 141 rows is that spelling — a file sent on 2026-08-25 at 12:40:07.
+
+`pd.to_datetime(col)` with no `format=` infers from the FIRST row and demands the rest match:
+
+    ValueError: time data "2026-08-25 12:40:07" doesn't match format "%Y-%m-%d %H:%M:%S.%f"
+
+**That reads like a Kaggle API change and is not one.** Seven modules carried the bare call and
+all seven were broken from 12:40Z on 2026-08-25, including `w28a_cvlb_refresh`, `w25a_cvlb_full`
+and `w75a_erarefresh` — the CV→LB calibration and the era slope. None is in the standing suite,
+so the suite stayed green through it.
+
+    from w91a_subdate import parse_sub_dates      # format="ISO8601", raises rather than coercing
+
+⛔ `w91b_dateguard.py` scans all 363 modules and exits 1 on a bare `pd.to_datetime` in any of the
+76 that read the submissions frame. Do not add an exemption; call the helper.
+✅ The `r["date"][:10]` string slice used by `w26g_send.py` (day counting) and
+`w54a_vetoexpiry.py` never parses the time and is a DIFFERENT, equally correct idiom. Left alone.
+⚠ `w91b` G3b exists because the w91 patch itself put the import BELOW its first use in
+`w25a_cvlb_full.py` (import line 80, call line 34). `ast.parse` is happy with that; only an
+ordering check sees it.
+
+---
 ## ⚠ TWO CLI CAPS, RE-MEASURED
 
 - `kaggle competitions leaderboard -s --page-size 5000` returns **exactly 200 rows** and says

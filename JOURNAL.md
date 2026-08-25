@@ -28160,3 +28160,187 @@ today, and w88 read **140 of 2,881 at 0.97119** (Chris Deotte 0.97172) this morn
 Unchanged from w80–w89: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
 zips with python's `zipfile` — `w90a` does). Local `main` is ahead of `origin/main`. The
 workspace is the memory and it is committed; the remote is not.
+
+---
+
+# w91 — 2026-08-25, slot 10 of 10 → **NO SUBMISSION, THE DAY WAS SPENT AT 12:40Z.** Six days out
+
+    date -u                            ->  2026-08-25 15:04Z
+    w26g_send.py --n 10                ->  "141 submissions on record; 10 already sent on
+                                            2026-08-25 (UTC); 0 of 10 slots left today"
+
+Fourth run today at the cap. Research and code only, as the brief requires. The dry run again
+flagged itself correctly — *"⚠ DRY RUN AGAINST A QUEUE FOR ANOTHER DAY: queue was written for
+2026-08-26"* — and printed `hijack CV bar 0.9701349052`, the live bar.
+
+**All 33 standing checks rc=0** (`logs/w91/`), stems copied from RESEARCH rather than
+reconstructed. `w84a_pickargmax` rc=0; the pick is unchanged: `w36_ad199stdcorr.csv`,
+CV 0.9701400060, rank 1 of 130. `w89b_fieldsweep` rc=0, **COVERAGE 3/3**, nothing new in the
+DATASETS tier — every `~` owner it surfaced (`mohankrishnathalla`, `tamerlanomralinov`,
+`kenchanhodgkin`, `souvikdbiswas`, `stephentarter`) is already in the ledger, 2–17 mentions each.
+
+## 0. THE ANGLE IS CLOSED, AND I CHECKED THE CODE, NOT THE DO-NOT LIST
+
+ANGLE: *"Blending: rank-average or weight the tuned models by out-of-fold performance. Search
+blend weights on OOF predictions, never on the public leaderboard."* ⛔ **Declined with cause.**
+Per w88's rule — a blanket exclusion outlives the reason for it — I read the mechanism:
+
+    agent/stack.py       a linear combiner FITTED ON THE OOF MATRIX, scored by repeated paired
+                         50/50 stratified splits so split noise cancels; `transform(kind=...)`
+                         already offers rank-gauss alongside logit; `hill_climb()` is the
+                         rank-average-style averager, kept as the weaker alternative because a
+                         linear stacker can give a decorrelated member a NEGATIVE coefficient;
+                         `DEFAULT_DROP = ("golem_a","golem_f")` is a MEASURED exclusion of two
+                         es-on-val members that were earning undeserved weight.
+    experiments/         blend_lab, meta_search, subset_lab, w16n_finegrid, transform_weights
+
+The angle names, verbatim, what the pick already is: `w36_ad199stdcorr` is an OOF-searched
+weighted blend. Nothing in the angle is unbuilt. Closed on merits, not on the list.
+
+Substituted: **run the instruments, not just the suite.**
+
+## 1. 🔴 THE INSTRUMENT THAT DECIDES OUR PRIVATE SCORE HAS BEEN CRASHING SINCE 12:40Z TODAY
+
+`w50b_autoselect.py` — the module that enumerates which files Kaggle will AUTO-SELECT for
+private scoring, which is this account's ONLY selection mechanism because it cannot click
+(w74) — dies on line 55:
+
+    ValueError: time data "2026-08-25 12:40:07" doesn't match format "%Y-%m-%d %H:%M:%S.%f"
+
+**The CLI has two spellings for the same column.** It prints `2026-08-25 12:40:32.297000`,
+except when the microsecond field is exactly zero, and then it drops the fractional part
+entirely. That is ~1 submission in 1000 and **this account crossed it today**: exactly 1 of
+141 rows, one of the ten files sent at the cap. `pd.to_datetime` with no `format=` infers from
+the FIRST row and then requires every other row to match it, so one row is enough.
+
+⚠ **IT WAS NEVER ONE MODULE.** Seven call sites carried the bare call and all seven broke at
+the same instant:
+
+    w50b_autoselect      the auto-selection enumeration           <- found by running it
+    w75a_erarefresh      the era slope (+1.4425, quoted in w90 §4)
+    w28a_cvlb_refresh    the CV->LB calibration refresh
+    w25a_cvlb_full       the full CV->LB table
+    w15j_cvlb, w15i_cvlb, w15j_tiebreak
+
+⚠⚠ **A SUITE ENUMERATES THE MODULES IN FRONT OF IT.** None of the seven is one of the 33
+standing checks, so the suite ran 33/33 green this morning, this afternoon, and in w88/w89/w90,
+with the calibration path dead underneath it. This is w90's lesson arriving from the other
+side: there a *fix* enumerated the cases in front of it; here the *suite* did.
+
+✅ Not on the deadline path. `w86a`'s registered `DEADLINE_DAY` list — `w84a_pickargmax`,
+`w26g_send`, `w23b_sendqueue`, `w55a_unpriced`, `w54a_vetoexpiry`, `w85c_slotguard`,
+`w74b_clickstaleguard` — contains none of the seven, and the send path counts days with
+`r["date"][:10]`, a string slice that never parses the time. The 08-26..08-31 sends were never
+at risk. What was at risk is any run that tries to refresh the calibration or re-read the
+auto-selection, and one of those was about to be me.
+
+## 2. ✅ FIXED WITH ONE OWNER AND A GUARD THAT FIRES
+
+`experiments/w91a_subdate.py` — `parse_sub_dates()`, `FORMAT = "ISO8601"`, raises rather than
+coercing. All seven call sites delegate. One owner, per w87's rule: two copies of a ruling is
+how a registrar and a verifier come to disagree within the hour.
+
+`experiments/w91b_dateguard.py` — **standing check 34**, six gates, all rc=0:
+
+    G1   the helper pins ISO8601 and parses both spellings in one column
+    G2   363 modules scanned, 76 read the submissions frame, 0 bare date parses.
+         AST, not grep — this file is full of the literal string `pd.to_datetime` in prose.
+         Scope is "does it fetch or read the submissions list", so `w47a_extrap` (a date-ONLY
+         `day` column in a local CSV) is out by the RULE, not by a name exemption.
+    G3   CONTROL-: all 7 historical bad lines, recovered from git and replanted, are flagged.
+         CONTROL+: a correct `format=`-carrying call is NOT flagged.
+    G3b  every importer imports before it uses. CONTROL- on a planted late import.
+    G4   LIVE: 141 rows, 140 with fractional seconds, 1 without, all parse.
+    G5   CONTROL-: the bare call STILL RAISES on that same live column. Exercised, not
+         asserted. The day G5 stops raising, the CLI changed — report it, do not pass silently.
+
+⚠ **G3b EXISTS BECAUSE THE FIX ITSELF HAD THE BUG.** My patch inserted the import after the
+last top-level import; `w25a_cvlb_full.py` keeps a `from scipy.stats import ...` forty lines
+BELOW its first use of the column, so the import landed at line 80 and the call at line 34.
+`ast.parse` is happy. A syntax check is happy. G2 is happy. Only an ordering test sees it, and
+I only looked because I checked line numbers rather than trusting the patch report.
+
+## 3. THE TIER PICTURE, RE-READ ON THE REPAIRED INSTRUMENT — UNCHANGED, AND ALREADY KNOWN
+
+    live best public 0.97119, held by 2 files:
+       2026-08-23 12:41:28  w36_ad199stdcorr_ens4     CV 0.9701365875   (pick rank 4)
+       2026-08-23 12:41:31  w38_ad202stdcorr_ens4     CV 0.9701349001   (pick rank 6)
+    limit 2, latest-first   -> [ad202_ens4, ad199_ens4]     WANTED captured 0/2
+    limit 2, earliest-first -> [ad199_ens4, ad202_ens4]     WANTED captured 0/2
+
+The CV pick `w36_ad199stdcorr.csv` (CV 0.9701400060) sits in tier 2 at public 0.97118 and is
+**not** auto-selected. ✅ **This is not news and it is not a defect** — it is exactly the state
+`w74b_clickstaleguard` records and re-verifies every run (tier1 unchanged 131→141 scored), and
+the value of being able to click the swap is already priced at **+4.5228e-6** (`w74a`, +3.0704e-6
+at the 95% upper tau). The `_ens4` variants are separate files, not a naming skew in `w50b`'s
+`WANTED`. Nothing here reopens the click.
+
+## 4. NEXT RUN
+
+1. **`date -u` FIRST.** If it is 08-26 and ~12:40Z has passed, check `w26g_send.py --n 10` for
+   "0 of 10 slots left today" before planning anything.
+2. **THE 08-26 SEND IS THREE COMMANDS, REGISTERED AND RE-VERIFIED FOUR TIMES NOW.**
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry,
+   matched file-for-file against `w72a_plan_2026-08-26.json`, then `--go`. The sender must print
+   **`hijack CV bar 0.9701349052`**. Its ten are unchanged (w87 §4, re-seen in w89/w90/w91).
+3. **Then the checks, AFTER the sends. THE COUNT IS NOW 34** — `w91b_dateguard` joins the list.
+   Full stems are in RESEARCH; copy them, do not reconstruct them.
+4. **The field sweep is still ONE COMMAND.** `.venv/bin/python experiments/w89b_fieldsweep.py`.
+   rc=1 means a hole in the QUERY SET — read the `⛔ NOT REACHED` line first. Screen a pack with
+   a `members.csv` using `w89c_screen.py`, one without using `w90a_extread.py`, and look for a
+   published `target` column first.
+5. ⛔ **EVERY REMAINING DAY IS ALREADY REGISTERED — 08-26 THROUGH 08-31.** Do not re-run
+   `w72a_planday.py --day D`. Drift is reported by `w87a` C1/C7.
+6. 🆕 **RUN AN INSTRUMENT THAT IS NOT IN THE SUITE.** §1 is the whole argument. Cheap candidates
+   nobody has executed lately: `w83a_reproject` (gated on a material board move, so not idly),
+   `w50b_autoselect`, `w15i_cvlb`. A green suite is evidence about 34 files and nothing else.
+7. ⛔ **DO NOT** re-open blending or OOF weight search (§0, re-checked against `agent/stack.py`
+   this run, not against the list) · **DO NOT** re-open feature engineering, XGBoost, CatBoost,
+   LightGBM, stacker seed/fold averaging, an OOF error-analysis angle, or the original dataset
+   (−58e-6 at 1x) · **DO NOT** reopen `ext_members17` · **DO NOT** import the 0.97124 anchor or
+   any part of the 0.97127 cluster · **DO NOT** quote w90 §4 as a null; it is a registered
+   refusal to read · **DO NOT** price a foreign file through `w53a.predict_flags` · **DO NOT**
+   add an exemption to `w91b` G2 to let a module keep a bare `pd.to_datetime` · **DO NOT**
+   narrow `w91b` G4/G5's live column to the rows that agree — the mixed column IS the fixture
+   and the board is append-only · **DO NOT** "fix" a caller by dropping the 12:40:07 row; it is
+   a real submission · **DO NOT** relax `parse_sub_dates` to `errors="coerce"`; a NaT sorts to
+   one end of the tiebreak with no traceback · **DO NOT** re-open the selection click on the
+   strength of §3 — it is priced at +4.5228e-6 and `w74b` re-verifies the tiers every run ·
+   **DO NOT** shrink `w89b.REACH` to make its coverage check pass · **DO NOT** weaken w89b's
+   boundary or specificity rules · **DO NOT** re-open ARM 208's `WANTED_INELIGIBLE` key ·
+   **DO NOT** "fix" the 08-27 registration · **DO NOT** move `PRED_SD` to w82a's 13.00e-6 ·
+   **DO NOT** lower w88a's ceiling · **DO NOT** re-implement `certified_members`; `w48e` owns it
+   · **DO NOT** widen w48e's OOF exemption past `is_member AND certified` · **DO NOT** change
+   `w87a` C5 or `w85c` G3 · **DO NOT** satisfy `w86a` G2 by lowering the projection · **DO NOT**
+   turn the filler readings into any correction · **DO NOT** retire a veto to fill a slot ·
+   **DO NOT** re-run `w26d_queueprice.py` as the daily writer · **DO NOT** build a per-DAY or
+   per-family correction from `w82a`'s table · **DO NOT** "fix" slot 2 into the CV #2 file ·
+   **DO NOT** re-run `w83a` absent a material board move · **DO NOT** treat the rank slide as a
+   reason to chase the public LB · **DO NOT** quote the superseded n=44 / ±14e-6 calibration
+   numbers · **DO NOT** quote w80e's G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null ·
+   **DO NOT** read a LOW S as evidence of a foreign partition · **DO NOT** register a prereg4
+   that picks POS from the detected models · **DO NOT** quote `w80a_posthoc.json` as registered
+   · **DO NOT** chase the 0.97127 public cluster · **DO NOT** re-run `w63a_setprice.py` with no
+   arguments · **DO NOT** point `HIJACKPRICE` back at `w63a_setprice.json` · **DO NOT** install
+   a `Σ|w|` health check · **DO NOT** cite w63 §4's iff as established · **DO NOT**
+   re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a frozen constant from a mutable CSV
+   · **DO NOT** re-base the ranker · **DO NOT** apply the duplicate override.
+8. ⚠ **NEW LESSONS.**
+   • **A green suite is evidence about the files in the suite.** 33/33 rc=0 four runs running,
+     while seven modules on the calibration path were dead. Nothing was wrong with any check;
+     the set was wrong. Run something that is not a guard (§1).
+   • **An API can have two spellings for one field, and the rare one is the one that bites.**
+     140 of 141 rows carry microseconds. The 141st does not, because its microsecond field was
+     zero, and `pd.to_datetime`'s infer-from-row-0 turns that into a ValueError that reads like
+     a Kaggle outage (§1).
+   • **The fix had the bug the fix was for.** The w91 patch put an import below its own first
+     use in `w25a_cvlb_full.py`, and `ast.parse`, a syntax check and G2 were all green on it.
+     G3b is that failure, kept (§2).
+   • **Check the line numbers, not the patch report.** Seven "patched" lines printed clean and
+     one of them was a NameError waiting for the next caller (§2).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w90: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
+zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is the
+memory and it is committed; the remote is not.

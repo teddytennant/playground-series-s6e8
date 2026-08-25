@@ -8,13 +8,16 @@ Answers two closing questions:
 """
 import subprocess, sys, io
 import pandas as pd, numpy as np
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from w91a_subdate import parse_sub_dates  # w91: one owner of the timestamp format
 
 COMP = "playground-series-s6e8"
 
 raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"],
                      capture_output=True, text=True).stdout
 sub = pd.read_csv(io.StringIO(raw))
-sub["date"] = pd.to_datetime(sub["date"])
+sub["date"] = parse_sub_dates(sub["date"])
 sub["stem"] = sub["fileName"].str.replace(r"\.csv$", "", regex=True)
 assert (sub["status"] == "SubmissionStatus.COMPLETE").all(), "a submission is not COMPLETE"
 print(f"live submissions: {len(sub)}  all COMPLETE")

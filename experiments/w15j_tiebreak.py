@@ -12,9 +12,12 @@ branch, which RESEARCH explicitly flagged as the live one:
 That is checkable. Enumerate the rules.
 """
 import pandas as pd, io, itertools
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from w91a_subdate import parse_sub_dates  # w91: one owner of the timestamp format
 
 d = pd.read_csv("/tmp/w15j_subs.csv")
-d["date"] = pd.to_datetime(d["date"])
+d["date"] = parse_sub_dates(d["date"])
 d["stem"] = d.fileName.str.replace(r"\.csv$", "", regex=True)
 cv = pd.read_csv("experiments/audit_results.csv").set_index("name")["cv"]
 d["cv"] = d.stem.map(cv)

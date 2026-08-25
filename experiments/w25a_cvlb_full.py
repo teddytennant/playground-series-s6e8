@@ -23,6 +23,9 @@ import subprocess
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from w91a_subdate import parse_sub_dates  # w91: one owner of the timestamp format
 
 COMP = "playground-series-s6e8"
 
@@ -31,7 +34,7 @@ raw = subprocess.run(
     capture_output=True, text=True,
 ).stdout
 sub = pd.read_csv(io.StringIO(raw))
-sub["date"] = pd.to_datetime(sub["date"])
+sub["date"] = parse_sub_dates(sub["date"])
 bad = sub[sub["status"] != "SubmissionStatus.COMPLETE"]
 print(f"live submissions: {len(sub)}   non-COMPLETE: {len(bad)}")
 sub = sub[sub["status"] == "SubmissionStatus.COMPLETE"].copy()

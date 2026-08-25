@@ -26,6 +26,9 @@ from __future__ import annotations
 
 import io, json, os, subprocess
 import pandas as pd
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from w91a_subdate import parse_sub_dates  # w91: one owner of the timestamp format
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -52,7 +55,7 @@ def live_submissions() -> pd.DataFrame:
     df = pd.read_csv(io.StringIO(out))
     df = df[df.publicScore.notna()].copy()
     df["stem"] = df.fileName.str.replace(".csv", "", regex=False)
-    df["date"] = pd.to_datetime(df.date)
+    df["date"] = parse_sub_dates(df.date)
     return df.sort_values("date")
 
 

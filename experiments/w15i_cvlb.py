@@ -46,6 +46,9 @@ from scipy.stats import rankdata
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agent"))
 from common import ROOT, TARGET, load_raw  # noqa: E402
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from w91a_subdate import parse_sub_dates  # w91: one owner of the timestamp format
 
 SUB = os.path.join(ROOT, "submissions")
 HERE = os.path.join(ROOT, "experiments")
@@ -134,7 +137,7 @@ def main():
     s = pd.read_csv(a.subs)
     s = s[s["status"].astype(str).str.endswith("COMPLETE")].copy()
     s["stem"] = s["fileName"].str.replace(".csv", "", regex=False)
-    s["date"] = pd.to_datetime(s["date"])
+    s["date"] = parse_sub_dates(s["date"])
     s = s.sort_values("date")
 
     rows = []

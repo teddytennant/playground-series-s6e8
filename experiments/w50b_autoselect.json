@@ -1,14 +1,12 @@
 {
-  "n_scored": 101,
-  "best_public": 0.97118,
+  "n_scored": 141,
+  "best_public": 0.97119,
   "tier1": [
-    "w21_ad187corr_ens4",
-    "w27_ad190stdcorr",
-    "w29_ad194stdcorr",
-    "w36_ad199stdcorr"
+    "w36_ad199stdcorr_ens4",
+    "w38_ad202stdcorr_ens4"
   ],
-  "newest_of_tier1": "w36_ad199stdcorr",
-  "newest_is_wanted": true,
+  "newest_of_tier1": "w38_ad202stdcorr_ens4",
+  "newest_is_wanted": false,
   "band": [
     0.9712,
     0.97125

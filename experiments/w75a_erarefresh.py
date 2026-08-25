@@ -37,6 +37,9 @@ COMP = "playground-series-s6e8"
 
 import stdflag                                    # noqa: E402
 import w46c_predlb as W46                         # noqa: E402
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from w91a_subdate import parse_sub_dates  # w91: one owner of the timestamp format
 
 FAIL = []
 
@@ -134,7 +137,7 @@ raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
                      env={**os.environ, "KAGGLE_CONFIG_DIR": "/home/nixos/.kaggle"}).stdout
 sub = pd.read_csv(io.StringIO(raw))
 assert len(sub) >= 131, f"page-size truncation or auth failure: {len(sub)} rows"
-sub["date"] = pd.to_datetime(sub["date"])
+sub["date"] = parse_sub_dates(sub["date"])
 n_incomplete = int((sub.status != "SubmissionStatus.COMPLETE").sum())
 sub = sub[sub.status == "SubmissionStatus.COMPLETE"].copy()
 sub["stem"] = sub.fileName.str.replace(r"\.csv$", "", regex=True)

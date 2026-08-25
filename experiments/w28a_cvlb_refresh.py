@@ -43,6 +43,9 @@ COMP = "playground-series-s6e8"
 # Classifiers live in `stdflag` -- see that module for why the substring rule was WRONG.
 import stdflag  # noqa: E402
 from stdflag import family, is_std   # noqa: E402
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from w91a_subdate import parse_sub_dates  # w91: one owner of the timestamp format
 
 
 # --- live LB -------------------------------------------------------------------------
@@ -51,7 +54,7 @@ raw = subprocess.run(
     capture_output=True, text=True, cwd=ROOT).stdout
 sub = pd.read_csv(io.StringIO(raw))
 assert len(sub) > 50, f"page-size truncation: only {len(sub)} rows (the CLI default is 50)"
-sub["date"] = pd.to_datetime(sub["date"])
+sub["date"] = parse_sub_dates(sub["date"])
 print(f"live submissions: {len(sub)}   non-COMPLETE: {(sub.status != 'SubmissionStatus.COMPLETE').sum()}")
 sub = sub[sub.status == "SubmissionStatus.COMPLETE"].copy()
 sub["stem"] = sub.fileName.str.replace(r"\.csv$", "", regex=True)
