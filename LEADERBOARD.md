@@ -2303,3 +2303,16 @@ methodologically new one, and the workspace already holds TabM/TabNet/RealMLP/Re
 FT-Transformer/DeepFM with the `nn` family measured at +0.8e-6 and a sign flip. Others:
 `souvikdbiswas` rank blend (8), `mikhailnaumov` XGB (12), `parthsarnobat` cat+xgb (5),
 `sometimessubodh` (5), `bariankitvinod` (0).
+
+## 2026-08-25 (w88, slot 7) — no movement
+
+    rank 140 / 2,881 at 0.97119 (top 4.86%); top-5% cut is rank 144, we are 4 inside
+    1 Chris Deotte 0.97172 (gap 0.00053) · 2 Changye Li 0.97154 · 3 MILANFX 0.97149
+    4 cstdy 0.97140 · 5 Utkarsh 0.97134
+
+Unchanged against w87's 140/2,881, so `w83a_reproject` was deliberately not re-run — no
+material board move is its own rule.
+
+⚠ `kaggle competitions leaderboard -s --page-size 5000` returns **exactly 200 rows** and says
+nothing about it. Rank 140 is inside that window today; the read goes silently blind if the
+account ever slides past 200. Nothing on the send path depends on it.

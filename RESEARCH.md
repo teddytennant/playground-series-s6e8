@@ -1,3 +1,107 @@
+# 🔴 THE SEND GATE IS PER FILE AND RUNS 60 MORE TIMES — THE CALENDAR PRICES AT 0.21e-6 (`w88a`)
+# (w88, 2026-08-25)
+
+    w26g_send.hijack_risk    refuses any filler at P(above tier) > P_MAX = 0.02   <- PER FILE
+    w87a C7                  replays that over all 60 registered files, 0 refusals <- PER FILE
+    nothing                  asked what 60 independently-tolerated 2% draws come to
+
+    P(at least one of the 60 lands ABOVE the tier)  0.0286   E[#] 0.029
+    P(at least one of the 60 lands AT    the tier)  0.2466   E[#] 0.264
+
+⚠ The family-wise probability EXCEEDS the sender's own per-file tolerance. **That is not a
+finding.** A probability is not a price, and both landings already have one on disk.
+
+## THE PRICE, READ FROM `w79a_barfill.json` AND NEVER RE-DERIVED
+
+    base (the cost of nobody clicking)                        +4.5228e-6
+    an ABOVE-tier landing  = worthless_limit1 - base          +1.0484e-6
+    an AT-tier landing     = that / gate_j.leverage (= 1.5)   +0.6989e-6
+
+⟹ **the whole remaining calendar, all six days, prices at +0.2143e-6** — one twenty-first of
+the click price, 21.1x under the ceiling. At w82a's wider sd, +0.4074e-6, still 11.1x under.
+✅ The per-file gate is vindicated in aggregate. **A question closed, not opened.**
+
+⛔ **EVERY NUMBER IN `w79a_barfill.json` IS ALREADY IN e-6.** w63a prints `{base:+.4f}e-6` and
+stores the mantissa. w88a's first cut divided by `U` again, reported 214337e-6, and **G3 passed
+anyway** because the ceiling carried the same error — the ratio was right and both magnitudes
+were nonsense. A units bug that cancels inside the comparison is invisible in the verdict.
+
+## ⚠⚠ THE TIGHTEST FILE IS THE ONE THE SENDER'S DOCSTRING NAMES, AND ITS VERDICT IS CONTESTED
+
+    2026-08-27  w36_ad197std_logit  pred_lb 0.971177  margin 13.2e-6  P(above) 0.0188 @8.77e-6
+    2026-08-27  w34_ad195std_logit  pred_lb 0.971175  margin 15.4e-6  P(above) 0.0099 @8.77e-6
+
+`w36_ad197std_logit` is by name the file that motivated the probabilistic gate (its 3e-6 margin
+against the old 0.97118 tier). The tier rose to 0.97119, its margin went 3 → 13.2e-6 and its
+risk 18% → 1.88% — **94% of P_MAX, and admitted.**
+
+**AT `w82a`'s MEASURED 13.00e-6 IT IS 0.0805 — FOUR TIMES P_MAX, I.E. REFUSED.** Two of the 60
+flip. The gate runs at `PRED_SD = 8.77e-6` (w52c's HELD-OUT era-slice RMSE, pinned by `w58a` to
+w53a's wide branch); w82a's 13.00e-6 is the realised residual over 62 published `pred_lb` values
+across every family. **Neither dominates** — every registered file is an era file, so the
+sender's population is the right one, but the realised number is the honest one.
+
+⛔ **LEFT ALONE ON THE MEASUREMENT, AND A LATER RUN MUST NOT "FIX" 08-27.** Dropping both
+flipped files buys 0.145e-6 at the wider sd and 0.021e-6 at the sender's, against a send-path
+edit two days before it fires. ⛔ Do not move `PRED_SD`: `w58a` pins it, and the price is
+unchanged either way.
+
+## `w88a_calexposure.py` — STANDING CHECK #32
+
+    G1    every registered file carries a pred_lb; an unpriceable row FAILS, never dropped
+    G2    every registered file under the sender's own P_MAX (worst 0.0188)
+    G3    the PRICED family-wise exposure stays under `base` -- a ceiling w74a fixed long
+          before this file existed, so it cannot be tuned to the answer
+    C1 +- 5 plants = ceil(base/above_cost) fire G3 at +5.3726e-6; 4 pass at +4.3409e-6 -- the
+          control BRACKETS the ceiling. ⚠ ONE plant CANNOT fire it and that is arithmetic:
+          lowering the ceiling to make the control green is fitting the bar to the control.
+    C2 -  an unpriced registration is caught by G1
+    C3    every probability IS `w26g_send.hijack_risk`, imported; max |d| 0.0e+00
+    C4    the board read is `w26g_send.api_submissions` -- refuses at its own page size
+    C5    tier drift vs registration REPORTED, never asserted
+    C6    the worst calendar G2 admits prices at +7.7698e-6, ABOVE the ceiling ⟹ **G3 is not
+          implied by G2** -- the only thing that makes a second gate worth having
+
+## ✅ THE 08-26 TOKEN IS NOT AT RISK — w87 §8 ITEM 1 OVERSTATED IT
+
+    access_token_expiration 2026-08-26T00:40:25Z; the send window is ~12:40Z
+    the CLI's dead window is the 30 MINUTES AFTER expiry (w34's sign error)
+
+12:40Z is ~12h past expiry, far outside 00:40–01:10Z, so the CLI refreshes normally. Refreshing
+today mints a token expiring ~02:16Z and does not help. **Nothing to do.** The only run this
+bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication required" as dead.
+
+## THE 32 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+
+    w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
+    w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
+    w65b_pinguard     w65c_subsetcheck   w66d_rangeguard    w67b_slopeguard   w68b_floorguard
+    w70b_basisguard   w70d_chainguard    w71b_dupguard      w72b_dayguard     w74b_clickstaleguard
+    w75b_muguard      w76b_addguard      w77b_bracketguard  w78b_treatguard   w79b_fillguard
+    w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
+    w87a_registrarguard                  w88a_calexposure
+
+⚠ The journal records these as bare PREFIXES (`w68b w70b w71b ...`). w88 expanded five of them
+from memory and got all five wrong; `.venv/bin/python experiments/<wrong>.py` exits **2** with
+`No such file`, which reads exactly like a guard failure. Copy the stems above.
+⚠ Clear `OMP_NUM_THREADS`/`OPENBLAS_NUM_THREADS`/`MKL_NUM_THREADS` first — `w65b_pinguard`
+reads the environment and returns rc=1 spuriously under an exported shell.
+⚠ `w65c` and `w66d` need ~4 min. Run the suite with a 900s per-check timeout.
+
+## ⚠ TWO CLI CAPS, RE-MEASURED
+
+- `kaggle competitions leaderboard -s --page-size 5000` returns **exactly 200 rows** and says
+  nothing. We are rank 140 of 2,881, so the read is fine today; it goes silently blind if the
+  account ever slides past 200. Nothing on the send path uses it — `w83a_reproject` reads a
+  downloaded board zip, not this call.
+- `kaggle competitions submissions --page-size 500` → 141 rows. Still under the cap (w86).
+
+**THE LESSONS.** A per-item tolerance is not a policy until somebody adds it up — 31 checks
+asked "is this file safe?" and none asked "is the calendar safe?", and the gap survived because
+every individual answer was correct. A probability is not a price, and the probability is the
+one that alarms. When a control cannot fire, check the arithmetic before you move the bar.
+
+---
 # 🔴 THE REGISTRAR AND THE SENDER DISAGREED, AND ONLY THE REGISTRAR HAD A VOTE — `w87a`
 # (w87, 2026-08-25)
 
@@ -13037,9 +13141,12 @@ it is.** Use `TZ=UTC stat -c %y <f>`, or `stat -c %Y` and compare epochs. (w67 m
 healthy background job as starved on exactly this.)
 
 ### GUARD-SUITE MECHANICS
-- Full suite (14): `w54a_vetoexpiry w55a_unpriced w56b_wantedguard w57c_muguard w59b_barguard
-  w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard w64b_hedgeguard
-  w65b_pinguard w65c_subsetcheck w66d_rangeguard w67b_slopeguard`.
+- ⚠ **SUPERSEDED — the suite is 32, not 14.** The full stems are at the top of this file
+  ("THE 32 STANDING CHECKS, FULL STEMS"). The 14 below are the first fourteen, kept as the
+  record of what the suite was at w67.
+- Full suite (14, w67): `w54a_vetoexpiry w55a_unpriced w56b_wantedguard w57c_muguard
+  w59b_barguard w60b_ineligguard w60d_memberguard w62b_barstaleguard w63b_setguard
+  w64b_hedgeguard w65b_pinguard w65c_subsetcheck w66d_rangeguard w67b_slopeguard`.
 - ⚠ **Clear `OMP_NUM_THREADS`/`OPENBLAS_NUM_THREADS`/`MKL_NUM_THREADS` before running it** —
   `w65b_pinguard` reads the environment and returns rc=1 spuriously under an exported shell.
 - ⚠ `w65c` and `w66d` need ~4 min under load. Background them; a 120s shell will time out.
