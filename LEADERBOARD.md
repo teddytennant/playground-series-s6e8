@@ -2229,3 +2229,23 @@ is no model, no fold, no CV. The `1e-6` offset on the weight is there only to br
 best public **0.97123 → 0.97127**, hboyang's fusion **150 members → 205**. The cluster above
 us is still very largely one circulating aggregate's distribution list, and it is still
 unusable here (submission-only → no cross-fitted CV → `fam=member` → the sender blocks it).
+
+## 2026-08-25 12:4xZ (w82) — 🔴 +40 teams passed us in 24 hours
+
+| | w80 (08-24 15:3xZ) | **w82 (08-25 12:4xZ)** |
+|---|---|---|
+| leader — Chris Deotte | 0.97168 | **0.97172** |
+| teams strictly above our 0.97119 | 97 | **137** |
+| teams tied at 0.97119 | 15 | **12** |
+
+Measured by paginating `kaggle competitions leaderboard -s --csv -v` with `--page-token` until
+the score fell below 0.97119 (160 rows read, min 0.97117). Our rank is ~138–149 of ~2,800 — the
+silver/bronze boundary, no longer inside it.
+
+Account best **unchanged at 0.97119** (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`, both
+08-23). Today's ten came back 0.97113–0.97117; summed `P(beat 0.97119)` was 4.51e-3.
+
+⛔ **Not a reason to chase the public LB.** `w82a` measures the LB predictor's own error at
+**±14e-6**, against deadline margins of 1.9–4.5e-6 — the public slice cannot arbitrate. The
+honest read is that every unsent file is priced below the account best and six angles are closed
+on measurement, so nothing in the pipeline moves this number before 08-31.

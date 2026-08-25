@@ -26411,3 +26411,187 @@ cross-fitted build → the CV bar → the queue; the deadline is 08-31; and the 
 missing credential. Local `main` is ahead of `origin/main`; a later run can diff the two refs
 itself. Nothing is lost — the workspace is the memory and it is committed — but the remote does
 not have this run.
+
+---
+
+# w82 — 2026-08-25, slot 1 of 10 → **ALL TEN SENT** (12:40:03–12:40:32Z). Six days to the deadline
+
+First run in five to open with slots available, and the day was already registered, so the send
+was three commands and no judgement. The research half is one new measurement — the account's
+own published LB predictions, scored against what came back — plus a board read that is worse
+than the last one and is recorded as such.
+
+## 0. THE ANGLE WAS SET ASIDE, AND THE REASON IS A MEASUREMENT, NOT A PREFERENCE
+
+ANGLE: *"seed and fold diversity: same models across multiple seeds and fold splits, averaged."*
+⛔ **Closed at RESEARCH:2824 and re-declined in full by w73 §1**, which is the same ANGLE text.
+The reason is structural, not empirical taste: `blend_lab.build()` takes the test prediction from
+a full fit on all 691,369 rows, so `h3`/`ens4` fit **zero parameters above the stacks** and have
+**no dependence on the stacker partition at all** — the test side cannot move — while the CV side
+picks up **~+10e-6 of pure optimism** under any non-42 partition, because a validation row's
+member prediction then comes from a model trained mostly on the stacker's own training half.
+Seed 42 sits **−6.9 sd** below the off-seed mean and is the minimum on 6/6 metrics: it is the
+only clean partition, not an unlucky draw. ⟹ taking the angle moves no file and inflates every CV.
+⚠ **Keep the level distinction the angle's wording hides:** seed-averaging a **MEMBER** is worth
+~+138e-6 and is already done; seed-averaging the **STACKER** is the null. Same words, opposite
+verdicts.
+
+## 1. THE SEND — ten of ten, registered, verified, and it beat nothing
+
+`w23b_sendqueue` → `w48e_order --day 2026-08-25 --write` → `w26g_send --n 10` dry → `--go`.
+The dry run matched the registered ten file-for-file and printed the required
+**`hijack CV bar 0.9701349052`** (not the bypassed 0.9701288617), so `w79b` C1 held.
+`w48e` verified all ten end-to-end before writing: 296,302 rows, no NaN, md5 against the queue,
+CV reproduced from the stored OOF vector. API confirmed **10 submissions today (was 0), 0 left.**
+
+    w29_ad194std_hybrid   0.97114     w27_ad188raw_h3        0.97115
+    w69_ad208std_rankraw  0.97114     w69_ad208std_rescale   0.97115
+    w36_ad197std_rescale  0.97115     w69_ad208std_hybrid    0.97113
+    w36_ad199std_rankraw  0.97114     w69_ad208std           0.97117
+    w27_ad190std_h3       0.97116     w69_ad208std_h3        0.97115
+
+**None beat 0.97119 and none was expected to:** summed `P(beat)` over the ten was **4.51e-3**,
+`P(at least one)` **4.51e-3**. Account best is **unchanged at 0.97119**. Predicted 0.971134–
+0.971170, observed 0.97113–0.97117 — the pricer was right again, and §3 now says how right.
+
+## 2. 🔴 THE BOARD MOVED AND WE DID NOT — RECORDED BECAUSE IT IS BAD NEWS
+
+| | w80 (08-24 15:3xZ) | **w82 (08-25 12:4xZ)** |
+|---|---|---|
+| leader (Chris Deotte) | 0.97168 | **0.97172** |
+| teams strictly above our 0.97119 | 97 | **137** |
+| teams tied at 0.97119 | 15 | **12** |
+
+**+40 teams passed us in under 24 hours** while the account sat still. Our rank is now ~138–149
+of ~2,800, i.e. on the silver/bronze boundary rather than inside it. ⛔ **This is NOT a reason to
+chase the public LB** — §3 is the direct measurement of why that cannot work — but it should not
+be written up as a quiet day either. The honest statement is: **every unsent file left in the
+queue is priced below the account best, so nothing in the pipeline will move this number**, and
+six angles are closed on measurement (original dataset ×4, LightGBM ×3, CatBoost, blending/weight
+search, feature engineering, stacker seed/fold averaging). The account is out of ideas that pay,
+not out of slots.
+
+## 3. 🎯 NEW, AND FREE: `w82a` — THE PRICER'S OUT-OF-SAMPLE ERROR IS **±14e-6**, AND IT SETTLES
+   THE CV-vs-LB ARGUMENT FROM THE OTHER SIDE
+
+`w26g` copies `w26d`'s `pred_lb` verbatim into every submission DESCRIPTION, and Kaggle stores
+descriptions forever. So the account has been keeping, for free, an **append-only, genuinely
+out-of-sample** record of predicted-vs-observed public LB: each prediction was published *before*
+its score existed and no later run can edit it. `experiments/w82a_pricecal.py` reads it back.
+
+    priced sends with a score   44        days 2026-08-21 .. 2026-08-25
+    residual mean               -1.30e-6
+    residual sd                 14.03e-6
+    LB rounding (5 dp)           2.89e-6  ->  net predictive sd 13.73e-6
+
+⟹ **The pricer is unbiased and imprecise.** Mean −1.3e-6 on n=44 is a clean bill of health for
+`w46c`/`w26d`. The sd is the number that matters:
+
+| margin currently under argument | size | vs one residual sd |
+|---|---|---|
+| ad202/ad211 CV reorder (w73 §2) | 1.904e-6 | 0.14 sd |
+| binding CV margin (w75) | 2.417e-6 | 0.17 sd |
+| click price at tau=0 (w74a) | 4.523e-6 | 0.32 sd |
+
+🎯 **Every quantity this account is deciding the deadline on is smaller than one sd of the LB
+predictor.** That is the CV-selection discipline arriving from a second, measured direction
+instead of as a rule quoted out of the brief: the public slice is not merely *untrustworthy*
+here, it is **arithmetically incapable** of resolving the candidates apart. It also explains the
+whole shape of the last five days — 44 sends, 0 beats, and that is exactly what a ±14e-6 predictor
+aimed 20–50e-6 below the account best should produce.
+
+⛔ **`w82a` ADOPTS NOTHING.** Three controls, 0 failures: C1 recovers a known mean/sd to <0.05e-6;
+C2 plants a malformed `predicted LB` string and requires it to be **dropped, not parsed as 0.0**
+(a silent parse failure would drag the mean to −971000e-6 and read as a spectacular finding);
+C3 asserts the sample size against a floor of 30, so a future change to `w26g`'s message format
+empties the sample **loudly** instead of reporting an sd over three rows.
+
+### 3.1 ⛔ THE PER-FAMILY TABLE IS REPORTED AND MUST NOT BE ADOPTED
+
+The by-family means run from **−16.83e-6 (ad199, n=6)** to **+11.67e-6 (ad196, n=3)**, and today's
+`ad208` — five of today's ten, and the family's first read — came in at **−8.60e-6**. Tempting.
+It is **t = −1.45** against the other 39 (diff −8.24e-6, se 5.70), i.e. nothing. Building a
+family correction out of it would be choosing the population after seeing which way it went —
+prereg2's error (w80 §2) and the one w81 §6 refused by name. **No re-price. No re-rank.**
+
+## 4. VERIFICATION STATE
+
+- **THE TOKEN WAS REFRESHED FIRST, AS THE FIRST ACTION OF THE RUN.** `date -u` read
+  **2026-08-25 12:40:15Z** against an expiry of **2026-08-25T01:39:30Z** — 11 hours dead and far
+  outside the 30-minute lying window, so this would have been a hard 401 on the first send.
+  Backup at `~/.kaggle/credentials.json.bak.w82`; **new expiry 2026-08-26T00:40:25Z**, which is
+  again BEFORE tomorrow's ~12:40Z window. **The 08-26 run must refresh first, as its own first
+  action. It cannot be done for it.**
+- **26 standing check scripts, ALL rc=0** (25 inherited + **`w82a` new**), each run via command
+  substitution, never a pipe: `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d
+  w67b w68b w70b w71b w72b w74b w75b w76b w77b w78b w79b w80f w82a`. Extend the LIST, never an
+  integer.
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- **`w74b_clickstaleguard` was re-run AFTER the sends, which is the only run of it that counts.**
+  rc=0: board 131 → **141 scored, all ten new files below tier 2, tiers UNCHANGED**
+  (tier1 0.97119 = `w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`; tier2 0.97118, 5 files).
+  ⟹ **`SELECT_THESE.md` is unchanged and its +4.5228e-6 price is still live.**
+- `check_selection.py` **rc=1 — STILL NOTHING SELECTED**, and still un-clickable: no browser
+  binary, no `curl`, no CDP listener (w80 §9 checked all three). ⛔ Do not spend a run on it.
+- Queue after today: **61 unsent**, of which 19 vetoed and 4 carry no OOF vector. Days **08-26,
+  08-27 and 08-28 are already registered** from `w72a_plan_*.json`; **08-29..08-31 will be short**
+  and w72 §2.1 priced that shortfall at **exactly 0.00e+00**. ⛔ Do not build files to fill them.
+
+## 5. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-26T00:40:25Z**. Then
+   `w70d_chainguard`, then the **26** check scripts in §4 — extend the LIST, not a count.
+2. **THE 08-26 SEND IS THREE COMMANDS AND THE DAY IS ALREADY REGISTERED** (`w72a_plan_2026-08-26`).
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry,
+   match file-for-file, then `--go`. ⛔ Do NOT re-derive the day; do NOT hand-write it into
+   `ORDERS`. ⚠ The sender must print `hijack CV bar 0.9701349052`. If it prints 0.9701288617,
+   `w79b` C1 has been bypassed — stop.
+3. **Re-run `w74b_clickstaleguard` AFTER the sends, not before** (§4). It is the only thing that
+   can void `SELECT_THESE.md`, and a pre-send run of it tests yesterday's board.
+4. **THERE IS STILL NO OPEN TECHNICAL ITEM.** w81 closed the last one. The remaining work is the
+   daily send and the deadline selection, which is on **CV** — and §3 now measures why the public
+   LB cannot substitute for it.
+5. ⛔ **DO NOT** build a per-family LB correction from `w82a`'s table (§3.1) · **DO NOT** treat
+   §2's rank slide as a reason to chase the public LB (§3) · **DO NOT** reopen `ext_members17` ·
+   **DO NOT** quote w80e's G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null, its q05/q95,
+   or its "SCRUBBED" class · **DO NOT** read a LOW S as evidence of a foreign partition ·
+   **DO NOT** register a prereg4 that picks POS from the detected models · **DO NOT** quote
+   `w80a_posthoc.json` as registered · **DO NOT** quote w80a's "signal-to-null ratio 0.6x" ·
+   **DO NOT** read w80a's P2 as evidence about the fold scheme · **DO NOT** chase the 0.97127
+   public cluster · **DO NOT** spend a run on the selection click · **DO NOT** re-run
+   `w63a_setprice.py` with no arguments · **DO NOT** point `HIJACKPRICE` back at
+   `w63a_setprice.json` · **DO NOT** re-point `w59b`'s no-over-block control at `w38_ad202std_h3`
+   or `w36_ad199std_h3` · **DO NOT** install a `Σ|w|` health check · **DO NOT** quote w77 §6's
+   "Σ|w| is the alarm" as general · **DO NOT** quote `w77a`'s P6 as a finding · **DO NOT** cite
+   w63 §4's iff as established · **DO NOT** re-open the original dataset · **DO NOT**
+   re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a frozen constant from a mutable CSV ·
+   **DO NOT** re-run a pricer as a routine staleness check · **DO NOT** re-base the ranker ·
+   **DO NOT** build files for 08-29..08-31 · **DO NOT** apply the duplicate override · **DO NOT**
+   take stacker seed/fold averaging (§0), an OOF error-analysis angle, a LightGBM/CatBoost/XGBoost
+   tuning angle, or a feature-engineering angle.
+6. ⚠ **NEW LESSONS.**
+   • **The account was already keeping a perfect out-of-sample calibration record and nobody had
+     read it.** Every `pred_lb` was published in a submission description before its score
+     existed, and Kaggle stores descriptions forever — 44 rows of un-editable, un-refittable
+     prediction-then-outcome, free, for one API call (§3). Look for the log you are already
+     writing before building an experiment to generate one.
+   • **"Trust CV over the public LB" got a lot stronger when it stopped being a rule and became
+     a number.** ±14e-6 against margins of 1.9–4.5e-6 means the public slice is not
+     untrustworthy, it is *arithmetically incapable* of separating the candidates (§3). A
+     discipline you can measure is one you will not talk yourself out of at the deadline.
+   • **An unbiased estimator with a wide sd explains a boring five days better than any story
+     about the files.** 44 sends, 0 beats, aimed 20–50e-6 below the best — that is exactly the
+     expected output, not evidence that anything is broken (§3).
+   • **Write the bad board read up, at the top, with the delta.** +40 teams passed us in a day
+     (§2). The temptation is to bury it under a green verification section, and burying it is how
+     a run ends up chasing the public LB the next morning.
+   • **Run the staleness guard AFTER the event it guards against.** `w74b` before the sends tests
+     yesterday's board and passes vacuously (§4).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+`git push origin main` fails with `gh: command not found` → `could not read Username for
+'https://github.com'`. No `gh`, no ssh key, no token, no browser, no `curl` — a sealed box, not a
+missing credential. Local `main` is ahead of `origin/main`; a later run can diff the two refs
+itself. Nothing is lost — the workspace is the memory and it is committed — but the remote does
+not have this run.

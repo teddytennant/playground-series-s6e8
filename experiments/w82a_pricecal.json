@@ -1,0 +1,67 @@
+{
+  "n": 44,
+  "days": [
+    "2026-08-21",
+    "2026-08-22",
+    "2026-08-23",
+    "2026-08-24",
+    "2026-08-25"
+  ],
+  "resid_mean_e6": -1.295454545453949,
+  "resid_sd_e6": 14.029171510705199,
+  "lb_quantisation_sd_e6": 2.8867513459481295,
+  "net_predictive_sd_e6": 13.728959171890965,
+  "by_family_e6": {
+    "ad188": {
+      "count": 3,
+      "mean": -0.33,
+      "std": 1.15
+    },
+    "ad190": {
+      "count": 1,
+      "mean": 9.0,
+      "std": NaN
+    },
+    "ad194": {
+      "count": 2,
+      "mean": -1.5,
+      "std": 0.71
+    },
+    "ad195": {
+      "count": 6,
+      "mean": 8.0,
+      "std": 11.06
+    },
+    "ad196": {
+      "count": 3,
+      "mean": 11.67,
+      "std": 1.53
+    },
+    "ad197": {
+      "count": 5,
+      "mean": 5.8,
+      "std": 7.82
+    },
+    "ad199": {
+      "count": 6,
+      "mean": -16.83,
+      "std": 19.23
+    },
+    "ad202": {
+      "count": 7,
+      "mean": -5.29,
+      "std": 13.25
+    },
+    "ad208": {
+      "count": 5,
+      "mean": -8.6,
+      "std": 11.7
+    },
+    "ad211": {
+      "count": 6,
+      "mean": 1.17,
+      "std": 13.44
+    }
+  },
+  "ADOPTS": "nothing -- measurement only; see the module docstring"
+}

@@ -12830,3 +12830,42 @@ reads like an auth problem and is not. Fix, verified:
 
 ⚠ A run that stops at the failed push has **already committed** — check `git status -sb` for
 `[ahead N]` before re-doing any work.
+
+---
+
+# 🎯 THE PRICER'S OUT-OF-SAMPLE ERROR IS ±14e-6 — MEASURED, n=44 (w82a, 2026-08-25)
+
+**The account keeps a free, un-editable, genuinely out-of-sample calibration log and it took 82
+runs to read it.** `w26g_send.py` copies `w26d`'s `pred_lb` verbatim into every submission
+DESCRIPTION; Kaggle stores descriptions forever; the prediction was therefore published *before*
+its score existed and no later run can touch it.
+
+    .venv/bin/python experiments/w82a_pricecal.py     # ~1 API call, 0 = ok. Reads only.
+
+    priced sends with a score   44        days 2026-08-21 .. 2026-08-25
+    residual mean               -1.30e-6     <- w46c/w26d are UNBIASED
+    residual sd                 14.03e-6     <- and imprecise
+    LB rounding (5 dp)           2.89e-6  ->  net predictive sd 13.73e-6
+
+## Why this is the strongest argument on the account for selecting on CV
+
+| margin the deadline turns on | size | vs one residual sd |
+|---|---|---|
+| ad202/ad211 CV reorder (w73 §2) | 1.904e-6 | 0.14 sd |
+| binding CV margin (w75) | 2.417e-6 | 0.17 sd |
+| click price at tau=0 (w74a) | 4.523e-6 | 0.32 sd |
+
+⟹ the public slice is not merely untrustworthy here, it is **arithmetically incapable** of
+separating the deadline candidates. It also explains the last five days exactly: 44 sends, 0
+beats, all aimed 20–50e-6 below the account best is precisely what a ±14e-6 predictor produces.
+
+⛔ **ADOPTS NOTHING. Do not re-price, do not re-rank, and do NOT build a per-family correction**
+from the by-family table it prints (means run −16.83e-6 `ad199` to +11.67e-6 `ad196`). Today's
+`ad208` at −8.60e-6 over n=5 is **t = −1.45** against the other 39 — nothing. Fitting it is
+choosing the population after seeing the numbers, i.e. prereg2's error (w80 §2), refused by name
+in w81 §6.
+
+Controls, 0 failures: C1 known-answer mean/sd recovery to <0.05e-6; C2 a malformed
+`predicted LB` string must be **dropped, not parsed as 0.0** (a silent parse failure drags the
+mean to −971000e-6 and reads as a finding); C3 sample-size floor of 30, so a change to `w26g`'s
+message format empties the sample loudly rather than reporting sd over three rows.
