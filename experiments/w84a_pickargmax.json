@@ -1,0 +1,62 @@
+{
+  "n_sent_rows": 141,
+  "n_files_with_cv": 130,
+  "slot1": "w36_ad199stdcorr.csv",
+  "slot1_cv": 0.970140006,
+  "slot1_rank": 1,
+  "slot2": "w23_ad187stdcorr.csv",
+  "slot2_cv": 0.9701150809,
+  "slot2_rank": 35,
+  "slot2_note": "w64-settled cross-base hedge; NOT a CV pick, see check_selection.py",
+  "top8": [
+    {
+      "fileName": "w36_ad199stdcorr.csv",
+      "cv": 0.970140006,
+      "ref": 55656399,
+      "pub": 0.97118
+    },
+    {
+      "fileName": "w38_ad202stdcorr.csv",
+      "cv": 0.9701375891,
+      "ref": 55691071,
+      "pub": 0.97117
+    },
+    {
+      "fileName": "w40_ad211stdcorr.csv",
+      "cv": 0.9701374733,
+      "ref": 55691067,
+      "pub": 0.97118
+    },
+    {
+      "fileName": "w36_ad199stdcorr_ens4.csv",
+      "cv": 0.9701365875,
+      "ref": 55714895,
+      "pub": 0.97119
+    },
+    {
+      "fileName": "w36_ad199std_h3.csv",
+      "cv": 0.9701354276,
+      "ref": 55691062,
+      "pub": 0.97116
+    },
+    {
+      "fileName": "w38_ad202stdcorr_ens4.csv",
+      "cv": 0.9701349001,
+      "ref": 55714897,
+      "pub": 0.97119
+    },
+    {
+      "fileName": "w69_ad208std_h3.csv",
+      "cv": 0.970134235,
+      "ref": 55770414,
+      "pub": 0.97115
+    },
+    {
+      "fileName": "w40_ad211std_h3.csv",
+      "cv": 0.9701331846,
+      "ref": 55714894,
+      "pub": 0.97116
+    }
+  ],
+  "ADOPTS": "nothing -- reports; a human moves WANTED"
+}

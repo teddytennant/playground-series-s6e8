@@ -13,7 +13,9 @@ the number below is precisely that it argues AGAINST letting the public LB arbit
 per-family residual into a correction term would be choosing the population after seeing which
 way it went -- the error w80 §2 and w81 §6 both caught in this workspace.
 
-THE ONE NUMBER. The residual sd is ~14e-6. The public LB is reported to 5 dp, so it carries a
+THE ONE NUMBER. The residual sd is ~13e-6 over n=62 (w84 corrected the 50-row cap; the
+superseded capped read was ~14e-6 over n=44, and the mean moved -1.30e-6 -> +0.08e-6, i.e.
+the pricer is even closer to unbiased than the capped sample said). The public LB is reported to 5 dp, so it carries a
 +-5e-6 rounding box of its own (sd 2.89e-6); netting that out still leaves ~13.7e-6 of genuine
 predictive error. Every CV gap this account is currently arguing over -- the 1.904e-6 ad202/ad211
 swap (w73 §2), the 2.417e-6 binding margin (w75), the 4.52e-6 click price (w74a) -- is SMALLER
@@ -25,6 +27,8 @@ CONTROLS (w72 §5.3: a control that can only fail is not a control).
   C1 +  a synthetic sample with a KNOWN mean/sd is recovered to <0.05e-6 -> the estimator works.
   C2 -  a planted description whose `predicted LB` text is malformed is DROPPED, not parsed as
         0.0 -- a silent parse failure would drag the mean to -971000e-6 and read as a finding.
+  C4 +- the pagination is EXERCISED both ways -- see C4. This file shipped WITHOUT
+        --page-size and silently measured the most recent 50 sends only.
   C3    the parsed sample size is asserted against a floor, so a future change to w26g's message
         format empties the sample LOUDLY instead of reporting sd over three rows.
 
@@ -46,11 +50,15 @@ PRED_RE = re.compile(r"predicted LB (0\.\d+)")
 LB_DP = 5                # Kaggle reports the public score to 5 decimal places
 
 
+# ⚠ THE CAP. Without --page-size the CLI returns 50 rows here and says nothing about it
+# (RESEARCH "The Kaggle submission list is PAGINATED"). This file shipped without it and
+# measured 44 sends over 5 days when 62 over 7 days existed. C4 below pins the argv.
+SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "200"]
+
+
 def fetch() -> pd.DataFrame:
     """Live submission list. Reads only; never sends."""
-    raw = subprocess.run(
-        ["kaggle", "competitions", "submissions", "-c", COMP, "-v"],
-        capture_output=True, text=True, check=True).stdout
+    raw = subprocess.run(SUBS_ARGV, capture_output=True, text=True, check=True).stdout
     # the CLI can print a pagination token line above the header -- strip anything before it
     lines = raw.splitlines()
     head = next(i for i, l in enumerate(lines) if l.startswith("ref,"))
@@ -91,6 +99,28 @@ def controls() -> list[str]:
         bad.append(f"C2 malformed description not dropped (kept {len(got)} of 2)")
     elif abs(got["resid_e6"].iloc[0]) > 0.6:
         bad.append("C2 the well-formed row did not price to ~0")
+
+    # C4 -- the pagination is EXERCISED, not asserted. w56b's idiom: a flag that is only
+    # checked for its own spelling is a flag a future edit removes. This fetches BOTH ways
+    # and requires the paginated call to return strictly more rows, so the day the account
+    # is under the cap this control reports that instead of passing vacuously.
+    if "--page-size" not in SUBS_ARGV:
+        bad.append("C4 the submission fetch has lost --page-size -- the sample is capped at 50")
+    else:
+        try:
+            capped = subprocess.run(
+                [a for a in SUBS_ARGV if a not in ("--page-size", "200")],
+                capture_output=True, text=True, check=True).stdout
+            n_capped = sum(1 for ln in capped.splitlines() if re.match(r"^\d+,", ln))
+            n_full = len(fetch())
+            if n_full < n_capped:
+                bad.append(f"C4 paginated fetch returned FEWER rows ({n_full}) than the "
+                           f"capped one ({n_capped}) -- pagination is broken")
+            elif n_full == n_capped:
+                print(f"  ⚠ C4 the account is at {n_full} scored sends, at or under the "
+                      f"CLI cap -- pagination is untested this run, not passing")
+        except (subprocess.CalledProcessError, OSError) as e:
+            bad.append(f"C4 could not exercise the pagination: {e}")
 
     return bad
 

@@ -4639,7 +4639,7 @@ row bootstrap and the 8 resampled fold splits. **This line is closed; do not re-
   linear stacker is the right family and this is the third instrument to say so**; (d) the
   CV→board offset is stable enough (±6e-5 over three of his stacks) to price a suspect library
   with two submissions, which is his method and ours arrived at independently and better
-  calibrated (w82a, ±14e-6); (e) sd(gap) = sd(move)·√(2(1−ρ)) — decorrelation is the only lever
+  calibrated (w82a, ±13e-6 on n=62 after the w84 pagination fix); (e) sd(gap) = sd(move)·√(2(1−ρ)) — decorrelation is the only lever
   on the row-sampling part of a split, and at the ρ two real teams show, **none of the public
   top ten's nine adjacent gaps is a real ordering**; (f) three of seven finished S6 boards
   erased their public top ten and the kept-count never landed between one and four.
@@ -12906,7 +12906,7 @@ reads like an auth problem and is not. Fix, verified:
 
 ---
 
-# 🎯 THE PRICER'S OUT-OF-SAMPLE ERROR IS ±14e-6 — MEASURED, n=44 (w82a, 2026-08-25)
+# 🎯 THE PRICER'S OUT-OF-SAMPLE ERROR IS ±13e-6 — MEASURED, n=62 (w82a, corrected w84 2026-08-25)
 
 **The account keeps a free, un-editable, genuinely out-of-sample calibration log and it took 82
 runs to read it.** `w26g_send.py` copies `w26d`'s `pred_lb` verbatim into every submission
@@ -12915,10 +12915,18 @@ its score existed and no later run can touch it.
 
     .venv/bin/python experiments/w82a_pricecal.py     # ~1 API call, 0 = ok. Reads only.
 
-    priced sends with a score   44        days 2026-08-21 .. 2026-08-25
-    residual mean               -1.30e-6     <- w46c/w26d are UNBIASED
-    residual sd                 14.03e-6     <- and imprecise
-    LB rounding (5 dp)           2.89e-6  ->  net predictive sd 13.73e-6
+    priced sends with a score   62        days 2026-08-19 .. 2026-08-25
+    residual mean               +0.08e-6     <- w46c/w26d are UNBIASED
+    residual sd                 13.00e-6     <- and imprecise
+    LB rounding (5 dp)           2.89e-6  ->  net predictive sd 12.68e-6
+
+⚠ **THE FIRST READ OF THIS WAS CAPPED AND NOBODY NOTICED.** As shipped, `w82a_pricecal.py`
+called the CLI WITHOUT `--page-size 200`, so it silently measured **the most recent 50 rows
+only** — n=44 over 5 days, when 62 over 7 days existed. RESEARCH's own paginated-list warning
+says "every call site in `experiments/` now does"; this one did not. Fixed in w84, and `w82a`
+now carries **C4, which exercises the pagination both ways** rather than asserting the flag.
+The superseded capped read was mean −1.30e-6, sd 14.03e-6, net 13.73e-6. **The correction moved
+the mean 16× closer to zero and the conclusion got STRONGER, not weaker.**
 
 ## Why this is the strongest argument on the account for selecting on CV
 
@@ -12930,7 +12938,7 @@ its score existed and no later run can touch it.
 
 ⟹ the public slice is not merely untrustworthy here, it is **arithmetically incapable** of
 separating the deadline candidates. It also explains the last five days exactly: 44 sends, 0
-beats, all aimed 20–50e-6 below the account best is precisely what a ±14e-6 predictor produces.
+beats, all aimed 20–50e-6 below the account best is precisely what a ±13e-6 predictor produces.
 
 ⛔ **ADOPTS NOTHING. Do not re-price, do not re-rank, and do NOT build a per-family correction**
 from the by-family table it prints (means run −16.83e-6 `ad199` to +11.67e-6 `ad196`). Today's
@@ -12942,3 +12950,35 @@ Controls, 0 failures: C1 known-answer mean/sd recovery to <0.05e-6; C2 a malform
 `predicted LB` string must be **dropped, not parsed as 0.0** (a silent parse failure drags the
 mean to −971000e-6 and reads as a finding); C3 sample-size floor of 30, so a change to `w26g`'s
 message format empties the sample loudly rather than reporting sd over three rows.
+
+---
+
+# 🛡 THE PICK IS THE CV ARGMAX OF EVERYTHING EVER SENT — AND IT IS NOW GUARDED (w84a, 2026-08-25)
+
+`SELECT_THESE.md` names two refs. Every guard around it protected a *different* claim —
+`w74b` the click PRICE, `w56b` WANTED's ELIGIBILITY, `w59b`/`w62b` the send-path hijack BAR.
+**Nothing asserted the thing the pick actually rests on:** that no file this account has sent
+out-CVs the slot-1 pick. That was true when WANTED was set and had been carried in prose across
+~60 further sends.
+
+    .venv/bin/python experiments/w84a_pickargmax.py    # 2 API calls, 0 = ok. Reads only.
+
+    slot 1  w36_ad199stdcorr.csv   CV 0.9701400060   rank   1 of 130   margin +2.417e-6
+    slot 2  w23_ad187stdcorr.csv   CV 0.9701150809   rank  35 of 130   (a HEDGE, not a CV pick)
+
+**The +2.417e-6 margin over the CV #2 sent file is w75's binding CV margin, reproduced from a
+completely independent route** — live submission descriptions rather than the on-disk ledger.
+
+Five guards, all exercised rather than asserted: G1 argmax · G2 pagination fired both ways
+(141 paginated vs 50 capped) · G3 a planted higher-CV send demotes the pick to rank 2 · G4 the
+w64 "slot 2 is settled" marker and both WANTED filenames pinned in `check_selection.py` ·
+G5 the 13 files shared with `w57a_tierprice2.json` agree to 4.3e-11.
+
+⚠ **THE HAZARD IT WATCHES IS LIVE.** Six days and up to 60 sends remain and
+`w26g_send.hijack_cv_bar` exists precisely because a queued file CAN clear the bar. If one
+does, it becomes a legitimate deadline candidate and **WANTED must be moved BY HAND.** G1 is
+what notices. Today the best of the ten 08-25 sends is CV rank 7, so it passes on a real margin.
+
+⛔ **G4 IS NOT A BUG REPORT.** Slot 2 is CV rank ~35 ON PURPOSE — the cross-base hedge priced at
+a measured size by `w64a_hedgeprice.py`. A later run that "fixes" slot 2 into the CV #2 file is
+re-opening a settled question. ⛔ **This file ADOPTS NOTHING**; it reports, a human moves WANTED.

@@ -26801,3 +26801,172 @@ CV number in the file. On this board vote count tracks the title, not the method
 
 Unchanged from w80/w81/w82: no `gh`, no ssh key, no token, no browser, no `curl`. Local `main`
 is ahead of `origin/main`. The workspace is the memory and it is committed; the remote is not.
+
+---
+
+# w84 — 2026-08-25, slot 3 of 10 → **NO SUBMISSION, THE DAY WAS SPENT AT 12:40Z.** Six days out
+
+w82 sent all ten registered 08-25 files at 12:40:03–12:40:32Z; this run opened at 13:03Z.
+`kaggle competitions submissions -v --page-size 200` shows the ten, all COMPLETE and scored, so
+the cap is reached and **there is no slot to use.** None was skipped and none was wasted.
+Everything below is the consolidation the angle asked for, and it found a real defect.
+
+## 0. THE ANGLE WAS TAKEN, IN FULL, AND IT PAID
+
+ANGLE: *"Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check the CV-to-LB
+gap across every experiment so far, and make sure the strongest submission is the one selected."*
+Taken as written. All three parts ran; two of them turned up something the workspace did not
+know. This is the first angle in nine runs that was not already closed by a prior entry.
+
+## 1. ✅ THE FULL CHECK SUITE, RUN FOR REAL — 28 SCRIPTS, ALL rc=0
+
+w83 deferred these to "the next run", so this is their first execution since w82's 12:4xZ pass
+and it is **not** the vacuous re-run w82 §5.3 warned about: `w82a` was edited this run (§2) and
+`w84a` is new (§3), so the suite was testing changed code.
+
+- `w70d_chainguard` **rc=0** (8 of 8 modules import).
+- **27 standing check scripts, ALL rc=0**, each run via command substitution, never a pipe:
+  `w54a w55a w56b w57c w59b w60b w60d w62b w63b w64b w65b w65c w66d w67b w68b w70b w71b w72b
+  w74b w75b w76b w77b w78b w79b w80f w82a w83a`. Extend the LIST, never an integer.
+- **The list is now 28 — add `w84a_pickargmax`.** Logs in `logs/w84/`.
+- `w74b_clickstaleguard` **rc=0**: live board 141 scored, tier1 0.97119
+  (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`), tier2 0.97118 ×5, **TIERS UNCHANGED** ⟹
+  `SELECT_THESE.md` stands and its **+4.5228e-6** click price is still live.
+- `check_selection.py` **rc=1 — still nothing selected**, still un-clickable. ⛔ Do not spend a
+  run on it.
+
+## 2. 🔴 `w82a` WAS READING THROUGH THE 50-ROW CAP — THE HEADLINE CALIBRATION NUMBER WAS WRONG
+
+RESEARCH has carried this since 2026-08-17, under its own heading: *"`kaggle competitions
+submissions -v` returns only 50 rows in this environment… **Always pass `--page-size 200`.**
+Every call site in `experiments/` now does."* **`w82a_pricecal.py`, written three days ago, did
+not.** Line 52 shipped as `["kaggle","competitions","submissions","-c",COMP,"-v"]`. So the
+number w82 put at the top of RESEARCH — the strongest argument on this account for selecting on
+CV — was computed on **the most recent 50 submissions**, not on the history.
+
+| | n | days | mean | sd | net |
+|---|---|---|---|---|---|
+| capped (w82, superseded) | 44 | 08-21 .. 08-25 | −1.295e-6 | 14.029e-6 | 13.729e-6 |
+| **paginated (w84, live)** | **62** | **08-19 .. 08-25** | **+0.081e-6** | **13.002e-6** | **12.684e-6** |
+
+The cap cost **18 rows and two entire days**. ⚠ **And the correction went the workspace's way:**
+the residual mean moved **16× closer to zero**, so "w46c/w26d are unbiased" is now a much
+stronger statement than it was on the capped sample, and the sd is still 13e-6 against margins
+of 1.904 / 2.417 / 4.523e-6. **The conclusion is unchanged and better supported: the public
+slice is arithmetically incapable of separating the deadline candidates.**
+
+`w82a` now carries **C4, which EXERCISES the pagination** — it fetches both ways and requires
+the paginated call to return strictly more rows, and says so out loud if the account is ever
+under the cap rather than passing vacuously. Asserting the flag's spelling would have been the
+w56b anti-pattern. Re-run: **rc=0, FAILURES 0.** RESEARCH's heading and table are corrected in
+place with the superseded numbers kept visible.
+
+⛔ Still **ADOPTS NOTHING.** The by-day table now shows 08-21 at **−29.0e-6 over n=4** and 08-19
+at +5.9e-6. **DO NOT** build a per-day correction out of that — it is the same choose-the-
+population-after-seeing-it error as the per-family table, refused by name in w81 §6.
+
+## 3. 🛡 `w84a` — NOTHING WAS GUARDING THE ONE CLAIM THE DEADLINE PICK RESTS ON
+
+The angle's third clause turned out to be un-checkable with what was on disk. Every guard around
+`SELECT_THESE.md` protects a different claim — `w74b` the click PRICE, `w56b` WANTED's
+ELIGIBILITY, `w59b`/`w62b` the send-path hijack BAR, `w57a_tierprice2.json` only 13 files.
+**Nothing asserted that no file this account has sent out-CVs the slot-1 pick.** True when
+WANTED was set, carried in prose across ~60 sends since, never re-tested.
+
+`experiments/w84a_pickargmax.py` tests it against the live, paginated submission list — the
+descriptions are immutable and were published at send time, so this reads what was claimed then,
+not anything a later run could edit. **rc=0, 5 guards, FAILURES 0.**
+
+    sent rows 141   distinct files with a parseable CV 130
+    slot 1  w36_ad199stdcorr.csv   CV 0.9701400060   rank   1 of 130   margin +2.417e-6
+    slot 2  w23_ad187stdcorr.csv   CV 0.9701150809   rank  35 of 130   (a HEDGE, not a CV pick)
+
+**The strongest submission IS the selected one.** And the margin over the CV #2 sent file is
+**+2.417e-6 — w75's binding CV margin, reproduced from a completely independent route** (live
+descriptions vs the on-disk ledger). That agreement is worth more than the guard.
+
+Guards, all exercised: **G1** argmax · **G2** pagination fired both ways (141 vs 50) · **G3** a
+planted higher-CV send demotes the pick to rank 2, so G1 is not inert · **G4** the w64 "slot 2 is
+settled" marker and both WANTED filenames pinned in `check_selection.py` · **G5** the 13 files
+shared with the ledger agree to **4.3e-11**.
+
+⚠ **THE HAZARD IS LIVE.** Six days, up to 60 more sends, and `hijack_cv_bar` exists precisely
+because a queued file CAN clear the bar. If one does it becomes a real deadline candidate and
+**WANTED must be moved BY HAND** — G1 is what notices. Today the best of the ten 08-25 sends is
+CV rank 7, so it passes on margin, not vacuously.
+⛔ **G4 IS NOT A BUG.** Slot 2 is rank ~35 ON PURPOSE (w64a's measured cross-base hedge). A run
+that "fixes" it into the CV #2 file is re-opening a settled question.
+
+## 4. THE FIELD AND THE BOARD — BOTH UNCHANGED SINCE w83
+
+`kernels list --sort-by dateRun`: **nothing new since w83's 12:52Z sweep.** The two most recent
+are the mamarin private-split notebook (47 votes, read in full by w83) and the therrien NN
+(42 votes, ⛔ still nothing there). One call, correctly spent, correctly empty.
+
+Board `lb_w84/`, stamped **13:05:51Z**: **2,875 teams, we are rank 140 at 0.97119, top 4.87%**,
+Chris Deotte leads at 0.97172 (gap 0.00053). Top-10% cut is rank 287, top-5% cut is rank 143 —
+we are 3 places inside it. Against w83's 139/2874 that is **no material movement**, so ⛔
+`w83a_reproject` is NOT re-run: it is a precedent table, not a monitor, and its own instruction
+is to re-run only if the board size or our rank moves materially.
+
+## 5. NEXT RUN
+
+1. **`date -u`, THEN REFRESH THE TOKEN FIRST** — expiry **2026-08-26T00:40:25Z**, which is
+   before tomorrow's ~12:40Z window. It WILL be expired. Then `w70d_chainguard`, then the **28**
+   check scripts in §1 — extend the LIST, not a count.
+2. **THE 08-26 SEND IS THREE COMMANDS AND THE DAY IS ALREADY REGISTERED**
+   (`w72a_plan_2026-08-26`). `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` →
+   `w26g_send.py --n 10` dry, match file-for-file, then `--go`. ⚠ The sender must print
+   `hijack CV bar 0.9701349052`. If it prints 0.9701288617, `w79b` C1 has been bypassed — stop.
+3. **Run `w74b_clickstaleguard` AND `w84a_pickargmax` AFTER the sends, not before.** Both read
+   the live board/list, so a pre-send run tests yesterday's state and passes vacuously.
+   `w84a` G1 is the one that can force WANTED to move.
+4. **THERE IS STILL NO OPEN TECHNICAL ITEM.** The remaining work is the daily send and the
+   deadline selection, which is on **CV**.
+5. ⛔ **DO NOT** build a per-DAY correction from `w82a`'s corrected by-day table (§2) · **DO NOT**
+   "fix" slot 2 into the CV #2 file (§3, G4) · **DO NOT** re-run `w83a` absent a material board
+   move (§4) · **DO NOT** build a per-family LB correction from `w82a`'s table · **DO NOT** treat
+   the rank slide as a reason to chase the public LB · **DO NOT** reopen `ext_members17` ·
+   **DO NOT** quote the superseded n=44 / ±14e-6 calibration numbers (§2) · **DO NOT** quote
+   w80e's G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null, its q05/q95, or its "SCRUBBED"
+   class · **DO NOT** read a LOW S as evidence of a foreign partition · **DO NOT** register a
+   prereg4 that picks POS from the detected models · **DO NOT** quote `w80a_posthoc.json` as
+   registered · **DO NOT** quote w80a's "signal-to-null ratio 0.6x" · **DO NOT** read w80a's P2 as
+   evidence about the fold scheme · **DO NOT** chase the 0.97127 public cluster · **DO NOT** spend
+   a run on the selection click · **DO NOT** re-run `w63a_setprice.py` with no arguments ·
+   **DO NOT** point `HIJACKPRICE` back at `w63a_setprice.json` · **DO NOT** re-point `w59b`'s
+   no-over-block control at `w38_ad202std_h3` or `w36_ad199std_h3` · **DO NOT** install a `Σ|w|`
+   health check · **DO NOT** quote w77 §6's "Σ|w| is the alarm" as general · **DO NOT** quote
+   `w77a`'s P6 as a finding · **DO NOT** cite w63 §4's iff as established · **DO NOT** re-open the
+   original dataset · **DO NOT** re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a frozen
+   constant from a mutable CSV · **DO NOT** re-run a pricer as a routine staleness check ·
+   **DO NOT** re-base the ranker · **DO NOT** build files for 08-29..08-31 · **DO NOT** apply the
+   duplicate override · **DO NOT** take stacker seed/fold averaging, an OOF error-analysis angle,
+   a LightGBM/CatBoost/XGBoost tuning angle, or a feature-engineering angle.
+6. ⚠ **NEW LESSONS.**
+   • **A rule the workspace wrote down and enforced everywhere still got violated by the very
+     next file it wrote.** The paginated-list warning is a top-level RESEARCH heading that ends
+     "every call site in `experiments/` now does" — and `w82a`, three days younger than the
+     warning, did not (§2). "Every call site does X" is a claim that decays the moment a new call
+     site is added. It needs a test, not a sentence.
+   • **A capped read fails silently and in the flattering direction.** 50 rows came back, parsed
+     cleanly, produced a plausible n=44 and a plausible sd, and passed a C3 floor of 30. Nothing
+     anywhere said "there were 141". A sample-size floor cannot detect truncation — only a
+     comparison against the un-capped call can (§2, now C4).
+   • **Consolidation is not a wasted slot.** Nine runs of new angles had been declined as
+     already-closed; the first run that was told to go back and re-verify found a wrong headline
+     number and a completely unguarded claim (§2, §3). Re-reading is a search strategy.
+   • **Ask which guard covers the claim, not whether the area has guards.** `SELECT_THESE.md` was
+     surrounded by four guards and the claim it rests on had none (§3). A dense guard suite reads
+     as coverage and hides the specific hole.
+   • **A correction that strengthens the conclusion is still a correction, and must be logged as
+     one.** The mean moved 16× closer to zero (§2). The temptation is to report the better number
+     and not the error that produced the worse one.
+   • **Two instruments agreeing from independent routes is a result.** +2.417e-6 arrived from the
+     live submission descriptions and matched w75's binding margin off the on-disk ledger (§3).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w83: no `gh`, no ssh key, no token, no browser, no `curl`. (`unzip` is
+missing too — read the board zip with python's `zipfile`, not the shell.) Local `main` is ahead
+of `origin/main`. The workspace is the memory and it is committed; the remote is not.
