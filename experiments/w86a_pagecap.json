@@ -1,10 +1,10 @@
 {
-  "live_rows": 141,
+  "live_rows": 151,
   "sent_today": 10,
-  "slots_left": 60,
+  "slots_left": 50,
   "projected_final": 201,
   "bar": 241,
-  "call_sites": 49,
+  "call_sites": 50,
   "under_bar": 0,
   "g4_missing": [],
   "failures": []

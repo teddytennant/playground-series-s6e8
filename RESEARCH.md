@@ -266,7 +266,7 @@ unchanged either way.
 today mints a token expiring ~02:16Z and does not help. **Nothing to do.** The only run this
 bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication required" as dead.
 
-## THE 34 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 35 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -275,7 +275,7 @@ bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication 
     w75b_muguard      w76b_addguard      w77b_bracketguard  w78b_treatguard   w79b_fillguard
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
-    w91b_dateguard
+    w91b_dateguard    w92a_smokerun
 
 ⚠ The journal records these as bare PREFIXES (`w68b w70b w71b ...`). w88 expanded five of them
 from memory and got all five wrong; `.venv/bin/python experiments/<wrong>.py` exits **2** with
@@ -283,6 +283,17 @@ from memory and got all five wrong; `.venv/bin/python experiments/<wrong>.py` ex
 ⚠ Clear `OMP_NUM_THREADS`/`OPENBLAS_NUM_THREADS`/`MKL_NUM_THREADS` first — `w65b_pinguard`
 reads the environment and returns rc=1 spuriously under an exported shell.
 ⚠ `w65c` and `w66d` need ~4 min. Run the suite with a 900s per-check timeout.
+⚠ `w92a_smokerun` needs ~162s — it EXECUTES five real instruments rather than checking a
+property. Budget ~3 min on top of the ~8 the rest of the suite takes.
+🔴 **`w54a_vetoexpiry` AND `w85c_slotguard` FAIL BY DESIGN WHEN RUN AFTER THE DAY'S SEND.** The
+queue on disk was written for the day just sent, so w54a's C1 freshness check refuses it and
+w85c's G4 (which runs w54a) inherits that. This is the guard working, not a defect. Rebuild for
+the next unsent day and re-run those two:
+
+    .venv/bin/python experiments/w23b_sendqueue.py
+    .venv/bin/python experiments/w48e_order.py --day <next UTC day> --write
+
+Do not "fix" either check.
 
 ## ⚠ THE SUBMISSIONS `date` COLUMN HAS TWO SPELLINGS AND ONE OF THEM CRASHES pandas (w91)
 
@@ -310,12 +321,74 @@ so the suite stayed green through it.
 ordering check sees it.
 
 ---
+## 🔴 A FROZEN MODEL'S CENTRING BELONGS TO THE MODEL, NOT TO THE CSV IT WAS FITTED ON (w92)
+
+`experiments/w25a_cvlb_full.csv` is a **mutable registry**. w30 legitimately refreshed it on
+**2026-08-22 10:12** from 71 rows to 91 (60 -> 78 above the `cv>=0.97` floor), moving the
+`cv>=0.97` mean by **+4.914e-6**:
+
+    git 24dbd0a (as w25f/w26e read it)   71 rows, 60 above floor, MU 0.970052225431
+    on disk since 2026-08-22             91 rows, 78 above floor, MU 0.970057139522
+
+✅ The LIVE pricer is PINNED against the refreshed value and that pin is exercised, not asserted.
+`w46c`/`w53a` centre on `w30b_corrterm.json` at MU **0.9700571395217258**; `w57c_muguard` checks
+three JSONs agree with it and that applying the 08-22 shift **breaks** the fit (residual sd
+7.7200 -> 21.8591e-6, 2.8x), so the pin is load-bearing. `w75b_muguard` re-derives it. Both green.
+
+🔴 `w28a_cvlb_refresh.py` re-derived a FROZEN model's MU off that CSV and asserted it matched
+`w26e_famfix.json`. It therefore **died on 2026-08-22 10:12** — three days before the timestamp
+bug existed — and the w91 date repair could not have revived it. Fixed in w92: MU is read from
+the model's own JSON and the 60 fit stems from `w28a_w25f_fitrows.json`, a git-provenanced
+snapshot. Its GATE now reproduces w26e's own residual sd on its own rows: **n=60, 8.35e-6 vs
+stored 8.35e-6.**
+
+⚠ **WHICH CV->LB MODEL IS WHICH.** `w28a` audits the SUPERSEDED 08-19 w25f/w26e ancova, not the
+live pricer. Out of sample on the 73 files sent since it was fitted it reads **mean -13.59e-6,
+sd 18.00e-6** against a fitted 8.35e-6 — 2.2x degradation, same sign and rough size as the era
+term. For the LIVE predictor use `w82a_pricecal` (measures it against its own published
+predictions); for the era term use `w75a_erarefresh`.
+
+⛔ **NEVER RUN `w25a_cvlb_full.py`.** It rewrites the CSV the live MU pin is checked against.
+It is excluded from `w92a_smokerun` by that rule, in code, with the reason stored beside it.
+
+---
+## THE REPAIR SURFACE IS EXECUTED, NOT JUST TYPE-CHECKED — `w92a_smokerun` (check 35, w92)
+
+w91 patched seven modules for the timestamp format, shipped `w91b_dateguard` to prove the parse,
+and ran none of them. The first one executed died on an older, unrelated break. So:
+
+    G1  RUN: w28a_cvlb_refresh, w50b_autoselect, w75a_erarefresh, w15i_cvlb, w15j_cvlb -> rc 0
+    G2  every EXCLUDED module is excluded by a STATED RULE and still exists (no vacuous pass)
+    G3  COVERAGE derived live — the surface is every module importing `w91a_subdate`, and it
+        must equal RUN u EXCLUDED. 9 found, 9 classified. A new reader of the submissions frame
+        fails G3 until somebody classifies it.
+    G4  CONTROL-: a planted module exiting 1 is reported as a failure by the same runner.
+
+⛔ EXCLUDED, by rule: `w25a_cvlb_full.py` (rewrites the MU pin source) · `w15j_tiebreak.py`
+(w15-era one-off superseded in full by `w50b_autoselect`; reads `/tmp/w15j_subs.csv`, a scratch
+path gone after any reboot). ⛔ Do not shrink `RUN` to make G1 pass.
+
+⚠ `w91b` G3b triggered on a **mention** of `parse_sub_dates`, not a load, so `w92a`'s own
+docstring made it go red. Narrowed in w92 to modules that actually `Load` the name — a module
+with no load cannot NameError. CONTROL- still fires; the summary now counts 8 real loaders
+instead of string mentions minus a hardcoded 2.
+
+---
 ## ⚠ TWO CLI CAPS, RE-MEASURED
 
 - `kaggle competitions leaderboard -s --page-size 5000` returns **exactly 200 rows** and says
-  nothing. We are rank 140 of 2,881, so the read is fine today; it goes silently blind if the
-  account ever slides past 200. Nothing on the send path uses it — `w83a_reproject` reads a
-  downloaded board zip, not this call.
+  nothing. ⚠ **We are now rank 171 of 2,976 (w92, 08-26) — 29 rows from that blind spot**, and
+  the 200th row scores 0.97117 against our 0.97119. One more day of field movement puts us off
+  the page. Nothing on the send path uses it — `w83a_reproject` reads a downloaded board zip.
+- 🔴 **OUR TEAM NAME ON THE BOARD IS `Teddy Tennant`, NOT `thtennant`.** Grepping the handle
+  returns nothing and reads exactly like having fallen off the 200-row page. `thtennant` appears
+  only in the `TeamMemberUserNames` column of the downloaded board CSV.
+- Full board, no `unzip` needed:
+
+      kaggle competitions leaderboard -c playground-series-s6e8 -d -p lb_<run>
+      python -c "import zipfile; zipfile.ZipFile('lb_<run>/playground-series-s6e8.zip').extractall('lb_<run>')"
+
+  `w83a_reproject` globs `lb_*/**/*publicleaderboard*.csv`, so extracting is all it needs.
 - `kaggle competitions submissions --page-size 500` → 141 rows. Still under the cap (w86).
 
 **THE LESSONS.** A per-item tolerance is not a policy until somebody adds it up — 31 checks

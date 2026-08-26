@@ -55,8 +55,15 @@ print(ns[["stem", "cv", "fam"]].head(15).to_string(index=False,
       float_format=lambda v: f"{v:.7f}"))
 
 print("\n=== 3. CV->LB, sent files, correlation at current resolution ===")
-print(f"n={len(s)}  pearson(cv,lb)={np.corrcoef(s['cv'], s['lb_live'])[0,1]:+.4f}  "
-      f"spearman={s['cv'].corr(s['lb_live'], method='spearman'):+.4f}")
+# w92: complete cases only, and SAY SO. 4 sent stems carry no stored OOF vector, so the
+# old line printed `n=63` while pearson saw 63 rows and returned nan and pandas' spearman
+# silently dropped to 59. A green run that prints +nan is still a broken read.
+c = s.dropna(subset=["cv", "lb_live"])
+print(f"n={len(c)} of {len(s)} sent ({len(s) - len(c)} with no stored OOF vector, dropped)  "
+      f"pearson(cv,lb)={np.corrcoef(c['cv'], c['lb_live'])[0, 1]:+.4f}  "
+      f"spearman={c['cv'].corr(c['lb_live'], method='spearman'):+.4f}")
+print("  ⚠ this is the w15-era LOCAL registry, not the live board. The same statistic over "
+      "the whole\n    send history is w75a_erarefresh (n=142, Spearman +0.812).")
 print(f"distinct LB values among sent files: {sorted(s['lb_live'].unique())}")
 m.to_csv("experiments/w15j_cvlb.csv", index=False)
 print("\nwrote experiments/w15j_cvlb.csv")

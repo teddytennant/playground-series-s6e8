@@ -10,6 +10,13 @@ branch, which RESEARCH explicitly flagged as the live one:
    "If the limit were 1 AND the tiebreak latest-first, blend158_logit alone is selected."
 
 That is checkable. Enumerate the rules.
+
+⛔ SUPERSEDED (w92, 2026-08-26). `w50b_autoselect.py` enumerates the same branches against the
+LIVE board and fetches its own submissions; this file reads `/tmp/w15j_subs.csv`, a scratch
+path written by a sibling w15 script and gone after any reboot, so it raises FileNotFoundError
+on a clean machine. Kept for provenance. `w92a_smokerun` excludes it by that rule rather than
+repairing it — a second owner of the auto-selection enumeration is how a registrar and a
+verifier come to disagree.
 """
 import pandas as pd, io, itertools
 import os as _os, sys as _sys

@@ -1,3 +1,42 @@
+# Snapshot 2026-08-26 12:56 UTC — w92, FULL BOARD (2,976 teams), material move
+
+| | w88/w91 (08-25) | **now** |
+|---|---|---|
+| our best public | 0.97119 | **0.97119** (unmoved — today's ten all landed 0.97113–0.97116) |
+| rank | 140 of 2,881 | **171 of 2,976** |
+| percentile | top 4.86% | **top 5.75%** |
+| top-5% cut | rank 144 — 4 places INSIDE | rank 149 at 0.97121 — **22 places OUTSIDE** |
+| teams strictly above | 137 | **170** |
+| teams tied at 0.97119 | 12 | **9** |
+| leader | Chris Deotte 0.97172 | Chris Deotte **0.97184** (gap 0.00065) |
+| our submissions | 141 | **151** |
+
+31 teams passed us and the field grew by 95 in a single day. This is the first **material board
+move** since w83, so `w83a_reproject` was re-run (its own rule reserves it for exactly this).
+All five controls PASS — C2's zero-noise null returns rank 171 on all 4,000 reps, C3 reads the
+board 0.1h old at 2,976 teams.
+
+**A. matched null** (add each past AUC episode's own public→private shift sd to every team,
+re-rank): median private rank **180** under all three sds; P(top 5%) 26.3% / 34.0% / 38.8%;
+P(top 10%) 99.1% / 95.3% / 85.2%. Read the sd column, not the medians — the three finished AUC
+boards disagree about it by 3×, which is wider than anything this account can influence.
+
+**B. empirical band** (teams who stood in the top 3.75–7.75% of their own board, where they
+finished as a share of the field):
+
+    S6E1 5.49% · S6E2 5.19% · S6E3 5.63% · S6E4 4.89% · S6E5 11.65% · S6E6 10.94% · S6E7 15.25%
+
+Four boards held the band near 5%, three threw it past 10%. These are two populations and the
+pooled row (6.06%) describes neither.
+
+⛔ **Not a lever.** No submission this account can make moves the public rank in the time left,
+and the brief's own discipline says the private score is not chased from here. The only action
+with expected private AUC attached is still the selection click (+4.5228e-6, `SELECT_THESE.md`),
+and it is still un-clickable from this machine (w74). Board CSV in `lb_w92/`.
+
+⚠ Grep the board for **`Teddy Tennant`**, not `thtennant`. The handle appears only in the
+`TeamMemberUserNames` column, so searching for it looks exactly like being off the page.
+
 # Leaderboard notes — playground-series-s6e8
 
 ## Snapshot 2026-08-25 ~14:0x UTC — w87, FULL board download (`lb_w87/`, 2,881 rows)

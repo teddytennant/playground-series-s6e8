@@ -1,11 +1,11 @@
 {
- "n_sent_stems": 81,
- "n_with_cv": 77,
+ "n_sent_stems": 151,
+ "n_with_cv": 142,
  "mu": 0.9700522254313158,
  "gate_resid_sd": 8.348856440812957,
- "oos_n": 8,
- "oos_mean": 2.896339376876056,
- "oos_sd": 2.9254392495537522,
+ "oos_n": 73,
+ "oos_mean": -13.59394192187127,
+ "oos_sd": 17.997066586988637,
  "bars": {
   "h3": {
    "unstd": 0.9701167322709201,
@@ -32,6 +32,6 @@
    "std": 0.9700529887367357
   }
  },
- "best_sent_cv": 0.9701150808744374,
- "best_sent_stem": "w23_ad187stdcorr"
+ "best_sent_cv": 0.9701400059625016,
+ "best_sent_stem": "w36_ad199stdcorr"
 }

@@ -28344,3 +28344,321 @@ at the 95% upper tau). The `_ens4` variants are separate files, not a naming ske
 Unchanged from w80–w90: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
 zips with python's `zipfile`). Local `main` is ahead of `origin/main`. The workspace is the
 memory and it is committed; the remote is not.
+
+---
+
+# w92 — 2026-08-26, slot 1 of 10 → **ALL TEN SENT, 33/34 → 34/34, +1 NEW CHECK.** Five days out
+
+    date -u                 ->  2026-08-26 12:40Z
+    w26g_send.py --n 10     ->  "141 submissions on record; 0 already sent on 2026-08-26 (UTC);
+                                 10 of 10 slots left today"
+                            ->  "hijack CV bar 0.9701349052"          <- the live bar, as required
+
+## 1. ✅ THE SEND — THREE COMMANDS, PLAN MATCHED FILE-FOR-FILE, ALL TEN SCORED
+
+`w23b_sendqueue.py` → `w48e_order.py --day 2026-08-26 --write` → `w26g_send.py --n 10` dry →
+`--go`. The dry run's ten matched `w72a_plan_2026-08-26.json` in the same order, item for item.
+`w48e` verified all ten on disk: 296,302 rows, no NaN, md5 matches the queue, CV reproduces from
+the stored OOF vector.
+
+    #  file                          CV             pred_lb    P(beat best)   ->  LB
+    1  w27_ad188raw_rankraw      0.9700976054      0.971136      7.55e-15         0.97115
+    2  w34_ad195std_rankraw      0.9700978116      0.971120      0.00e+00         0.97113
+    3  w34_ad196std_rankraw      0.9700979783      0.971120      0.00e+00         0.97113
+    4  w27_ad188std_hybrid       0.9700993121      0.971129      0.00e+00         0.97113
+    5  w27_ad188raw_hybrid       0.9701001700      0.971131      0.00e+00         0.97113
+    6  w29_ad194stdcorr_rankraw  0.9701005596      0.971155      9.58e-08         0.97116
+    7  w36_ad197std_rankraw      0.9701011303      0.971125      6.66e-16         0.97114
+    8  w27_ad190std_hybrid       0.9701027989      0.971136      6.88e-15         0.97114
+    9  w34_ad196std_rescale      0.9701039146      0.971148      4.72e-08         0.97115
+    10 w34_ad195std_rescale      0.9701055639      0.971151      2.03e-07         0.97115
+
+    confirmed from the API: 10 submissions today (was 0). 0 slots left.
+
+All ten came back **0.97113–0.97116**, every one below the 0.97119 auto-selection tier, which is
+the point: these are DRAIN fillers, priced below the tier so they cannot be auto-selected and
+therefore cost nothing (`w54a`'s rule). Account best public **unchanged at 0.97119**, still held
+by `w36_ad199stdcorr_ens4` and `w38_ad202stdcorr_ens4`, both 08-23. 151 scored submissions.
+
+## 0. THE ANGLE IS CLOSED, AND I READ THE MECHANISM, NOT THE DO-NOT LIST
+
+ANGLE: *"Error analysis: find where the current best model is wrong. Segment the out-of-fold
+errors and look for structure a feature could capture."* ⛔ **Declined with cause.** Per w88's
+rule, I read the code rather than citing the standing exclusion:
+
+    erroran.py       the conditional-independence test the angle asks for, already built:
+                     y ⊥ x | z, stratified on quantile bins of the stack's own score, three
+                     statistics per feature (chi2/df omnibus, pooled z for WHERE, cross-fitted
+                     dAUC for the decision). Marginal association is not the question and it
+                     already knows that.
+    errormap.py      the prior question — within-segment AUC and within-vs-between, i.e. is the
+                     loss inside segments (unfixable by regrading) or across them (cheap).
+    w14d/w15b        the closure is a BOUND, not a shrug: per-cell isotonic real-minus-permuted
+                     control +6e-6 with both arms negative, a cell-local booster negative at
+                     9/9 checkpoints — and then w15b POWER-CALIBRATED that family of nulls by
+                     injecting a leader-sized signal (tau=0.134, +175e-6) and recovering
+                     78–102% of it at every checkpoint on both frames. The nulls detect.
+    w16a_where.py    the one residual that DOES beat its own control (w15f's `c_avg`, cond AUC
+                     0.505819 vs 0.500227 ± 0.00116, z +4.84) tested for spatial structure.
+
+The angle names a search that has been run, bounded, and power-verified. Nothing in it is
+unbuilt. Closed on merits.
+
+Substituted, per w91 §4 item 6: **run the instruments, not just the guards.** That is where the
+day's finding is.
+
+## 2. 🔴 THE MODULE w91 REPAIRED WAS STILL DEAD — A SECOND BREAK, ONE LINE DOWN
+
+w91 found seven modules broken by the submissions-timestamp format, patched all seven, shipped
+`w91b_dateguard` to prove the parse, and **ran none of them**. The first one executed today,
+`w28a_cvlb_refresh`, died anyway:
+
+    AssertionError: centring drifted from the fitted model      (line 96)
+
+Two lines below the patched line. The cause is unrelated to dates:
+
+    w28a:96   MU = old[old.cv >= 0.97].cv.mean()          # `old` = w25a_cvlb_full.csv
+              assert abs(MU - M["mu"]) < 1e-12            # M = w26e_famfix.json, frozen, n=60
+
+`w25a_cvlb_full.csv` is a **mutable registry**, and w30 legitimately refreshed it on
+**2026-08-22 10:12** from 71 rows to 91 (60 → 78 above the `cv>=0.97` floor), moving the mean by
+**+4.914e-6**. Recovered from git and checked both ways:
+
+    git 24dbd0a  (as w25f/w26e read it)   71 rows, 60 above floor, MU 0.970052225431  == M["mu"]
+    on disk today                          91 rows, 78 above floor, MU 0.970057139522  ≠  M["mu"]
+
+⚠ So `w28a` was dead from **2026-08-22 10:12**, three days before the date bug even existed, and
+**the w91 repair could not have revived it.** w91 counted seven modules as fixed; it fixed one
+break in seven modules, which is a different statement.
+
+✅ **Nothing downstream was at risk and I checked rather than assumed.** The 08-22 refresh was
+correct and the LIVE pricer is pinned against it: `w46c`/`w53a` centre on `w30b_corrterm.json` at
+MU **0.9700571395217258**, and `w57c_muguard` re-verifies that the pin holds, that three JSONs
+agree with it, and — G7 — that the 08-22 shift **breaks** the fit if applied (residual sd
+7.72 → 21.86e-6, 2.8×), so the pin is load-bearing and exercised, not asserted. Both mu guards
+rc=0 today.
+
+## 3. ✅ THE REPAIR, AND THE OUT-OF-SAMPLE READ IT RECOVERS
+
+A frozen model's centring is a property of the model, not of a CSV that is allowed to change.
+
+- `experiments/w28a_w25f_fitrows.json` — the 60 fit stems and their mu, lifted from
+  git `24dbd0a` with the provenance and the reason recorded in the artefact itself.
+- `w28a` now reads `MU = M["mu"]` (w75a's documented idiom) and `fit_rows` from that snapshot.
+  Two assertions replace the broken one and both are non-vacuous: the snapshot has exactly
+  `M["n"] == 60` stems, and it reproduces `M["mu"]` to 1e-12.
+- Its docstring now says which model it audits. It is **not** the live pricer — it is the
+  superseded 08-19 w25f/w26e ancova. `w82a_pricecal` is the live predictor measured against its
+  own published predictions; `w75a_erarefresh` is the era term. Pointers added so the next run
+  does not mistake one for the other.
+
+The gate that could never fire before now fires and passes exactly:
+
+    GATE: w26e rows n=60 residual sd 8.35e-6 (dof 50) vs stored 8.35e-6 -- PASS
+
+and the reading it was written for is back, on 151 scored submissions:
+
+    OUT OF SAMPLE, 73 files sent after w25f was fitted:
+      mean residual -13.59e-6   sd 18.00e-6   max|res| 51.4e-6   (fitted sd 8.35e-6)
+
+**The 08-19 model degrades to 2.2× its fitted sd and carries a −13.6e-6 bias out of sample.**
+That is a supersession argument, not a defect: it is the same drift `w75a` measures directly as
+the era term, and in the same direction. It is also a fresh, independent reminder of why the
+public LB cannot arbitrate — one sd of an LB predictor is wider than every CV gap on the table.
+
+## 4. ✅ STANDING CHECK **35** — `w92a_smokerun`, 162s, FAILURES 0
+
+The lesson generalises, so it gets an instrument rather than a paragraph.
+
+    G1  every runnable module in the repair surface exits 0
+        w28a_cvlb_refresh · w50b_autoselect · w75a_erarefresh · w15i_cvlb · w15j_cvlb
+    G2  every EXCLUDED module is excluded by a STATED RULE and still exists on disk, so a
+        rename cannot silently shrink the set into vacuous success
+    G3  COVERAGE, derived live: the surface is every module that imports
+        `w91a_subdate.parse_sub_dates`, and it must equal RUN ∪ EXCLUDED. 9 found, 9 classified.
+        w89b's lesson — the hole is in the QUERY, not the checker. A module that starts reading
+        the submissions frame tomorrow fails G3 until somebody classifies it.
+    G4  CONTROL-: a planted module that exits 1 is reported as a failure by the same runner.
+
+⛔ `w25a_cvlb_full.py` is excluded **by rule and must stay excluded**: it rewrites the CSV that
+`w57c`/`w75b` pin the live pricer's MU against. Running it inside a health check would re-centre
+the pricer as a side effect of checking its health.
+⛔ `w15j_tiebreak.py` is excluded as **superseded in full by `w50b_autoselect`** — noted in its
+own docstring this run. It reads `/tmp/w15j_subs.csv`, a scratch path gone after any reboot, and
+repairing it would create a second owner of the auto-selection enumeration.
+
+## 5. ✅ A MODULE THAT RAN GREEN AND PRINTED A NAN
+
+`w15j_cvlb` exits 0 and printed `n=63  pearson(cv,lb)=+nan  spearman=+0.5739`. Four of its 63
+sent stems carry no stored OOF vector, so **the printed n was wrong for both statistics**:
+pearson saw 63 rows and returned nan, pandas' spearman silently dropped to 59. Fixed to complete
+cases with the drop stated, and pointed at the instrument that does the same statistic properly:
+
+    n=59 of 63 sent (4 with no stored OOF vector, dropped)  pearson +0.9155  spearman +0.5739
+    ⚠ w15-era LOCAL registry, not the live board. Whole send history is w75a (n=142, ρ +0.812).
+
+## 6. ✅ THE OTHER FOUR INSTRUMENTS, EXECUTED — AND THE PICK GOT STRONGER
+
+`w75a_erarefresh` rc=0, FAILURES 0. It had not run since the date bug. The era term is now
+estimated on **n=39** held-out ad≥195 files instead of five:
+
+    w46c n=5        term -29.82e-6  -> argmax w36_ad199stdcorr, margin +2.417e-6
+    w75a refreshed  term -23.18e-6  -> argmax w36_ad199stdcorr, margin +2.417e-6   PASS
+    w75a day-mean   term -22.28e-6  -> argmax w36_ad199stdcorr, margin +2.417e-6
+    slot 1 stops being the era-deflated argmax at era = -40.35e-6
+      = -8.3 naive se from the refreshed estimate   (it was -2.4 se from the n=5 one)
+
+⚠ The naive se is far too small — one fixed public slice, heavily shared member sets — which is
+why the day-level read (-22.28e-6, se 3.63 over 5 days) is printed beside it. But the pick does
+not move under any of the three terms, and the crossing point went from 2.4 se away to 8.3.
+**The CV pick is unchanged and better supported than it was.**
+
+`w50b_autoselect` rc=0 — auto-selection unchanged: best public 0.97119 held by the same two
+`_ens4` files, WANTED captured 0/2 under all four limit×tiebreak branches. `w15i_cvlb` rc=0,
+`w15j_cvlb` rc=0. `w84a_pickargmax` rc=0: pick still `w36_ad199stdcorr.csv`, CV 0.9701400060,
+rank 1 of 130.
+
+## 7. THE SUITE — 33/34, THEN 34/34, AND BOTH FAILURES WERE ONE THING
+
+`w54a_vetoexpiry` rc=1 and `w85c_slotguard` rc=1 (its G4 runs w54a). Same root cause, and it is
+**designed behaviour, not a defect**: the queue on disk was written for 08-26 and its ten rows
+had just been sent, so w54a's C1 freshness check refused to print arithmetic on a queue that no
+longer exists — exactly the w85 fix, firing as intended. Rebuilt with the two commands C1 names
+(`w23b_sendqueue.py`, then `w48e_order.py --day 2026-08-27 --write`) and re-ran:
+
+    w54a rc=0   w55a rc=0   w85c rc=0  (G4: stale rc=1 want 1, live rc=0 want 0)
+
+    TOTAL SLOTS REMAINING 50   ·  queue 76 unsent = 10 pinned + 47 tail + 19 VETOED
+    SENDABLE if the veto binds 57  ->  7 spare, every slot fills, no vetoed file is reached
+
+⚠ **Run the suite AFTER the send and w54a/w85c WILL fail.** That is the guard working. Rebuild
+the queue for the next unsent day and re-run those two; do not touch either check.
+
+## 8. 📉 THE BOARD MOVED MATERIALLY — RANK 140 → 171, OUT OF THE TOP 5%
+
+`kaggle competitions leaderboard -s` returns exactly 200 rows and **our team name on the board is
+`Teddy Tennant`, not `thtennant`** — grepping the handle finds nothing and reads like being off
+the page. We were at line 174 of 203, i.e. **28 rows from the CLI's blind spot**.
+
+So I downloaded the full board (`lb_w92/`, 2,976 teams, stamped 12:56:43Z) and re-ran
+`w83a_reproject`, whose own rule reserves it for a material board move. This qualifies:
+
+    | | w88/w91 (08-25) | now (08-26 12:56Z) |
+    | rank            | 140 of 2,881 | **171 of 2,976** |
+    | percentile      | top 4.86%    | **top 5.75%** |
+    | top-5% cut      | rank 144 — 4 INSIDE | rank 149 at 0.97121 — **22 OUTSIDE** |
+    | teams above us  | 137          | 170 |
+    | leader          | 0.97172      | Chris Deotte **0.97184** |
+
+31 teams passed us and the field grew by 95 in one day. All five controls PASS (C2: zero-noise
+null returns rank 171 on all 4000 reps; C3: board 0.1h old, 2,976 ≥ 2,791).
+
+    A. matched null, shift sd from three finished AUC boards (0.000043 / 0.000067 / 0.000124):
+       median private rank 180 in all three; P(top 5%) 26.3% / 34.0% / 38.8%;
+       P(top 10%) 99.1% / 95.3% / 85.2%
+    B. empirical band, teams who stood in the top 3.75–7.75% of their own board:
+       S6E1 5.49% · S6E2 5.19% · S6E3 5.63% · S6E4 4.89% · S6E5 11.65% · S6E6 10.94% · S6E7 15.25%
+
+⛔ **This is not a reason to chase the public LB and I am not treating it as one.** Read column
+B: the seven episodes are two populations, four boards held the band near 5% and three threw it
+past 10%, and no submission this account can make moves that. The one action with expected
+private AUC attached is still the selection click (+4.5228e-6, `SELECT_THESE.md`) and it is
+still un-clickable from this machine (w74). The slide is context, not a lever.
+
+## 9. NEXT RUN
+
+1. **`date -u` FIRST**, then `w26g_send.py --n 10` and read "N of 10 slots left today".
+2. **THE 08-27 SEND IS THREE COMMANDS.** `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-27
+   --write` → `w26g_send.py --n 10` dry, matched file-for-file against
+   `w72a_plan_2026-08-27.json`, then `--go`. The sender must print **`hijack CV bar
+   0.9701349052`**. ⚠ I already rebuilt the queue for 08-27 at the end of this run (§7), so the
+   dry run should match immediately; rebuild anyway, it is cheap and it re-reads the live board.
+3. **Then the checks, AFTER the sends. THE COUNT IS NOW 35** — `w92a_smokerun` joins the list.
+   Full stems are in RESEARCH; copy them, do not reconstruct them. ⚠ w54a and w85c will fail
+   post-send until you rebuild the queue (§7). That is the guard working. Budget ~3 min for
+   `w92a` on top of the ~8 min the suite already takes.
+4. **The field sweep is still ONE COMMAND.** `.venv/bin/python experiments/w89b_fieldsweep.py`.
+   rc=1 means a hole in the QUERY SET — read the `⛔ NOT REACHED` line first.
+5. ⛔ **EVERY REMAINING DAY IS ALREADY REGISTERED — 08-27 THROUGH 08-31.** Do not re-run
+   `w72a_planday.py --day D`. Drift is reported by `w87a` C1/C7.
+6. 🆕 **KEEP RUNNING INSTRUMENTS, NOT JUST GUARDS.** §2 is the whole argument and `w92a` only
+   covers the submissions-frame surface. Cheap candidates outside it that nobody has executed
+   lately: `errormap.py`, `w16a_where.py`, `w39c_gapaudit.py`, `w48a_provenance.py`. ⚠ Check
+   what a module WRITES before running it — `w25a_cvlb_full.py` is the counter-example and it
+   is excluded from `w92a` for exactly that reason.
+7. ⛔ **DO NOT** re-open an OOF error-analysis angle (§0, re-checked against `erroran.py`,
+   `errormap.py` and `w16a_where.py` this run, not against the list) · **DO NOT** re-open
+   blending or OOF weight search · **DO NOT** re-open feature engineering, XGBoost, CatBoost,
+   LightGBM, stacker seed/fold averaging, or the original dataset (−58e-6 at 1×) · **DO NOT**
+   reopen `ext_members17` · **DO NOT** import the 0.97124 anchor or any part of the 0.97127
+   cluster · **DO NOT** re-run `w25a_cvlb_full.py` — it rewrites the LIVE pricer's MU source
+   (§2) · **DO NOT** re-derive `w28a`'s MU from `w25a_cvlb_full.csv` again; that is the bug ·
+   **DO NOT** repair `w15j_tiebreak`; `w50b_autoselect` owns the enumeration (§4) · **DO NOT**
+   quote `w28a`'s model as the live pricer — it is the superseded 08-19 ancova (§3) · **DO NOT**
+   treat the rank slide as a reason to chase the public LB (§8) · **DO NOT** grep the board for
+   `thtennant`; the team name is `Teddy Tennant` (§8) · **DO NOT** quote w90 §4 as a null ·
+   **DO NOT** price a foreign file through `w53a.predict_flags` · **DO NOT** add an exemption to
+   `w91b` G2 · **DO NOT** narrow `w91b` G4/G5's live column · **DO NOT** relax `parse_sub_dates`
+   to `errors="coerce"` · **DO NOT** shrink `w89b.REACH` or `w92a`'s RUN set to make a coverage
+   check pass · **DO NOT** re-open the selection click on the strength of §6 · **DO NOT**
+   re-open ARM 208's `WANTED_INELIGIBLE` key · **DO NOT** "fix" the 08-27 registration ·
+   **DO NOT** move `PRED_SD` to w82a's 13.00e-6 · **DO NOT** lower w88a's ceiling · **DO NOT**
+   re-implement `certified_members`; `w48e` owns it · **DO NOT** widen w48e's OOF exemption ·
+   **DO NOT** change `w87a` C5 or `w85c` G3 · **DO NOT** satisfy `w86a` G2 by lowering the
+   projection · **DO NOT** turn the filler readings into any correction · **DO NOT** retire a
+   veto to fill a slot · **DO NOT** re-run `w26d_queueprice.py` as the daily writer · **DO NOT**
+   build a per-DAY or per-family correction from `w82a`'s table · **DO NOT** "fix" slot 2 into
+   the CV #2 file · **DO NOT** quote the superseded n=44 / ±14e-6 calibration numbers ·
+   **DO NOT** quote w80e's G4 "16 of 50" · **DO NOT** quote `w80c`'s chi2(4) null · **DO NOT**
+   read a LOW S as evidence of a foreign partition · **DO NOT** register a prereg4 that picks
+   POS from the detected models · **DO NOT** quote `w80a_posthoc.json` as registered · **DO NOT**
+   re-run `w63a_setprice.py` with no arguments · **DO NOT** point `HIJACKPRICE` back at
+   `w63a_setprice.json` · **DO NOT** install a `Σ|w|` health check · **DO NOT** cite w63 §4's
+   iff as established · **DO NOT** re-parameterise `w46c.ERA_SHIFT` · **DO NOT** re-derive a
+   frozen constant from a mutable CSV · **DO NOT** re-base the ranker · **DO NOT** apply the
+   duplicate override.
+8. ⚠ **NEW LESSONS.**
+   • **Patching a module is not reviving it.** w91 fixed one break in seven files and reported
+     seven fixes. The first one run had a second break three days older, and the guard proving
+     the patch was green throughout. Only execution is evidence of execution (§2, §4).
+   • **A frozen model's centring belongs to the model, not to the CSV it was fitted on.** The
+     registry was allowed to change, the change was correct, and it killed a module that read
+     the constant off it. The workspace already had this rule written down; `w28a` predated it
+     and nobody re-read `w28a` (§3).
+   • **Green is not correct.** `w15j_cvlb` exits 0 and prints `+nan` next to an n that is wrong
+     for both statistics it labels. A guard suite would never have looked at it (§5).
+   • **Two failing checks can be one fact.** w54a and w85c both went red; there was one cause
+     and it was the guard doing its job. Diagnose before repairing (§7).
+   • **Search the board for the TEAM name, not the handle.** `thtennant` appears nowhere on the
+     leaderboard; `Teddy Tennant` is at rank 171. A grep for the handle returns nothing and
+     reads exactly like having fallen off the 200-row page (§8).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, COMMITS ARE LOCAL
+
+Unchanged from w80–w91: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip` (read
+zips with python's `zipfile` — that is how `lb_w92/` was opened this run). Local `main` is ahead
+of `origin/main`. The workspace is the memory and it is committed; the remote is not.
+
+## 10. ADDENDUM — SHIPPING `w92a` MADE `w91b` GO RED, AND `w91b` WAS THE ONE THAT WAS WRONG
+
+Re-ran every guard I had touched, and `w91b_dateguard` came back **FAILURES: 1**:
+
+    ⛔ experiments/w92a_smokerun.py: uses parse_sub_dates without importing it
+
+It does not. `w92a` names `parse_sub_dates` in its docstring and holds `"w91a_subdate"` as the
+string it matches module names against; it never loads the symbol. G3b's filter was `if
+"parse_sub_dates" not in src_: continue` — a **mention**, not a load — so any module that merely
+documents the helper got flagged. The ordering check then found zero uses and no import and
+called that the w91 bug.
+
+Fixed in `w91b` G3b, and this is a correctness fix rather than an exemption: **a module with no
+`Load` of the name cannot NameError on it**, so there is no ordering to check and it is skipped
+by the rule, not by name. The planted-late-import CONTROL- still fires (use 2 < import 3). While
+there, the summary line stopped counting string mentions minus a hardcoded `- 2` for "the helper
+plus this guard" and now counts modules that actually load it: **8, all importing first**.
+
+    w91b rc=0 · w92a rc=0 (162s) · w54a/w55a/w85c rc=0 on the rebuilt queue
+
+⚠ Worth its own line: **a guard that fires on documentation is a guard somebody eventually
+silences.** The standing rule "DO NOT add an exemption to w91b" is still right and I did not add
+one — I narrowed the trigger to the thing that can actually fail.

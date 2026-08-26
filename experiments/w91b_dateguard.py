@@ -191,7 +191,7 @@ with tempfile.TemporaryDirectory() as td:
 # first use of the column. The import landed at line 80 and the call was at line 34 —
 # a NameError that no syntax check and no source scan can see.
 print("\nG3b every importer of parse_sub_dates imports it BEFORE it uses it")
-bad_order = []
+bad_order, n_ordered = [], 0
 for p_ in PY:
     src_ = open(p_).read()
     if "parse_sub_dates" not in src_:
@@ -212,16 +212,22 @@ for p_ in PY:
                 and isinstance(node.ctx, ast.Load):
             use_lns.append(node.lineno)
     rel_ = os.path.relpath(p_, ROOT)
+    # w92: the trigger is a LOAD of the name, not a mention of it. `w92a_smokerun` names
+    # `parse_sub_dates` only in prose and in the string it matches module names against, and
+    # a module with no load cannot NameError on it. Flagging it was a false positive, and a
+    # guard that cries wolf on documentation is one somebody eventually silences.
+    if not use_lns:
+        continue
     if imp_ln is None:
         bad_order.append((rel_, "uses parse_sub_dates without importing it"))
-    elif use_lns and min(use_lns) < imp_ln:
+    elif min(use_lns) < imp_ln:
         bad_order.append((rel_, f"import at line {imp_ln}, first use at line {min(use_lns)}"))
+    n_ordered += 1
 if bad_order:
     for rel_, why in bad_order:
         fail(f"{rel_}: {why}")
 else:
-    n_imp = sum("parse_sub_dates" in open(p_).read() for p_ in PY) - 2  # helper + this guard
-    print(f"  ✅ {n_imp} importers, all in order")
+    print(f"  ✅ {n_ordered} module(s) load parse_sub_dates, all import it first")
 with tempfile.TemporaryDirectory() as td:
     p_ = os.path.join(td, "late_import.py")
     with open(p_, "w") as fh:

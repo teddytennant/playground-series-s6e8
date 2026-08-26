@@ -9,14 +9,26 @@ on 08-18 and ten on 08-19 -- and, more importantly, w27 slot 3 found and fixed a
 +27.43e-6 of predicted LB. Every prediction made between w25f and that fix was wrong by 3.3
 reporting steps. This script is the audit of what the model actually does now.
 
+⚠ WHICH MODEL THIS AUDITS (w92, 2026-08-26). The model here is the SUPERSEDED w25f/w26e
+ancova. The live pricer has been `w53a_pricer` on `w30b_corrterm.json` since w30, centred at
+the pinned MU 0.9700571395217258 that `w57c_muguard` and `w75b_muguard` re-verify every run.
+Read this file for what the 08-19 model does out of sample; read `w82a_pricecal` for the LIVE
+predictor measured against its own published predictions, and `w75a_erarefresh` for the era
+term. Nothing here re-prices, re-ranks or re-centres anything.
+
 Two things it deliberately does NOT do:
 
-1. It does NOT refit w25f. The coefficients are read frozen from `w25f_ancova2.json` and the
-   centring constant MU is recomputed from `w25a_cvlb_full.csv` -- the SAME 60 rows w25f fitted
-   -- so the model evaluated here is byte-for-byte the model that priced the queue.
-2. It does NOT overwrite `w25a_cvlb_full.csv`. ⚠ That file is w26d's MU source; re-running
-   `w25a_cvlb_full.py` today would silently re-centre the model on 18 extra rows and every
-   stored prediction and gate downstream would shift. Output goes to `w28a_cvlb_full.csv`.
+1. It does NOT refit w25f. The coefficients AND the centring constant MU are read frozen from
+   the model's own JSON, and the 60 fit stems from `w28a_w25f_fitrows.json`, a snapshot of
+   `w25a_cvlb_full.csv` as w25f read it (git 24dbd0a).
+   🔴 MU USED TO BE RE-DERIVED FROM THE LIVE `w25a_cvlb_full.csv`, and w30's legitimate
+   2026-08-22 refresh of that registry (71 rows -> 91, cv>=0.97 mean +4.914e-6) turned line 99
+   into an AssertionError. This module was dead from 2026-08-22 10:12 until w92, and the w91
+   date repair could not have revived it -- it had a second, independent break one line down.
+   A frozen model's centring is a property of the model, not of a mutable CSV.
+2. It does NOT overwrite `w25a_cvlb_full.csv`. ⚠ That file is the MU pin's source; re-running
+   `w25a_cvlb_full.py` would silently re-centre the LIVE pricer and every stored prediction
+   and gate downstream would shift. Output goes to `w28a_cvlb_full.csv`.
 
     .venv/bin/python experiments/w28a_cvlb_refresh.py
 """
@@ -78,8 +90,12 @@ t["gap"] = t.lb - t.cv
 t["fam"] = t.stem.map(family)
 t["std"] = t.stem.map(is_std)
 
-old = pd.read_csv(os.path.join(HERE, "w25a_cvlb_full.csv"))
-fit_rows = set(old[old.cv >= 0.97].stem)
+# ⛔ THE FIT MEMBERSHIP COMES FROM A FROZEN SNAPSHOT, NOT FROM THE LIVE REGISTRY.
+# `w25a_cvlb_full.csv` is mutable — w30 refreshed it on 2026-08-22 from 71 rows to 91 and
+# moved the cv>=0.97 mean by +4.914e-6. Reading fit membership off it marked 78 stems as
+# "in w25f's fit" when 60 were, and re-deriving MU off it broke this module outright.
+_FIT = json.load(open(os.path.join(HERE, "w28a_w25f_fitrows.json")))
+fit_rows = set(_FIT["stems"])
 stdflag.require_corr_registered(t.stem)   # a new *corr file must be classified BY HAND
 t["in_w25f"] = t.stem.isin(fit_rows)
 have = t.dropna(subset=["cv"]).sort_values("cv", ascending=False).reset_index(drop=True)
@@ -92,8 +108,9 @@ print(f"\nscored stems: {len(t)}   with a local OOF vector: {len(have)}   "
 # with these labels would be neither model. See stdflag.family's docstring.
 M = json.load(open(os.path.join(HERE, "w26e_famfix.json")))
 C, RESID = M["coefs_new"], M["resid_sd_new"]
-MU = old[old.cv >= 0.97].cv.mean()          # the SAME centring w25f/w26e used
-assert abs(MU - M["mu"]) < 1e-12, "centring drifted from the fitted model"
+MU = float(M["mu"])                         # the model's OWN centring, read from its JSON
+assert len(fit_rows) == M["n"] == 60, "the frozen fit snapshot is not w26e's 60 rows"
+assert abs(_FIT["mu"] - MU) < 1e-12, "the frozen snapshot no longer reproduces the model's mu"
 
 
 def predict(cv, fam, std):
