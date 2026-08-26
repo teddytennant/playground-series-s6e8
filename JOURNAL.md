@@ -28662,3 +28662,261 @@ plus this guard" and now counts modules that actually load it: **8, all importin
 ⚠ Worth its own line: **a guard that fires on documentation is a guard somebody eventually
 silences.** The standing rule "DO NOT add an exemption to w91b" is still right and I did not add
 one — I narrowed the trigger to the thing that can actually fail.
+
+---
+
+# 2026-08-26 — slot 2 of 10, ANGLE: consolidation (no new ideas)
+
+⛔ **NO SUBMISSION THIS RUN, AND THAT IS THE CAP, NOT A CHOICE.** `date -u` 13:09Z. The
+Kaggle API reports **10 of 10 sent today** (12:38–12:39Z, the w26g queue drain) and the brief's
+cap is 10. Slot 2 was already spent before this run started. So this run bought instruments and
+verification, which is what the angle asked for anyway.
+
+## 0. WHAT THE ANGLE ASKED, AND WHAT IT GOT
+
+Three things: re-verify the best pipeline end to end, check the CV-to-LB gap across every
+experiment, confirm the strongest submission is the one selected. All three are done, and the
+first two turned up **two red standing checks that nobody would have seen** — the suite had
+never been run as a suite, because there was no runner.
+
+## 1. 🆕 THE SUITE HAD NO RUNNER. `w93a_suite.py`, 36/36 GREEN in 420s
+
+Every run since w54 has retyped the stem list into an ad-hoc shell loop. RESEARCH says in bold
+"COPY THESE, DO NOT RECONSTRUCT THEM" because w88 expanded five stems from memory and got all
+five wrong — and `.venv/bin/python experiments/<wrong>.py` exits **2** with `No such file`,
+which reads exactly like a guard failure. A warning is not a fix; a runner is.
+
+    .venv/bin/python experiments/w93a_suite.py                    # 0 = all green
+    .venv/bin/python experiments/w93a_suite.py --only w84a_pickargmax,w57c_muguard
+
+  C1  every stem resolves on disk BEFORE anything runs, so a typo prints `MISSING ON DISK`
+      and is fatal — never a FAIL line mixed in with real ones.
+  C2  the list here is compared against the block published in RESEARCH.md, **parsed live out
+      of the document**. Neither copy can drift from the other silently.
+
+Both controls were fired, not asserted: a planted typo trips C2 (`only-here [...] only-RESEARCH
+[...]`), and with both copies doctored consistently it falls through to C1's `⛔ MISSING ON
+DISK`. It also clears the two operational traps RESEARCH records — it strips
+`OMP/OPENBLAS/MKL_NUM_THREADS` from the child environment (`w65b_pinguard` goes red under an
+exported shell) and gives each check 900s (`w65c`, `w66d`, `w92a` are minutes, not seconds).
+
+⚠ **C2 needed a fix within the hour.** I added a paragraph to RESEARCH.md naming
+`w93a_suite.py`, and C2's regex swept the whole section and read the runner's own name as a
+36th check. Narrowed to the indented table rows only. **A prose MENTION is not a standing
+check** — which is `w91b`'s bug from last run, in a different file, and I walked straight into
+it.
+
+## 2. 🔴 THE SUITE'S FIRST HONEST RUN CAME BACK **33/35**, AND NEITHER FAILURE WAS THE KNOWN ONE
+
+The known post-send failure pair — `w54a_vetoexpiry` and `w85c_slotguard` — was **green**, so
+w92's 08-27 queue rebuild held. The two that were red were new:
+
+### `w92a_smokerun` rc=1 — the coverage check doing exactly its job
+`⛔ G3: NOT CLASSIFIED — ['w93b_cvlbaudit.py']`. I had written that module an hour earlier and
+it imports `parse_sub_dates`, so w92a's live-derived surface grew from 9 to 10 and refused to
+pass until somebody classified the newcomer. **This is the design working**, verbatim from w92
+§4: "a module that starts reading the submissions frame tomorrow fails G3 until somebody
+classifies it." Added to `RUN`, not to `EXCLUDED` — it is read-only and cheap, so it should be
+executed rather than exempted. rc=0, six modules run.
+
+### `w88a_calexposure` rc=1 — ⚠ **FOUR FAILURES, ONE FACT, AND A REAL DEFECT**
+
+    G1  10 registered file(s) have no pred_lb: [('2026-08-26', 'w27_ad188raw_rankraw'), ...]
+    G3  priced calendar exposure nane-6 >= base 4.5228e-6
+    C1  the planted hijackers did NOT trip G3 (nane-6)
+    C1- the 4-plant calendar also fired G3 — the control swamps the bar
+
+Root cause, confirmed empirically before touching anything (all six plan files, against the
+live sent set):
+
+    2026-08-26  plan 10  already sent 10  SPENT
+    2026-08-27  plan 10  already sent  0
+    ... 08-28..08-31 likewise 0
+
+`registered()`'s own docstring says **"Every file registered for a day that has not been sent
+yet"**, and the code globs every plan file and filters by nothing. Today's ten files were sent
+at 12:39Z, which drops them out of `w26d_queueprice.csv` — that table prices the **unsent**
+queue — so all ten came back `pred_lb = None`. One `NaN` then poisoned the family-wise
+aggregate, and `nan` comparisons turned G3 and *both* C1 controls into nonsense. **The control
+that exists to prove the guard can detect a hijacker reported that it could not.**
+
+This is w92 §7's lesson arriving with sharper teeth. There, two red checks were one fact and
+the fact was a guard working correctly. Here, four red lines were one fact and the fact was a
+**defect**: unlike `w54a`, w88a had no staleness contract, so post-send it did not refuse — it
+computed, on NaN, and reported four different things wrong.
+
+Fixed by implementing the docstring. `sent_stems()` reads the live submission list and a
+registered stem in that set is SPENT and off the remaining calendar; the fetch refuses outright
+if the list comes back at its page size, so a **truncated** history can never be misread as
+"nothing else was sent". Every control now fires and brackets properly:
+
+    ℹ 10 registered file(s) on 1 day(s) are ALREADY SENT and are off the calendar: 2026-08-26
+    ✅ G1 all 50 registered files carry a pred_lb ({'w26d': 50})
+    FAMILY-WISE over all 50 remaining sends, at the sender's 8.77e-6:
+      P(≥1 ABOVE tier) 0.0286   P(≥1 AT tier) 0.2464   EXPOSURE +0.2141e-6  vs ceiling 4.5228e-6
+    ✅ G3 exposure is 21.1x under the ceiling
+    ✅ C1+ 5 plants drive it to +5.3723e-6 and G3 FIRES · C1- 4 plants pass at +4.3407e-6
+    ✅ C8 (new) planting a stem into the sent set drops exactly it (50 -> 49), and 0 of the
+       50 remaining registrations is already sent
+
+⚠ The pre-fix numbers were **not** wrong-but-close, they were `nan`. Any run that had quoted
+"the calendar prices at 0.2e-6" off today's output would have been quoting nothing at all.
+
+## 3. ✅ THE PIPELINE, VERIFIED BY EXECUTION — `w93c_pickverify`, STANDING CHECK **36**
+
+Every existing guard on the pick reads its CV out of **prose**: `w84a` parses it from the
+submission description, `w57a_tierprice2.json` stores it, `SELECT_THESE.md` prints it. Three
+copies of one number computed once on 2026-08-20 and carried ever since. w92's lesson was that
+only execution is evidence of execution, so this executes the metric.
+
+    train 691369 rows, base rate 0.7094243450          (== the sample_submission constant)
+    ✅ G1 w36_ad199stdcorr   claimed 0.9701400060  recomputed 0.9701400060  delta -0.0000e-6
+    ✅ G1 w23_ad187stdcorr   claimed 0.9701150809  recomputed 0.9701150809  delta -0.0000e-6
+    ✅ G2 slot 1 is the recomputed argmax of 8, margin +2.417e-6 over w38_ad202stdcorr
+    ✅ G4 CONTROL- a 10%-shuffled OOF scores 0.9229868502, -47153e-6 — G1 would have caught it
+
+**Both quoted CVs recompute exactly, and the +2.417e-6 margin the journal has carried for days
+is real.** The ordering the whole selection rests on survives recomputation.
+
+G3 covers the half no guard has ever touched — the **test-side artefact**, the thing Kaggle
+actually scores:
+
+    ✅ 296302 rows, ids match test.csv, addicted_label in [3.37e-06, 1], mean 0.5000016875,
+       296302 distinct values (100.00%, no rounding loss)
+
+⚠ **G3's first draft was wrong and went red on both files.** It demanded the OPEN interval
+(0,1) and each file has exactly one row at 1.0. The metric is **AUC**, which is rank-based, so
+0 and 1 are legal endpoints — my assertion was wrong, not the artefacts. Replaced with the
+closed interval plus the check that actually bites here: **ties**. A file rounded to k decimals
+silently discards ranking information the CV was computed with. 100.00% distinct, so nothing is
+lost. **Nothing on disk checked this before.**
+⚠ Also worth knowing: **mean 0.50000, not 0.7094.** The shipped files are rank vectors, not
+calibrated probabilities. That is correct for AUC. A future run that "notices" the mean is off
+the base rate and calibrates it would be destroying nothing and gaining nothing — the metric
+cannot see a monotone transform.
+
+## 4. ✅ THE CV-TO-LB GAP OVER **EVERY** SENT FILE — `w93b_cvlbaudit`, read-only
+
+The brief calls the CV-to-LB gap "the most useful number you will collect". The workspace holds
+it in three places and none is the whole history today: `w25a_cvlb_full.csv` is 91 rows and
+**last written 08-22** and must NOT be casually refreshed (w57c/w75b pin the live pricer's MU
+against it); `w82a_pricecal` calibrates the pricer's own predictions; `w75a_erarefresh` is
+ad≥195 only. This reads the live list and writes only its own JSON.
+
+    CV -> LB, 140 distinct files, 140 sends
+      gap = LB - CV   mean +1036.8e-6   sd 32.8e-6   min +986.1e-6   max +1169.0e-6
+      pearson(cv,lb) +0.9009    spearman +0.8005
+      CV span 0.9696410000 .. 0.9701400060  (499.0e-6)
+      LB span 0.97080 .. 0.97119            (390.0e-6)
+      the public board reports 18 DISTINCT values over this whole history
+
+**CV and LB agree at r = +0.90 over 140 files.** That is the single best defence of the
+selection discipline this workspace has produced, and it had never been computed over the full
+history. It is not a licence to chase the board — see the granularity below — it is evidence
+that CV is measuring the same thing the board measures, only with ~30x the resolution.
+
+    slot1 w36_ad199stdcorr   CV 0.9701400060 rank   1/140   LB 0.97118 rank  3 (tied with 4)
+    slot2 w23_ad187stdcorr   CV 0.9701150809 rank  35/140   LB 0.97116 rank 18 (tied with 18)
+    public-argmax pair (what auto-selection takes) : w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4
+    CV-argmax pair                                 : w36_ad199stdcorr, w38_ad202stdcorr
+    SELECT_THESE.md names                          : w36_ad199stdcorr, w23_ad187stdcorr
+
+🔴 **THE NUMBER THAT SETTLES THE 0.97119-vs-0.97118 ARGUMENT.** The public board reports **18
+distinct values across a 390e-6 span** — a 1e-5 grid. The entire CV range of everything this
+account has ever sent is 499e-6, i.e. the board's *reporting step* is a fifth of our whole
+spread. slot 1 sits 1e-5 below the `_ens4` pair on public and **+3.4e-6 above** them on CV.
+**One grid step is not a measurement.** This is the same conclusion w16w reached from the
+paired-residual side ("never quote LB = CV + 0.0010143 to 1e-6") arrived at from a completely
+different direction, and it is the arithmetic reason the selection stays on CV.
+
+⚠ Two controls in this module were **green and vacuous** on first run and I fixed both rather
+than banking them — w92 §5's lesson is one run old:
+  • **G3 compared 0 files.** I assumed the ledger held a `rows` list; it holds a flat
+    `{stem: cv}` dict. It printed `✅ ... on 0 overlapping files`. Now 13 files, 0
+    disagreements, **and it fails if the overlap drops below 10** so it cannot go quietly
+    vacuous again.
+  • **G2 fired on five files that were never attempts.** The `w37_cal_*` family are
+    single-member MEASUREMENT probes whose own descriptions say "this is a MEASUREMENT, not an
+    attempt on the board", and they land 2–9e-3 low by design. Classifying them by SCORE would
+    have been the `stdflag` mistake — **a number is not provenance** — so they are classified
+    by what their description says they are, and excluded from the gap statistics they would
+    otherwise have skewed.
+
+## 5. THE SELECTION — UNCHANGED, BETTER SUPPORTED, STILL UNCLICKED
+
+`check_selection.py` rc=**1**: nothing is selected. Unchanged since w74 and **still blocked** —
+no browser, no `gh`, no token, and the write path was probed and falsified on 08-13.
+
+    auto-slot 1: public 0.97119, 2-way — w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4
+    auto-slot 2: public 0.97118, 5-way — w21_ad187corr_ens4, w27_ad190stdcorr, w29_ad194stdcorr,
+                                         w36_ad199stdcorr, w40_ad211stdcorr
+
+⚠ Note that the CV pick **is** in the auto-slot-2 tie, so auto-selection could capture it on a
+favourable tiebreak. `w50b_autoselect` (run inside w92a) still reports WANTED captured **0/2**
+under all four limit×tiebreak branches, so it does not. The click is still worth ~+4.5e-6.
+
+## 6. WHAT DID **NOT** MOVE, DELIBERATELY
+
+Consolidation means confirming, not reopening. Untouched: `w25a_cvlb_full.csv` (read nothing
+from it, wrote nothing to it), the MU pin, `w46c.ERA_SHIFT`, the send queue, the veto list, the
+day registrations, `PRED_SD`, and every item on the DO-NOT list. No model was retrained, no
+blend reweighted, no feature touched. **`w36b_run.sh` was read but not re-executed** — it is
+~6.5 h per arm and a full rebuild is not the verification available today; recomputing the
+metric from the stored OOF (§3) is, and it is exact.
+
+## 7. NEXT RUN
+
+1. **`date -u` FIRST.** Then `.venv/bin/python experiments/w26g_send.py --n 10` and read
+   "N of 10 slots left today". Today was full at 10/10 before the run started.
+2. **THE 08-27 SEND IS STILL THREE COMMANDS**, unchanged: `w23b_sendqueue.py` →
+   `w48e_order.py --day 2026-08-27 --write` → `w26g_send.py --n 10` dry, matched file-for-file
+   against `w72a_plan_2026-08-27.json`, then `--go`. The sender must print **`hijack CV bar
+   0.9701349052`**. The queue on disk is already built for 08-27 (w92 §7) and all six plan days
+   are registered — **do not re-run `w72a_planday.py`.**
+3. 🆕 **THE CHECKS ARE NOW ONE COMMAND AND THERE ARE 36:**
+   `.venv/bin/python experiments/w93a_suite.py` — ~7 min, prints a per-check table. Do not
+   retype the stem list; if you want a subset use `--only`. ⚠ Run it AFTER the send and
+   `w54a`/`w85c` will fail until the queue is rebuilt for the next unsent day. That is the
+   guard working. **`w88a` will now stay green across a send** — that was this run's fix.
+4. **The field sweep is still one command**: `.venv/bin/python experiments/w89b_fieldsweep.py`.
+5. ⛔ **DO NOT** re-open anything on the standing DO-NOT list (it is long and it is in the w92
+   entry above; all of it still holds). Added this run: **DO NOT** relax `w93c` G3 back to the
+   open interval (0,1) — the metric is AUC and 1.0 is legal · **DO NOT** "calibrate" a shipped
+   file toward the 0.7094 base rate; they are rank vectors and AUC cannot see a monotone
+   transform (§3) · **DO NOT** classify the `w37_cal_*` probes as attempts, or by their score
+   (§4) · **DO NOT** let `w93b` G3's overlap fall below 10 without fixing the key format
+   rather than the threshold · **DO NOT** widen `w93a`'s C2 parse back over the section prose ·
+   **DO NOT** make `w93b` write `w25a_cvlb_full.csv` · **DO NOT** read the 20-row leaderboard
+   CLI output as the whole board (§8) · **DO NOT** treat the 1e-5 public gap between slot 1 and
+   the `_ens4` pair as a measurement — it is one reporting step (§4).
+6. ⚠ **NEW LESSONS.**
+   • **A warning in a document is not a control.** RESEARCH has said "copy these stems, do not
+     reconstruct them" since w88 got five wrong, and every run since retyped them anyway. Five
+     minutes of runner turned the warning into a check that fires (§1).
+   • **NaN is not a small error, it is the absence of a result.** w88a printed four different
+     failures, including a control announcing the guard could not detect what it exists for,
+     and every one of them was one `None` propagating. Diagnose the *arithmetic* before
+     believing any of the lines (§2).
+   • **A docstring that describes behaviour the code does not implement is a latent bug with a
+     timer on it.** `registered()` promised to skip sent days for as long as it has existed. It
+     went off the first time a day was fully spent while the module still had work to do (§2).
+   • **Check the metric before writing the assertion.** My own G3 called both selection
+     candidates malformed because I wrote a probability-calibration bound for a ranking metric.
+     The artefacts were fine; the check was wrong (§3).
+   • **A guard is only as good as its overlap.** `w93b` G3 printed a green tick over zero
+     comparisons. It now refuses to pass below ten (§4).
+
+## 8. ⚠ THE LEADERBOARD CLI NOW RETURNS **20 ROWS**, NOT 200
+
+`kaggle competitions leaderboard -c ... -s` came back with 20 rows plus a
+`Next Page Token`. RESEARCH records it as 200. A future run grepping `Teddy Tennant` in that
+output will find nothing — and per w92 §8 that reads exactly like having fallen off the board,
+now at 20 rows instead of 200. Download the full board (`lb_*/`, opened with python's
+`zipfile`) before quoting any rank. Leader unchanged at the top: **Chris Deotte 0.97184**; the
+20th row is 0.97129; we are at 0.97119.
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED
+
+Unchanged from w80–w92: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip`. Local
+`main` is ahead of `origin/main`. The workspace is the memory and it is committed; the remote
+is not.

@@ -1,0 +1,37 @@
+{
+ "n_files": 140,
+ "n_sends": 140,
+ "gap_mean": 0.0010367704128571378,
+ "gap_sd": 3.281343627973766e-05,
+ "pearson": 0.9008852872653008,
+ "spearman": 0.8005241733328778,
+ "n_used": 140,
+ "dropped_no_cv": 6,
+ "slots": {
+  "slot1": {
+   "file": "w36_ad199stdcorr.csv",
+   "cv": 0.970140006,
+   "lb": 0.97118,
+   "cv_rank": 1,
+   "lb_rank": 3,
+   "lb_tie": 5
+  },
+  "slot2": {
+   "file": "w23_ad187stdcorr.csv",
+   "cv": 0.9701150809,
+   "lb": 0.97116,
+   "cv_rank": 35,
+   "lb_rank": 18,
+   "lb_tie": 19
+  }
+ },
+ "auto_pair": [
+  "w36_ad199stdcorr_ens4.csv",
+  "w38_ad202stdcorr_ens4.csv"
+ ],
+ "cv_pair": [
+  "w36_ad199stdcorr.csv",
+  "w38_ad202stdcorr.csv"
+ ],
+ "note": "read-only audit; writes nothing that any other module reads"
+}

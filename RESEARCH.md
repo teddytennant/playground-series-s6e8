@@ -266,7 +266,55 @@ unchanged either way.
 today mints a token expiring ~02:16Z and does not help. **Nothing to do.** The only run this
 bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication required" as dead.
 
-## THE 35 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## ⚠ THE LEADERBOARD CLI RETURNS **20 ROWS** NOW, NOT 200 (w93, 2026-08-26)
+
+`kaggle competitions leaderboard -c playground-series-s6e8 -s` came back with **20 rows and a
+`Next Page Token`** on 2026-08-26 14:0xZ. Earlier notes here say 200. Combined with the w92
+finding that this account appears on the board as **`Teddy Tennant`, not `thtennant`**, a grep
+for either name in that output now returns nothing at any plausible rank — and that reads
+exactly like having fallen off the board. **Download the full board and open it with python's
+`zipfile`** (there is no `unzip`) before quoting a rank; `lb_w92/` is the last full copy,
+2,976 teams stamped 2026-08-26 12:56:43Z, rank 171.
+
+## 🔴 THE PUBLIC BOARD'S REPORTING GRID IS 1e-5, AND OUR WHOLE CV SPREAD IS 5e-4 (w93)
+
+`w93b_cvlbaudit.py`, over all 140 distinct files this account has sent:
+
+    gap = LB - CV   mean +1036.8e-6   sd 32.8e-6   min +986.1e-6   max +1169.0e-6
+    pearson(cv,lb) +0.9009    spearman +0.8005
+    CV span 0.9696410000 .. 0.9701400060 (499.0e-6)
+    LB span 0.97080 .. 0.97119 (390.0e-6) in **18 DISTINCT VALUES**
+
+Two facts to carry:
+1. **CV tracks LB at r = +0.90 over 140 files.** The selection discipline is not a leap of
+   faith; the two metrics measure the same thing, CV with ~30x the resolution.
+2. **One LB grid step is not a measurement.** The `_ens4` pair leads the CV pick by exactly
+   1e-5 on public and trails it by 3.4e-6 on CV. w16w reached the same place from the paired
+   residual side ("a CV difference under ~5e-6 is a coin flip on the public slice"). ⛔ Do not
+   treat that 1e-5 as evidence of anything.
+
+⛔ `w93b` is READ-ONLY and must stay so. It writes only `w93b_cvlbaudit.json`, which nothing
+reads. It deliberately touches **nothing** in `w25a_cvlb_full.csv` — refreshing that file
+re-centres the LIVE pricer's MU as a side effect (w92 §2).
+⚠ The `w37_cal_*` files are **single-member MEASUREMENT probes**, not attempts; their own
+descriptions say so and they land 2–9e-3 below the blend band by design. Classify them by
+provenance, never by score — classifying by a number is the `stdflag` mistake.
+
+## ✅ THE SHIPPED FILES ARE RANK VECTORS, NOT CALIBRATED PROBABILITIES (w93)
+
+`w93c_pickverify` G3, on both selection candidates:
+
+    296302 rows, ids match test.csv, addicted_label in [3.37e-06, 1.0],
+    mean 0.5000016875, 296302 distinct values (100.00%, no rounding loss)
+
+- The mean is **0.50000**, not the 0.7094 base rate. That is correct: the metric is **AUC**,
+  which cannot see a monotone transform. ⛔ Do not "fix" it.
+- 1.0 is a **legal** value under AUC. w93c's first draft asserted the open interval (0,1) and
+  called both candidates malformed over the single row at 1.0. ⛔ Do not restore that bound.
+- What CAN cost AUC is **ties**: a file written at k decimals discards ranking information the
+  CV was computed with. 100% distinct here. Nothing else on disk checks this.
+
+## THE 36 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -275,7 +323,14 @@ bites is one landing INSIDE 00:40–01:10Z, which must not read "Authentication 
     w75b_muguard      w76b_addguard      w77b_bracketguard  w78b_treatguard   w79b_fillguard
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
-    w91b_dateguard    w92a_smokerun
+    w91b_dateguard    w92a_smokerun      w93c_pickverify
+
+🆕 **RUN THE SUITE WITH ONE COMMAND — `.venv/bin/python experiments/w93a_suite.py`** (w93).
+It holds the list above ONCE, and its C2 re-parses this very block and exits 1 if the two
+copies drift, so the hand-typing hazard the next paragraph warns about is now caught rather
+than warned about. Its C1 resolves every stem BEFORE running anything, so a typo prints
+`MISSING ON DISK` instead of a `No such file` exit 2 that reads like a guard failure. ~5 min.
+`--only w84a_pickargmax,w57c_muguard` runs a subset.
 
 ⚠ The journal records these as bare PREFIXES (`w68b w70b w71b ...`). w88 expanded five of them
 from memory and got all five wrong; `.venv/bin/python experiments/<wrong>.py` exits **2** with

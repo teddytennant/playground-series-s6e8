@@ -1,3 +1,22 @@
+# ⚠ 2026-08-26 ~14:05 UTC — w93: THE `-s` CLI NOW RETURNS 20 ROWS, NOT 200
+
+`kaggle competitions leaderboard -c playground-series-s6e8 -s` returned **20 rows plus a
+`Next Page Token`**. Every earlier note here assumes 200. Our team is `Teddy Tennant` at rank
+171, so it appears in **neither** page size — and a grep that finds nothing reads exactly like
+having dropped off the board. ⛔ Download the full board and open it with python's `zipfile`
+before quoting any rank. The w92 snapshot below (2,976 teams, 12:56:43Z) is the live one.
+
+Top of the board at 14:05Z, unchanged in shape from 12:56Z:
+
+    1  Chris Deotte   0.97184        4  cstdy       0.97140
+    2  Changye Li     0.97154        5  Utkarsh     0.97134
+    3  MILANFX        0.97149       20  tao guo     0.97129   <- the 20th row the CLI shows
+
+Our 0.97119 is 65e-6 behind the leader and below every row the truncated CLI prints. **This is
+context, not a lever** — no submission this account can make moves it, the final selection is
+on CV, and the one action with expected private AUC attached is still the un-clickable
+selection (`SELECT_THESE.md`).
+
 # Snapshot 2026-08-26 12:56 UTC — w92, FULL BOARD (2,976 teams), material move
 
 | | w88/w91 (08-25) | **now** |

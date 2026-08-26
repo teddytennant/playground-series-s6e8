@@ -45,6 +45,9 @@ RUN = [
     "w75a_erarefresh.py",
     "w15i_cvlb.py",
     "w15j_cvlb.py",
+    "w93b_cvlbaudit.py",     # added w93: the live CV->LB gap audit. RUN, not excluded — it is
+                             # read-only by construction (writes only its own JSON) and its
+                             # own G1-G4 are what make it worth executing rather than trusting.
 ]
 
 # Excluded, each with the rule that excludes it. Not a convenience list.

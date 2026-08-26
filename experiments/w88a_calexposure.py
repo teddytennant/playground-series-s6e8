@@ -58,6 +58,8 @@ from __future__ import annotations
 
 import datetime as dt
 import glob
+import io
+import subprocess
 import json
 import math
 import os
@@ -70,6 +72,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "agent"))
 
 import w26g_send as SND                                                     # noqa: E402
+from w84a_pickargmax import PAGE, SUBS_ARGV                                 # noqa: E402
 
 OUT = os.path.join(HERE, "w88a_calexposure.json")
 QUEUEPRICE = os.path.join(HERE, "w26d_queueprice.csv")
@@ -99,11 +102,40 @@ def price_units():
     return base, above, above / lev, lev
 
 
-def registered(fail_on_missing=True, plant=None):
+def sent_stems():
+    """Every stem this account has already submitted, read live.
+
+    ⚠ This is what makes `registered()` honour its own docstring. Until w93 it globbed EVERY
+    plan file, so a day whose ten files had just been sent stayed on the "remaining" calendar
+    — and because a sent file drops out of `w26d_queueprice.csv` (which prices the UNSENT
+    queue), all ten came back with `pred_lb = None`. That single fact then produced FOUR
+    simultaneous failures on 2026-08-26: G1 unpriceable, a NaN family-wise exposure, G3
+    tripping on that NaN, and both C1 controls reporting the guard could not detect the thing
+    it exists for. One fact, four red lines — w92 §7's lesson, again.
+
+    The day-string slice is deliberate and is `w54a_vetoexpiry`'s idiom: it never parses a
+    time, so it cannot meet the two-spelling `date` hazard `w91a_subdate` exists for.
+    """
+    raw = subprocess.run(SUBS_ARGV, capture_output=True, text=True, check=True).stdout
+    lines = raw.splitlines()
+    head = next(i for i, l in enumerate(lines) if l.startswith("ref,"))
+    d = pd.read_csv(io.StringIO("\n".join(lines[head:])))
+    if len(d) >= PAGE:
+        # never silently treat a truncated history as "nothing else was sent"
+        raise SystemExit(f"w88a: the submission list came back at its page size ({PAGE}); it "
+                         f"is truncated and spent days could not be identified. Raise PAGE.")
+    return {str(f).replace(".csv", "") for f in d["fileName"]}
+
+
+def registered(fail_on_missing=True, plant=None, sent=None):
     """Every file registered for a day that has not been sent yet, with its published pred_lb.
 
     `plant` appends a synthetic (day, stem, pred_lb) row -- C1's lever.
+    `sent` is the already-submitted stem set; fetched live when not supplied. A registered
+    stem in that set is SPENT and is not part of the remaining calendar.
     """
+    if sent is None:
+        sent = sent_stems()
     q = pd.read_csv(QUEUEPRICE)
     pl = {s: v for s, v in zip(q["stem"], q["pred_lb"])}
     fam = {s: f for s, f in zip(q["stem"], q["fam"])}
@@ -119,10 +151,13 @@ def registered(fail_on_missing=True, plant=None):
     except OSError:
         pl85 = {}
 
-    out, missing = [], []
+    out, missing, spent = [], [], []
     for p in sorted(glob.glob(PLANS)):
         d = json.load(open(p))
         for stem in d["plan"]:
+            if stem in sent:
+                spent.append((d["day"], stem))
+                continue
             v = pl.get(stem)
             src = "w26d"
             if v is None or (isinstance(v, float) and math.isnan(v)):
@@ -141,6 +176,7 @@ def registered(fail_on_missing=True, plant=None):
                         fam="rankraw", cv=0.97, reg_tier=out[0]["reg_tier"] if out else None))
         if plant[2] is None:
             missing.append((plant[0], plant[1]))
+    registered.spent = spent          # what the filter removed, for the caller to print
     return pd.DataFrame(out), missing
 
 
@@ -179,6 +215,11 @@ def main():
           f"(leverage {lev:.1f}, n_tier {json.load(open(SND.HIJACKPRICE))['gate_j']['n_tier']})")
 
     df, missing = registered()
+    spent = getattr(registered, "spent", [])
+    if spent:
+        days = sorted({d for d, _ in spent})
+        print(f"ℹ {len(spent)} registered file(s) on {len(days)} day(s) are ALREADY SENT and "
+              f"are off the remaining calendar: {', '.join(days)}")
 
     # ---------------------------------------------------------------------- G1
     if missing:
@@ -300,6 +341,30 @@ def main():
     else:
         fails.append("C2 an unpriced registration was NOT caught")
         print("⛔ C2 an unpriced registration slipped through G1")
+
+    # ------------------------------------------------------------------- C8 (w93)
+    # The spent-day filter is now load-bearing: without it a fully-sent day comes back
+    # unpriceable and NaNs the whole calendar (see `sent_stems`). A filter that silently
+    # stopped filtering would look exactly like a quiet day, so it is exercised both ways.
+    if len(df):
+        victim = str(df["stem"].iloc[0])
+        dfc, _ = registered(sent=set(sent_stems()) | {victim})
+        gone = victim not in set(dfc["stem"])
+        shrank = len(dfc) == len(df) - 1
+        # and every row that SURVIVES the live filter must be genuinely unsent
+        live_sent = sent_stems()
+        leaked = [x for x in df["stem"] if x in live_sent]
+        if gone and shrank and not leaked:
+            print(f"✅ C8 the spent-day filter bites: planting {victim} into the sent set "
+                  f"drops exactly it ({len(df)} -> {len(dfc)}), and 0 of the {len(df)} "
+                  f"remaining registrations is already sent")
+        else:
+            fails.append(f"C8 spent filter: dropped={gone} shrank={shrank} leaked={leaked[:3]}")
+            print(f"⛔ C8 the spent-day filter did not behave: dropped={gone} "
+                  f"shrank={shrank} already-sent rows still on the calendar={leaked[:3]}")
+    else:
+        fails.append("C8 the remaining calendar is EMPTY — every plan day reads as spent")
+        print("⛔ C8 nothing is registered as remaining; the filter may be over-reaching")
 
     # ⚠ ONE planted hijacker CANNOT fire G3, and that is arithmetic, not a weak guard: an
     # above-tier landing costs `above_cost` and the ceiling is `base`, so the plant has to be
