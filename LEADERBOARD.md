@@ -2456,3 +2456,31 @@ public LB shows the best of all submissions and today's ten were low-CV drain fi
 Both facts together mean the same thing for the deadline: **rank is not drifting away from
 us, and it is not coming back either.** Only a genuinely better file moves it, which is what
 the w96 TE-prior measurement is for.
+
+## 2026-08-27 (w97) — third consecutive identical reading
+
+`lb_w97/`, full download, board stamped 2026-08-27T13:47:12 UTC. **3,074 teams** (3,073 on
+08-26). Leader Chris Deotte **0.97190**. Us **0.97119: 196 ahead, 9 tied, rank 197** — the same
+three numbers as w95 and w96. The 92→197 slide was a step, not a trend; nothing around us has
+moved in 48 hours.
+
+Top ten: 0.97190, 0.97154, 0.97149, 0.97140, then a five-way shelf at 0.97134, 0.97132.
+
+**Band density around us is spiky, and the spikes are notebooks, not skill.** Counting teams per
+1e-5 bin:
+
+    0.97130    7      0.97124   10      0.97118    6      0.97113   53   <-- shared CSV
+    0.97129   17      0.97123   13      0.97117   28
+    0.97128   75  <-- shared CSV        0.97116    1
+    0.97127   16      0.97122    3      0.97115    9
+    0.97126    8      0.97121   13      0.97114   12
+    0.97125   12      0.97120    8      0.97119    9   <-- us
+
+3–17 teams in every ordinary bin, then 75 at 0.97128 and 53 at 0.97113. The 0.9712x one is
+`atakanaldemir/s6e8-v13-diversity-anchor`, **already dispositioned** — w90 reproduced its OOF on
+our verified partition to 0.000e-6 and its own README admits the correction weight was chosen on
+the full OOF grid (es-on-val), with 50 of its 244 members being szymonkapiski's weak-50 that w81
+and w89c independently refused. ⛔ Closed; not re-opened.
+
+Auto-pick tiers **unchanged by today's ten sends** (best of them 0.97116): slot 1 is still the
+0.97119 two-way (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`), slot 2 the 0.97118 five-way.

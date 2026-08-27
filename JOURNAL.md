@@ -29435,3 +29435,175 @@ guarantee than a file that is not in the directory being globbed.
 
 **Lesson: a directory that is globbed is an API.** Writing into it is a public act, and
 "I'll remember to `--drop` it" is not a control.
+
+---
+
+# 2026-08-27 — w97, slot 3 of 10. ⛔ NO SUBMISSION: 0 of 10 slots left, and that is correct
+
+`.venv/bin/python experiments/w26g_send.py --n 10`:
+
+    161 submissions on record; 10 already sent on 2026-08-27 (UTC); 0 of 10 slots left today
+
+All ten landed COMPLETE, best public **0.97116**, nothing errored. They were the queue drain,
+CV 0.9700325–0.9700963, i.e. 18.8–82.5e-6 below the best sent CV. **None entered an auto-pick
+tier** (top is still 0.97119, two-way), so the click's price is unchanged by today's sends.
+
+## 1. THE ANGLE WAS "FIND THE ORIGINAL DATASET". IT IS CLOSED FOUR TIMES, WITH EVIDENCE
+
+Not skipped on a hunch — this workspace has closed it on four independent measurements, and
+the brief's own escape clause ("unless the journal gives you a concrete reason") applies:
+
+| route | verdict | where |
+|---|---|---|
+| literal concatenation | **−58e-6 at 1×, −986e-6 at 10×, −3,340e-6 at 50×**, monotone in dose | RESEARCH "The original dataset — CLOSED" |
+| separate estimator (`orig_binm`, maxcorr 0.879) | w\*=0.000, below a pure-noise control; −1 to −6e-6 across five transforms, 12 readings, none positive | w15d |
+| regional rescue in cell A (where the label functions agree) | `orig_bin` z +0.72, `orig_binm` z +1.32 — null | w15i |
+| a *better* original to find | none exists: the linked source is deleted, byte-identical to our copy, and **no other public Kaggle dataset carries the 12-column schema** (15 candidates + 4 siblings screened) | w15d |
+
+The structural reason is on file and is what makes this a closure rather than a failure to try:
+the original satisfies `weekend − daily ∈ [0.50, 3.00]` in 100% of rows and violates
+`daily >= social+gaming+work` in 60.7%; the competition frame does the exact opposite
+(**0 of 603,714** budget violations, 52% weekend-band). Each frame obeys a hard constraint the
+other lacks, and the label functions disagree on 86% of the frame. **The Playground "find the
+original" edge is genuinely absent in S6E8 and the reason is structural, not procedural.**
+
+## 2. ✅ w96d IS HEALTHY, AND FOLD 0 OF THE REPLICATION IS NOT ENCOURAGING
+
+The chain (pid 32247) is running, state R, ~14 cores, and past the point where w96 left it:
+
+    fold-0 AUC global        0.9668953349  (2353 trees)
+    fold-0 AUC global_seed43 0.9669598152  (2443 trees)
+    fold-0 AUC windowed      0.9669586861  (2128 trees)
+    fold 0: SIGNAL (windowed-global) +63.351e-6   NULL (seed43-global) +64.480e-6
+
+⚠ **The null is LARGER than the signal on this fold.** That is one fold of five and the rule is
+A+B over all five, so it decides nothing — recorded as an observation, not a verdict, and
+deliberately not acted on. It is exactly the outcome the addendum's withdraw-only replication
+was ordered before the build in order to be able to catch.
+
+⚠ **Timekeeping trap that cost me two tool calls and is worth writing down:** `date -u` prints
+UTC, `ls`/`stat` print EDT (UTC−4), and `/proc/<pid>/stat` field 22 is in clock ticks whose
+`CLK_TCK` cannot be read here — `getconf` does not exist on this box any more than `ps` does.
+I briefly read a 2-minute-old log as 4 hours stale. **Compare `stat -c '%y'` against `date`
+(local), never against `date -u`.**
+
+## 3. 📝 PRE-REGISTERED THE BLEND RULE — `experiments/w97_prereg.txt`, committed at e09db23
+
+w96 measured +42e-6 at the MEMBER. The number that decides anything is what the member is worth
+INSIDE the pack, and w96 §4 already priced that at low single digits of e-6 off `w24b_value_std`
+(+1.07e-6/member redundant, +1.21e-5/member orthogonal; this member is the same model, folds,
+features and seeds, differing in one encoding, so it is at the redundant end).
+
+**Written while the evidence that it was written first is checkable**, which is the only reason
+it is worth anything: `oof_w96/` did not exist (`ls` → No such file) and the log held exactly
+**two** AUC lines, **both null-arm** (`global`, `global_seed43`) — no `windowed` number anywhere,
+at any fold, at either vector. Committed before fold 0's windowed arm finished.
+
+**The decision quantity is a difference of differences:** `Delta = d(windowed) − d(global)`,
+paired within rep. NOT `d(windowed)` — that answers "is one more member of this family worth
+anything", which w24b answered years of runs ago (+1.07e-6, trivially yes) and which is not the
+question. The claim is about the *encoding*, and the global twin was built in the same loop off
+the same frames at the same seed for exactly this subtraction.
+
+Registered prediction: **Delta in [0, +3e-6], modal +1e-6.** Rule, all five needed to ENROL:
+
+    G0 INSTRUMENT   w26i's own cat4 reproduction gate must return w20d's +0.000041 within 3sd
+    G1 CONSISTENCY  Delta > 0 on >= 4 of 5 reps
+    G2 MAGNITUDE    mean(Delta) >= +1.0e-6
+    G3 CEILING      mean(Delta) <= +10e-6  (larger = disbelieve, re-run on fresh reps FIRST)
+    G4 PROVENANCE   sd_test_over_sd_oof in [0.95, 1.45]
+
+`experiments/w97a_gate.py` applies it in code so it cannot be re-read once the table is on
+screen. Verified it refuses today: prints NOT YET DECIDABLE and exits 2.
+
+**§4 of the prereg bounds what a PASS is allowed to do**, which matters more than the rule:
+enrolment copies the windowed member into `oof/` **and nothing else**. The global twin never
+enrols whatever it scores (`oof/` is globbed, not allow-listed — w96 §10). It does **not** change
+`SELECT_THESE.md`; swapping a pick with weeks of provenance for one with days on a +2e-6 CV delta
+is the Rogii failure in a CV costume, and needs its own prereg. It does **not** trigger a send.
+
+## 4. ⏳ `w97b` IS DETACHED AND WAITING — the next run gets an answer, not a job to start
+
+    .venv/bin/python experiments/detach.py logs_w97b_value_then_gate.txt \
+        bash experiments/w97b_value_then_gate.sh 32247        [pid 52805, verified waiting]
+
+It polls `/proc/32247/cmdline` for the w96d chain (re-reading cmdline each time, so a recycled
+pid cannot be mistaken for it), then:
+
+  1. if **neither** arm is on disk → prints that w96d withdrew and **exits 0 doing nothing**.
+     A WITHDRAW is the end of the line per the addendum; there is nothing to price.
+  2. otherwise `w26i_value.py --new-dir $PWD/oof_w96 --new-names lgbm_teprior_{windowed,global}
+     --reps 5 --out w97a_teprior_value` — the **unchanged** instrument w20d/w21b/w26i/w33b/w34c/
+     w36a all used, hybrid, C=1.0, `HONEST_DROP` untouched. It builds `windowed`, `global` and
+     `both` arms against the same pack on the same rows; ~6 arms × 5 reps × ~150s ≈ 75 min.
+  3. `w97a_gate.py`, report only.
+
+⚠ Step 3 deliberately does **not** `cp` into `oof/`. Automating enrolment would let `oof/` change
+without anyone deciding to change it, which is the entire content of w96 §10.
+
+## 5. THE BOARD IS UNCHANGED FOR THE THIRD CONSECUTIVE READING
+
+`lb_w97/`, full download, 3,074 teams. Leader Chris Deotte **0.97190**; us **0.97119**,
+**196 ahead, 9 tied, rank 197** — identical to w95 and w96. w96 read the 92→197 slide as a step
+rather than a trend; a third identical reading is the confirmation.
+
+Band density around us is spiky, not smooth: **75 teams at 0.97128** and **53 at 0.97113**
+against 3–17 in every neighbouring bin. Those are circulating public notebooks, not a skill
+gradient. The 0.9712x one is **already identified and already closed** — w90 reproduced
+`atakanaldemir/s6e8-v13-diversity-anchor` OOF on our own partition to 0.000e-6 and found its own
+README admits es-on-val selection, with 50 of its 244 members being szymonkapiski's weak-50 that
+w81 and w89c independently refused. Not re-opened.
+
+## 6. THE CLICK — RE-PROBED, STILL BLOCKED, STILL THE ONLY THING A HUMAN IS NEEDED FOR
+
+`check_selection.py` → **rc=1, `*** NOTHING IS SELECTED ***`**. Both WANTED files show SENT.
+Re-probed the browser route cheaply because RESEARCH says to and because things change:
+
+    brave / brave-browser / google-chrome / chromium / firefox / curl   ALL ABSENT from PATH
+    ~/.config/{chromium,google-chrome}                                  exist, contain only Crash Reports
+    ~/.config/BraveSoftware/Brave-Browser                               absent
+    CDP 127.0.0.1:9222                                                  ECONNREFUSED
+    mcp__brave__* in this session                                       absent (ToolSearch: no match)
+
+Unchanged. ⛔ **Teddy, in a browser, on `SELECT_THESE.md`'s two refs (55656399, 55588167),
+before 2026-08-31 23:59.** Worth ~3–4.5e-6 of expected private AUC — a place or two, not a medal
+— and it costs one minute.
+
+## 7. WHAT DID NOT MOVE, DELIBERATELY
+
+No submission (none available). Nothing enrolled into `oof/`. No blend reweighted, no
+registration, `SELECT_THESE.md` untouched, MU pin / `w46c.ERA_SHIFT` / `PRED_SD` untouched, the
+08-28 queue not rebuilt. `w93a_suite.py` **not** run for the third run running: it wants all 16
+cores and w96d is holding ~14 of them, and contending with the pre-registered measurement to
+re-green a suite that was 36/36 a few hours ago is a bad trade. It is the first thing to run once
+w97b reports.
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. `date -u`, then `w26g_send.py --n 10`. If slots are open, **send first**: `w23b_sendqueue.py`
+   → `w48e_order.py --day <today> --write` → `w26g_send.py --n 10` dry, matched **in code**
+   against the day's `w72a_plan_*.json`, then `--go`.
+2. `tail -40 logs_w97b_value_then_gate.txt`. Three possible endings and all three are answers:
+   **NO ARMS ON DISK** (w96d withdrew — ⛔ end of the line, do not hunt a third operating point),
+   **NO-ENROL** (modal; the encoding is not distinguishable from one more redundant member), or
+   **ENROL** (then and only then `cp oof_w96/{oof,test,summary}_lgbm_teprior_windowed.* oof/` —
+   the windowed member alone, never the twin — and read `w97_prereg.txt` §4 before doing
+   anything else with it).
+3. `.venv/bin/python experiments/w93a_suite.py` (~5.5 min, 36 checks), then rebuild the queue for
+   08-29 or `w54a_vetoexpiry` and `w85c_slotguard` stay red by design.
+4. ⛔ **DO-NOT, carried forward and added to.** All of w92–w96's list holds. Added this run:
+   **DO NOT** re-open the original dataset — four closures, structural reason, §1 · **DO NOT**
+   read w96d's per-fold SIGNAL/NULL lines as a verdict; the rule is A+B over five folds and fold
+   0's null already exceeded its signal (§2) · **DO NOT** switch w97's decision quantity to
+   `d(windowed)` or `d(both)` if Delta comes back flat; the twin was built at cost to prevent
+   exactly that · **DO NOT** let an ENROL touch `SELECT_THESE.md` (§3) · **DO NOT** compare
+   `stat` mtimes against `date -u` — `ls` is EDT and the gap reads as 4 hours of staleness (§2).
+5. ⚠ **NEW LESSONS.**
+   • **Price a member where it is spent, not where it is measured.** +42e-6 of member AUC and
+     ~+1e-6 of blend CV are the same finding; only the second one is a decision.
+   • **A control arm earns its cost by being subtractable.** The global twin turns a confounded
+     "is this member good" into a clean "is this *encoding* good", and it only works if the
+     subtraction is registered before the table exists.
+   • **A spike in the leaderboard band histogram is a shared notebook, not a skill gradient.**
+     75 teams at one 1e-5 bin and 3–17 either side is a CSV, and it is worth checking whether
+     it is one you have already dispositioned before treating the gap as something to close.

@@ -13774,3 +13774,82 @@ empty, relative paths resolved against `ROOT`; every pre-existing invocation is 
 
 ⚠ "I'll remember to `--drop` it" is not a control, and neither is a DO-NOT list. A directory
 that something globs is an API; writing into it is a public act.
+
+---
+
+# The standing instrument for "what is a member worth INTO the pack" (recorded w97, 2026-08-27)
+
+Every member-value question in this workspace since w20d has been answered with the **same**
+harness, and a future run should reuse it rather than write a new one — the reproduction gate
+below is what makes each new table comparable to the ones already in this file.
+
+    experiments/w26i_value.py
+
+Paired 50/50 stratified splits (`StratifiedShuffleSplit(1, test_size=0.5, random_state=rep)`),
+hybrid transform, C=1.0, `HONEST_DROP = (golem_a, golem_f, lgbm_tuned_lat, lgbm_tuned_lat_frac)`.
+Split noise is ~2e-4 and the effects are ~2e-6, so **nothing it prints is readable except as a
+within-rep difference.** Cost ~150s per arm-fit; 6 arms × 5 reps ≈ 75 min.
+
+**It already takes members that live outside `oof/`**, which is the right way to evaluate one —
+`stack.py:load_members` globs `oof_*.npy` with no allow-list, so a file dropped into `oof/` is
+enrolled everywhere at once (w96 §10):
+
+    .venv/bin/python experiments/w26i_value.py \
+        --new-dir  $PWD/<dir>  --new-names  <a>,<b> \
+        --reps 5 --out <tag>   --prereg-note "<what was predicted, before the run>"
+
+With two `--new-names` it builds arms `<a>`, `<b>` and `both`, each as pack+member against the
+**same** pack on the **same** rows, and writes per-rep held-out AUC to `<tag>.csv`. Any further
+pairing (e.g. `a − b` to isolate one encoding from "one more member of this family") is then
+arithmetic on stored columns and needs no re-fit — the pack term cancels exactly.
+
+⚠ **`--drop` on `stack.py` REPLACES the default, it does not extend it.** `DEFAULT_DROP` is
+`("golem_a", "golem_f")`; passing `--drop foo` silently re-enrols both golems.
+
+## The reproduction gate is not optional and is not ours to relax
+
+`w26i` re-runs w20d's `cat4` arm (`ad_catnative`, `ad_gcatlr02`, `ad_gcatd8`, `ad_gcatseed7`
+against `base165`) every time and checks it returns the published **+0.000041** within 3 sd.
+w36a got +0.000044 ± 0.000005 → PASS. **If it fails, no row in that run's table is comparable to
+anything in this file and none of it should be quoted** — including the rows that look good.
+
+## The conversion rate, which is what makes member AUC readable at all
+
+`experiments/w24b_value_std.json`, same instrument:
+
+| family | n | paired delta | **per member** |
+|---|---|---|---|
+| all 22 imports | 22 | +0.000054 | +2.45e-06 |
+| cat (new family) | 4 | +0.000049 | **+1.21e-05** |
+| redundant | 10 | +0.000011 | **+1.07e-06** |
+
+So: **a new orthogonal family is worth ~12e-6 of blend CV per member and a redundant one ~1e-6**,
+against member-level effects that are routinely 10–50× larger. Solo-to-stack pass-through here is
+~1.4%. Quote a member's fold AUC as a member number and never as a blend number.
+
+## Standing rules attached to it
+
+- Anything above **+10e-6** is disbelieved on sight and re-run on fresh reps **before** it is
+  believed, not after it is spent.
+- A delta whose **sign flips** across reps is a null whatever its mean. w20d's `nn` group is the
+  worked example; w36a's `ram_hgb`/`ram_lgb`/`both` are three more (all SIGN FLIPS, all NULL).
+- Measure against the **pack**, not against `base165`. `base165` is missing the 22 imports that
+  already span some of the same directions, so it overstates every new member.
+
+## Operational notes re-verified 2026-08-27
+
+- **kaggle CLI is `~/.local/bin/kaggle`**, needs `KAGGLE_CONFIG_DIR=/home/nixos/.kaggle`, and is
+  **not importable from `.venv`** — `.venv/bin/python -m kaggle` is `No module named kaggle` and
+  `.venv/bin/kaggle` does not exist. Always pass `--page-size 500`.
+- **The browser route to the final-selection toggle is still shut.** brave / brave-browser /
+  google-chrome / chromium / firefox / curl all absent from PATH; `~/.config/{chromium,
+  google-chrome}` contain only `Crash Reports`; no `BraveSoftware` dir; CDP 9222 refused; no
+  `mcp__brave__*` in the session (ToolSearch returns no match). Root `CLAUDE.md`'s Brave-MCP
+  instructions cannot be followed on this box. Re-probed cheaply and it costs ~4 tool calls;
+  do that rather than re-deriving it.
+- **`getconf` does not exist here**, alongside the already-recorded `ps`, `pgrep` and `setsid`.
+  So `/proc/<pid>/stat` field 22 cannot be converted to wall-clock reliably — use the
+  **`/proc/<pid>/fd` symlink timestamps** for process start time instead.
+- ⚠ **`ls` / `stat` print EDT (UTC−4); `date -u` and every log line are UTC.** Compare a `stat`
+  mtime against local `date`, never against `date -u`, or a 2-minute-old file reads as 4 hours
+  stale. This has now misled two separate runs.
