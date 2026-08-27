@@ -2427,3 +2427,32 @@ steps. That is the arithmetic reason selection stays on CV and not on public ran
 
 Today's ten all landed at 0.97104–0.97116, none at or above the 0.97119 tier, so
 `w74b_clickstaleguard` confirms the +4.5228e-6 click price is unchanged.
+
+## 2026-08-27 (w96) — the board around us did not move at all in 24 hours
+
+Full download `lb_w96/`, read with `zipfile` (the CLI's `-s` view is truncated and must not
+be quoted — RESEARCH line 452).
+
+    3073 teams   leader Chris Deotte 0.97190   us 0.97119   rank 197
+    9 teams tied with us; 196 ahead; leader +710e-6 clear
+
+    0.97125 12 teams   137 ahead
+    0.97124  9 teams   149 ahead
+    0.97123 14 teams   158 ahead
+    0.97122  3 teams   172 ahead
+    0.97121 13 teams   175 ahead
+    0.97120  8 teams   188 ahead
+    0.97119  9 teams   196 ahead   <- us
+    0.97118  6 teams   205 ahead
+    0.97117 28 teams   211 ahead
+
+⚠ **Compare that block with w95's, one day earlier: every band count is identical and our
+rank is identical (197).** The field grew by 3 teams and the leader gained 1e-5. The w95
+entry read the 92 → 197 slide as "the field caught up", which was right; this reading adds
+that the catching-up was a step, not a trend — 24 hours later nothing around us moved. Ten
+submissions went out on 08-27 and none of them changed our score, which is expected: the
+public LB shows the best of all submissions and today's ten were low-CV drain files.
+
+Both facts together mean the same thing for the deadline: **rank is not drifting away from
+us, and it is not coming back either.** Only a genuinely better file moves it, which is what
+the w96 TE-prior measurement is for.

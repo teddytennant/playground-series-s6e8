@@ -13693,3 +13693,63 @@ what notices. Today the best of the ten 08-25 sends is CV rank 7, so it passes o
 ⛔ **G4 IS NOT A BUG REPORT.** Slot 2 is CV rank ~35 ON PURPOSE — the cross-base hedge priced at
 a measured size by `w64a_hedgeprice.py`. A later run that "fixes" slot 2 into the CV #2 file is
 re-opening a settled question. ⛔ **This file ADOPTS NOTHING**; it reports, a human moves WANTED.
+
+# w96 (2026-08-27) — four facts that cost this run time or would have cost the next one
+
+## ⛔⛔ `run_lgbm.PRESETS["control"]` IS **NOT** THE PRESET THE BLEND MEMBERS WERE TRAINED AT
+
+`agent/run_lgbm.py` has exactly one entry in `PRESETS`, named `control`, and its own comment
+says what it is: *"the public library's hand-set vector, our control"*. It is easy to read
+that single entry as "the preset" and describe an experiment run at it as running at the
+shipped operating point. **It is not.** Every tuned member in `oof/` was trained with an
+inline `--params` JSON, and the vector is different and stronger:
+
+|                    | PRESETS["control"] | what the members actually used |
+|--------------------|--------------------|--------------------------------|
+| learning_rate      | 0.035              | **0.025**                      |
+| num_leaves         | 96                 | **63**                         |
+| min_child_samples  | 40                 | **250**                        |
+| reg_lambda         | 5.0                | **80.0**                       |
+| max_bin            | (default 255)      | **511**                        |
+| max_depth / subsample / subsample_freq / colsample_bytree | 7 / 0.9 / 1 / 0.6 | same |
+
+**Verify with `oof/summary_<member>.json`, never with `PRESETS`.** Each summary carries the
+exact `params` dict, the seed list, the `frac` flag and the per-fold `iters` that produced
+the file. w96a's docstring made this mistake and it is corrected in the w96b prereg addendum
+rather than by re-running, because changing an operating point after seeing a number is the
+move the prereg exists to forbid.
+
+## 🎯 THE NOISE FLOOR OF A PAIRED FOLD-LEVEL AUC DIFFERENCE IS ~±34e-6 (w96a, control vector)
+
+Measured, not assumed. `global_seed43` refits the identical frame — same rows, same columns,
+same params — with `random_state` changed from 42 to 43 and **nothing else**. Fold 0:
+
+    global         0.9667116527  (1025 trees)
+    global_seed43  0.9666773152  ( 877 trees)     paired difference  -34.338e-6
+
+So a single-fold single-seed paired delta of a few tens of e-6 is **inside its own noise**,
+and the tree count moves by 15% on a seed change alone. Any future claim of the form "feature
+X is worth +N e-6, measured on fold 0" must be read against this number. The cheapest way to
+get it is to add a seed-only arm to whatever is already being run: it costs one extra fit and
+it is the difference between a number and a number with a scale attached.
+
+⚠ At a *screening* operating point the floor is far worse. The w96a smoke run (60 trees)
+produced signal +65.7e-6 against a null of **-175.4e-6**.
+
+## ⚠ THE DISK IS 100% FULL — 3.7 GB FREE. DO NOT BUILD A SECOND `cache/`
+
+    /dev/mapper/cryptroot  457G  430G  3.7G  100% /
+    workspace 23G:  notebooks 8.2G · cache 6.6G · data 3.6G · submissions 2.4G · experiments 700M
+
+`experiments/build_cache.py`'s per-fold layout (`f{f}_{Xa,ya,Xb,yb,Xt}.npy`) is ~730 MB per
+fold, **~3.6 GB for five** — it would fit in what is free and leave the disk with nothing.
+Any new per-fold design matrix work must build, use and drop each frame inside its fold, the
+way `w96c_build_teprior_member.py` does. If space is ever genuinely needed, `notebooks/` is
+8.2 GB of pulled public kernels and is the only large directory that is pure cache.
+
+## `kaggle` IS ON THE DEFAULT PATH ALREADY — IT IS **NOT** IN `.venv/bin`
+
+`/home/nixos/.local/bin/kaggle`, and `/home/nixos/.local/bin` is the first entry of the PATH
+the Bash tool starts with. `.venv/bin/kaggle` does not exist; guessing it wastes a call. This
+is unrelated to the `gh`/`ssh`/`curl` situation, which genuinely does need
+`export PATH="/run/current-system/sw/bin:$PATH"` (w95 §9).

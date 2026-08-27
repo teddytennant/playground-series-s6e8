@@ -36,9 +36,9 @@ def main():
     print(f"w96a: {len(folds)} fold slot(s), {len(S)} complete   C1={res.get('C1', 'not reached')}")
     for k in sorted(folds, key=int):
         f = folds[k]
-        s, n = f.get("signal_e6"), f.get("null_e6")
-        print(f"  fold {k}: signal {s if s is None else round(s, 3)!s:>10}e-6   "
-              f"null {n if n is None else round(n, 3)!s:>10}e-6")
+        def cell(v):
+            return "     n/a  " if v is None else f"{v:+10.3f}e-6"
+        print(f"  fold {k}: signal {cell(f.get('signal_e6'))}   null {cell(f.get('null_e6'))}")
     if len(S) < 5 or len(N) < 5:
         print(f"NO-BUILD (NOT YET DECIDABLE): the rule reads all five folds; "
               f"{len(S)} signal / {len(N)} null are present. Re-run when the job finishes.")

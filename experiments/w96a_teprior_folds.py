@@ -61,6 +61,12 @@ PARAMS = dict(objective="binary", metric="auc", learning_rate=0.035, num_leaves=
               verbosity=-1, n_jobs=16)
 N_EST, STOPPING = 8000, 200
 
+# What the members in the blend were ACTUALLY trained at -- see oof/summary_lgbm_tuned_lat.json
+# and the w96b prereg addendum. --tuned swaps to it. The replication is confirmatory only.
+TUNED = dict(learning_rate=0.025, num_leaves=63, max_depth=7, max_bin=511,
+             min_child_samples=250, subsample=0.9, subsample_freq=1,
+             colsample_bytree=0.6, reg_lambda=80.0)
+
 # global and global_seed43 differ in the LIGHTGBM SEED ALONE and share one frame byte for
 # byte, so their paired difference is the noise floor for the windowed-vs-global one. They
 # run back to back precisely so the frame cannot drift between them.
@@ -77,18 +83,25 @@ def write(res):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--folds", default="0,1,2,3,4")
+    ap.add_argument("--tuned", action="store_true",
+                    help="the vector the blend members were really trained at. CONFIRMATORY "
+                         "ONLY -- it can withdraw a BUILD, never create one (w96b prereg).")
     ap.add_argument("--smoke", action="store_true",
                     help="60 trees, 20 rounds -- exercises every path in ~2 min. "
                          "Its AUCs are meaningless; it exists to prove the plumbing.")
     a = ap.parse_args()
     want = [int(s) for s in a.folds.split(",")]
-    global N_EST, STOPPING, OUT
+    global N_EST, STOPPING, OUT, PARAMS
+    if a.tuned:
+        PARAMS = dict(objective="binary", metric="auc", verbosity=-1, n_jobs=16, **TUNED)
+        OUT = OUT.replace(".json", "_tuned.json")
     if a.smoke:
         N_EST, STOPPING = 60, 20
         OUT = OUT.replace(".json", "_smoke.json")
 
     t0 = time.time()
-    res = {"preset": "run_lgbm.PRESETS[control]", "params": dict(PARAMS),
+    res = {"preset": "tuned (oof/summary_lgbm_tuned_lat.json)" if a.tuned
+           else "run_lgbm.PRESETS[control]", "params": dict(PARAMS),
            "n_estimators": N_EST, "stopping": STOPPING, "smooth": SMOOTH, "win": WIN,
            "folds_requested": want, "folds": {}}
     tr, te = load_raw()
