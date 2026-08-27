@@ -367,7 +367,81 @@ provenance, never by score — classifying by a number is the `stdflag` mistake.
 - What CAN cost AUC is **ties**: a file written at k decimals discards ranking information the
   CV was computed with. 100% distinct here. Nothing else on disk checks this.
 
-## THE 36 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+# ✅ THE UNSENT SET IS FULLY ACCOUNTED FOR — AND THE VETO'S REAL LOAD IS **4 FILES, NOT 19**
+# (w100, 2026-08-27) — `experiments/w100a_complement.py`, STANDING CHECK #37
+
+Every guard here reads the calendar **forwards**, from the slots outwards: `w85c` asks whether
+enough files are sendable, `w87a` whether every REGISTERED file is one the sender would plan,
+w98 §1 whether every planned file exists on disk. **None of them reads the complement.** A file
+that is unsent, unplanned, unvetoed and unrefused is a gap no slot instrument can see — it is
+not a hole in the calendar, it just sits in `submissions/` where `w23b_sendqueue` globs it, and
+if its CV is high it sits at the TOP of any CV ordering. That is not hypothetical: `w48e_order`
+says in its own comment that this is *"precisely how `w42_ad217std_logit` got planned into a
+send list."* The 19-file `VETO` exists because of it, and nothing tested whether the VETO, the
+refusals and the calendar between them still cover the whole unsent set.
+
+They do. Measured 2026-08-27, 161 submissions on the API, tier 0.97119, bar 0.9701349052:
+
+    231 csvs in submissions/, 161 sent, 70 unsent:
+
+      40  planned (08-28..08-31)      19  w48e_order.VETO          3  refused by the plan
+       4  byte-identical to a SENT     3  registrar headroom       1  refused by the sender
+          file (would score the same)     (w87a `headroom_stems`)     (hboyang_mix)
+    ------------------------------------------------------------------------------------
+      COMPLEMENT = 0
+
+⚠⚠ **THE UNIVERSE HAS TO BE THE DIRECTORY, NOT THE QUEUE.** w100a's first cut took the priced
+queue as its universe and reported a clean complement over a set that had already been filtered
+three times: `w23b_sendqueue` drops byte-identical twins and wrong-row-count files before it
+writes, and a `cv.notna()` filter cost another 29 rows — **the whole certified `w85_cal_*` pool,
+which is 26 of the 40 files the calendar still plans.** 231 csvs on disk, 66 in the queue, 37
+with a CV. 🎯 **A check whose universe is a filtered artefact measures the filter, not the risk.**
+Re-run over `submissions/` the complement came back **3** — the deliberate spares — and only then
+was it worth anything.
+
+⚠ **`w23b_sendqueue.csv` / `w26d_queueprice.csv` sorted by CV is NOT a send priority and reading
+it as one is the trap.** The top 23 rows by CV are all barred, and 14 of them carry a CV ABOVE
+the WANTED final pick (0.9701400060) — `w48_cal_hboyang_mix` 0.9701815536, the whole `w42_ad217*`
+family, the whole `w50_ad216*` family. Their CV is inflated by an imported member and they are
+`WANTED_INELIGIBLE`; the ordering is real, the ranking is meaningless. A future run that
+rediscovers this list will think it has found 14 unsent files better than the pick. It has not.
+
+## 🎯 THE NEW NUMBER: 15 OF THE 19 VETOED FILES HAVE A SECOND BARRIER. FOUR DO NOT.
+
+`w100a` C5 re-classifies with `VETO` emptied and asks what is still held. `w26g_send`'s own
+two-part gate (`above_tier_reason` non-None AND `hijack_risk >= P_MAX`) independently refuses
+15 of the 19. ⚠ Take the whole VETO-less complement and you get **7**, not 4 — it sweeps in three
+files the veto never held. The quantity is `vetoed ∩ complement(VETO=∅)`. The `VETO` entry is the
+**only** thing holding these four:
+
+    w50_ad216std_h3            cv 0.9701459152  pred_lb 0.971176  P(above tier) 0.014
+    w29_ad194stdcorr_rescale   cv 0.9701012580  pred_lb 0.971175  P(above tier) 0.012
+    w50_ad216std_hybrid        cv 0.9701365515  pred_lb 0.971166  P(above tier) 0.001
+    w50_ad216std_rankraw       cv 0.9701134182  pred_lb 0.971143  P(above tier) 0.000
+
+They fall through the sender because their predicted LB sits just UNDER the tier, so
+`hijack_risk` comes back below `P_MAX = 0.02` and the two-part test never completes.
+⛔ **`w50_ad216std_h3` carries a CV 5.9e-6 ABOVE the WANTED pick, on the contaminated ad216 arm.**
+Retire its `VETO` entry and it is sendable, top-of-a-CV-sort plausible, and one 2.2-sigma draw
+from being auto-selected. **Do not tidy `w48e_order.VETO`. Four of those entries are the whole
+barrier, and w100a C5 is what will tell you if that count moves.**
+
+## ⚠ TWO ORDERING FACTS ABOUT `w100a` THAT WILL BITE IF THEY MOVE
+
+1. **It must run AFTER `w87a`.** It consumes `w87a_registrarguard.json` for the spare list.
+   It is last in `w93a_suite.STEMS`, w87a is 31st. If either moves, C6 fails **loudly on the
+   day stamp** rather than silently on a stale set — w100a refuses any headroom whose stamp is
+   not today, because `plannable − registered` moves on every send day (the w62b class of bug:
+   an artefact read without its stamp). Control fired: stamp forced to 2026-08-01 → rc 1, and
+   the three spares fall back into the complement.
+2. **Its universe is `submissions/`, and it must stay that way.** See the box above.
+
+ℹ The one sender-refused file is `w48_cal_hboyang_mix` — highest CV in the queue, P(above tier)
+**1.000**, and NOT in `VETO`. It is held by `fam=member` in `above_tier_reason` plus a
+registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
+it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
+
+## THE 37 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -376,7 +450,7 @@ provenance, never by score — classifying by a number is the `stdflag` mistake.
     w75b_muguard      w76b_addguard      w77b_bracketguard  w78b_treatguard   w79b_fillguard
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
-    w91b_dateguard    w92a_smokerun      w93c_pickverify
+    w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
 
 🆕 **RUN THE SUITE WITH ONE COMMAND — `.venv/bin/python experiments/w93a_suite.py`** (w93).
 It holds the list above ONCE, and its C2 re-parses this very block and exits 1 if the two

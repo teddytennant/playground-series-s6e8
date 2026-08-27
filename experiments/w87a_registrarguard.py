@@ -29,7 +29,11 @@ decoration).
   C1 +  every REGISTERED file is one the sender would actually plan, and the registrations
         cover every remaining slot. Both halves: a short calendar and a poisoned day differ.
   C2 +  the sender's plannable set minus the registrations is reported as HEADROOM, never
-        asserted to be zero — 63 plannable for 60 slots is healthy, not a fault.
+        asserted to be zero — 63 plannable for 60 slots is healthy, not a fault. ⚠ The STEMS
+        go into the artefact as `headroom_stems`, not just the count: `w100a_complement`
+        reads them as the one accounted bucket it cannot derive for itself, and a bare count
+        would have made it re-type RESEARCH's "3 spare (gnb_raw, qda_raw, gmm_raw)" into its
+        own source — the prose-only-veto mistake at one remove.
   C3 +- THE VACUOUS-`sent` REGRESSION, FIRED BOTH WAYS on the real pre-w85 queue snapshot:
         the old read must admit already-sent files, the live code must admit none.
   C4 +- THE MEMBER-ADMISSION REGRESSION, FIRED: with `certified_members` forced empty the pool
@@ -290,6 +294,7 @@ def main() -> int:
     json.dump(dict(day=dt.datetime.now(dt.timezone.utc).date().isoformat(),
                    live_rows=len(api), slots=slots, registered=len(reg),
                    plannable=len(plannable), headroom=len(spare),
+                   headroom_stems=sorted(spare),
                    tier=tier, bar=bar, days=sorted(fut), failures=FAILS),
               open(OUT, "w"), indent=1)
 

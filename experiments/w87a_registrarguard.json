@@ -5,6 +5,11 @@
  "registered": 40,
  "plannable": 43,
  "headroom": 3,
+ "headroom_stems": [
+  "w85_cal_gmm_raw",
+  "w85_cal_gnb_raw",
+  "w85_cal_qda_raw"
+ ],
  "tier": 0.97119,
  "bar": 0.970134905249569,
  "days": [
