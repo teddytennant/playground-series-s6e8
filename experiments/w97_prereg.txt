@@ -1,0 +1,118 @@
+w97 PRE-REGISTRATION — what the windowed-TE member has to do to enter the blend
+==============================================================================
+
+WRITTEN BEFORE THE NUMBER EXISTED. The evidence for that claim is checkable and is the
+only reason this document is worth anything:
+
+  * `oof_w96/` DID NOT EXIST when this was committed (`ls oof_w96` -> No such file).
+  * `logs_w96d_replicate_then_build.txt` held exactly TWO AUC lines, and BOTH are null-arm
+    fold-0 readings:
+        fold-0 AUC global        0.9668953349
+        fold-0 AUC global_seed43 0.9669598152
+    There was no `windowed` number anywhere in the log, at any fold, at either vector.
+  * The replication gate (w96b, A+B, withdraw-only) had not been applied and could still
+    have cancelled the build outright.
+
+So nothing below was chosen to fit a result. If a later run finds this document was edited
+after `oof_w96/` appeared, the edit invalidates it and the rules revert to "no enrolment".
+
+
+0. WHY THIS DOCUMENT EXISTS AT ALL
+----------------------------------
+w96 measured the windowed TE prior at the MEMBER level: +42e-6 of fold AUC. That is not
+the number that decides anything. The number that decides anything is what the member is
+worth INSIDE the pack, and this workspace has already measured the conversion rate
+(`experiments/w24b_value_std.json`, paired 50/50 splits):
+
+    new orthogonal family   +1.21e-05 per member
+    redundant family        +1.07e-06 per member
+
+The windowed-prior LGBM is the same model, the same folds, the same features and the same
+seed list as members already held; it differs in ONE encoding. It sits at the redundant end
+of that range. w96 priced it in advance at "low single digits of e-6 at the blend" and this
+prereg does not revise that.
+
+
+1. THE INSTRUMENT — w26i, DELIBERATELY UNCHANGED
+------------------------------------------------
+`experiments/w26i_value.py`, the same harness w20d / w21b / w26i / w33b / w34c / w36a used.
+Not a new script. Paired 50/50 stratified splits (`random_state=rep`), hybrid transform,
+C=1.0, 5 reps, `HONEST_DROP` untouched. Split noise is ~2e-4 and the effect sought is ~2e-6,
+so NOTHING here is readable except as a within-rep difference.
+
+    .venv/bin/python experiments/w26i_value.py \
+        --new-dir  $PWD/oof_w96 \
+        --new-names lgbm_teprior_windowed,lgbm_teprior_global \
+        --reps 5 --out w97a_teprior_value
+
+It builds arms `lgbm_teprior_windowed`, `lgbm_teprior_global` and `both`, each as pack+member
+against the same pack on the same rows.
+
+
+2. THE DECISION QUANTITY IS A DIFFERENCE OF DIFFERENCES
+-------------------------------------------------------
+NOT `d(windowed)` — that quantity answers "is one more member of this family worth
+anything", which is a question w24b already answered (+1.07e-6, yes, trivially) and which
+is NOT the question. The windowed prior's claim is about the ENCODING.
+
+    Delta = d(windowed) - d(global)      paired within each rep
+
+The global twin was built in the same loop, off the same frames, at the same seed, for
+exactly this subtraction. Both arms are read from `w97a_teprior_value.csv`, which stores the
+per-rep held-out AUC of every arm, so the pairing is arithmetic on stored columns and needs
+no re-fit.
+
+REGISTERED PREDICTION, stated now: Delta in [0, +3e-6], modal +1e-6.
+
+
+3. THE RULE — all five must hold for the windowed member to be ENROLLED
+-----------------------------------------------------------------------
+G0  INSTRUMENT.  w26i's own reproduction gate must PASS: the cat4 arm must return w20d's
+    published +0.000041 within 3 sd. If it FAILS, no row in the table is comparable to
+    anything in RESEARCH.md, nothing is enrolled, and the failure is what gets written
+    down. This gate is not ours to relax; it predates w97.
+
+G1  CONSISTENCY.  Delta > 0 on at least 4 of the 5 reps. A sign that flips is a null
+    whatever its mean — w20d's `nn` group is the worked example on file.
+
+G2  MAGNITUDE.  mean(Delta) >= +1.0e-6. Below that the encoding is not distinguishable from
+    "one more redundant member", which is the null this whole exercise exists to rule out.
+
+G3  CEILING.  mean(Delta) <= +10e-6. w26i's standing rule: anything larger is disbelieved on
+    sight and re-run on fresh reps (5..9) BEFORE it is believed, not after it is spent. A
+    big number here is evidence of a bug, not of a win.
+
+G4  PROVENANCE.  `oof_w96/summary_lgbm_teprior_windowed.json` must report
+    sd_test_over_sd_oof in [0.95, 1.45], the standing member gate.
+
+
+4. WHAT ENROLMENT DOES AND DOES NOT MEAN
+-----------------------------------------
+ENROL means: copy `oof_/test_/summary_lgbm_teprior_windowed` into `oof/`, and nothing else.
+
+  * The `global` twin NEVER enrols, whatever it scores. It is a control. `oof/` is globbed,
+    not allow-listed (w96 §10), so putting the control there would silently weight it in
+    every future stack run.
+  * Enrolment does NOT change `SELECT_THESE.md`. The two final picks stand. A new blend
+    displaces the CV-argmax pick only under its own separate pre-registration, and with 4
+    days left the bar for swapping a file with weeks of provenance for one with days is
+    higher than a +2e-6 CV delta, not lower. This is the Rogii failure wearing a CV costume.
+  * Enrolment does NOT trigger a submission. Today's 10 slots are spent and the 08-28 queue
+    is already registered and dry-run verified. Any new blend is queue material for 08-29 at
+    the earliest, and goes through `w48e_order` / `w26g_send` like everything else.
+
+NO-ENROL is a completely acceptable outcome and is the modal one. It costs the price of the
+build, which is already sunk.
+
+
+5. THE MOVE THIS DOCUMENT EXISTS TO FORBID
+-------------------------------------------
+Reading the table and then deciding what would have counted. Specifically:
+
+  * Do NOT switch the decision quantity to `d(windowed)` or `d(both)` because Delta came
+    back flat. The twin was built at real cost precisely so that the confounded comparison
+    would not be the one available.
+  * Do NOT re-run at a different transform, C, rep count or fold set to move Delta across
+    +1.0e-6. G3's re-run is the ONE re-run permitted, it is triggered by a number that is
+    too LARGE, and it changes only the rep seeds.
+  * Do NOT enrol on G1 alone ("consistent but small"). Consistency is cheap at n=5.
