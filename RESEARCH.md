@@ -13853,3 +13853,94 @@ against member-level effects that are routinely 10–50× larger. Solo-to-stack 
 - ⚠ **`ls` / `stat` print EDT (UTC−4); `date -u` and every log line are UTC.** Compare a `stat`
   mtime against local `date`, never against `date -u`, or a 2-minute-old file reads as 4 hours
   stale. This has now misled two separate runs.
+- **`unzip` does not exist here either.** Leaderboard/competition zips must be opened with
+  Python's `zipfile`, not the shell. `kaggle competitions leaderboard -d -p <dir> -q` then
+  `zipfile.ZipFile(glob('<dir>/*.zip')[0])`.
+
+## The suite is NOT core-hungry — measured 2026-08-27 (w98), correcting three runs of deferral
+
+`w93a_suite.py` was skipped by w95, w96 and w97 on the asserted ground that it "wants all 16
+cores". **Timed it under exactly that contention** (w96d's LightGBM chain running, load average
+16–17 the whole time), split into two `--only` batches:
+
+    12 endgame-critical checks    55s   12/12 green
+    24 remaining checks          293s   24/24 green
+    TOTAL                        348s   36/36 GREEN
+
+It is **wall-clock bound on three stems**, not CPU-bound across the set: `w92a_smokerun` 134s,
+`w65c_subsetcheck` 95s, `w55a_unpriced` and `w85c_slotguard` 15s each; **the other 32 total
+~40s**. Measured cost to the competing job: w96d's fold-1 windowed arm ran 510s against fold 0's
+188s, i.e. ~5 min of one chain's wall clock. ⛔ **Do not defer the suite for core contention.**
+
+⚠ **AND THE "EXPECTED RED" NOTE IS STALE.** `w93a_suite.py`'s docstring and several journal
+entries say `w54a_vetoexpiry` and `w85c_slotguard` "FAIL BY DESIGN when the send queue on disk
+is for a day already sent". Once the queue is rebuilt for the next UTC day **both pass**, and
+they did on 2026-08-27. **There is no expected-red in the suite. 36/36 is the correct reading
+and any red is a real red.**
+
+## Endgame supply — VERIFIED COMPLETE THROUGH THE DEADLINE (w98, 2026-08-27)
+
+All four remaining send-days are pre-registered: `w72a_plan_2026-08-{28,29,30,31}.json`, **10
+files each, 40 distinct, zero cross-day duplicates**. Each of the 40 verified on four axes —
+present in `w23b_sendqueue.csv`; `sent == False`; **absent from the live API's 161 sent
+filenames**; present under `submissions/`; **md5 on disk == md5 in the queue**. PROBLEMS: 0.
+`w72a_planday.py --audit` agrees: 0 unregistered days, 3 sendable files spare, `SHORTFALL -3`.
+
+⛔ **No future run needs to build a candidate to avoid an idle slot.** The drain to 08-31 is the
+four-command chain and nothing else.
+⚠ But all 40 are **below** the w59 hijack CV bar 0.9701349 and priced at `P(beat best) 0.00e+00`.
+The queue is exhausted of anything that can move the public best or the auto-selection tier;
+these sends are free and worth zero. **The click is the only remaining lever with a positive
+number on it.**
+
+⚠ **The 12 unsent files whose CV is ABOVE the bar are held back on purpose, not by oversight**
+(`w48_cal_hboyang_mix` 0.9701816, six `w42_ad217*`, four `w50_ad216*`, `w69_ad208stdcorr`).
+Three sit in the plans' `refused` block with written reasons; the rest are on
+`w48e_order.VETO` — 19 vetoed-and-unsent. Sending a w40d-ineligible file is the **danger**: if
+it lands in tier 1 while nothing is selected, Kaggle auto-selects it. That is what the sender's
+`P_MAX = 0.02` hijack gate exists for.
+
+⚠ **`w23b_sendqueue.csv`'s `sent` column is not an authority** — it reads `False` on all 66 rows
+while 161 files have gone out. `w72a_planday._vetoed_sent` was fixed for this once; the lesson
+did not propagate to hand-reads. **Dedup against `kaggle competitions submissions -v
+--page-size 500`, always.**
+
+## Where the field is: the data ceiling, and the public notebooks that are NOT worth pulling
+
+**Medal arithmetic at 3,075 teams** (2026-08-27): gold ≈ top 14, silver ≈ top 154, bronze ≈ top
+308. We are **rank 198 at public 0.97119** (leader Chris Deotte 0.97190) — bronze on public, and
+silver would need clearing the 48 teams in the 0.97120–0.97124 bins, i.e. **+60e-6**. Not
+reachable by sending. Medals settle on **private**, and the 75-team 0.97128 and 53-team 0.97113
+spikes are shared es-on-val notebooks (w90 reproduced the first), so private rank is plausibly
+better than public and is not something the remaining days can improve.
+
+- ⛔ **`azzamradman/0826-knock-the-blender-with-a-liner`** — 18 votes, #2 by public score, and
+  the whole notebook is one `pd.read_csv('<private dataset>/knock_the_blender.csv').to_csv(
+  'submission.csv')`. No model, no OOF, nothing reproducible. **Do not pull it again. Vote
+  count is not method.**
+- 📚 **`johnsebin97/j-s-sfa-2-2` ("S6E8 v12 — the ceiling, measured")** — 9 votes, and the only
+  new *idea* in the public field this week. Learning curve at four train sizes (71k→571k rows):
+  holdout AUC 0.955791 / 0.959026 / 0.961665 / 0.963350, gains halving per doubling. Fitted to
+  four forms that respect an error floor → infinite-data OOF **0.9663–0.9693**, mapped to
+  **LB 0.9695–0.9725**. Corroborated in-notebook by an 85-model blend sitting at OOF 0.967973,
+  i.e. already at a single model's infinite-data limit.
+  ⚠ **Take the shape, not the digits** — their OOF→LB map uses a **+0.0032** offset against our
+  measured CV→LB **+0.0010143** (itself only good to ±5–9e-6), so the two are different objects
+  and the numeric ceiling is soft. The qualitative claim is independently replicated by **our
+  own record**: every member added for weeks prices at ~+1e-6 into the pack. Extra rows move you
+  *along* the curve, not up it; only new features raise it, and this competition has twelve.
+
+### ✅ CONFIRMED ABSENT: the leave-one-out group-rate leak (audited w98, do not re-grep)
+
+johnsebin's notebook retracts its own `+0.009276 ADDS SIGNAL` finding as a leak in the
+diagnostic. The mechanism is worth knowing: a LOO group rate `(group_sum − y_i)/(size − 1)`
+takes exactly **two** values inside a group — `(S−1)/(n−1)` when `y_i = 1`, `S/(n−1)` when
+`y_i = 0` — so **conditional on the group it determines the label**. A GBM infers the group from
+the raw columns and reads the label off the remainder. Their proof on a key with no signal at
+all: marginal AUC **0.49570** (looks harmless), AUC after removing the group mean **1.00000**.
+
+**Our tree is clean.** Grepped `experiments/*.py` and `agent/*.py`: the only `loo` is
+`w47a_extrap.py:163-169`, which is leave-one-out cross-validation of a fitted **CV→LB slope**
+over ~40 file-level points — not a row-level feature — plus `SD_LOO` in `w48c_slope.py`, the
+same object's sd. **No row-level LOO target encoder exists in the modelling path**; our TE is
+fold-wise throughout, which is the encoder johnsebin had to fall back to.

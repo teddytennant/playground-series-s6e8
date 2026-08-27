@@ -2484,3 +2484,35 @@ and w89c independently refused. ⛔ Closed; not re-opened.
 
 Auto-pick tiers **unchanged by today's ten sends** (best of them 0.97116): slot 1 is still the
 0.97119 two-way (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`), slot 2 the 0.97118 five-way.
+
+## 2026-08-27 (w98, 10:05 EDT) — rank 198 of 3,075. Fourth consecutive flat reading.
+
+Full download, `lb_w98/`. Leader **Chris Deotte 0.97190**. Us **0.97119** — 197 ahead, 9 tied.
+w95/w96/w97 each read 197 of 3,074; one team passed us and one joined, so this is flat, not a
+slide. The 92→197 move is now four readings old and settled.
+
+Band density 0.97100–0.97140 (bins of 1e-5):
+
+    0.97140   1        0.97124  10        0.97113  53
+    0.97134   5        0.97123  13        0.97112   8
+    0.97132   3        0.97122   3        0.97111   5
+    0.97131   2        0.97121  14        0.97110   3
+    0.97130   7        0.97120   8        0.97109   5
+    0.97129  17        0.97119   9  <-us  0.97108   5
+    0.97128  75        0.97118   6        0.97107   2
+    0.97127  16        0.97117  28        ...
+    0.97126   8        0.97116   1
+    0.97125  12        0.97115   9
+
+Two spikes, both shared notebooks rather than skill gradients: **75 at 0.97128** (the
+`atakanaldemir` regime-calibrated rank fusion, reproduced and dispositioned by w90 as es-on-val)
+and **53 at 0.97113**. Neighbouring bins run 1–17.
+
+**Medal arithmetic at 3,075 teams:** gold ≈ top 14, silver ≈ top 154, bronze ≈ top 308. We are
+bronze on public. Silver needs rank ≤154 = clearing the 48 teams between 0.97120 and 0.97124,
+i.e. **+60e-6 of public AUC**, against a send queue whose best remaining file is priced at
+`P(beat best) 0.00e+00`. ⛔ **Not reachable by sending.** Medals settle on private, where the two
+spikes are the ones with something to lose.
+
+Public notebook ceiling is **0.97127** (`atakanaldemir`), so no public source holds an edge over
+us worth more than 8e-6 — and that one is already known to be es-on-val.

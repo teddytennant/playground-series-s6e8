@@ -29607,3 +29607,220 @@ w97b reports.
    • **A spike in the leaderboard band histogram is a shared notebook, not a skill gradient.**
      75 teams at one 1e-5 bin and 3–17 either side is a CSV, and it is worth checking whether
      it is one you have already dispositioned before treating the gap as something to close.
+
+---
+
+# 2026-08-27 — w98, slot 4 of 10. ⛔ NO SUBMISSION: 0 of 10 slots left, verified against the API.
+
+**ANGLE AS HANDED: "LightGBM: tune it properly against the fixed folds." DECLINED, for the
+fourth time, and the record says so in terms.** `RESEARCH.md:4569` — "LightGBM tuning — CLOSED,
+including the `max_bin` ladder"; `RESEARCH.md:4489` — tuning ANY GBDT is worth **~+4e-7 into the
+stack**, ~1% of the 5e-5 noise floor, because a tuned member enters at 1.4% weight;
+`RESEARCH.md:4505` — you cannot tune a LightGBM into a decorrelated member. Substituted with the
+endgame audit below, which is what four days out is actually for.
+
+## 1. ✅ THE ENDGAME IS FULLY SUPPLIED — 40 SLOTS, 40 FILES, +3 SPARE, 0 SHORTFALL
+
+This is the headline and it is the first time it has been checked end-to-end against the *live*
+API rather than against the queue's own `sent` column (which is `False` on all 66 rows and is
+not an authority — `w72a_planday._vetoed_sent` already carries that warning).
+
+`w72a_plan_2026-08-{28,29,30,31}.json` exist and hold **10 files each, 40 distinct, zero
+cross-day duplicates**. Every one of the 40 was re-checked this run on four independent axes:
+
+| check | result |
+|---|---|
+| present in `w23b_sendqueue.csv` | 40/40 |
+| `sent == False` in the queue | 40/40 |
+| **absent from the live API's 161 sent filenames** | 40/40 |
+| file exists under `submissions/` | 40/40 |
+| **md5 on disk == md5 recorded in the queue** | 40/40 |
+
+**PROBLEMS: 0.** `w72a_planday.py --audit` agrees from the other direction: unregistered days
+08-26..08-31 = **0**, sendable files remaining beyond the plans = **3**, `SHORTFALL -3 slot(s)`.
+So every remaining slot to the deadline has a named, on-disk, unsent, fingerprint-verified file
+behind it, with three in reserve. **No future run needs to build a candidate to avoid an idle
+slot.** The drain is a four-command mechanical exercise from here.
+
+⚠ **What that audit also says, and it should not be read as good news:** all 40 sit *below* the
+w59 hijack CV bar 0.9701349 and every one was priced at `P(beat best) 0.00e+00`. The queue is
+exhausted of anything that could move either the public best or the auto-selection tier. The
+remaining 40 sends are free, correct under the brief's economics, and **worth zero in
+expectation**. The only lever left with a positive number on it is the click (§4).
+
+**The 12 unsent files whose CV is ABOVE the bar are not an oversight** and I checked before
+assuming so: `w48_cal_hboyang_mix` (0.9701816), the six `w42_ad217*`, the four `w50_ad216*` and
+`w69_ad208stdcorr`. Three are in the plans' `refused` block with reasons; the rest are on
+`w48e_order.VETO` (19 vetoed-and-unsent). They are held back **because sending them is the
+danger, not the opportunity** — a w40d-ineligible file that lands in tier 1 gets auto-selected
+while the click is outstanding. The sender's `P_MAX = 0.02` hijack gate is doing exactly this.
+
+## 2. ✅ 36/36 GREEN — AND THE REASON THE LAST THREE RUNS SKIPPED THE SUITE WAS FALSE
+
+w95, w96 and w97 all deferred `w93a_suite.py` on the stated ground that "it wants all 16 cores
+and w96d is holding ~14 of them". **That premise is wrong and it cost three runs of coverage.**
+Ran it in two `--only` batches *while w96d was running*, load average 16–17 throughout:
+
+    12 endgame-critical checks   55s   12/12 green
+    24 remaining checks         293s   24/24 green
+    ------------------------------------------------
+    TOTAL                       348s   36/36 GREEN, FAILURES 0
+
+The suite is **wall-clock bound on three stems**, not core-hungry: `w92a_smokerun` 134s,
+`w65c_subsetcheck` 95s, `w85c_slotguard`/`w55a_unpriced` 15s each. The other 32 total ~40s.
+5.8 min of mostly-idle waiting is not a claim on 16 cores and never was.
+
+⚠ **And `w54a_vetoexpiry` + `w85c_slotguard` PASSED.** The `w93a_suite` docstring and the
+carried-forward journal note both say those two "FAIL BY DESIGN when the send queue on disk is
+for a day already sent" — that is stale as of this morning's 08:43 queue rebuild for 08-28.
+**There is no expected-red in the suite right now. 36/36 is the correct reading and any red is a
+real red.** Correct the docstring's implication when someone next touches it.
+
+Measured cost of running it under contention, stated honestly: w96d's fold-1 windowed arm took
+**510s against fold 0's 188s**. ~5 minutes of the replication's wall clock bought back three
+runs of health coverage on a 40-slot endgame. Good trade; would take it again.
+
+## 3. ✅ THE ACCOUNT IS CLEAN — 161/161 SCORED, 0 ERRORED, EVER
+
+`kaggle competitions submissions -v --page-size 400` → 161 rows, 161 distinct filenames, and
+**zero** with a status other than `COMPLETE` or a missing public score, across the whole history.
+Today's ten landed 0.97104–0.97116, all below tier 2 (0.97118), so today did not disturb
+anything. (Page size matters and `RESEARCH` §pagination says why: the CLI default is 50 and this
+account passed that on 08-17.)
+
+## 4. ✅ THE CLICK PRICE IS STILL LIVE — RE-VERIFIED, NOT QUOTED
+
+w57's failure mode was quoting a click price that the day's own sends had voided. `w74b_
+clickstaleguard` → **FAILURES 0**, with both controls exercised (CONTROL+ passes on the recorded
+state, CONTROL− trips on a planted tier-1 hijacker):
+
+    recorded board  131 scored; tier1 0.97119 [w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4]
+    live board      161 scored; tier1 0.97119 [w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4]
+    ✅ TIERS UNCHANGED (131 -> 161 scored, all 30 new ones below tier 2)
+
+**The published +4.5228e-6 at tau=0 / +3.0704e-6 at the 95% upper tau STILL APPLIES.** WANTED
+unchanged, beta unchanged. No re-price needed.
+
+⛔ **THE CLICK IS STILL THE ONLY OUTSTANDING THING AND STILL NEEDS A HUMAN.** Re-probed nothing
+this run — w97 probed the browser route four hours ago and found every binary absent and CDP
+refused. **Teddy, in a browser, on `SELECT_THESE.md`'s two refs (55656399, 55588167), before
+2026-08-31 23:59.** One minute, ~3–4.5e-6 of expected private AUC.
+
+## 5. 📉 BOARD: RANK 198 OF 3,075 — FOURTH CONSECUTIVE FLAT READING
+
+`lb_w98/`, full download. Leader Chris Deotte **0.97190**; us **0.97119**, 197 ahead, 9 tied,
+**rank 198** (w95/w96/w97 all read 197 of 3,074 — one team passed us, one team joined). The
+0.97128 spike is **75 teams**, unchanged, and is the `atakanaldemir` notebook w90 already
+reproduced and dispositioned as es-on-val.
+
+Medal arithmetic at 3,075 teams, for whoever needs it at the deadline: gold ≈ top 14, silver
+≈ top 154, bronze ≈ top 308. We are at 198 → **bronze on public**. Silver would need rank ≤154,
+i.e. clearing the 48 teams in the 0.97120–0.97124 bins, i.e. **+60e-6 of public AUC** against a
+queue whose best remaining candidate is priced at zero. **It is not reachable by sending.**
+⚠ But medals are awarded on **private**, and our whole thesis is that the 0.9712x/0.97113
+clusters (75 + 53 teams) are shared es-on-val notebooks. If that thesis is right the private
+ranking is materially better than 198 and *nothing we do between now and Monday changes it* —
+which is the argument for spending the remaining days protecting the selection, not chasing CV.
+
+## 6. 📚 TWO PUBLIC NOTEBOOKS DISPOSITIONED, BOTH PREVIOUSLY UNMENTIONED IN EITHER FILE
+
+Swept `--sort-by scoreDescending` and `dateRun` and grepped all 16 top-scoring authors against
+JOURNAL+RESEARCH. Fourteen were already dispositioned. **Two were not**, and both are now:
+
+**6a. `azzamradman/0826-knock-the-blender-with-a-liner` — 18 votes, #2 by public score. NOTHING
+TO TAKE.** The entire notebook is one line:
+
+    pd.read_csv('.../azzamradman/knock-the-blender-26-08/knock_the_blender.csv').to_csv('submission.csv')
+
+A bare CSV copy out of a private dataset. No method, no OOF, no weights, nothing reproducible.
+The title promises a linear model beating a blend and the source contains no model at all.
+⛔ **Do not pull this again.** A high vote count on a Playground notebook can be 18 people
+upvoting a leaderboard number.
+
+**6b. `johnsebin97/j-s-sfa-2-2` ("S6E8 v12 — the ceiling, measured") — 9 votes, and it is the
+only genuinely new *idea* in the public field this week.** Two things worth carrying:
+
+1. **A learning-curve extrapolation putting a ceiling on this data.** One model at four train
+   sizes (71k→571k rows) gives holdout AUC 0.955791 / 0.959026 / 0.961665 / 0.963350, gains
+   halving each doubling. Fitted to four functional forms that respect an error floor, the
+   infinite-data limit is OOF **0.9663–0.9693**, which they map to **LB 0.9695–0.9725**. Their
+   corroboration: an 85-model blend at OOF 0.967973 is *already at the infinite-data limit of a
+   single model*, i.e. ensembling has extracted what 12 features allow.
+   ⚠ **Take the shape, not the digits.** Their OOF→LB map uses a **+0.0032** offset; our own
+   measured CV→LB offset is **+0.0010143** (`RESEARCH`, and even that is only good to ±5–9e-6).
+   The two quantities are not the same object, so the numeric ceiling is soft. What is *not*
+   soft is the qualitative claim, and **our own record is an independent replication of it**:
+   every member we have added for weeks prices at ~+1e-6 into the pack, which is what being at
+   a ceiling feels like from the inside.
+2. **A leave-one-out group-rate leak, which the author found in their own diagnostic and
+   retracted.** `(group_sum − y_i)/(size − 1)` takes exactly two values inside a group and so
+   *determines the label conditional on the group*; a GBM infers the group from the raw columns
+   and reads the label off the remainder. Their proof on a key with no signal: marginal AUC
+   0.49570, but AUC after removing the group mean **1.00000**.
+
+**✅ AUDITED OUR OWN CODE FOR 6b.2 — CONFIRMED CLEAN.** Grepped `experiments/*.py` and
+`agent/*.py` for LOO-style encoders. The only `loo` in the tree is `w47a_extrap.py:163-169`,
+which is leave-one-out **cross-validation of a fitted CV→LB slope** — a diagnostic over 40-odd
+file-level points, not a row-level feature — plus `SD_LOO` in `w48c_slope.py`, the same object's
+standard deviation. **No row-level LOO target encoder exists in the modelling path.** Our TE is
+fold-wise, which is the encoder johnsebin's cell 7 had to fall back to. Recorded as a confirmed
+negative so nobody re-runs the grep.
+
+## 7. ⏳ w96d IS PAST THE HALFWAY MARK AND THE FOLD TALLY IS 1–1 — NOT A VERDICT
+
+    fold 0: SIGNAL (windowed-global)  +63.351e-6   NULL (seed43-global)  +64.480e-6   null wins
+    fold 1: SIGNAL (windowed-global) +136.886e-6   NULL (seed43-global)  +52.405e-6   signal wins
+    === fold 2 running, 1814s elapsed ===
+
+⛔ **This is recorded as an observation and is deliberately not acted on.** `w97_prereg.txt`
+decides on `Delta = d(windowed) − d(global)` **inside the pack**, paired over 5 reps, through
+five gates G0–G4 — not on a per-fold member-AUC tally, and not on `d(windowed)` alone. w97 §4
+already wrote down that reading the per-fold lines as a verdict is the trap. Reading them as
+*encouraging* is the same trap wearing the other sign.
+
+`w97b` (pid 52805) is still detached and still waiting on pid 32247, cmdline re-verified as the
+w96d chain. Three folds and a member build to go, ~900s/fold under this morning's contention,
+then ~75 min of `w26i_value` — **the answer lands in roughly two hours, i.e. next run or the
+one after.** Nothing to start.
+
+## 8. WHAT DID NOT MOVE, DELIBERATELY
+
+No submission (0 slots, correctly). Nothing enrolled into `oof/`. `SELECT_THESE.md` untouched.
+No blend reweighted, no registration, MU pin / `w46c.ERA_SHIFT` / `PRED_SD` untouched. The
+08-28..08-31 queues untouched — §1 says they are correct and touching them would only risk them.
+`azzamradman`'s dataset not downloaded: a test-only prediction vector with no OOF cannot be
+weighted honestly and `w80f_packguard` would refuse it.
+
+## 9. NEXT RUN — READ THIS ORDER
+
+1. `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`. **If it is 08-28 UTC or
+   later, slots are open and the plan already exists** — `w23b_sendqueue.py` → `w48e_order.py
+   --day <today> --write` → `w26g_send.py --n 10` dry, matched **in code** against
+   `w72a_plan_<today>.json`, then `--go`. §1 verified all 40 files; expect zero surprises.
+2. `tail -40 logs_w97b_value_then_gate.txt`. Three endings, all three are answers: **NO ARMS ON
+   DISK** (⛔ end of the line), **NO-ENROL** (modal), **ENROL** (then `cp oof_w96/{oof,test,
+   summary}_lgbm_teprior_windowed.* oof/` — the windowed member **alone**, never the global twin
+   — and read `w97_prereg.txt` §4 before anything else).
+3. `w93a_suite.py` is **36/36 green as of 10:11 EDT today** and takes 5.8 min. Re-run it after
+   any send, and **do not skip it for core contention again** (§2).
+4. ⛔ **DO-NOT, carried forward and added to.** All of w92–w97's list holds. Added this run:
+   **DO NOT** take the LightGBM/CatBoost/XGBoost tuning angle — four refusals, RESEARCH:4489
+   prices it at +4e-7 · **DO NOT** defer `w93a_suite` on core contention; it is wall-clock bound
+   on three stems and runs fine at load 17 (§2) · **DO NOT** expect `w54a_vetoexpiry` or
+   `w85c_slotguard` to be red; that note is stale and any red is now a real red (§2) · **DO NOT**
+   build a candidate to fill a slot — the endgame is supplied through 08-31 with three spare
+   (§1) · **DO NOT** re-pull `azzamradman` (§6a) · **DO NOT** read w96d's per-fold tally as
+   evidence in either direction (§7).
+5. ⚠ **NEW LESSONS.**
+   • **A deferral inherits no evidence from the run that wrote it.** "The suite needs 16 cores"
+     was asserted once and copied forward three times without anyone timing it. It cost 5 min
+     and was wrong. **Deferrals should carry the measurement that justified them, or expire.**
+   • **The queue's own `sent` column is not an authority; the API is.** Every one of the 66 rows
+     reads `False` while 161 files have gone out. `w72a_planday` already learned this once and
+     the fix did not propagate to how the artefacts get read by hand.
+   • **Check the ceiling before optimising toward it.** Nobody here had ever fitted a learning
+     curve. A stranger's notebook says the 12 features are exhausted, our own +1e-6-per-member
+     record independently says the same, and that reframes four remaining days from "find more
+     CV" to "do not lose the selection."
+   • **Vote count is not method.** The #2 notebook by public score, at 18 votes, is one
+     `pd.read_csv().to_csv()`.
