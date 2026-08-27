@@ -62,3 +62,34 @@ WHAT "BUILD" MEANS, CONCRETELY
 
 EVALUATED IN CODE, NOT BY EYE: `experiments/w96b_gate.py` prints BUILD or NO-BUILD and the
 three sub-verdicts. No human read of the table sits between the numbers and the decision.
+
+
+ADDENDUM, same day, written after `logs_w96a_teprior_folds.txt` held EXACTLY ONE arm
+------------------------------------------------------------------------------------
+(`fold-0 AUC global 0.9667116527, 1025 trees` — one control number and no signal or null
+number anywhere; verifiable from the log's line order and from the json, which held no
+`signal_e6` key.)
+
+THE MISTAKE THIS ADDENDUM ADMITS. w96a's docstring calls its parameter vector "the shipped
+preset" and cites `run_lgbm.PRESETS["control"]`. That vector really is in run_lgbm, but the
+members actually in the blend were NOT trained at it. `oof/summary_lgbm_tuned_lat.json` and
+its siblings were trained at lr 0.025 / 63 leaves / max_bin 511 / min_child_samples 250 /
+reg_lambda 80, passed inline as --params. PRESETS["control"] is what run_lgbm's own comment
+says it is — a hand-set control vector — and it is a weaker, less regularised learner than
+the tuned one. w96a is therefore priced at a STRONG operating point, not at THE shipped one.
+
+WHY w96a IS NOT RE-RUN OR RE-SPECIFIED. The rule above was committed before any arm existed
+and it is evaluated on w96a exactly as launched. Changing the operating point after seeing a
+number is the move the last paragraph of THE RULE exists to forbid, and the fact that the
+change would be defensible on its own merits is precisely what makes it dangerous.
+
+THE REPLICATION, AND ITS DELIBERATE ASYMMETRY. `w96a --tuned` reruns the identical paired
+design at the tuned vector. It is CONFIRMATORY ONLY:
+
+  * It can turn a BUILD into a NO-BUILD. If the control-vector rule says BUILD and the tuned
+    vector does not reproduce A and B, the effect does not survive to the learner we ship and
+    there is nothing to build.
+  * It can NEVER turn a NO-BUILD into a BUILD. If the rule above says no, no is the answer,
+    whatever the replication shows.
+
+That asymmetry is the whole point: it can only ever cost us a build, never buy one.
