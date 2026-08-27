@@ -1,0 +1,64 @@
+w96b PRE-REGISTERED DECISION RULE — written 2026-08-27, BEFORE any arm of w96a existed
+======================================================================================
+
+State of knowledge at the moment this file was written (verifiable: `logs_w96a_teprior_folds.txt`
+held zero "AUC" lines and `experiments/w96a_teprior_folds.json` held no `folds` entry with an
+arm in it; the run had been launched ~3 minutes earlier and was still building the fold-0
+control frame):
+
+  * w94a  12-column TE-only frame, fold 0, cheap preset : windowed - global = +520.313e-6
+  * w94c  real 184-column frame, fold 0, cheap preset   : windowed - global = +123.872e-6
+  * w96a  real 184-column frame, SHIPPED preset, 5 folds, with a null arm : RUNNING, NO ARMS YET
+  * The selection margin the whole account rests on is +2.417e-6 of CV.
+  * Nothing anywhere has ever measured this at the shipped preset, and nothing has ever
+    measured the noise floor of a paired difference at that preset.
+
+THE QUESTION THIS RULE DECIDES
+------------------------------
+One thing only: **do we spend the compute on a full windowed-prior OOF build** — a
+`cache_win/` sibling of `cache/` plus one member trained off it, both on the frozen folds?
+
+It does NOT decide whether that member enters the blend. That is a separate decision, made
+later, on the member's OOF CV against the incumbents, under the existing member gates
+(sd_test/sd_oof in [0.95, 1.45], the provenance rule, w60d, the value screen). A build that
+happens and then loses on OOF CV is a build that told us the truth cheaply.
+
+THE RULE
+--------
+Read `experiments/w96a_teprior_folds.json` after all five folds are present. Let
+
+    S = [signal_e6] over the 5 folds   (windowed - global, same seed, same rows, same params)
+    N = [null_e6]   over the 5 folds   (global_seed43 - global, IDENTICAL FRAME, seed alone)
+
+BUILD if all three hold:
+
+  A. SEPARATION.  mean(S) - mean(N) > 2 * sqrt( var(S)/5 + var(N)/5 )
+     i.e. the signal clears the noise arm by two standard errors of their difference.
+  B. CONSISTENCY. at least 4 of the 5 folds have signal_e6 > 0.
+  C. MAGNITUDE.   mean(S) >= 25e-6 at the member level.
+     Rationale, stated in advance so it cannot be revised downward afterwards: a member-level
+     edge is diluted by every other member in the blend, the whole CV span of everything this
+     account has ever sent is 499e-6, and four days remain. Below 25e-6 the expected blend
+     movement does not justify disturbing a frozen and guarded pipeline.
+
+DO NOT BUILD otherwise, and in particular:
+
+  - If A fails, the number is noise however large it looks. The null arm exists exactly so
+    that "+124e-6" cannot be read without a scale next to it. The smoke run at 60 trees
+    produced signal +65.7e-6 against null -175.4e-6 — a perfect illustration of a signal that
+    is invisible inside its own noise, and the reason C alone is not a rule.
+  - If C fails but A and B pass, record it as a REAL BUT SMALL effect and move on. A real
+    +10e-6 on one member four days out is a fact, not a project.
+  - Do not re-run w96a with more folds, other seeds or another preset in order to move a
+    number across one of these thresholds. If the rule says no, the answer is no.
+
+WHAT "BUILD" MEANS, CONCRETELY
+------------------------------
+  .venv/bin/python experiments/detach.py logs_w96c_cachewin.txt \
+      .venv/bin/python -u experiments/w96c_build_cachewin.py
+  then the standard member runner against cache_win/, under a NEW name (`lgbm_teprior_win`).
+  It writes only to `cache_win/` and to `oof/`. It touches no submission, no blend weight, no
+  registration, no veto list, and nothing on the DO-NOT list.
+
+EVALUATED IN CODE, NOT BY EYE: `experiments/w96b_gate.py` prints BUILD or NO-BUILD and the
+three sub-verdicts. No human read of the table sits between the numbers and the decision.
