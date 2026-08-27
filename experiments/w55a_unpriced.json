@@ -7,7 +7,7 @@
     "0.99995": 4.0000000000040004e-05,
     "0.99999": 2.0000000000020002e-05
   },
-  "n_scored": 151,
+  "n_scored": 161,
   "rows": {
     "w15f_antistudent_cv.csv": {
       "all": {
@@ -680,12 +680,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w23_ad187std_h3_rescale.csv",
+          "anchor": "w29_ad194std_rankraw.csv",
           "bound": 0.97948,
           "bucket": 0.0,
           "envelope": 0.008340000000000014,
           "point": 0.97114,
-          "spearman": 0.8391164187065506,
+          "spearman": 0.8392284132230144,
           "valid": false
         }
       },

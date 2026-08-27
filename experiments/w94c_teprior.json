@@ -1,0 +1,34 @@
+{
+  "sub_frac": 0.6,
+  "params": {
+    "objective": "binary",
+    "metric": "auc",
+    "learning_rate": 0.08,
+    "num_leaves": 64,
+    "min_child_samples": 40,
+    "subsample": 0.9,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.6,
+    "reg_lambda": 5.0,
+    "max_depth": 7,
+    "verbosity": -1,
+    "n_jobs": 16,
+    "random_state": 42
+  },
+  "arms": {},
+  "windowed_keys": {
+    "age": 18,
+    "daily_screen_time_hours": 1397,
+    "social_media_hours": 729,
+    "gaming_hours": 401,
+    "work_study_hours": 601,
+    "sleep_hours": 451,
+    "notifications_per_day": 231,
+    "app_opens_per_day": 166,
+    "weekend_screen_time": 1459
+  },
+  "windowed_vs_global_max_te_shift": 0.5320897102355957,
+  "C1_max_abs_diff": 0.0,
+  "C1_base_nan_cells": 2954024,
+  "C1": "PASS"
+}

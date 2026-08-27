@@ -28920,3 +28920,236 @@ now at 20 rows instead of 200. Download the full board (`lb_*/`, opened with pyt
 Unchanged from w80–w92: no `gh`, no ssh key, no token, no browser, no `curl`, no `unzip`. Local
 `main` is ahead of `origin/main`. The workspace is the memory and it is committed; the remote
 is not.
+
+---
+
+# w95 — 2026-08-27, slot 1 of 10 → **ALL TEN SENT** (12:38:43–12:39:13Z). Four days out
+ANGLE: consolidation — re-verify the best pipeline end to end, check the CV-to-LB gap across
+every experiment, confirm the strongest submission is the one selected.
+
+## 0. WHAT LANDED
+
+The day's ten went out on the registered plan, file-for-file, and all ten have scored. The
+suite went 35/36 → **36/36** after one real defect was found and fixed. The CV→LB audit now
+covers **150 files**. The pick is unchanged and re-verified by execution. Nothing was
+reopened, no model retrained, no weight touched.
+
+    12:38:43Z .. 12:39:13Z   10 files, confirmed from the API: "10 submissions today (was 0). 0 slots left."
+
+    1 blend159_rankraw        CV 0.9700325394  →  LB 0.97105
+    2 blend160origm_rankraw   CV 0.9700331271  →  LB 0.97105
+    3 blend160orig_rankraw    CV 0.9700342765  →  LB 0.97104
+    4 w27_ad188std_logit      CV 0.9700372515  →  LB 0.97115
+    5 w34_ad195std_logit      CV 0.9700443436  →  LB 0.97115
+    6 w36_ad197std_logit      CV 0.9700458726  →  LB 0.97116
+    7 w29_ad194std_rankraw    CV 0.9700930067  →  LB 0.97114
+    8 w27_ad188std_rankraw    CV 0.9700930487  →  LB 0.97115
+    9 w27_ad190std_rankraw    CV 0.9700951829  →  LB 0.97114
+   10 w27_ad188std_rescale    CV 0.9700962686  →  LB 0.97114
+
+The dry run matched `w72a_plan_2026-08-27.json` element-for-element (compared in code, not by
+eye) and the sender printed the required `hijack CV bar 0.9701349052`. Queue rebuilt for
+**2026-08-28** immediately after, which is why `w54a_vetoexpiry` and `w85c_slotguard` are
+green in this entry rather than red-by-design.
+
+## 1. 🔴 `w88a_calexposure` CRASHED **BECAUSE THE CALENDAR BECAME PERFECTLY SAFE**
+
+The suite came back 35/36 with `w88a_calexposure` rc=1 — the same check w93 repaired
+yesterday, red again one day later, for a completely unrelated reason.
+
+    ✅ G1 all 40 registered files carry a pred_lb
+    ✅ G2 every registered file is under the sender's per-file P_MAX (worst 0.0000 vs 0.02)
+      PRICED EXPOSURE +0.0000e-6   ceiling = base +4.5228e-6
+    ZeroDivisionError: float division by zero        ← line 291, INSIDE the ✅ branch
+
+Every guard **passed** and then the module died formatting the pass message:
+`base/live['exposure_e6']` with an exposure of exactly `0.0`. Today's send drained the last
+files within reach of the tier; the tightest margin on the whole remaining calendar is now
+**120e-6** and every landing probability underflows to 0.0. **The guard crashed because the
+answer was as good as it can possibly be.**
+
+Fixed with a `_ratio()` helper that reports a zero as a zero. Both call sites use it — the G3
+line and the sensitivity line, where the same division sat inside a `try` that catches
+`ZeroDivisionError` and would have printed the misleading *"sensitivity row unavailable"* for
+a calendar that is in fact provably harmless.
+
+⚠ **My first draft of the helper was itself wrong by a factor of 1e6.** It printed
+`ceiling +4522768.5296e-6` because I divided `base` by `U` — but `base` is *already* carried in
+e-6 units, which the caller's own `ceiling = base +4.5228e-6` line says plainly. Caught by
+reading the two numbers side by side, not by any check.
+
+**So I added the check.** New control **C9** exercises both branches of `_ratio`, because the
+live calendar only ever reaches the zero branch and an untaken branch is not a tested one:
+
+    ✅ C9 the ceiling report survives a zero exposure (EXACTLY 0 —...) and still reads the
+       ratio when there is one (9.0x under the ceiling)
+
+C9 was **fired, not asserted**: doctoring the `/U` back into a scratch copy turns it red with
+the 4522800 number in the failure text. ⚠ That scratch copy has to live in `experiments/`
+for its imports to resolve, and it **overwrites `w88a_calexposure.json`** — the real module
+was re-run afterwards to restore a clean artefact (`failures []`, `exposure 0.0`, `n 40`).
+
+Every other control still fires and brackets properly: C1+ 5 plants → +5.1582e-6 and G3 FIRES,
+C1− 4 plants pass at +4.1266e-6, C2 and C8 green.
+
+**Suite re-run end to end: `TOTAL 315s   36/36 green`.**
+
+## 2. ✅ THE CV→LB GAP, NOW OVER 150 FILES — `w93b_cvlbaudit`
+
+    CV -> LB, 150 distinct files, 150 sends
+      gap = LB - CV   mean +1038.2e-6   sd 33.6e-6   min +986.1e-6   max +1169.0e-6
+      pearson(cv,lb) +0.8893    spearman +0.7782
+      CV span 0.9696410000 .. 0.9701400060  (499.0e-6)
+      LB span 0.97080 .. 0.97119            (390.0e-6)
+      18 DISTINCT public values over the whole history
+
+Ten new points, and the correlation moved **down**: pearson +0.9009 → **+0.8893**, spearman
++0.8005 → **+0.7782**. That is not a warning sign and it should not be read as one — today's
+ten are all low-CV drain files clustered at the bottom of the CV range, and adding a tight
+cluster at one end of a scatter dilutes a correlation mechanically. The gap statistics barely
+moved (mean +1036.8 → +1038.2e-6, sd 32.8 → 33.6e-6). **Record it, do not act on it.**
+
+    slot1 w36_ad199stdcorr   CV 0.9701400060 rank   1/150   LB 0.97118 rank  3 (tied with 4)
+    slot2 w23_ad187stdcorr   CV 0.9701150809 rank  35/150   LB 0.97116 rank 18 (tied with 19)
+
+`w93c_pickverify` re-executes the metric from the stored OOF: both quoted CVs recompute to the
+last digit, slot 1 is the recomputed argmax of 8 with a **+2.417e-6** margin, the shuffle
+control lands −47153e-6, and both test-side artefacts are 296,302 rows with 100.00% distinct
+values. **Slot 1 is rank 1 of 150 on CV and it is rank 1 by recomputation, not by parsing.**
+
+## 3. ✅ THE CLICK PRICE IS NOT STALE — AND NOTHING ABOVE 0.97116 WENT OUT
+
+None of today's ten scored above **0.97116**, so the tier did not move. `w74b_clickstaleguard`
+confirms it against the live board rather than the recorded one:
+
+    recorded board  131 scored; tier1 0.97119 [w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4]
+    live board      161 scored; tier1 0.97119 [same two files]
+    ✅ TIERS UNCHANGED (131 -> 161 scored, all new ones below tier 2). +4.5228e-6 STILL APPLIES.
+    ✅ CONTROL- a planted tier-1 hijacker trips it (2 complaints, incl. the DETERMINED test)
+
+`SELECT_THESE.md` needs no edit. `check_selection.py` still exits **1** — nothing is selected.
+
+## 4. ⛔ THE SELECTION CLICK IS STILL BLOCKED, AND I RE-PROBED IT PROPERLY
+
+`~/.ssh/id_ed25519` **exists**, which contradicts thirteen runs of journal saying "no ssh key".
+It does not help: **there is no `ssh` binary on this box**, and `origin` is an https remote with
+no token. Also absent: `gh`, `curl`, `wget`, `brave`, `chromium`, `firefox`. Local `main` is
+**26 commits ahead** of `origin/main`.
+
+⚠ **Correct the record: the key is present, the client is not.** A future run that finds the
+key and concludes push is available will waste a slot rediscovering this. The blocker is the
+missing binary, not the missing credential.
+
+## 5. 📉 THE BOARD, READ FROM THE FULL DOWNLOAD
+
+The CLI's `leaderboard -s` output is truncated (20 rows) and must not be quoted. Full download
+via `lb_w95/`, opened with `zipfile`:
+
+    3070 teams   leader Chris Deotte 0.97189   us 0.97119   rank 197
+    9 teams tied with us at 0.97119; 196 teams ahead; leader is +700e-6 clear
+
+⚠ **We have moved from rank 92/2774 (w75, 08-24) to rank 197/3070.** The score did not fall —
+the field caught up and grew. The board is extremely dense here: one 1e-5 reporting step around
+us is worth 8–15 places, and the whole CV span of everything this account has ever sent is
+499e-6, i.e. **five reporting steps**. Nothing about that changes the selection, which is on CV.
+
+## 6. 🕳 A HOLE IN THE RECORD: **w94 RAN AND NEVER WROTE A JOURNAL ENTRY**
+
+`logs_w94_*.txt` and `experiments/w94{a,b,c}_*.py` are on disk, dated 2026-08-26 09:45–11:28
+local, i.e. **after** the w93 entry that closes the journal. That run ran the field sweep, ran
+the suite (36/36), and built a screening experiment for a **windowed-local target-encoding
+prior** — then stopped. `w94c_teprior.json` on disk has `"arms": {}`: the windowed-key counts
+and the C1 identity control were written, and **neither arm's AUC ever was**. The run was cut
+off mid-training.
+
+So the measurement's own docstring is the only account of it that exists. Restarting it costs
+nothing this run — the day's ten are spent — and w94c was explicitly rebuilt to write each arm
+the moment it exists, so a kill can no longer cost the whole thing. It is running detached:
+
+    .venv/bin/python -u experiments/w94c_teprior_fast.py > logs_w95_w94c.txt      [LAUNCHED]
+
+⚠ **Next run: read `experiments/w94c_teprior.json` FIRST.** If `arms` has two entries the
+screen is answered; if it is still `{}` it was killed again and that is worth knowing before
+launching a third attempt. ⚠ Its absolute AUCs are at a cheap screening operating point
+(lr 0.08, 64 leaves, 60% subsample) and are **NOT comparable to any CV in this journal** — only
+the paired difference between the two arms means anything.
+
+## 7. WHAT DID **NOT** MOVE, DELIBERATELY
+
+`w25a_cvlb_full.csv`, the MU pin, `w46c.ERA_SHIFT`, `PRED_SD`, the veto list, the day
+registrations for 08-28..08-31, `SELECT_THESE.md`, and every item on the DO-NOT list. No model
+retrained, no blend reweighted, no feature touched. `w36b_run.sh` read but not executed.
+
+## 8. NEXT RUN
+
+1. **`date -u` FIRST**, then `.venv/bin/python experiments/w26g_send.py --n 10` and read the
+   slot line. Today (08-27) was filled at 12:39Z.
+2. **The 08-28 send is three commands** and the queue on disk is **already built for 08-28**
+   (this run rebuilt it). Do not re-run `w72a_planday.py` — all six plan days are registered.
+   `w23b_sendqueue.py` → `w48e_order.py --day 2026-08-28 --write` → `w26g_send.py --n 10` dry,
+   matched in code against `w72a_plan_2026-08-28.json`, then `--go`.
+3. **The checks are one command and there are 36**: `.venv/bin/python experiments/w93a_suite.py`
+   (~5.5 min). Run it AFTER the send, then rebuild the queue for 08-29 or `w54a`/`w85c` stay
+   red by design.
+4. **Read `experiments/w94c_teprior.json`** before doing anything with the TE prior (§6).
+5. ⛔ **DO NOT** re-open the standing DO-NOT list (w92/w93 entries above; all of it holds).
+   Added this run: **DO NOT** "fix" `w88a` by lowering the ceiling or by treating a zero
+   exposure as a fault — a zero there is the best possible reading (§1) · **DO NOT** rescale
+   `base` inside `_ratio`, it is already in e-6 units · **DO NOT** read the pearson/spearman
+   dip as CV decoupling from LB; it is a low-CV cluster added at one end (§2) · **DO NOT**
+   conclude `git push` works because `~/.ssh/id_ed25519` exists — there is no `ssh` binary (§4)
+   · **DO NOT** run a doctored copy of a module out of `experiments/` without re-running the
+   real one afterwards; they share the output JSON (§1).
+6. ⚠ **NEW LESSONS.**
+   • **A guard can crash on the good news.** `w88a` divided by an exposure that had just become
+     exactly zero. Format the *safe* case as deliberately as the unsafe one (§1).
+   • **A branch the live data never reaches is untested code inside a check.** `_ratio`'s
+     non-zero path is the one that will run again once the calendar refills, so C9 exercises
+     both (§1).
+   • **A correlation can fall while nothing gets worse.** Ten points added at one end of the
+     CV range dropped pearson by 116e-4 and moved the gap mean by 1.4e-6. Read what was added
+     before reading the coefficient (§2).
+   • **A run that does not journal leaves artefacts that look like decisions.** w94's empty
+     `arms` dict would read as "measured, found nothing" to anyone who did not open it (§6).
+
+### ⛔ ADDENDUM — `git push` STILL BLOCKED, 26 COMMITS AHEAD
+
+Unchanged in effect from w80–w93, corrected in detail by §4: the ssh **key** is present, the
+ssh **binary** is not, `origin` is https, and there is no token. The workspace is the memory
+and it is committed locally; the remote is not.
+
+## 9. 🔴 CORRECTION TO §4 AND TO THIRTEEN RUNS OF ADDENDA — **`git push` WAS NEVER BLOCKED**
+
+§4 above says "there is no `ssh` binary on this box". That is **wrong**, and so is the
+`git push` addendum every entry since w80 has carried. The binaries are all present at
+**`/run/current-system/sw/bin`** — `gh`, `ssh`, `curl` — they are simply not on the PATH the
+Bash tool starts with:
+
+    export PATH="/run/current-system/sw/bin:$PATH"
+    gh auth status  ->  ✓ Logged in to github.com account teddytennant
+                        Token scopes: 'gist', 'read:org', 'repo', 'workflow'
+
+⚠ **RESEARCH.md has documented this workaround in three separate places since before w80**
+(the `git push needs gh on the PATH` sections). Thirteen consecutive runs wrote "no `gh`, no
+`curl`, no browser" into the journal and none of them read their own reference document. My
+own §4 "re-probed it properly" by running `command -v` — which is exactly the check that
+cannot see it. **A bare `command -v` is a statement about PATH, not about the machine.**
+
+**26 commits of work existed only on this disk for two weeks because of a PATH.**
+
+### ⛔ THE SELECTION CLICK IS STILL BLOCKED, AND `curl` DOES NOT CHANGE THAT
+
+Do not read the above as reopening the click. The w95 finding is about `gh`/`git`, not about
+Kaggle. RESEARCH's 08-13 falsification stands on its own evidence and `curl` was never the
+missing piece:
+
+- The toggle is `POST /api/i/competitions.SubmissionService/UpdateSubmissionSelection`.
+- `/api/i/` wants the **website's cookie session plus its XSRF token**. The OAuth
+  `credentials.json` this box holds does not open it — proven by a control, not assumed: the
+  same requests with **no `Authorization` header at all** reproduce the identical 400/404
+  pattern, so the 400 is the router answering before auth and says nothing about the token.
+- There is **no logged-in Kaggle profile anywhere on this machine**. `google-chrome` is on
+  PATH and its profile holds only `Crash Reports`.
+
+**The blocker is the login, not the tooling.** It still needs Teddy, in his own browser, on
+`SELECT_THESE.md`'s two refs, before 2026-08-31 23:59.

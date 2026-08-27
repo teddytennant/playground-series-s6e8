@@ -1,64 +1,55 @@
 {
- "day": "2026-08-26",
+ "day": "2026-08-27",
  "tier": 0.97119,
- "n_registered": 50,
+ "n_registered": 40,
  "pred_sd_e6": 8.770000000000001,
  "p_max": 0.02,
  "base_e6": 4522768.52959767,
  "above_landing_e6": 1048408.193688374,
  "at_landing_e6": 698938.7957922494,
  "leverage": 1.5,
- "any_above": 0.028571611093332283,
- "any_at": 0.2463608837382225,
- "e_above": 0.02875851506808308,
- "e_at": 0.2631781041804959,
- "exposure_e6": 0.21409605005049184,
+ "any_above": 0.0,
+ "any_at": 0.0,
+ "e_above": 0.0,
+ "e_at": 0.0,
+ "exposure_e6": 0.0,
  "sensitivity": {
-  "sd_e6": 12.404628345171664,
-  "any_above": 0.11823834792733634,
-  "any_at": 0.31538203302915846,
-  "exposure_e6": 0.37047863057487185,
-  "flips": [
-   [
-    "w34_ad195std_logit",
-    0.04976567209185556
-   ],
-   [
-    "w36_ad197std_logit",
-    0.07087330748540877
-   ]
-  ]
+  "sd_e6": 12.831265451249186,
+  "any_above": 0.0,
+  "any_at": 0.0,
+  "exposure_e6": 0.0,
+  "flips": []
  },
  "tightest": [
   {
-   "day": "2026-08-27",
-   "stem": "w36_ad197std_logit",
-   "margin_e6": 13.226341050387447,
-   "p_above": 0.018842704781363018
+   "day": "2026-08-29",
+   "stem": "w16d_membercell",
+   "margin_e6": 120.000000000009,
+   "p_above": 0.0
   },
   {
-   "day": "2026-08-27",
-   "stem": "w34_ad195std_logit",
-   "margin_e6": 15.432034508822134,
-   "p_above": 0.00990930117496791
+   "day": "2026-08-29",
+   "stem": "w15f_antistudent_cv",
+   "margin_e6": 120.000000000009,
+   "p_above": 0.0
   },
   {
-   "day": "2026-08-27",
-   "stem": "w27_ad188std_logit",
-   "margin_e6": 33.42224158076057,
-   "p_above": 5.904099663500695e-06
+   "day": "2026-08-29",
+   "stem": "blend160origm_logit",
+   "margin_e6": 147.34210838196483,
+   "p_above": 0.0
   },
   {
-   "day": "2026-08-27",
-   "stem": "w27_ad188std_rescale",
-   "margin_e6": 37.56948454725073,
-   "p_above": 6.05011900467467e-07
+   "day": "2026-08-29",
+   "stem": "blend156_logit",
+   "margin_e6": 150.5912724035774,
+   "p_above": 0.0
   },
   {
-   "day": "2026-08-27",
-   "stem": "w27_ad190std_rankraw",
-   "margin_e6": 58.77737366077884,
-   "p_above": 1.7680301667155618e-13
+   "day": "2026-08-29",
+   "stem": "blend160orig_logit",
+   "margin_e6": 150.63392177316894,
+   "p_above": 0.0
   }
  ],
  "failures": [],

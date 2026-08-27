@@ -350,6 +350,24 @@ the next unsent day and re-run those two:
 
 Do not "fix" either check.
 
+## ⚠ `w88a_calexposure` CAN GO RED BECAUSE THE CALENDAR IS **SAFE** (w95)
+
+On 2026-08-27 the send drained every remaining file within reach of the tier. The tightest
+margin on the whole remaining calendar went to **120e-6**, every landing probability underflowed
+to `0.0`, and the priced exposure became **exactly 0.0** — at which point the module raised
+`ZeroDivisionError` while formatting its own PASS line (`base/exposure`). Every guard had
+passed. Fixed in w95 with `_ratio()`, used by both the G3 line and the sensitivity line.
+
+⛔ **A zero exposure is the best possible reading, not a fault.** Do not lower the ceiling, do
+not treat it as a missing measurement, and do not rescale `base` inside `_ratio` — `base` is
+already carried in e-6 units, which the caller's `ceiling = base +4.5228e-6` line states.
+✅ Control **C9** exercises both branches of `_ratio`, because the live calendar only reaches
+the zero branch and an untaken branch is untested code inside a check.
+
+⚠ **Doctored copies of a check must live in `experiments/` for imports to resolve, and they
+overwrite the real module's output JSON.** After firing a control that way, re-run the real
+module to restore a clean artefact.
+
 ## ⚠ THE SUBMISSIONS `date` COLUMN HAS TWO SPELLINGS AND ONE OF THEM CRASHES pandas (w91)
 
 `kaggle competitions submissions -v` prints `2026-08-25 12:40:32.297000`, **except** when the
@@ -5556,6 +5574,20 @@ anything below 553,095 inner rows. The offending file is
 `cache/oofsim/results_s7_SMOKE_f0.05.json.rejected`; do not restore it. This is the same
 class of error as `oof_naji18.npy` landing in `data/ext_members2/` — an artefact that loads
 cleanly and is wrong.
+
+## 🔴 `gh`, `ssh` AND `curl` ARE ALL ON THIS BOX — THEY ARE NOT ON THE TOOL SHELL'S PATH (w95)
+
+Thirteen journal entries (w80..w94) carried "no `gh`, no ssh key, no token, no `curl`" and
+declared `git push` blocked. All of it was a PATH artefact. `command -v gh` is a statement
+about PATH, not about the machine.
+
+    export PATH="/run/current-system/sw/bin:$PATH"        # 1046 binaries incl. gh, ssh, curl
+    gh auth status   ->  ✓ Logged in to github.com account teddytennant, scopes incl. 'repo'
+    git push                                              # works
+
+⛔ **This does NOT reopen the final-selection click** — see the next section. The Kaggle
+blocker is the missing website cookie session, and `curl` was never the missing piece; the
+08-13 falsification used a no-auth control and stands.
 
 ## ⚠ Final selection is a MANUAL BROWSER ACTION and the default is the Rogii failure
 

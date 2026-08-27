@@ -199,6 +199,25 @@ def expose(df, tier, sd, above_cost, at_cost):
                 max_pf=max(p_above) if p_above else 0.0)
 
 
+def _ratio(base, exposure):
+    """How far the calendar sits under the ceiling, in words the zero case can survive.
+
+    Both arguments are ALREADY in e-6 units -- `base` is what the caller prints as
+    "ceiling = base +4.5228e-6" -- so neither is rescaled here. The first draft of this
+    helper divided by U again and reported the ceiling as +4522768e-6.
+
+    ⚠ `base / exposure` is the natural phrasing and it raises ZeroDivisionError the moment
+    the calendar becomes maximally SAFE. That is what happened on 2026-08-27: the send drained
+    every file within reach of the tier, the tightest remaining margin went to 120e-6, every
+    landing probability underflowed to 0.0, and the guard crashed while passing. A zero here
+    is the best possible reading, not a missing one, so it is reported as a zero.
+    """
+    if exposure > 0:
+        return f"{base / exposure:.1f}x under the ceiling"
+    return ("EXACTLY 0 — no remaining registered file can reach the tier at this sd "
+            f"(ceiling {base:+.4f}e-6)")
+
+
 def main():
     fails = []
     base, above_cost, at_cost, lev = price_units()
@@ -288,7 +307,7 @@ def main():
         print(f"⛔ G3 the remaining calendar now costs more than nobody clicking. Read WHY "
               f"before editing anything.")
     else:
-        print(f"✅ G3 exposure is {base/live['exposure_e6']:.1f}x under the ceiling")
+        print(f"✅ G3 exposure is {_ratio(base, live['exposure_e6'])}")
 
     # ------------------------------------------------------- sensitivity, REPORTED ONLY
     sens = {}
@@ -303,7 +322,7 @@ def main():
         print(f"\nℹ SENSITIVITY (reported, adopts nothing) at w82a's out-of-sample sd "
               f"{sd82/U:.2f}e-6: P(any above) {w['any_above']:.4f}, P(any at) {w['any_at']:.4f}, "
               f"exposure {w['exposure_e6']:+.4f}e-6 — still "
-              f"{base/w['exposure_e6']:.1f}x under the ceiling.")
+              f"{_ratio(base, w['exposure_e6'])}.")
         # THE ONE LINE A LATER RUN NEEDS. The two sds are not the same estimand -- 8.77e-6 is
         # w52c's HELD-OUT era-slice RMSE and every registered file is an era file, while w82a's
         # 13.00e-6 is the realised residual over every priced send of every family -- so neither
@@ -365,6 +384,18 @@ def main():
     else:
         fails.append("C8 the remaining calendar is EMPTY — every plan day reads as spent")
         print("⛔ C8 nothing is registered as remaining; the filter may be over-reaching")
+
+    # ------------------------------------------------------------------- C9 (w95)
+    # `_ratio` exists because the ceiling report crashed on a calendar that was maximally
+    # safe. Both of its branches are exercised here, because today's live calendar only ever
+    # reaches the zero branch and an untaken branch is not a tested one.
+    _r0, _r1 = _ratio(4.5228, 0.0), _ratio(4.5228, 0.5)
+    if "EXACTLY 0" in _r0 and "4522" not in _r0 and _r1.startswith("9.0x"):
+        print(f"✅ C9 the ceiling report survives a zero exposure ({_r0[:11]}...) and still "
+              f"reads the ratio when there is one ({_r1})")
+    else:
+        fails.append(f"C9 _ratio misreported: zero->{_r0!r} nonzero->{_r1!r}")
+        print(f"⛔ C9 the ceiling report is wrong: zero->{_r0!r} nonzero->{_r1!r}")
 
     # ⚠ ONE planted hijacker CANNOT fire G3, and that is arithmetic, not a weak guard: an
     # above-tier landing costs `above_cost` and the ceiling is `base`, so the plant has to be

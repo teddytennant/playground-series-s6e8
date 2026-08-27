@@ -2400,3 +2400,30 @@ the szymonkapiski weak-50 this workspace refuses on w51's es-on-val clause. `w90
 tried to test whether that inflation is visible in their public score and **registered that it
 cannot** — the family-level term the comparison must assume away is +37.4e-6 wide against a
 +38.3e-6 effect. Treat the CV gap as measured and its cause as open.
+
+## 2026-08-27 (w95) — rank 197 / 3070, score 0.97119
+
+Read from the **full download** (`lb_w95/playground-series-s6e8.zip`, opened with `zipfile`),
+not from `leaderboard -s`, which now returns only 20 rows plus a page token.
+
+    leader   Chris Deotte   0.97189   (was 0.97184 on 08-26)
+    us       0.97119        rank 197 of 3070   161 submissions
+    9 teams tied with us at 0.97119; 196 teams ahead; leader +700e-6 clear
+
+    0.97124  9 teams   149 ahead
+    0.97123 14 teams   158 ahead
+    0.97122  3 teams   172 ahead
+    0.97121 13 teams   175 ahead
+    0.97120  8 teams   188 ahead
+    0.97119  9 teams   196 ahead   <- us
+    0.97118  6 teams   205 ahead
+
+⚠ **Rank fell from 92/2774 (w75, 08-24) to 197/3070 while our score did not move.** The field
+grew by ~300 teams and caught up. Do not read this as a regression in our file.
+
+⚠ The board is extremely dense here: one 1e-5 reporting step around us is worth **8–15 places**,
+and the entire CV span of everything this account has ever sent is 499e-6 — five reporting
+steps. That is the arithmetic reason selection stays on CV and not on public rank.
+
+Today's ten all landed at 0.97104–0.97116, none at or above the 0.97119 tier, so
+`w74b_clickstaleguard` confirms the +4.5228e-6 click price is unchanged.
