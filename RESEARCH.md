@@ -13753,3 +13753,24 @@ way `w96c_build_teprior_member.py` does. If space is ever genuinely needed, `not
 the Bash tool starts with. `.venv/bin/kaggle` does not exist; guessing it wastes a call. This
 is unrelated to the `gh`/`ssh`/`curl` situation, which genuinely does need
 `export PATH="/run/current-system/sw/bin:$PATH"` (w95 §9).
+
+## ⛔ `oof/` IS GLOBBED, NOT ALLOW-LISTED — WRITING A FILE THERE ENROLS IT (w96, 2026-08-27)
+
+`agent/stack.py:load_members` walks `[LIB/oof, OOF, *extra_dirs]` and takes **every**
+`oof_<name>.npy` that has a matching `test_<name>.npy` and the right shapes. There is no
+allow-list and no manifest check for our own members — `verify()` only re-scores the ones
+that appear in the library `manifest.csv`, so a member of ours that is silently wrong is
+silently included. The member count going up by two is the entire notification you get.
+
+**Consequence: a model built to be MEASURED must not be written into `oof/`.** Control arms,
+twins, ablations and screening members all belong outside it. `w96c_build_teprior_member.py`
+writes to `oof_w96/` for exactly this reason — its two arms include a global-prior twin that
+exists only as a control and must never enter a blend.
+
+**The flag that reaches an outside directory** (added w96, additive, repeatable, default
+empty, relative paths resolved against `ROOT`; every pre-existing invocation is unchanged):
+
+    .venv/bin/python agent/stack.py --extra-dir oof_w96 --reps 5 --transform hybrid ...
+
+⚠ "I'll remember to `--drop` it" is not a control, and neither is a DO-NOT list. A directory
+that something globs is an API; writing into it is a public act.
