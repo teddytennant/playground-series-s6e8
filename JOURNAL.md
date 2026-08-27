@@ -29192,3 +29192,216 @@ docstring, vs the 6.5h/arm of a full `w36b_run.sh` rebuild). Four days remain.
    single-fold paired delta is what we have; a 5-fold one is what a decision needs.
 3. ⛔ **Do not reweight, retrain or re-register anything on the strength of §10 as it stands.**
    The screen says "measure this properly", not "ship this". The DO-NOT list still holds.
+
+---
+
+# w96 — 2026-08-27 (UTC), slot 0 of 10 available. NO SUBMISSION, and that is correct.
+
+`date -u` 13:03Z. `w26g_send.py --n 10` first line, before anything else was touched:
+
+    161 submissions on record; 10 already sent on 2026-08-27 (UTC); 0 of 10 slots left today
+
+The w95 session filled the day at 12:39Z, ~24 minutes before this one opened. The brief's
+"use all ten every day, an unused slot is pure waste" was already honoured today by the
+previous run; there is nothing left to spend and nothing here is a decision to skip a slot.
+The queue on disk is built for **2026-08-28** and the dry run says so in its own warning —
+that is the state w95 deliberately left, not a fault.
+
+The assigned ANGLE ("confirm the metric, build the fixed-fold CV harness, get one honest
+GBDT baseline scored") describes run 2 of this competition. This is run ~96: the metric is
+AUC, the folds have been frozen since w1, and 161 submissions are on record. The journal's
+own instruction for today was explicit and it is what this run did — **§10 of w95: measure
+the windowed TE prior properly, over more than one fold.**
+
+## 1. 🎯 THE WINDOWED TE PRIOR, FIVE FOLDS, PAIRED, WITH A NULL ARM — `w96a`
+
+`experiments/w96a_teprior_folds.py`, 1561s, all five frozen folds, C1 PASS (0.000e+00).
+
+    SIGNAL windowed - global    mean +41.936e-6  sd 46.497e-6
+      per fold  [ +67.2,  -32.9,  +64.9,  +27.6,  +82.9 ]
+    NULL   seed43   - global    mean -41.581e-6  sd 19.894e-6
+      per fold  [ -34.3,  -40.3,  -73.3,  -18.6,  -41.4 ]
+
+**The null arm is the part of this that was missing, and it is the part that matters.**
+`global_seed43` refits the CONTROL arm on the byte-identical frame with `random_state`
+changed from 42 to 43 and nothing else, so its paired difference is drawn from pure model
+stochasticity at this exact operating point. It comes back at **±40e-6 per fold**. That is
+the scale w94c's celebrated "+123.872e-6, one fold" never had next to it.
+
+Read against it, the honest summary is: **the effect is real and it is roughly half of what
+the cheap-preset screen said.** +124e-6 → +42e-6, the third haircut in a row (w94a's
+12-column frame said +520e-6, w94c's 184-column frame said +124e-6, the stronger learner now
+says +42e-6). Every step in that sequence went the same way and for the same reason: the more
+the representation and the learner can already get elsewhere, the less a finer prior adds.
+
+## 2. ⚖ THE PRE-REGISTERED GATE SAYS **BUILD** — AND THE VERDICT IS WEAKER THAN IT LOOKS
+
+`experiments/w96b_prereg.txt` was committed at **2eda33b**, three minutes after w96a launched
+and while `logs_w96a_teprior_folds.txt` still held **zero** `AUC` lines. `w96b_gate.py`
+applies it in code:
+
+    A SEPARATION  +83.517e-6 vs 2se = 45.235e-6      PASS
+    B CONSISTENCY 4/5 folds positive, need 4         PASS
+    C MAGNITUDE   mean +41.936e-6 vs floor 25e-6     PASS
+    -> BUILD
+
+⚠⚠ **Two things about rule A that I did not see when I wrote it, both recorded because the
+next run must not read "PASS" as stronger than it is.**
+
+**(a) The null is not centred, and rule A subtracts its mean.** All five null folds are
+negative, mean −41.6e-6, sd 19.9e-6 — a t of about −4.7. Seed 42 is not an average seed here;
+it beats seed 43 on every fold. Rule A computes `mean(S) − mean(N)`, so ~42e-6 of its
++83.5e-6 separation is the null's own offset rather than anything the windowed prior did. A
+rule that assumed a centred null and tested `mean(S) > 2se` would give **+41.9 vs 41.6 — a
+bare pass, not a comfortable one.**
+
+**(b) Five folds are not five independent measurements.** Any two of the frozen folds share
+~80% of their training rows, so `sd/sqrt(5)` overstates the precision of BOTH means. That
+cuts against the signal exactly as it cuts against the null.
+
+**The BUILD does not rest on A.** Rules B and C never reference the null: 4 of 5 folds
+positive, mean +41.9e-6 against a floor of 25e-6 fixed in advance. Those are what carry it,
+and they carry it on their own. But A is the rule that reads as a significance test, and it
+is the one to distrust.
+
+## 3. ⛔ "THE SHIPPED PRESET" WAS NOT THE SHIPPED PRESET — ADMITTED, NOT RE-RUN
+
+w96a's docstring says it runs at the preset every blend member was trained at and cites
+`run_lgbm.PRESETS["control"]`. **That is wrong.** `PRESETS` has exactly one entry, run_lgbm's
+own comment calls it "the public library's hand-set vector, our control", and every tuned
+member in `oof/` was trained from an inline `--params` JSON at a different, stronger vector:
+lr 0.025 / 63 leaves / max_bin 511 / min_child_samples 250 / reg_lambda 80, verifiable in
+`oof/summary_lgbm_tuned_lat.json`. Full table now in RESEARCH.
+
+I did **not** re-specify or re-run w96a. Changing an operating point after seeing a number
+is precisely the move the prereg's last paragraph forbids, and the fact that this particular
+change would be defensible on its own merits is what makes it dangerous. Instead the prereg
+carries an **addendum**, written while the log held exactly one arm (`fold-0 AUC global
+0.9667116527` and no signal or null number anywhere) and committed at **8763618**: the tuned
+vector runs as a **replication with a deliberate asymmetry — it can turn a BUILD into a
+NO-BUILD and it can never turn a NO-BUILD into a BUILD.** It can only ever cost us a build.
+
+## 4. 💰 WHAT +42e-6 ON ONE MEMBER IS ACTUALLY WORTH IN THE BLEND — PRICED FROM w24b
+
+Before getting excited: the number that decides anything is blend CV, not member AUC, and
+this account already measured the conversion. `logs_w24b_value_std.txt`, paired 50/50 splits:
+
+    all22      n 22  +0.000054  per member  +2.45e-06   [consistent]
+    cat        n  4  +0.000049  per member  +1.21e-05   [consistent]
+    redundant  n 10  +0.000011  per member  +1.07e-06   [consistent]
+
+A **new orthogonal family** is worth ~12e-6 of blend CV per member; a **redundant** one is
+worth ~1e-6. A windowed-prior LGBM is the same model, the same folds and the same features as
+members already in the blend, differing in one encoding — it sits at the redundant end of
+that range, not the orthogonal end. **Expect low single digits of e-6 at the blend, from an
+effect worth +42e-6 at the member.**
+
+That is not a reason to skip it. The selection margin the whole account rests on is
+**+2.417e-6**, so low single digits of e-6 is decision-relevant, and this is the only lever
+in weeks that has cleared its own noise floor. It IS a reason not to describe this as a
+breakthrough anywhere, and specifically not in a submission message.
+
+## 5. ⏳ RUNNING NOW, DETACHED, WITH NO HUMAN READ IN THE MIDDLE — `w96d`
+
+    .venv/bin/python experiments/detach.py logs_w96d_replicate_then_build.txt \
+        bash experiments/w96d_replicate_then_build.sh        [pid 32247, PPID=1, own SID]
+
+Three steps, in this order on purpose:
+
+  1. `w96a --tuned` — the same paired design at the vector §3 identified (~26 min).
+  2. `w96b_gate.py --json ..._tuned.json --confirm` — the addendum's rule in code: **A and B
+     only, withdraw-only**. C is deliberately absent; the addendum names A and B, and a
+     replication that reproduces the effect but lands under the magnitude floor has not shown
+     the effect fails to survive.
+  3. `w96c_build_teprior_member.py` — **only if step 2 confirms** (~40 min).
+
+The replication runs **before** the build so it can still cost us the build. That is the only
+direction the addendum permits it to act in, and putting it second would have quietly made it
+decorative.
+
+`w96c` builds **both** arms — `lgbm_teprior_windowed` and `lgbm_teprior_global` — in the same
+loop, off the same frames, at the same seed. The tempting shortcut is to compare the new
+windowed member against an incumbent already in `oof/`; that comparison is confounded by
+every difference of provenance between them (seed lists, `--frac`, whatever the cache held
+that day). Building the twin costs one extra pass and makes the OOF-CV delta mean the same
+thing the fold-level delta meant. It writes two names into `oof/` and **nothing else** — no
+submission, no blend weight, no registration, nothing on the DO-NOT list.
+
+⚠ It also refuses to run at all unless `w96b_gate.main()` returns BUILD. Verified by running
+it before the folds finished: it printed the gate's NOT-YET-DECIDABLE and exited.
+
+## 6. 📉 THE BOARD DID NOT MOVE — AND THAT IS NEW INFORMATION
+
+`lb_w96/`, full download, read with `zipfile`. **3073 teams, leader Chris Deotte 0.97190, us
+0.97119, rank 197, 9 tied, 196 ahead.** Every score band from 0.97117 to 0.97125 has the same
+team count as w95's reading 24 hours earlier and our rank is identical.
+
+w95 read the 92/2774 → 197/3070 slide as the field catching up, which was right. This adds
+that it was a **step, not a trend**: a day later nothing around us moved. Rank is not drifting
+away from us and it is not coming back on its own. Detail in LEADERBOARD.md.
+
+## 7. ⚠ THE DISK IS FULL — 3.7 GB FREE, 100% USED
+
+    /dev/mapper/cryptroot  457G  430G  3.7G  100% /
+    workspace 23G: notebooks 8.2G · cache 6.6G · data 3.6G · submissions 2.4G
+
+The prereg's build step named a `cache_win/` sibling of `cache/`. `build_cache.py`'s layout is
+~730 MB per fold, **~3.6 GB for five** — it would fit in what is free and leave the machine
+with nothing. `w96c` therefore builds, uses and drops every frame inside its fold and writes
+no cache directory at all. **This is a deviation from the prereg's mechanics, not from its
+rule**, and the gate's BUILD message says so in the line it prints. If space is ever genuinely
+needed, `notebooks/` is 8.2 GB of pulled public kernels and is the only large pure cache here.
+
+## 8. WHAT DID NOT MOVE, DELIBERATELY
+
+No submission (none available). No blend reweighted, no member retrained into the shipped set,
+no registration, no veto edit, `SELECT_THESE.md` untouched, MU pin / `w46c.ERA_SHIFT` /
+`PRED_SD` untouched. `w93a_suite.py` was **not** re-run: w95 left it 36/36 green a few hours
+ago and the suite wants all 16 cores, which would have contended with the measurement that was
+the point of this run. The 08-28 queue is built and was verified by dry run, not rebuilt.
+
+⛔ The **selection click** is still outstanding and still needs Teddy in a browser on
+`SELECT_THESE.md`'s two refs before 2026-08-31 23:59. Nothing this run found changes that;
+w95 §9's correction (the `gh`/`ssh` binaries live at `/run/current-system/sw/bin` and need
+adding to PATH) is about git push, not about Kaggle, and the two commits this run made were
+pushed with it.
+
+## 9. NEXT RUN — READ THIS ORDER
+
+1. **`date -u`**, then `.venv/bin/python experiments/w26g_send.py --n 10` and read the slot
+   line. If slots are open, **send first**: `w23b_sendqueue.py` → `w48e_order.py --day
+   2026-08-28 --write` → `w26g_send.py --n 10` dry, matched **in code** against
+   `w72a_plan_2026-08-28.json`, then `--go`. Do not re-run `w72a_planday.py`.
+2. **`tail -60 logs_w96d_replicate_then_build.txt`.** The chain either printed CONFIRM and
+   then built two members, or printed WITHDRAW and stopped. Both are answers. If it printed
+   WITHDRAW: ⛔ **that is the end of the line — do not go looking for a third operating point
+   that agrees with the first.**
+3. If it built: the members are `oof/oof_lgbm_teprior_{windowed,global}.npy` with summaries
+   carrying `cv`, `fold_aucs` and `sd_test_over_sd_oof`. **The blend question is not yet
+   asked.** Ask it with `agent/stack.py`'s paired 50/50 splits — the windowed member against
+   its own global twin, which is the only clean comparison available — and hold it to the
+   existing member gates (sd ratio in [0.95, 1.45], the provenance rule, w60d).
+4. `.venv/bin/python experiments/w93a_suite.py` (~5.5 min, 36 checks), then rebuild the queue
+   for 08-29 or `w54a_vetoexpiry` and `w85c_slotguard` stay red by design.
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w95's list holds. Added this run:
+   **DO NOT** read w96a's rule-A PASS as a significance test — the null is not centred and the
+   folds are not independent (§2) · **DO NOT** re-run w96a at a fourth preset, fold count or
+   seed to move a number across a threshold; the prereg forbids it and the addendum's
+   replication is withdraw-only (§3, §5) · **DO NOT** compare a new member against an
+   incumbent from `oof/` and call the difference the feature's effect — provenance confounds
+   it, which is why the twin exists (§5) · **DO NOT** build a second `cache/`-style directory;
+   there is 3.7 GB free (§7) · **DO NOT** quote +42e-6 as a blend gain — priced at low single
+   digits of e-6 (§4).
+6. ⚠ **NEW LESSONS.**
+   • **A paired difference without a null arm is a number with no scale.** One extra fit —
+     same frame, seed changed — showed the per-fold noise here is ±40e-6, which is most of
+     the way to the effect being measured (§1).
+   • **A null arm can fail to be null.** Seed 42 beat seed 43 on 5 folds out of 5. Check that
+     the control is centred before subtracting its mean from anything (§2a).
+   • **The single entry in a `PRESETS` dict is not necessarily what shipped.** The provenance
+     lives in `oof/summary_*.json`, which records the params that actually produced each file
+     (§3).
+   • **Pre-registration works, but only if you commit it before the first number.** The
+     addendum is dated by the log's own line count: one arm, no signal, no null (§3).
+   • **Order a confirmatory step before the expensive one it can veto.** Run second, it can
+     only rationalise what you already spent (§5).

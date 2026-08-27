@@ -1,0 +1,168 @@
+{
+  "preset": "run_lgbm.PRESETS[control]",
+  "params": {
+    "objective": "binary",
+    "metric": "auc",
+    "learning_rate": 0.035,
+    "num_leaves": 96,
+    "min_child_samples": 40,
+    "subsample": 0.9,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.6,
+    "reg_lambda": 5.0,
+    "max_depth": 7,
+    "verbosity": -1,
+    "n_jobs": 16
+  },
+  "n_estimators": 8000,
+  "stopping": 200,
+  "smooth": 20.0,
+  "win": 16,
+  "folds_requested": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "folds": {
+    "0": {
+      "n_train": 553095,
+      "n_valid": 138274,
+      "global": {
+        "auc": 0.9667116526727053,
+        "trees": 1025,
+        "seed": 42,
+        "secs": 72.0
+      },
+      "global_seed43": {
+        "auc": 0.9666773151510972,
+        "trees": 877,
+        "seed": 43,
+        "secs": 72.6
+      },
+      "max_te_shift": 0.5320897102355957,
+      "windowed": {
+        "auc": 0.9667788197335249,
+        "trees": 1146,
+        "seed": 42,
+        "secs": 90.4
+      },
+      "signal_e6": 67.1670608195507,
+      "null_e6": -34.33752160808545
+    },
+    "1": {
+      "n_train": 553095,
+      "n_valid": 138274,
+      "global": {
+        "auc": 0.9676453447051571,
+        "trees": 1118,
+        "seed": 42,
+        "secs": 87.7
+      },
+      "global_seed43": {
+        "auc": 0.9676050593620055,
+        "trees": 1100,
+        "seed": 43,
+        "secs": 85.8
+      },
+      "windowed": {
+        "auc": 0.9676124258566494,
+        "trees": 1077,
+        "seed": 42,
+        "secs": 83.3
+      },
+      "signal_e6": -32.918848507645926,
+      "null_e6": -40.28534315159149
+    },
+    "2": {
+      "n_train": 553095,
+      "n_valid": 138274,
+      "global": {
+        "auc": 0.9677934664568826,
+        "trees": 1182,
+        "seed": 42,
+        "secs": 88.8
+      },
+      "global_seed43": {
+        "auc": 0.9677202153270987,
+        "trees": 1083,
+        "seed": 43,
+        "secs": 83.0
+      },
+      "windowed": {
+        "auc": 0.967858391778244,
+        "trees": 1175,
+        "seed": 42,
+        "secs": 77.4
+      },
+      "signal_e6": 64.92532136137541,
+      "null_e6": -73.25112978384674
+    },
+    "3": {
+      "n_train": 553095,
+      "n_valid": 138274,
+      "global": {
+        "auc": 0.9681634926326635,
+        "trees": 1053,
+        "seed": 42,
+        "secs": 82.3
+      },
+      "global_seed43": {
+        "auc": 0.9681448432277486,
+        "trees": 1029,
+        "seed": 43,
+        "secs": 81.0
+      },
+      "windowed": {
+        "auc": 0.9681911315764549,
+        "trees": 1211,
+        "seed": 42,
+        "secs": 80.5
+      },
+      "signal_e6": 27.63894379131937,
+      "null_e6": -18.649404914916623
+    },
+    "4": {
+      "n_train": 553096,
+      "n_valid": 138273,
+      "global": {
+        "auc": 0.9673510414455366,
+        "trees": 1029,
+        "seed": 42,
+        "secs": 80.9
+      },
+      "global_seed43": {
+        "auc": 0.9673096591044471,
+        "trees": 1087,
+        "seed": 43,
+        "secs": 84.8
+      },
+      "windowed": {
+        "auc": 0.9674339068554205,
+        "trees": 1134,
+        "seed": 42,
+        "secs": 87.5
+      },
+      "signal_e6": 82.86540988389213,
+      "null_e6": -41.38234108952421
+    }
+  },
+  "windowed_keys": {
+    "age": 18,
+    "daily_screen_time_hours": 1397,
+    "social_media_hours": 729,
+    "gaming_hours": 401,
+    "work_study_hours": 601,
+    "sleep_hours": 451,
+    "notifications_per_day": 231,
+    "app_opens_per_day": 166,
+    "weekend_screen_time": 1459
+  },
+  "C1_max_abs_diff": 0.0,
+  "C1": "PASS",
+  "signal_mean_e6": 41.935577469698345,
+  "signal_sd_e6": 46.49727433039554,
+  "null_mean_e6": -41.5811481095929,
+  "null_sd_e6": 19.893726051244812
+}

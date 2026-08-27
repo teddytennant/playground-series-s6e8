@@ -12,7 +12,8 @@ import math
 import os
 import sys
 
-SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "w96a_teprior_folds.json")
+HERE = os.path.dirname(os.path.abspath(__file__))
+SRC = os.path.join(HERE, "w96a_teprior_folds.json")
 MIN_MEAN_E6 = 25.0     # rule C
 MIN_POSITIVE = 4       # rule B
 K_SE = 2.0             # rule A
@@ -25,9 +26,14 @@ def var(v):
     return sum((x - m) ** 2 for x in v) / (len(v) - 1)
 
 
-def main():
+def main(src=None, confirm=False):
+    """confirm=True applies the ADDENDUM's replication rule: A and B only, and the verdict
+    is CONFIRM/WITHDRAW rather than BUILD/NO-BUILD. C is deliberately absent -- the addendum
+    names A and B, and a replication that reproduces the effect but lands slightly under the
+    magnitude floor has not shown the effect fails to survive to the tuned learner."""
+    SRC = src or globals()["SRC"]
     if not os.path.exists(SRC):
-        print(f"NO-BUILD: {SRC} does not exist -- w96a has not run.")
+        print(f"{'WITHDRAW' if confirm else 'NO-BUILD'}: {SRC} does not exist.")
         return 2
     res = json.load(open(SRC))
     folds = res.get("folds", {})
@@ -40,11 +46,11 @@ def main():
             return "     n/a  " if v is None else f"{v:+10.3f}e-6"
         print(f"  fold {k}: signal {cell(f.get('signal_e6'))}   null {cell(f.get('null_e6'))}")
     if len(S) < 5 or len(N) < 5:
-        print(f"NO-BUILD (NOT YET DECIDABLE): the rule reads all five folds; "
+        print(f"{'WITHDRAW' if confirm else 'NO-BUILD'} (NOT YET DECIDABLE): the rule reads all five folds; "
               f"{len(S)} signal / {len(N)} null are present. Re-run when the job finishes.")
         return 2
     if res.get("C1") != "PASS":
-        print("NO-BUILD: C1 did not pass. No arm comparison off an unverified variant.")
+        print(f"{'WITHDRAW' if confirm else 'NO-BUILD'}: C1 did not pass. No arm comparison off an unverified variant.")
         return 1
 
     mS, mN = sum(S) / len(S), sum(N) / len(N)
@@ -60,8 +66,19 @@ def main():
           f"                {'PASS' if b else 'FAIL'}")
     print(f"  C MAGNITUDE   mean {mS:+.3f}e-6 vs floor {MIN_MEAN_E6:.0f}e-6"
           f"          {'PASS' if c else 'FAIL'}")
+    if confirm:
+        # the addendum's asymmetry, in code: A and B only, and it can only ever withdraw.
+        if a and b:
+            print("\nCONFIRM. The effect survives to the tuned vector on A and B. The "
+                  "control-vector BUILD stands.")
+            return 0
+        print("\nWITHDRAW. The effect does not reproduce at the vector the blend members "
+              "were actually trained at, so there is nothing to build (w96b addendum).")
+        return 1
     if a and b and c:
-        print("\nBUILD. Launch experiments/w96c_build_cachewin.py per the prereg.")
+        print("\nBUILD. Launch experiments/w96c_build_teprior_member.py per the prereg. "
+              "(The prereg names a cache-building script; the disk has 3.7 GB free, so the "
+              "build is in-memory per fold instead. Same arms, same folds, no cache dir.)")
         return 0
     if a and b and not c:
         print("\nNO-BUILD: REAL BUT SMALL. A and B hold, so the effect is not noise -- it is "
@@ -74,4 +91,9 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    ap = __import__("argparse").ArgumentParser()
+    ap.add_argument("--json", default=None)
+    ap.add_argument("--confirm", action="store_true",
+                    help="apply the addendum's replication rule (A and B, withdraw-only)")
+    _a = ap.parse_args()
+    sys.exit(main(_a.json, _a.confirm))
