@@ -15,7 +15,18 @@
     "n_jobs": 16,
     "random_state": 42
   },
-  "arms": {},
+  "arms": {
+    "global": {
+      "fold0_auc": 0.9657349112758633,
+      "trees": 322,
+      "secs": 20.9
+    },
+    "windowed": {
+      "fold0_auc": 0.9658587836506917,
+      "trees": 290,
+      "secs": 18.9
+    }
+  },
   "windowed_keys": {
     "age": 18,
     "daily_screen_time_hours": 1397,
@@ -30,5 +41,6 @@
   "windowed_vs_global_max_te_shift": 0.5320897102355957,
   "C1_max_abs_diff": 0.0,
   "C1_base_nan_cells": 2954024,
-  "C1": "PASS"
+  "C1": "PASS",
+  "windowed_minus_global_e6": 123.87237482835988
 }

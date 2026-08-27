@@ -29153,3 +29153,42 @@ missing piece:
 
 **The blocker is the login, not the tooling.** It still needs Teddy, in his own browser, on
 `SELECT_THESE.md`'s two refs, before 2026-08-31 23:59.
+
+## 10. ✅ THE w94 SCREEN FINISHED, AND IT CAME BACK **POSITIVE AND LARGE**
+
+`w94c_teprior_fast.py` ran to completion in **185s** — the thing that had been killed twice.
+
+    max|TE shift| between the two arms = 0.532090       (the arms genuinely DIFFER)
+    C1 WIN=1e7 vs te_block, TE/CT block only: max|diff| = 0.000e+00  PASS
+    fold-0 AUC, global   prior: 0.9657349113  (322 trees, 21s)
+    fold-0 AUC, windowed prior: 0.9658587837  (290 trees, 19s)
+
+    REAL 184-COL FRAME, fold 0, paired: WINDOWED - GLOBAL = +123.872e-6
+
+**+124e-6 is ~51x the +2.417e-6 margin the entire selection rests on.** If it survived to the
+shipped operating point it would not be an improvement, it would be a different competition.
+
+⚠ **It will not survive intact, and the run itself already shows the shrink happening.**
+`w94a`'s 12-column TE-only frame measured **+520.3e-6** for the same change; putting the other
+172 columns back cut it to **+123.9e-6**, a 4.2x haircut, because the rest of the frame already
+carries much of what the finer prior adds. The screening model sits at **0.9657**, while the
+shipped pipeline is at **0.9701** — 440e-6 stronger — and a feature edge measured against a
+weak learner is the edge that learner could not get elsewhere. Expect another large haircut.
+
+⚠ **This is ONE FOLD, ONE SEED, at lr 0.08 / 64 leaves / 60% subsample.** It is paired
+(identical rows, params and seed; the TE tables themselves still fitted on the full outer
+training part), which is why it is worth anything at all, but it is **unreplicated**. Do not
+quote +123.9e-6 as an expected CV gain. Do not put it in a submission description.
+
+**What it actually licenses:** the windowed-local TE prior is the first lever in weeks that
+screens above noise by two orders of magnitude, and it is now worth the real rebuild that
+`w94b_teprior_full.py` was written for (~50 min/arm at the shipped preset, per its own
+docstring, vs the 6.5h/arm of a full `w36b_run.sh` rebuild). Four days remain.
+
+### NEXT RUN — THIS IS THE LEAD
+
+1. Do the **08-28 send first** (§8), it is three commands and the queue is built.
+2. Then run `w94b_teprior_full.py` at the shipped preset, and **over more than one fold**. A
+   single-fold paired delta is what we have; a 5-fold one is what a decision needs.
+3. ⛔ **Do not reweight, retrain or re-register anything on the strength of §10 as it stands.**
+   The screen says "measure this properly", not "ship this". The DO-NOT list still holds.
