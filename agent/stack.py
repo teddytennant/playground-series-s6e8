@@ -36,7 +36,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedShuffleSplit
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import DATA, LIB, OOF, SUB, TARGET, get_folds, load_raw  # noqa: E402
+from common import DATA, LIB, OOF, ROOT, SUB, TARGET, get_folds, load_raw  # noqa: E402
 
 
 # golem_a and golem_f early-stop on the held-out validation fold, which their author
@@ -202,6 +202,11 @@ def main():
                     help="also load data/ext_members (FM + golem libraries)")
     ap.add_argument("--ext2", action="store_true",
                     help="also load data/ext_members2 (boltuzamaki 47 + mohankrishnathalla 4)")
+    ap.add_argument("--extra-dir", action="append", default=[],
+                    help="load oof_*/test_* pairs from this directory too. Repeatable. "
+                         "Members built for evaluation rather than for shipping live outside "
+                         "oof/ precisely so that enrolling them is an explicit act -- this is "
+                         "the flag that does it.")
     ap.add_argument("--transform", default="logit",
                     choices=["logit", "rankraw", "rescale", "hybrid"])
     a = ap.parse_args()
@@ -213,6 +218,8 @@ def main():
         extra += (os.path.join(DATA, "ext_members"),)
     if a.ext2:
         extra += (os.path.join(DATA, "ext_members2"),)
+    for d in a.extra_dir:
+        extra += (d if os.path.isabs(d) else os.path.join(ROOT, d),)
     names, O, T = load_members(y, len(te), extra_dirs=extra,
                                drop=set(filter(None, a.drop.split(","))))
     print(f"{len(names)} members loaded (ext={a.ext}, dropped={a.drop})\n")

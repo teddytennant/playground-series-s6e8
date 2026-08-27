@@ -16,10 +16,16 @@ free (100% used). Every frame here is built, used and dropped inside its fold.
 Params are the TUNED vector -- what the blend members were actually trained at
 (oof/summary_lgbm_tuned_lat.json), not run_lgbm.PRESETS["control"]. See the w96b addendum.
 
-Writes oof/oof_{name}.npy, oof/test_{name}.npy and oof/summary_{name}.json via
-`common.save_preds`, and nothing else. No submission, no blend weight, no registration.
-Whether either arm then ENTERS the blend is a later decision under the existing member
-gates; this only produces the evidence for it.
+⛔ IT DOES NOT WRITE INTO `oof/`, AND THAT IS DELIBERATE. `stack.py:load_members` globs
+`oof_*.npy` out of `oof/` and takes EVERYTHING it finds. Dropping two files in there would
+silently enrol both of them -- including the global twin, which exists only as a control and
+has no business in any blend -- in every future stack run, with no line anywhere saying so.
+Output goes to `oof_w96/`, and reaching it costs a deliberate `--extra-dir oof_w96` on the
+stack command line. Opting a member in should be an act, not an accident.
+
+Writes oof_w96/{oof,test,summary}_{name}.{npy,json} and nothing else. No submission, no
+blend weight, no registration. Whether either arm then ENTERS the blend is a later decision
+under the existing member gates; this only produces the evidence for it.
 """
 from __future__ import annotations
 import argparse
@@ -47,6 +53,8 @@ PARAMS = dict(objective="binary", metric="auc", learning_rate=0.025, num_leaves=
               verbosity=-1, n_jobs=16, random_state=SEED)
 N_EST, STOPPING = 8000, 200
 SD_RATIO_GATE = (0.95, 1.45)   # RESEARCH w43: the member side-agreement gate
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(ROOT, "oof_w96")   # NOT oof/ -- see the docstring
 
 
 def say(*a):
@@ -59,6 +67,7 @@ def main():
     ap.add_argument("--force", action="store_true", help="build even if the w96b gate says no")
     a = ap.parse_args()
     arms = [s.strip() for s in a.arms.split(",")]
+    os.makedirs(OUT_DIR, exist_ok=True)
 
     rc = w96b_gate.main()
     if rc != 0:
@@ -124,14 +133,13 @@ def main():
         say(f"[{arm}] OOF CV {cv:.10f}   per-fold mean {np.mean(aucs):.10f}   "
             f"sd_test/sd_oof {ratio:.4f} "
             f"{'PASS' if lo <= ratio <= hi else 'FAIL'} (gate [{lo}, {hi}])")
-        save_preds(name, oof, tp, ntr, nte)
+        save_preds(name, oof, tp, ntr, nte, out=OUT_DIR)
         json.dump({"name": name, "cv": cv, "params": {k: v for k, v in PARAMS.items()},
                    "seeds": [SEED], "frac": False, "iters": iters, "fold_aucs": aucs,
                    "sd_test_over_sd_oof": ratio, "smooth": SMOOTH,
                    "win": WIN if arm == "windowed" else None,
                    "built_by": "experiments/w96c_build_teprior_member.py"},
-                  open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                    "oof", f"summary_{name}.json"), "w"), indent=2)
+                  open(os.path.join(OUT_DIR, f"summary_{name}.json"), "w"), indent=2)
         say(f"[{arm}] saved as {name} ({time.time()-t0:.0f}s)")
 
     say(f"done ({time.time()-t0:.0f}s)")

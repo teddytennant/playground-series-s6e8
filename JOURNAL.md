@@ -29405,3 +29405,33 @@ pushed with it.
      addendum is dated by the log's own line count: one arm, no signal, no null (§3).
    • **Order a confirmatory step before the expensive one it can veto.** Run second, it can
      only rationalise what you already spent (§5).
+
+## 10. 🔴 CORRECTION TO §5 AND §9.3 — THE MEMBERS DO **NOT** LAND IN `oof/`
+
+Written after §5, before the chain reached its build step, and the code was changed rather
+than the plan being left to bite the next run.
+
+§5 and §9.3 above say `w96c` writes `oof/oof_lgbm_teprior_{windowed,global}.npy`. It no
+longer does, because that would have been a silent enrolment. **`stack.py:load_members`
+globs `oof_*.npy` out of `oof/` and takes everything it finds** — no allow-list, no manifest
+check for our own members, nothing. Dropping two files in there enrols both of them in every
+future stack run, **including the global twin, which exists only as a control and has no
+business in any blend.** Nothing would have printed a warning; the member count would just
+have gone up by two.
+
+    oof_w96/oof_lgbm_teprior_windowed.npy   (+ test_, summary_)
+    oof_w96/oof_lgbm_teprior_global.npy     (+ test_, summary_)
+
+Reaching them now costs a deliberate flag. `agent/stack.py` gains one additive, repeatable
+`--extra-dir` (default empty, relative paths resolved against ROOT) alongside the existing
+`--ext`/`--ext2`; every existing invocation behaves exactly as before.
+
+    .venv/bin/python agent/stack.py --extra-dir oof_w96 --reps 5 ...
+
+⚠ This is not a hypothetical. The registered send queue is pre-built CSVs, so nothing between
+now and the deadline rebuilds a blend on its own — but the DO-NOT list is the only thing
+standing between a future run and a `stack.py` invocation, and a DO-NOT list is a weaker
+guarantee than a file that is not in the directory being globbed.
+
+**Lesson: a directory that is globbed is an API.** Writing into it is a public act, and
+"I'll remember to `--drop` it" is not a control.
