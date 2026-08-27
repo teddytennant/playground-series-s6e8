@@ -1,3 +1,54 @@
+# ✅ THE HIJACK CHANNEL IS CLOSED FOR THE REST OF THE COMPETITION — EXPOSURE IS **EXACTLY 0**
+# (w99, 2026-08-27) — this SUPERSEDES the "+0.2143e-6 / verdict is contested" reading below
+
+The `w88a` section further down was written 2026-08-25 against a **60-file** remaining calendar
+and flagged two files as contested. Both facts have since expired. Re-read 2026-08-27:
+
+    remaining registered files      40  (08-26 and 08-27 are spent, 20 files off the calendar)
+    tightest margin to the tier     120.0e-6   (w16d_membercell / w15f_antistudent_cv, 08-29)
+    P(any of the 40 lands ABOVE)    0.0000     E[#] 0.000
+    P(any of the 40 lands AT)       0.0000     E[#] 0.000
+    PRICED EXPOSURE                 +0.0000e-6   vs ceiling base +4.5228e-6
+
+⟹ **Nothing this account can still send is capable of reaching the tier.** The min margin is
+120e-6 against a residual sd of 12.83e-6 — **9.4 sd** out, counting the +5e-6 half-step. The
+whole no-click cost is now the base 4.5228e-6 and **no future send can add to it.**
+
+## 🎯 THIS RESOLVES THE BRIEF-vs-CV TENSION, AND IT RESOLVES IT AS "SEND"
+
+The brief says use all 10 slots daily because a send can never hurt public rank. That is true of
+*public rank* but was never true of *private score*, because with nothing clicked Kaggle
+auto-selects on **public** — so in principle every extra send is a fresh chance to displace a
+CV-good auto-pick with a slice-lucky CV-bad one. That is the Rogii mechanism, mechanised.
+It is now priced at **zero** for every remaining slot. ✅ **Drain the queue; it is free.**
+⚠ Free w.r.t. *selection*. It remains worth ~0 in expected score — that part is unchanged.
+
+## ⚰️ THE CONTESTED `PRED_SD` IS NOW MOOT — DO NOT RE-OPEN IT
+
+`w88a` (08-25) left the sender's `PRED_SD` 8.77e-6 vs `w82a`'s realised 13.00e-6 unresolved,
+because two 08-27 files flipped verdict between them. **Those two files were sent 2026-08-27
+and both cleared, by more than they were priced to:**
+
+    stem                pred_lb    actual     resid      margin to tier
+    w36_ad197std_logit  0.971177   0.97116   -17e-6      -30e-6  (BELOW tier)
+    w34_ad195std_logit  0.971175   0.97115   -25e-6      -40e-6  (BELOW tier)
+
+w88a now prints, in its own words: **"no registered file's per-file verdict depends on which sd
+is used."** ⛔ The dispute cannot affect another decision this competition. Do not spend a run
+adjudicating it, and ⛔ **still do not move `PRED_SD`** — `w58a` pins it and the price is now
+identically 0 under both. ⚠ n=2 clearing is ONE draw and is **not** evidence for either sd.
+
+## ⚠ WHAT THIS RUN GOT WRONG — READ BEFORE RE-RUNNING A CHECK "FOR MORE DATA"
+
+w99 re-ran `w82a_pricecal` believing it would grow n=62 → 82. **It was already n=82**: the
+figure in the w88a section is the *08-25* reading, and `w93a_suite` had re-run w82a at 10:11
+the same morning. Both `w82a_pricecal.json` and `w88a_calexposure.json` came back **byte-
+identical to HEAD**. Two API-bound checks were re-run for nothing.
+🎯 **A number quoted in RESEARCH is dated to the section that wrote it, not to the artefact.**
+Before re-running a check to "add data", `git status` the artefact and read the json's own `n`.
+The 36 standing checks re-run every suite pass — the artefacts are current even when the prose
+around them is not.
+
 # 🔴 THE SWEEP COVERED BOTH INDICES AND TWO OF THREE SPELLINGS — `s06e08` (w90, 2026-08-25)
 
     kaggle datasets list -s s6e8     ->  20 rows   <- w89's fix
@@ -196,6 +247,8 @@ three are today the files that fall off the end of the 60-slot calendar as our w
 # 🔴 THE SEND GATE IS PER FILE AND RUNS 60 MORE TIMES — THE CALENDAR PRICES AT 0.21e-6 (`w88a`)
 # (w88, 2026-08-25)
 
+# ⚰️ SUPERSEDED 2026-08-27 (w99): the 20 sent files are off the calendar, the 40 that remain
+#    price at EXACTLY 0, and the contested PRED_SD is MOOT. See the w99 block at the top.
     w26g_send.hijack_risk    refuses any filler at P(above tier) > P_MAX = 0.02   <- PER FILE
     w87a C7                  replays that over all 60 registered files, 0 refusals <- PER FILE
     nothing                  asked what 60 independently-tolerated 2% draws come to
