@@ -31328,3 +31328,15 @@ as `check_selection.py` from the workspace root gives `No such file` and **rc=2*
      walked straight through mine.
    • **Design the exemption surface out rather than promising restraint** (§3). One structural
      rule met the same day-one pressure that had already forced #42 to a second exemption.
+
+### w107 addendum — the push failed first, in the shape §4 is about
+
+`git push` exits **128**: the remote's credential helper is `gh`, which exists only at
+`/run/current-system/sw/bin/gh` and is not on the run shell's PATH — the same repair as w103's
+`sudo` finding, `PATH="/run/wrappers/bin:/run/current-system/sw/bin:$PATH" git push`. Recorded in
+RESEARCH under `git push NEEDS THE SAME PATH REPAIR`.
+
+⚠ **And my first read of it was `rc=0`, from `git push 2>&1 | tail`** — `$?` after a pipeline is
+`tail`'s status. That is w106 §4's lesson, written a run ago, and it still caught me the moment I
+was hurrying at the end of a run. The DO-NOT list had it; reading the list is not the same as
+having the habit. 43/43 suite green in 234s before the commit.

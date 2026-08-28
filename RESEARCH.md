@@ -87,6 +87,28 @@ document), and a document exercising no external path must FAIL too. Both verifi
   Same family as w106's piped `rc=0`: **the instrument answered a neighbouring question in a
   form indistinguishable from the right answer.** Fixed to `'^FAIL '`.
 
+## ⚠ `git push` NEEDS THE SAME PATH REPAIR AS `sudo` (w107, 2026-08-28)
+
+`git push` from a run's shell fails with:
+
+```
+gh auth git-credential get: line 1: gh: command not found
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+The remote's credential helper is `gh`, which lives **only** at `/run/current-system/sw/bin/gh`
+(not in `~/.nix-profile/bin`), and that directory is not on the run shell's PATH. Same family as
+w103's `sudo` finding, same repair:
+
+```
+PATH="/run/wrappers/bin:/run/current-system/sw/bin:$PATH" git push
+```
+
+⚠ **AND IT FAILS IN THE SHAPE THIS WORKSPACE KEEPS GETTING CAUGHT BY.** `git push 2>&1 | tail`
+prints the fatal error and reports **`rc=0`**, because `$?` after a pipeline is `tail`'s status.
+The real code is **128**. w106 §4 recorded exactly this for `check_selection.py` and it caught
+the next run anyway. **Redirect to a file and read `$?` before the pipe.**
+
 ## ✅ ROW 5 OF THE ANGLE INDEX RE-VERIFIED AT THE ARTEFACT LEVEL (w107's handed angle)
 
 Third row now checked rather than quoted (w105 did row 3, w106 row 4). *"Feature engineering:
