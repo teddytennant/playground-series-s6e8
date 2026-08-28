@@ -1,9 +1,9 @@
 {
- "day": "2026-08-27",
- "live_rows": 161,
- "slots": 40,
- "registered": 40,
- "plannable": 43,
+ "day": "2026-08-28",
+ "live_rows": 171,
+ "slots": 30,
+ "registered": 30,
+ "plannable": 33,
  "headroom": 3,
  "headroom_stems": [
   "w85_cal_gmm_raw",
@@ -13,7 +13,6 @@
  "tier": 0.97119,
  "bar": 0.970134905249569,
  "days": [
-  "2026-08-28",
   "2026-08-29",
   "2026-08-30",
   "2026-08-31"

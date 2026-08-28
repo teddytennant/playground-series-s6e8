@@ -49,6 +49,46 @@ Before re-running a check to "add data", `git status` the artefact and read the 
 The 37 standing checks re-run every suite pass — the artefacts are current even when the prose
 around them is not.
 
+# 🔧 HOW TO RUN A JOB THAT OUTLIVES THE SESSION THAT STARTS IT
+# (w102, 2026-08-28) — the w96 build died twice for this reason before anyone named it
+
+`nohup ... &` **is not enough on this box.** The w96 member build was launched detached on 08-27,
+was still mid-fold when the session ended, and came back with an empty `oof_w96/` and a log that
+stops in the middle of fold 1 — no error, no exit line. A whole build lost, and the next run read
+the truncated log as a crash rather than as a kill.
+
+    setsid      not installed
+    pgrep / ps  not installed  (poll /proc/<pid>/cmdline instead — see w97b)
+    at          not installed
+
+✅ **USE A TRANSIENT SYSTEMD USER UNIT.** It is owned by the user manager, not by the session, so
+the session ending does not touch it:
+
+    export XDG_RUNTIME_DIR=/run/user/$(id -u)      # REQUIRED — systemd-run cannot find the
+                                                   # user bus without it and fails outright
+    systemd-run --user --unit=<name> --collect -p WorkingDirectory="$PWD" \
+        /bin/bash "$PWD/experiments/<script>.sh"
+
+    systemctl  --user is-active <name>.service     # alive?
+    journalctl --user -u <name>.service -n 40      # its stdout, if the script does not redirect
+
+⚠⚠ **TWO TRAPS, AND BOTH FAIL SILENTLY AND MISLEADINGLY.**
+
+1. **THE UNIT'S `PATH` IS ALMOST EMPTY.** No `dirname`, no `ls`, no `touch`. The house idiom
+   `cd "$(dirname "$0")/.."` therefore becomes `cd /` — and the script then reports
+   **`.venv/bin/python: No such file or directory`** from thirty lines further down, which reads
+   like a broken venv and is really a broken `cd`. Any script launched this way must
+   `export PATH=/run/current-system/sw/bin:/usr/bin:/bin:$PATH`, `cd` to an **absolute** path,
+   and assert something like `[ -x .venv/bin/python ]` immediately after.
+2. **A UNIT'S STDOUT GOES TO THE JOURNAL, NOT TO A FILE.** No run here ever looks in the journal.
+   Have the script own its log with `exec > logs_<name>.txt 2>&1` *after* the `cd`.
+
+🎯 **THE GENERAL LESSON: A DETACHED JOB REPORTS ITS FAILURES SOMEWHERE NOBODY IS READING.** Every
+symptom above — the killed build, the empty PATH, the journal-only stdout — presents to the next
+run as a *truncated log*, which is indistinguishable from "still running" and from "crashed". So
+the launch must be verified positively (`is-active` **plus** a log line that advances), never
+inferred from the absence of an error.
+
 # 📇 THE ANGLE INDEX — SEVEN MODELLING ANGLES, ALL CLOSED BY MEASUREMENT, ONE GREP AWAY
 # (w101, 2026-08-27) — this block exists so a handed angle costs ONE grep, not half a run
 
@@ -75,8 +115,28 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | w15b/w15d → w62 | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` |
 | 6 | *blending: rank-average or weight the models by OOF* | ×2, 36 members apart → w63 | **−0.96e-6** | `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` |
 | 7 | *seed and fold diversity, averaged* | ×5, → w64 | structural null | `SEVENTH angle closed` (JOURNAL) |
+| 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
 
-⚠ **"CLOSED" HERE MEANS PRICED, NOT DISLIKED.** Every row is a measurement against a matched
+⚠ **ROW 8 IS A DIFFERENT GENUS FROM ROWS 1–7, AND THE DISTINCTION MATTERS.** Rows 1–7 say *we
+measured this and it does not pay*. Row 8 says *this is already built and is under standing
+guard* — the angle asks for work that exists, not for work that failed. Handed on 2026-08-28,
+day 19, with 171 submissions on record, it resolved to three citations and no rebuild:
+
+| deliverable | where it already is | how it is kept honest |
+|---|---|---|
+| the metric | **ROC AUC**, `## Competition basics` | it is a table row, not an inference |
+| the fixed folds | `StratifiedKFold(5, shuffle=True, random_state=42)`, every pack since w38 | `w93a_suite.py`, 38 checks |
+| an honest GBDT baseline, scored | 171 submissions; best public **0.97119** | every send is CV-gated by `w26g_send.py` |
+
+🎯 **A FOUNDATION ANGLE LATE IN A COMPETITION IS A PROMPT ARTEFACT, NOT AN INSTRUCTION TO START
+OVER.** The slot text is written once and handed every day; on day 19 "get one honest baseline
+scored" is asking for something that was done on day 1 and has been rebuilt on top of ever since.
+The obligation is to *verify the deliverables and cite them* — which is what the three rows above
+are — and then spend the run on something live. ⛔ Rebuilding a verified foundation is not
+conservative; it costs a whole run and risks regressing a pipeline that 171 scored submissions
+depend on.
+
+⚠ **"CLOSED" HERE MEANS PRICED, NOT DISLIKED.** Rows 1–7 are each a measurement against a matched
 control, and each names the control. None of them is a preference. The journal's standing rule is
 that an angle may be set aside only with a concrete reason — these rows **are** the reason, and
 quoting the row is the whole obligation. Do not re-run the experiment to re-earn the right to

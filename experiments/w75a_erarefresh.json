@@ -1,6 +1,6 @@
 {
- "n_sent_stems": 161,
- "n_with_oof": 152,
+ "n_sent_stems": 171,
+ "n_with_oof": 162,
  "n_without_oof": 9,
  "nocv_stems": [
   "w15e_antistudent",
@@ -52,7 +52,7 @@
   }
  ],
  "kill_era_lb6": -40.35,
- "spearman_cv_lb_all": 0.793428839900364,
- "spearman_cv_lb_97": 0.7745054473410425,
+ "spearman_cv_lb_all": 0.8173749596814451,
+ "spearman_cv_lb_97": 0.8100922912048412,
  "failures": 0
 }

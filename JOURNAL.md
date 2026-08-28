@@ -30128,3 +30128,142 @@ route is human-only and no further probing is warranted.
    • **A closure that cannot be found in one grep gets re-litigated.** Seven angles were closed by
      measurement and the refusals still cost half a run each, because *findable* is a separate
      property from *written down* — and only the second one was ever anybody's job.
+
+---
+
+# w102 — 2026-08-28, slot 1 of 10, ANGLE "Foundation: confirm the metric, build the fixed-fold CV
+# harness, and get one honest GBDT baseline scored"
+# ✅ **ALL TEN SENT** (12:37:17–12:37:50Z) · 38/38 GREEN · THE DEAD w96 BUILD DIAGNOSED AND RESTARTED
+
+## 0. WHAT WENT OUT
+
+`w26g_send.py --n 10 --go`, the registered 08-28 plan, unedited. Before `--go` the dry run's ten
+stems were matched **in code** against `w72a_plan_2026-08-28.json` — identical stems in identical
+order — rather than by eye. All ten landed:
+
+    blend153_hybrid 0.97101   blend150sx_rescale 0.97103   blend153_rescale 0.97102
+    blend156_hybrid 0.97102   blend159_hybrid    0.97103   blend160orig_hybrid 0.97102
+    blend153_rankraw · w14a_repro159av_hybrid · blend160origm_hybrid · w14a_repro159av_rankraw
+
+Predicted 0.970999–0.971035, observed 0.97101–0.97103 — `pred_lb` is still calibrated to ~1e-5.
+**171 submissions on record, 0 slots left.** Best public unchanged at **0.97119**; leader Chris
+Deotte 0.97205. No pick moved: every one of the ten is a pinned file, not a deadline candidate.
+
+## 1. 🔴 THE w96 BUILD DID NOT CRASH — IT WAS KILLED, AND THE LOG CANNOT TELL YOU WHICH
+
+w101 §4 handed this run a live build. It was not live. `oof_w96/` was **empty**, both pids
+(32247, 52805) were **gone**, and `logs_w96d_replicate_then_build.txt` stopped in the middle of
+fold 1 with no error and no exit line. w101's own next-run list gave three endings — NO ARMS ON
+DISK, NO-ENROL, ENROL — and the true state was a **fourth one nobody had written down: killed
+mid-build, verdict still unreached.** ⚠ Read against that list, an empty `oof_w96/` looks exactly
+like "NO ARMS ON DISK → ⛔ end of the line", which would have retired a live thread by accident.
+
+The replication gate had already CONFIRMED on a complete five-fold run (A +84.0e-6 vs 2se 69.7,
+B 4/5, C +83.4e-6 vs floor 25 — all on file). The gate is **withdraw-only**, so re-running it
+could only ever re-confirm the same JSON. ⟹ only step 3 needed resuming, and re-running the gate
+would have been re-litigating a closed decision. `w102a_build_then_price.sh` runs the build alone,
+then delegates to `w97b_value_then_gate.sh` for pricing — `w97b` took a one-branch edit to accept
+`none` as its wait-pid, which is why the chain does not duplicate a line of it.
+
+## 2. 🎯 IT TOOK FOUR LAUNCH ATTEMPTS, AND EVERY FAILURE LOOKED LIKE A DIFFERENT BUG
+
+Written up in RESEARCH as **`# 🔧 HOW TO RUN A JOB THAT OUTLIVES THE SESSION THAT STARTS IT`**,
+because this is the second build lost to it and nothing on the box named the cause.
+
+    attempt 1  setsid nohup ...        setsid: command not found  (nor are ps, pgrep, at)
+    attempt 2  systemd-run --user      failed: no $XDG_RUNTIME_DIR, so no user bus
+    attempt 3  + XDG_RUNTIME_DIR       ran, died instantly: ".venv/bin/python: No such file"
+    attempt 4  + PATH + absolute cd    ✅ active, load 17.8, training
+
+⚠⚠ **ATTEMPT 3 IS THE ONE WORTH REMEMBERING. A systemd user unit's `PATH` is almost empty** — no
+`dirname`, no `ls`, no `touch`. So the house idiom `cd "$(dirname "$0")/.."` evaluated to `cd /`,
+and the script then reported a **missing venv from thirty lines further down**. I spent three
+probes chasing a venv/permissions problem that was really a broken `cd`. The second trap: a unit's
+stdout goes to the **journal**, which no run here ever reads — the script now owns its log with
+`exec >` after the `cd`.
+
+🎯 **THE GENERAL SHAPE: A DETACHED JOB REPORTS ITS FAILURES WHERE NOBODY IS LOOKING.** Killed
+build, empty PATH, journal-only stdout — all three present to the next run as a *truncated log*,
+which is indistinguishable from "still running" and from "crashed". ⟹ **a launch must be verified
+positively — `is-active` PLUS a log line that advances — never inferred from the absence of an
+error.** That is what §1's lost build cost, and it is the same family as w101 §3's vacuous pass.
+
+## 3. THE ANGLE — SATISFIED, NOT REFUSED, AND THAT IS A DISTINCTION WORTH KEEPING
+
+Five consecutive runs opened with a refusal, so the reflex was to make this the sixth. It is not.
+Rows 1–7 of the angle index say *measured, does not pay*; this angle asks for work that **exists**.
+Handed on day 19 with 171 scored submissions, it resolved to three citations and no rebuild:
+
+    the metric              ROC AUC              `## Competition basics` — a table row, not an inference
+    the fixed folds         StratifiedKFold(5, shuffle=True, random_state=42), every pack since w38
+    a scored GBDT baseline  171 submissions, best public 0.97119, every send CV-gated by w26g
+
+⟹ **row 8 of the ANGLE INDEX**, plus a paragraph marking it as a different genus. ⛔ **A foundation
+angle late in a competition is a prompt artefact, not an instruction to start over** — the slot
+text is written once and handed daily. Rebuilding a verified foundation is not the cautious
+option; it costs a run and risks regressing a pipeline 171 submissions depend on.
+
+`w101a_angleguard`'s floor raised **7 rows/8 anchors → 8/10**, so a later tidy-up that drops the
+new row goes red instead of quietly shrinking the index. Guard green: 10/10 anchors resolve
+outside the block, C2/C3 both fire both ways.
+
+## 4. ✅ 38/38, AND THE TWO REDS WERE THE GUARDS WORKING
+
+Suite after the send: **36/38, 382s**, failing exactly `w54a_vetoexpiry` and `w85c_slotguard` —
+the post-send queue-freshness pair, which *must* go red once ten files leave the queue. Rebuilt
+per their own instruction (`w23b_sendqueue.py` → `w48e_order.py --day 2026-08-29 --write`) and
+re-ran both: **rc=0 and rc=0**. The 08-29 plan is registered and verified — all ten 296,302 rows,
+no NaN, md5 matched, CV reproduced from the OOF vector.
+
+## 5. ⚠ DISK IS AT 100% (3.2 GB FREE) — CHECKED, AND IT IS NOT AN ENDGAME BLOCKER
+
+`notebooks/w38` (4.0 G) and `notebooks/w40` (3.6 G) are pulled external-member kernel outputs and
+**are referenced** (`w56a_arm217power.py`, RESEARCH); `cache/` (6.6 G) feeds the packs. ⛔ Nothing
+deleted — the remaining endgame is 30 sends (upload-only), suite runs (small JSON) and one build
+(~16 MB of npy), all of which fit in 3.2 GB comfortably. Recorded so the next run does not
+re-derive it, and does not panic-delete a load-bearing directory either.
+
+## 6. WHAT DID NOT MOVE
+
+Nothing enrolled in `oof/` — the build is still running and enrolment is deliberately manual
+(w96 §10). `SELECT_THESE.md` untouched; the pick is unchanged. No blend reweighted. `PRED_SD` /
+MU pin / `w46c.ERA_SHIFT` untouched. `w48e_order.VETO` untouched — w101 §1 showed four entries are
+the only thing holding their file. The 08-30/08-31 queues untouched.
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK, STILL UNDONE, STILL WORTH MORE THAN EVERYTHING ELSE LEFT
+
+`check_selection.py` **rc=1**. Nothing is selected. Kaggle will then auto-select on **public**
+score, which is not what CV prefers. Browser → competition submissions page → **"Use for Final
+Score"** on refs **55656399** and **55588167**, nothing else. One minute, **+4.5228e-6** expected
+private AUC, deadline **2026-08-31 23:59**. w99 §1 proved this price is now fixed — no remaining
+send can raise or lower it. There is no browser and no Kaggle session cookie on this box (w97,
+w99 §3); the route is human-only and further probing is not warranted.
+
+⚠ Note the near-miss: I read `check_selection.py | tail` and then `echo rc=$?`, which reports
+**`tail`'s** exit code, not the script's. It printed `rc=0` and I nearly recorded the click as
+done. Re-run without a pipe. **A pipeline's `$?` is the last stage's**, and here that turns a
+red guard green.
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first** (w101 §1 — it is the only thing that knows whether the last run
+   finished), then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **`grep -v -i warning logs_w102a_build_then_price.txt | tail`** and
+   `XDG_RUNTIME_DIR=/run/user/$(id -u) systemctl --user is-active w102a-build.service`.
+   ⛔ **Do not read a truncated log as a verdict in either direction (§1).** Endings:
+   **inactive + both arms in `oof_w96/`** → it finished; read the `w97a_gate.py` verdict at the
+   bottom of the log · **inactive + `oof_w96/` empty or half-filled** → killed again; `rm -rf
+   oof_w96/*` and relaunch via §2's recipe, never `nohup` · **active** → leave it alone.
+3. If it reached ENROL: `cp oof_w96/{oof,test,summary}_lgbm_teprior_windowed.*` into `oof/` — the
+   windowed member **alone**, never the global twin — and read `w97_prereg.txt` §4 first.
+   ⚠ **NO-ENROL is still the modal outcome and is not a failure** (prereg §2: Delta ∈ [0,+3e-6]).
+4. Send the registered 08-29 ten. It is built, verified and match-checked; do not re-litigate it.
+5. Re-run `w93a_suite.py` (38 checks, ~6.4 min) after the send, then rebuild the queue for 08-30
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard` — they go red on every send by design (§4).
+6. ⛔ **DO-NOT, carried forward and added to.** All of w92–w101's list holds. Added this run:
+   **DO NOT** launch a long job with `nohup`/`setsid` — use the systemd-user recipe in RESEARCH
+   (§2) · **DO NOT** re-run the w96 replication gate; it is withdraw-only and already CONFIRMED
+   on a complete five-fold run (§1) · **DO NOT** read `$?` after a pipe when checking a guard
+   (§7) · **DO NOT** delete anything from `notebooks/` or `cache/` to reclaim disk — referenced,
+   and the endgame fits in 3.2 GB (§5) · **DO NOT** treat a foundation-flavoured ANGLE as a
+   refusal *or* as a rebuild — verify the three deliverables and cite them (§3).

@@ -14,14 +14,21 @@ cd "$(dirname "$0")/.."
 P=.venv/bin/python
 WAIT_PID="${1:-32247}"
 
-echo "== 0. waiting for w96d (pid $WAIT_PID) =="
-# /proc poll: ps and pgrep do not exist on this box. Re-read cmdline every time so a
-# recycled pid cannot be mistaken for the chain still running.
-while [ -r "/proc/$WAIT_PID/cmdline" ] && \
-      tr '\0' ' ' < "/proc/$WAIT_PID/cmdline" 2>/dev/null | grep -q w96d; do
-  sleep 60
-done
-echo "w96d gone at $(date -u)"
+if [ "$WAIT_PID" = "none" ]; then
+  # Caller already ran the build to completion in this same shell, so there is no pid to
+  # poll. The arms check below is what decides whether there is anything to price -- it is
+  # the same check either way, so skipping the wait cannot skip a guard.
+  echo "== 0. no wait requested (build already finished in the caller) =="
+else
+  echo "== 0. waiting for w96d (pid $WAIT_PID) =="
+  # /proc poll: ps and pgrep do not exist on this box. Re-read cmdline every time so a
+  # recycled pid cannot be mistaken for the chain still running.
+  while [ -r "/proc/$WAIT_PID/cmdline" ] && \
+        tr '\0' ' ' < "/proc/$WAIT_PID/cmdline" 2>/dev/null | grep -q w96d; do
+    sleep 60
+  done
+  echo "w96d gone at $(date -u)"
+fi
 
 W=oof_w96/oof_lgbm_teprior_windowed.npy
 G=oof_w96/oof_lgbm_teprior_global.npy
