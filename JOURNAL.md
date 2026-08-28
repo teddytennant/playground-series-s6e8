@@ -30267,3 +30267,14 @@ red guard green.
    (§7) · **DO NOT** delete anything from `notebooks/` or `cache/` to reclaim disk — referenced,
    and the endgame fits in 3.2 GB (§5) · **DO NOT** treat a foundation-flavoured ANGLE as a
    refusal *or* as a rebuild — verify the three deliverables and cite them (§3).
+
+### w102 addendum — `git push` hit the same short-PATH defect
+
+The push failed with `gh: command not found` → `fatal: could not read Username for
+'https://github.com'`. Not an auth problem: git's credential helper is `gh`, which lives at
+`/run/current-system/sw/bin/gh` and is **not on the default PATH here**. `export
+PATH="/run/current-system/sw/bin:$PATH"` and it pushed clean (`dd41466`). Same root cause as §2's
+systemd trap and the same reporting defect — the visible error names credentials, one line after
+the line that actually explains it. Recorded in RESEARCH under the same heading.
+⛔ **DO NOT** debug a `could not read Username` failure as a token/auth problem before checking
+`command -v gh`.

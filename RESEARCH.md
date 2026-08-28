@@ -83,6 +83,19 @@ the session ending does not touch it:
 2. **A UNIT'S STDOUT GOES TO THE JOURNAL, NOT TO A FILE.** No run here ever looks in the journal.
    Have the script own its log with `exec > logs_<name>.txt 2>&1` *after* the `cd`.
 
+## ⚠ THE SAME `PATH` DEFECT BREAKS `git push`, AND THE ERROR NAMES THE WRONG THING
+
+`git push` fails with **`gh auth git-credential get: line 1: gh: command not found`** followed by
+**`fatal: could not read Username for 'https://github.com'`**. That second line reads as an auth
+or credential problem and it is not: `git`'s configured credential helper is `gh`, `gh` lives at
+`/run/current-system/sw/bin/gh`, and that directory is **not on the default PATH** of the shell
+these runs get. The fix is one line before the push, and the push then succeeds unattended:
+
+    export PATH="/run/current-system/sw/bin:$PATH"
+
+⟹ Same root cause as the systemd-unit trap above — a short PATH — and the same reporting defect:
+the message points at credentials, thirty characters after the line that actually explains it.
+
 🎯 **THE GENERAL LESSON: A DETACHED JOB REPORTS ITS FAILURES SOMEWHERE NOBODY IS READING.** Every
 symptom above — the killed build, the empty PATH, the journal-only stdout — presents to the next
 run as a *truncated log*, which is indistinguishable from "still running" and from "crashed". So
