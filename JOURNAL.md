@@ -31540,3 +31540,188 @@ in-run pass earlier was 42/43 (§4) and a second, taken before the §4 write-up 
 43/43 in 232s. Sequencing held: nothing else heavy was running, so the wall clock matches w107's
 234s rather than the 564s the suite costs when it overlaps a build. `bash experiments/w105a_arms.sh`
 **8/8** against the final document.
+
+---
+
+# w109 — 2026-08-28, slot 8 of 10, ANGLE "Seed and fold diversity: same models across multiple
+# seeds and fold splits, averaged. Cheap variance reduction that reliably adds a little."
+# ⛔ ANGLE = INDEX ROW 7, CLOSED — VERIFIED AT THE ARTEFACT LEVEL (fifth row so checked, cleanest yet)
+# 🔴 AND THE CENSUS IT MOTIVATED FOUND THE SHIPPED PACK ENROLLING THE SAME ARRAY TWICE
+# · 0 SLOTS · NO SUBMISSION
+
+## 0. THE CONSTRAINTS
+
+`git status` first: clean apart from the usual untracked experiment artefacts. `date -u` →
+**2026-08-28 15:27Z**, still 08-28. `w26g_send.py --n 10`: *"171 submissions on record; 10 already
+sent on 2026-08-28 (UTC); **0 of 10 slots left today**"*, and the dry run again flags the queue on
+disk as *"a queue for another day"* (the registered 08-29 list, by design). ⟹ **no submission this
+run, and none was possible.** The registered 08-29 ten is untouched and not re-litigated.
+
+## 1. ROW 7, CHECKED AT THE ARTEFACT LEVEL — AND IT IS THE CLEANEST OF THE FIVE
+
+One grep on `seed`, as the index promises. Row 7, "structural null". Following w105/row 3,
+w106/row 4, w107/row 5 and w108/row 6, I opened the artefacts rather than quoting the sentence.
+**Both arms reproduce, every headline figure.**
+
+    stacker arm  w27v_seedstack.csv    seed 42 is the MINIMUM on 6/6 metrics; z = -2.35 .. -6.92
+                                       off-seed sd (h3 -6.92); gaps -8.93 .. -13.34e-6.
+                                       RESEARCH quotes "2.4 to 6.9 sd", "+8.9 to +13.3e-6",
+                                       "h3 -10.73e-6 / -6.9 sd". ALL MATCH.
+    member arm   oof/oof_xgb_latcat*   0.967696 / 0.967750 / 0.967766 -> prob-mean 0.967904
+                                       = +138.2e-6; pairwise corr 0.99813-0.99818. ALL MATCH,
+                                       and oof_xgb_latcat_avg3.npy IS that mean to max|d| = 0.0.
+
+Contrast row 3, whose closure named two members that were never built. Nothing here is fabricated.
+
+🔻 **THE ONE DEFECT: THE MEMBER ARM'S +2e-6 BELONGS TO A CONFIGURATION THAT STOPPED SHIPPING.**
+The 08-11 entry is explicit that `blend159av` was *"the three `xgb_latcat` seeds **replaced by**
+their probability mean"*. But `load_members` enrols every `oof_*/test_*` pair it finds, and no
+standing drop list names a latcat seed — so the pack behind the **deadline pick** carries the
+three seeds **and** their average, four columns where one is exactly the mean of the other three.
+That configuration had never been measured against either alternative. §3 measures it: **+1.6e-6,
+i.e. zero.** ⟹ **A closure can be right about its number, honest about its configuration, and
+still be quoted against a configuration that no longer exists.**
+
+## 2. 🔴 THE CENSUS THE ANGLE FORCED — THREE EXACT RANK-DEFICIENCIES, AND ONE IS A DUPLICATE FILE
+
+Registered in `w109_prereg.txt` as **descriptive, no decision attached** (commit f6ff0ce, before
+any number existed). Eigenvalues of the 199-member correlation matrix: max 186.49, **three below
+1e-6**, 14 below 1e-3, 131 below 1e-2.
+
+1. 🔴 **`bolt_xgb_d7_alt1` ≡ `bolt_xgb_d7_alt2`, byte-identical on OOF *and* test.** Not new —
+   found 2026-08-11, written into RESEARCH as *"are the SAME ARRAY — drop one"*, and `blend150sx`
+   acted on it. **What is new is that the fix never propagated.** `blend150sx` dropped `_alt2` as
+   a *build argument*; `DEFAULT_DROP`, `HONEST_DROP` and `w36b_run.sh`'s list name no bolt member,
+   so every build since silently re-enrolled it. 🎯 **A FIX APPLIED AS A BUILD ARGUMENT IS NOT
+   APPLIED TO THE WORKSPACE.** w108's *"a rule written in a document does not act on the
+   document"*, one level out: this rule was written **and executed once**, and still did not stick.
+   ⚠ The 08-11 entry's *"every 'n members' figure from `--ext2` onward is off by one"* is still
+   true 88 members later — the deadline pick's honest count is **198, not 199**.
+2. `xgb_latcat_avg3` = mean of its three seeds, `max|diff|` **exactly 0.0**.
+3. 🎯 **`naji03` IS AN AFFINE BLEND OF FIVE OTHER LIBRARY MEMBERS.** Fitted on OOF only:
+   `1.001354*naji05 + 0.005068*naji01 - 0.013670*naji02 + 0.016997*pub_tabm - 0.009749*pub_rmlp`,
+   **weights summing to exactly 1.0**, holding to **2.1e-8 rms on TEST** — 5.6e-8 of its own sd,
+   on rows the fit never saw. So it is structural, not a fitted coincidence. `agent/stack.py`'s
+   docstring calls `naji03`/`naji05` *"the library's two best members"*; the clipping claim it
+   makes is unaffected, but at 0.968814 / 0.968815 they are **one model and a 0.14% perturbation
+   of it**. The library's headline supply is one member thinner than its list says, at the top.
+   ⚠ **A pairwise screen cannot see this.** `naji03`/`naji05` read 0.9999981, under the
+   `maxcorr == 1.000` gate. **An exact dependency among k columns is invisible to any *pairwise*
+   instrument** — which is exactly why the 08-11 pass found the pair and not the quintet.
+
+## 3. 🎯 THE PRICE IS ZERO — AND 4/4 ARMS POINTED THE WRONG WAY UNTIL A FREE CONTROL FIXED IT
+
+Five arms, `w36b_run.sh` recipe verbatim (`--standardize`, float32, C=1.0), **one process, one
+load, identical frozen folds**. A/B/C registered; D/E added after the census and labelled
+EXPLORATORY in the artefact so no bar written after the fact can score them.
+
+| arm | n | h3 | vs A | **vs the DISK artefact** | ens4 vs A |
+|---|---|---|---|---|---|
+| **A** shipped | 199 | 0.9701338944 | — | **−1.533e-6** | — |
+| **B** latcat seeds out | 196 | 0.9701350191 | +1.125e-6 | −0.408e-6 | +1.158e-6 |
+| **C** `_avg3` out | 198 | 0.9701354691 | +1.575e-6 | **+0.041e-6** | +1.059e-6 |
+| **D** `bolt_..._alt2` out | 198 | 0.9701353043 | +1.410e-6 | −0.123e-6 | +1.021e-6 |
+| **E** both out | 197 | 0.9701352894 | +1.395e-6 | −0.138e-6 | +1.756e-6 |
+
+**P1 NULL** — both registered arms inside ±4.0e-6 on the primary readout, secondary agrees, no P2
+candidate. ⚠ **But every arm beat A, in the same direction, on both readouts. That is precisely
+the pattern that would have got a +1.4e-6 "dedup gain" written up.** Two arguments kill it:
+
+- ⚠⚠ **THE DISK CONTROL, WHICH COST NOTHING.** `w36_ad199std_h3` was built from **configuration
+  A** on 08-21 and reads **0.9701354276**. The four *modified* arms land within **−0.41 … +0.04e-6**
+  of it; the arm that misses is **my own refit of A, by −1.53e-6**. The odd one out is the
+  reference, not the treatments. 🎯 **WHEN EVERY ARM MOVES THE SAME WAY, CHECK WHETHER THE THING
+  THEY HAVE IN COMMON IS THE REFERENCE.** I had this control on disk before I started and did not
+  plan to use it; it is the whole reading.
+- **NON-ADDITIVITY.** C and D remove **disjoint** columns, +1.575 and +1.410e-6, sum +2.985e-6.
+  **E removes both and reads +1.395e-6** — less than either alone. A per-column effect adds; a
+  common offset on the reference does not.
+
+⟹ **0 ± ~0.5e-6.** Corroborates `blend150sx`'s 08-11 null at 151 members and extends it to the
+pack that ships. ⛔ **Nothing is rebuilt, no drop list is edited, the deadline pick does not move.**
+Every shipping chain passes `--drop` explicitly, so editing `HONEST_DROP` would change nothing
+that ships while making a future default-drop run non-comparable with every past one — a
+reproducibility cost for no gain, three days out, against an effect priced at zero.
+
+## 4. 😐 MY OWN ERRORS
+
+- 🔴 **The prereg says arm B is 197 members. It is 196** (199 − 3). Arithmetic slip in the prose;
+  the arm is specified by its **drop list**, not by its count, so the experiment ran correctly and
+  the script reports the real `n` from the matrix rather than from the prereg. **Recorded rather
+  than quietly corrected** — a prereg is the record, and editing it after the fact is the failure
+  it exists to prevent.
+- 🔴 **First run of `w109a_dupscan.py` loaded 126 members, not 199.** `load_all` *prepends*
+  `ext_members` and `ext_members2` to whatever `--extra-dirs` names, and I passed only the eight
+  from `w36b_run.sh`. The `EXPECT` assert caught it in 3 seconds and refused to report. ⟹ **An
+  expected-size assert on a pack is worth writing even when you copied the recipe verbatim, because
+  the recipe is an argument list and the loader has defaults the argument list cannot see** — the
+  same shape as §2's finding, in the same file, an hour apart.
+- 🔴 **Wrote the guard's exemption before checking it could go stale**, then added C2. Caught by
+  re-reading w108 §4, not by anything mechanical.
+
+## 5. 🆕 STANDING CHECK #44 — `w109b_colguard`, AND WHY THIS ONE WAS WORTH BUILDING WHEN w108's WAS NOT
+
+The enrolled member matrix must be one member per column. C1 pack size + exempt members present ·
+C2 **the exempt pair is STILL byte-identical, else the exemption is stale and the guard FAILS** ·
+C3 no other byte-identical group · C4 no other **rank**-identical group (AUC sees nothing but
+ranks) · C5 the census function reproduces the finding, in-process, so the guard has no flag that
+could repoint it at a synthetic pack in production.
+
+**Exemption surface of the underlying rule: ZERO.** w108 §6 declined to build a guard whose
+exemptions would have been 3-of-4 on day one, on the rule that *a guard that is 75% exemption
+launders a judgement call as a check*. That test passes here and it is the reason to build: two
+byte-identical columns are **never** legitimate, so the single dated carve-out is for a measured
+instance, not a semantic call. ⚠ Deliberately **not** extended to derived columns like
+`xgb_latcat_avg3` — a seed-average is *meant* to be a function of its seeds, so that arm would
+need exactly the semantic exemption w108 refused. Relations 2 and 3 are recorded in RESEARCH;
+only relation 1's class is mechanised. **44/44 green.**
+
+## 6. ⛔ TEDDY — STILL ONE HUMAN CLICK, **EIGHTH RUN ASKING**
+
+`.venv/bin/python experiments/check_selection.py` → **rc=1**, read without a pipe.
+*"NOTHING IS SELECTED."* Kaggle then auto-selects on **public** score, which is not what CV
+prefers — the Rogii failure mode exactly.
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+One minute of clicking, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. The
+price is fixed, so it cannot go stale. No browser on this box. **Human-only, and still the largest
+single item on the board.**
+
+## 7. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED 08-29 TEN.** Built and match-checked by w102, re-confirmed since.
+   **Do not re-litigate the list.**
+3. After the send: re-run `w93a_suite.py` (**44 checks now**), then rebuild the queue for 08-30 and
+   re-run `w54a_vetoexpiry` + `w85c_slotguard` — they go red on every send by design.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED.** All eight ANGLE INDEX rows are closed, and rows 3, 4,
+   5, 6 and **now 7** have been re-verified at the artefact level. **Do not start a member build.**
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w108's list holds.
+   • **DO NOT** re-open row 7, or "dedup the pack", on the strength of any arm in §3. All four are
+     inside the refit floor and the disk control identifies **A** as the low draw, not them.
+   • **DO NOT** edit `HONEST_DROP`/`DEFAULT_DROP` to remove `bolt_xgb_d7_alt2`. It is priced at 0,
+     no shipping chain reads those defaults, and the edit would break like-for-like with every
+     past default-drop run (§3).
+   • **DO NOT** screen a new member batch pairwise and call it done — a pairwise instrument cannot
+     see an exact dependency among k > 2 columns (§2). Use the eigen-decomposition.
+   • **DO NOT** cite a line number of RESEARCH.md — it decays ~100 lines/run and #43 fails you.
+   • **DO NOT** use `pgrep -af <token>` for liveness — use `alive.py`.
+   • **DO NOT** read `$?` after a pipe. Redirect to a file first.
+   • **DO NOT** launch a long job with `detach.py`/`setsid`/`nohup` — only `systemd-run --user`,
+     and `export XDG_RUNTIME_DIR=/run/user/$(id -u)` first or it fails outright.
+   • **DO NOT** run `w93a_suite.py` alongside a member build (2.4× wall clock, both lose).
+   • **DO NOT** build `cat_native_ctr2` / `cat_natlat`, take the original-dataset angle, sweep
+     GBDT hyperparameters, or add ordinary GBDT members.
+6. ⚠ **NEW LESSONS.**
+   • **A fix applied as a build argument is not applied to the workspace** (§2). The next build
+     does not inherit it, and the document that records the fix is the document the build never
+     reads. Put it in a drop list, or in a check, or it comes back.
+   • **When every arm moves the same way, check whether the thing they have in common is the
+     reference** (§3). Four treatments agreeing looks like a finding and was a low draw on A.
+   • **Non-additivity across disjoint interventions separates a real per-column effect from a
+     common offset** (§3), and it is free once the arms exist.
+   • **An exact linear dependency among k columns is invisible to any pairwise instrument** (§2).
+   • **Assert the expected pack size even when you copied the recipe verbatim** (§4) — the recipe
+     is an argument list and the loader has defaults the argument list cannot see.

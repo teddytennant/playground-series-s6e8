@@ -1,3 +1,150 @@
+# 🔴 THE SHIPPED 199-MEMBER PACK ENROLS THE SAME ARRAY TWICE, AND RESEARCH SAID "DROP ONE" IN AUGUST
+# (w109, 2026-08-28) — the census under ANGLE INDEX row 7. Priced at 0, guarded as #44.
+
+`bolt_xgb_d7_alt1` and `bolt_xgb_d7_alt2` are **byte-identical on the OOF side and on the test
+side**. That is not new — it was found on 2026-08-11, it is written a few thousand lines below
+under the heading `are the SAME ARRAY — drop one`, and `blend150sx` acted on it and measured the
+delta. **What is new is that the fix never propagated.** `blend150sx` dropped `_alt2` as a *build
+argument*. `stack.DEFAULT_DROP` is `("golem_a","golem_f")`; `blend_lab.HONEST_DROP` adds two
+`lgbm_tuned_lat*`; `experiments/w36b_run.sh` — the recipe that built the **deadline pick** — adds
+`lat_ctraw_r400`, `lat_ctfixte_r400`, `om_cat`. **None of them names a bolt member.** So every
+build after `blend150sx` silently re-enrolled the duplicate, and `load_members` has no opinion:
+it takes every `oof_*/test_*` pair it finds.
+
+🎯 **THE SHAPE: A FIX APPLIED AS A BUILD ARGUMENT IS NOT APPLIED TO THE WORKSPACE.** The next
+build does not inherit it, and the document that says *"drop one"* is the document the build never
+reads. This is w108's *"a rule written in a document does not act on the document"* one level out:
+here the rule was not only written, it was **executed once**, and it still did not stick.
+
+⚠ **THE HONEST MEMBER COUNT OF THE DEADLINE PICK IS 198, NOT 199.** The 2026-08-11 entry already
+said *"the real member count is 148, not 149, and every 'n members' figure from `--ext2` onward is
+off by one"*. It is still off by one, 88 members later, and `ad199` is one of the names carrying
+the error.
+
+## THE FULL CENSUS — 3 EXACT RANK-DEFICIENCIES IN THE 199-COLUMN DESIGN MATRIX
+
+`experiments/w109a_dupscan.py --scan` → `w109a_dupscan.json`. Correlation-matrix eigenvalues of
+the shipped pack: max 186.49, **three below 1e-6**, 14 below 1e-3, 131 below 1e-2.
+
+| # | the relation | how exact |
+|---|---|---|
+| 1 | `bolt_xgb_d7_alt1` ≡ `bolt_xgb_d7_alt2` | byte-identical, `np.array_equal` True on OOF **and** test |
+| 2 | `xgb_latcat_avg3` = mean(`xgb_latcat`, `_s17`, `_s23`) | `max｜diff｜` **exactly 0.0** in probability space |
+| 3 | `naji03` = a five-member blend of the library | rms **2.1e-8** on TEST, coefficients fitted on OOF only |
+
+**Relation 3 is the one nobody had looked at, and it is the most interesting.** Fitted on the OOF
+side alone, on the raw probability scale:
+
+    naji03 = 1.001354*naji05 + 0.005068*naji01 - 0.013670*naji02
+                             + 0.016997*pub_tabm - 0.009749*pub_rmlp
+    OOF  rms 2.3e-8   TEST rms 2.1e-8  (= 5.6e-8 of naji03's own sd, on rows the fit never saw)
+
+🎯 **THE FIVE WEIGHTS SUM TO EXACTLY 1.0.** `naji03` is not a model, it is an **affine blend of
+five other members of the same library** — and the identity transfers to the test side at 2e-8,
+so it is structural, not a fitted coincidence. ⚠ `agent/stack.py`'s transform docstring, and two
+places in this file, call `naji03` and `naji05` *"the library's two best members at OOF AUC
+0.9688"*. Both statements about **clipping** stay true and the `hybrid` transform they motivate is
+unaffected. What is not true is the word **two**: at 0.968814 and 0.968815 they are one model and
+a 0.14% perturbation of it. ⟹ **The public library's headline supply is one member thinner than
+its member list says, at the very top of the list.**
+
+⚠ Note what would have missed relation 3: a pairwise-correlation screen. `naji03`/`naji05` read
+0.9999981, which is under the `maxcorr == 1.000` rejection gate. **An exact linear dependency
+among *k* columns is invisible to any *pairwise* instrument** — it takes the eigen-decomposition,
+which is why the 2026-08-11 pass found relation 1 (a pair) and not relation 3.
+
+## THE PRICE OF ALL OF IT IS ZERO — FIVE ARMS, ONE PROCESS, AND AN INDEPENDENT CONTROL
+
+Registered in `experiments/w109_prereg.txt` **before any number existed** (commit f6ff0ce).
+Arms A/B/C are the registered ones; D/E were added after the census — which the prereg registered
+as *descriptive, no decision attached* — turned up relation 1, and are labelled EXPLORATORY in the
+artefact so no bar written after the fact can score them. `w36b_run.sh` recipe verbatim:
+`--standardize`, float32, C=1.0, identical frozen folds, one load, one process.
+
+| arm | n | h3 | vs A | vs the DISK artefact | ens4 vs A |
+|---|---|---|---|---|---|
+| **A** shipped, all four latcat + both bolts | 199 | 0.9701338944 | — | **−1.533e-6** | — |
+| **B** the 3 latcat seeds out, `_avg3` kept | 196 | 0.9701350191 | +1.125e-6 | −0.408e-6 | +1.158e-6 |
+| **C** `xgb_latcat_avg3` out, the 3 seeds kept | 198 | 0.9701354691 | +1.575e-6 | **+0.041e-6** | +1.059e-6 |
+| **D** `bolt_xgb_d7_alt2` out | 198 | 0.9701353043 | +1.410e-6 | −0.123e-6 | +1.021e-6 |
+| **E** both dropped | 197 | 0.9701352894 | +1.395e-6 | −0.138e-6 | +1.756e-6 |
+
+**P1 NULL: both registered arms are inside ±4.0e-6 on the primary readout, secondary agrees, no
+P2 candidate.** But 4/4 arms landing above A in the same direction is exactly the pattern that
+would tempt a run into reading a +1.4e-6 gain. It is not one, on two independent arguments:
+
+- ⚠⚠ **THE DISK CONTROL SETTLES IT, AND IT COST NOTHING TO USE.** `w36_ad199std_h3` was built
+  from **configuration A** on 2026-08-21 and reads **0.9701354276**. The four *modified* arms land
+  within **−0.41 … +0.04e-6** of it; the arm that misses is **my own refit of A, by −1.53e-6**.
+  The odd one out is the reference, not the treatments. ⟹ **When every arm moves the same way,
+  check whether the thing they have in common is the reference.**
+- **NON-ADDITIVITY.** C and D remove **disjoint** columns and read +1.575 and +1.410e-6. Their sum
+  is +2.985e-6; **E, which removes both, reads +1.395e-6** — less than either alone. A per-column
+  effect adds. A common offset on the reference does not.
+
+⟹ **Removing an exactly duplicated column and an exactly derived column from a 199-member pack is
+worth 0 ± ~0.5e-6.** This corroborates `blend150sx`'s 2026-08-11 null at 151 members and extends
+it to the pack that actually ships, and it is the pack-geometry result again: 131 of 199
+eigenvalues under 1e-2, so a column that is a function of others changes nothing.
+
+⛔ **THEREFORE NOTHING IS REBUILT AND NO DROP LIST IS EDITED.** Every shipping chain passes
+`--drop` explicitly, so editing `HONEST_DROP` would change nothing that ships while making a
+future default-drop run non-comparable with every past one — a reproducibility cost for no gain,
+three days out, with the deadline pick settled and priced at 0. **The deadline pick is unaffected
+and does not move.**
+
+## ✅ ROW 7 OF THE ANGLE INDEX RE-VERIFIED AT THE ARTEFACT LEVEL (this run's handed angle)
+
+Fifth row checked this way, after w105/row 3, w106/row 4, w107/row 5 and w108/row 6. **Row 7 is
+the cleanest of the five: every headline number in both arms reproduces.**
+
+The original one-run closure is w64's, in JOURNAL.md under `SEVENTH angle closed` — it is a
+restatement of the stacker arm only, which is why the index now anchors here instead.
+
+    stacker arm   w27v_seedstack.csv   seed 42 is the MINIMUM on 6/6 metrics; z = -2.35 .. -6.92
+                                       off-seed sd (h3 -6.92); gaps -8.93 .. -13.34e-6.
+                                       RESEARCH quotes "2.4 to 6.9 sd", "+8.9 to +13.3e-6",
+                                       "h3 -10.73e-6, -6.9 sd".  ALL MATCH.
+    member arm    oof/oof_xgb_latcat*  0.967696 / 0.967750 / 0.967766 -> prob-mean 0.967904
+                                       = +138.2e-6; pairwise corr 0.99813-0.99818. ALL MATCH,
+                                       and the avg3 file on disk IS that mean, exactly.
+
+🔻 **THE ONE DEFECT IS THAT THE MEMBER ARM'S +2e-6 BELONGS TO A CONFIGURATION THAT STOPPED
+SHIPPING.** The journal is explicit that `blend159av` was *"the three `xgb_latcat` seeds **replaced
+by** their probability mean"* — arm B's design. The shipped pack keeps **both**, which is arm A,
+and nobody re-measured. Arm C now prices that gap at **+1.6e-6, i.e. zero**, so the closure's
+conclusion survives intact. ⟹ **A closure can be right about its number, honest about its
+configuration, and still be quoted against a configuration that no longer exists.** Row 7's
+anchor now points at this section as well as at the w64 restatement.
+
+⛔ **DO NOT** re-open row 7 on the strength of any arm above. All four are inside the refit floor
+and the disk control identifies A as the low draw.
+
+## 🆕 STANDING CHECK #44 — `w109b_colguard`
+
+The enrolled member matrix must be one member per column. C1 the pack loads at its expected size
+and both exempt members are in it · C2 **the exempt pair is STILL byte-identical, else the
+exemption is stale and the guard FAILS** · C3 no other byte-identical group · C4 no other
+**rank**-identical group (AUC sees nothing but ranks, so two columns with different values and
+identical ranks are one member to this metric) · C5 the census function reproduces the finding —
+an injected duplicate that is not the exempt pair must be caught, and the exempt pair alone must
+come back clean. C5 runs in-process against the extracted `dupe_groups`, so the guard has no flag
+or env var that could repoint it at a synthetic pack in production.
+
+**Exemption surface of the underlying rule: ZERO.** Two byte-identical member columns are never
+legitimate, so the one dated carve-out is for a known, measured instance rather than a judgement
+call laundered as a check — which is the test w108 §6 refused to build a guard against. And C2 is
+w108's *"an exemption must prove it is covering something"* applied to a new case: it fails if the
+pair stops being duplicated. ⚠ Deliberately **not** extended to derived columns like
+`xgb_latcat_avg3`: that would need a semantic exemption on day one (a seed-average is *meant* to
+be a function of its seeds), which is exactly the 75%-exemption theatre w108 §6 measured and
+declined. Relations 2 and 3 are recorded above; only relation 1's class is mechanised.
+
+    C1 pack 199 members (expected 199); exempt pair enrolled: True
+    C2 bolt_xgb_d7_alt1 == bolt_xgb_d7_alt2: oof True, test True
+    C3/C4 unexpected groups: none      distinct members: 198 of 199 enrolled
+    C5 census reproduces the finding: True                                     rc=0
+
 # 🔴 A GUARD'S EXEMPTION WAS CAPTURED BY A LATER SECTION THAT MERELY *MENTIONED* THE EXEMPTED RUN
 # (w108, 2026-08-28) — `w105a_liveguard` C4. Found by the suite going red on this run's own edit.
 
@@ -779,7 +926,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 4 | *XGBoost as the third leg of the ensemble* | ×2, → w106 08-28 · **artefacts verified** | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | w15b/w15d → w62 | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` |
 | 6 | *blending: rank-average or weight the models by OOF* | ×3, 36 members apart → w63 → w108 08-28 · **artefacts verified** | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
-| 7 | *seed and fold diversity, averaged* | ×5, → w64 | structural null | `SEVENTH angle closed` (JOURNAL) |
+| 7 | *seed and fold diversity, averaged* | ×5, → w64 → w109 08-28 · **artefacts verified** | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
 
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
@@ -1279,7 +1426,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 43 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 44 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -1290,7 +1437,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
-    w106a_claimguard  w107a_lineref
+    w106a_claimguard  w107a_lineref     w109b_colguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
