@@ -1,0 +1,79 @@
+w109 PRE-REGISTRATION -- 2026-08-28, written and committed BEFORE any number below exists.
+
+MOTIVATION (established this run, before writing this file)
+----------------------------------------------------------
+ANGLE INDEX row 7 ("seed and fold diversity, averaged") is closed. Both its arms were
+re-verified at the artefact level this run and BOTH REPRODUCE EXACTLY:
+
+  stacker arm  experiments/w27v_seedstack.csv -> seed 42 is the minimum on 6/6 metrics,
+               z = -2.35 .. -6.92 off-seed sd (h3 -6.92), gaps -8.93 .. -13.34e-6.
+               RESEARCH quotes "2.4 to 6.9 sd", "+8.9 to +13.3e-6", "h3 -10.73e-6 / -6.9 sd".
+  member arm   oof/oof_xgb_latcat{,_s17,_s23,_avg3}.npy -> 0.967696 / 0.967750 / 0.967766,
+               probability mean 0.967904 = +138.2e-6 over the best single, pairwise corr
+               0.99813-0.99818. RESEARCH quotes all six figures and every one matches.
+
+The gap is not in the evidence, it is in the CONFIGURATION the member arm's stack-level
+number belongs to. JOURNAL (2026-08-11): "blend159av -- 159 members: the three xgb_latcat
+seeds REPLACED BY their probability mean" -> +2e-6, the "1.4% pass-through" quoted ever
+since. But agent/stack.py:load_members enrols every oof_*/test_* pair it finds in oof/, and
+DEFAULT_DROP is only ("golem_a","golem_f"); blend_lab's HONEST_DROP adds two lgbm_tuned_lat*.
+None of them drop a latcat seed. So the pack that produced the deadline pick
+(w36_ad199stdcorr, via experiments/w36b_run.sh) carries ALL FOUR latcat columns: the three
+seeds AND their average. That configuration has never been measured against either
+alternative. Measured this run, in raw probability space:
+
+  max |avg3 - mean(base, s17, s23)| = 0.0   (exactly the mean, by construction)
+  R^2 of avg3 on the three seeds:  logit/hybrid 0.999996114, rankraw 0.999988161,
+                                   rescale 0.999996448
+  condition number of the 4-column block: 671 (rankraw) .. 1230 (rescale)
+
+So it is NOT rank-deficient -- the transforms are nonlinear, the fit is well posed, and a
+"collinearity breaks the solve" claim would be false. The open question is statistical, not
+numerical: four columns at R^2 ~ 0.99999 spend four shares of an isotropic L2 budget on one
+member. Sign unknown a priori.
+
+Q1 -- DESCRIPTIVE, NO DECISION ATTACHED
+---------------------------------------
+Over the shipped 199-member pack, on the raw OOF probability scale: the count and identity
+of member pairs at Pearson r >= 0.9995, and the eigenvalues of the correlation matrix, whose
+near-zero end locates any near-exact linear dependency among the columns. Reported whatever
+it says. This is a census, not a test.
+
+Q2 -- THE ABLATION
+------------------
+Three arms, ONE process, ONE load, identical frozen folds, identical BLAS thread count (4,
+blend_lab's pin), the shipped recipe verbatim -- --standardize, float32, C=1.0, drop
+"golem_a,golem_f,lgbm_tuned_lat,lgbm_tuned_lat_frac,lat_ctraw_r400,lat_ctfixte_r400,om_cat",
+extra-dirs ext_members3,4,6,7pin,8,10,11,12 (experiments/w36b_run.sh):
+
+  A  shipped        199 members, all four latcat columns
+  B  seeds out      197 members, xgb_latcat / _s17 / _s23 dropped, _avg3 kept
+                    (= the configuration the +2e-6 was measured in, at 199)
+  C  average out    198 members, xgb_latcat_avg3 dropped, the three seeds kept
+
+A is REBUILT here rather than read off disk, so all three share one process and the w28
+threading floor is common to them.
+
+READOUT, fixed now: cross-fitted h3 (equal rank-average of hybrid/rankraw/rescale, per
+experiments/make_h3.py) is the PRIMARY. ens4 (all four transforms) is the SECONDARY.
+
+DECISION RULE, fixed now
+------------------------
+P1  NULL.  If |CV(B)-CV(A)| < 4.0e-6 AND |CV(C)-CV(A)| < 4.0e-6 on the primary readout,
+    the shipped duplication is a null. Record it and change nothing. 4.0e-6 is the rebuild
+    floor already pre-registered at w36b ("WANTED moves only above ... the 4e-6 rebuild
+    floor"), not a number chosen today.
+
+P2  CANDIDATE.  An arm is a candidate iff it beats A by > +4.0e-6 on the PRIMARY readout
+    AND the SECONDARY readout moves the same way. A candidate is a new file for the 08-30
+    queue and NOTHING MORE.
+
+P3  DISAGREEMENT.  If primary and secondary disagree in sign, the result is read as a null.
+    Registered now precisely so the readout cannot be chosen after seeing which way it
+    points -- that is the defect w64 sec 4 recorded against its own prereg.
+
+P4  WANTED DOES NOT MOVE THIS RUN, whatever any arm says. The deadline pick
+    (w36_ad199stdcorr, w23_ad187stdcorr) is settled and its bar is a separate instrument.
+    This run may add to the queue; it may not re-select.
+
+P5  ALL THREE ARM CVs ARE REPORTED, including if A is the worst of the three.
