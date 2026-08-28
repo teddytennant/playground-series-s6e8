@@ -30739,3 +30739,165 @@ log deleted; the real `w93a_suite.py` re-run green afterwards.
 flake.** If it goes red again, `experiments/w93a_fail_w85c_slotguard.log` will exist and will say
 why — read it before re-running. Do not let a re-run that comes back green close it silently a
 second time; two unexplained reds in the guard that governs the send is a real problem.
+
+---
+
+# w105 — 2026-08-28, slot 4 of 10, ANGLE "CatBoost: it usually handles categoricals better than
+# the others on survey-style data. Tune and compare on identical folds."
+# ⛔ ANGLE = INDEX ROW 3, CLOSED ×2 · 0 SLOTS · NO SUBMISSION
+# 🔻 THE LIVENESS CHECK RESEARCH PRESCRIBES LIES IN **BOTH** DIRECTIONS — AND I BELIEVED IT ONCE
+
+## 0. THE CONSTRAINTS
+
+`git status` first (w101 §1): clean, w104 finished tidy. `w26g_send.py --n 10`: *"171 submissions
+on record; 10 already sent on 2026-08-28 (UTC); **0 of 10 slots left today**"* — w102 sent the
+registered ten at 12:37Z, and the dry run correctly flags the queue on disk as *"a queue for
+another day"* (it is the 08-29 list). ⟹ no submission this run, and none was possible.
+`check_selection.py` still rc=1 — see §7. The `w102a` build owned 13–14 cores throughout.
+
+## 1. THE ANGLE — ROW 3, SECOND HANDING, AND ITS CLOSURE WAS STANDING ON A DEAD CITATION
+
+One grep, as the index promises. Row 3, *CatBoost: it handles categoricals better*, closed w61
+08-22 at **5.9e-6/member**. Resolved in two pieces the way row 2 had to be, because the handed
+string carries the same split:
+
+| the sub-clause | status |
+|---|---|
+| *tune and compare on identical folds* | closed — 5.9e-6 is the `rest`-group price for **any** ordinary GBDT member, ~12% of the 5e-5 noise floor |
+| *handles categoricals better* | **pipeline, not hyperparameter.** CatBoost's native CTR *is* an ordered (windowed) target statistic — which is exactly what the w96 windowed-TE-prior member ports into LightGBM. Same live experiment as row 2's fourth knob, and it finished today (§4). |
+
+🔴 **BUT THE CLOSURE'S OWN EVIDENCE DOES NOT EXIST.** w61's supporting bullet reads *"already in
+the pack four ways (`cat_lat`, `cat_native`, `cat_native_ctr2`, `cat_natlat`)"*. Checked instead
+of quoted:
+
+    ls oof/oof_cat_*                                    cat_lat  cat_native  cat_raw   — three, and not those three
+    find . -name '*cat_native_ctr2*' -o -name '*cat_natlat*'   nothing, anywhere on disk
+    cat experiments/w26i_run.log                        "waiting for w26h_run.sh to exit..."  — the only line
+
+Those two were **never built**. They are w26's E1/E2, pre-registered in `w26_prereg.txt` with
+priors (+1.5e-6, +1.0e-6 into the 187-pack), their build modes exist in `run_catboost.py`
+(`--mode natlat`, `--ctr_complexity`), and `w26i_value.py` still lists them as its **defaults** —
+but the w26a→w26f→w26h→w26i chain never reached that stage and a later run wrote the plan down as
+an accomplished fact. ✅ **The closure survives on different evidence** — the `rest` group, 35
+members at +0.000206 ± 0.000011 total, which does not depend on those files. ⛔ **And do not build
+them:** their own registered priors are 3% and 2% of the noise floor against 10–20 h of build at
+1–2 h per fold. Sentence corrected in place; row 3 given a sub-table.
+
+🎯 **THE INDEX TELLS YOU AN ANGLE IS CLOSED. IT DOES NOT TELL YOU THE CLOSURE'S EVIDENCE STILL
+EXISTS.** `w101a_angleguard` verifies the *pointer* resolves — and it does, greenly, at a
+paragraph whose contents are false. A working pointer to a wrong claim is the index's blind spot.
+
+## 2. 🔻 THE FINDING — `pgrep -af <token>` FAILS IN OPPOSITE DIRECTIONS, AND I ATE THE FIRST ONE
+
+Step 2 of the handoff has read `pgrep -af w96c_build` since w103. Typed at this shell it is wrong
+twice over, and a lying `pgrep` prints exactly what an honest one prints:
+
+| | mechanism | reads as |
+|---|---|---|
+| **FALSE ABSENCE** | `pgrep` matches with **ERE**; `\|` is BRE, so `pgrep -af 'a\|b'` is a *literal* matching nothing real | the build is dead |
+| **FALSE PRESENCE** | the agent runs everything as `bash -c '<whole script>'`, so the **wrapper's argv holds the token**; pgrep matches the wrapper, rc=0 | the build is alive |
+
+😐 **I hit the first one and wrote "the build died a third time" in my head before checking.**
+`pgrep -af "w96c_build\|w26i_value"` came back empty at 13:46Z with the log stopped mid-fold-3.
+The only thing that saved it was `systemctl --user is-active` disagreeing. Clean-room, one arm per
+command line so nothing self-matches:
+
+    A  pgrep -af 'w96c_build'                FOUND    B  pgrep -af 'w96c_build\|w26i_value'   ABSENT
+    C  pgrep -af 'w96c_build|w26i_value'     FOUND    D  pgrep -af 'zzz_no_such_proc'         ABSENT
+
+**B is indistinguishable from D.** Cost of having believed it: relaunching a running build —
+16 cores double-booked and `oof_w96/` written by two processes at once, which would have
+destroyed the very experiment this run existed to finish.
+
+⚠⚠ **AND THE SELF-MATCH HALF WAS ALREADY IN RESEARCH — FOUR TIMES, SINCE w14.** *"`pgrep -f
+<script>.py` matches your own waiter"*, *"three background waits hung on this after the job had
+already finished"*, the bracket dodge. Then **w103 reinstated the bare form as THE positive
+liveness check** and nothing connected them, because they sit ~6,000 and ~12,000 lines apart in
+a document read by grepping for today's keyword. 🎯 **A LONG DOCUMENT CAN HOLD A PRESCRIPTION AND
+ITS REFUTATION AT THE SAME TIME AND NEVER NOTICE.** That is not fixable with more prose. It is
+fixable with a check, which is what #41 is.
+
+## 3. ✅ WHAT CHANGED ON DISK
+
+- **`experiments/alive.py`** — the replacement. `--unit` + `--cmd-contains`; rc 0 alive / 1 dead /
+  **2 undecided**. Two properties: it reads `/proc/<pid>/cmdline` as a **plain substring** (no
+  regex, so no dialect to get wrong) and it **excludes its own ancestor chain** (the wrapper
+  carrying the search string is always an ancestor — that *is* the false-presence mechanism).
+  🎯 The general rule it encodes: **a liveness check must assert the matched line looks like the
+  job, not that some line matched.** ✅ It earned its 2 on first use: it reported *"unit active but
+  no process matches"* at the exact moment the member build finished and the pricing stage began.
+- **Standing check #41 — `w105a_liveguard.py`**, five controls, every one fired in the failing
+  direction in code on a doctored copy (deleted after): C1 ± the false presence, with the naive
+  reader required to *still be broken* — 🔴 if it ever comes back clean the hazard is gone and the
+  guard retires **deliberately**, good news goes RED (w103a/w104a C4 pattern) · C2 ± the ERE
+  dialect, same retirement rule · C3 ± the reader both ways · C4 + the document — RESEARCH must
+  name `alive.py`, and no `pgrep` line may carry `\|` **outside the section that documents the
+  anti-pattern**, an exemption scoped to that section's own span so it dies with it · C5 + not
+  vacuous. Registered in `w93a_suite.STEMS`; C2 of the runner confirms both copies read **41**.
+- **RESEARCH**: w105 section at the top; the two *prescriptive* `pgrep -af w96c_build` sites
+  (w103's and w102's) marked superseded and pointed at `alive.py`; w61's four-ways bullet
+  corrected; ANGLE INDEX row 3 → `×2` with a sub-table.
+- **`experiments/w105_prereg_addendum.txt`**, committed at 13:52Z **before** `w97a_teprior_value.csv`
+  existed — see §5.
+
+## 4. ✅ THE BUILD FINISHED, BOTH ARMS, AND IT REPRODUCED THE LOST 08-27 RUN TO THE DIGIT
+
+`w102a-build.service`, pid 1940842, in the **user** cgroup — w104's whole point, and the reason
+it is still here. Member stage complete at 09:49 EDT; pricing running since.
+
+    [windowed] OOF CV 0.9678666796   sd_test/sd_oof 1.0021 PASS      1778s
+    [global]   OOF CV 0.9677807195   sd_test/sd_oof 1.0021 PASS      3711s
+    member-level windowed − global = +86e-6            G4 met on BOTH arms
+
+Fold 0 of both arms is **bit-identical** to the two AUC lines the lost 08-27 log held, so the
+kill changed nothing about the experiment and `w97_prereg`'s provenance claim still checks out.
+⚠ The +86e-6 is the **member-level** effect (w96 measured +42e-6). It is **not** the decision
+quantity and must not be reported as one.
+
+## 5. ⚠ THE CONTROL IS A NEAR-DUPLICATE OF A MEMBER WE ALREADY HOLD — REGISTERED BEFORE THE NUMBER
+
+w26i's maxcorr screen, printed before any paired cell ran:
+
+    lgbm_teprior_windowed   maxcorr 0.997893  vs lgbm_fixed_lat   [ok]
+    lgbm_teprior_global     maxcorr 0.999997  vs lgbm_fixed_lat   [NEAR-DUPLICATE (prereg R-E3)]
+
+The flag is advisory in this instrument — it prints and still builds `pack + [nm]` for every arm
+— so **the pairing is intact and Delta is computable exactly as pre-registered.** But the control
+arm is a near-literal copy of `lgbm_fixed_lat`, so `d(global)` ≈ 0 and `Delta ≈ d(windowed)`:
+w97_prereg §2's argument was that the twin absorbs the "one more redundant member" component, and
+a twin worth nothing absorbs nothing. ⟹ **a PASS must be reported as the weaker claim** — *"a
+member at this correlation distance pays"*, not *"the windowed encoding pays"*. A FAIL is
+unaffected and if anything harsher. Written to `experiments/w105_prereg_addendum.txt` and
+committed **while `w97a_teprior_value.csv` did not exist** (checked before and after the commit),
+precisely so neither side of the verdict can deploy it as an excuse. ⛔ It changes **no gate**.
+😐 And it was foreseeable and was not foreseen: w96 made the control as similar as possible to the
+treatment and never asked how similar it would then be to the pack. **A control can be too good.**
+
+## 6. 😐 TWO NEAR-MISSES IN MY OWN WORK, BOTH THE SAME SHAPE AS THE FINDING
+
+- **I nearly recorded "the bracket trick does not work".** `pgrep -af 'w96c_[b]uild'` matched the
+  wrapper in two separate probes, so I had two observations and a mechanism. Both probes were
+  **confounded**: the wrapper's argv held the whole multi-arm script, and a *later* arm mentioned
+  the plain token. Run alone in its own command it is fine (rc=1 against a token nothing carries).
+  ⟹ The true claim is narrower and more useful: **the bracket trick is sound but in a multi-arm
+  `bash -c` every arm poisons every other arm through one shared argv.** A false claim
+  manufactured by a confounded probe, in the run whose subject is exactly that.
+- **`w105a_liveguard`'s C2 failed on first run and was right to.** My sentinel was
+  `bash -c '# TOK\nexec sleep 25'` — bash tail-call-optimises the last command into an `execve`,
+  which **replaces the argv and takes the token with it**. The `started` check read /proc before
+  the exec and passed. A probe that certifies a sentinel whose evidence is destroyed a moment
+  later is the same defect as a tool that ships its own success criterion (w104 §3). Fixed with a
+  trailing `:` and a re-check after a delay.
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK, STILL UNDONE, FOURTH RUN ASKING
+
+`check_selection.py` rc=1. Nothing is selected, so Kaggle auto-selects on **public** score, which
+is not what CV prefers.
+
+    Browser → competition submissions page → "Use for Final Score"
+    refs 55656399 and 55588167, nothing else.
+
+One minute, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. w99 §1 proved the
+price is fixed — no remaining send can raise or lower it, so it cannot go stale. w103 §3 re-took
+the browser measurement under the corrected PATH: no browser of any kind on this box. **Human-only
+and still the largest item on the board.**

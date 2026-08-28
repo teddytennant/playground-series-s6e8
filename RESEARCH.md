@@ -1,3 +1,93 @@
+# 🔻 `pgrep -af <token>` LIES IN **BOTH** DIRECTIONS HERE, AND IT IS THE LIVENESS CHECK
+# RESEARCH PRESCRIBES (w105, 2026-08-28) — use `experiments/alive.py` instead
+
+w103 was right that a build must be verified **positively**, and wrong about the command. Step 2
+of every handoff since has read `pgrep -af w96c_build`. Typed at this agent's shell that command
+fails in two independent ways, in **opposite** directions, and neither failure is visible in its
+output — a lying `pgrep` prints exactly what an honest one prints.
+
+| | what happens | what it looks like |
+|---|---|---|
+| **FALSE ABSENCE** | `pgrep` matches with **ERE**. `\|` is BRE. `pgrep -af 'a\|b'` is a *literal* and matches nothing real. | the build is dead |
+| **FALSE PRESENCE** | the agent runs every command as `bash -c '<the whole script text>'`, so the **wrapper's argv contains the token**. `pgrep -af` matches the wrapper and exits 0. | the build is alive |
+
+Both fired on w105 inside ten minutes. The false absence came first: `pgrep -af 'w96c_build\|w26i_value'`
+returned nothing, the log had stopped mid-fold, and the obvious reading was *a third lost build*.
+It was running fine — `systemctl --user is-active` disagreed, which is the only reason it was
+caught. **Cost of believing it: relaunching a build that is already running**, i.e. 16 cores
+double-booked and `oof_w96/` written by two processes at once. Measured, clean-room, one arm per
+command line so nothing self-matches:
+
+    A  pgrep -af 'w96c_build'                target FOUND    matches 1
+    B  pgrep -af 'w96c_build\|w26i_value'    target ABSENT   matches 0     ← identical to D
+    C  pgrep -af 'w96c_build|w26i_value'     target FOUND    matches 1
+    D  pgrep -af 'zzz_no_such_proc'          target ABSENT   matches 0
+
+## 🎯 THE PART THAT IS NOT ABOUT `pgrep` — THE DOCUMENT ALREADY HELD THE ANSWER, TWICE
+
+⚠⚠ **THE SELF-MATCH HALF WAS NOT NEW. IT HAS BEEN IN THIS FILE SINCE w14.** Four separate
+sections record it — *"`pgrep -f <script>.py` matches your own waiter"*, *"three background waits
+hung on this after the job had already finished"*, and the bracket dodge `w27j_[c]tclass.py`.
+Then **w103 reinstated the bare form as THE positive liveness check** and nobody connected the
+two, because they are ~6,000 and ~12,000 lines apart in a document that is read by grepping for
+today's keyword. ⟹ **A LONG DOCUMENT CAN HOLD A PRESCRIPTION AND ITS REFUTATION AT THE SAME TIME
+AND NEVER NOTICE.** Prose cannot fix this; a standing check can, which is what `#41` is for.
+
+⚠ **THE BRACKET TRICK IS SOUND AND IS ALSO A TRAP HERE.** Measured both ways: alone in its own
+command, `pgrep -af 'w105zz_[p]robe'` correctly returns rc=1 against a token nothing carries. But
+the wrapper's argv holds the **entire** script, so any *other* arm — a second probe, an echo, even
+a comment — that mentions the plain token silently defeats the bracketed arm. w105 was fooled by
+exactly that twice and nearly wrote down *"the bracket trick does not work"*, which would have
+been a false claim manufactured by a confounded probe: the same defect the section is about,
+one level up. **In a multi-arm `bash -c`, every arm poisons every other arm through one argv.**
+
+## ✅ THE FIX — `experiments/alive.py`, AND THE PROPERTY IT RELIES ON
+
+    .venv/bin/python experiments/alive.py --unit w102a-build.service \
+        --cmd-contains w96c_build_teprior_member.py     # rc 0 alive · 1 dead · 2 undecided
+
+Two properties, and the second is the general one:
+
+* it walks `/proc/<pid>/cmdline` with a **plain substring** — no regex, so there is no BRE/ERE
+  dialect to get wrong;
+* it **excludes its own ancestor chain**. The wrapper whose argv carries the search string is
+  always an ancestor of the probe. That is the whole mechanism of the false presence, and
+  excluding ancestors closes it without any cleverness inside the pattern.
+
+🎯 **THE RULE WORTH KEEPING PAST THIS TOOL: A LIVENESS CHECK MUST ASSERT THAT THE MATCHED LINE
+LOOKS LIKE THE JOB, NOT THAT SOME LINE MATCHED.** `rc=0` from a matcher is not evidence; the
+matched *content* is.
+
+⚠ `alive.py` returns **2 = undecided** when the unit is active but nothing matches, and says so.
+That is not a failure — it is what it printed on its first real use, when the member build had
+finished and the pricing stage had started under the same unit. Read the log; do not read a 2 as
+either answer. ⛔ And `systemctl --user is-active <unit>` alone is not enough either: it stays
+`active` across every stage of a multi-stage script.
+
+## ⚰️ AND A CITATION IN THE CATBOOST CLOSURE THAT POINTS AT NOTHING
+
+Separate finding, same run, same shape — checking a claim instead of quoting it. The w61 section
+below (`⛔ CATBOOST TUNING IS CLOSED`) supports itself with *"the CatBoost function class is
+already in the pack four ways (`cat_lat`, `cat_native`, `cat_native_ctr2`, `cat_natlat`)"*.
+
+    ls oof/oof_cat_*            cat_lat  cat_native  cat_raw          — THREE, and not those three
+    find . -name '*cat_native_ctr2*' -o -name '*cat_natlat*'          — NOTHING, anywhere on disk
+    experiments/w26i_run.log    "waiting for w26h_run.sh to exit..."  — the ONLY line in the file
+
+**Those two members were never built.** They are w26's E1/E2, pre-registered in
+`experiments/w26_prereg.txt` with priors (E1 modal **+1.5e-6**, E2 modal **+1.0e-6** into the
+187-pack), the build modes exist in `run_catboost.py` (`--mode natlat`, `--ctr_complexity`), and
+`w26i_value.py` still names them as its **defaults** — but the w26a→w26f→w26h→w26i chain never
+reached that stage, and a later run wrote the plan into RESEARCH as an accomplished fact.
+
+✅ **THE CLOSURE ITSELF SURVIVES, ON DIFFERENT EVIDENCE.** Its price comes from the w61 `rest`
+group — 35 ordinary XGB/LGBM/CatBoost members worth +0.000206 ± 0.000011 in total, i.e.
+**5.9e-6 each** — which does not depend on those two files existing. And the unbuilt arms' own
+registered priors (+1.5e-6, +1.0e-6) are **3% and 2% of the 5e-5 noise floor**, against 10–20 h
+of build time for a native CatBoost pair at 1–2 h per fold. ⛔ **Do not build them.** But fix the
+sentence: a closure resting on a citation that does not resolve invites exactly the re-litigation
+the ANGLE INDEX exists to prevent.
+
 # 🔻 THE 08-27 BUILD WAS NOT KILLED BY "THE SESSION ENDING" — IT WAS KILLED BY ITS **CGROUP**
 # (w104, 2026-08-28) — and the tool RESEARCH told eight runs to use could never have prevented it
 
@@ -106,8 +196,10 @@ Three claims in this file were wrong for this reason, and each has now been corr
 
 ⚠⚠ **THE w102 §1 ENTRY IS THE ONE TO INTERNALISE.** It concluded *"the build did not crash — it
 was killed, and the log cannot tell you which"*, and built a whole handoff protocol around
-reading a truncated log. The log never had to be the evidence. `pgrep -af w96c_build` answers it
-directly, and did in w103:
+reading a truncated log. The log never had to be the evidence. A process check answers it
+directly, and did in w103 — ⛔ **but NOT with the command w103 wrote here.** `pgrep -af
+w96c_build` matches this agent's own `bash -c` wrapper, whose argv holds the search string,
+so it reports ALIVE with the build dead. Use `experiments/alive.py` (w105, top of this file):
 
     1940840 /bin/bash …/experiments/w102a_build_then_price.sh
     1940842 .venv/bin/python -u experiments/w96c_build_teprior_member.py     17:41 elapsed, 1328% CPU
@@ -274,7 +366,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 |---|---|---|---|---|
 | 1 | *the original dataset* — find it, concat it as extra rows | ×5, from 08-11 | 0 | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` |
 | 2 | *tune LightGBM properly against the fixed folds* | ×4, from 08-10 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
-| 3 | *CatBoost: it handles categoricals better* | w61, 08-22 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
+| 3 | *CatBoost: it handles categoricals better* | ×2, w61 08-22 → w105 08-28 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
 | 4 | *XGBoost as the third leg of the ensemble* | same instrument as 2 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | w15b/w15d → w62 | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` |
 | 6 | *blending: rank-average or weight the models by OOF* | ×2, 36 members apart → w63 | **−0.96e-6** | `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` |
@@ -298,6 +390,21 @@ arithmetic, and the remaining quarter is the pre-registered experiment already r
 box"** — which is why w104 spent its run seeing that build to a verdict instead of sweeping
 `num_leaves`. ⛔ Still do not sweep the three closed knobs: the arithmetic (3e-5 member-level ×
 1.4% pass-through) does not care which values you have not tried yet.
+
+⚠ **ROW 3 IS HANDED WITH THE SAME SPLIT AS ROW 2, AND ITS CITATION WAS BROKEN.** The 08-28
+handing read *"CatBoost handles categoricals better on survey-style data. Tune and compare on
+identical folds."* Resolve it in two pieces, not one:
+
+| the sub-clause | status | where |
+|---|---|---|
+| *tune and compare on identical folds* | closed, **5.9e-6/member** — and that is the `rest`-group price for ANY ordinary GBDT member, ~12% of the 5e-5 noise floor | `CATBOOST TUNING IS CLOSED` |
+| *handles categoricals better* | **pipeline, not hyperparameter** — and CatBoost's native CTR *is* an ordered (windowed) target statistic, which is precisely what the w96 windowed-TE-prior member ports into LightGBM. Same live experiment as row 2's fourth knob. | `w97_prereg.txt`, `experiments/w105_prereg_addendum.txt` |
+
+🔴 **AND w105 FOUND THE ROW-3 CLOSURE STANDING ON A CITATION THAT RESOLVES TO NOTHING** — two of
+the four members it named as proof were never built. Corrected in the w61 section itself; the
+closure survives on the `rest`-group measurement. ⟹ **The index tells you an angle is closed; it
+does not tell you the closure's evidence still exists. Check the artefact, not the sentence.**
+`#41 w105a_liveguard` is the same lesson mechanised for the liveness recipe.
 
 ⚠ **ROW 8 IS A DIFFERENT GENUS FROM ROWS 1–7, AND THE DISTINCTION MATTERS.** Rows 1–7 say *we
 measured this and it does not pay*. Row 8 says *this is already built and is under standing
@@ -748,7 +855,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 40 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 41 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -758,7 +865,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
-    w101a_angleguard  w103a_pathguard    w104a_cgroupguard
+    w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -2852,9 +2959,18 @@ Fourth angle now closed by measurement rather than by opinion, alongside the ori
 (×4) and LightGBM tuning (×3):
 * the `rest` group — **35** ordinary XGB/LGBM/CatBoost members — is worth +0.000206 ± 0.000011
   **in total**, i.e. **5.9e-6 each**;
-* the CatBoost function class is already in the pack four ways (`cat_lat`, `cat_native`,
-  `cat_native_ctr2`, `cat_natlat`), and `run_catboost.py --inner` is the honest tuning path,
-  built and run;
+* the CatBoost function class is already in the pack — **three ways as of 2026-08-28:
+  `cat_lat`, `cat_native`, `cat_raw`** — and `run_catboost.py --inner` is the honest tuning
+  path, built and run;
+  ⛔ **CORRECTED w105, 2026-08-28.** This bullet used to read *"four ways (`cat_lat`,
+  `cat_native`, `cat_native_ctr2`, `cat_natlat`)"*. **The last two were never built** — no
+  such file exists anywhere on disk, `experiments/w26i_run.log` contains only *"waiting for
+  w26h_run.sh to exit..."*, and the chain died before that stage. They are w26's E1/E2,
+  planned in `experiments/w26_prereg.txt`, and a later run wrote the plan down as a fact.
+  The closure is unaffected — its price is the `rest`-group measurement above, which does
+  not depend on those files — and the two unbuilt arms' own registered priors (+1.5e-6 and
+  +1.0e-6) are 3% and 2% of the 5e-5 noise floor against 10–20 h of build. ⛔ Do not build
+  them, and do not read the missing files as an open thread;
 * the one place foreign CatBoosts paid (**+10.3e-6 each**, adarsh1077) was measured to be a
   property of the **PIPELINE we did not hold**, not of the function class. The operational rule
   is *"prefer a pipeline we do not hold"*, NOT *"prefer CatBoost"*.
@@ -12481,6 +12597,9 @@ for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" i
 installed, in `/run/current-system/sw/bin`, invisible to a bare `command -v`. w102 §1 found a
 build dead and concluded *"the log cannot tell you whether it crashed or was killed"* — with
 `ps` it is one command, and a liveness check no longer has to be inferred from a log's tail:
+    # ⛔ SUPERSEDED w105 — this line self-matches the agent's bash -c wrapper and reports
+    #    ALIVE with the build dead. Use:
+    #      .venv/bin/python experiments/alive.py --unit <unit> --cmd-contains <script.py>
     export PATH="/run/current-system/sw/bin:$PATH"; pgrep -af w96c_build
 (superseded) Also: **`pgrep` is not installed here** (`pgrep: command not found`), like
 `setsid`, `ps` and `free`. Do not build a wait-loop on any of them.
