@@ -1,0 +1,58 @@
+w111 PRE-REGISTRATION — 2026-08-28, slot 10 of 10
+ANGLE as handed: "Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check the
+CV-to-LB gap across every experiment so far, and make sure the strongest submission is the one
+selected."
+
+CONSTRAINT KNOWN BEFORE ANY WORK
+--------------------------------
+w26g_send.py --n 10: 171 submissions on record, 10 already sent 2026-08-28 (UTC), 0 of 10 slots
+left. NOTHING SHIPS FROM THIS RUN. No member is built, no drop list is edited, the registered
+08-29 queue is not re-litigated, the deadline pick does not move except by a HUMAN click.
+
+STATUS OF THE ANGLE BEFORE ANY WORK
+-----------------------------------
+This is ANGLE INDEX row 10 (consolidation), handed x5 before today (08-11 s8, 08-13 s5,
+08-16 w16c, 08-19 w28 s9, 08-24 w75 s4) and now x6. Row 10 is the ONLY row of the ten that is
+not a closed modelling angle: it is the standing checklist, and RESEARCH says explicitly that
+consolidation is where the remaining value is. So it is taken AS ISSUED and EXECUTED, not
+refused with a citation. It is also the one row never re-verified at the artefact level
+(rows 3,4,5,6,7,9 have been, by w105-w110).
+
+THE THREE INSTRUMENTS ROW 10 NAMES, PLUS THE ONE THE ANGLE'S MIDDLE CLAUSE NAMES
+--------------------------------------------------------------------------------
+  I1  check_selection.py       is the strongest submission selected?      live, read-only
+  I2  w93a_suite.py            45 standing checks                          ~255s
+  I3  w93b_cvlbaudit.py        CV-to-LB gap over EVERY file sent           live, read-only
+  I4  w84a_pickargmax + w93c_pickverify   the CV-argmax pick, and its verification
+
+I3's artefact on disk is STALE: w93b_cvlbaudit.json was written at 160 sends and there are now
+171. Re-running it is the angle's middle clause done properly, and it writes only its own file.
+
+REGISTERED PREDICTIONS
+----------------------
+P1  I1 exits rc=1 with "NOTHING IS SELECTED" and names refs 55656399 and 55588167.
+P2  I3 re-run live at 171 sends: gap_mean stays within 1e-4 of the published 0.0010358;
+    gap_sd stays below 6e-5 (published 3.392e-5); pearson stays above 0.80 (published 0.8842).
+P3  I3's cv_pair is UNCHANGED at (w36_ad199stdcorr.csv, w38_ad202stdcorr.csv) - none of the 11
+    files sent since the audit was written displaces the CV argmax, because today's ten were
+    pinned exploratory files (CV nan) or blends at CV 0.96995-0.96996, all below 0.9701400.
+P4  I4 green, and the file pair it names is the same pair I1 names by ref.
+P5  the full suite is 45/45 GREEN under systemd-run with PATH inherited - INCLUDING
+    w54a_vetoexpiry and w85c_slotguard, which fail by design only when the queue on disk was
+    written for the day just sent. The queue on disk is for 2026-08-29, the next UNSENT day,
+    so the freshness condition is satisfied and neither should be red.
+
+FALSIFICATION AND WHAT EACH MISS MEANS
+--------------------------------------
+P1 miss (rc=0): the click has been done - that is the largest open item closing, record it.
+P2 miss: the CV-to-LB relation has moved with 11 more sends; report the new numbers as the
+    current ones and say which direction it moved. Not a reason to change a pick.
+P3 miss: a file sent since w93 outranks the deadline pick ON CV. That WOULD change the pick,
+    and it is the one outcome of this run that could move a decision. Verify with I4 before
+    believing it.
+P4 miss: the selection instruments disagree with each other; diagnose before anything else.
+P5 miss: read the FULL failure log at experiments/w93a_fail_<stem>.log before diagnosing, and
+    treat a red under systemd-run as an ENVIRONMENT hypothesis until re-run in the shell (w110).
+
+Read-only run. No file that any other module consumes is written except w93b_cvlbaudit.json,
+which is its own and is read by nothing.
