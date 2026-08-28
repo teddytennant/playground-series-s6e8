@@ -29939,3 +29939,192 @@ queues untouched: §1 is a reason to send them **as registered**, not to edit th
    and all absent (§3) · **DO NOT** re-price the hijack channel; it is exactly 0 and no send
    can change it (§1) · **DO NOT** re-run a standing check to "add data" without diffing its
    artefact first (§4) · **DO NOT** read w96d's per-fold tally as evidence (w98 §7, still live).
+
+---
+
+# w101 — 2026-08-27, slot 7 of 10, ANGLE "Feature engineering: interactions, in-fold target and
+# count encodings, careful categorical treatment"
+# ⛔ ANGLE REFUSED (EIGHTH TIME) · 0 SLOTS (cap spent) · NO SUBMISSION · w100's WORK RECOVERED
+
+## 0. THE THREE CONSTRAINTS
+
+**Cap spent.** `w26g_send.py --n 10`: *"161 submissions on record; 10 already sent on 2026-08-27
+(UTC); 0 of 10 slots left today."* No slot existed and none was attempted. ⚠ The dry run also
+printed a loud **"QUEUE FOR ANOTHER DAY"** banner — it globbed the 08-28 queue, correctly refused
+to treat it as today's plan, and that banner is the guard working, not a fault.
+
+**The 16 cores are committed** to `w96d` (pid 32247) with `w97b` (pid 52805) detached behind it.
+Load ran 12 → 24 across the run. Nothing new was trained.
+
+**ANGLE REFUSED, and this time the refusal got written down properly.** See §2.
+
+## 1. 🔴 THE FIRST FINDING WAS A PROCESS ONE: **w100 LEFT ITS WORK UNCOMMITTED AND UNJOURNALED**
+
+`git status` at the top of this run showed `experiments/w100a_complement.py` **staged but never
+committed**, a +78-line staged `RESEARCH.md` block describing it, edits to `w87a_registrarguard.py`
+and `w93a_suite.py`, and an unstaged `w87a_registrarguard.json`. `grep '^# w100' JOURNAL.md`
+returned **nothing**. A whole run's output was sitting in the index, one `git checkout` from
+being lost, and no entry anywhere said it existed.
+
+✅ **Verified before landing it, not after.** Ran the full suite — now **37 checks** because w100
+registered `w100a_complement` as #37 — and it came back **37/37 green, FAILURES 0, 335s**
+(`logs_w101_suite.txt`), with `w100a_complement rc=0` and C2 confirming the suite's `STEMS` list
+and RESEARCH's published table agree at 37. **Committed as `4638046`.**
+
+The content is w100's and is good: every guard on this workspace reads the calendar *forwards*
+(are there enough files for the slots / is every registered file plannable / does every planned
+file exist), and none of them asked the complement — of the 70 unsent files in `submissions/`,
+is each one planned, vetoed or refused? It is: 40 planned / 19 vetoed / 3 refused / 4
+byte-identical twins / 3 registrar headroom / 1 sender-refused, **complement 0**. And its
+by-product is the sharper number: **4 of the 19 `VETO` entries are the only thing holding their
+file**, `w50_ad216std_h3` among them at a CV 5.9e-6 *above* the WANTED pick. ⛔ Do not tidy `VETO`.
+
+🎯 **LESSON, and it is not w100's alone: `git status` is part of orienting, not part of shipping.**
+The standing playbook puts `git status` in step 6, next to the commit. Read there, it only ever
+describes *this* run's changes. Read in step 1 it also answers *"did the last run finish?"* — and
+here it was the only thing on the box that knew the answer.
+
+## 2. ⛔ THE ANGLE, REFUSED FOR THE EIGHTH TIME — AND THE REFUSAL TURNED INTO THE RUN'S DELIVERABLE
+
+Feature engineering is closed, and closed by exactly the instrument the angle asks for. The angle
+says *"measure every feature on CV, keep only what pays."* w15b measured a 40-column numeric frame
+— raw columns, constrained imputation, bounds, decimal lattice, and every interaction a 31-leaf
+tree finds over 1000 rounds — against the **stack's residual** rather than the raw target, which
+is the stronger test. `real − ctrl` came back **NEGATIVE at all 8 round counts in BOTH modes**
+(offset −2.0e-5 → −2.2e-4; feature −7.4e-5 → −5.3e-4). And the *productive* half of the angle is
+already spent: target + frequency encoding at full resolution on all columns is **in the pipeline**
+and is on file as the single biggest win this workspace ever found (+0.0023 CV / +0.0017 LB).
+The angle is not unexplored. It is exhausted from the top. w62 closed it as the fifth angle.
+
+### 🎯 BUT THE REAL FINDING IS *WHY I HAD TO SPEND HALF A RUN RE-ESTABLISHING THAT*
+
+This is the **eighth** handing (w16s, w22, w62, and five more) and the **fifth consecutive run**
+to open with a refusal — w97/w98/w99 refused GBDT tuning, w101 refuses FE. Seven distinct angles
+have now been closed by measurement. **Every closure was written down. Not one of them was
+written down anywhere a future run could find in less than a dozen greps**, because each lived in
+its own run's prose section, anchored to nothing, in one of two 30k-line documents.
+
+⟹ Built **`RESEARCH.md` § "📇 THE ANGLE INDEX"**: seven rows, one per angle as handed, each with
+its closure, its price, and a **grep string**. Take a content word out of your ANGLE — `feature`,
+`CatBoost`, `tune`, `seed`, `blend`, `original`, `XGBoost` — grep the block, read the row.
+
+    1 original dataset  ×4, from 08-11      0          5 feature engineering  w15b/w62  NEGATIVE
+    2 LightGBM tuning   ×3                  +4e-7      6 blending/weights     ×2 → w63  −0.96e-6
+    3 CatBoost          w61                 5.9e-6/m   7 seed/fold diversity  ×5 → w64  struct null
+    4 XGBoost 3rd leg   same instrument as 2 +4e-7
+
+⚠ **Anchors are section-header TEXT, never line numbers.** RESEARCH.md gets a new section
+prepended at the top *every run*, so every line number in it is stale within a day. That is w99
+§4's *"a number quoted in RESEARCH is dated to the section that wrote it"* — applied to navigation
+instead of to arithmetic.
+
+⚠ **"CLOSED" in that table means PRICED, not disliked.** Every row is a measurement against a
+matched control and names it. The journal's rule is that an angle may be set aside only with a
+concrete reason; the row **is** the reason. Do not re-run the experiment to re-earn the right to
+skip it.
+
+## 3. ✅ STANDING CHECK #38 — `w101a_angleguard`, BECAUSE A NAVIGATION TABLE ROTS SILENTLY
+
+An index whose pointers have rotted is **worse than no index**: a future run greps a dead anchor,
+gets nothing, concludes the closure was never written, and re-runs a closed angle — the exact cost
+the index exists to prevent. At least with no index you fall back to `grep -i` over the document.
+
+    .venv/bin/python experiments/w101a_angleguard.py     # rc=0, FAILURES 0, 4 controls
+
+🔴 **THE BUG IT EXISTS BECAUSE OF WAS IN THE INDEX'S OWN FIRST DRAFT, AND I ALMOST SHIPPED IT.**
+I hand-verified the seven rows with `grep -c`. Six returned 2+ hits. One — `THE ORIGINAL DATASET
+IS` — returned exactly **1**, and one hit is *not* a pass: it was the index's own copy of the
+string, and no such header existed. The live header is `## The original dataset — CLOSED, both
+routes measured here`. ⟹ **AN ANCHOR MUST BE COUNTED OUTSIDE THE BLOCK THAT QUOTES IT.** A naive
+`count >= 1` self-satisfies on every row it will ever check. Same shape as w100a's *"a check whose
+universe is a filtered artefact measures the filter"*: **a check whose corpus contains the claim
+measures the claim.** C3 fires that exact regression in code — a self-only anchor must read 0
+under the live reader and ≥1 under the naive one, and both are computed so the two cannot agree.
+
+🎯 **AND C4 CAUGHT A SECOND BUG ON THE FIRST EXECUTION — IN MY OWN PARSER.** C4 refuses to pass
+over an empty set. First run: `C4 not vacuous: 0 rows, 0 anchors (floor 7/8)` → **FAILURES 4**.
+Cause: RESEARCH's house style puts provenance on a *second* `# ` line under the title, so the
+block-end scan (`find("\n# ")`) terminated the block **on its own subtitle** and handed the parser
+one header and zero rows. Without C4 that reads as `C1 0/0 resolving` → green, forever, over
+nothing. ⚠ **The vacuous pass is the failure mode that survives review**, because a check that
+examines nothing prints exactly what a check that examines everything successfully prints.
+
+Registered as **#38** in both `w93a_suite.STEMS` and RESEARCH's published table; C2 re-parses the
+document and confirms the two agree at 38. Committed `81ece84`.
+
+## 4. ⏳ w96d CLEARED ITS REPLICATION GATE — THE BUILD IS LIVE, THE VERDICT IS NOT IN YET
+
+The five folds finished this run and **the addendum's rule CONFIRMED at the tuned vector**:
+
+    fold 0  signal  +63.351e-6   null  +64.480e-6      SIGNAL mean  +83.384e-6  sd 54.060e-6
+    fold 1  signal +136.886e-6   null  +52.405e-6      NULL   mean   -0.640e-6  sd 56.143e-6
+    fold 2  signal +107.767e-6   null  -36.644e-6      A SEPARATION +84.025e-6 vs 2se 69.711  PASS
+    fold 3  signal +109.948e-6   null  -62.722e-6      B CONSISTENCY   4/5, need 4            PASS
+    fold 4  signal   -1.031e-6   null  -20.721e-6      C MAGNITUDE  +83.384e-6 vs floor 25    PASS
+
+    CONFIRM. The effect survives to the tuned vector on A and B. The control-vector BUILD stands.
+
+`w96c` is now building the member (it re-prints its own gate on the **control** vector, mean
+**+41.936e-6**, also PASS — so two independent operating points clear it). `oof_w96/` exists and
+is filling. `w97b` (pid 52805) is still detached and still waiting, and runs `w26i_value` behind
+the build.
+
+⛔⛔ **DO NOT READ ANY NUMBER ABOVE AS THE VERDICT, AND THAT INCLUDES READING IT AS ENCOURAGING.**
+This is on the DO-NOT list from w98 §7 and it is the single easiest mistake available right now,
+because +83e-6 with A/B/C all green *feels* like an answer. It is not the decision quantity.
+`w97_prereg.txt` §2 decides on **Delta = d(windowed) − d(global), paired within rep, INSIDE the
+pack**, through G0–G4, registered prediction **[0, +3e-6], modal +1e-6**. A large member-level
+effect and a ~+1e-6 pack-level Delta are not in tension — that is the definition of w24b's
+**redundant family (+1.07e-6/member)**, which is where the prereg already placed this member in
+advance. ⚠ The A gate passed at +84.0e-6 against a 2se of **69.7e-6**, and fold 4 is ~zero: it
+cleared, but it is not a wide margin. **NO-ENROL remains the modal outcome and is not a failure.**
+
+## 5. WHAT DID NOT MOVE
+
+No send (0 slots — and the brief's "use all 10 daily" is satisfied; today's ten went out at
+12:38Z). No model trained by me. Nothing enrolled in `oof/`. `SELECT_THESE.md` untouched. No
+blend reweighted. `PRED_SD` / MU pin / `w46c.ERA_SHIFT` untouched. The 08-28..08-31 queues
+untouched. `w48e_order.VETO` untouched — §1 is the reason it must stay that way.
+
+## 6. ⛔ TEDDY — THE ONE OUTSTANDING ITEM IS STILL A HUMAN CLICK, AND IT IS STILL UNDONE
+
+`check_selection.py` rc=1. Nothing is selected. With nothing clicked Kaggle auto-selects the final
+two on **public** score, which is not what CV prefers. Browser → competition submissions page →
+**"Use for Final Score"** on refs **55656399** and **55588167**, nothing else. One minute, worth
+**+4.5228e-6** of expected private AUC, deadline **2026-08-31 23:59**. w99 §1 proved this price is
+now **fixed** — no remaining send can raise or lower it — so it will not go stale. There is no
+browser and no Kaggle session cookie on this box (w97, w99 §3, both checked exhaustively); the
+route is human-only and no further probing is warranted.
+
+## 7. NEXT RUN — READ THIS ORDER
+
+1. **`git status` FIRST**, before anything else. §1: it is the only thing that knows whether the
+   previous run finished. If it shows staged-but-uncommitted work with no matching journal entry,
+   that is a recovery job and it is the highest-value thing on the board.
+2. `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`. **If it is 08-28 UTC or
+   later, 10 slots are open and the plan already exists**: `w23b_sendqueue.py` → `w48e_order.py
+   --day <today> --write` → `w26g_send.py --n 10` dry, matched **in code** against
+   `w72a_plan_<today>.json`, then `--go`. w99 §1: the whole 40-file remainder is selection-safe.
+3. `tail -40 logs_w97b_value_then_gate.txt`. The build was live at the end of this run. Endings:
+   **NO ARMS ON DISK** (⛔ end of the line), **NO-ENROL** (modal — §4), **ENROL** (→ copy
+   `oof_w96/{oof,test,summary}_lgbm_teprior_windowed.*` into `oof/`, the windowed member **alone**,
+   never the global twin, and read `w97_prereg.txt` §4 before anything else).
+4. Re-run `w93a_suite.py` — **38 checks now**, ~5.6 min — after any send.
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w99's list holds. Added this run:
+   **DO NOT** take the feature-engineering angle — eighth refusal; grep `📇 THE ANGLE INDEX` and
+   quote the row, do not re-derive it (§2) · **DO NOT** take *any* of the seven indexed angles
+   without first reading its row · **DO NOT** read w96d's fold table or its A/B/C passes as the
+   enrolment verdict, in either direction (§4) · **DO NOT** tidy `w48e_order.VETO` — four entries
+   are load-bearing (§1) · **DO NOT** trust a `grep -c >= 1` on an anchor quoted in the same file
+   it points into (§3).
+6. ⚠ **NEW LESSONS.**
+   • **A check whose corpus contains the claim measures the claim.** The dual of w100a's filtered
+     universe. Exclude the assertion from the evidence, in code, with a control that proves the
+     exclusion is wired.
+   • **A vacuous pass prints the same thing as a real pass.** Every check that iterates a parsed
+     set needs a floor on the set's size. C4 caught my own parser on its first execution.
+   • **`git status` belongs in orienting, not in shipping.** A run that dies after staging leaves
+     no other trace.
+   • **A closure that cannot be found in one grep gets re-litigated.** Seven angles were closed by
+     measurement and the refusals still cost half a run each, because *findable* is a separate
+     property from *written down* — and only the second one was ever anybody's job.
