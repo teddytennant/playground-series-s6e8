@@ -1,0 +1,62 @@
+w105 ADDENDUM TO w97_prereg.txt — AN INTERPRETATION NOTE, REGISTERED BEFORE THE NUMBER EXISTS
+=============================================================================================
+
+WRITTEN 2026-08-28, ~14:15 UTC, while `experiments/w26i_value.py` was still at rep 0 of 5.
+The checkable evidence that this predates the result:
+
+  * `experiments/w97a_teprior_value.csv` DID NOT EXIST when this was committed.
+  * `logs_w102a_build_then_price.txt` held exactly one paired-cell line, `rep 0 base165 ...
+    AUC 0.970104`, which is the BASE arm and carries no information about either treatment.
+  * The commit that adds this file also adds nothing under `w97a_*`.
+
+THIS ADDENDUM CHANGES NO GATE. G0-G4 in w97_prereg.txt §3 stand exactly as written, read off
+`Delta = d(windowed) - d(global)` exactly as written. w97_prereg §5 forbids switching the
+decision quantity and that prohibition is untouched. What follows is a caveat on what a PASS
+would mean, and it is registered now precisely so that it cannot be deployed later as an
+excuse by whichever side of the verdict finds it convenient.
+
+
+THE OBSERVATION
+---------------
+w26i's maxcorr screen, printed before any paired cell ran:
+
+    lgbm_teprior_windowed   solo 0.967867   maxcorr 0.997893  vs lgbm_fixed_lat   [ok]
+    lgbm_teprior_global     solo 0.967781   maxcorr 0.999997  vs lgbm_fixed_lat   [NEAR-DUPLICATE]
+
+The screen is advisory in this instrument -- `w26i_value.py` prints the flag and still builds
+`pack + [nm]` for every arm -- so the pairing the prereg depends on is intact and Delta is
+computable exactly as specified. Nothing here is a reason to stop.
+
+
+WHAT IT MEANS, STATED IN ADVANCE
+--------------------------------
+The CONTROL arm is a near-literal copy of a member the pack already holds. At r = 0.999997 the
+"global TE prior" model is not merely redundant in the w24b sense (+1.07e-6, "one more member of
+a family we have"); it is approximately the same predictions as `lgbm_fixed_lat`.
+
+Consequently:
+
+  1. d(global) is expected to be ~0, being the marginal value of a duplicate. Therefore
+     Delta = d(windowed) - d(global) will be approximately d(windowed).
+
+  2. ⚠ THE SUBTRACTION THEREFORE REMOVES LESS THAN THE PREREG ASSUMED. w97_prereg §2's whole
+     argument for the difference-of-differences is that the twin absorbs the "one more redundant
+     member" component so that what survives is the ENCODING. If the twin contributes ~nothing,
+     there is ~nothing to absorb, and a Delta that clears G2 is consistent with EITHER
+     "the windowed encoding is worth something" OR "any member at maxcorr 0.9979 rather than
+     0.99999 is worth something". Those two are not separated by this design.
+
+  3. ⟹ A PASS SHOULD BE REPORTED AS THE WEAKER CLAIM. Not "the windowed encoding pays" but
+     "a member at this correlation distance pays, and the windowed encoding is how we got one".
+     A FAIL is unaffected: if Delta does not clear G2 even with the control contributing
+     nothing, the encoding has no case at all and the reading is if anything harsher.
+
+  4. ⛔ THIS IS NOT A LICENCE TO RE-RUN WITH A DIFFERENT CONTROL. Building a third arm to fix
+     the design after seeing the maxcorr would be choosing the comparison, and w97_prereg §5
+     forbids exactly that move. With three days to the deadline it is also unaffordable: the
+     two arms just built cost 5489s of wall clock between them.
+
+  5. It is also worth recording plainly that this was FORESEEABLE and was not foreseen. w96
+     chose "same model, same folds, same features, same seed, one encoding changed" as the
+     control precisely to make the arms similar, and did not ask how similar the control would
+     then be to the members already in the pack. A control can be too good.
