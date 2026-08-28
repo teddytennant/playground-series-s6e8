@@ -47,6 +47,10 @@ decoration).
          drops to zero the hazard is gone (or the two paths are being built wrong) — either way
          a human must look, so it goes RED rather than quietly green. Retiring this guard is a
          decision, not a drift.
+  C5 +-  RESOLVING IS NOT WORKING (w104). `sudo` exists under BOTH SYSBIN and /run/wrappers/bin,
+         and only the wrapper is setuid-root. `shutil.which` finds the broken one and calls it
+         found, so C1 cannot see this. C5 asserts the corrected path yields a setuid-root binary
+         AND that the SYSBIN copy is not one — the difference IS the trap.
 """
 from __future__ import annotations
 
@@ -62,6 +66,15 @@ OUT = os.path.join(HERE, "w103a_pathguard.json")
 
 # The directory the agent shell's PATH omits. Everything below is about this one string.
 SYSBIN = "/run/current-system/sw/bin"
+
+# ⚠ w104: SYSBIN IS NOT THE WHOLE FIX. NixOS keeps setuid wrappers in a SECOND directory, and
+# sw/bin holds a same-named, NON-setuid copy of each. So `sudo` resolves under SYSBIN, runs, and
+# exits with "must be owned by uid 0 and have the setuid bit set" — a failure that looks like a
+# permissions problem and is a PATH problem. w104 piped that error into grep while sweeping the
+# kernel log for OOM kills, got an empty result, and nearly recorded "no OOM events" as a fact.
+# C1 could not catch this: shutil.which finds the broken copy and reports success.
+WRAPPERS = "/run/wrappers/bin"
+SETUID_TOOLS = ["sudo"]
 
 # Tools this workspace has recorded as ABSENT, plus the ones its launch/push recipes depend on.
 # Each of these has a false "not installed" claim behind it somewhere in RESEARCH.md or JOURNAL.md.
@@ -83,14 +96,16 @@ def fail(msg: str) -> None:
 
 
 def corrected_path() -> str:
-    p = os.environ.get("PATH", "")
-    return SYSBIN if not p else f"{SYSBIN}{os.pathsep}{p}"
+    """WRAPPERS first: for a name present in both, the setuid copy is the one that works."""
+    parts = [WRAPPERS, SYSBIN] + [d for d in os.environ.get("PATH", "").split(os.pathsep) if d]
+    return os.pathsep.join(parts)
 
 
 def naive_path() -> str:
     """What a fresh agent shell sees. SYSBIN is stripped in case a caller already exported it,
     so the comparison measures the defect and not this process's own environment."""
-    parts = [d for d in os.environ.get("PATH", "").split(os.pathsep) if d and d != SYSBIN]
+    parts = [d for d in os.environ.get("PATH", "").split(os.pathsep)
+             if d and d not in (SYSBIN, WRAPPERS)]
     return os.pathsep.join(parts)
 
 
@@ -149,9 +164,39 @@ def main() -> int:
              "section must be retired DELIBERATELY, not left to rot — or the two paths are "
              "being constructed wrongly and C4 has stopped testing anything.")
 
+    # ---- C5 +-: RESOLVING IS NOT WORKING. A setuid tool must resolve to a binary that is
+    # actually setuid-root, and the same name under SYSBIN alone must NOT be — that difference
+    # is the second half of the defect and it is invisible to `which`.
+    setuid_ok, trap_seen = [], []
+    for t in SETUID_TOOLS:
+        good = shutil.which(t, path=corrected)
+        sysonly = shutil.which(t, path=SYSBIN)
+        def suid(path):
+            try:
+                st = os.stat(path)
+                return bool(st.st_mode & 0o4000) and st.st_uid == 0
+            except OSError:
+                return False
+        g, b = suid(good) if good else False, suid(sysonly) if sysonly else False
+        print(f"\nC5 {t:<6} corrected={good or '-'} setuid_root={g}   (want True)")
+        print(f"   {'':<6} sysbin   ={sysonly or '-'} setuid_root={b}   (want False, = the trap)")
+        if not g:
+            fail(f"C5: {t} does not resolve to a setuid-root binary even with {WRAPPERS} on "
+                 f"PATH. Anything needing root will fail with a message about ownership, which "
+                 f"reads as a permissions problem and is a PATH problem")
+        else:
+            setuid_ok.append(t)
+        if sysonly and not b:
+            trap_seen.append(t)
+    if not trap_seen:
+        print(f"C5 note: no SYSBIN copy of {SETUID_TOOLS} shadows the wrapper any more. Not a "
+              f"failure — but the trap this control exists for may be gone; check before "
+              f"trusting the shape of this guard.")
+
     json.dump(dict(day=dt.datetime.now(dt.timezone.utc).date().isoformat(),
                    sysbin=SYSBIN, sysbin_exists=os.path.isdir(SYSBIN),
                    probed=probed, only_via_sysbin=only_via_sysbin,
+                   wrappers=WRAPPERS, setuid_ok=setuid_ok, setuid_trap=trap_seen,
                    corrected={k: v for k, v in found_corrected.items()},
                    naive={k: v for k, v in found_naive.items()},
                    failures=FAILS), open(OUT, "w"), indent=1)

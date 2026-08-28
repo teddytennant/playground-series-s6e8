@@ -1,3 +1,80 @@
+# 🔻 THE 08-27 BUILD WAS NOT KILLED BY "THE SESSION ENDING" — IT WAS KILLED BY ITS **CGROUP**
+# (w104, 2026-08-28) — and the tool RESEARCH told eight runs to use could never have prevented it
+
+The daily runner is a systemd **system** unit, `kaggle-playground.service`, `KillMode=control-group`,
+`KillSignal=15`. When it deactivates after slot 10, systemd SIGTERMs **every process in its
+cgroup**. Cgroup membership is inherited across `fork()` and is **not** changed by `setsid()`, by
+a second fork, or by being reparented to init. Verified in code, both directions, this run:
+
+    detach.py child (setsid + double fork)  /system.slice/kaggle-playground.service   == ours
+    systemd-run --user child                /user.slice/…/app.slice/<unit>.service    != ours
+    kaggle-playground.service               KillMode=control-group  KillSignal=15
+    Linger=yes                              (the user manager survives with no session)
+
+🔴 **SO `experiments/detach.py` — which RESEARCH has told every run to use "for every long build"
+since 08-20 — CANNOT DO THE ONE THING IT WAS WRITTEN FOR.** w96d's member build *was* launched
+through it on 08-27 (pid 32247, ppid=1, own session). The evidence for how it died:
+
+| observation | instrument | reading |
+|---|---|---|
+| kernel OOM at that time? | `sudo dmesg -T`, log spans 08-26 12:26 → 08-28 08:48 | **no** — the only OOM storm is 08-26 12:26 |
+| systemd-oomd kill? | `journalctl -u systemd-oomd` | none |
+| crash? | the build log ends mid-fold with no traceback and no exit line | no |
+| unit teardown? | `journalctl`: `kaggle-playground.service: Deactivated successfully` **11:04:33 EDT 08-27** | the build's log last advanced **11:01:20 EDT**, mid-fold-2 |
+
+⚠ `sudo` is at **`/run/wrappers/bin/sudo`**, not `/run/current-system/sw/bin/sudo` — the copy in
+sw/bin is not setuid and exits with *"must be owned by uid 0 and have the setuid bit set"*. My
+first OOM sweep piped that error into `grep`, got no hits, and read it as *"no OOM events"*. It
+was a broken instrument printing an empty set. **w103's PATH finding has a second directory**,
+and `w103a_pathguard` does not cover it because it tests `shutil.which`, which finds the wrong
+sudo and calls it found. Add `/run/wrappers/bin` in front of `sw/bin` for anything setuid.
+
+## 🎯 WHY EIGHT DAYS OF RUNS MISSED IT — THE PART WORTH KEEPING
+
+**`ppid=1` and "own session" are the only two facts a detach tool can report, and neither one is
+the fact that decides.** w41 verified detach.py by checking exactly those (JOURNAL: *"PID 4127802,
+ppid=1, own session — w41's detach.py fix"*) and wrote the verification down as a pass. Those
+checks would have printed the identical green on the morning it lost the build. The tool reports
+success in the vocabulary it controls; the killer operates in a vocabulary — cgroups — the tool
+never mentions, so **it cannot report its own failure mode even in principle.**
+
+⚠ **AND THE PROBE BUILT TO SETTLE THIS COULD NOT HAVE SETTLED IT.** w103 left a `setsid`
+heartbeat running to see whether it outlived "the session". It did, and w103 pre-registered that
+as the discriminating observation. It is not: the runner unit stays **active across slot
+boundaries**, so a job started in slot 2 and still beating in slot 3 has not been tested at all.
+The discriminating event is unit *deactivation*, after slot 10 — which no single slot can
+observe. That is the exact defect w103 named one paragraph above the probe it then built:
+*a probe whose two hypotheses predict the same observation reads exactly like a pass.* ⟹ Probe
+killed and deleted this run; the cgroup reading settles it far more cheaply and does not have to
+wait for anything.
+
+🎯 **THE GENERAL FORM, WHICH IS NEW AND IS THE REASON THIS SECTION IS LONG:** *w103 taught that a
+false absence closes routes. This is the mirror image — **a false PRESENCE, in the form of a
+verification that measures the wrong property, keeps a broken route OPEN.*** A closed route at
+least gets re-derived when the angle is handed again. A route certified by a check that cannot
+fail is never questioned, gets written into RESEARCH as an instruction, and is followed by every
+run after. Eight days, two lost builds, three runs of misdiagnosis. When a tool ships its own
+success criterion, **ask what the failure would have looked like to that criterion.**
+
+## ✅ WHAT CHANGED ON DISK
+
+- **`experiments/detach.py` now REFUSES** (rc=2) when its own cgroup is under `/system.slice/`,
+  printing the systemd-run recipe. `--force` overrides, for a job genuinely meant to die with the
+  run. A loud failure at second zero beats a silent one seven hours in. Its docstring's *"setsid
+  DOES NOT EXIST on this box"* — a w103 PATH error — is corrected in the same edit.
+- **Standing check #40, `w104a_cgroupguard.py`**, six controls, all fired in the failing direction
+  in code: C1 ± the hazard *and* its fix (unforced `detach.py` must refuse; forced, its child must
+  land in our cgroup) · C2 + the remedy actually isolates · C3 ± the cgroup reader both ways
+  (a plain child must match us, pid 1 must not) · C4 ± `KillMode` must still be `control-group` —
+  **if the unit is ever changed the hazard is GONE and this guard must be retired deliberately,
+  so good news goes RED** (w103a's C4 pattern) · C5 + `Linger=yes`, the remedy's own dependency ·
+  C6 + not vacuous.
+
+🔴 **C2 FAILED ON ITS FIRST RUN AND WAS RIGHT TO** — the probe exited 127 with `cat: command not
+found`, which is trap #1 of the recipe two sections below, reproduced live by the guard written to
+check the recipe. Fixed by launching the probe the way the recipe says (`--setenv=PATH=…`). A
+guard that skips the documented preconditions measures a launch nobody performs.
+
 # 🔻 A `command not found` HERE IS A FACT ABOUT **PATH**, NOT ABOUT THE MACHINE
 # (w103, 2026-08-28) — three durable claims in this document were wrong for this one reason
 
@@ -123,12 +200,20 @@ was still mid-fold when the session ended, and came back with an empty `oof_w96/
 stops in the middle of fold 1 — no error, no exit line. A whole build lost, and the next run read
 the truncated log as a crash rather than as a kill.
 
-    setsid      not installed
-    pgrep / ps  not installed  (poll /proc/<pid>/cmdline instead — see w97b)
-    at          not installed
+    setsid      (superseded, w103) INSTALLED — the probe ran under a PATH missing sw/bin
+    pgrep / ps  (superseded, w103) INSTALLED — same defect; `ps -o pid,etime -p <pid>` works
+    at          genuinely absent, the one claim here that was right
 
-✅ **USE A TRANSIENT SYSTEMD USER UNIT.** It is owned by the user manager, not by the session, so
-the session ending does not touch it:
+⛔ **AND `setsid` BEING PRESENT DOES NOT MAKE IT USABLE FOR THIS (superseded reasoning, w104).**
+The reason given below — *"owned by the user manager, not by the session"* — is not the mechanism.
+The mechanism is the **cgroup**: the runner is a system unit with `KillMode=control-group`, and
+`setsid` does not leave a cgroup. `experiments/detach.py`, this workspace's own double-fork
+detacher, is in the runner's cgroup and dies with it; it now refuses rather than pretending
+otherwise. See the w104 section at the top of this file and `w104a_cgroupguard.py`.
+
+✅ **USE A TRANSIENT SYSTEMD USER UNIT.** It lives in the **user manager's cgroup tree**
+(`/user.slice/…`), which the system unit's teardown does not reach — that, and not session
+ownership, is why it survives. `Linger=yes` here, so the user manager itself persists:
 
     export XDG_RUNTIME_DIR=/run/user/$(id -u)      # REQUIRED — systemd-run cannot find the
                                                    # user bus without it and fails outright
@@ -188,13 +273,31 @@ that wrote it"* — this block is that lesson applied to navigation.
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
 | 1 | *the original dataset* — find it, concat it as extra rows | ×5, from 08-11 | 0 | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` |
-| 2 | *tune LightGBM properly against the fixed folds* | ×3 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
+| 2 | *tune LightGBM properly against the fixed folds* | ×4, from 08-10 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 3 | *CatBoost: it handles categoricals better* | w61, 08-22 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
 | 4 | *XGBoost as the third leg of the ensemble* | same instrument as 2 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | w15b/w15d → w62 | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` |
 | 6 | *blending: rank-average or weight the models by OOF* | ×2, 36 members apart → w63 | **−0.96e-6** | `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` |
 | 7 | *seed and fold diversity, averaged* | ×5, → w64 | structural null | `SEVENTH angle closed` (JOURNAL) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
+
+⚠ **ROW 2 IS HANDED WITH A KNOB LIST, AND ONE OF THE KNOBS IS NOT A KNOB.** The 08-28 handing
+read *"learning rate, leaves, regularisation, categorical handling"*. The first three are inside
+the closure verbatim (it is a closure over depth / eta / leaves / lambda / rounds / seed). The
+fourth is not a hyperparameter at all — changing how a categorical is represented changes the
+**pipeline**, which the same section says is what actually sets where a member lands. So resolve
+it separately rather than sweeping it under the arithmetic:
+
+| the sub-clause | status | where |
+|---|---|---|
+| learning rate / leaves / regularisation | closed, **+4e-7**, ~1% of the 5e-5 noise floor | `tuning ANY GBDT is worth ~4e-7` |
+| *categorical handling* | **OPEN AND ALREADY UNDER TEST** — that is what the w96 windowed TE prior is | `w97_prereg.txt`, `oof_w96/` |
+
+🎯 So the honest answer to row 2 is not "closed, go away". It is **"three quarters closed by
+arithmetic, and the remaining quarter is the pre-registered experiment already running on this
+box"** — which is why w104 spent its run seeing that build to a verdict instead of sweeping
+`num_leaves`. ⛔ Still do not sweep the three closed knobs: the arithmetic (3e-5 member-level ×
+1.4% pass-through) does not care which values you have not tried yet.
 
 ⚠ **ROW 8 IS A DIFFERENT GENUS FROM ROWS 1–7, AND THE DISTINCTION MATTERS.** Rows 1–7 say *we
 measured this and it does not pay*. Row 8 says *this is already built and is under standing
@@ -645,7 +748,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 39 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 40 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -655,7 +758,18 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
-    w101a_angleguard  w103a_pathguard
+    w101a_angleguard  w103a_pathguard    w104a_cgroupguard
+
+🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
+stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
+shown at all, so a check dying on a traceback displayed its last ordinary stdout line instead. A
+`w85c_slotguard` red on 08-28 could not be diagnosed for that reason and did not reproduce on
+three later runs. Now `rc != 0` writes the full stdout+stderr to
+**`experiments/w93a_fail_<stem>.log`** and the summary prints the path.
+⛔ **AND THE "expected post-send" NOTE NO LONGER FIRES ON STEM MEMBERSHIP ALONE.** w85c inherits
+that condition from w54a via its G4, so **w85c red while w54a is GREEN is not the post-send
+pattern** — the summary now says so explicitly instead of offering the excuse. On 08-28 that note
+was printed next to a red for which it was false, and it sent the run looking in the wrong place.
 
 🆕 **RUN THE SUITE WITH ONE COMMAND — `.venv/bin/python experiments/w93a_suite.py`** (w93).
 It holds the list above ONCE, and its C2 re-parses this very block and exits 1 if the two

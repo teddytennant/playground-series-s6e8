@@ -30495,3 +30495,247 @@ it is the only one no agent run can do.**
      one this session cannot cause, the probe must outlive the session.
    • **A guard that goes green when its hazard disappears becomes a permanent no-op.** Make the
      good news RED so retirement is a decision (§4, C4).
+
+---
+
+# w104 — 2026-08-28, slot 3 of 10, ANGLE "LightGBM: tune it properly against the fixed folds —
+# learning rate, leaves, regularisation, categorical handling"
+# ⛔ ANGLE 3/4 CLOSED BY ARITHMETIC, 1/4 ALREADY UNDER PRE-REGISTERED TEST · 0 SLOTS · NO SUBMISSION
+# 🔻 THE 08-27 BUILD WAS KILLED BY ITS **CGROUP**, AND `detach.py` COULD NEVER HAVE SAVED IT
+
+## 0. THE CONSTRAINTS
+
+`git status` first (w101 §1): no staged work, no orphaned commit — w103 finished clean. Cap is
+spent (`w26g_send.py --n 10`: *"171 submissions on record; 10 already sent on 2026-08-28 (UTC);
+0 of 10 slots left today"*). w102 sent the registered ten at 12:37Z. The 08-29 queue is built and
+match-verified; the dry run correctly flags it as *"a queue for another day"*. 16 cores are
+committed to the `w102a` build. ⟹ zero CPU spent on modelling, deliberately.
+
+`check_selection.py` **rc=1**, run without a pipe (w102 §7). Nothing is clicked. See §7.
+
+## 1. THE ANGLE — THE INDEX CLOSED THREE QUARTERS OF IT IN ONE GREP, AND I IMPROVED THE ROW
+
+Row 2 of `📇 THE ANGLE INDEX`, fourth handing (`×3` → `×4, from 08-10`):
+
+    | 2 | *tune LightGBM properly against the fixed folds* | ×4 | **+4e-7** |
+
+The arithmetic is unchanged and is not a trial: tuning a GBDT for solo AUC on these folds was
+measured at **+3e-5** (08-10), solo→stack pass-through is **1.4%**, so 3e-5 × 1.4% = **+4e-7**,
+~1% of the 5e-5 noise floor. A 10× better tune still does not clear it.
+
+🎯 **BUT THE HANDED STRING NAMES FOUR KNOBS AND ONE OF THEM IS NOT A KNOB.** *Learning rate,
+leaves, regularisation* are inside the closure verbatim — it is a closure over depth / eta /
+leaves / lambda / rounds / seed. ***Categorical handling* is not a hyperparameter**; changing how
+a categorical is represented changes the **pipeline**, and the same RESEARCH section's own
+generalisation is *"where a member lands is set by its function class and its pipeline, not its
+hyperparameters."* So it does not fall to the arithmetic. Resolved separately, and it resolves to
+the experiment already running on this box: **the w96 windowed target-encoding prior**, under
+`w97_prereg.txt`, with its global twin as the control. ⟹ The honest answer to row 2 is *"three
+quarters closed by arithmetic, and the remaining quarter is the pre-registered test already
+live"*, which is why this run spent itself getting that build to a verdict instead of sweeping
+`num_leaves`. Written into the index as a sub-table so the fifth handing gets it too.
+
+## 2. 🔻 THE FINDING — SYSTEMD KILLS BY **CGROUP**, AND `setsid` DOES NOT LEAVE ONE
+
+The w96 member build has now been lost twice. w102 diagnosed it as *"killed when the session
+ended"* and built the systemd-user recipe around that. w103 repealed *"the log cannot tell you
+which"* by finding `ps`/`pgrep`. Neither found the mechanism. It is this:
+
+    kaggle-playground.service   is a systemd SYSTEM unit
+                                KillMode=control-group   KillSignal=15
+
+On deactivation systemd signals **every process in the unit's cgroup**. Cgroup membership is
+inherited across `fork()` and is **not** changed by `setsid()`, by a second fork, or by being
+reparented to init. Measured in code this run, both directions:
+
+    detach.py child (setsid + double fork)   /system.slice/kaggle-playground.service     == ours
+    systemd-run --user child                 /user.slice/…/app.slice/<unit>.service      != ours
+    plain child                              == ours          pid 1   /init.scope   != ours
+    Linger=yes                               (the user manager survives with no session)
+
+🔴 **SO `experiments/detach.py` — which RESEARCH has instructed every run to use "for every long
+build" since 08-20 — CANNOT DO THE ONE THING IT EXISTS FOR.** w96d *was* launched through it on
+08-27 (pid 32247, ppid=1, own session). Four instruments, and only the last one answers:
+
+| question | instrument | reading |
+|---|---|---|
+| kernel OOM? | `sudo dmesg -T`, spans 08-26 12:26 → 08-28 08:48 | **no** — only OOM storm is 08-26 12:26 |
+| systemd-oomd? | `journalctl -u systemd-oomd` | none |
+| crash? | build log ends mid-fold, no traceback, no exit line | no |
+| **unit teardown?** | `journalctl`: `kaggle-playground.service: Deactivated successfully` **11:04:33 EDT 08-27** | log last advanced **11:01:20 EDT**, mid-fold-2 ⟹ **yes** |
+
+## 3. 🎯 WHY EIGHT DAYS OF RUNS MISSED IT — A NEW SHAPE, AND IT IS THE MIRROR OF w103's
+
+**`ppid=1` and "own session" are the only two facts a detach tool can report, and neither is the
+fact that decides.** w41 verified `detach.py` by checking exactly those and wrote it down as a
+pass (*"PID 4127802, ppid=1, own session — w41's detach.py fix"*). **Those checks would have
+printed the identical green on the morning it lost the build.** The tool reports success in the
+vocabulary it controls; the killer operates in a vocabulary — cgroups — the tool never mentions,
+so it cannot report its own failure mode even in principle.
+
+⚠⚠ **THE GENERAL FORM, AND IT IS NEW: w103 taught that a false ABSENCE closes routes. This is the
+mirror image — a false PRESENCE, in the form of a verification that measures the wrong property,
+keeps a broken route OPEN.** A closed route at least gets re-derived when the angle is handed
+again. A route certified by a check that cannot fail is *never questioned*, gets written into
+RESEARCH as an instruction, and is obeyed by every run after. Price: eight days, two lost builds,
+three runs of misdiagnosis. ⟹ **When a tool ships its own success criterion, ask what its failure
+would have looked like to that criterion.**
+
+😐 It fired on me too, twice, and both times I caught it only by checking the instrument:
+• My first OOM sweep returned no hits and I nearly wrote "no OOM events". `sudo` under
+  `/run/current-system/sw/bin` is **not setuid** — the real one is `/run/wrappers/bin/sudo` —
+  so I had piped *"must be owned by uid 0"* into `grep` and read the empty set as data. **w103's
+  PATH finding has a SECOND directory**, and `w103a_pathguard` could not catch it because
+  `shutil.which` finds the broken copy and calls it found.
+• `w104a_cgroupguard`'s C2 failed on first run with `cat: command not found` — trap #1 of the
+  very recipe it was written to verify, reproduced live. A guard that skips the documented
+  preconditions measures a launch nobody performs.
+
+## 4. ⚰️ w103's setsid PROBE — VERDICT IN, AND THE PROBE COULD NOT HAVE DELIVERED IT
+
+w103 left a `setsid` heartbeat to see whether it outlived "the session", and pre-registered
+*"beats past this session's end ⟹ setsid detaches properly"*. It did beat past it (13:21:06Z,
+against w103's commit at 13:12:51Z). **That observation is worthless.** The runner unit stays
+ACTIVE across slot boundaries, so a job started in slot 2 and still beating in slot 3 has not
+been tested at all — the discriminating event is unit *deactivation* after slot 10, which no
+single slot can observe. This is precisely the defect w103 named one paragraph above the probe it
+then built. The cgroup reading settles it in one `cat`, costs nothing and waits for nothing.
+**VERDICT: `setsid` does NOT survive the runner. Probe killed, script and heartbeat deleted.**
+
+## 5. ✅ WHAT CHANGED ON DISK
+
+- **`experiments/detach.py` REFUSES** (rc=2) when its own cgroup is under `/system.slice/`,
+  printing the systemd-run recipe instead of a pid that looks detached and is not. `--force`
+  overrides, for a job genuinely meant to die with the run. Both directions exercised. Its
+  docstring's *"setsid DOES NOT EXIST on this box"* (a w103 PATH error) corrected in the same edit.
+- **Standing check #40 — `w104a_cgroupguard.py`**, six controls, each fired in the failing
+  direction in code: C1 ± the hazard *and* its fix · C2 + the remedy actually isolates ·
+  C3 ± the cgroup reader both ways · C4 ± `KillMode` must still be `control-group`, so **if the
+  unit is ever changed the hazard is GONE and the guard must be retired deliberately — good news
+  goes RED** (w103a's C4 pattern) · C5 + `Linger=yes`, the remedy's own dependency · C6 + not
+  vacuous. Registered in `w93a_suite.STEMS` and RESEARCH's published table; C2 confirms both
+  copies read **40**.
+- **`w103a_pathguard` gained C5 ±** — `/run/wrappers/bin` and the setuid trap. `sudo` must resolve
+  to a setuid-root binary under the corrected path AND the SYSBIN copy must not be one; that
+  difference *is* the defect, and it is invisible to `which`. Verified: wrapper `setuid_root=True`,
+  sw/bin copy `False`.
+- **RESEARCH**: w104 section at the top; the w102 launch section's stated reason (*"owned by the
+  user manager, not by the session"*) marked superseded and replaced with the cgroup mechanism;
+  its stale `setsid / pgrep / ps not installed` block corrected.
+
+## 6. ⏳ THE BUILD — ALIVE, SAFE, AND REPRODUCING THE LOST RUN TO THE DIGIT
+
+`w102a-build.service`, pid 1940842, cgroup `/user.slice/…/app.slice/w102a-build.service` —
+**outside** the runner, which per §2 is the whole reason it is still here. Verified positively
+with `ps`, not from the log.
+
+    [windowed] fold 0..4 → OOF CV 0.9678666796   sd_test/sd_oof 1.0021 PASS   ⟹ G4 already met
+    [global]   fold 0    0.9668953349            fold 1  0.9678729616
+
+✅ **The rebuild reproduces the run that was killed.** `[windowed] fold 0 = 0.9669586861` and
+`[global] fold 0 = 0.9668953349` are **bit-identical** to the two AUC lines the lost 08-27 log
+held (and which `w97_prereg.txt` quotes as its proof of being written before the number existed).
+Fold 1 windowed agrees to 9 decimals (…103312 vs …103333). ⟹ nothing about the loss changed the
+experiment, and the prereg's provenance claim still checks out.
+Fold deltas so far: windowed − global = **+63e-6** (f0), **+137e-6** (f1) — the member-level
+effect w96 measured, ⚠ **not** the decision quantity. The decision quantity is `Delta =
+d(windowed) − d(global)` **inside the pack**, from `w26i_value.py`, and is ~15 min of build +
+~75 min of pricing away. **NO-ENROL remains the modal outcome and is not a failure.**
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK, STILL UNDONE
+
+`check_selection.py` rc=1. Nothing is selected, so Kaggle will auto-select on **public** score,
+which is not what CV prefers.
+
+    Browser → competition submissions page → "Use for Final Score"
+    refs 55656399 and 55588167, nothing else.
+
+One minute, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. w99 §1 proved the
+price is fixed — no remaining send can raise or lower it, so it cannot go stale. w103 §3 re-took
+the browser measurement under the corrected PATH: still no browser of any kind on this box, so
+the route is genuinely human-only. **Largest remaining item on the board and the only one no
+agent run can do.**
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **Check the build POSITIVELY** (w103 §2 — and note §2 above for *why* it is still alive):
+
+       export PATH="/run/wrappers/bin:/run/current-system/sw/bin:$PATH"
+       ps -o pid,etime -p 1940842            # or: pgrep -af w96c_build
+       XDG_RUNTIME_DIR=/run/user/$(id -u) systemctl --user is-active w102a-build.service
+
+   Inactive **+ both arms in `oof_w96/` + a `w97a_gate.py` verdict at the bottom of
+   `logs_w102a_build_then_price.txt`** → it finished; read the verdict. Inactive + no verdict →
+   relaunch step 3 alone via the systemd-user recipe. ⛔ **Never with `detach.py` or `setsid`** —
+   §2; `detach.py` now refuses, so an attempt costs you rc=2 and not a day.
+3. If ENROL: `cp oof_w96/{oof,test,summary}_lgbm_teprior_windowed.*` into `oof/` — the windowed
+   member **alone**, never the global twin (`oof/` is globbed, not allow-listed) — and read
+   `w97_prereg.txt` §4 first. Enrolment does **not** change `SELECT_THESE.md` and does **not**
+   trigger a send.
+4. **Send the registered 08-29 ten.** Built, verified, match-checked by w102. Do not re-litigate.
+5. Re-run `w93a_suite.py` — **40 checks now** — after the send, then rebuild the queue for 08-30
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard`; they go red on every send by design.
+6. ⛔ **DO-NOT, carried forward and added to.** All of w92–w103's list holds, with one repeal.
+   • **REPEALED:** w102's *"a transient systemd user unit works because it is owned by the user
+     manager, not by the session"* — right conclusion, wrong mechanism. It is the **cgroup** (§2).
+     The distinction is load-bearing: the wrong reason made `setsid` look like a valid shortcut.
+   • **DO NOT** launch a long job with `detach.py`, `setsid` or `nohup`. Only `systemd-run --user`.
+     `#40 w104a_cgroupguard` enforces this and `detach.py` now refuses.
+   • **DO NOT** call `sudo` without `/run/wrappers/bin` in front of `sw/bin` — the sw/bin copy is
+     not setuid and its error reads as a permissions problem (§3).
+   • **DO NOT** read row 2 of the ANGLE INDEX as closing *categorical handling* (§1). Three of its
+     four knobs are closed by arithmetic; the fourth is the live w96/w97 experiment.
+   • **DO NOT** take the original-dataset angle — w103 §1; concat is *inverted* here, monotone in
+     dose.
+7. ⚠ **NEW LESSONS.**
+   • **A false presence keeps a broken route open, and that is worse than a false absence.** A
+     closed route is re-derived when the angle comes round again; a route certified by a check
+     that cannot fail is never questioned at all (§3).
+   • **When a tool ships its own success criterion, ask what its failure would look like to that
+     criterion.** `detach.py` could print `ppid=1, own session` on the morning it lost the build.
+   • **A guard must exercise the documented preconditions of the thing it verifies**, or it
+     measures a launch nobody performs (§3, C2's first firing).
+   • **Corollary to w103's probe lesson: check whether the discriminating event has actually
+     OCCURRED, not merely whether time has passed.** The setsid probe crossed a slot boundary and
+     read as a pass; slot boundaries are not what kills anything here (§4).
+
+## 9. ADDENDUM — THE SUITE WENT 39/40, THE RED DID NOT REPRODUCE, AND THE RUNNER HAD THROWN AWAY
+## THE ONE THING THAT WOULD HAVE EXPLAINED IT
+
+Full suite run after the RESEARCH edits (several guards parse that document, so this was owed,
+not optional): **39/40, `w85c_slotguard` rc=1.** Re-ran it standalone → **rc=0, FAILURES 0**.
+Re-ran it through the suite alone → green. Re-ran the **whole suite** → **40/40 green, 302s.**
+So: one red, three subsequent greens, **not reproduced and NOT explained.** Recording it that way
+rather than closing it, because I could not diagnose it — and the reason I could not is the
+finding:
+
+🔴 **`w93a_suite.py` CAPTURED stdout AND stderr AND THEN PRINTED ONE 90-CHARACTER LINE OF STDOUT,
+DISCARDING THE REST.** A red check's evidence was gone by the time anyone read the summary.
+`p.stderr` was captured and **never displayed at all**, so a check dying on a traceback would show
+its last ordinary stdout line instead of the traceback. ⟹ A runner that reports a failure while
+destroying its explanation converts every transient red into an unfalsifiable one. Fixed: on
+`rc != 0` the full stdout+stderr goes to `experiments/w93a_fail_<stem>.log` and the path is
+printed in the summary.
+
+🔴 **AND THE ANNOTATION ACTIVELY SENT ME TO THE WRONG PLACE.** The suite printed *"(expected
+post-send; rebuild the queue)"* next to the red and *"⚠ every failure is the post-send
+queue-freshness guard doing its job"* underneath it. **Both were false.** w85c inherits that
+condition from w54a through its G4, and **w54a was GREEN in the same run** — so the post-send
+story could not hold, and the note fired on **stem membership alone**, never on evidence. That is
+the same defect as a control that can only pass. Fixed two ways: the summary now demands
+`w54a_vetoexpiry` actually be among the failures before it offers the excuse, and prints an
+explicit **⛔ "w85c is red but w54a is GREEN, so this is NOT the post-send pattern"** otherwise;
+the per-line note is downgraded from *"expected"* to *"in the post-send set — see the summary"*,
+since at print time w54a may not have run yet and the verdict cannot exist.
+
+✅ **BOTH NEW BRANCHES FIRED IN CODE BEFORE I TRUSTED THEM** — a doctored copy in `experiments/`
+(house rule) with a stub that exits 1 after writing to both streams. Verified the log captures
+`stdout line two` *and* the stderr line the old runner never showed, that the path is printed, and
+that the ⛔ branch fires when a POST_SEND stem is red without w54a. Doctored copies, stub and test
+log deleted; the real `w93a_suite.py` re-run green afterwards.
+
+⚠ **FOR THE NEXT RUN: a single red in `w85c_slotguard` is now UNEXPLAINED PRECEDENT, not a known
+flake.** If it goes red again, `experiments/w93a_fail_w85c_slotguard.log` will exist and will say
+why — read it before re-running. Do not let a re-run that comes back green close it silently a
+second time; two unexplained reds in the guard that governs the send is a real problem.

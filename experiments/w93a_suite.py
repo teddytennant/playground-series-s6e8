@@ -32,7 +32,7 @@ ROOT = os.path.dirname(HERE)
 PY = os.path.join(ROOT, ".venv", "bin", "python")
 RESEARCH = os.path.join(ROOT, "RESEARCH.md")
 
-# The 39, verbatim from RESEARCH.md. C2 re-parses that document and compares.
+# The 40, verbatim from RESEARCH.md. C2 re-parses that document and compares.
 STEMS = [
     "w54a_vetoexpiry", "w55a_unpriced", "w56b_wantedguard", "w57c_muguard", "w59b_barguard",
     "w60b_ineligguard", "w60d_memberguard", "w62b_barstaleguard", "w63b_setguard",
@@ -43,7 +43,7 @@ STEMS = [
     "w82a_pricecal", "w84a_pickargmax", "w85c_slotguard", "w86a_pagecap",
     "w87a_registrarguard", "w88a_calexposure", "w89a_foldid", "w91b_dateguard",
     "w92a_smokerun", "w93c_pickverify", "w100a_complement", "w101a_angleguard",
-    "w103a_pathguard",
+    "w103a_pathguard", "w104a_cgroupguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).
@@ -99,7 +99,7 @@ def main() -> int:
     env = {k: v for k, v in os.environ.items()
            if k not in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")}
 
-    results, t_all = [], time.time()
+    results, fails_logged, t_all = [], [], time.time()
     for n, stem in enumerate(stems, 1):
         t0 = time.time()
         try:
@@ -109,7 +109,23 @@ def main() -> int:
         except subprocess.TimeoutExpired:
             rc, tail = 124, ["TIMEOUT"]
         dt = time.time() - t0
-        note = "  (expected post-send; rebuild the queue)" if rc and stem in POST_SEND_EXPECTED else ""
+        # KEEP THE EVIDENCE. Until w104 this runner captured stdout and stderr and then printed
+        # ONE 90-character line of stdout, discarding the rest -- so a red check's reason was
+        # gone by the time anyone read the summary. w104 hit a w85c_slotguard red that did not
+        # reproduce on three later runs and could not be diagnosed, because the output that
+        # would have explained it had been thrown away. stderr was never shown at all, so a
+        # check dying on a traceback displayed its last ordinary stdout line instead.
+        if rc != 0:
+            log = os.path.join(HERE, f"w93a_fail_{stem}.log")
+            with open(log, "w", encoding="utf-8") as fh:
+                fh.write(f"# {stem} rc={rc} at {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n")
+                fh.write("# ---- stdout ----\n" + (p.stdout or "") if hasattr(p, "stdout") else "")
+                fh.write("\n# ---- stderr ----\n" + (getattr(p, "stderr", "") or ""))
+            fails_logged.append(log)
+        # Not "expected" yet -- whether this is the post-send pattern depends on w54a, which may
+        # not have run. The verdict is in the summary; this line only says the stem is a
+        # candidate. The old wording asserted the excuse before the evidence existed.
+        note = "  (in the post-send set — see the summary)" if rc and stem in POST_SEND_EXPECTED else ""
         print(f"[{n:2d}/{len(stems)}] {stem:24s} rc={rc}  {dt:6.1f}s"
               f"  {tail[-1][:90] if tail else ''}{note}", flush=True)
         results.append((stem, rc, dt))
@@ -118,9 +134,20 @@ def main() -> int:
     print(f"\nTOTAL {time.time() - t_all:.0f}s   {len(results) - len(bad)}/{len(results)} green")
     if bad:
         print("FAILURES: " + "  ".join(f"{s}(rc={rc})" for s, rc in bad))
-        if all(s in POST_SEND_EXPECTED for s, _ in bad):
+        for log in fails_logged:
+            print(f"  full output: {log}")
+        # ⚠ Only claim "expected post-send" when the freshness guard the story rests on ACTUALLY
+        # failed. w85c inherits its G4 from w54a, so w85c red WITHOUT w54a red is not the
+        # post-send pattern -- it is something else, and w104 was sent looking in the wrong place
+        # by this note firing on stem membership alone.
+        names = {s for s, _ in bad}
+        if names and names <= POST_SEND_EXPECTED and "w54a_vetoexpiry" in names:
             print("⚠ every failure is the post-send queue-freshness guard doing its job. "
                   "Rebuild the queue for the next unsent day and re-run those two.")
+        elif names & POST_SEND_EXPECTED and "w54a_vetoexpiry" not in names:
+            print("⛔ w85c is red but w54a is GREEN, so this is NOT the post-send freshness "
+                  "pattern (w85c's G4 runs w54a). Read the saved output above before assuming "
+                  "it is expected. If it does not reproduce, say so rather than closing it.")
         return 1
     print("FAILURES: 0")
     return 0
