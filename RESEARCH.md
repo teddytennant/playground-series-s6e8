@@ -1,3 +1,146 @@
+# 🔴 A GUARD'S EXEMPTION WAS CAPTURED BY A LATER SECTION THAT MERELY *MENTIONED* THE EXEMPTED RUN
+# (w108, 2026-08-28) — `w105a_liveguard` C4. Found by the suite going red on this run's own edit.
+
+**The suite went 42/43 the moment w108's block landed, and the red was not in the block's claims —
+it was in a guard three hundred lines below.** `#41 w105a_liveguard` C4 forbids any `pgrep` line in
+RESEARCH.md carrying a `\|` BRE alternation, and exempts the w105 section that documents the
+anti-pattern on purpose. It located that span like this:
+
+```
+  lo = next(i for i,l in enumerate(lines) if l.startswith("# ") and "w105" in l.lower())
+```
+
+w108's block opens with the subtitle `# (w108, 2026-08-28) — ... after w105/row 3, w106/row 4`.
+That is a `# ` header containing `w105`, it sorts first, and it **took the exemption with it**:
+
+```
+  span before   lines 351..440   the real w105 section, covering 3 anti-pattern lines
+  span after    lines   1.. 84   w108's block,          covering 0 anti-pattern lines
+```
+
+🎯 **THE FAILURE IS TWO-SIDED AND ONLY ONE SIDE IS LOUD.** The real section lost its cover and went
+red — visible. **w108's block silently GAINED cover it was never meant to have** — a false-negative
+window opened over the newest, least-reviewed text in the document, and nothing would have said so.
+⟹ **An exemption located by substring is not scoped to a section; it is scoped to whoever mentions
+the section's name first.** Every write-up here names the runs it builds on, so the capture surface
+is *every future block*.
+
+## THE FIX — AND THE ARM THAT MAKES IT SELF-CHECKING
+
+1. Match the section's **own header text** (`RESEARCH PRESCRIBES (w105,`) and require **exactly
+   one** hit. Zero or two now FAILS loudly rather than picking the first — a renamed header stops
+   the guard instead of drifting it somewhere harmless.
+2. 🎯 **THE EXEMPTED SPAN MUST ACTUALLY CONTAIN THE THING IT EXCUSES.** A span covering zero
+   anti-pattern lines is a misplaced exemption and fails. **This arm alone catches today's bug**,
+   independently of how the span was located. It is w106's *"a stale exemption that reports itself
+   present is a control that can only pass"* — mechanised, inside the guard that lesson was
+   written about.
+
+`c4_scan()` was split out of `main()` so `bash experiments/w105a_arms.sh` can exercise it on
+synthetic documents **without giving the guard an env var or flag that repoints it at a fake
+document in production**. A guard you can aim elsewhere is a guard that can be aimed somewhere
+harmless. **8/8 arms pass**, and C2b is a live control: the OLD locator is clean on the document
+with w108's subtitle removed and breaks with it prepended, while the new one is green on both.
+
+⚠ **TWO OF MY OWN CONTROL ERRORS, BOTH THE SAME SHAPE — A CONTROL THAT COULD NOT SEPARATE.**
+- 🔴 I first built the "old locator breaks" control against the **live** document, which by then
+  already carried the trigger. The baseline and the treatment were the same document, so the arm
+  reported FAIL on a fix that worked. **A before/after control needs a real "before".**
+- 🔴 Then I **appended** the decoy header instead of prepending it. The old locator took the FIRST
+  match, so a decoy after the real header changed nothing and the control passed vacuously. **The
+  reproduction has to reproduce the ordering, not just the content.**
+
+⚠ **THE HAZARD IS NOW FIXED AT THE GUARD, NOT PATCHED AROUND IN THE PROSE.** This very block's
+subtitle names `w105a_liveguard` in a `# ` header and is harmless, because the locator no longer
+matches on the substring — which is the point. ⛔ **Do not "fix" a recurrence of this by renaming
+your headings.** The document is not the defect; a locator that resolves an exemption by substring
+is, and the misplacement arm now catches it wherever the span lands.
+
+# 🔻 ROW 6 (BLENDING) VERIFIED AT THE ARTEFACT LEVEL — THE CLOSURE HOLDS, ITS ANCHOR DOES NOT
+# (w108, 2026-08-28) — fourth row checked rather than quoted, after w105/row 3, w106/row 4, w107/row 5
+
+**Every headline number in row 6 reproduces from the artefact, to ten digits.** `w36d_wsearch.json`
+is on disk and holds `equal 0.9701205752950482`, `xfit 0.9701196117472624`, so the quoted
+**−0.96e-6** is exact. `experiments/transform_weights.py` exists and its `simplex(4, 0.05)` really
+does return **1,771** points (run, not read). Nothing here is fabricated — contrast row 3, whose
+closure named two members that were never built.
+
+## 🔴 BUT THE ARTEFACT HAS TWO ARMS, THE CLOSURE QUOTES ONE, AND THE OMITTED ARM'S SIGN IS POSITIVE
+
+```
+  arm   keys                              equal          xfit           d(xfit vs equal)
+  h3    hybrid+rankraw+rescale            0.9701205753   0.9701196117   -0.96e-6   <- quoted
+  all4  logit+hybrid+rankraw+rescale      0.9701181652   0.9701195043   +1.34e-6   <- NOT quoted
+```
+
+A run that follows the index's own instruction — *one grep on the row's anchor* — lands on the
+w63 nine-line restatement, which quotes h3 alone. **The +1.34e-6 arm is invisible from there, and
+it reads like an open door: "honest cross-fitted weight search beats equal weights".**
+
+✅ **IT IS NOT A DOOR, AND THE FULL WRITE-UP ALREADY SAYS SO.** `d(xfit vs equal)` is a
+**within-arm** comparison. Across arms, fitted-all4 lands **−1.0710e-6 below equal-weight h3** —
+the search spends four parameters rediscovering "drop logit" (it pushes logit 0.25 → 0.081) and
+still finishes below the zero-parameter baseline. Equal-weight h3 beats all four honest numbers in
+the artefact. **The closure survives on the evidence; it is the navigation that failed.**
+
+🎯 **THE DEFECT IS THAT ROW 6'S ANCHOR POINTS AT THE RESTATEMENT, NOT THE EVIDENCE.** The index
+promises *"the row tells you where the number lives"*. For row 6 it told you where the number was
+**repeated**. The 40-line w36d table holding the second arm, the cross-arm resolution and the
+"use this number" rule sits under a different header entirely. **Row 6 now carries both anchors,
+evidence first.** ⟹ A compressed restatement that keeps the conclusion and drops the arm that
+argues against it is indistinguishable from the full account until you open the artefact.
+
+## ⚠ TWO CORRECTIONS FOUND WHILE CHECKING, BOTH IN THE UNSAFE DIRECTION
+
+1. **The optimism rate divides by k where it should divide by k−1** (a simplex has k−1 free
+   parameters). `0.45k e-6` → the measured `0.55(k−1) e-6`. They cross at k≈3.9 — exactly where
+   both measurements sit — and separate as k grows. The rate is used as a **bar searches must
+   clear**, so understating it admits searches that should be refused. Details under
+   `THE PRICE OF A TOP-LEVEL SEARCH`. ✅ w34's independent +2.54e-6 corroboration **survives and
+   tightens**: predicted 2.25e-6 before, 2.44e-6 now.
+2. **The stacking note's "1,540-point simplex" is the pre-bugfix grid** — cut range one position
+   short, every row summing to 0.95, so **neither baseline it was compared against was on it**.
+   1,771 is the fixed grid. Annotated in place; the scores were valid, the search space was not.
+
+## 🎯 THE ANGLE'S THREE CLAUSES, RESOLVED SEPARATELY — AND ONE OF THEM IS ALREADY SHIPPED
+
+The handed string is *"rank-average or weight the tuned models by out-of-fold performance. Search
+blend weights on OOF predictions, never on the public leaderboard."* That is three asks, and
+collapsing them into one refusal is what made this row feel thin:
+
+| clause | status | evidence |
+|---|---|---|
+| *search blend weights on OOF, never on LB* | **ALREADY THE SHIPPED ARCHITECTURE.** `agent/stack.py` fits a `LogisticRegression` meta-learner on member OOF **inside the frozen folds**; 46% of its coefficients are negative. The incumbent IS an OOF-fitted weighted blend. | `agent/stack.py`, the `mo[iva]` cross-fit |
+| *weight by OOF performance* | **exactly +0.000000**, and the mechanism re-derived this run: the four stacks span 0.970044–0.970111, so `(auc−0.5)^p` weights spread by only **1.1e-3 around 0.25 at p=32**. No spread to exploit. | `Do not weight near-equal models by their OOF AUC` |
+| *rank-average / fit the TOP-LEVEL weights* | **closed, −1.07e-6**, verified above | `THE PRICE OF A TOP-LEVEL SEARCH` |
+
+⟹ **Row 6 is not "we tried blending and it failed". It is "the blend is the product; the one knob
+above it is closed."** A run handed this angle should say that, not re-derive a refusal.
+
+## ⛔ NO STANDING CHECK SHIPPED THIS RUN, AND THAT IS THE FINDING, NOT AN OMISSION
+
+w105, w106 and w107 each shipped a guard (#41, #42, #43). The obvious #44 here is *"a closure
+citing a multi-arm artefact must name every arm"*. **I measured the surface before building it:**
+
+```
+  multi-arm list-of-dict json artefacts in experiments/ :  4
+    w15b_tecause.json    n=9   key=member    <- a member census; summarising it is correct
+    w34b_vet.json        n=9   key=member    <- same
+    w35c_vet.json        n=7   key=member    <- same
+    w36d_wsearch.json    n=2   key=tag       <- the only real case
+```
+
+**Three of four instances would need an exemption on day one**, because a 9-member vetting list is
+*supposed* to be summarised. w107 shipped #43 on the rule *design the exemption surface out rather
+than promising restraint*; here I cannot — the distinction between "census" and "arm" is semantic,
+not structural. ⟹ **A guard that is 75% exemption is theatre, and worse, it launders a judgement
+call as a check.** Recorded so the next run does not feel obliged to ship one guard per run.
+
+⚠ Note the near-miss: a guard keyed on cited **`.json` paths** would have been vacuous against its
+own motivating case. RESEARCH cites 7 json paths and `w36d_wsearch.json` is not one of them — the
+closure names the artefact by **script stem** (`w36d`). w107's standard is *"it reproduces the
+finding that caused it"*; the obvious implementation fails that test outright.
+
 # 🔴 EVERY LINE-NUMBER CITATION INTO RESEARCH.md IS STALE — 7 of 7, measured (w107, 2026-08-28)
 # ⟹ STANDING CHECK #43 `w107a_lineref` NOW FORBIDS THEM. USE A GREP-ABLE TEXT ANCHOR.
 
@@ -635,7 +778,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 3 | *CatBoost: it handles categoricals better* | ×2, w61 08-22 → w105 08-28 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
 | 4 | *XGBoost as the third leg of the ensemble* | ×2, → w106 08-28 · **artefacts verified** | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | w15b/w15d → w62 | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` |
-| 6 | *blending: rank-average or weight the models by OOF* | ×2, 36 members apart → w63 | **−0.96e-6** | `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` |
+| 6 | *blending: rank-average or weight the models by OOF* | ×3, 36 members apart → w63 → w108 08-28 · **artefacts verified** | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
 | 7 | *seed and fold diversity, averaged* | ×5, → w64 | structural null | `SEVENTH angle closed` (JOURNAL) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
 
@@ -5492,6 +5635,12 @@ is not.
 - **Ensembling the four transforms: drop the worst, do not fit weights.** Paired 50/50,
   3/3 consistent: dropping the lowest-CV transform is +5e-6, a full 1,540-point simplex
   search is +6e-6. Three fitted parameters buy 1e-6 over one bit of information.
+  ⚠ **w108: that "1,540-point" grid is the PRE-BUGFIX one and it could not represent either
+  baseline it was compared against.** `transform_weights.py:simplex` documents the fix — the cut
+  range was one position short, so every row summed to 0.95, and neither equal weights nor
+  h3 = (0, 1/3, 1/3, 1/3) was a grid point. Post-fix the k=4 grid is **1,771** points (verified
+  by running `simplex(4, 0.05)`), which is the number w63's closure quotes. AUC is scale-invariant
+  so the pre-fix SCORES were valid; the SEARCH SPACE was not. Trust the 1,771 figure, not this one.
   `blend156_h3` (hybrid + rankraw + rescale, equal) cross-fits to **0.970046** vs
   `blend156`'s 0.970042. `logit` is the one to drop — its clip destroys the tails of ~49
   saturating members.
@@ -13452,7 +13601,11 @@ search would have claimed.
    searching costs more than it returns. Do not re-open this a third time.
 2. **The drop-logit decision survives at 195 members.** Fitted all4 pushes `logit` to weight
    0.081 (from 0.25) and gains +1.34e-6 over equal-all4 — i.e. the search rediscovers "drop
-   logit" on its own — but still lands 0.97e-6 BELOW the zero-parameter equal-weight h3.
+   logit" on its own — but still lands **1.07e-6 BELOW** the zero-parameter equal-weight h3.
+   ⚠ **w108 recomputed this from the artefact: 0.9701195043 − 0.9701205753 = −1.0710e-6.** The
+   "0.97e-6" written here was the h3 row's −0.96e-6 carried across by eye. Same sign, same
+   conclusion, 11% understated — and it is the ONLY cross-arm number in the table, i.e. the one
+   a reader needs to refuse the +1.34e-6 arm.
 3. ⚠⚠ **THE PRICE OF A TOP-LEVEL SEARCH IS ~+0.45e-6 PER FREE PARAMETER, MEASURED.** 3 params
    → +1.27e-6 of optimism; 4 params → +1.82e-6. **This independently corroborates w34's
    scheme-selection optimism of +2.54e-6 for the 5-arm correction** (5 params × 0.45 = 2.3e-6,
@@ -13463,6 +13616,30 @@ search would have claimed.
 **Use this number.** Any future top-level search over k arms/weights must beat the equal-weight
 baseline by more than ~0.45k e-6 before it is worth anything, and the in-sample number it
 prints will overstate it by exactly that much.
+
+### ⚠ w108 CORRECTION — THE DIVISOR IS k−1, NOT k, AND THE BAR ABOVE IS THEREFORE TOO EASY
+
+A weight vector constrained to the simplex has **k−1** free parameters, not k. Dividing the two
+measured optimisms by the right denominator moves the rate up by ~35%:
+
+```
+  arm   k   optimism    /k (as written)   /(k-1) (correct)
+  h3    3   1.2649e-6   0.4216e-6         0.6324e-6
+  all4  4   1.8159e-6   0.4540e-6         0.6053e-6
+  two-point slope in k:  (1.8159-1.2649)/1  =  0.5510e-6 per arm added
+```
+
+⟹ **The honest rule is `optimism ≈ 0.55(k−1) e-6`, not `0.45k e-6`.** The two agree near k=3–4,
+which is why this went unnoticed — they cross at k≈3.9, exactly where both measurements sit. They
+separate as k grows: at k=10 the written rule asks a search to clear 4.5e-6 and the measured slope
+asks 5.0e-6. ⚠ **The error is in the unsafe direction: the bar is used to REFUSE candidate
+searches, so understating it admits searches that should be refused.**
+
+✅ **AND THE CORROBORATION THE PARAGRAPH ABOVE RESTS ON SURVIVES — IT IMPROVES.** w34's
+scheme-selection optimism for the 5-arm correction is **+2.54e-6** measured. The written rule
+predicts 5 × 0.45 = 2.25e-6 (11% low); the corrected rule predicts 4 × 0.61 = **2.44e-6** (4%
+low). The claim that two independent methods agree was true and is now tighter, so this correction
+costs the pre-registration discipline nothing and hardens the bar it sets.
 
 Artefacts: `submissions/w34_ad195std_h3w.csv`, `w34_ad195std_all4w.csv` (test side uses the
 full-data weights; the stored OOF is the cross-fitted one). Neither is a deadline candidate —

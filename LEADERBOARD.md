@@ -2569,3 +2569,14 @@ experiment at −1.9e-6. w107 re-verified **row 5** at the artefact level (it ho
 negative) and marked its carve-out **spent**. The one remaining action with a measured price is
 still the **final-selection click** in `SELECT_THESE.md`: **+4.5228e-6 expected private AUC**,
 and `check_selection.py` reads **rc=1 — nothing selected** for the sixth run running.
+
+## 2026-08-28, w108 (slot 7) — board unchanged, no submission possible (0 of 10 slots)
+
+Top of board still `Chris Deotte` **0.97205**, then 0.97154 / 0.97149 / 0.97145. Account best
+remains **0.97119** (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`). Today's ten went out
+before this run; the two most recent landed 0.97105 and 0.97103, both as expected — every
+remaining unsent file is below the best already-sent CV and `w26d` prices the whole queue at
+6.3e-4 of beating the board. **Nothing on the leaderboard changed the CV-based deadline pick.**
+
+⛔ The final-selection click is still not done — see JOURNAL w108 §7. Auto-selection on public
+score costs **+4.5228e-6** of expected private AUC against the CV pick.

@@ -128,6 +128,32 @@ def spawn_sentinel(token: str) -> subprocess.Popen:
     return proc
 
 
+C4_HDR = "RESEARCH PRESCRIBES (w105,"
+
+
+def c4_scan(txt: str):
+    """Locate the exempt w105 span and scan the rest of `txt` for the BRE-alternation anti-pattern.
+
+    Returns (header_hits, lo, hi, bad, covered, anti). `lo is None` means the span could not be
+    identified unambiguously, which the caller must treat as a FAIL rather than as "no exemption".
+
+    Split out of main() by w108 so `w105a_arms.sh` can exercise it on synthetic documents WITHOUT
+    giving the guard an env var or flag that repoints it at a fake document in production. A guard
+    you can aim somewhere else is a guard that can be aimed somewhere harmless.
+    """
+    lines = txt.splitlines()
+    hits = [i for i, l in enumerate(lines) if l.startswith("# ") and C4_HDR in l]
+    lo = hits[0] if len(hits) == 1 else None
+    hi = len(lines)
+    if lo is not None:
+        hi = next((j for j in range(lo + 1, len(lines)) if lines[j].startswith("# ")), len(lines))
+    exempt = range(lo, hi) if lo is not None else range(0)
+    anti = [i for i, l in enumerate(lines) if "pgrep" in l and r"\|" in l]
+    bad = [lines[i].strip()[:100] for i in anti if i not in exempt]
+    covered = [i for i in anti if i in exempt]
+    return hits, lo, hi, bad, covered, anti
+
+
 def main() -> int:
     if not os.path.exists(ALIVE):
         print(f"ERROR: {ALIVE} missing -- the fix this guard certifies is not on disk")
@@ -205,25 +231,40 @@ def main() -> int:
     # ---- C4: the document ---------------------------------------------------------------------
     txt = open(RESEARCH, encoding="utf-8").read()
     names_fix = "alive.py" in txt
-    # The w105 section quotes the anti-pattern ON PURPOSE -- it is the section documenting it.
-    # Exclude exactly that span (its header to the next top-level header) and scan the rest, so
-    # the exemption dies with the section rather than outliving it.
-    lines = txt.splitlines()
-    lo = next((i for i, l in enumerate(lines) if l.startswith("# ") and "w105" in l.lower()), None)
-    if lo is None:
-        lo = next((i for i, l in enumerate(lines) if "(w105," in l), None)
-    hi = len(lines)
-    if lo is not None:
-        hi = next((j for j in range(lo + 1, len(lines))
-                   if lines[j].startswith("# ") and "w105" not in lines[j].lower()), len(lines))
-    exempt = range(lo, hi) if lo is not None else range(0)
-    bad = [l.strip()[:100] for i, l in enumerate(lines)
-           if "pgrep" in l and r"\|" in l and i not in exempt]
-    NOTES.setdefault("c4_span", {"lo": lo, "hi": hi})
+    # The w105 section quotes the anti-pattern ON PURPOSE -- it is the section documenting it, so
+    # exactly that span is exempt. The span is located by the section's OWN header, never by
+    # "a header that mentions w105".
+    #
+    # w108, 2026-08-28: it used to be located by `l.startswith("# ") and "w105" in l.lower()`, and
+    # w108's block opened with a subtitle reading "... after w105/row 3, w106/row 4". That line is
+    # a `# ` header containing "w105", so it won the `next(...)` and MOVED THE WHOLE EXEMPTION to
+    # the top of the file: the real w105 section lost its cover and went red, while w108's block
+    # silently gained cover it was never meant to have. An exemption located by a substring can be
+    # captured by any later document that merely MENTIONS the exempted run.
+    #
+    # Two changes, and the second is the one that actually protects this:
+    #   1. Match the section's distinctive header text, and require EXACTLY ONE match. Zero or two
+    #      is a FAIL, never a silent pick-the-first -- if the header is renamed this guard stops
+    #      loudly instead of drifting onto whatever else matched.
+    #   2. VERIFY THE EXEMPTION IS WHERE IT CLAIMS TO BE: the exempted span must actually contain
+    #      the anti-pattern it exists to excuse. Today's misplacement covered a span with ZERO
+    #      pgrep lines, so this arm alone catches it. That is w106's lesson -- "a stale exemption
+    #      that reports itself present is a control that can only pass" -- applied to the guard
+    #      that the lesson was written about.
+    hits, lo, hi, bad, covered, anti = c4_scan(txt)
+    NOTES.setdefault("c4_span", {"lo": lo, "hi": hi, "header_hits": hits,
+                                 "anti_total": len(anti), "anti_covered": len(covered)})
     NOTES["c4"] = {"research_names_alive_py": names_fix, "pgrep_with_bre_alternation": bad}
     if not names_fix:
         fail("C4 RESEARCH.md does not name `alive.py`; the prescription that caused this "
              "defect is still the only one on offer")
+    if len(hits) != 1:
+        fail(f"C4 the w105 section header {C4_HDR!r} matched {len(hits)} times, expected exactly 1. "
+             "Refusing to guess which span is exempt -- rename it back or update HDR.")
+    elif not covered:
+        fail(f"C4 the exemption span (lines {lo}..{hi}) contains NO pgrep anti-pattern, so it is "
+             "not covering the section it was written for. An exemption that excuses nothing has "
+             "been relocated -- w108 hit exactly this.")
     if bad:
         fail(f"C4 RESEARCH.md still shows a pgrep pattern with a BRE alternation: {bad}")
 

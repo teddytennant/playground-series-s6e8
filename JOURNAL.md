@@ -31340,3 +31340,203 @@ RESEARCH under `git push NEEDS THE SAME PATH REPAIR`.
 `tail`'s status. That is w106 §4's lesson, written a run ago, and it still caught me the moment I
 was hurrying at the end of a run. The DO-NOT list had it; reading the list is not the same as
 having the habit. 43/43 suite green in 234s before the commit.
+
+---
+
+# w108 — 2026-08-28, slot 7 of 10, ANGLE "Blending: rank-average or weight the tuned models by
+# out-of-fold performance. Search blend weights on OOF predictions, never on the public leaderboard."
+# ⛔ ANGLE = INDEX ROW 6, CLOSED — VERIFIED AT THE ARTEFACT LEVEL (fourth row so checked)
+# 🔴 THE SUITE CAUGHT MY OWN EDIT: #41's EXEMPTION WAS CAPTURED BY MY BLOCK'S SUBTITLE
+# · 0 SLOTS · NO SUBMISSION
+
+## 0. THE CONSTRAINTS
+
+`git status` first: clean apart from the usual untracked experiment artefacts. `date -u` →
+**2026-08-28 15:04Z**, still 08-28. `w26g_send.py --n 10`: *"171 submissions on record; 10 already
+sent on 2026-08-28 (UTC); **0 of 10 slots left today**"*, and the dry run again flags the queue on
+disk as *"a queue for another day"* (the registered 08-29 list, as designed). ⟹ **no submission
+this run, and none was possible.** All ten 08-29 files re-confirmed on disk at 296,302 rows +
+header. Do not re-litigate that list.
+
+## 1. THE ANGLE — ROW 6, CHECKED AT THE ARTEFACT LEVEL
+
+One grep on `blend`, as the index promises. Row 6, price **−0.96e-6**. Following w105/row 3,
+w106/row 4 and w107/row 5, I opened the artefacts rather than quoting the sentence.
+
+**Every headline number reproduces to ten digits.** `experiments/w36d_wsearch.json` holds
+`equal 0.9701205752950482` and `xfit 0.9701196117472624`; `transform_weights.py` exists and
+`simplex(4, 0.05)` really does return **1,771** points (run, not read). Nothing fabricated —
+contrast row 3, whose closure named two members that were never built.
+
+🔻 **BUT THE ARTEFACT HAS TWO ARMS AND THE CLOSURE QUOTES ONE, AND THE OMITTED ARM IS POSITIVE.**
+
+    arm   keys                          equal          xfit           d(xfit vs equal)
+    h3    hybrid+rankraw+rescale        0.9701205753   0.9701196117   -0.96e-6   <- quoted
+    all4  logit+hybrid+rankraw+rescale  0.9701181652   0.9701195043   +1.34e-6   <- NOT quoted
+
+A run following the index's own instruction — *one grep on the row's anchor* — lands on the w63
+nine-line restatement, which quotes h3 alone. From there the `all4` arm is invisible and reads
+like an open door: *honest cross-fitted weight search beats equal weights*.
+
+✅ **IT IS NOT A DOOR.** `d(xfit vs equal)` is a **within-arm** comparison. Across arms,
+fitted-all4 lands **−1.0710e-6 below equal-weight h3**: the search spends four parameters
+rediscovering "drop logit" (pushing logit 0.25 → 0.081) and still finishes below the
+zero-parameter baseline. Equal-weight h3 beats all four honest numbers in the artefact.
+**The closure survives on its evidence; the navigation is what failed.**
+
+🎯 **THE DEFECT IS THAT ROW 6'S ANCHOR POINTED AT THE RESTATEMENT, NOT THE EVIDENCE.** The index
+promises *"the row tells you where the number lives"*; for row 6 it told you where the number was
+**repeated**. The full w36d write-up — which does contain the second arm, the cross-arm
+resolution and the "use this number" rule — sits under a different header. **Row 6 now carries
+both anchors, evidence first.** ⟹ A compressed restatement that keeps the conclusion and drops
+the arm arguing against it is indistinguishable from the full account until you open the artefact.
+
+## 2. TWO CORRECTIONS FOUND WHILE CHECKING, BOTH IN THE UNSAFE DIRECTION
+
+- 🔴 **The optimism rate divides by k where it should divide by k−1.** A simplex weight vector has
+  k−1 free parameters. Measured: h3 1.2649e-6 at k=3, all4 1.8159e-6 at k=4 → `/k` gives
+  0.42/0.45, `/(k−1)` gives 0.63/0.61, and the two-point slope in k is **0.551e-6 per arm added**.
+  The honest rule is **`0.55(k−1) e-6`, not `0.45k e-6`**. They cross at k≈3.9 — exactly where
+  both measurements sit, which is why it went unnoticed — and separate as k grows (at k=10:
+  4.5e-6 written vs 5.0e-6 measured). ⚠ **The bar is used to REFUSE searches, so understating it
+  admits searches that should be refused.** ✅ The w34 corroboration it rests on **survives and
+  tightens**: +2.54e-6 measured, 2.25e-6 predicted before, **2.44e-6 now**.
+- 🔴 **The "1,540-point simplex" in the stacking notes is the PRE-BUGFIX grid.** Its cut range was
+  one position short, so every row summed to 0.95 and **neither baseline it was compared against
+  was on it** — not equal weights, not h3. `transform_weights.py:simplex` documents this. AUC is
+  scale-invariant so the scores were valid; the search space was not. 1,771 is the fixed grid.
+  Annotated in place.
+
+## 3. THE ANGLE'S THREE CLAUSES, AND ONE OF THEM IS ALREADY SHIPPED
+
+Collapsing the handed string into one refusal is what made this row feel thin. It is three asks:
+
+| clause | status |
+|---|---|
+| *search blend weights on OOF, never on LB* | **ALREADY THE SHIPPED ARCHITECTURE.** `agent/stack.py` fits a `LogisticRegression` meta-learner on member OOF **inside the frozen folds** (`mo[iva] = ...`); 46% of its coefficients are negative. The incumbent IS an OOF-fitted weighted blend. |
+| *weight by OOF performance* | **exactly +0.000000**, mechanism re-derived this run: the four stacks span 0.970044–0.970111, so `(auc−0.5)^p` weights spread only **1.1e-3 around 0.25 at p=32**. No spread to exploit. |
+| *rank-average / fit the TOP-LEVEL weights* | **closed, −1.07e-6**, verified in §1 |
+
+⟹ **Row 6 is not "we tried blending and it failed". It is "the blend IS the product; the one knob
+above it is closed."** A run handed this angle should say that, not re-derive a refusal.
+
+## 4. 🔴 THE SUITE WENT RED ON MY OWN EDIT — #41's EXEMPTION MOVED ONTO MY BLOCK
+
+42/43, `w105a_liveguard` rc=1. The red was **not** in my claims; it was in a guard 300 lines below.
+C4 forbids any `pgrep` line in RESEARCH.md carrying a `\|` BRE alternation, exempting the w105
+section that documents the anti-pattern on purpose. It located that span by
+`l.startswith("# ") and "w105" in l.lower()`. My block opens
+`# (w108, 2026-08-28) — ... after w105/row 3, w106/row 4`. **That header sorted first and took the
+exemption with it.**
+
+    span before   lines 351..440   the real w105 section, covering 3 anti-pattern lines
+    span after    lines   1.. 84   w108's block,          covering 0 anti-pattern lines
+
+🎯 **TWO-SIDED, AND ONLY ONE SIDE IS LOUD.** The real section lost cover and went red — visible.
+**My block silently GAINED cover** — a false-negative window over the newest, least-reviewed text
+in the document, and nothing would have said so. ⟹ **An exemption located by substring is not
+scoped to a section; it is scoped to whoever mentions the section's name first** — and every
+write-up here names the runs it builds on, so the capture surface is *every future block*.
+
+**Fixed two ways.** (1) Match the section's own header text and require **exactly one** hit — zero
+or two now FAILS loudly instead of picking the first. (2) 🎯 **The exempted span must actually
+contain the thing it excuses.** A span covering zero anti-pattern lines is a misplaced exemption
+and fails. **That arm alone catches this bug regardless of how the span was located** — it is
+w106's *"a stale exemption that reports itself present is a control that can only pass"*
+mechanised, inside the guard that lesson was written about.
+
+`c4_scan()` split out of `main()` so `bash experiments/w105a_arms.sh` can exercise it on synthetic
+documents **without giving the guard an env var or flag that repoints it at a fake document in
+production**. A guard you can aim elsewhere is a guard that can be aimed somewhere harmless.
+**8/8 arms pass.**
+
+## 5. 😐 THREE OF MY OWN ERRORS, ALL CONTROLS THAT COULD NOT SEPARATE
+
+- 🔴 **Built the "old locator breaks" control against the LIVE document**, which by then already
+  carried the trigger. Baseline and treatment were the same document, so the arm reported FAIL on
+  a fix that worked. **A before/after control needs a real "before".**
+- 🔴 **Then APPENDED the decoy header instead of prepending it.** The old locator took the FIRST
+  match, so a decoy after the real header changed nothing and the control passed vacuously.
+  **The reproduction has to reproduce the ordering, not just the content.**
+- 🔴 **Stripped only the first decoy.** Once I had written a second w108 block there were two
+  headers mentioning w105, and the arms' `CLEAN` baseline still held one. Caught by the script's
+  own assertion. Now strips all of them, and asserts at least one exists so C2/C2b cannot pass
+  on a document with nothing to strip.
+
+## 6. ⛔ NO STANDING CHECK SHIPPED FOR §1, AND THAT IS A FINDING
+
+w105/w106/w107 each shipped a guard. The obvious #44 here is *"a closure citing a multi-arm
+artefact must name every arm"*. **I measured the surface before building it:**
+
+    multi-arm list-of-dict json artefacts in experiments/ :  4
+      w15b_tecause.json  n=9  key=member   <- a member census; summarising it is correct
+      w34b_vet.json      n=9  key=member   <- same
+      w35c_vet.json      n=7  key=member   <- same
+      w36d_wsearch.json  n=2  key=tag      <- the only real case
+
+**Three of four instances would need an exemption on day one**, because a 9-member vetting list is
+*supposed* to be summarised. w107 shipped #43 on the rule *design the exemption surface out rather
+than promising restraint*; here I cannot — the census/arm distinction is semantic, not structural.
+⟹ **A guard that is 75% exemption is theatre, and worse, it launders a judgement call as a check.**
+And §4 is what that costs when you get it wrong: an exemption surface is not free even at n=1.
+
+⚠ Note the near-miss: a guard keyed on cited **`.json` paths** would have been vacuous against its
+own motivating case. RESEARCH cites 7 json paths and `w36d_wsearch.json` is not one of them — the
+closure names the artefact by **script stem** (`w36d`). w107's standard is *"it reproduces the
+finding that caused it"*; the obvious implementation fails that test outright.
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK, **SEVENTH RUN ASKING**
+
+`.venv/bin/python experiments/check_selection.py` → **rc=1**, read without a pipe.
+*"NOTHING IS SELECTED."* Kaggle then auto-selects on **public** score, which is not what CV
+prefers — the Rogii failure mode exactly.
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+One minute of clicking, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. The
+price is fixed, so it cannot go stale. No browser on this box. **Human-only, and still the largest
+single item on the board.**
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED 08-29 TEN.** Built, verified and match-checked by w102, re-confirmed on
+   disk again this run at 296,302 rows + header. **Do not re-litigate the list.**
+3. After the send: re-run `w93a_suite.py` (**43 checks**), then rebuild the queue for 08-30 and
+   re-run `w54a_vetoexpiry` + `w85c_slotguard` — they go red on every send by design.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED.** All eight ANGLE INDEX rows are closed, and rows 3, 4,
+   5 and **now 6** have been re-verified at the artefact level. Remaining runs are queue
+   management, the suite, and getting §7 clicked. **Do not start a new member build.**
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w107's list holds.
+   • **DO NOT** re-open row 6 on the strength of `all4`'s +1.34e-6. It is a within-arm number and
+     that arm still finishes 1.07e-6 BELOW equal-weight h3 (§1). Asked and shut.
+   • **DO NOT** quote `0.45k e-6` as the top-level search bar; it is `0.55(k−1) e-6` (§2).
+   • **DO NOT** quote the "1,540-point simplex" result — that grid could not represent either
+     baseline it was compared against (§2). 1,771 is the fixed one.
+   • **DO NOT** "fix" a #41 red by renaming your headings. The locator was the defect, and it is
+     fixed; the misplacement arm now catches a moved span wherever it lands (§4).
+   • **DO NOT** cite a line number of RESEARCH.md — it decays ~100 lines/run and #43 fails you.
+   • **DO NOT** use `pgrep -af <token>` for liveness — use `alive.py`.
+   • **DO NOT** read `$?` after a pipe. Redirect to a file first.
+   • **DO NOT** launch a long job with `detach.py`/`setsid`/`nohup` — only `systemd-run --user`.
+   • **DO NOT** run `w93a_suite.py` alongside a member build (2.4× wall clock, both lose).
+   • **DO NOT** build `cat_native_ctr2` / `cat_natlat`, take the original-dataset angle, sweep
+     GBDT hyperparameters, or add ordinary GBDT members.
+6. ⚠ **NEW LESSONS.**
+   • **A compressed restatement can be faithful about its conclusion and silent about the arm
+     that argues against it** (§1). Both were in the artefact; only one was in the closure the
+     index points at. **Anchor an index row at the evidence, not the summary.**
+   • **An exemption located by substring is scoped to whoever mentions the name first** (§4), and
+     the false-negative half of that failure is silent.
+   • **Make an exemption prove it is covering something.** That check is independent of how the
+     span is found, so it survives the next locator bug too (§4).
+   • **Measure a guard's exemption surface BEFORE building the guard** (§6). 3-of-4 exemptions on
+     day one is the signal to write the lesson down instead of shipping a check.
+   • **A before/after control needs a real "before", and must reproduce the ORDERING** (§5).
+
+⏱ **SUITE, POST-EDIT: 43/43 green, 233s** — run after every edit in this entry had landed. The
+in-run pass earlier was 42/43 (§4) and a second, taken before the §4 write-up was prepended, was
+43/43 in 232s. Sequencing held: nothing else heavy was running, so the wall clock matches w107's
+234s rather than the 564s the suite costs when it overlaps a build. `bash experiments/w105a_arms.sh`
+**8/8** against the final document.
