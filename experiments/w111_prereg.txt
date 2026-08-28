@@ -103,3 +103,35 @@ FALSIFICATION AND CONSEQUENCE
 NOTHING SHIPS EITHER WAY. 0 of 10 slots. WANTED does not move: w64a settled slot 2 at
 +0.1444e-6 and its two named re-open conditions are both unmet (slot 1 is still the strict CV
 argmax of everything sent; no new pack ladder exists).
+
+ADDENDUM 2 — MY BASE WAS WRONG, CAUGHT 3 MINUTES IN, AND THE FIX BUYS A SECOND ARM
+==================================================================================
+I read the base off `experiments/w60a_run.sh`, which sets W21A_BASE=w36_ad199std. That script
+builds the **ens4 twin** (TAG w36_ad199stdcorr_ens4), not the pick. The pick's own artefact,
+`experiments/w21a_w36_ad199stdcorr.json`, records base = **w36_ad199std_h3**, base_auc
+0.9701354276. So the run launched at 16:47Z is reproducing w36_ad199stdcorr_ens4, not
+w36_ad199stdcorr. Caught from the log's first line (base AUC 0.9701323250 = the ens4 base) two
+arms in, BEFORE any result was read as evidence for anything.
+
+⟹ same genus as w64's "a deferral copied forward copies its candidate forward too": I took the
+base from a RECIPE THAT NAMES A SIBLING instead of from the artefact of the file itself.
+
+THE FIX. Let the running arm finish -- it reproduces `w36_ad199stdcorr_ens4`, which is one of
+the TWO files Kaggle's auto-selection would take, so it is worth having -- and launch the
+correct arm concurrently, which is exactly what w60a itself did (two w21a arms, 23 min total,
+"rank/AUC arithmetic over numpy, not a thread-hungry GBDT").
+
+  arm A (running)  BASE w36_ad199std     TAG w111repro     -> expect w36_ad199stdcorr_ens4
+  arm B (new)      BASE w36_ad199std_h3  TAG w111repro_h3  -> expect w36_ad199stdcorr  (THE PICK)
+
+PREDICTIONS, RESTATED PER ARM (Q1/Q2/Q4 unchanged in form)
+  A1  arm A base AUC 0.9701323250 -- ALREADY CONFIRMED in its first log line.
+  A2  arm A ships CV 0.9701365875 and is rank-identical to w36_ad199stdcorr_ens4.csv.
+  B1  arm B base AUC 0.9701354276 (the h3 base, from the pick's own artefact).
+  B2  arm B ships CV 0.9701400060 and is rank-identical to w36_ad199stdcorr.csv -- THE PICK.
+  Both: nested_delta and naive_delta reproduce (A: +2.232e-6 / +4.632e-6, scheme_optimism
+  +2.400e-6; B: +5.1535e-6 / +5.1535e-6, scheme_optimism 0.0).
+
+⚠ B2 is the load-bearing one. A is a bonus that happens to price the other side of the click:
+if BOTH reproduce, then the CV pick and the file auto-selection would take are each verified to
+be the artefact their CV describes, and the click argument rests on two checked objects.
