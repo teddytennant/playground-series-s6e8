@@ -30901,3 +30901,51 @@ One minute, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. 
 price is fixed — no remaining send can raise or lower it, so it cannot go stale. w103 §3 re-took
 the browser measurement under the corrected PATH: no browser of any kind on this box. **Human-only
 and still the largest item on the board.**
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **Check the build POSITIVELY, WITH THE NEW TOOL** (§2 — the old one lies both ways):
+
+       .venv/bin/python experiments/alive.py --unit w102a-build.service \
+           --cmd-contains w26i_value.py          # rc 0 alive · 1 dead · 2 undecided
+
+   ⛔ **NOT `pgrep -af`.** rc=2 means *undecided*, not *dead* — read
+   `logs_w102a_build_then_price.txt` before concluding anything.
+3. **The verdict.** `logs_w102a_build_then_price.txt` ends with `w97b done <date>`. Above it is
+   `w97a_gate.py`'s ENROL / NO-ENROL, already coded against `w97_prereg.txt` §3 so the rule
+   cannot be re-read after the table is on screen. **NO-ENROL is the modal outcome and is not a
+   failure.** ⚠ Read `experiments/w105_prereg_addendum.txt` (§5) BEFORE quoting a PASS: the
+   control is a near-duplicate (maxcorr 0.999997) of `lgbm_fixed_lat`, so a pass licenses only
+   the weaker claim. If the log stops without `w97b done`, the pricing was interrupted — re-run
+   `bash experiments/w97b_value_then_gate.sh none` under the **systemd-run --user** recipe, never
+   `detach.py`/`setsid`/`nohup` (w104).
+4. If ENROL: `cp oof_w96/{oof,test,summary}_lgbm_teprior_windowed.*` into `oof/` — the windowed
+   member **alone**, never the global twin (`oof/` is globbed, not allow-listed). Enrolment does
+   **not** change `SELECT_THESE.md` and does **not** trigger a send (prereg §4).
+5. **Send the registered 08-29 ten.** Built, verified, match-checked by w102. Do not re-litigate.
+6. Re-run `w93a_suite.py` — **41 checks now** — after the send, then rebuild the queue for 08-30
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard`; they go red on every send by design.
+   ⚠ w104 §9 left **one unexplained `w85c_slotguard` red** as precedent. If it reds again,
+   `experiments/w93a_fail_w85c_slotguard.log` now exists and says why — read it first.
+7. ⛔ **DO-NOT, carried forward and added to.** All of w92–w104's list holds.
+   • **DO NOT** use `pgrep -af <token>` to check whether anything is running (§2). Use
+     `alive.py`. `#41 w105a_liveguard` enforces the document side of this.
+   • **DO NOT** launch a long job with `detach.py`, `setsid` or `nohup` — only `systemd-run --user`.
+   • **DO NOT** call `sudo` without `/run/wrappers/bin` ahead of `sw/bin`.
+   • **DO NOT** build `cat_native_ctr2` / `cat_natlat` (§1). They were never built, their absence
+     is not an open thread, and their own registered priors are 2–3% of the noise floor.
+   • **DO NOT** take the original-dataset angle (w103 §1) or sweep GBDT hyperparameters (row 2).
+8. ⚠ **NEW LESSONS.**
+   • **A long document can hold a prescription and its refutation at once and never notice.** The
+     self-match hazard had been in RESEARCH since w14 when w103 prescribed the command that
+     trips it. Distance in a grep-navigated file is the same as absence.
+   • **A working pointer can point at a false claim.** `w101a_angleguard` proves the ANGLE
+     INDEX's anchors resolve; it cannot know the paragraph they land on cites files that were
+     never built (§1). **Check the artefact, not the sentence.**
+   • **A liveness check must assert the matched line looks like the job, not that some line
+     matched.** `rc=0` from a matcher is not evidence; the matched content is.
+   • **A control can be too good** (§5). w96 made the twin as close to the treatment as possible
+     and never asked how close it would then be to the pack.
+   • **A confounded probe manufactures false claims that feel measured** (§6). I had two
+     observations and a mechanism for "the bracket trick is broken" and it was wrong.
