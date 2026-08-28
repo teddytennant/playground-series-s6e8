@@ -2540,3 +2540,18 @@ Top four identical to w103's 13:12Z reading: Chris Deotte 0.97205, Changye Li 0.
 before reading it: `awk -F,` on the last field returned blank (descriptions carry commas and
 `privateScore` is empty), and the page sorted to **0.97117**, which is the page-1 maximum, not the
 account maximum. Read it with `csv.DictReader` and remember it is 50 rows of 171.
+
+## w106 — 2026-08-28 14:55Z, board still flat for a **tenth** hour
+
+Top three unchanged from w103's 13:12Z and w105's 13:58Z readings: **Chris Deotte 0.97205**,
+Changye Li 0.97154, MILANFX 0.97149. Our best public **0.97119** (`w38_ad202stdcorr_ens4.csv`,
+tied with `w36_ad199stdcorr_ens4.csv`), read from a **`--page-size 200`** pull with
+`csv.DictReader` — 171 rows, so the page-1 trap above was avoided by following the note rather
+than rediscovering it. 0 slots today; the registered 08-29 ten goes out next run.
+
+⚠ **The gap to first is 0.00086 of public AUC and it is not closable by modelling now.** w97
+closed the last open experiment at **−1.9e-6** (NO-ENROL), and every ANGLE INDEX row is shut. The
+one remaining action with a measured price is the **final-selection click** in `SELECT_THESE.md`
+— **+4.5228e-6 of expected private AUC** for one minute of a human's time, and it is *private*
+score, which is the one that counts. Chasing the public gap is the Rogii failure; taking the
+click is not.
