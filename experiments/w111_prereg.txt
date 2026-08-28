@@ -56,3 +56,50 @@ P5 miss: read the FULL failure log at experiments/w93a_fail_<stem>.log before di
 
 Read-only run. No file that any other module consumes is written except w93b_cvlbaudit.json,
 which is its own and is read by nothing.
+
+ADDENDUM (written after I1-I3 returned, BEFORE the reproduction below was launched)
+====================================================================================
+WHY THIS ADDENDUM. The angle's FIRST clause is "re-verify the best pipeline end-to-end", and
+none of I1-I4 does that. w93c_pickverify's own docstring names the gap in one sentence: "the CV
+is computed on the OOF vector; the file Kaggle scores is a DIFFERENT ARRAY written by the same
+build, and nothing on disk has ever asserted that the shipped file is a well-formed submission
+for THIS test set". w93c then asserts well-formedness (G3) but NOT provenance. So the last link
+of the deadline chain -- shipped CSV <- same build as the OOF vector the CV comes from -- has
+never been checked, and it is the link the whole selection argument rests on.
+
+IT IS CHEAP TO CHECK, BECAUSE THE PICK IS NOT A TRAINED OBJECT. w36_ad199stdcorr is w21a
+post-hoc rank arithmetic over the base w36_ad199std, whose OOF and CSV are both on disk
+(w60a_run.sh; "no refit, no new members, no search"). w60a ran TWO w21a arms concurrently in
+23 minutes, so one arm is ~20 min of numpy.
+
+THE RUN. `W21A_BASE=w36_ad199std W21A_TAG=w111repro .venv/bin/python
+experiments/w21a_ad187corr.py` -- the shipped recipe verbatim, only the TAG changed.
+
+REGISTERED PREDICTIONS
+  Q1  the reproduced OOF CV equals the pick's claimed 0.9701400060. This is rank arithmetic
+      over a stored vector, not a solver, so I register EXACT to < 1e-9, NOT merely inside the
+      3.68e-6 BLAS floor. A miss inside the floor is still a miss of Q1 as registered.
+  Q2  the reproduced test CSV is RANK-IDENTICAL to submissions/w36_ad199stdcorr.csv. The
+      script prints this itself ("rank-identical to an existing submission file?"), so the
+      instrument is the shipped one and not something I wrote after seeing the answer.
+      AUC reads only the ordering, so rank-identity is the exact statement "the file Kaggle
+      will score is the artefact whose CV the selection is made on".
+  Q3  the base's own CV reads 0.9701323250 and the correction is +4.263e-6 -- w60a_ad199_ens4
+      names the base figure for the ens4 side; this is the h3-side twin and must agree with
+      the ledger's w36_ad199std.
+  Q4  no file already on the 171-file sent ledger changes. Verified by md5 over submissions/
+      before and after, and the two scratch outputs are MOVED OUT of submissions/ the moment
+      the run ends.
+
+FALSIFICATION AND CONSEQUENCE
+  Q1 miss: the claimed CV is not reproducible from the base -- report, and w93c's G1 (which
+      recomputes from the STORED oof vector, a different route) becomes the only witness.
+  Q2 miss: THE SHIPPED FILE IS NOT THE ARTEFACT ITS CV DESCRIBES. That is a hole in the
+      deadline argument and would be the finding of this run. It does NOT license moving the
+      pick on the spot -- it licenses saying so loudly and checking slot 2 the same way.
+  Q3 miss: the base on disk is not the base the pick was built from.
+  Q4 miss: STOP. Restore from git and write it at the top of the journal entry.
+
+NOTHING SHIPS EITHER WAY. 0 of 10 slots. WANTED does not move: w64a settled slot 2 at
++0.1444e-6 and its two named re-open conditions are both unmet (slot 1 is still the strict CV
+argmax of everything sent; no new pack ladder exists).
