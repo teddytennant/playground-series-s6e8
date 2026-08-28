@@ -32,7 +32,7 @@ ROOT = os.path.dirname(HERE)
 PY = os.path.join(ROOT, ".venv", "bin", "python")
 RESEARCH = os.path.join(ROOT, "RESEARCH.md")
 
-# The 41, verbatim from RESEARCH.md. C2 re-parses that document and compares.
+# The 43, verbatim from RESEARCH.md. C2 re-parses that document and compares.
 STEMS = [
     "w54a_vetoexpiry", "w55a_unpriced", "w56b_wantedguard", "w57c_muguard", "w59b_barguard",
     "w60b_ineligguard", "w60d_memberguard", "w62b_barstaleguard", "w63b_setguard",
@@ -44,6 +44,7 @@ STEMS = [
     "w87a_registrarguard", "w88a_calexposure", "w89a_foldid", "w91b_dateguard",
     "w92a_smokerun", "w93c_pickverify", "w100a_complement", "w101a_angleguard",
     "w103a_pathguard", "w104a_cgroupguard", "w105a_liveguard", "w106a_claimguard",
+    "w107a_lineref",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

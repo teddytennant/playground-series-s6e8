@@ -1,3 +1,117 @@
+# 🔴 EVERY LINE-NUMBER CITATION INTO RESEARCH.md IS STALE — 7 of 7, measured (w107, 2026-08-28)
+# ⟹ STANDING CHECK #43 `w107a_lineref` NOW FORBIDS THEM. USE A GREP-ABLE TEXT ANCHOR.
+
+The ANGLE INDEX has said since w101 that *"anchors are section-header text, not line numbers:
+RESEARCH.md is edited at the top every run, so every line number in it is wrong by the next
+day."* The **closure body of the very row that sentence sits above** then cited three line
+numbers. w107 checked all of them. The rule was right and nothing was enforcing it.
+
+**THE MECHANISM, CONFIRMED IN GIT RATHER THAN ASSUMED.** The last four commits touching
+RESEARCH.md each open with a hunk at `@@ -1,3 +1,N @@`, N = 69, 80, 93, 133 — a block prepended
+at the very top, every run. So an internal line number decays **~100 lines per run,
+deterministically**, and it never announces itself: the pointer still resolves, it just lands on
+unrelated prose that reads like prose because it *is* prose.
+
+```
+  the citation                        lands on today            its claim actually lives at
+  ----------------------------------  ------------------------  -----------------------------------
+  RESEARCH line ~10662  SDK window    THE SEND QUEUE            THE KAGGLE CLI HAS A 30-MINUTE
+                                                                DEAD WINDOW              drift  -124
+  this file's §4 at line ~6342  TE    the browser/login         A SECOND skew in the same
+                                block    blocker                block                    drift +4665
+  see line ~7137   -19.26e-6 xgb,     a calibrator-dispersion   THE CT SKEW IS A PROPERTY
+                   -82.68e-6 cat        argument                OF THE MATRIX            drift +4621
+  RESEARCH line ~6613  rounds trend   w14a_cvlb.py's CV/LB      Where the effect sits relative
+                                        slope                   to everything else       drift +4586
+  The table at line 2287  rho lookup  a token-refresh snippet   the "5e-5 noise floor" is the
+                                                                WITHIN-PACK floor        drift +4651
+  cf. bolt_xgb_d7_alt1/alt2, line     w37e's offset-form        are the SAME ARRAY
+  1361                                  rejection
+  ~line 313   the 49-member census    the broken-lookup-path    Mechanism only partially
+                                        lesson                  confirmed
+```
+
+🎯 **FOUR OF THEM DRIFT BY ~4,600 LINES IN THE SAME DIRECTION, AND THAT NUMBER IS NOT A
+COINCIDENCE — IT IS THE ACCUMULATED PREPEND.** ~100 lines/run × the ~46 runs since the w26-era
+runs that wrote them. The staleness is a clock, and it can be read off the drift.
+
+✅ **AND THE CONTROL SEPARATES CLEANLY, WHICH IS WHY THIS IS A RULE AND NOT A MOOD.**
+
+    into RESEARCH.md  (PREPENDED, @@ -1,3 +1,N @@)      7 refs   0 live   7 stale
+    into JOURNAL.md   (APPENDED,  @@ -30949,3 +...@@)   1 ref    1 live   0 stale
+    into source files                                   3 refs   2 live   1 drifted
+
+`RESEARCH:2124`'s *"JOURNAL line 19481 records, as a closure: «Train has no exact feature
+duplicates…»"* is **verbatim correct at 19481 today**, months on. JOURNAL is append-only by the
+playbook's hard rules, so its line numbers are stable and citing them is fine. ⟹ **The defect is
+not "line numbers are bad". It is "line numbers into a file that grows at the top".**
+
+⚠ **ALL SEVEN ARE NOW TEXT ANCHORS AND THE DOCUMENT IS GREEN.** Nothing was deleted — each
+pointer was replaced by the grep string for the section that actually holds the claim.
+
+## 📏 THE RULE, AND WHAT #43 CAN AND CANNOT SEE
+
+`.venv/bin/python experiments/w107a_lineref.py` — scans RESEARCH.md outside fenced blocks.
+**A citation into RESEARCH.md itself FAILS** (not "gets checked" — it is structurally
+unmaintainable). A citation naming any other file is **resolved**: file found anywhere in the
+repo, line within range. Arms: `bash experiments/w107a_arms.sh`, **10/10 pass**.
+
+⚠ **THE PRICE, STATED UP FRONT (w106 house style):**
+1. **External refs are checked for existence and range ONLY, never semantics.** `w25a_cvlb_full.py
+   (import line 80, call line 34)` passes, and line 80 *is* the scipy import — but line 34 is
+   `capture_output=True`, not the call the sentence claims. **A green is not "the citation is
+   true".** That is the one drifted external in the table above.
+2. **JOURNAL.md is not scanned.** It is append-only by hard rule, so a guard failing on its
+   history could never be made green, and a guard that cannot go green gets switched off.
+3. **Fenced blocks are skipped.** That exclusion is **structural, not per-instance**: it is what
+   lets a run quote a broken pointer in its own write-up without adding an exemption. w106 §5
+   found exemption lists erode a guard by each addition being individually reasonable —
+   **this one cannot grow, because it is one rule rather than a list.**
+   ✅ **AND IT WAS TESTED ON DAY ONE BY THIS VERY SECTION.** The write-up above quotes all seven
+   broken pointers, and #43 duly fired 8 times on it. Moving the forensic table into a fence
+   cleared it — **0 exemptions added**. #42 needed its second exemption within the hour of
+   shipping with its first; #43 met the same pressure and did not need a first.
+
+🔻 **C0 NON-VACUITY, TWO ARMS, BECAUSE #43 IS AN INSTRUMENT THAT REPORTS ABSENCE.** An empty
+document must FAIL (`scanner found NO line citations` — a broken regex is not a clean
+document), and a document exercising no external path must FAIL too. Both verified.
+
+😐 **TWO OF THIS RUN'S OWN ERRORS, AND THE ARMS CAUGHT BOTH.**
+- 🔴 **A DATE PARSED AS A CITATION.** `\d{2,6}(?!\s*[-–]\s*\d{2})` **backtracks**: blocked on
+  `2026-08-11` it retries with `202`, the lookahead then sees `6` instead of `-`, and passes.
+  The exclusion was there, was tested by eye, and did nothing. Fixed with `(?!\d)` to pin the
+  whole number. ⟹ **A negative lookahead is not a filter unless the token it follows is
+  anchored.**
+- 🔴 **THE ARM HARNESS COUNTED `grep -c '^FAIL'`, WHICH ALSO MATCHES THE `FAILURES n` SUMMARY
+  LINE.** C2 read 2 findings where there was 1 and reported a failure the guard did not have.
+  Same family as w106's piped `rc=0`: **the instrument answered a neighbouring question in a
+  form indistinguishable from the right answer.** Fixed to `'^FAIL '`.
+
+## ✅ ROW 5 OF THE ANGLE INDEX RE-VERIFIED AT THE ARTEFACT LEVEL (w107's handed angle)
+
+Third row now checked rather than quoted (w105 did row 3, w106 row 4). *"Feature engineering:
+interactions, in-fold target and count encodings"* — **closed, price negative**, and it holds:
+
+| the claim | checked | verdict |
+|---|---|---|
+| re-derived from `agent/features.py:te_block` | file read | **present, line 175** |
+| *"measured negative in three model classes"* | the §M3(d) table | **live: −19.26e-6 (xgb), −82.68e-6 (cat)** on top of the §G6 LightGBM null |
+| *"this file's §4"* | `## 4. A SECOND skew in the same block` | **the section is real** — only its line number was fiction |
+| frequency vs count encoding is not a new arm | GBDTs are per-column scale-invariant | holds by argument, no artefact needed |
+
+🎯 **AND THE DISTINCTION w106 DREW SURVIVES A THIRD TEST.** Row 5's stale `§4` pointer looks
+identical on the page to row 3's citation of two files that were never built — a confident
+pointer to a specific place. Row 3's was **fabrication**; row 5's is a **real section behind a
+rotted pointer**. You cannot tell which from the sentence. `#42` checks the members, `#43` now
+checks the pointers.
+
+⛔ **ROW 5'S CARVE-OUT IS SPENT.** The row permits *"a registered test of one encoding with its
+control already built"*. The one experiment that licensed — w96's windowed TE prior — came back
+**NO-ENROL** (mean −1.924e-6, 2/5 reps positive; w106 §6). Recorded in the index itself so no
+ninth handing of this angle reads the carve-out as an open door.
+
+---
+
 # ⛔ THE WINDOWED TE-PRIOR MEMBER IS **NO-ENROL** — w97 gate closed in code (w106, 2026-08-28)
 # ⟹ THERE IS NO OPEN MODELLING EXPERIMENT LEFT IN THIS WORKSPACE
 
@@ -603,6 +717,10 @@ clear it.** That is why the row is stable under "but nobody tried *these* hyperp
   still built, because it is a **pre-registered encoding comparison against a twin control**
   (`w97_prereg.txt`), not a hunt for a new feature. Row 5 forbids re-searching the feature space.
   It does not forbid a registered test of one encoding with its control already built.
+  ⛔ **AND THAT CARVE-OUT IS NOW SPENT.** The one experiment it licensed — w96's windowed TE
+  prior — was decided **NO-ENROL** by `w97a_gate.py` on 2026-08-28 (mean **−1.924e-6**, 2/5 reps
+  positive; w106 §6). There is no second registered encoding test with a control already built,
+  so the carve-out currently licenses **nothing**. Do not read it as an open door.
 
 # 🔴 THE SWEEP COVERED BOTH INDICES AND TWO OF THREE SPELLINGS — `s06e08` (w90, 2026-08-25)
 
@@ -996,7 +1114,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 42 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 43 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -1007,7 +1125,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
-    w106a_claimguard
+    w106a_claimguard  w107a_lineref
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -2276,7 +2394,8 @@ missing half is verifying it PASSES on a state known good. w72b was checked both
 # ⚠⚠ REFRESH THE KAGGLE TOKEN **BEFORE** THE SEND CHAIN, NOT AFTER THE FIRST 401 (w70)
 
 The token expired **17:41:21Z** mid-run and every call returned `Authentication required`. This
-is the documented SDK sign-error window (RESEARCH line ~10662): the CLI trusts the token for
+is the documented SDK sign-error window (grep `THE KAGGLE CLI HAS A 30-MINUTE DEAD WINDOW`):
+the CLI trusts the token for
 **30 minutes after expiry**, sends it, and Kaggle 401s. Fixed in seconds:
 
     cp ~/.kaggle/credentials.json ~/.kaggle/credentials.json.bak.<wave>
@@ -5095,7 +5214,7 @@ rows are in *some* consistent order. Use it whenever an author ships their label
 | `xgb2` | **0.968733** | 0.9945 | ⛔ es-on-val → `ext_members10es/` |
 | `flamllgb` / `flamlxgb` | 0.9663 / 0.9680 | 0.9874 / 0.9944 | ⛔ FLAML picks **hyperparameters** on the scored fold |
 | `realmlp`,`resnet`,`tabm`,`tabnet` | — | **1.00000** | ⛔ ALREADY HELD as `pub_rmlp`/`pub_resnet`/`pub_tabm`/`pub_tabnet` (szymonkapiski re-published them 08-04; `tabnet` bit-exact, others agree to 3e-08 = a float32 round-trip) |
-| `xgb` | 0.967980 | — | ⛔ **byte-identical to `flamlxgb`** on both oof and test (cf. `bolt_xgb_d7_alt1`/`alt2`, line 1361) |
+| `xgb` | 0.967980 | — | ⛔ **byte-identical to `flamlxgb`** on both oof and test (cf. grep `are the SAME ARRAY`) |
 
 ### ⚠⚠ A MEMBER THAT IS BOTH UNUSUALLY STRONG AND UNUSUALLY DECORRELATED IS A LEAKY OOF
 
@@ -6225,7 +6344,7 @@ side. This is a defect in the instrument, not a property of the public slice, an
 therefore applies to the private slice equally.
 
 ⚠ **Do not quote "49 of 159 members need the repair" as the size of this.** The census (see
-the *Mechanism only partially confirmed* block above, ~line 313) says only **~9 of the 49
+the *Mechanism only partially confirmed* block above) says only **~9 of the 49
 are asymmetric**; the 16 heaviest pinners are at 91–94% on *both* sides, ratio 1.00.
 Aggregate asymmetry is **OOF 9.884% of cells vs test 9.531% — 0.35pp**. Symmetric pinning
 damages CV and test equally and cannot displace the gap, so the whole effect has to come out
@@ -9498,7 +9617,8 @@ the two foreign files drag the mean +28.6e-6. The "loose logit family" is an art
 
 ## ⚠ 1. `sd(gap) = sd(single)·√(2(1−rho))` is FALSE. Delete the rho lookup table.
 
-The table at line 2287 ("Quick lookup at other rho, sd(single)=567e-6: 0.9999→8.0e-6,
+The table under `The workspace's "5e-5 noise floor" is the WITHIN-PACK floor` ("Quick lookup
+at other rho, sd(single)=567e-6: 0.9999→8.0e-6,
 0.999→25.4e-6, 0.995→56.7e-6, 0.99→80.2e-6, 0.98→113.5e-6") is **not usable** and must not be
 quoted for teams whose predictions we cannot see. Measured on **820 pairs over 41 vectors**
 (`experiments/w17h_floorpop.py`, gated bit-exact against `w15a_crossteam.json` at 0.000e-12):
@@ -12066,9 +12186,10 @@ only**, never against each other, so adding a second candidate cannot move the f
 ## Two dead ends under the "in-fold target/count encoding" angle — do not rebuild either
 
 1. **The TE re-shrink.** Independently re-derived from `agent/features.py:te_block` on
-   2026-08-19 before checking. It is already this file's §4 at line ~6342 (with the closed-form
+   2026-08-19 before checking. It is already this file's §4 (grep `A SECOND skew in the same block`) with the closed-form
    serve-time corrector and the λ-recovery of `TE_SMOOTH`), and it is **measured negative in
-   three model classes** — see line ~7137: −19.26e-6 (xgb), −82.68e-6 (cat), on top of the
+   three model classes** — grep `THE CT SKEW IS A PROPERTY OF THE MATRIX`: −19.26e-6 (xgb),
+   −82.68e-6 (cat), on top of the
    LightGBM null at §G6. Do not ship a `te` or `both` arm.
 2. **Frequency encoding instead of count encoding** (`CT_/n` rather than a raw count). This is
    the obvious "principled" alternative to the s=4/3 rescale and it is **not a new arm**: it is
@@ -12870,7 +12991,7 @@ against a fixed member COUNT).
 `w31_prereg_slot2.txt` §N2(e) registered the control's CT gain at 2000 rounds as "0.5×–1.5× of
 the 400-round +293.86e-6", i.e. +147..+441e-6. **The pooled answer was already on disk and in
 this file:** `w26k_run.log` has all five folds at 2000 rounds — s=1.0 `0.9677106709`, s=4/3
-`0.9682861183`, **d_c +575.45e-6** — and RESEARCH line ~6613 already stated the trend
+`0.9682861183`, **d_c +575.45e-6** — and RESEARCH (grep `Where the effect sits relative to everything else`) already stated the trend
 "+117e-6 at 100 rounds → +294e-6 at 400 → ~600e-6 at 2000". A registered band that EXCLUDES an
 already-measured value is not a prior, and the prereg was amended to void it (§N5) rather than
 scored against it.

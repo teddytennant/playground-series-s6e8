@@ -31164,3 +31164,167 @@ board.** ⚠ See §4 — my first reading of this today was a piped `rc=0` and i
 ⏱ **SUITE, POST-EDIT (owed, w105 §9): 42/42 green, 234s.** The earlier in-run pass took **564s**
 for the identical work because it overlapped the pricing build — 2.4× wall clock, and it slowed
 the pricing cells 95s → 119s at the same time. Both jobs were the loser. Sequence them.
+
+---
+
+# w107 — 2026-08-28, slot 6 of 10, ANGLE "Feature engineering: interactions, in-fold target and
+# count encodings, careful categorical treatment. Measure every feature on CV, keep only what pays."
+# ⛔ ANGLE = INDEX ROW 5, CLOSED — VERIFIED AT THE ARTEFACT LEVEL, AND ITS CARVE-OUT IS NOW SPENT
+# 🔻 NEW STANDING CHECK #43 `w107a_lineref` — 7 OF 7 LINE CITATIONS INTO RESEARCH.md WERE STALE
+# · 0 SLOTS · NO SUBMISSION
+
+## 0. THE CONSTRAINTS
+
+`git status` first (w101 §1): clean apart from the usual untracked experiment artefacts.
+`date -u` → **2026-08-28 14:49Z**, still 08-28. `w26g_send.py --n 10`: *"171 submissions on
+record; 10 already sent on 2026-08-28 (UTC); **0 of 10 slots left today**"*, and the dry run
+again flags the queue on disk as *"a queue for another day"* (the registered 08-29 list, as
+designed). ⟹ **no submission this run, and none was possible.** The 08-29 ten is built, verified
+and match-checked by w102 — tomorrow's run sends it and must not re-litigate it.
+
+## 1. THE ANGLE — ROW 5, CHECKED AT THE ARTEFACT LEVEL RATHER THAN QUOTED
+
+One grep, as the index promises: row 5, *feature engineering / in-fold target and count
+encodings*, price **negative**. w105 found row 3's closure citing two files that were never
+built and w106 found row 4's price inherited from a different model family, so the house rule is
+now to check the artefacts. Row 5 holds:
+
+| the claim | checked | verdict |
+|---|---|---|
+| re-derived from `agent/features.py:te_block` | file read | **present, line 175** |
+| *"negative in three model classes"* | the §M3(d) table | **live: −19.26e-6 (xgb), −82.68e-6 (cat)**, on the §G6 LightGBM null |
+| *"this file's §4"* | `## 4. A SECOND skew in the same block` | **section real, its line number fiction** |
+| frequency ≠ a new arm vs count encoding | GBDTs are per-column scale-invariant | holds by argument |
+
+⟹ **No feature work done and none warranted.** Row 5's price is negative, not merely small.
+
+⛔ **AND THE CARVE-OUT IS SPENT — WRITTEN INTO THE INDEX.** Row 5's note permits *"a registered
+test of one encoding with its control already built"*. The single experiment that licensed was
+w96's windowed TE prior, decided **NO-ENROL** by w106 (mean −1.924e-6, 2/5 reps positive). The
+note now says so, so a ninth handing of this angle cannot read it as an open door.
+
+## 2. 🔻 THE FINDING — THE INDEX'S OWN NAVIGATION RULE WAS TRUE AND UNENFORCED
+
+The ANGLE INDEX has said since w101: *"anchors are section-header text, not line numbers:
+RESEARCH.md is edited at the top every run, so every line number in it is wrong by the next
+day."* **The closure body of the very row that sentence sits above cited three line numbers.**
+I checked all of them, then every other line citation in the document.
+
+🎯 **7 OF 7 CITATIONS INTO RESEARCH.md ARE STALE. NOT ONE SURVIVES.** Each still *resolves* —
+it just lands on unrelated prose, which reads like prose because it is prose. `~7137`, sold as
+the −19.26e-6/−82.68e-6 table, is a calibrator-dispersion argument; `~6342`, sold as the TE
+re-shrink §4, is the browser-login blocker; `2287`, sold as the rho lookup, is a token-refresh
+snippet.
+
+✅ **THE MECHANISM WAS CONFIRMED IN GIT, NOT ASSUMED.** The last four commits touching
+RESEARCH.md each open at `@@ -1,3 +1,N @@`, N = 69/80/93/133 — a block prepended at the top every
+run. **~100 lines/run of decay.** Four of the seven drift by **~4,600 lines in the same
+direction**, which is that rate times the ~46 runs since the w26-era runs that wrote them. **The
+staleness is a clock and it can be read off the drift.**
+
+✅ **AND THE CONTROL SEPARATES, WHICH IS WHY THIS IS A RULE AND NOT A MOOD.**
+
+    into RESEARCH.md  (PREPENDED)   7 refs   0 live   7 stale
+    into JOURNAL.md   (APPENDED)    1 ref    1 live   0 stale
+    into source files               3 refs   2 live   1 drifted
+
+RESEARCH's *"JOURNAL line 19481 records, as a closure: «Train has no exact feature
+duplicates…»"* is **verbatim correct at 19481 today**. JOURNAL is append-only by hard rule
+(hunks land at ~30949 of 31166), so its line numbers are stable. ⟹ **The defect is not "line
+numbers are bad" — it is "line numbers into a file that grows at the top."** A guard that banned
+all of them would have been wrong and would have been argued with.
+
+**All seven rewritten as grep-able text anchors. Nothing deleted**; each pointer was replaced by
+the grep string for the section that actually holds the claim, and all seven anchors verified to
+resolve.
+
+## 3. 🔻 STANDING CHECK #43 — `experiments/w107a_lineref.py`, 10/10 ARMS
+
+Scans RESEARCH.md outside fenced blocks. **A citation into RESEARCH.md itself FAILS** — not
+"gets checked", it is structurally unmaintainable. A citation naming any other file is
+**resolved** (found anywhere in the repo, line in range). `bash experiments/w107a_arms.sh`.
+
+✅ **IT REPRODUCES THE FINDING THAT CAUSED IT.** Run against the *uncorrected* w26-era sentence
+it reports exactly `line 7137` and nothing else — it rediscovers the finding without being told
+about it, the only real evidence it would have caught this in time.
+
+🔻 **C0 NON-VACUITY, TWO ARMS, BECAUSE #43 REPORTS ABSENCE** (w106 §3's lesson). An empty
+document must **FAIL** — *"scanner found NO line citations"* — because a broken regex and a
+clean document are the same observation otherwise. A document exercising no external path fails
+too, so a green can never mean "the resolve path was never run".
+
+⚠ **THE PRICE, STATED UP FRONT.** External refs are checked for existence and range **only,
+never semantics** — `w25a_cvlb_full.py (import line 80, call line 34)` passes, and line 80 *is*
+the scipy import, but line 34 is `capture_output=True`, not the call claimed. JOURNAL.md is not
+scanned: append-only by hard rule, so a guard failing on its history could never go green, and a
+guard that cannot go green gets switched off.
+
+🎯 **THE EXEMPTION PROBLEM WAS DESIGNED OUT, AND THE DESIGN WAS TESTED ON DAY ONE.** w106 §5
+found that #42 needed a second exemption within the hour of shipping with its first, because
+every write-up of a defect quotes the defect. #43's answer is **one structural rule — skip
+fenced blocks — instead of a list that grows.** This run's own write-up quotes all seven broken
+pointers and duly fired #43 eight times; moving the forensic table into a fence cleared it.
+**0 exemptions added.** Same pressure, no erosion surface.
+
+## 4. 😐 TWO OF MY OWN ERRORS, AND THE ARMS CAUGHT BOTH BEFORE THE WRITE-UP
+
+- 🔴 **A DATE PARSED AS A CITATION.** `\d{2,6}(?!\s*[-–]\s*\d{2})` **backtracks**: blocked on
+  `2026-08-11` it retries with `202`, the lookahead then sees `6` rather than `-`, and passes.
+  The exclusion existed, was eyeballed, and did nothing. ⟹ **A negative lookahead is not a
+  filter unless the token it follows is anchored.** Fixed with `(?!\d)`.
+- 🔴 **THE ARM HARNESS COUNTED `grep -c '^FAIL'`, WHICH ALSO MATCHES THE `FAILURES n` SUMMARY.**
+  C2 read 2 findings where there was 1 and reported a guard failure that did not exist. Same
+  family as w106's piped `rc=0`: **an instrument answering a neighbouring question in a form
+  indistinguishable from the right answer.** Fixed to `'^FAIL '`.
+
+Also fixed two genuine defects in the guard that the live document exposed: a `JOURNAL line N`
+ref misclassified as internal (it names a file without writing the extension), and a resolver
+that only looked in two directories and so declared `w15b-research.md` missing when it sits in
+`journal_inbox/merged-2026-08-15/`.
+
+## 5. ⛔ TEDDY — STILL ONE HUMAN CLICK, **SIXTH RUN ASKING**
+
+`.venv/bin/python experiments/check_selection.py` → **rc=1**, read without a pipe (w106 §4).
+*"NOTHING IS SELECTED."* So Kaggle auto-selects on **public** score, which is not what CV
+prefers — the Rogii failure mode exactly.
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+One minute of clicking, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. w99
+§1 proved the price is fixed, so it cannot go stale. **Human-only, and still the largest single
+item on the board.** ⚠ Note the path: the script is `experiments/check_selection.py`; invoking it
+as `check_selection.py` from the workspace root gives `No such file` and **rc=2**, which is the
+`alive.py` "undecided" code and reads like a broken tool rather than a typo.
+
+## 6. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED 08-29 TEN.** Built, verified and match-checked by w102, re-confirmed on
+   disk by w106 at 296,302 rows + header. **Do not re-litigate the list.**
+3. After the send: re-run `w93a_suite.py` (**43 checks now**), then rebuild the queue for 08-30
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard` — they go red on every send by design.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED** (w106 §6, NO-ENROL). All eight ANGLE INDEX rows are
+   closed, and rows 3, 4 and 5 have now been re-verified at the artefact level. Remaining runs
+   are queue management, the suite, and getting §5 clicked. **Do not start a new member build
+   with three days left.**
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w106's list holds.
+   • **DO NOT** cite a line number of RESEARCH.md. It decays ~100 lines/run and #43 fails you.
+     Use a grep-able text anchor. Citing a JOURNAL.md line is fine — it is appended, not
+     prepended.
+   • **DO NOT** add an exemption to #43. It has none and needs none: put the quote in a fence.
+   • **DO NOT** use `pgrep -af <token>` for liveness — use `alive.py`.
+   • **DO NOT** read `$?` after a pipe. Redirect to a file first.
+   • **DO NOT** launch a long job with `detach.py`/`setsid`/`nohup` — only `systemd-run --user`.
+   • **DO NOT** run `w93a_suite.py` alongside a member build (w106: 2.4× wall clock, both lose).
+   • **DO NOT** build `cat_native_ctr2` / `cat_natlat`, take the original-dataset angle, sweep
+     GBDT hyperparameters, or add ordinary GBDT members.
+6. ⚠ **NEW LESSONS.**
+   • **A rule written in a document does not act on the document.** The navigation rule #43 now
+     enforces had been stated correctly since w101, three rows above the closure that broke it.
+   • **The defect is the direction of growth, not the pointer.** 7/7 stale into a prepended file,
+     1/1 live into an appended one. A ban on all line numbers would have been wrong.
+   • **A negative lookahead is not a filter unless its token is anchored** (§4). Backtracking
+     walked straight through mine.
+   • **Design the exemption surface out rather than promising restraint** (§3). One structural
+     rule met the same day-one pressure that had already forced #42 to a second exemption.

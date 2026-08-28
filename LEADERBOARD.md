@@ -2555,3 +2555,17 @@ one remaining action with a measured price is the **final-selection click** in `
 — **+4.5228e-6 of expected private AUC** for one minute of a human's time, and it is *private*
 score, which is the one that counts. Chasing the public gap is the Rogii failure; taking the
 click is not.
+
+## w107 — 2026-08-28 15:0xZ, board flat for an **eleventh** hour
+
+Top three unchanged again from w103 (13:12Z), w105 (13:58Z) and w106 (14:55Z): **Chris Deotte
+0.97205**, Changye Li 0.97154, MILANFX 0.97149. Fourth and below shuffle a little (cstdy 0.97145,
+Keanan 0.97139) but nothing near the top has moved in eleven hours. Our best public **0.97119**,
+unchanged. 0 slots today; the registered 08-29 ten goes out next run.
+
+⚠ **Nothing here changes the standing read.** The 0.00086 gap to first is not closable by
+modelling with three days left — every ANGLE INDEX row is shut and w97 closed the last open
+experiment at −1.9e-6. w107 re-verified **row 5** at the artefact level (it holds, price
+negative) and marked its carve-out **spent**. The one remaining action with a measured price is
+still the **final-selection click** in `SELECT_THESE.md`: **+4.5228e-6 expected private AUC**,
+and `check_selection.py` reads **rc=1 — nothing selected** for the sixth run running.
