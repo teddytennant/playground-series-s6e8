@@ -31969,3 +31969,217 @@ died on `FileNotFoundError: 'kaggle'` — the short-PATH trap RESEARCH already r
 w54a's *"in the post-send set — see the summary"* note appeared next to it, which is the excuse
 w104 already warned reads as a diagnosis. Both went green with PATH set. **A guard red under a
 detached launcher is an environment hypothesis until you have re-run it in your own shell.**
+
+---
+
+# w111 — 2026-08-28, slot 10 of 10, ANGLE "Consolidation: no new ideas. Re-verify the best
+# pipeline end-to-end, check the CV-to-LB gap across every experiment so far, and make sure the
+# strongest submission is the one selected."
+# ✅ ROW 10 — THE ONE ANGLE THIS WORKSPACE TAKES AS ISSUED — EXECUTED, AND THE PICK NOW
+# ✅ REPRODUCES **BYTE FOR BYTE** FROM ITS BASE, EIGHT DAYS LATER · 0 SLOTS · NO SUBMISSION
+
+## 0. THE CONSTRAINTS
+
+`git status` first: clean apart from the usual untracked experiment artefacts, **0 tracked
+deletions**. `date -u` → **2026-08-28 16:23Z**. `w26g_send.py --n 10`: *"171 submissions on
+record; 10 already sent on 2026-08-28 (UTC); **0 of 10 slots left today**"*, and the dry run
+again flags the queue on disk as a queue for 08-29 — the registered next day, by design.
+⟹ **no submission this run, and none was possible.** The registered 08-29 ten is untouched.
+
+Registered in `experiments/w111_prereg.txt` before anything ran, with two addenda, each
+committed **before** the run it registers.
+
+## 1. WHY THIS ROW IS DIFFERENT FROM THE OTHER NINE
+
+Rows 1–9 of the ANGLE INDEX are closed modelling angles: the obligation is to quote the price
+and spend the run elsewhere. **Row 10 is not a modelling angle — it is the standing checklist**,
+and RESEARCH's own §"WHAT THIS BLOCK DOES NOT LICENSE" says in as many words that consolidation
+is where the remaining value is and that *"the one angle in nine runs that was taken as issued
+and paid was consolidation"*. So it was executed, not refused. It is also the last of the ten
+rows never verified at the artefact level (w105/3, w106/4, w107/5, w108/6, w109/7, w110/9).
+
+## 2. 🎯 THE HEADLINE: THE DEADLINE PICK REBUILDS BYTE-IDENTICALLY, AND SO DOES THE FILE
+##    AUTO-SELECTION WOULD TAKE INSTEAD
+
+`w93c_pickverify`'s docstring names the one link of the deadline chain nothing has ever checked:
+*"the CV is computed on the OOF vector; the file Kaggle scores is a **different array** written
+by the same build, and nothing on disk has ever asserted"* they came from one build. w93c
+asserts the shipped CSV is **well-formed**; it cannot assert **provenance**.
+
+That link is cheap to close, because the pick is not a trained object. `w36_ad199stdcorr` is
+`w21a` post-hoc rank arithmetic over a base whose OOF and CSV are both on disk — *"no refit, no
+new members, no search"* (w60a). Two arms, run concurrently exactly as `w60a_run.sh` runs them:
+
+| arm | base | tag | result |
+|---|---|---|---|
+| B | `w36_ad199std_h3` | `w111repro_h3` | **CSV and OOF md5-identical to `w36_ad199stdcorr`** — THE PICK |
+| A | `w36_ad199std` | `w111repro` | **CSV and OOF md5-identical to `w36_ad199stdcorr_ens4`** — the auto-pick |
+
+    8d8e748f025c2ba1a6909ac13c3eed0f   w111repro_h3.csv == w36_ad199stdcorr.csv
+    f1a958e471a43719b14addf7e189a793   oof_w111repro_h3.npy == oof_w36_ad199stdcorr.npy
+    4cb5145849f7d3fcc0243a3737272bc8   w111repro.csv == w36_ad199stdcorr_ens4.csv
+    b35e6a7957d2525d25972e50e7343752   oof_w111repro.npy == oof_w36_ad199stdcorr_ens4.npy
+
+Not merely rank-identical — **byte-identical**, 8 days after the originals, on both sides of the
+build. The whole logs match too: **75 lines each against `w36b_build.log` / `w60a_ad199_ens4.log`,
+4 differences, and all four are lines that carry the TAG.** One of those four is itself the
+evidence: the originals printed *"rank-identical to an existing submission file? **no**"* because
+they were the first of their kind; the reproductions print *"**['w36_ad199stdcorr.csv']**"* and
+*"**['w36_ad199stdcorr_ens4.csv']**"*, from the shipped script's own dupe scan rather than from
+anything I wrote after seeing the answer. Every scalar in the two `w21a_*.json` artefacts —
+`base`, `base_auc`, `nested_delta`, `naive_delta`, `scheme_optimism`, `naive_arm`, `shipped` —
+matches its reproduction.
+
+⟹ **The file Kaggle will score IS the artefact whose CV the selection is made on, for the CV
+pick and for the file auto-selection would take instead. The click argument now rests on two
+checked objects rather than two names.**
+
+⚠ **Q4 held**: 426 files in `submissions/`, **0 changed, 0 added, 0 gone** across the whole run
+(md5 of every file before and after). The two scratch outputs were moved to
+`experiments/w111_repro_out/` the moment the arms finished, and the six guards that read
+`submissions/` were re-run green afterwards.
+
+## 3. 😐 MY OWN ERROR — I TOOK THE BASE FROM A SIBLING'S RUN SCRIPT
+
+I read `W21A_BASE=w36_ad199std` off `experiments/w60a_run.sh` and launched. **That script builds
+the ens4 TWIN.** The pick's own artefact, `experiments/w21a_w36_ad199stdcorr.json`, records
+`base = w36_ad199std_h3`. Caught from the running log's **first line** (base AUC 0.9701323250 is
+the ens4 base, not 0.9701354276) about three minutes in, before any output was read as evidence,
+and registered as ADDENDUM 2 before the corrected arm was launched.
+
+🎯 **SAME GENUS AS w64's "A DEFERRAL COPIED FORWARD COPIES ITS CANDIDATE FORWARD TOO": I TOOK A
+PARAMETER FROM A RECIPE THAT NAMES A SIBLING INSTEAD OF FROM THE ARTEFACT OF THE THING I WAS
+REPRODUCING.** The two bases differ by 3.1e-6 of CV and produce two different sent files, so
+nothing about the mistake was visible in the shape of the output — only in the first number.
+⟹ **Read a build parameter from the artefact of the file itself. A run script names its own
+tag's base, and twins share a script family.** Mechanised as #46's C1 (§6).
+
+⚠ The fix was better than the plan: letting arm A finish and launching arm B alongside it cost
+nothing (w60a itself runs two w21a arms concurrently — *"rank/AUC arithmetic over numpy, not a
+thread-hungry GBDT"*) and bought a verification of **both** sides of the click.
+
+## 4. THE CV→LB GAP OVER EVERY FILE EVER SENT — AND A PREREG PREMISE OF MINE THAT WAS WRONG
+
+`w93b_cvlbaudit.py`, live, rc=0, all four controls green. **171 sends; 5 declared measurement
+probes excluded by their own descriptions; 6 rows carry no parseable CV; 160 complete cases.**
+
+    gap = LB - CV    mean +1035.8e-6   sd 33.9e-6   min +983.3e-6   max +1169.0e-6
+    pearson +0.8842   spearman +0.8061
+    CV span 499.0e-6 over the whole history; LB span 390.0e-6 across 18 distinct public values
+
+🔻 **MY PREREG SAID THE ARTEFACT WAS STALE AT 160 SENDS AND IT WAS NOT.** `w93b_cvlbaudit.json`
+was rewritten at **16:25Z today**, by the run that sent the 08-28 ten. I misread its mtime as
+12:25 "hours old" — the file times are **EDT** and every timestamp I had been reading from the
+Kaggle API is **UTC**, and the box is UTC−4. ⟹ **A "stale artefact" premise is a claim about a
+timestamp; check the clock's zone before believing your own arithmetic on it.** The re-run is
+therefore a determinism check rather than a refresh, and it reproduces **every statistic to the
+digit**. Three days of the same artefact, out of git:
+
+| date | complete cases | gap mean | gap sd | pearson | spearman | auto pair | CV pair |
+|---|---|---|---|---|---|---|---|
+| 08-26 | 140 | 1036.77e-6 | 32.81e-6 | +0.9009 | +0.8005 | unchanged | unchanged |
+| 08-27 | 150 | 1038.15e-6 | 33.63e-6 | +0.8893 | +0.7782 | unchanged | unchanged |
+| 08-28 | 160 | 1035.78e-6 | 33.92e-6 | +0.8842 | +0.8061 | unchanged | unchanged |
+
+**31 more sends have moved the mean gap by 2.4e-6 and moved neither pair.** The gap is the most
+stable number in this workspace and it is the one the brief asked to be collected.
+
+## 5. ⚠ TWO INSTRUMENTS NAMING DIFFERENT SECOND FILES ARE NOT IN CONFLICT
+
+`w93b` prints `CV-argmax pair = [w36_ad199stdcorr, w38_ad202stdcorr]`; `SELECT_THESE.md` names
+`[w36_ad199stdcorr, w23_ad187stdcorr]`. I registered P4 as *"the pair I4 names is the pair I1
+names"* and for ten seconds read this as the falsification. **It is a definitional difference,
+not a disagreement**: slot 2 is CV rank **35 of 160 on purpose** — the cross-base hedge — and
+`w84a_pickargmax.json` says so in a field (`slot2_note`) rather than in prose. ⟹ **Check that
+two instruments define the same quantity before reading a difference as a conflict.**
+
+✅ **AND THE HEDGE ITSELF RE-VERIFIED AT THE ARTEFACT LEVEL**, from `w64a_hedgeprice.json`:
+E[max] spread over the whole ladder **0.144687e-6**; the deferred contrast **+0.144391e-6**;
+GLS pack slope **−0.058597e-6/member**, CI **[−0.767, +0.650]**; break-even **−1.500548e-6/member**,
+i.e. excluded by **3.99σ**; corr(slot1, incumbent) **0.9995444** vs corr(slot1, challenger)
+**0.9999732**, break-even corr **0.9984102**, decorrelation earning **0.0003266 of 0.144718e-6 =
+0.226%**. **Every published figure exact.** The artefact also records its own two falsified
+predictions (P2, P5) and a prereg defect, which is what an honest artefact looks like.
+⛔ **Both named re-open conditions are UNMET**: slot 1 is still the strict CV argmax of
+everything sent (rank 1 of 160, margin +2.417e-6 over `w38_ad202stdcorr`), and no longer pack
+ladder exists. **WANTED does not move.**
+
+## 6. 🆕 STANDING CHECK #46 — `w111b_baseguard`, THE PROVENANCE CHAIN AT 3 SECONDS
+
+The reproduction costs ~20 minutes and cannot go in the suite. The **chain it verified** can:
+
+    C1  the pick's OWN w21a artefact names a base, that base's OOF and CSV are on disk, and the
+        two picks still name DISTINCT bases -- the h3/ens4 confusion of §3, asserted live
+    C2  the metric EXECUTES: base_auc recomputes from the stored base OOF to < 1e-9
+    C3  BYTE IDENTITY re-checked against two independently written files -- shipped vs the
+        reproduction kept in experiments/w111_repro_out/
+    C4  three negative controls, each on a scratch copy: a base name the artefact does not
+        carry; a base_auc moved by 1e-8; a ONE-BYTE edit of the reproduction. All three FIRE.
+
+Expected values live in `experiments/w111a_reproduction.json`, **read off disk by
+`w111a_record.py`, never typed into the guard** (w60b's rule). ⚠ **Honest limit, stated not
+exempted: C3 is a PIN.** It makes the evidence tamper-evident from 2026-08-28 onward; it cannot
+testify about anything before the record was written. What testifies about the original build is
+the reproduction itself, and that is a journal entry, not a property this file re-derives.
+**46/46 registered**; `w93a_suite.py`'s C2 re-parses the RESEARCH stem block and the count in
+that header is matched by SHAPE (`\d+`), so 45 → 46 passed without an edit to the parser.
+
+## 7. THE SUITE
+
+**45/45 green in 255 s** on the pre-#46 list, then **46/46** after registering the new check
+(§9). `w54a_vetoexpiry` and `w85c_slotguard` were **both green**, as registered in P5: they fail
+by design only when the queue on disk was written for the day just SENT, and the queue on disk is
+for **08-29**, the next unsent day. A guard that is red-by-design in one state is green in the
+adjacent one, and predicting which is a real test of whether you understand it.
+
+## 8. ⛔ TEDDY — STILL ONE HUMAN CLICK, **TENTH RUN ASKING**
+
+`.venv/bin/python experiments/check_selection.py` → **rc=1**, read without a pipe.
+*"NOTHING IS SELECTED."* Kaggle then auto-selects on **public** score — the Rogii failure.
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+⚠ Note `check_selection.py` prints **filenames** (`w36_ad199stdcorr.csv`, `w23_ad187stdcorr.csv`);
+the **refs** are in `SELECT_THESE.md`. My prereg predicted the refs would appear in the tool's
+output and they do not — the two documents are complementary, not redundant.
+
+One minute of clicking, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**.
+And as of this run both candidate files are verified byte-for-byte reproducible, so there is
+nothing left to check before clicking. **Human-only, and still the largest single item.**
+
+## 9. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED 08-29 TEN.** Built and match-checked by w102, re-confirmed since.
+   **Do not re-litigate the list.**
+3. After the send: re-run `w93a_suite.py` (**46 checks now**), then rebuild the queue for 08-30
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard` — they go red on every send by design.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED. All TEN index rows are now closed or resolved, and
+   rows 3, 4, 5, 6, 7, 9 and 10 have been verified at the artefact level.** Do not start a
+   member build.
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w110's list holds.
+   • **DO NOT** move WANTED. Slot 1 is the strict CV argmax (rank 1/160, +2.417e-6); slot 2 is
+     the w64-settled hedge and **both** its re-open conditions are unmet (§5).
+   • **DO NOT** re-run the 20-minute pick reproduction to "check it again" — #46 re-checks the
+     byte identity in 3 s, and the reproduction outputs are on disk in `w111_repro_out/`.
+   • **DO NOT** take a build parameter from a sibling's run script (§3). Read it from the
+     artefact of the file you are reproducing.
+   • **DO NOT** read a filesystem mtime against a Kaggle API timestamp without converting —
+     this box is **EDT, UTC−4** (§4).
+   • **DO NOT** re-open error analysis / OOF segmentation, calibrate the final file, quote
+     `274k` for the hard band (it is **250,188**), read `−7.4e-5 → −5.3e-4` as a trajectory,
+     write an index anchor without counting it OUTSIDE the index, cite a line number of
+     RESEARCH.md, use `pgrep -af` for liveness, read `$?` after a pipe, launch a long job with
+     anything but `systemd-run --user` (with `XDG_RUNTIME_DIR` **and** `--setenv=PATH="$PATH"`),
+     run the suite alongside a member build, build `cat_native_ctr2` / `cat_natlat`, take the
+     original-dataset angle, sweep GBDT hyperparameters, or add ordinary GBDT members.
+6. ⚠ **NEW LESSONS.**
+   • **Read a build parameter from the artefact of the thing you are reproducing** (§3).
+   • **Byte-identity was available and is stronger than the statistic I planned to compare**
+     (§2). I registered rank-identity; md5 was free and says strictly more.
+   • **Two instruments naming different files are not in conflict until you have checked they
+     define the same quantity** (§5).
+   • **A "stale artefact" premise is a claim about a timestamp — check the clock's zone** (§4).
+   • **Predicting which way a red-by-design guard will read is a real test of understanding it**
+     (§7).

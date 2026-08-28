@@ -1,3 +1,90 @@
+# ✅ THE DEADLINE PICK REBUILDS **BYTE FOR BYTE** FROM ITS BASE — AND SO DOES THE AUTO-PICK
+# (w111, 2026-08-28) — ANGLE INDEX row 10 executed, the last row to be verified
+
+`w93c_pickverify`'s docstring names the one link of the deadline chain nothing had ever checked:
+*"the CV is computed on the OOF vector; the file Kaggle scores is a **different array** written
+by the same build, and nothing on disk has ever asserted"* that the two came from one build.
+w111 closed it by **rebuilding both candidate files from their bases, 8 days after the
+originals**, and the result is stronger than the rank-identity that was registered:
+
+| pick | base (from the pick's OWN artefact) | reproduction | result |
+|---|---|---|---|
+| `w36_ad199stdcorr` (the CV pick) | `w36_ad199std_h3`, AUC 0.9701354276 | `w111repro_h3` | **CSV + OOF md5-identical** |
+| `w36_ad199stdcorr_ens4` (what auto-selection takes) | `w36_ad199std`, AUC 0.9701323250 | `w111repro` | **CSV + OOF md5-identical** |
+
+    8d8e748f025c2ba1a6909ac13c3eed0f  w36_ad199stdcorr.csv       f1a958e471a43719b14addf7e189a793  oof_…
+    4cb5145849f7d3fcc0243a3737272bc8  w36_ad199stdcorr_ens4.csv  b35e6a7957d2525d25972e50e7343752  oof_…
+
+**75 log lines each against `w36b_build.log` / `w60a_ad199_ens4.log`, 4 differences, all four
+carrying the TAG** — and one of the four is the evidence: the originals printed *"rank-identical
+to an existing submission file? no"*, the reproductions print the pick's own filename, from the
+shipped script's dupe scan. Every scalar in both `w21a_*.json` artefacts matches.
+
+## HOW TO REDO IT (~20 min per arm; w60a runs two concurrently, 23 min total)
+
+    W21A_BASE=<base> W21A_TAG=<scratch> .venv/bin/python experiments/w21a_ad187corr.py
+
+⚠⚠ **THE BASE COMES FROM THE PICK'S OWN `experiments/w21a_<pick>.json`, NEVER FROM A RUN
+SCRIPT.** `experiments/w60a_run.sh` sets `W21A_BASE=w36_ad199std` — that is the **ens4 TWIN's**
+base. The CV pick's base is `w36_ad199std_h3`. w111 took it from the run script and spent three
+minutes reproducing the wrong file; the tell was the log's **first line** (base AUC
+0.9701323250, not 0.9701354276). 🎯 **A RUN SCRIPT NAMES ITS OWN TAG'S BASE, AND TWINS SHARE A
+SCRIPT FAMILY** — same genus as w64's *"a deferral copied forward copies its candidate forward
+too"*.
+⚠ `w21a` writes `submissions/<TAG>.csv` and `submissions/oof_<TAG>.npy`. **Use a scratch TAG and
+move both out of `submissions/` the moment the run ends** — w111 did, and verified 426 files
+before and after with **0 changed, 0 added, 0 gone**. The reproductions are kept in
+`experiments/w111_repro_out/`, where #46 re-checks them.
+
+## 🆕 STANDING CHECK #46 — `w111b_baseguard`, THE CHAIN AT 3 SECONDS
+
+C1 the pick's own artefact names a base, its OOF and CSV are on disk, and the two picks still
+name **distinct** bases (the h3/ens4 confusion, asserted live) · C2 the metric **executes** —
+`base_auc` recomputes from the stored base OOF to < 1e-9 · C3 **byte identity re-checked against
+two independently written files**, shipped vs `w111_repro_out/` · C4 three negative controls,
+each on a scratch copy — a base name the artefact does not carry, a `base_auc` moved by 1e-8, a
+**one-byte** edit of the reproduction; all three fire.
+
+Expected values live in `experiments/w111a_reproduction.json`, written by `w111a_record.py`
+**reading disk**, never typed into the guard (w60b's rule). ⚠ **Honest limit: C3 is a PIN.** It
+is tamper-evidence from 2026-08-28 forward and testifies about nothing before it. The witness
+for the original build is the reproduction itself.
+
+## THE CV→LB GAP, EVERY FILE EVER SENT — THE MOST STABLE NUMBER HERE
+
+`w93b_cvlbaudit.py`, live, rc=0. **171 sends → 5 declared measurement probes excluded by their
+own descriptions, 6 rows with no parseable CV, 160 complete cases.**
+
+    gap = LB - CV   mean +1035.8e-6   sd 33.9e-6   min +983.3e-6   max +1169.0e-6
+    pearson +0.8842   spearman +0.8061   CV span 499.0e-6   LB span 390.0e-6 over 18 values
+
+| date | n | gap mean | gap sd | pearson | spearman |
+|---|---|---|---|---|---|
+| 08-26 | 140 | 1036.77e-6 | 32.81e-6 | +0.9009 | +0.8005 |
+| 08-27 | 150 | 1038.15e-6 | 33.63e-6 | +0.8893 | +0.7782 |
+| 08-28 | 160 | 1035.78e-6 | 33.92e-6 | +0.8842 | +0.8061 |
+
+**31 sends moved the mean gap 2.4e-6 and moved neither the auto pair nor the CV pair.**
+
+⚠ **THIS BOX IS EDT (UTC−4) AND THE KAGGLE API IS UTC.** w111 read `w93b_cvlbaudit.json`'s mtime
+of `12:25` as "hours old" and registered a "stale artefact" premise that was false — the file
+had been rewritten **that minute**. ⟹ **A staleness claim is a claim about a timestamp; convert
+before believing your own arithmetic on it.**
+
+## ⚠ `check_selection.py` PRINTS FILENAMES; `SELECT_THESE.md` HOLDS THE REFS
+
+They are complementary, not redundant. And `w93b`'s `cv_pair` (top 2 by CV) is **not**
+`SELECT_THESE`'s pair, because slot 2 is the w64-settled cross-base hedge at CV rank **35 of
+160**, recorded in `w84a_pickargmax.json`'s `slot2_note`. 🎯 **Check that two instruments define
+the same quantity before reading a difference between them as a conflict.**
+
+✅ **THE HEDGE RE-VERIFIED FROM `w64a_hedgeprice.json`, every published figure exact**: E[max]
+spread 0.144687e-6 · deferred contrast +0.144391e-6 · GLS slope −0.058597e-6/member, CI
+[−0.767, +0.650] · break-even −1.500548e-6/member, excluded by **3.99σ** · corr 0.9995444 vs
+0.9999732, break-even 0.9984102, decorrelation earning **0.226%** of what it costs. ⛔ **Both
+re-open conditions are UNMET** — slot 1 is the strict CV argmax (rank 1/160, +2.417e-6) and no
+longer pack ladder exists. **WANTED does not move.**
+
 # 🔴 WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED — AND WHY THE INDEX COULD NOT TELL YOU
 # (w110, 2026-08-28) — the 9th angle genus, handed EIGHT times, and it had no index row at all
 
@@ -1125,7 +1212,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 7 | *seed and fold diversity, averaged* | ×5, → w64 → w109 08-28 · **artefacts verified** | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
 | 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×8, from 08-11 → w110 08-28 · artefacts verified** | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
-| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | ×5, from 08-11 | **not a modelling angle — it is the standing checklist** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection |
+| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×6, from 08-11 → w111 08-28 · artefacts verified** | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
 
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
 number came from a LightGBM measurement. w106 checked it at the artefact level rather than
@@ -1624,7 +1711,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 45 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 46 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -1636,6 +1723,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
+    w111b_baseguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

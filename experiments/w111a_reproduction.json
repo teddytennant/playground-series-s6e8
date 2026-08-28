@@ -1,0 +1,26 @@
+{
+ "written": "2026-08-28",
+ "picks": {
+  "w36_ad199stdcorr": {
+   "base": "w36_ad199std_h3",
+   "base_auc": 0.9701354276135699,
+   "pick_csv_md5": "8d8e748f025c2ba1a6909ac13c3eed0f",
+   "pick_oof_md5": "f1a958e471a43719b14addf7e189a793",
+   "repro_tag": "w111repro_h3",
+   "repro_csv_md5": "8d8e748f025c2ba1a6909ac13c3eed0f",
+   "repro_oof_md5": "f1a958e471a43719b14addf7e189a793",
+   "artefact_fields_match_repro": true
+  },
+  "w36_ad199stdcorr_ens4": {
+   "base": "w36_ad199std",
+   "base_auc": 0.9701323249566141,
+   "pick_csv_md5": "4cb5145849f7d3fcc0243a3737272bc8",
+   "pick_oof_md5": "b35e6a7957d2525d25972e50e7343752",
+   "repro_tag": "w111repro",
+   "repro_csv_md5": "4cb5145849f7d3fcc0243a3737272bc8",
+   "repro_oof_md5": "b35e6a7957d2525d25972e50e7343752",
+   "artefact_fields_match_repro": true
+  }
+ },
+ "note": "digests read from disk; see JOURNAL w111 for the run that made them"
+}

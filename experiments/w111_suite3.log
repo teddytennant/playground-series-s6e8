@@ -1,0 +1,52 @@
+w93a suite — 46 checks, 900s each, python /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/.venv/bin/python
+C2 list matches RESEARCH.md (46 stems)  PASS
+C1 all 46 stems resolve on disk  PASS
+[ 1/46] w54a_vetoexpiry          rc=0     1.5s    OK: the queue outlasts the calendar. No vetoed file is reached before the deadline.
+[ 2/46] w55a_unpriced            rc=0    10.1s  guard check: `w55: unpriceable` in w26g_send.py -> present ✅
+[ 3/46] w56b_wantedguard         rc=0     0.0s  WANTED guard intact.
+[ 4/46] w57c_muguard             rc=0     0.7s  MU pin holds, its artefacts agree, and the pin is load-bearing.
+[ 5/46] w59b_barguard            rc=0     0.8s  w59b: the measured bar is wired, strict, and fails safe.
+[ 6/46] w60b_ineligguard         rc=0     0.8s  FAILURES: 0
+[ 7/46] w60d_memberguard         rc=0     0.8s  w60d: the member label is derived in stdflag and bites in the sender.
+[ 8/46] w62b_barstaleguard       rc=0     1.2s  FAILURES: 0
+[ 9/46] w63b_setguard            rc=0     1.3s  FAILURES: 0
+[10/46] w64b_hedgeguard          rc=0     0.8s  FAILURES: 0
+[11/46] w65b_pinguard            rc=0     1.5s  FAILURES 0
+[12/46] w65c_subsetcheck         rc=0    66.5s  R-M11f VERDICT: CONFIRMED
+[13/46] w66d_rangeguard          rc=0     0.8s  w66d: the fitted range is a number, and the member row is out of the max.
+[14/46] w67b_slopeguard          rc=0     1.3s  ==========================================================================================
+[15/46] w68b_floorguard          rc=0     0.8s  FAILURES 0
+[16/46] w70b_basisguard          rc=0     0.2s    FAILURES 0
+[17/46] w70d_chainguard          rc=0     1.4s    ran as a side effect. This is a SMOKE TEST — still dry-run the four-command chain before
+[18/46] w71b_dupguard            rc=0    13.8s    ✅ the override is unapplied and both apply paths are shut.
+[19/46] w72b_dayguard            rc=0     1.9s    ✅ nothing has been sent twice; no pending day plans a sent, missing or vetoed file.
+[20/46] w74b_clickstaleguard     rc=0     0.7s  FAILURES: 0
+[21/46] w75b_muguard             rc=0     0.7s  w75b_muguard: 0 complaint(s)
+[22/46] w76b_addguard            rc=0     0.0s    ✅ all four checks pass.
+[23/46] w77b_bracketguard        rc=0     0.7s  FAILURES 0
+[24/46] w78b_treatguard          rc=0     0.1s  FAILURES 0
+[25/46] w79b_fillguard           rc=0     0.8s  FAILURES 0
+[26/46] w80f_packguard           rc=0     0.0s    FAILURES 0: []
+[27/46] w82a_pricecal            rc=0     1.6s  FAILURES: 0
+[28/46] w84a_pickargmax          rc=0     1.0s  FAILURES: 0
+[29/46] w85c_slotguard           rc=0    10.0s  FAILURES 0
+[30/46] w86a_pagecap             rc=0     1.2s  FAILURES 0
+[31/46] w87a_registrarguard      rc=0     5.8s    ✅ CONTROLS 0 failure(s)
+[32/46] w88a_calexposure         rc=0     4.5s  ✅ GUARDS 0 failure(s) -> /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-se
+[33/46] w89a_foldid              rc=0     2.2s  packs failing the identity test: 0
+[34/46] w91b_dateguard           rc=0     0.9s  FAILURES: 0
+[35/46] w92a_smokerun            rc=0    88.3s  FAILURES 0
+[36/46] w93c_pickverify          rc=0     3.1s  FAILURES: 0
+[37/46] w100a_complement         rc=0     4.4s    wrote w100a_complement.json — 0 failures.
+[38/46] w101a_angleguard         rc=0     0.0s  OK: every ANGLE INDEX pointer resolves. A handed angle still costs one grep.
+[39/46] w103a_pathguard          rc=0     0.0s  OK: 5 of 6 tools are invisible to a bare `command -v`. A 'command not found' here is a sta
+[40/46] w104a_cgroupguard        rc=0     0.6s  OK: detach.py stays in the runner's cgroup and dies with it; the systemd-run --user recipe
+[41/46] w105a_liveguard          rc=0     0.4s  FAILURES 0   -> experiments/w105a_liveguard.json
+[42/46] w106a_claimguard         rc=0     0.1s  FAILURES 0   -> experiments/w106a_claimguard.json
+[43/46] w107a_lineref            rc=0     0.0s  FAILURES 0   -> experiments/w107a_lineref.json
+[44/46] w109b_colguard           rc=0    22.6s  PASS  one member per column, plus one known and still-real duplicate pair
+[45/46] w110b_covguard           rc=0     0.0s  FAILURES 0
+[46/46] w111b_baseguard          rc=0     1.8s  FAILURES: 0
+
+TOTAL 258s   46/46 green
+FAILURES: 0

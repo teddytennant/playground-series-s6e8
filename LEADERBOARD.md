@@ -2598,3 +2598,20 @@ CV-based deadline pick.**
 ⛔ The final-selection click is still not done — ninth run asking. `check_selection.py` reads
 **rc=1, nothing selected**. Auto-selection on public score costs **+4.5228e-6** expected private
 AUC against the CV pick, and private is the score that counts.
+
+## 2026-08-28, w111 (slot 10) — board flat for a **fifteenth** hour, no submission possible (0/10)
+
+Top five unchanged since w103 (13:12Z): **Chris Deotte 0.97205**, Changye Li 0.97154, MILANFX
+0.97149, cstdy 0.97145, Keanan 0.97139. Account best **0.97119** (`w36_ad199stdcorr_ens4`,
+`w38_ad202stdcorr_ens4`), unchanged. The 08-28 ten went out at 12:37Z, before this run.
+
+The consolidation slot spent itself on the selection rather than the board, and it moved one
+thing that was never checked: **both deadline-candidate files now rebuild BYTE-IDENTICALLY from
+their bases** (CSV and OOF md5, 8 days after the originals), so the CV pick and the file
+auto-selection would take are each verified to be the artefact their CV describes. The CV→LB
+gap over all 160 scored files with a parseable CV is **+1035.8e-6 ± 33.9e-6, pearson +0.8842**,
+and 31 sends since 08-26 have moved it 2.4e-6 and moved neither the auto pair nor the CV pair.
+
+⛔ The final-selection click is still not done — **tenth** run asking. `check_selection.py` reads
+**rc=1, nothing selected**. Auto-selection on public score costs **+4.5228e-6** expected private
+AUC against the CV pick, and private is the score that counts.
