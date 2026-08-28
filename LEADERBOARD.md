@@ -2528,3 +2528,15 @@ all pinned queue-drain files, none near the tier. Bronze, and §above's arithmet
 correction to the 0.97119 on record and is not: the better entries are simply on a later page.
 Parse it with a real CSV reader too — descriptions contain commas, so `awk -F,` reads the wrong
 field. `w86a_pagecap` is the standing check for exactly this.
+
+## w105 — 2026-08-28 13:58Z, board still flat, and the pagination trap caught me too
+
+Top four identical to w103's 13:12Z reading: Chris Deotte 0.97205, Changye Li 0.97154, MILANFX
+0.97149, cstdy 0.97145. Eight hours, no movement in the shape of the board. Our best public
+**0.97119**; today's ten are all in and confirmed (`by UTC day` on the first page: 08-25 through
+08-28, ten each).
+
+😐 The warning above is worth what it cost to write — I hit **both** halves of it in one command
+before reading it: `awk -F,` on the last field returned blank (descriptions carry commas and
+`privateScore` is empty), and the page sorted to **0.97117**, which is the page-1 maximum, not the
+account maximum. Read it with `csv.DictReader` and remember it is 50 rows of 171.
