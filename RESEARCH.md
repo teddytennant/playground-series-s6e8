@@ -1,3 +1,69 @@
+# 🔻 A `command not found` HERE IS A FACT ABOUT **PATH**, NOT ABOUT THE MACHINE
+# (w103, 2026-08-28) — three durable claims in this document were wrong for this one reason
+
+The agent shell runs with a curated nix-store `PATH` that **omits `/run/current-system/sw/bin`**,
+which is where every NixOS system package on this box actually lives. Nothing announces that. A
+run types `setsid …`, gets `setsid: command not found`, and writes down the only conclusion the
+evidence appears to support: *the tool is not installed*. It is installed. It is one directory away.
+
+    export PATH="/run/current-system/sw/bin:$PATH"     # ← the whole fix
+
+    setsid  pgrep  ps  free  gh  python3    installed, INVISIBLE to a bare `command -v`
+    nohup                               present either way (coreutils) — never a PATH problem
+    at                                  genuinely absent, the one claim that was right
+
+🎯 **WHY THIS SHAPE IS SO EXPENSIVE: AN ABSENCE IS THE ONE OBSERVATION A BROKEN LOOKUP PATH
+CANNOT BE DISTINGUISHED FROM.** Every other wrong answer looks wrong. `command not found` looks
+exactly like the truth, arrives with the shell's authority, and gets written into a durable
+document as a fact about the *machine* rather than a fact about the *environment the probe ran
+in*. Then it propagates, because a false absence is load-bearing in a way a false presence is not:
+it closes routes, and a closed route is never revisited.
+
+Three claims in this file were wrong for this reason, and each has now been corrected in place:
+
+| claim | what it actually cost |
+|---|---|
+| `setsid is NOT INSTALLED in this sandbox` | the systemd-user launch recipe was built to route around a tool that exists |
+| `pgrep is not installed here, like ps and at` | **w102 §1 called a lost build undiagnosable.** With `ps` it is one command |
+| `gh … is not installed` | w102's push failure read as an auth/token problem for three probes |
+
+⚠⚠ **THE w102 §1 ENTRY IS THE ONE TO INTERNALISE.** It concluded *"the build did not crash — it
+was killed, and the log cannot tell you which"*, and built a whole handoff protocol around
+reading a truncated log. The log never had to be the evidence. `pgrep -af w96c_build` answers it
+directly, and did in w103:
+
+    1940840 /bin/bash …/experiments/w102a_build_then_price.sh
+    1940842 .venv/bin/python -u experiments/w96c_build_teprior_member.py     17:41 elapsed, 1328% CPU
+
+⟹ **A LIVENESS CHECK IS NOW POSITIVE, NOT INFERRED.** w102's rule — *"a launch must be verified
+positively, never inferred from the absence of an error"* — was right, and it was being applied
+with one hand tied behind its back.
+
+## ⛔ WHAT THIS DOES **NOT** LICENSE
+
+**It does not reopen the final-selection click.** w97/w99 concluded "no browser binary of any kind
+on disk" *under this exact defect*, so w103 re-took the measurement with the corrected PATH:
+`brave`, `brave-browser`, `chromium`, `google-chrome-stable`, `firefox` — **none present**, and
+`/run/current-system/sw/bin` holds only `curl`/`wget`. ✅ **The closure stands.** But note what
+almost happened: it stood on evidence that had already been shown unreliable everywhere else it
+was used, and nobody had re-checked. *A conclusion can be right and its evidence worthless at the
+same time*, and only one of those two things gets written down.
+
+**It does not mean "use `setsid` for long jobs".** `setsid` has never actually been TRIED here —
+every attempt died at the PATH lookup — so it is **UNTESTED**, not known-good. The systemd-user
+recipe is the one with evidence behind it. (w103 did confirm `setsid` runs and puts the child in
+its own session; whether that survives the harness tearing down a session is still unverified.)
+
+## THE STANDING RULE, AND THE GUARD THAT ENFORCES IT
+
+⛔ **NEVER record "X is not installed" from a bare `command -v`.** Re-probe with
+`/run/current-system/sw/bin` on PATH first, and if the tool is still missing say *"absent under
+the corrected PATH"* — naming the probe, not just the result. `#39 w103a_pathguard` holds this:
+C1 every listed tool resolves under the corrected PATH · C2 not vacuous (floor 5 tools) · C3 the
+resolver fired both ways, so a nonsense name must resolve nowhere · C4 **the defect itself,
+measured** — at least one tool must be reachable *only* via `sw/bin`, so if the agent PATH is
+ever fixed the guard goes RED and the retirement is a decision rather than a drift.
+
 # ✅ THE HIJACK CHANNEL IS CLOSED FOR THE REST OF THE COMPETITION — EXPOSURE IS **EXACTLY 0**
 # (w99, 2026-08-27) — this SUPERSEDES the "+0.2143e-6 / verdict is contested" reading below
 
@@ -121,7 +187,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
-| 1 | *the original dataset* — find it, concat it as extra rows | ×4, from 08-11 | 0 | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` |
+| 1 | *the original dataset* — find it, concat it as extra rows | ×5, from 08-11 | 0 | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` |
 | 2 | *tune LightGBM properly against the fixed folds* | ×3 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 3 | *CatBoost: it handles categoricals better* | w61, 08-22 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
 | 4 | *XGBoost as the third leg of the ensemble* | same instrument as 2 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
@@ -579,7 +645,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 38 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 39 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -589,7 +655,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w80f_packguard    w82a_pricecal      w84a_pickargmax    w85c_slotguard    w86a_pagecap
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
-    w101a_angleguard
+    w101a_angleguard  w103a_pathguard
 
 🆕 **RUN THE SUITE WITH ONE COMMAND — `.venv/bin/python experiments/w93a_suite.py`** (w93).
 It holds the list above ONCE, and its C2 re-parses this very block and exits 1 if the two
@@ -10010,7 +10076,15 @@ The second of those had **four completed reps printed to its log and wrote nothi
 because the script only saved after the last rep.
 
 - `nohup … &` does **not** save a job. Neither does the harness's `run_in_background`.
-- **`setsid` is NOT INSTALLED** in this sandbox (`setsid: command not found`), so the usual
+- ⛔ **CORRECTED w103, 2026-08-28: `setsid` IS installed**, at `/run/current-system/sw/bin/setsid`.
+  The original claim below came from a bare `command -v` under the agent shell's curated PATH,
+  which omits that directory. See `# 🔻 A "command not found" HERE IS A FACT ABOUT PATH`.
+  ⚠ **DO NOT read this as "so use setsid".** `setsid` has never actually been TRIED here — every
+  attempt died at the PATH lookup — so it is UNTESTED, not known-good and not known-bad. The
+  systemd-user recipe below is the one with evidence behind it; keep using it. What this
+  correction changes is the stated *reason* the alternative was unavailable, and it reopens
+  a route that was closed by mistake rather than by measurement. (superseded) **`setsid` is NOT INSTALLED** in this
+  sandbox (`setsid: command not found`), so the usual
   detach trick is unavailable. `nohup ./script.sh > log 2>&1 < /dev/null &` starts fine and
   runs for as long as the session lives; it dies with it.
 - Consequence, and it is not optional for anything that takes more than a few minutes:
@@ -12289,8 +12363,13 @@ for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" i
   *pattern*) echo "LIVE $(basename $d): $c";; esac; done
 ```
 
-Also: **`pgrep` is not installed here** (`pgrep: command not found`), like `setsid`, `ps` and
-`free`. Do not build a wait-loop on any of them.
+⛔ **CORRECTED w103, 2026-08-28 — THIS ONE COST A DIAGNOSIS.** `pgrep`, `ps`, `free` and `setsid` are ALL
+installed, in `/run/current-system/sw/bin`, invisible to a bare `command -v`. w102 §1 found a
+build dead and concluded *"the log cannot tell you whether it crashed or was killed"* — with
+`ps` it is one command, and a liveness check no longer has to be inferred from a log's tail:
+    export PATH="/run/current-system/sw/bin:$PATH"; pgrep -af w96c_build
+(superseded) Also: **`pgrep` is not installed here** (`pgrep: command not found`), like
+`setsid`, `ps` and `free`. Do not build a wait-loop on any of them.
 
 ⚠ And do not conclude "the job died" from a silent log — check the process list *with the form
 above* and check the log's mtime. Long arms here print nothing for 10+ minutes at a stretch.
@@ -12606,7 +12685,10 @@ what is alive; do not build control flow on either.
 
 ## ⚠ `git push` is blocked on this box (found w32, 2026-08-20; failing since at least w31)
 
-`origin` is HTTPS and the credential helper shells out to `gh`, which **is not installed**.
+⛔ **CORRECTED w103, 2026-08-28: `gh` IS installed**, at `/run/current-system/sw/bin/gh`, and the
+push works once that is on PATH (w102 addendum found this; the claim here was never updated).
+(superseded) `origin` is HTTPS and the credential helper shells out to `gh`, which **is not
+installed**.
 No `~/.git-credentials`, no `GH_TOKEN`/`GITHUB_TOKEN`, no global `credential.helper`.
 
     gh auth git-credential get: line 1: gh: command not found

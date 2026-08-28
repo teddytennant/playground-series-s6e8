@@ -30278,3 +30278,220 @@ systemd trap and the same reporting defect — the visible error names credentia
 the line that actually explains it. Recorded in RESEARCH under the same heading.
 ⛔ **DO NOT** debug a `could not read Username` failure as a token/auth problem before checking
 `command -v gh`.
+
+---
+
+# w103 — 2026-08-28, slot 2 of 10, ANGLE "Original dataset: find the real source dataset this
+# synthetic data was generated from, and concatenate it as extra training rows"
+# ⛔ ANGLE CLOSED (fifth handing, one grep) · 0 SLOTS (cap spent at 12:37Z) · NO SUBMISSION
+# 🔻 THREE DURABLE RESEARCH CLAIMS FOUND FALSE — ALL FOR ONE REASON
+
+## 0. THE CONSTRAINTS
+
+`git status` first (w101 §1): no staged work, no orphaned commit — w102 finished clean. Cap is
+spent; the API reports 10 sends today, all at 12:37Z, and w102 sent the registered plan. The 16
+cores are committed to the `w102a` build (alive, verified positively — see §2). ⟹ zero CPU spent
+on modelling this run, deliberately.
+
+## 1. THE ANGLE — CLOSED IN ONE GREP, WHICH IS THE INDEX WORKING AS DESIGNED
+
+Row 1 of `📇 THE ANGLE INDEX`, handed for the **fifth** time (count updated ×4 → ×5):
+
+    | 1 | *the original dataset* — find it, concat it as extra rows | ×5, from 08-11 | 0 |
+
+`jayjoshi37/smartphone-usage-and-addiction-prediction`, 7,500 × 16, in `data/orig/`. Both routes
+were measured on 2026-08-11 against matched controls:
+
+    Route 2, literal concat   +1× the originals   OOF 0.962581 vs 0.962639 baseline   −58e-6
+                              +10×                0.961653                            −986e-6
+                              +50×                0.959299                          −3,340e-6
+    Route 1, separate member  `orig_binm` solo 0.8864, maxcorr 0.879 (most decorrelated object
+                              this workspace holds) — worth −1e-6 to −2e-6 in the 160-member
+                              stack across logit/hybrid/rankraw/rescale/ens4, 0 under h3.
+                              Twelve readings, none positive.
+
+**Monotone in dose.** The single most reliable edge in the Playground Series is not merely absent
+in S6E8 — *it is inverted*. ⛔ Do not re-open. ✅ **THE INDEX PAID FOR ITSELF THIS RUN**: w101 built
+it because closing this class of angle was costing half a run each time; today it cost one grep
+and two `sed -n`s. That is the whole return, and it is worth noting that it landed on the first
+run after it was written.
+
+## 2. 🔻 THE FINDING — `command not found` HERE HAS NEVER MEANT WHAT EVERY RUN READ IT TO MEAN
+
+w102's addendum found that `git push` failed with `could not read Username` only because `gh`
+lives in `/run/current-system/sw/bin`, **which is not on this shell's PATH**. It recorded that as
+a fact about `gh`. It is not about `gh`. I checked the agent shell's PATH directly:
+
+    /home/nixos/.local/bin:/nix/store/…-git/bin:/nix/store/…-coreutils/bin: … (curated nix-store list)
+    contains /run/current-system/sw/bin:  NO   ← the defect
+
+That directory is where **every NixOS system package on this box lives**. So every `X: command
+not found` ever recorded here means *"not in the agent's curated PATH"* and has never meant *"not
+on the machine"*. Re-probed with `PATH="/run/current-system/sw/bin:$PATH"`:
+
+    setsid  pgrep  ps  gh  python3     ALL INSTALLED, invisible to a bare `command -v`
+    nohup                              present either way (coreutils) — never a PATH problem
+    at                                 genuinely absent — the one claim that was right
+
+🔴 **THREE DURABLE CLAIMS IN `RESEARCH.md` WERE WRONG BECAUSE OF THIS, AND EACH COST REAL WORK.**
+All three corrected in place (house style — tagged `(superseded)`, not deleted):
+
+| the claim | what it cost |
+|---|---|
+| `setsid is NOT INSTALLED in this sandbox` | the systemd-user launch recipe was built to route around a tool that exists |
+| `pgrep is not installed here, like ps and at` | **w102 §1 declared a lost build undiagnosable** |
+| `gh … is not installed` | w102's push read as an auth/token problem for three probes |
+
+🎯 **THE MIDDLE ROW IS THE EXPENSIVE ONE.** w102 §1 concluded *"the build did not crash — it was
+killed, and the log cannot tell you which"*, and built a three-branch handoff protocol around
+reading a truncated log. **The log never had to be the evidence.** One command answers it, and
+answered it today:
+
+    1940842  .venv/bin/python -u experiments/w96c_build_teprior_member.py   17:41 elapsed, 1328% CPU
+
+⟹ w102's own rule — *"a launch must be verified positively, never inferred from the absence of an
+error"* — was correct, and had been applied with one hand tied behind its back for two runs.
+
+⚠⚠ **WHY THIS SHAPE IS SO EXPENSIVE, WHICH IS THE PART TO KEEP: AN ABSENCE IS THE ONE OBSERVATION
+A BROKEN LOOKUP PATH CANNOT BE DISTINGUISHED FROM.** Every other wrong answer looks wrong.
+`command not found` looks exactly like the truth, arrives with the shell's authority, and is then
+written down as a fact about the *machine* rather than about the *environment the probe ran in*.
+And it propagates asymmetrically: a false absence **closes routes**, and a closed route is never
+revisited. Same family as w101 §3 ("a check whose corpus contains the claim measures the claim")
+and w100a ("a check whose universe is a filtered artefact measures the filter") — the common
+parent is **the instrument silently defining the result**.
+
+😐 It fired on me mid-run, too: my own edit script died on `python3: command not found` one
+command after I had written the section explaining that exact failure.
+
+## 3. ⛔ WHAT THIS DOES **NOT** REOPEN — I CHECKED THE ONE THAT MATTERS
+
+The obvious hope was the final-selection click. w97/w99 closed it as human-only on the evidence
+*"no browser binary of any kind on disk"* — **taken under this exact defect.** So I re-took the
+measurement with the corrected PATH:
+
+    brave  brave-browser  chromium  google-chrome-stable  firefox     NONE PRESENT
+    /run/current-system/sw/bin holds only curl / wget
+
+✅ **The closure stands and the click remains human-only.** ⚠ But note what nearly happened: it
+stood on evidence that had already been shown unreliable everywhere else it was used, and nobody
+re-checked. **A conclusion can be right while its evidence is worthless, and only one of those
+two things ever gets written down.** Re-taking a measurement whose *instrument* was discredited is
+not re-litigating a closed decision — the decision was never the thing in doubt.
+
+⚠ **AND IT DOES NOT LICENSE "USE `setsid`".** `setsid` has never been TRIED here — every attempt
+died at the PATH lookup — so it is **UNTESTED**, not known-good. Keep the systemd-user recipe,
+which is the one with evidence. I did confirm `setsid` runs and puts its child in a new session;
+survival across a harness teardown is a separate question and is recorded below.
+
+## 4. ✅ GUARD #39 — `w103a_pathguard`, AND IT CAUGHT A BUG IN ITSELF
+
+Registered in `w93a_suite.STEMS` and in RESEARCH's published table; the suite's C2 re-parses the
+document and confirms both copies read **39**. Four controls, each fired in the failing direction
+in code rather than asserted in prose:
+
+    C1 +   every listed tool resolves under the corrected PATH   control: `at` → RED
+    C2 +   not vacuous, floor 5 tools                            control: empty list → RED
+    C3 +-  the resolver both ways: a nonsense name must resolve nowhere, a real one must resolve
+                                                                 control: which()→always-yes → RED
+    C4 +-  THE DEFECT ITSELF, MEASURED — ≥1 tool reachable ONLY via sw/bin
+                                                                 control: all-naive tools → RED
+
+**C4 is the one that took thought.** The naive design fails when a tool is missing. But the state
+that actually ends this guard's usefulness is the agent PATH getting *fixed* — good news, which a
+green-on-good-news guard would swallow silently, leaving a permanent no-op in the suite. So C4
+goes **RED** when the hazard disappears, with a message saying so. ⟹ **retiring the guard becomes
+a decision instead of a drift.** Same intent as w54a/w85c going red by design after a send.
+
+🔴 **THE C2 CONTROL CAUGHT A REAL BUG IN MY OWN GUARD ON FIRST FIRING** — an empty `TOOLS` list
+hit `TOOLS[0]` in C3 and raised `IndexError` *before* C2 could print its vacuity failure. It still
+exited non-zero, so the suite would have gone red — but with a traceback, which `w93a_suite`
+classifies as ERROR (a broken stem) rather than FAIL (a guard doing its job). Those route to
+different responses. Fixed; C2's control now reports cleanly.
+
+## 5. WHAT DID NOT MOVE
+
+No send (0 slots; the brief's "use all 10" was satisfied by w102 at 12:37Z). No model trained.
+Nothing enrolled in `oof/` — the build is still running. `SELECT_THESE.md` untouched; the pick is
+unchanged. No blend reweighted. `PRED_SD` / MU pin / `w46c.ERA_SHIFT` untouched.
+`w48e_order.VETO` untouched (w101 §1: four entries are load-bearing). The registered 08-29 queue
+is untouched and still verified — **do not re-litigate it, send it.**
+
+## 6. 🧪 A PROBE LEFT RUNNING FOR THE NEXT RUN — AND WHY MY FIRST ONE WAS WORTHLESS
+
+Having found `setsid` exists, the obvious question is whether it replaces the four-attempt systemd
+dance with one line. My first probe: `setsid bash -c 'sleep 90; echo alive >> /tmp/...'`. It
+survived, across three separate Bash tool calls, and wrote its file. **That result proves
+nothing.** w102 recorded that plain `nohup` *also* "starts fine and runs for as long as the
+session lives; it dies with it" — so surviving a tool call is exactly the behaviour both options
+share. ⟹ **the probe could not distinguish the two hypotheses it was built to distinguish**, and
+it read as a clean pass. (I also misread it once in the other direction, calling the job dead when
+the output file was merely not written yet — 90 seconds had not elapsed. Absence of evidence,
+twice in one experiment, in both directions.)
+
+🎯 **THE DISCRIMINATING EVENT IS SESSION TEARDOWN, AND A SESSION CANNOT TRIGGER IT ON ITSELF.**
+So the observation is only available to a *later* run, and the probe has to outlive the run that
+starts it. `experiments/w103b_setsid_probe.sh` (launched 13:10:36Z, setsid, verified positively
+with `pgrep`) beats a UTC timestamp into `experiments/w103b_heartbeat.txt` every 30s for up to 8h.
+
+**NEXT RUN, READ IT LIKE THIS:** `tail -3 experiments/w103b_heartbeat.txt` against
+`git log -1 --format=%cI` for w103's commit. Beats continuing well past this session's end ⟹
+`setsid` detaches properly and RESEARCH's launch recipe can collapse to one line. Beats stopping
+at the boundary ⟹ it is no better than `nohup` and the systemd recipe is load-bearing. **Record
+the verdict either way and delete the probe** — an undeleted probe becomes another artefact nobody
+can date.
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK, STILL UNDONE, AND I RE-CHECKED THE ROUTE TODAY
+
+`check_selection.py` **rc=1** (run without a pipe — w102 §7). Nothing is selected. With nothing
+clicked Kaggle auto-selects the final two on **public** score, which is not what CV prefers.
+
+    Browser → competition submissions page → "Use for Final Score"
+    refs 55656399 and 55588167, nothing else.
+
+One minute, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. w99 §1 proved the
+price is fixed — no remaining send can raise or lower it, so it cannot go stale. §3 above re-took
+the browser measurement with the corrected PATH: still no browser of any kind on this box, so the
+route is genuinely human-only. **This is now the single largest remaining item on the board, and
+it is the only one no agent run can do.**
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **Check the build POSITIVELY, not from its log** (§2 — this is the whole point of the finding):
+
+       export PATH="/run/current-system/sw/bin:$PATH"
+       pgrep -af w96c_build          # a pid = running. no pid + empty oof_w96/ = killed.
+
+   ⛔ Do not reconstruct w102 §8's three-branch log-reading protocol; it was written under the
+   belief that `ps`/`pgrep` did not exist here. If killed: `rm -rf oof_w96/*` and relaunch via the
+   systemd recipe. If finished: read the `w97a_gate.py` verdict at the bottom of the log.
+3. If it reached ENROL: copy `oof_w96/{oof,test,summary}_lgbm_teprior_windowed.*` into `oof/` —
+   the windowed member **alone**, never the global twin — and read `w97_prereg.txt` §4 first.
+   ⚠ **NO-ENROL is still the modal outcome and is not a failure** (prereg §2: Delta ∈ [0,+3e-6]).
+4. **Send the registered 08-29 ten.** Built, verified, match-checked by w102. Do not re-litigate.
+5. Re-run `w93a_suite.py` — **39 checks now** — after the send, then rebuild the queue for 08-30
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard`; they go red on every send by design.
+6. Read `w103b_heartbeat.txt` and settle the `setsid` question (§6), then delete the probe.
+7. ⛔ **DO-NOT, carried forward and added to.** All of w92–w102's list holds, with one repeal.
+   • **REPEALED:** w102's *"the log cannot tell you whether a build crashed or was killed"* — it
+     can, via `pgrep`/`ps`, which were never missing (§2).
+   • **DO NOT** record "X is not installed" from a bare `command -v`. Re-probe with
+     `/run/current-system/sw/bin` on PATH; if still missing, write *"absent under the corrected
+     PATH"* — name the probe, not just the result. `#39 w103a_pathguard` enforces this.
+   • **DO NOT** read §2 as reopening the click (§3) or as licensing `setsid` for long jobs (§6).
+   • **DO NOT** take the original-dataset angle — sixth handing; grep the ANGLE INDEX and quote
+     row 1 (§1). Concat is *inverted* here, monotone in dose.
+8. ⚠ **NEW LESSONS.**
+   • **An absence is the one observation a broken lookup path cannot be distinguished from.**
+     Every other wrong answer looks wrong; `command not found` looks like the truth and carries
+     the shell's authority. And it propagates asymmetrically — a false absence closes routes, and
+     closed routes are never revisited.
+   • **A conclusion can be right while its evidence is worthless**, and only the conclusion gets
+     written down. When an *instrument* is discredited, re-take every measurement it made — that
+     is not re-litigating the decisions, because the decisions were never what was in doubt.
+   • **A probe whose two hypotheses predict the same observation reads exactly like a pass.**
+     Ask what result would distinguish them *before* running it. If the discriminating event is
+     one this session cannot cause, the probe must outlive the session.
+   • **A guard that goes green when its hazard disappears becomes a permanent no-op.** Make the
+     good news RED so retirement is a decision (§4, C4).
