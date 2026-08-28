@@ -1,0 +1,31 @@
+stack blend158_h3  raw OOF AUC 0.970048  after OOF isotonic 0.969986  (delta -0.000062; monotone per fold, so ~0 expected)
+/home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/.venv/lib/python3.12/site-packages/sklearn/impute/_iterative.py:867: ConvergenceWarning: [IterativeImputer] Early stopping criterion not reached.
+  warnings.warn(
+frame (691369, 40)  mode feature
+  [base] fold0
+  [base] fold1
+  [base] fold2
+  [base] fold3
+  [base] fold4
+  baseline (stack score as the only feature) best 0.969967 over [25, 50, 100, 200, 350, 500, 750, 1000] -> ['0.969650', '0.969853', '0.969917', '0.969961', '0.969967', '0.969966', '0.969966', '0.969965']
+  [real] fold0
+  [real] fold1
+  [real] fold2
+  [real] fold3
+  [real] fold4
+  [ctrl] fold0
+  [ctrl] fold1
+  [ctrl] fold2
+  [ctrl] fold3
+  [ctrl] fold4
+
+base 0.969967
+  round       real     d_real       ctrl     d_ctrl  real-ctrl
+     25   0.969130  -0.000837   0.969656  -0.000311  -0.000526
+     50   0.969470  -0.000496   0.969707  -0.000260  -0.000236
+    100   0.969828  -0.000139   0.969901  -0.000065  -0.000074
+    200   0.969874  -0.000092   0.969951  -0.000016  -0.000077
+    350   0.969823  -0.000144   0.969938  -0.000028  -0.000116
+    500   0.969759  -0.000208   0.969914  -0.000052  -0.000155
+    750   0.969653  -0.000313   0.969871  -0.000096  -0.000218
+   1000   0.969564  -0.000403   0.969827  -0.000139  -0.000263

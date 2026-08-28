@@ -1,0 +1,57 @@
+/home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/errormap.py:59: Pandas4Warning: Starting with pandas version 4.0 all arguments of sum will be keyword-only.
+  "n_missing_all": np.minimum(tr[NUM + CAT].isna().sum(1).to_numpy(), 5),
+/home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/errormap.py:60: Pandas4Warning: Starting with pandas version 4.0 all arguments of sum will be keyword-only.
+  "n_screen_missing": tr[[DAILY] + COMP].isna().sum(1).to_numpy(),
+blend158_h3 global OOF AUC 0.970048   n=691,369
+
+segmentation           pooled within  vs global  pair share
+n_missing_all               0.974025  +0.003977       0.263
+n_screen_missing            0.974071  +0.004023       0.441
+stress_level                0.970267  +0.000219       0.289
+academic_work_impact        0.970223  +0.000175       0.442
+gender                      0.970142  +0.000094       0.308
+daily_band                  0.933423  -0.036625       0.107
+age_band                    0.970327  +0.000279       0.398
+other_screen_band           0.961145  -0.008904       0.332
+
+per-level detail (size, base rate, within-level AUC):
+
+  n_missing_all
+           0  n= 269185 (38.9%)  base 0.7081  AUC 0.977541
+           1  n= 180459 (26.1%)  base 0.7090  AUC 0.974040
+           2  n= 120697 (17.5%)  base 0.7112  AUC 0.966550
+           3  n=  67328 ( 9.7%)  base 0.7118  AUC 0.955155
+           4  n=  32557 ( 4.7%)  base 0.7095  AUC 0.940698
+           5  n=  21143 ( 3.1%)  base 0.7122  AUC 0.913295
+
+  n_screen_missing
+           0  n= 421427 (61.0%)  base 0.7092  AUC 0.975994
+           1  n= 159020 (23.0%)  base 0.7085  AUC 0.968945
+           2  n=  85608 (12.4%)  base 0.7113  AUC 0.949011
+           3  n=  23304 ( 3.4%)  base 0.7125  AUC 0.921371
+           4  n=   2010 ( 0.3%)  base 0.7070  AUC 0.892758
+
+  stress_level
+        High  n= 220873 (31.9%)  base 0.7114  AUC 0.970933
+         Low  n= 207783 (30.1%)  base 0.7112  AUC 0.969904
+      Medium  n= 207565 (30.0%)  base 0.7057  AUC 0.970143
+          NA  n=  55148 ( 8.0%)  base 0.7090  AUC 0.966562
+
+  daily_band
+        -1.0  n=  95854 (13.9%)  base 0.7113  AUC 0.940549
+         0.0  n=   5738 ( 0.8%)  base 0.2421  AUC 0.898671
+         1.0  n=  55006 ( 8.0%)  base 0.2678  AUC 0.922258
+         2.0  n= 121650 (17.6%)  base 0.3584  AUC 0.916339
+         3.0  n= 128538 (18.6%)  base 0.6593  AUC 0.938796
+         4.0  n= 145496 (21.0%)  base 0.9547  AUC 0.967081
+         5.0  n= 120659 (17.5%)  base 0.9987  AUC 0.972378
+         6.0  n=  18428 ( 2.7%)  base 0.9997  AUC 0.993495
+
+  other_screen_band
+        -1.0  n= 269942 (39.0%)  base 0.7097  AUC 0.959300
+         0.0  n= 265750 (38.4%)  base 0.5883  AUC 0.961781
+         1.0  n=  71829 (10.4%)  base 0.8933  AUC 0.987842
+         2.0  n=  29205 ( 4.2%)  base 0.8893  AUC 0.990302
+         3.0  n=  21557 ( 3.1%)  base 0.9313  AUC 0.990472
+         4.0  n=  14926 ( 2.2%)  base 0.9623  AUC 0.991887
+         5.0  n=  18160 ( 2.6%)  base 0.9889  AUC 0.991280

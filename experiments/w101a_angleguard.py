@@ -53,7 +53,7 @@ OUT = os.path.join(HERE, "w101a_angleguard.json")
 
 BLOCK_HEAD = "# 📇 THE ANGLE INDEX"
 # The index is deliberately small and fixed; if it shrinks, that is a regression, not a tidy-up.
-MIN_ROWS, MIN_ANCHORS = 8, 10
+MIN_ROWS, MIN_ANCHORS = 10, 12   # w110 added rows 9 (error analysis) and 10 (consolidation)
 
 FAILS = 0
 

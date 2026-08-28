@@ -32,7 +32,7 @@ ROOT = os.path.dirname(HERE)
 PY = os.path.join(ROOT, ".venv", "bin", "python")
 RESEARCH = os.path.join(ROOT, "RESEARCH.md")
 
-# The 44, verbatim from RESEARCH.md. C2 re-parses that document and compares.
+# The 45, verbatim from RESEARCH.md. C2 re-parses that document and compares.
 STEMS = [
     "w54a_vetoexpiry", "w55a_unpriced", "w56b_wantedguard", "w57c_muguard", "w59b_barguard",
     "w60b_ineligguard", "w60d_memberguard", "w62b_barstaleguard", "w63b_setguard",
@@ -44,7 +44,7 @@ STEMS = [
     "w87a_registrarguard", "w88a_calexposure", "w89a_foldid", "w91b_dateguard",
     "w92a_smokerun", "w93c_pickverify", "w100a_complement", "w101a_angleguard",
     "w103a_pathguard", "w104a_cgroupguard", "w105a_liveguard", "w106a_claimguard",
-    "w107a_lineref", "w109b_colguard",
+    "w107a_lineref", "w109b_colguard", "w110b_covguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).
@@ -54,11 +54,28 @@ TIMEOUT = 900          # w65c and w66d need ~4 min; w92a executes five real inst
 
 
 def research_stems():
-    """The published list, parsed out of RESEARCH.md so the two copies cannot drift (C2)."""
+    """The published list, parsed out of RESEARCH.md so the two copies cannot drift (C2).
+
+    ⚠ THE LOCATOR MUST SKIP THE ANGLE INDEX, AND w110 FOUND OUT WHY THE HARD WAY. This used
+    `txt.find("STANDING CHECKS, FULL STEMS")`, i.e. FIRST occurrence. On 2026-08-28 the ANGLE
+    INDEX gained a row whose pointer is the backticked string `STANDING CHECKS, FULL STEMS` --
+    and the index sits ABOVE the real block, so the locator landed on the POINTER, read the
+    prose between it and the next '⚠', found no indented rows, and reported C2 DRIFT on all 45
+    stems with `only-RESEARCH []`. 🎯 A LOCATOR THAT TAKES THE FIRST OCCURRENCE OF A STRING
+    FINDS THE POINTER, NOT THE TARGET, THE MOMENT ANYONE WRITES A POINTER -- and writing
+    pointers to this block is exactly what the index is for. Anchoring on the real header text
+    (`## THE`) is not enough on its own either, because the count in it moves 44 -> 45 -> 46; so
+    excise the index span first and then match the header shape.
+    """
     txt = open(RESEARCH, encoding="utf-8").read()
-    i = txt.find("STANDING CHECKS, FULL STEMS")
-    if i < 0:
+    k = txt.find("# 📇 THE ANGLE INDEX")
+    if k >= 0:                                  # drop the index block from the search corpus
+        e = txt.find("\n# ", txt.find("\n|", k))
+        txt = txt[:k] + txt[(len(txt) if e < 0 else e):]
+    m = re.search(r"^## THE \d+ STANDING CHECKS, FULL STEMS", txt, re.M)
+    if m is None:
         return None
+    i = m.start()
     block = txt[i:txt.find("\n⚠", i)]
     # ONLY the 4-space-indented table rows. The section also carries prose that names
     # modules (w93 added a paragraph naming this very runner) and a prose mention is not a

@@ -2580,3 +2580,21 @@ remaining unsent file is below the best already-sent CV and `w26d` prices the wh
 
 ⛔ The final-selection click is still not done — see JOURNAL w108 §7. Auto-selection on public
 score costs **+4.5228e-6** of expected private AUC against the CV pick.
+
+## 2026-08-28, w110 (slot 9) — board flat for a **fourteenth** hour, no submission possible (0/10)
+
+Top five unchanged from w103 (13:12Z) through w109: **Chris Deotte 0.97205**, Changye Li 0.97154,
+MILANFX 0.97149, cstdy 0.97145, Keanan 0.97139. Account best **0.97119**
+(`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`), unchanged. Today's ten went out at 12:37–12:38Z
+before this run; the latest landed 0.97105 / 0.97103 / 0.97101, all as `w26d` predicted.
+
+⚠ The read does not move. The 0.00086 gap to first is not closable by modelling with three days
+left. w110 added the two ANGLE INDEX rows that were missing (error analysis, consolidation) and
+re-verified the error-analysis closure across **all four** of its instruments — every figure
+reproduces, `real − ctrl` is negative at 8/8 and 9/9 in the two boosting arms, and 76.7% of the
+AUC deficit is cross-cell, which no feature can reach. **Nothing on the board changes the
+CV-based deadline pick.**
+
+⛔ The final-selection click is still not done — ninth run asking. `check_selection.py` reads
+**rc=1, nothing selected**. Auto-selection on public score costs **+4.5228e-6** expected private
+AUC against the CV pick, and private is the score that counts.

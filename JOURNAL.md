@@ -31725,3 +31725,247 @@ single item on the board.**
    • **An exact linear dependency among k columns is invisible to any pairwise instrument** (§2).
    • **Assert the expected pack size even when you copied the recipe verbatim** (§4) — the recipe
      is an argument list and the loader has defaults the argument list cannot see.
+
+---
+
+# w110 — 2026-08-28, slot 9 of 10, ANGLE "Error analysis: find where the current best model is
+# wrong. Segment the out-of-fold errors and look for structure a feature could capture."
+# 🔴 THE 9th ANGLE GENUS — HANDED EIGHT TIMES, CLOSED SINCE AUGUST, AND IT HAD NO INDEX ROW
+# ⛔ CLOSED, RE-VERIFIED AT THE ARTEFACT LEVEL ACROSS ALL FOUR INSTRUMENTS · 0 SLOTS · NO SUBMISSION
+
+## 0. THE CONSTRAINTS
+
+`git status` first: clean apart from the usual untracked experiment artefacts, no tracked
+deletions. `date -u` → **2026-08-28 16:03Z**, still 08-28. `w26g_send.py --n 10`: *"171
+submissions on record; 10 already sent on 2026-08-28 (UTC); **0 of 10 slots left today**"*, and
+the dry run again flags the queue on disk as *"a queue for another day"* — the registered 08-29
+list, by design. ⟹ **no submission this run, and none was possible.** The registered 08-29 ten is
+untouched and not re-litigated.
+
+## 1. 🔴 THE FINDING: THE INDEX HAS BEEN MISSING THE MOST-HANDED ANGLE IN THE COMPETITION
+
+The ANGLE INDEX shipped 2026-08-27 with seven modelling rows plus a foundation row, built by
+enumerating *the closures its author remembered writing*. The corpus it should have been built
+from is *the ANGLE strings the harness has actually handed*, and those are in this file. Two
+genera and **thirteen handings** were missing:
+
+| genus | handings | row before w110 |
+|---|---|---|
+| error analysis / segment the OOF errors | **8** — 08-11 s7, 08-14 w14d, 08-16 w16a, 08-17 w17 s1, 08-19 w27 s8, 08-20 w38 s8, 08-24 w74 s3, **08-28 w110 s9** | **none** |
+| consolidation | **5** — 08-11 s8, 08-13 s5, 08-16 w16c, 08-19 w28 s9, 08-24 w75 s4 | **none** |
+
+Eight handings ties feature engineering as the most-handed angle here, and the angle was closed
+by four controlled instruments in August. Following the index's **own documented protocol** —
+*"take a content word out of your ANGLE string and grep this block"* — `error`, `analysis`,
+`segment` all return nothing. 🎯 **AN INDEX BUILT FROM THE CLOSURES INHERITS THE BLIND SPOT OF
+WHOEVER ENUMERATED THEM. Enumerate from the record of DEMAND, not from your memory of SUPPLY.**
+Rows 9 and 10 are now in the table; #45 makes the demand side mechanical.
+
+⚠ Note what #38 `w101a_angleguard` could not do here, and it is not a defect in #38: it checks
+that pointers **resolve**, which is the supply side. An index of three rows, all resolving, is
+green under it. A guard on a table checks the rows that are there; nothing checks the rows that
+are not, unless you hand it the corpus that says which rows there should be.
+
+## 2. ✅ ALL FOUR INSTRUMENTS RE-VERIFIED — AND TWO OF THEM HAD NO ARTEFACT
+
+Sixth index row checked this way, after w105/row 3, w106/row 4, w107/row 5, w108/row 6 and
+w109/row 7. Registered in `experiments/w110_prereg.txt` (commit before anything ran).
+
+    I1  errormap.py        NO artefact on disk -> re-run   w110a_errormap.log    ALL MATCH
+    I2  w14d_bandmap.py    w14d_bandmap.log                                      ALL MATCH
+    I3  w14d_cellboost.py  w14d_cellboost.log                                    ALL MATCH
+    I4  resid_boost2.py    NO artefact on disk -> re-run   w110a_residboost.log  see §3
+
+I1: 0.974025 / 0.974071 / 0.961145 / **0.933423 (−0.036625)**, 0 missing 0.977541, 5+ missing
+0.913295, base 0.2421 → 0.9997. I2: within-cell deficit 0.006964 vs cross-cell 0.022987 (the
+**76.7%** figure), oracle ceilings +0.001461 / +0.006964 / +0.022987, per-cell isotonic real
+−118e-6 vs permuted control −124e-6. I3: `real − ctrl` negative at **9 of 9** checkpoints across
+BAND / D / G, monotonically worse with capacity in all three. **Every figure exact.**
+
+⚠ **THE PREMISE IS DEAD BEFORE ANY MODEL IS FITTED, AND THE ANGLE'S OWN DECOMPOSITION SAYS SO.**
+The angle asks for *structure a feature could capture*. **76.7% of the AUC deficit is CROSS-cell**
+— pairs of rows in different segments — which no within-segment feature, monotone map or
+cell-local booster can touch. The 23.3% that is within-cell is exactly what I3 attacked, with a
+control, and lost at 9/9. w17 s1 then priced the only residue (cells A/B/E/F never boosted) at
+**≤4.9% of the deficit** by arithmetic that cannot rot; cell A has **345 negatives** in 77,654
+rows, so its within-cell AUC prices 2.7e7 of ~1.4e11 pairs and cannot move the global number
+whatever it says.
+
+## 3. 🎯 I4 REPRODUCES TO THE DIGIT AFTER 17 DAYS — AND MY REGISTERED P2 IS FALSIFIED
+
+`resid_boost2.py --mode feature`, `w110a_residboost.log`. **P1 CONFIRMED**, `real − ctrl` negative
+at 8 of 8. **P3 CONFIRMED**, baseline (stack score as the only feature) **0.969967**, the ~8e-5
+tree-discretisation handicap, exact. The two endpoint magnitudes RESEARCH quotes, **−7.4e-5** and
+**−5.3e-4**, are both in the table exactly.
+
+🔻 **P2 FALSIFIED.** I registered *"the magnitude grows with rounds"*, reading the published
+`−7.4e-5 → −5.3e-4` as a trajectory. It is not one: **−5.3e-4 is round 25, the FIRST checkpoint,
+and −7.4e-5 is round 100, the MIDDLE.** The curve is U-shaped — worst at fewest rounds, best at
+100, degrading again to −2.6e-4 at 1000. The published arrow points backwards and I inherited the
+error by predicting it. ⟹ **A "a → b" written over a RANGE is not a claim about ordering, and
+reading it as one buys you a falsified prediction and a wrong mechanism.** Same genus as w108's
+*"a before/after control must reproduce the ORDERING"*, arriving from the opposite direction: there
+the control lacked an ordering, here I invented one that was not claimed.
+
+⚠ The corrected shape is **stronger** for the closure. At 25–50 rounds neither arm has converged
+to baseline, so the early gap is a convergence artefact; in the honest region (100+) `ctrl` sits
+within 16–139e-6 of base and `real` is below it at **all six** checkpoints, widening monotonically
+from 200 out. Ordinary signature of capacity spent on features carrying nothing new.
+
+## 4. 😐 MY OWN ERRORS
+
+- 🔴 **I wrote row 10's anchor as `THE STANDING CHECKS` and it resolved to exactly ONE hit — its
+  own copy inside the index.** That is w101's original bug, reproduced by me in the same table
+  eight hours later. Caught by counting before running the guard, not by the guard. Real header
+  is `THE 45 STANDING CHECKS, FULL STEMS`; the anchor is now the substring that survives the
+  count going 44 → 45 → 46. ⟹ **An anchor written into an index must be counted OUTSIDE the
+  index, and the natural first draft always fails that.**
+- 🔴 **My first design for #45 would have passed its own motivating case.** See §5.
+- 🔴 The 08-11 `274k` row count for the hard band is **250,188** (§6). Corrected in RESEARCH,
+  left in place in this file, which is append-only.
+
+## 5. 🆕 STANDING CHECK #45 — `w110b_covguard`, AND THE WEAK VERSION I ALMOST SHIPPED
+
+Every handed ANGLE must be carried by an index row. C1 coverage · C2 fired both ways with a
+planted angle · C3 **the regression in code**: delete the error-analysis row from an in-memory
+copy and the handing must go UNCOVERED under the live reader **and** COVERED under the naive one
+· C4 not vacuous, floors on rows, handings and distinct genera. **45/45 registered.**
+
+⚠ **THE STRICT FORM IS LOAD-BEARING.** The obvious test is *"some content word of the genus
+appears in the index"*. The error-analysis ANGLE string contains `feature` and `model`, and
+`feature` is in row 5 — so the ANY-word test calls **the exact defect the guard exists for**
+COVERED. I measured that before writing the file, which is w108 §6's rule doing its job. The live
+test is *all* genus words in **one single row**, and a row rather than the block because the
+block's prose names every angle by hand (a MENTION is not a POINTER). ⟹ **Run a guard against its
+own motivating case before shipping it. An instrument that passes the failure it was built for is
+worse than none, because it certifies the gap.**
+
+**Exemption surface: ZERO** — no carve-out list, no per-angle judgement, one six-word stoplist
+applied identically to every genus. The honest limit is **scope, stated not exempted**: the corpus
+is the modern `ANGLE "<text>"` header form used from w99 onward (10 runs, parses with no
+heuristics). The dozen older header shapes are not parsed — an extractor for those is itself a
+pile of judgement calls, which is what the file refuses to contain. `w101a_angleguard`'s floor
+moves **8 → 10 rows** in the same edit so the new rows cannot be tidied away.
+
+## 6. ⛔ TEDDY — STILL ONE HUMAN CLICK, **NINTH RUN ASKING**
+
+`.venv/bin/python experiments/check_selection.py` → **rc=1**, read without a pipe.
+*"NOTHING IS SELECTED."* Kaggle then auto-selects on **public** score, which is not what CV
+prefers — the Rogii failure mode exactly.
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+One minute of clicking, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. The
+price is fixed, so it cannot go stale. No browser on this box. **Human-only, and still the largest
+single item on the board.**
+
+## 7. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED 08-29 TEN.** Built and match-checked by w102, re-confirmed since.
+   **Do not re-litigate the list.**
+3. After the send: re-run `w93a_suite.py` (**45 checks now**), then rebuild the queue for 08-30 and
+   re-run `w54a_vetoexpiry` + `w85c_slotguard` — they go red on every send by design.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED.** All TEN index rows are closed or resolved, and rows 3,
+   4, 5, 6, 7 and **now 9** have been re-verified at the artefact level. **Do not start a member
+   build.**
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w109's list holds.
+   • **DO NOT** re-open error analysis / OOF segmentation in any framing. Four instruments, all
+     with matched controls, all null or negative; the residue is priced at ≤4.9%; and 76.7% of
+     the deficit is cross-cell, which the angle's proposed fix structurally cannot reach (§2).
+   • **DO NOT** calibrate the final submission file. Out-of-fold isotonic costs **6.2e-5 AUC**,
+     re-confirmed to the digit this run (§3).
+   • **DO NOT** quote `274k rows` for the 4–8h hard band. It is **250,188**; 274,034 is the
+     adjacent 6–10h pair (§6 of the RESEARCH section, corrected there).
+   • **DO NOT** read `−7.4e-5 → −5.3e-4` as a trajectory (§3). It is a range, and the arrow is
+     backwards against rounds.
+   • **DO NOT** write an index anchor without counting it OUTSIDE the index (§4).
+   • **DO NOT** cite a line number of RESEARCH.md — it decays ~100 lines/run and #43 fails you.
+   • **DO NOT** use `pgrep -af <token>` for liveness — use `alive.py`.
+   • **DO NOT** read `$?` after a pipe. Redirect to a file first.
+   • **DO NOT** launch a long job with `detach.py`/`setsid`/`nohup` — only `systemd-run --user`,
+     and `export XDG_RUNTIME_DIR=/run/user/$(id -u)` first or it fails outright.
+   • **DO NOT** run `w93a_suite.py` alongside a member build (2.4× wall clock, both lose).
+   • **DO NOT** build `cat_native_ctr2` / `cat_natlat`, take the original-dataset angle, sweep
+     GBDT hyperparameters, or add ordinary GBDT members.
+6. ⚠ **NEW LESSONS.**
+   • **Enumerate an index's rows from the record of DEMAND, not from your memory of SUPPLY** (§1).
+     Thirteen handings across two genera were invisible for exactly that reason.
+   • **A guard on a table checks the rows that are there; nothing checks the rows that are not**
+     (§1) — unless you hand it the corpus that says which rows there should be.
+   • **Run a guard against its own motivating case before shipping it** (§5). The obvious version
+     of #45 certified the very gap it was built for.
+   • **An "a → b" written over a range is not a claim about ordering** (§3).
+   • **An anchor written into an index must be counted OUTSIDE the index** (§4) — the natural
+     first draft always fails that, twice now in the same table.
+
+## 8. ADDENDUM — C3's FIRST IMPLEMENTATION DID NOT DEMONSTRATE WHAT §5 CLAIMS FOR IT
+
+Written after §5 and kept separate rather than folded in. My first `w110b_covguard` built its
+naive reader from the **genus** words only, so with row 9 removed it printed *"live UNCOVERED,
+naive also uncovered — strictness not demonstrated"*. The genus is `Error analysis`; `feature`
+and `model` live in the **elaboration**, not the genus, so that reader was never the one that
+could be fooled.
+
+The reader that actually shipped on 08-27 and certified the missing row is the index's own
+published protocol: *"take a content word out of your ANGLE string"* — the **whole string**,
+grepped against the **whole block**. C3 now reconstructs that, and doctors the block text the
+same way it doctors the row list, so *"the naive reader still sees it"* is a property of the
+reader rather than an artefact of an untouched corpus. It now prints **live UNCOVERED, naive
+COVERED**, which is the claim §5 makes.
+
+⟹ **A control that fails to separate two readers has not shown the strict one is needed — it has
+shown you built the wrong weak one.** The guard was green in both versions; only the *evidence
+for its design* differed, and the first version's own output said so in one line. Read a control's
+message, not its exit code.
+
+## 9. 🔴 AND THE SUITE CAUGHT A DEFECT I CREATED WITH ROW 10's ANCHOR — 45/45 → C2 DRIFT ON ALL 45
+
+The first full-suite run after the edits went red before running a single check:
+
+    ⛔ C2 DRIFT  only-here [all 45 stems]  only-RESEARCH []
+
+`research_stems()` locates the published stem list with `txt.find("STANDING CHECKS, FULL STEMS")`
+— **first occurrence**. Row 10 of the ANGLE INDEX, added this run, carries the backticked pointer
+`STANDING CHECKS, FULL STEMS`, and the index sits **above** the real block. So the locator landed
+on the **pointer**, read the prose after it, found no indented rows, and reported every stem as
+missing from RESEARCH. `only-RESEARCH []` is the tell: an empty set on that side is not drift, it
+is a parse that returned nothing.
+
+🎯 **A LOCATOR THAT TAKES THE FIRST OCCURRENCE OF A STRING FINDS THE POINTER, NOT THE TARGET, THE
+MOMENT ANYONE WRITES A POINTER — and writing pointers to that block is precisely what the index
+is for.** The index and the locator were each correct in isolation and incompatible together; the
+collision was created by adding one table row, in a file the locator does not read for content.
+
+Fixed generally rather than by renaming my anchor: `research_stems()` now **excises the ANGLE
+INDEX span from its search corpus** (the same manoeuvre `w101a_angleguard` makes for the opposite
+reason — there to stop the index satisfying its own anchors, here to stop it capturing someone
+else's locator) and then matches the header *shape* `^## THE \d+ STANDING CHECKS, FULL STEMS`,
+because the count in that header moves 44 → 45 → 46 and a literal would rot on the next check.
+
+⟹ **Two lessons, and the second is the general one.**
+- **An anchor is a deliberate duplicate of its target's text. Any parser that resolves that text
+  by first-occurrence is broken by the act of pointing at it.** Renaming the anchor hides this
+  until the next pointer; excising the pointer block fixes the class.
+- **`only-RESEARCH []` — an empty set on one side of a drift report — means the parse failed, not
+  that the document is empty.** A diff between "everything" and "nothing" is a parser error
+  wearing a content error's clothes, and it would have been easy to "fix" by editing the stem
+  list. Read which side is empty before believing a drift.
+
+⚠ For the next run: this is the **third** time in two runs that a change to the index broke
+something outside the index (w101's self-satisfying anchor, §4's repeat of it, and now this).
+**The ANGLE INDEX is load-bearing for at least three parsers. Run `w93a_suite.py` after ANY edit
+to it**, not just after edits to a check.
+
+⏱ **SUITE, POST-EDIT: 45/45 GREEN, 255s** — run after every edit in this entry had landed,
+including the index preamble rewrite. Nothing else heavy was running.
+
+⚠ **AND w54a/w55a WERE RED FOR AN ENVIRONMENT REASON, NOT A CONTENT ONE.** The first two
+attempts ran the suite under `systemd-run --user` without inheriting `PATH`, and `w55a_unpriced`
+died on `FileNotFoundError: 'kaggle'` — the short-PATH trap RESEARCH already records for sudo and
+`git push`, arriving in a third place. Re-run by hand in the interactive shell it was rc=0 in 10s.
+⟹ **`systemd-run --user --setenv=PATH="$PATH"` for anything that shells out to `kaggle`**, and
+w54a's *"in the post-send set — see the summary"* note appeared next to it, which is the excuse
+w104 already warned reads as a diagnosis. Both went green with PATH set. **A guard red under a
+detached launcher is an environment hypothesis until you have re-run it in your own shell.**
