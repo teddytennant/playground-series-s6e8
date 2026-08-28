@@ -43,7 +43,7 @@ STEMS = [
     "w82a_pricecal", "w84a_pickargmax", "w85c_slotguard", "w86a_pagecap",
     "w87a_registrarguard", "w88a_calexposure", "w89a_foldid", "w91b_dateguard",
     "w92a_smokerun", "w93c_pickverify", "w100a_complement", "w101a_angleguard",
-    "w103a_pathguard", "w104a_cgroupguard", "w105a_liveguard",
+    "w103a_pathguard", "w104a_cgroupguard", "w105a_liveguard", "w106a_claimguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

@@ -30949,3 +30949,218 @@ and still the largest item on the board.**
      and never asked how close it would then be to the pack.
    • **A confounded probe manufactures false claims that feel measured** (§6). I had two
      observations and a mechanism for "the bracket trick is broken" and it was wrong.
+
+---
+
+# w106 — 2026-08-28, slot 5 of 10, ANGLE "XGBoost: third leg of the ensemble, tuned on the same
+# folds so the blend weights mean something."
+# ⛔ ANGLE = INDEX ROW 4, CLOSED — BUT ITS PRICE WAS **INHERITED**, SO I CHECKED IT · 0 SLOTS · NO SUBMISSION
+# 🔻 NEW STANDING CHECK #42: A CLOSURE'S CITATIONS ARE NOW MACHINE-CHECKED
+
+## 0. THE CONSTRAINTS
+
+`git status` first (w101 §1): clean apart from the usual untracked experiment artefacts.
+`date -u` → **2026-08-28 14:01Z**, still 08-28. `w26g_send.py --n 10`: *"171 submissions on
+record; 10 already sent on 2026-08-28 (UTC); **0 of 10 slots left today**"*, and the dry run
+correctly flags the queue on disk as *"a queue for another day"* (it is the registered 08-29
+list). ⟹ **no submission this run, and none was possible.** The 08-29 ten is built, verified and
+match-checked by w102 — tomorrow's run sends it and should not re-litigate it.
+
+## 1. THE ANGLE — ROW 4, AND THE REASON IT NEEDED CHECKING RATHER THAN QUOTING
+
+One grep, as the index promises: row 4, *XGBoost as the third leg*, price **+4e-7**. But its
+`closed` cell read **"same instrument as 2"** — the number came from a *LightGBM* measurement.
+After w105 found row 3's closure citing two files that never existed, an inherited price is
+precisely the thing not to take on trust. Checked at the artefact level:
+
+| the claim | checked | verdict |
+|---|---|---|
+| *"the pack already holds `xgb_lat`, `xgb_latcat` (×3 seeds), `xgb_cat_lattice`, `xgb_raw_nan`, `bolt_xgb_*`"* | `ls oof/` | **all six present** |
+| *XGBoost is not a missing leg* | family table | `latr1_xgb` **0.96780 — best GBDT of any family** (LGBM 0.96768, CatBoost 0.96718) |
+| the +4e-7 is LightGBM-only | 3e-5 × **1.4% pass-through** | the pass-through was measured **on XGBoost** — `xgb_latcat` seed-averaging, +138e-6 solo → **+2e-6** stack |
+
+⟹ **Row 4 holds on its own evidence.** Marked `×2 · artefacts verified` in the index, with the
+distinction written into RESEARCH: 🎯 **an inherited price is not automatically a fabricated one
+— but you only know which by looking.** No XGBoost work done, and none is warranted: +4e-7 is
+~1% of the 5e-5 noise floor, and *"do not tune GBDTs, do not add ordinary GBDT members"* stands.
+
+## 2. 🔻 THE FINDING MADE EXECUTABLE — `w101a_angleguard` CANNOT SEE THIS CLASS OF DEFECT
+
+w105 wrote the lesson (*"a working pointer can point at a false claim; check the artefact, not
+the sentence"*) and left it as prose. Prose in a 14,000-line document read by grepping for
+today's keyword is w105's *own* finding about how RESEARCH fails. So it is now a check.
+
+🎯 **THE POINTER AND THE CLAIM ARE DIFFERENT OBJECTS AND NEED DIFFERENT CHECKS.** `w101a` proves
+the ANGLE INDEX's anchors resolve — they do, greenly, at a paragraph whose contents are false.
+That is not a bug in w101a; it is the wrong instrument for the question.
+
+**`experiments/w106a_claimguard.py`, standing check #42.** Scans RESEARCH.md for possession
+claims (*"already in the pack"*, *"we already hold"*, …), pulls backticked member-shaped names
+from a 3-line window, checks each against every `oof_<name>.npy` on disk.
+
+Two design choices carry the whole thing, and both are about being *believed*:
+
+- **THE INVENTORY IS A DELIBERATE SUPERSET** (507 names — live pack, every `data/ext_members*`,
+  every pulled notebook, `oof_rejected/`). So it **cannot** fire on *"held, but not in this
+  pack"*, only on *"exists nowhere at all"*. A narrower inventory is a more sensitive instrument
+  and a less believable one.
+- **THE SIBLING RULE** — report a name only when at least one sibling in the same claim **is**
+  in the inventory. If a list names four things and two are ours, the sentence speaks our
+  vocabulary and an absent entry is a defect; if none are ours, it is about somebody else's
+  artefacts.
+
+**Measured on the live document: the sibling rule turns 12 flagged tokens into 1 true finding
+and 0 false positives.** All 11 suppressed are genuine non-members — usernames (`amanatar`,
+`lavanyabacche`), an md5, a transform bit (`drop_worst`), a run label (`w38c`), a correction
+object (`c_avg`), and the **foreign** names of rejected external streams (`omidbag_oof`,
+`mohankr_realmlp`) whose sentence says they duplicate members we hold, i.e. **the claim's
+subject is the other side of the sentence.** That class is why the naive scanner is useless
+here: right once, wrong eleven times, and muted by run two.
+
+⚠ **THE PRICE, STATED UP FRONT:** a claim where *every* named member is absent is invisible to
+it. Chosen, not overlooked — widen it when such an instance exists, using that instance as the
+control.
+
+✅ **IT REPRODUCES THE FINDING THAT CAUSED IT.** Run against the *uncorrected* w61 sentence it
+reports exactly `cat_native_ctr2` and `cat_natlat` and nothing else — it rediscovers w105's
+finding **without being told about it**, which is the only real evidence it would have caught it
+in time.
+
+## 3. ✅ ALL SIX ARMS FIRED IN THE FAILING DIRECTION IN CODE (house rule, w105 §3)
+
+Doctored copy in `experiments/`, deleted after; the real guard re-run green afterwards.
+
+- **C0 ± inventory floor (≥100).** The arm that stops #42 being **a guard that can only pass**:
+  with the walk broken and the inventory empty, the sibling rule suppresses *every* finding and
+  the guard goes green on a document full of fiction. Verified an empty inventory fails C0 **and**
+  cascades into C2/C3/C5. 🎯 *An instrument that reports absence must prove it can still see.*
+- **C1 −/+** live document clean; a freshly planted false citation is caught.
+- **C2 +** the historical true positive on the real text.
+- **C3 ±** the *sibling rule*, not the exemption, does the work — exemptions off must yield
+  exactly the pair quoted inside w105's correction and no more.
+- **C4 +** no stale exemption; retitling an exempt section is **fatal**, not silently wider.
+- **C5 +** not vacuous — 32 claims, 16 resolved names.
+
+## 4. 😐 TWO OF MY OWN ERRORS THIS RUN, BOTH THE SAME SHAPE AS THE SUBJECT
+
+- 🔴 **THE GUARD FIRED ON MY OWN WRITE-UP, AND THE SPAN-SCOPED EXEMPTION I ADDED COVERED
+  NOTHING.** RESEARCH wraps titles over two or three `#` lines; my span logic closed at *the next
+  line starting with `#`*, i.e. the **second line of the title**. So the exemption was registered,
+  `found=True`, C4 green — and it exempted a header and no body. **A stale exemption that still
+  reports itself present is exactly the w104 "control that can only pass" pattern**, and I built
+  one by accident inside the guard whose job is to catch that family. Fixed by skipping the
+  contiguous header block; both spans now resolve to real bodies (0–15, 156–180).
+- 🔴 **`.venv/bin/python check_selection.py | tail` REPORTED `rc=0` AND IT IS `rc=1`.** `$?` after
+  a pipeline is the **last** stage's status — I read `tail`'s success as the program's. I nearly
+  wrote *"the click finally happened"*. Re-run with the pipe removed: **rc=1, still unselected.**
+  ⟹ Same family as w105's lying `pgrep`: **an instrument that answers a different question than
+  the one asked, in a form indistinguishable from the right answer.** Redirect to a file and read
+  `$?` before the pipe.
+
+## 5. ⚠ THE EXEMPTION LIST GREW ON DAY ONE — AND THAT IS THE EROSION MECHANISM
+
+#42 shipped with **one** exemption (w105's correction section, which quotes the false claim to
+correct it) and needed a **second within the hour** — this run's own write-up, for the identical
+reason. Every future write-up of this defect will want a third. 🎯 **THAT IS HOW A GUARD'S
+COVERAGE ERODES: NOT BY ANYONE SWITCHING IT OFF, BUT BY EACH INDIVIDUAL EXEMPTION BEING
+OBVIOUSLY REASONABLE.** Written into the module as a hard stop: **if the list reaches four, do
+not add a fifth — fix the root cause** by quoting broken citations *without a possession verb on
+the same line* (*"the bullet named `cat_natlat`"*, not *"we already hold `cat_natlat`"*), which
+costs nothing and needs no exemption.
+
+## 6. ✅ THE w97 VERDICT LANDED: **NO-ENROL**, DECIDED IN CODE AGAINST THE PRE-REGISTERED RULE
+
+`w97b_value_then_gate.sh` finished 14:40:08Z. The windowed-TE-prior member — the live experiment
+inherited from w96/w102, and the only *modelling* question open in this workspace — does not
+enter the blend.
+
+    Delta per rep:  -4.98  +2.12  +2.44  -5.04  -4.17   (e-6)
+    mean -1.924e-06   sd 3.857e-06   positive 2/5
+    registered prediction was [0, +3e-6], modal +1e-6
+
+| gate | reading | |
+|---|---|---|
+| **G0** INSTRUMENT | cat4 `+0.000044` vs published `+0.000041` | **PASS** |
+| **G1** CONSISTENCY | 2/5 reps positive, need 4 | **FAIL** |
+| **G2** MAGNITUDE | mean **−1.924e-6** vs floor +1.0e-6 | **FAIL** |
+| **G3** CEILING | −1.924e-6 vs +10e-6 | PASS |
+| **G4** PROVENANCE | sd_test/sd_oof 1.0021 ∈ [0.95, 1.45] | PASS |
+
+⟹ **NO-ENROL. Nothing was copied into `oof/`.** This is the modal outcome the prereg named in
+advance and it is **not a failure** — the build's cost was sunk before the number existed, and
+the instrument's own reproduction gate PASSED, so the reading is comparable to everything else
+in RESEARCH.
+
+⚠ **THE NEAR-DUPLICATE CAVEAT (w105 §5) DOES NOT APPLY HERE.** It weakened a *PASS* only; w105
+wrote that "a FAIL is unaffected and if anything harsher." Recording that the escape hatch was
+checked and is shut, rather than leaving it available to a later run.
+
+🎯 **AND THE CONTROL BEAT THE TREATMENT.** `d(global) = +2.77e-6/member (t +3.11)` against
+`d(windowed) = +0.85e-6 (t +0.74)` — the arm that is a **0.999997 near-copy** of `lgbm_fixed_lat`
+priced *higher* than the new encoding. `both` came in at +1.86e-6/member, which is w24b's
+redundant-family rate (+1.07e-6) to within noise. So the honest summary is: **the pair behaves
+exactly like "two more redundant members", which is precisely the null the whole exercise was
+built to rule out.** The windowed encoding is not a lever here.
+
+⛔ **THE REGISTERED PREDICTION WAS WRONG, AND IN THE OPTIMISTIC DIRECTION** — [0, +3e-6] against
+an observed −1.92e-6, i.e. the true value sat *outside the interval on the low side*. w96 priced
+this from a +42e-6 member-level effect and w105 measured +86e-6 at the member level; **neither
+survived the conversion to blend value at all.** One more datum for the standing conversion rule:
+member-level AUC is not evidence about stack value, and this workspace has now watched a
+large member-level effect convert to a negative stack effect.
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK, **FIFTH RUN ASKING**, AND I ALMOST RECORDED IT AS DONE
+
+`check_selection.py` **rc=1**. Nothing is selected, so Kaggle auto-selects on **public** score,
+which is not what CV prefers — the Rogii failure mode exactly.
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+One minute of clicking, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. w99 §1
+proved the price is fixed, so it cannot go stale. No browser exists on this box (w103 §3
+re-measured under the corrected PATH). **Human-only, and still the largest single item on the
+board.** ⚠ See §4 — my first reading of this today was a piped `rc=0` and it is `rc=1`.
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. ⛔ **DO NOT wait on the w102a build. It is FINISHED and its verdict is IN (§6): NO-ENROL.**
+   The unit may still read `active`; that is not evidence of work. If you need to check anything
+   running, use `.venv/bin/python experiments/alive.py --unit <u> --cmd-contains <tok>`,
+   **never `pgrep -af`** (w105 §2). rc=2 means *undecided*, not dead.
+3. **SEND THE REGISTERED 08-29 TEN.** Built, verified and match-checked by w102; all ten files
+   re-confirmed on disk this run at 296,302 rows + header. **Do not re-litigate the list.**
+4. After the send: re-run `w93a_suite.py` (**42 checks now**), then rebuild the queue for 08-30
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard` — they go red on every send by design.
+   ✅ w104's unexplained `w85c_slotguard` red **did not recur**: 42/42 green this run, 564s.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED.** With w97 NO-ENROL there is **no open modelling
+   experiment left**. Angles 1–8 are all closed by measurement and rows 3 and 4 have now been
+   re-verified at the artefact level. ⟹ Remaining runs are queue management, the suite, and
+   getting §7 clicked. **Do not start a new member build with three days left** — the conversion
+   rate makes it unrecoverable even if it works.
+6. ⛔ **DO-NOT, carried forward and added to.** All of w92–w105's list holds.
+   • **DO NOT** rescue w97 by switching to `d(windowed)` or `d(both)` (prereg §5). Asked and shut.
+   • **DO NOT** use `pgrep -af <token>` for liveness — use `alive.py`.
+   • **DO NOT** read `$?` after a pipe (§4). Redirect to a file first.
+   • **DO NOT** launch a long job with `detach.py`/`setsid`/`nohup` — only `systemd-run --user`.
+   • **DO NOT** run `w93a_suite.py` alongside a member build; load hit 24 on 16 cores and the
+     pricing cells slowed 95s → 119s. The suite is 564s of real CPU.
+   • **DO NOT** build `cat_native_ctr2` / `cat_natlat`, take the original-dataset angle, sweep
+     GBDT hyperparameters, or add ordinary GBDT members.
+7. ⚠ **NEW LESSONS.**
+   • **An inherited price is not automatically a fabricated one — but you only know by looking**
+     (§1). Row 4's number came from a LightGBM measurement and turned out to be independently
+     supported on XGBoost; row 3's identical-looking citation was fiction.
+   • **A guard's coverage erodes by reasonable exemptions, not by anyone switching it off** (§5).
+     #42 needed a second exemption within the hour of shipping with its first.
+   • **An instrument that reports absence must prove it can still see** (§3, C0). An empty
+     inventory would have made #42 green on a document full of fiction.
+   • **A stale exemption that reports itself present is a control that can only pass** (§4).
+     Built one by accident, inside the guard whose job is catching that family.
+   • **A large member-level effect can convert to a NEGATIVE stack effect** (§6). +86e-6 at the
+     member level → −1.9e-6 of Delta at the blend.
+
+⏱ **SUITE, POST-EDIT (owed, w105 §9): 42/42 green, 234s.** The earlier in-run pass took **564s**
+for the identical work because it overlapped the pricing build — 2.4× wall clock, and it slowed
+the pricing cells 95s → 119s at the same time. Both jobs were the loser. Sequence them.

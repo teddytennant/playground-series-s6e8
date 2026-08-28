@@ -1,3 +1,133 @@
+# ⛔ THE WINDOWED TE-PRIOR MEMBER IS **NO-ENROL** — w97 gate closed in code (w106, 2026-08-28)
+# ⟹ THERE IS NO OPEN MODELLING EXPERIMENT LEFT IN THIS WORKSPACE
+
+The last live modelling question (w96 → w102 → w105 → w106) is decided, against
+`experiments/w97_prereg.txt` §3, by `w97a_gate.py`, which was coded before the table existed.
+
+    Delta per rep:  -4.98  +2.12  +2.44  -5.04  -4.17  (e-6)
+    mean -1.924e-06   sd 3.857e-06   positive 2/5      registered prediction was [0, +3e-6]
+
+    G0 INSTRUMENT  cat4 +0.000044 vs published +0.000041   PASS
+    G1 CONSISTENCY 2/5 positive, need 4                    FAIL
+    G2 MAGNITUDE   mean -1.924e-6 vs floor +1.0e-6         FAIL
+    G3 CEILING     PASS      G4 PROVENANCE  1.0021  PASS
+
+**Nothing was copied into `oof/`.** G0 passing matters: the instrument reproduced w20d's
+published cat4 row, so this reading is comparable to every other number in this document.
+
+⚠ **THE w105 §5 NEAR-DUPLICATE CAVEAT DOES NOT APPLY** — it weakened a PASS only. Checked and
+shut, so no later run can reach for it.
+
+🎯 **THE CONTROL BEAT THE TREATMENT, AND THAT IS THE RESULT.** `d(global)` = **+2.77e-6/member**
+(t +3.11) vs `d(windowed)` = **+0.85e-6** (t +0.74) — the arm that is a **0.999997 near-copy** of
+`lgbm_fixed_lat` priced *higher* than the new encoding, and `both` came in at +1.86e-6/member,
+which is w24b's redundant-family rate (+1.07e-6) to within noise. ⟹ **The pair behaves exactly
+like "two more redundant members" — the null the exercise existed to rule out.**
+
+🔻 **AND A LARGE MEMBER-LEVEL EFFECT CONVERTED TO A NEGATIVE STACK EFFECT.** w96 measured the
+windowed prior at **+42e-6** of fold AUC and w105 re-measured it at **+86e-6**; the blend value is
+**−1.9e-6**. The registered prediction [0, +3e-6] was wrong *on the optimistic side*. This is the
+strongest instance yet of the standing rule: **member-level AUC is not evidence about stack
+value.** Solo→stack pass-through here is ~1.4% and the sign is not even guaranteed.
+
+⛔ **CONSEQUENCE FOR THE REMAINING RUNS (deadline 2026-08-31 23:59).** All eight ANGLE INDEX rows
+are closed by measurement, rows 3 and 4 now re-verified at the artefact level, and w97 was the
+only open experiment. **Do not start a new member build.** With three days left the conversion
+rate makes it unrecoverable even if it works. Remaining work is queue management, the standing
+suite, and the one human click in `SELECT_THESE.md`.
+
+---
+
+# 🔻 A CLOSURE'S CITATIONS ARE NOW MACHINE-CHECKED — `w106a_claimguard`, standing check #42
+# (w106, 2026-08-28) — because `w101a_angleguard` proves the POINTER resolves, not that the
+# paragraph it lands on is true
+
+w105 found the CatBoost closure supporting itself with *"already in the pack four ways
+(`cat_lat`, `cat_native`, `cat_native_ctr2`, `cat_natlat`)"* where **the last two were never
+built**. The closure survived on other evidence, so nothing was lost. What was lost is the
+assumption that a closure's citations are real — and that assumption is load-bearing, because
+every modelling angle handed to this workspace is refused by citing a measurement.
+
+🎯 **THE POINTER AND THE CLAIM ARE DIFFERENT OBJECTS AND NEED DIFFERENT CHECKS.**
+`w101a_angleguard` verifies the ANGLE INDEX's anchors still find their section. They do,
+greenly, at a paragraph whose contents are false. That is not a bug in w101a; it is the wrong
+instrument for the question. **Check the artefact, not the sentence** — now executable.
+
+## HOW #42 DECIDES, and the one design choice that makes it believable
+
+`experiments/w106a_claimguard.py` scans RESEARCH.md for possession claims (*"already in the
+pack"*, *"we already hold"*, *"the pack already holds"* …), pulls the backticked member-shaped
+names out of a 3-line window, and checks each against an inventory of every `oof_<name>.npy`
+**anywhere under the workspace**.
+
+- **THE INVENTORY IS A DELIBERATE SUPERSET** — the live pack, every `data/ext_members*`, every
+  pulled notebook, `oof_rejected/`. 507 names as of w106. So the guard **cannot** fire on
+  *"held, but not in this pack"*, only on *"exists nowhere at all"*. A narrower inventory would
+  be a more sensitive instrument and a less believable one, and an unbelievable guard gets
+  switched off within two runs.
+- **THE SIBLING RULE** — a name is reported only when at least one of its siblings in the same
+  claim **is** in the inventory. If a list names four things and two are ours, the sentence is
+  speaking our vocabulary and an absent entry is a defect; if none are ours, the sentence is
+  about somebody else's artefacts.
+
+Measured on the live document: **the sibling rule turns 12 flagged tokens into 1 true finding
+and 0 false positives.** All 11 it suppresses are genuine non-members — Kaggle usernames
+(`amanatar`, `lavanyabacche`, `tamerlanomralinov`), an md5, a transform bit (`drop_worst`), a
+run label (`w38c`), a correction object (`c_avg`), and the **foreign** names of rejected external
+streams (`omidbag_oof`, `mohankr_realmlp`, `mohankr_mlp`) whose sentence says they duplicate
+members we hold — i.e. the claim's subject is the *other side* of the sentence. That last class
+is the reason a naive "flag every backticked name near a possession claim" scanner is useless
+here: it is right once and wrong eleven times, and it would be muted.
+
+⚠ **THE PRICE, STATED SO NOBODY REDISCOVERS IT AS A SURPRISE:** a claim in which **every** named
+member is absent is invisible to this guard. That hole is chosen, not overlooked. If a
+wholly-fabricated list ever turns up, widen the rule then, using that instance as the control.
+
+## ✅ IT REPRODUCES THE FINDING THAT CAUSED IT, AND ALL SIX ARMS FIRED IN CODE
+
+The validation that matters: run against the **uncorrected** w61 sentence it reports exactly
+`cat_native_ctr2` and `cat_natlat` and nothing else — it rediscovers w105's finding without
+being told about it. Controls, every one fired in the failing direction on a doctored copy
+(deleted after; the real guard re-run green afterwards):
+
+- **C0 ± inventory floor (≥100 names).** The arm that stops this being *a guard that can only
+  pass*: with the walk broken and the inventory empty, the sibling rule would suppress **every**
+  finding and #42 would go green on a document full of fiction. Verified: an empty inventory
+  fails C0 **and** cascades into C2/C3/C5, which is correct.
+- **C1 −** the live document is clean today; ± a fresh false citation is caught.
+- **C2 +** the historical true positive, on the real text.
+- **C3 ±** the *sibling rule*, not the exemption, is doing the work — with exemptions off, the
+  document must yield exactly the pair quoted inside w105's own correction and no more. More
+  than that means the rule has started admitting noise.
+- **C4 +** no stale exemption. w105's correction section legitimately **quotes** the false claim,
+  so its span is exempt — scoped to the section's own text, so retitling or deleting it is
+  **fatal** rather than silently widening coverage (w105's C4 span-scoping applied again).
+- **C5 +** not vacuous — the regex must still match several claims and resolve several names, or
+  it has drifted off the document's vocabulary and the green means nothing.
+
+## ✅ ROW 4 OF THE ANGLE INDEX RE-VERIFIED AT THE ARTEFACT LEVEL (this run's handed angle)
+
+w106 was handed *"XGBoost: third leg of the ensemble, tuned on the same folds"* = **row 4**,
+whose price is **inherited** (*"same instrument as 2"*, +4e-7) rather than measured on XGBoost.
+Given w105's finding, an inherited closure is exactly the thing to distrust. Checked instead of
+quoted, and **it holds — with its own evidence**:
+
+- `⚠ CLOSED 2026-08-13: tuning ANY GBDT is worth ~4e-7` names six XGB members and **all six
+  exist on disk**: `xgb_lat`, `xgb_latcat` (+`_s17`, `_s23`, `_avg3`), `xgb_cat_lattice`,
+  `xgb_raw_nan`, plus the `bolt_xgb_*` family. #42 confirms this automatically.
+- XGBoost is **not a missing leg** — `latr1_xgb` at 0.96780 is the **best GBDT of any family**
+  here (LGBM 0.96768, CatBoost 0.96718).
+- The +4e-7 is not extrapolated from LightGBM alone: it is `3e-5` (measured GBDT tuning gain)
+  × **1.4% solo→stack pass-through**, and the pass-through was measured *on XGBoost* —
+  seed-averaging `xgb_latcat` bought +138e-6 solo, the largest member-level gain ever recorded
+  here, and moved the stack **+2e-6**.
+
+⟹ Row 4 closed, ×2, **artefacts verified**. Contrast row 3, whose closure cited two files that
+never existed. **An inherited price is not automatically a fabricated one — but you only know
+which by looking.**
+
+---
+
 # 🔻 `pgrep -af <token>` LIES IN **BOTH** DIRECTIONS HERE, AND IT IS THE LIVENESS CHECK
 # RESEARCH PRESCRIBES (w105, 2026-08-28) — use `experiments/alive.py` instead
 
@@ -367,11 +497,22 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 1 | *the original dataset* — find it, concat it as extra rows | ×5, from 08-11 | 0 | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` |
 | 2 | *tune LightGBM properly against the fixed folds* | ×4, from 08-10 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 3 | *CatBoost: it handles categoricals better* | ×2, w61 08-22 → w105 08-28 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
-| 4 | *XGBoost as the third leg of the ensemble* | same instrument as 2 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
+| 4 | *XGBoost as the third leg of the ensemble* | ×2, → w106 08-28 · **artefacts verified** | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | w15b/w15d → w62 | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` |
 | 6 | *blending: rank-average or weight the models by OOF* | ×2, 36 members apart → w63 | **−0.96e-6** | `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` |
 | 7 | *seed and fold diversity, averaged* | ×5, → w64 | structural null | `SEVENTH angle closed` (JOURNAL) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
+
+⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
+number came from a LightGBM measurement. w106 checked it at the artefact level rather than
+quoting it and **it holds on its own evidence**: all six XGB members its closure names exist on
+disk, `latr1_xgb` (0.96780) is the best GBDT of *any* family here so XGBoost is not a missing
+leg, and the 1.4% solo→stack pass-through in the +4e-7 was measured **on XGBoost**
+(`xgb_latcat` seed-averaging: +138e-6 solo → +2e-6 stack). Contrast row 3, whose closure cited
+two files that were never built. 🎯 **An inherited price is not automatically a fabricated one —
+but you only know which by looking.** `w106a_claimguard` (#42) now checks the member citations in
+every such closure automatically, so this costs the next run nothing.
+
 
 ⚠ **ROW 2 IS HANDED WITH A KNOB LIST, AND ONE OF THE KNOBS IS NOT A KNOB.** The 08-28 handing
 read *"learning rate, leaves, regularisation, categorical handling"*. The first three are inside
@@ -855,7 +996,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 41 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 42 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -866,6 +1007,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w87a_registrarguard                  w88a_calexposure  w89a_foldid
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
+    w106a_claimguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
