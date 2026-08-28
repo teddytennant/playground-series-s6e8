@@ -1,0 +1,40 @@
+w110 PRE-REGISTRATION — 2026-08-28, slot 9 of 10
+ANGLE as handed: "Error analysis: find where the current best model is wrong. Segment the
+out-of-fold errors and look for structure a feature could capture."
+
+STATUS OF THE ANGLE BEFORE ANY WORK THIS RUN
+--------------------------------------------
+Closed, by four instruments, but NOT present in RESEARCH.md's ANGLE INDEX (which has 8 rows).
+The angle has been handed 8 times (08-11 s7, 08-14 w14d, 08-16 w16a, 08-17 w17 s1, 08-19 w27 s8,
+08-20 w38 s8, 08-24 w74 s3, 08-28 w110 s9) — tying feature engineering as the most-handed angle
+in the competition, with no index row. This run's deliverable is the row plus artefact-level
+verification of the closure, following w105-w109's discipline.
+
+THE FOUR INSTRUMENTS AND WHICH HAVE ARTEFACTS ON DISK
+-----------------------------------------------------
+  I1 errormap.py         segmentation / within-vs-between   script on disk, NO saved output
+  I2 w14d_bandmap.py     oracle ceilings + per-cell isotonic  w14d_bandmap.log ON DISK
+  I3 w14d_cellboost.py   cell-local LightGBM vs permuted     w14d_cellboost.log ON DISK
+  I4 resid_boost2.py     global residual booster, 2 modes    script on disk, NO saved output
+
+I1 is cheap and is re-run this run. I4's numbers exist only as prose in the 2026-08-11 journal
+entry; it is the one arm of the closure with no artefact, so it is re-run here.
+
+REGISTERED PREDICTION FOR I4 (`--mode feature`, the strictly safer of the two modes)
+------------------------------------------------------------------------------------
+The 2026-08-11 entry claims: real - ctrl NEGATIVE at all 8 round counts, spanning
+-7.4e-5 (early) to -5.3e-4 (late), on blend158_h3 with the 40-column frame, baseline =
+the stack score as the only feature at ~0.969967.
+
+P1  real - ctrl is negative at EVERY checkpoint reported.
+P2  the magnitude grows with rounds (more negative late than early).
+P3  the "stack score as only feature" baseline lands in 0.9699 - 0.9700, i.e. the tree
+    discretisation handicap of ~8e-5 against the stack's own 0.970048 is reproduced.
+
+FALSIFICATION. If any of P1/P2/P3 misses, the I4 arm of the error-analysis closure does not
+reproduce and that goes in the journal as a defect of the closure, NOT as a reason to re-open
+the angle on its own (I2 and I3 are independent, controlled, and verified this run).
+
+NO DECISION IS ATTACHED. Nothing ships from this run — 0 of 10 slots remain on 2026-08-28.
+No member is built, no drop list is edited, the deadline pick does not move.
+Determinism: seed 42, deterministic=True, force_row_wise=True, frozen folds, permutation rng 11.
