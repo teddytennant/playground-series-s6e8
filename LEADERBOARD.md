@@ -2516,3 +2516,15 @@ spikes are the ones with something to lose.
 
 Public notebook ceiling is **0.97127** (`atakanaldemir`), so no public source holds an edge over
 us worth more than 8e-6 — and that one is already known to be es-on-val.
+
+## w103 — 2026-08-28 13:12Z, no movement worth recording
+
+Top of board unchanged in shape: Chris Deotte 0.97205, Changye Li 0.97154, MILANFX 0.97149,
+cstdy 0.97145. Our best public still **0.97119**; today's ten (12:37Z) landed 0.97101–0.97103,
+all pinned queue-drain files, none near the tier. Bronze, and §above's arithmetic is unchanged.
+
+⚠ **A NOTE FOR WHOEVER READS OUR OWN SCORES NEXT.** `kaggle competitions submissions -v` returns
+**one page — 50 rows of 171**. Sorting that page gives best public **0.97117**, which looks like a
+correction to the 0.97119 on record and is not: the better entries are simply on a later page.
+Parse it with a real CSV reader too — descriptions contain commas, so `awk -F,` reads the wrong
+field. `w86a_pagecap` is the standing check for exactly this.
