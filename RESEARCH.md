@@ -57,6 +57,10 @@ exists) and is not in `WANTED` or in `ALLOWED` with a written reason. Offline, d
   `git show HEAD:experiments/check_selection.py`, the guard reports **41 hits over 10 distinct
   clickable stems**, including all four priced above. It catches the real historical defect.
 
+⚙ **`git push` NEEDS `PATH=/run/current-system/sw/bin:$PATH`.** The credential helper is `gh`
+and `gh` is not on the default PATH here (same trap as `pgrep`). Without it the failure reads
+`could not read Username for 'https://github.com'`, which looks like an expired token and is not.
+
 ⛔ **DO NOT** re-open the click PRICE (w74a stands, GATE R reproduces it), move `WANTED`, or
 delete `CLICK_HISTORY` — it is the record, and #48 is what keeps it from being read as an
 instruction. `w40_ad211stdcorr` appears in w114a only as C3's estimator control; it remains

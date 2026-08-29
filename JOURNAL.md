@@ -32864,3 +32864,14 @@ not evidence about the current run; the footer is.
 
 ⚠ `experiments/w39a_audit.csv` gained 10 rows as a side effect of the import smoke in §2 (it
 fingerprints tomorrow's queued ten). No rows were removed and `w39a_audit` reported FAILURES 0.
+
+## 7. ⚠ ONE OPERATIONAL FACT, LEARNED THE ONLY WAY
+
+`git push` failed with `gh auth git-credential get: gh: command not found` →
+`fatal: could not read Username for 'https://github.com'`. The credential helper is `gh` and
+**`gh` is not on this shell's default PATH**, exactly like `pgrep`. The push succeeds as
+
+    PATH=/run/current-system/sw/bin:$PATH git push
+
+🎯 **A PUSH THAT FAILS ON THE CREDENTIAL HELPER LOOKS LIKE AN AUTH PROBLEM AND IS A PATH
+PROBLEM.** Do not go looking for an expired token. Pushed: `817086d..59b4fed`.
