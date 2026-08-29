@@ -33364,3 +33364,216 @@ covered by the row it enriched — the demand-side check closes over the run tha
 ⚠ **Both suite runs printed `49/49 green`; only this one is evidence.** Keeping the contaminated
 run in §6 rather than deleting it is deliberate: the failure mode is that a future run reads a
 green footer and never asks what the file looked like while it was produced.
+
+---
+
+# w117 — 2026-08-29, slot 6 of 10, ANGLE "Blending: rank-average or weight the tuned models by
+# out-of-fold performance. Search blend weights on OOF predictions, never on the public
+# leaderboard." ⛔ AT CAP 10/10 — NO SUBMISSION. ANGLE = INDEX ROW 6, CLOSED.
+# 🔴 AND THE ROW SAID ×3 WHEN THE CORPUS SAYS ×11 — NINE OF TEN ROWS WERE WRONG. NEW CHECK #50.
+
+## 1. AT CAP, CONFIRMED FROM THE SENDER, NOT ASSUMED
+
+`w26g_send.py --n 10` line 1, verbatim: **`181 submissions on record; 10 already sent on
+2026-08-29 (UTC); 0 of 10 slots left today`**. `date -u` at the top of this run: **14:38Z**;
+today's ten landed 12:37Z, before it started. The dry run also warned, correctly, `⚠ DRY RUN
+AGAINST A QUEUE FOR ANOTHER DAY: queue was written for 2026-08-30`. Nothing sent, nothing
+written, queue CSV untouched. Best public unmoved at **0.97119**.
+
+## 2. THE ANGLE — ROW 6, CLOSED AT −1.07e-6, AND I DID NOT RE-OPEN IT
+
+Genus before the first colon is `blending`; the index row prices it **−1.07e-6** with two
+anchors (`THE PRICE OF A TOP-LEVEL SEARCH`, `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING —
+CLOSED`), artefact-verified by w108 on 08-28. All three sub-clauses of the handed string —
+rank-average, OOF-weighted, weight search on OOF — are the same top-level search, closed twice
+36 members apart. The fourth clause, *"never on the public leaderboard"*, is a discipline
+instruction this workspace already follows. **No member built, no weight fitted.**
+
+## 3. 🔴 THE FINDING: THE INDEX'S HANDING COUNTS WERE WRONG ON NINE OF TEN ROWS
+
+The row for my own angle read **×3**. A grep of the run headers found six before I finished
+reading the row. Counting the whole corpus properly:
+
+    row          1    2    3    4    5    6    7    8    9   10   total
+    claimed      6    4    2    2   15    3    5    -    8    6      52
+    corpus      13   14   14   14   15   11   11    8   11   12     123
+
+🎯 **THEY WERE NOT MERELY STALE, THEY WERE IMPOSSIBLE.** The harness hands the ten angles in a
+**fixed round-robin** — 08-25 ran slots 1–10 as seed/error/consolidation/foundation/original/
+LGB/Cat/XGB/FE/blending, 08-28 and 08-29 the same cycle at a different phase. Under a round-robin
+the distribution is near-uniform *by construction*, so a table reading 2 … 15 was refutable on
+its **shape**, before counting anything. I counted anyway, but the shape argument is the cheap
+one and it is the one a future run should reach for first.
+
+⚠ **AND THE ERROR RAN THE WRONG WAY FOR THE ONE USE THE NUMBERS HAD.** w116 — yesterday, one run
+before this one — made *frequency of handing* a reason to spend a run enriching a row. Computed
+from the claimed table that heuristic points at row 5 (×15) and away from row 3 (×2). **Row 3 is
+really ×14.** It pointed at the row that was already correct and away from the row that was most
+wrong. 🎯 **A NEW SIGNAL IS ONLY AS GOOD AS THE NUMBERS IT READS, AND w116 DID NOT CHECK THEM —
+NEITHER HAD ANYONE ELSE, FOR THE TWO DAYS THE TABLE HAD EXISTED.**
+
+🎯 **THE HONEST CORRECTION: THE TRUE COUNTS RUN 8–15, SO HANDING FREQUENCY IS NEARLY FLAT AND
+CARRIES ALMOST NO INFORMATION.** Row 5 is still the most-handed — by two handings over a ten-way
+near-tie, not by the 5x the old table implied. w116's *fix* (enrich the thin row) was right and
+stands; its *selection rule* does not. Use a row's content — price, artefact-level verification,
+resolving anchor — not its frequency.
+
+⚠ **`w110b_covguard` (#45) WAS GREEN THROUGHOUT AND COULD NOT HAVE CAUGHT THIS**, for the same
+structural reason it missed w116's finding: it checks that every handed angle is carried by *a*
+row. All 123 handings were covered. **Coverage, content and now COUNT are three different
+properties, and #45 checks only the first.**
+
+## 4. #50 `w117a_handcount` — the counts are machine-derived from here on
+
+Resolves each run header's handed ANGLE and classifies on the **genus**, the text before the
+first colon, which is the index's own published protocol; fails if a row's `×N` disagrees.
+**121 of 137 headers resolve.** The 16 that do not are **named in the output, never dropped** —
+11 are genuinely off-rotation (08-14/08-15 bespoke angles: *Field forensics*, *Row-identity
+structure*, *act on group 1's strongest lead*), one is w36's ADDENDUM which is not a run, and
+three are foundation handings the text renders unreadable (§5).
+
+⚠ **THE READER'S ORDER IS LOAD-BEARING AND BROADENING IT MADE THINGS WORSE, TWICE.** Header
+first, body second, quoted declarations before bare ones. Body-first left **42 of 137**
+unresolved and mis-resolved six the header had already answered — the body of a run that
+REFUSED its angle narrates the refusal *above* the quote that says what was handed. That is
+w110's locator bug again: the first occurrence finds the pointer, not the target. It then
+recurred **inside a single line**, where a loose regex SELECTED the line on its second `angle`
+and a different regex PARSED it from the first, giving the genus *"SET ASIDE, DELIBERATELY"*.
+🎯 **ONE REGEX MUST BOTH LOCATE AND PARSE A DECLARATION. TWO REGEXES DISAGREE SILENTLY.**
+
+✅ **INSENSITIVE TO ITS ONE FREE PARAMETER.** Sweeping the label-to-quote gap over 20/30/45/60/90
+characters moves the total by **one run** (121→122) and moves rows 5 and 6 not at all. Fixed 30.
+
+✅ **AND IT REPRODUCES w116'S HAND COUNT, WHICH IS THE REAL VALIDATION.** Row 5 came out **×15
+on every one of the four rewrites** of the reader. w116 counted 15 by hand, a day earlier, from
+the same corpus by a different method, and I was not fitting to it — the other nine rows all
+moved. **A machine count landing on an independent human count nobody was targeting is the
+strongest evidence available here that the extraction is right.**
+
+CONTROLS. C1 non-vacuous (≥100 headers, ≥110 resolved, ten rows parsed). **C2 fires both ways
+PER ROW**: corrected table → 0 bad, each of the ten rows perturbed alone → exactly 1 bad. C3 the
+real historical defect **frozen as a literal** (`HISTORICAL_CLAIMS`), not read from `HEAD`, on
+w115's rule that a control anchored to a moving reference dies the moment the fix is committed;
+must find ≥5 wrong rows or declare itself INERT. **C4 measures strictness rather than asserting
+it** — the naive whole-string reader the index warns against claims **18** runs for blending
+against the genus reader's **11**, and all 8 surplus runs are shown to have a non-blending
+genus, 5 of them the XGBoost angle ending *"…so the blend weights mean something"*.
+
+## 5. ⚠ ROW 8 IS ×8 MACHINE-READ AGAINST ×11 TRUE, AND THE ROW SAYS SO RATHER THAN HIDING IT
+
+w40, w58 and w76 quote the foundation angle as *"confirm the metric, build the fixed-fold CV
+harness…"* — row 8's own elaboration with the word `Foundation` dropped, too far from the label
+for the reader to bind. I could have added an adjustment table naming those three. I did not:
+**the enforced number is the machine-readable one, so the guard carries no exemption surface at
+all**, and the residual is named in the row text instead. w106 §5's finding — an exemption list
+erodes a guard because each addition is individually reasonable — is why. Every other row is
+complete. 🎯 **PREFER A SMALLER TRUE NUMBER WITH NO EXEMPTIONS TO A LARGER ONE THAT NEEDS THEM.**
+
+## 6. ⚠ A `str.replace` THAT MATCHES NOTHING IS A SILENT NO-OP THAT READS AS A RESULT
+
+Two edits this run changed nothing — whitespace mismatch in the pattern — and **both times the
+next command printed a plausible, unchanged number instead of an error.** I caught the second
+only by dropping into the module and printing what `classify()` actually returned. The
+RESEARCH.md edits assert their match count (`assert s.count(old)==1`, and a line-count assert
+for zero shift); the in-place patches to the check did not, and should have.
+🎯 Sibling of w113 §5 and w114's vacuous control: **an operation that cannot fail loudly will
+eventually succeed at nothing, quietly.**
+
+## 7. ✅ FIXED IN PLACE, ZERO LINE SHIFT — AND THE OFFSET GUARDS NEVER MOVED
+
+Ten table cells rewritten, header `49`→`50`, stem list extended **on its existing line**:
+**15,770 lines before and after.** `w106a_claimguard` and `w107a_lineref` green **untouched, no
+offsets re-recorded** — third demonstration of w115's discipline, and the largest yet.
+`w101a_angleguard` and `w110b_covguard` also green after the index edit.
+
+## 8. ⛔ THE CLICK — SIXTEENTH RUN ASKING. TWO DAYS LEFT. STILL NOTHING SELECTED.
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` read live this run, rc=1: **`*** NOTHING IS SELECTED ***`**.
+`55656399 → w36_ad199stdcorr.csv` (public 0.97118, CV 0.9701400060) · `55588167 →
+w23_ad187stdcorr.csv` (public 0.97116, CV 0.9701150809). Not clicking costs **+4.5228e-6**;
+clicking the wrong pair costs **+35.17e-6** or **+81.92e-6**, so the mis-click is still the
+bigger hazard by an order of magnitude.
+
+⚠ **`PushNotification` CALLED AGAIN — RETURN STRING VERBATIM, IDENTICAL TO w115's AND w116's:
+*"Mobile push not sent (Remote Control inactive)."*** **0 for 3. It did not reach Teddy's phone
+and I am not recording it as if it did.** Still worth one call a run: it costs nothing and the
+gate is a state, not a property.
+
+## 9. BOARD — NOT RE-MEASURED, DELIBERATELY
+
+Our public score did not move this run (nothing was sent), so `w83a_reproject`'s own rule says
+not to re-download. Quote w113's reading: **rank 249 / 3,241, top 7.68%, bronze cut 324, margin
++75.** Do not re-measure until our public score changes.
+
+## 10. NEXT RUN — READ THIS ORDER
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE TEN FOR WHATEVER UTC DAY IT IS.** 08-30's ten are stamped and ready.
+   ⚠ **If the run lands on 08-31**, run `w48e_order.py --day 2026-08-31 --write` FIRST (w116 §4
+   verified that plan resolves to ten valid, disjoint, below-tier files), then `w26g_send.py
+   --go`. Expect 0.93–0.96. Quote `w26d`'s **bound**, never its point estimate.
+3. **Do document edits BEFORE launching the suite** (w116 §6), then `w93a_suite.py` under
+   `systemd-run --user` with `--setenv=PATH`, read via `journalctl`, never under `timeout`.
+   **The suite is 50 checks now, not 49.**
+4. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). Do not start a member build.
+5. **Call `PushNotification` once** and **read the return string** — 0 for 3 so far (§8).
+6. ⛔ **DO-NOT, carried forward from w92–w116 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read `w110b_covguard`'s green as "the index row is good".
+   • 🆕 **DO NOT** treat *how often an angle was handed* as a reason to enrich its row. The true
+     counts run 8–15 and the signal is flat (§3). w116's fix stands; its selection rule does not.
+   • 🆕 **DO NOT** hand-maintain a count in the index. #50 derives all ten; if a row's `×N` is
+     edited by hand the suite goes red, which is the point.
+   • 🆕 **DO NOT** use a `str.replace` on a source file without asserting the match count (§6).
+   • 🆕 **DO NOT** use one regex to select a line and a different one to parse it (§4).
+7. ⚠ **NEW LESSONS.** • A hand-maintained number nobody checks is wrong within two days, and the
+   run that *built a signal on top of it* did not check it either (§3). • An impossible
+   distribution is refutable on its shape before you count anything — the round-robin argument
+   was cheaper than the census that confirmed it (§3). • Coverage, content and count are three
+   properties and #45 checks one (§3). • A machine count that reproduces an independent hand
+   count nobody was fitting to is the strongest validation available (§4). • Prefer a smaller
+   true number with no exemptions to a larger one that needs them (§5). • An operation that
+   cannot fail loudly will eventually succeed at nothing, quietly (§6).
+
+## 11. ADDENDUM — THE AUTHORITATIVE FOOTER: **50/50 GREEN** ON A CLEAN RUN, ALL EDITS LANDED FIRST
+
+⏱ `w93a_suite.py` under `systemd-run --user` with the full `--setenv=PATH`, read via
+`journalctl`, no `timeout`, `/proc` scanned first (clean, and the scan excluded itself). **Every
+document edit — the ten index cells, the header `49`→`50`, the stem list, the prepended
+RESEARCH.md section, this journal entry and `LEADERBOARD.md` — was final before launch**, which
+is w116 §6's lesson applied rather than repeated.
+
+    [38/50] w101a_angleguard   rc=0   0.0s  every ANGLE INDEX pointer resolves
+    [42/50] w106a_claimguard   rc=0   0.2s  FAILURES 0      (offsets NOT re-recorded)
+    [43/50] w107a_lineref      rc=0   0.1s  FAILURES 0      (offsets NOT re-recorded)
+    [45/50] w110b_covguard     rc=0   0.0s  FAILURES 0      (w117's handing now in the corpus)
+    [48/50] w114b_selectguard  rc=0   0.0s  ✅ CLEAN
+    [49/50] w115a_docselectguard rc=0 0.1s  ✅ CLEAN
+    [50/50] w117a_handcount    rc=0   0.1s  FAILURES: 0
+    TOTAL 325s   50/50 green   FAILURES: 0        no w93a_fail_*.log written
+
+✅ **`w110b_covguard` is green having read this entry**, so w117's own handing of the blending
+angle is covered by the row whose count it corrected — the demand-side check closes over the run
+that changed it, and #50 now closes over the same corpus from the count side.
+
+⚠ **ONE CHANGE LANDED AFTER THE SUITE: the `CONTROLS` docstring of #50**, which still described
+the first drafts of C2 and C4 rather than what they became. Rather than claim the green covers
+it, I proved it does: parsing both files and dropping the module docstring node, **the executable
+AST is identical** to the file the suite ran. 🎯 That is the honest form of "the green still
+stands" — a demonstration that the changed bytes cannot execute, not an assurance that they look
+harmless. ✅ `w117a_handcount` re-run alone afterwards: rc=0, FAILURES 0.
+
+⚠ **AND THE FIRST ATTEMPT AT THAT PROOF WAS WRONG** — a regex meant to blank the docstring out of
+both `ast.dump` strings did not match, and printed `False`, which reads as "the edit changed
+behaviour". The check was at fault, not the file. **Compare structures by editing the AST, not by
+running a regex over its printed form.**

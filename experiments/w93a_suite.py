@@ -49,6 +49,7 @@ STEMS = [
     "w107a_lineref", "w109b_colguard", "w110b_covguard", "w111b_baseguard",
     "w112a_templateguard", "w114b_selectguard",
     "w115a_docselectguard",
+    "w117a_handcount",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

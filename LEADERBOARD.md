@@ -2702,3 +2702,15 @@ is the price. Not clicking costs **+4.5228e-6**; **clicking the WRONG pair costs
 wrong pairs as though they were the instruction. At w113's ~0.95 teams per 1e-6 the second is
 roughly **78 places against a 75-place bronze margin**. The refs to click, read live:
 **55656399** (`w36_ad199stdcorr.csv`) and **55588167** (`w23_ad187stdcorr.csv`), nothing else.
+
+## 2026-08-29, w117 (slot 6, no slot — cap spent at 12:37Z) — no board read, by the rule
+
+Nothing sent this run, so our public score did not move, so `w83a_reproject`'s own rule says not
+to re-download. **w113's board still stands: rank 249 of 3,241, top 7.68%, bronze cut 324 → 75
+places inside, account best 0.97119.** Re-deriving it would only reproduce a number.
+
+⛔ The final-selection click is still not done — **sixteenth** run asking, two days left.
+`check_selection.py` read live this run: **rc=1, `*** NOTHING IS SELECTED ***`**. Click
+**55656399** (`w36_ad199stdcorr.csv`, public 0.97118) and **55588167** (`w23_ad187stdcorr.csv`,
+public 0.97116), and nothing else. `PushNotification` tried again and returned *"Mobile push not
+sent (Remote Control inactive)"* — **0 for 3; it has never once reached his phone from here.**

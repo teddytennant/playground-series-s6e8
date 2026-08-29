@@ -1,3 +1,87 @@
+# (w117, 2026-08-29) — THE INDEX'S HANDING COUNTS WERE WRONG ON **NINE OF TEN ROWS**, AND w116
+# HAD JUST MADE THEM A REASON TO SPEND A RUN
+
+w116 found that row 5 was the most-handed angle and had the thinnest row, and drew the lesson
+that **frequency of handing is a signal about which row to enrich**. That lesson is sound. The
+numbers it rests on were not: nothing has ever checked them, and they are hand-maintained prose.
+
+Measured against the corpus w101 says to use — the ANGLE strings JOURNAL.md records as handed,
+attributed to their run header — the table claimed **52 handings across 137 run headers**:
+
+    row          1    2    3    4    5    6    7    8    9   10   total
+    claimed      6    4    2    2   15    3    5    -    8    6      52
+    corpus      13   14   14   14   15   11   11    8   11   12     123
+
+🎯 **THE COUNTS WERE NOT MERELY STALE, THEY WERE IMPOSSIBLE.** The harness hands the ten angles
+in a **fixed round-robin** — 08-25 ran seed/error/consolidation/foundation/original/LGB/Cat/XGB/
+FE/blending in slots 1–10, 08-28 and 08-29 the same cycle offset by a phase. Under a round-robin
+the true distribution is near-uniform *by construction*, so a table reading 2 … 15 could have
+been rejected on its shape alone, without counting anything.
+
+⚠ **AND THE ERROR RAN THE WRONG WAY FOR THE ONE USE w116 GAVE IT.** Enrich-the-most-handed-row
+computed from the claimed numbers points at row 5 (×15) and away from row 3 (×2). Row 3 is
+actually ×14. The heuristic did not merely fail to help — it pointed at the one row that was
+already correct and away from the row that was most wrong.
+
+🎯 **THE HONEST CORRECTION TO w116'S LESSON: THE COUNTS RUN 8–15, SO HANDING FREQUENCY CARRIES
+ALMOST NO INFORMATION ABOUT WHICH ROW TO ENRICH.** Row 5 is still the most-handed, but by two
+handings over a ten-way tie, not by the 5x the old table implied. Use the row's *content* —
+whether it carries a price, an artefact-level verification and a resolving anchor — which is
+what w116 actually fixed. Do not re-derive "most-handed" as a priority signal; it is flat.
+
+## #50 `w117a_handcount` — the counts are now machine-derived, not maintained
+
+    .venv/bin/python experiments/w117a_handcount.py     # 0 = ok. Offline, 0.4s, no API call.
+
+Resolves each run header's handed ANGLE and classifies it by **genus** — the text before the
+first colon — which is the index's own published protocol, then fails if a row's `×N` disagrees.
+121 of 137 headers resolve; the 16 that do not are **named in the output, never dropped**, and
+are genuinely off-rotation (the 08-14/08-15 bespoke angles: *Field forensics*, *Row-identity
+structure*, *act on group 1's strongest lead*) plus w36's ADDENDUM, which is not a run.
+
+⚠ **ROW 8 IS ×8 MACHINE-READ AGAINST ×11 TRUE, AND THE ROW SAYS SO.** w40, w58 and w76 quote the
+foundation angle as *"confirm the metric, build the fixed-fold CV harness…"* — row 8's own
+elaboration with the word `Foundation` dropped — too far from the label for the reader to bind.
+The enforced number is the machine-readable one so the guard needs **no exemption table**; the
+residual is named in the row instead. Every other row is complete.
+
+⚠ **THE READER'S ORDER IS LOAD-BEARING, AND BROADENING IT MADE IT WORSE THREE TIMES.**
+Header-first, body-second, quoted-declaration before bare. Body-first left **42 of 137**
+unresolved and mis-resolved six the header had already answered, because the body of a run that
+REFUSED its angle narrates that refusal above the quote saying what was handed. Same shape as
+w110's locator bug: the first occurrence finds the pointer, not the target — and it recurred a
+second time inside one line, where a loose regex SELECTED the line on its second `angle` and a
+different regex PARSED it from the first, yielding the genus *"SET ASIDE, DELIBERATELY"*.
+🎯 **ONE REGEX MUST BOTH LOCATE AND PARSE A DECLARATION; TWO REGEXES DISAGREE SILENTLY.**
+
+✅ **THE READER IS INSENSITIVE TO ITS ONE FREE PARAMETER.** Sweeping the label-to-quote gap over
+20/30/45/60/90 characters moves the total by **one run** (121→122) and moves rows 5 and 6 not at
+all. Fixed at 30.
+✅ **AND IT REPRODUCES w116'S INDEPENDENT HAND COUNT.** Row 5 came out **×15 on every one of the
+four rewrites** of the reader — w116 counted 15 by hand from the same corpus, a day earlier, by
+a different method. A machine count that lands on a human count nobody was fitting to is the
+strongest evidence available here that the extraction is right.
+
+CONTROLS. C1 non-vacuous (≥100 headers, ≥110 resolved, all ten rows parsed). **C2 fires both
+ways PER ROW** — the corrected table scores 0 bad, and each of the ten rows perturbed alone
+scores exactly 1. C3 the real historical defect, **frozen as a literal** (`HISTORICAL_CLAIMS`,
+the pre-fix tuple) rather than read from `HEAD`, on w115's rule that a control anchored to a
+moving reference dies the moment you commit the fix; it must find ≥5 wrong rows or declare
+itself INERT. **C4 measures the reader's strictness rather than asserting it**: the naive
+whole-string reader the index warns against claims **18** runs for blending against the genus
+reader's **11**, and all 8 surplus runs are shown to have a non-blending genus — 5 of them the
+XGBoost angle, which ends *"…so the blend weights mean something"*.
+
+⚠ **A `str.replace` THAT MATCHES NOTHING IS A SILENT NO-OP THAT READS AS A RESULT.** Two edits
+in this run changed nothing because of a whitespace mismatch, and both times the next command
+printed a plausible unchanged number rather than an error. **Assert the match count.** The
+RESEARCH.md edit below does (`assert s.count(old)==1`); the first two attempts at the row-8
+pattern did not, and were only caught by debugging the output they failed to change.
+
+✅ **FIXED IN PLACE, ZERO LINE SHIFT.** Ten table cells rewritten, header 49→50, stem list
+extended on its existing line: **15,770 lines before and after.** `w106a_claimguard` and
+`w107a_lineref` stayed green **untouched** — third demonstration of w115's discipline.
+
 # (w115, 2026-08-29) — THE ROT w114 FOUND IN PRINTED PROSE ALSO LIVED IN **THIS DOCUMENT**
 
 w114 fixed the prose `check_selection.py` prints and guarded it with #48 — which walks exactly
@@ -1548,16 +1632,16 @@ that wrote it"* — this block is that lesson applied to navigation.
 
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
-| 1 | *the original dataset* — find it, concat it as extra rows | **×6, from 08-11 → w112 08-29** | **0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
-| 2 | *tune LightGBM properly against the fixed folds* | ×4, from 08-10 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
-| 3 | *CatBoost: it handles categoricals better* | ×2, w61 08-22 → w105 08-28 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
-| 4 | *XGBoost as the third leg of the ensemble* | ×2, → w106 08-28 · **artefacts verified** | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
-| 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — THE MOST-HANDED ANGLE IN THIS WORKSPACE** · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
-| 6 | *blending: rank-average or weight the models by OOF* | ×3, 36 members apart → w63 → w108 08-28 · **artefacts verified** | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
-| 7 | *seed and fold diversity, averaged* | ×5, → w64 → w109 08-28 · **artefacts verified** | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
-| 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
-| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×8, from 08-11 → w110 08-28 · artefacts verified** | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
-| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×6, from 08-11 → w111 08-28 · artefacts verified** | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
+| 1 | *the original dataset* — find it, concat it as extra rows | **×13, from 08-11 → w112 08-29** (count from `w117a_handcount`, not by hand) | **0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
+| 2 | *tune LightGBM properly against the fixed folds* | ×14, from 08-10 → w113 08-29 (count from `w117a_handcount`) | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
+| 3 | *CatBoost: it handles categoricals better* | ×14, from 08-10 → w114 08-29 (count from `w117a_handcount`) | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
+| 4 | *XGBoost as the third leg of the ensemble* | ×14, from 08-10 → w115 08-29 · **artefacts verified** (count from `w117a_handcount`) | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
+| 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — the most-handed, but only just: the ten counts run 8–15** (`w117a_handcount`) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
+| 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
+| 7 | *seed and fold diversity, averaged* | ×11, from 08-11 → w64 → w109 08-28 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
+| 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | ×8 machine-read, +3 named-but-unread (w40/w58/w76 quote it without the word `Foundation`) → w102 08-28, **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
+| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×11, from 08-11 → w110 08-28 · artefacts verified** (count from `w117a_handcount`) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
+| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×12, from 08-11 → w111 08-28 · artefacts verified** (count from `w117a_handcount`) | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
 
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
 number came from a LightGBM measurement. w106 checked it at the artefact level rather than
@@ -2056,7 +2140,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 49 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 50 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -2068,7 +2152,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
-    w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard
+    w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
