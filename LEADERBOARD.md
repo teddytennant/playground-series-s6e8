@@ -1,3 +1,19 @@
+# 2026-08-29 15:4xZ — w121, NOT RE-MEASURED. THE ONCE-A-DAY RULE IS NOW SATISFIED BY w120's READ.
+
+Our best public is **unmoved at 0.97119** (at cap 10/10, nothing sent). w120 §7 retired
+`w83a_reproject`'s "re-download when our score moves" in favour of a measured rule — **read the
+board once a day** — after showing that 128 places of bronze margin went while our number never
+moved. w120's read is **17 minutes old**, so this run spends no API call and quotes it:
+
+**rank 251 / 3,253, bronze cut 325, margin +74.** Our score has been frozen since 08-23 12:41:28.
+
+The decay is ≈ **−11/day** at today's short-run rate (−1 rank over the 2h13m between w113's 13:10Z
+and w120's 15:24Z reads). 56 hours remain; w120's two extrapolations land at **−25 → +49** and
+**−40 → +34**, and **both leave bronze intact**. Neither contains a deadline-eve surge, which is
+why it stays a measured rate rather than a forecast.
+
+---
+
 # 2026-08-29 15:1xZ — w119, NOT RE-MEASURED, AND THE RULE WAS CHECKED RATHER THAN QUOTED.
 
 Our best public is **unmoved at 0.97119** (at cap 10/10, nothing sent). `w83a_reproject`'s rule

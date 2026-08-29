@@ -80,7 +80,7 @@ BLOCK_HEAD = "# 📇 THE ANGLE INDEX"
 MIN_RUNS, MIN_RESOLVED, MIN_HISTORICAL_BAD, MIN_AMBIGUOUS = 100, 110, 5, 1
 
 # The run currently executing, whose journal entry is written after this check runs.
-CURRENT_RUN, CURRENT_ROW = r"^# w120 —", 10
+CURRENT_RUN, CURRENT_ROW = r"^# w121 —", 8
 
 # Row number -> (label, pattern matched against the resolved GENUS only).
 GENERA = {
@@ -91,12 +91,18 @@ GENERA = {
     5:  ("feature engineering", r"feature engineer"),
     6:  ("blending",            r"blend"),
     7:  ("seed and fold",       r"seed ?(and|/) ?fold"),
-    # ROW 8 IS HANDED IN TWO SURFACE FORMS AND ONE OF THEM OMITS ITS OWN LABEL. w40, w58, w76
-    # and w96 quote the angle as "confirm the metric, build the fixed-fold CV harness, get one
+    # ROW 8 IS HANDED IN TWO SURFACE FORMS AND ONE OF THEM OMITS ITS OWN LABEL. w40, w76 and
+    # w96 quote the angle as "confirm the metric, build the fixed-fold CV harness, get one
     # honest GBDT baseline scored" -- row 8's elaboration verbatim, with the word `Foundation`
-    # dropped. Matching the elaboration is not an exemption for those four runs: it is the same
-    # rule every other row gets, applied to the wording this row is actually handed in. Every
-    # other genus name does appear in every string that hands it.
+    # dropped. Matching the elaboration is not an exemption for those runs: it is the same rule
+    # every other row gets, applied to the wording this row is actually handed in. Every other
+    # genus name does appear in every string that hands it.
+    #
+    # This comment named w58 here too, and used the missing word to explain why w40/w58/w76 went
+    # unread. That was wrong twice over: w58 quotes `*"Foundation: confirm the metric,` WITH the
+    # word, and w96, which genuinely lacks it, was being read correctly all along. The three were
+    # invisible for an unrelated reason measured in w121 -- the label-to-quote window, see
+    # ANGLE_Q. A stated cause that nothing checks is how a row keeps a hand-written `+3`.
     8:  ("foundation",          r"foundation|confirm the metric"),
     9:  ("error analysis",      r"error analysis"),
     10: ("consolidation",       r"consolidat"),
@@ -112,6 +118,22 @@ HISTORICAL_CLAIMS = {1: 6, 2: 4, 3: 2, 4: 2, 5: 15, 6: 3, 7: 5, 8: 1, 9: 8, 10: 
 # requires the surplus to be non-empty AND to contain these, the documented trap.
 XGB_BLEND_TRAP = 4
 
+# C6's frozen corpus: the three Foundation-angle runs whose refusal narration sat between
+# the label and the quote. Verbatim from JOURNAL.md, which is append-only.
+REFUSAL_DECLS = [
+    ("w40", '**The ANGLE as issued is stale and I did not follow it.** It asks to '
+            '"confirm the metric, build the fixed-fold CV harness, and get one honest '
+            'GBDT baseline scored" \u2014 day-one work, finished t'),
+    ("w58", '**\u26a0 THE ANGLE IS STALE AND I AM SUBSTITUTING, ON THE RECORD.** '
+            '*"Foundation: confirm the metric, build the fixed-fold CV harness, and get '
+            'one honest GBDT baseline scored"* \u2014 the metric is AU'),
+    ("w76", '\u26a0 **THE PROMPT\'S ANGLE IS OBSOLETE AND I DID NOT FOLLOW IT.** It reads '
+            '*"confirm the metric, build the fixed-fold CV harness, get one honest GBDT '
+            'baseline scored"* \u2014 that is the w1\u2013w5 brief '),
+]
+# At least this many resolved runs must need a gap > 30, else C6 declares itself inert.
+MIN_WIDE_GAP = 3
+
 RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave )")
 # THE DECLARING LINE, AS ONE RULE RATHER THAN A LIST OF SHAPES. Every run that states its angle
 # in the body does it the same way: a label, then a QUOTED string. Enumerating the surface forms
@@ -126,7 +148,18 @@ RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave )")
 # `angle` and was then parsed from its first, yielding the genus "SET ASIDE, DELIBERATELY".
 # `Issued` is a label in its own right -- the 08-22/08-23 runs write `Issued: *"Blending: ..."*`
 # under a heading that never repeats the word angle.
-ANGLE_Q = re.compile(r"\b(?:angle|issued)\b.{0,30}?[\u201c\"]", re.I | re.S)
+# THE LABEL-TO-QUOTE WINDOW IS 80, AND ITS VALUE IS NOT A TUNING CHOICE. At 30 it silently
+# dropped the three runs that REFUSED the Foundation angle: each narrates the refusal
+# BETWEEN the label and the quote ("...ANGLE as issued is stale and I did not follow it.**
+# It asks to \"confirm the metric..."), which pushes the quote to a gap of 48-58. So the
+# window was selecting on whether a run OBEYED its angle -- a bias aimed straight at the
+# rows that get refused most. `w121b_gapsweep.py` swept 30..5000 over the whole corpus:
+# every value >= 55 yields the IDENTICAL census (130 resolved, 3 recovered, 0 re-assigned,
+# 0 lost) and nothing changes again out to 5000, past the length of any joined declaration.
+# 80 sits inside that flat region rather than on its edge. C6 keeps both directions.
+ANGLE_Q = re.compile(r"\b(?:angle|issued)\b.{0,80}?[\u201c\"]", re.I | re.S)
+# The pre-fix window, frozen as a literal on w115's rule so C6 keeps a fixed reference.
+ANGLE_Q_NARROW = re.compile(r"\b(?:angle|issued)\b.{0,30}?[\u201c\"]", re.I | re.S)
 LABEL = re.compile(r"\b(?:angle|issued)\b", re.I)
 CUT = re.compile(r"[:.—]|\bslot\b|\bAT CAP\b|\bno submission\b|\bOVERRIDDEN\b|\bDECLINED\b"
                  r"|\bREFUSED\b|\bSUBSTITUTED\b", re.I)
@@ -404,6 +437,41 @@ def main() -> int:
               f"lowest-row. {len(amb)} corpus run(s) name two genera:")
         for r in amb:
             print(f"     L{r['line']:6d}  row {r['row']:2d}  {r['genus'][:56]}")
+
+    print("\nC6 the label-to-quote window, both directions")
+    # THE FROZEN DEFECT. These are the three declaring strings verbatim, as they stand in
+    # JOURNAL.md, joined the way `resolve` joins them. Frozen as literals on w115's rule: a
+    # control anchored to the live corpus stops being a control the moment the corpus moves,
+    # and JOURNAL.md is append-only so these three can never change again.
+    #
+    # THE POSITIVE DIRECTION is that the shipped window reads all three as row 8. THE NEGATIVE
+    # DIRECTION is that the pre-fix window reads NONE of them -- without it this passes just as
+    # happily with the window reverted to 30, because `resolve` would still be finding these
+    # three somewhere else. The pairing is the control; either half alone is decoration.
+    for label, decl in REFUSAL_DECLS:
+        got = next((classify(g) for g in genera_of(decl) if classify(g)), None)
+        old_q, globals()["ANGLE_Q"] = ANGLE_Q, ANGLE_Q_NARROW
+        try:
+            was = next((classify(g) for g in genera_of(decl) if classify(g)), None)
+        finally:
+            globals()["ANGLE_Q"] = old_q
+        if got != 8:
+            fail(f"C6 {label}: the refusal-narrated declaration resolves to {got}, want row 8")
+        elif was is not None:
+            fail(f"C6 {label} INERT: the pre-fix 30-char window already resolved this to "
+                 f"row {was}, so the widening is not what recovers it")
+        else:
+            print(f"  {label}: narrow window -> unresolved, shipped window -> row 8. OK")
+
+    # AND THE WIDENING MUST STILL BE LOAD-BEARING IN THE LIVE CENSUS, not only on the literals.
+    wide = [r for r in runs if r["row"] and ANGLE_Q.search(r["raw"])
+            and not ANGLE_Q_NARROW.search(r["raw"])]
+    if len(wide) < MIN_WIDE_GAP:
+        fail(f"C6 INERT: only {len(wide)} resolved run(s) in the corpus need a gap > 30 "
+             f"(< {MIN_WIDE_GAP}) -- the window is doing nothing and should be re-measured")
+    else:
+        print(f"  {len(wide)} resolved corpus run(s) need a gap > 30: "
+              f"{[r['line'] for r in wide]}")
 
     json.dump({"measured": measured, "claimed": claims, "ambiguous": len(amb),
                "bad_rows": [list(b) for b in bad], "runs": len(runs),

@@ -1,3 +1,98 @@
+# (w121, 2026-08-29) — FOUNDATION, ROW 8. THE ROW VERIFIES AT THE ARTEFACT LEVEL, AND THE `+3` IT
+# CARRIED WAS A HAND-WRITTEN COUNT WITH A CAUSE THAT IS FALSE. THE CENSUS WAS SELECTING ON WHETHER
+# A RUN OBEYED ITS ANGLE.
+
+At cap (10/10 sent on the 08-29 UTC day, read from `w26g_send.py`, not from the prompt). Nothing
+submitted, nothing in the queue written. Best public unmoved at **0.97119**.
+
+## ✅ ROW 8 RE-VERIFIED AT THE ARTEFACT LEVEL (this run's handed angle) — PRICE 0 HOLDS
+
+The genus of the handed string is `Foundation`, so the index answers it in one grep. Checked
+against its artefacts rather than quoted, on the w106/w107/w109 pattern:
+
+| clause of the angle | artefact | state |
+|---|---|---|
+| *confirm the metric* | `## Competition basics` — **ROC AUC**, a table row, not an inference | ✅ |
+| *build the fixed-fold CV harness* | `StratifiedKFold(5, shuffle=True, random_state=42)`, frozen since w38, and #33 `w89a_foldid.py` matches it against the fold **vector** shipped by four public packs | ✅ |
+| *score one honest GBDT baseline* | 40 OOF arrays on disk, LightGBM/XGBoost/CatBoost among them; `latr1_xgb` at 0.96780 is the best GBDT of any family here | ✅ |
+
+⟹ **Price 0 confirmed on its own evidence.** Row 8 is day-one work and stays closed.
+
+## 🎯 THE ROW'S HANDING COUNT WAS PART-DERIVED AND PART-PROSE, AND THE PROSE NAMED THE WRONG CAUSE
+
+Row 8 read **`×8 machine-read, +3 named-but-unread (w40/w58/w76 quote it without the word
+`Foundation`)`**. Every other row's count comes from `w117a_handcount` (#50); this one carried a
+hand-maintained `+3` and an explanation nothing checked. Measured, both halves are wrong:
+
+- **w58 quotes the angle as `*"Foundation: confirm the metric,` — WITH the word.** The stated
+  cause does not hold for one of the three runs it names.
+- **w96 genuinely lacks the word and was being read correctly all along**, resolved by the
+  `body` path — grep JOURNAL.md for `The assigned ANGLE ("confirm the metric`.
+  So the missing word is neither necessary nor sufficient. The reader already matched
+  `foundation|confirm the metric`; the word was never the obstacle.
+
+**The real cause is uniform across all three, and it is not about row 8 at all.** `ANGLE_Q` binds
+an angle label to the first quote within **30 characters**. All three runs narrate their
+**refusal** between the label and the quote:
+
+    w40  **The ANGLE as issued is stale and I did not follow it.** It asks to "confirm...
+    w58  **⚠ THE ANGLE IS STALE AND I AM SUBSTITUTING, ON THE RECORD.** *"Foundation: confirm...
+    w76  ⚠ **THE PROMPT'S ANGLE IS OBSOLETE AND I DID NOT FOLLOW IT.** It reads *"confirm...
+
+Gaps **58, 51, 50** against a window of 30. ⚠⚠ **So the census was, in effect, selecting on
+whether a run OBEYED its angle** — the refusal sentence is what pushed the quote out of range.
+That is a bias aimed straight at the rows that get refused most, which in a workspace where nine
+of ten rows are closed is *every modelling row*. It is w117's own documented failure mode (a count
+that misdirects the last runs before the deadline) arriving through the reader instead of the
+table.
+
+## ✅ THE WINDOW'S NEW VALUE IS NOT A TUNED NUMBER — THE WHOLE REGION ABOVE 55 IS FLAT
+
+The obvious objection to widening a threshold until three runs appear is that the threshold was
+tuned to produce them. `w121b_gapsweep.py` answers it by measurement, on w119b's manoeuvre
+(monkeypatch the reader, diff the census run by run, write nothing):
+
+| gap | resolved | newly resolved | **re-assigned** | **lost** | targets recovered |
+|---|---|---|---|---|---|
+| 30 (shipped) | 127 | 0 | 0 | 0 | 0/3 |
+| 50 | 129 | 2 | 0 | 0 | 2/3 |
+| **55 … 5000** | **130** | **3** | **0** | **0** | **3/3** |
+
+🎯 **Every value from 55 to 5000 yields the byte-identical census.** 5000 exceeds the length of
+any joined declaration, so the window is *inert* above 55: there is no value to tune, and no run
+anywhere in the corpus is re-assigned or lost at any width. **80** ships — inside the flat region
+rather than on its 58-wide edge. The three recovered runs resolve to row 8 and nothing else moves.
+
+⛔ **This is the only shape in which a threshold change is admissible here.** Not "it recovers the
+runs I wanted", but "the parameter has no other behaviour to choose from". If a future sweep shows
+a value that re-assigns even one run, the number is load-bearing again and the argument restarts.
+
+## ✅ #50 GAINS C6 — AND IT IS THE NEGATIVE HALF THAT MAKES IT A CONTROL
+
+    C6 the label-to-quote window, both directions
+      w40: narrow window -> unresolved, shipped window -> row 8. OK
+      w58: narrow window -> unresolved, shipped window -> row 8. OK
+      w76: narrow window -> unresolved, shipped window -> row 8. OK
+      3 resolved corpus run(s) need a gap > 30: [17388, 21007, 25187]
+
+The three declaring strings are frozen as **literals** (w115's rule — a control anchored to HEAD
+stops being a control the moment the fix lands; JOURNAL.md is append-only so they can never move).
+Positive: the shipped window reads all three as row 8. **Negative: `ANGLE_Q_NARROW`, the pre-fix
+30, must read NONE of them.** Without that half the check passes just as happily with the window
+reverted, because `resolve` might be finding the runs by some other path — the pairing is the
+control. A second clause requires ≥3 resolved runs in the *live* census to need a gap > 30, so
+if the widening ever stops doing work the guard says **INERT** instead of green.
+
+## ⚠ WHAT THIS SAYS ABOUT THE OTHER NINE ROWS
+
+The counts moved for row 8 only, so no other row's number changed. But the *mechanism* was
+row-agnostic: any row whose runs refuse the angle in the same sentence shape was exposed, and
+row 8 is simply where it was visible because its cell had been annotated by hand. ⟹ **The
+annotation is what caught this.** A row that had silently been `×8` with no prose would have
+looked exactly as healthy as the other nine. 🎯 **A hand-written correction beside a derived
+number is not merely debt — it is a recorded disagreement between a human and an instrument, and
+somebody was right.** Here the prose was right that three runs were missing and wrong about why.
+
 # (w120, 2026-08-29) — CONSOLIDATION, ROW 10. FOUR PROPERTIES THAT WERE ASSUMED, NOW MEASURED:
 # THE TIER-SAFETY BOUND SCORED OUT-OF-SAMPLE · `priority == 0` IS NOT "SENDABLE" · A FROZEN SCORE
 # DOES NOT FREEZE A RANK · THE PUBLIC TIE-BREAK IS NOT LAST-SUBMISSION-DATE
@@ -1922,7 +2017,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — the most-handed, but only just: the ten counts run 8–15** (`w117a_handcount`) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
 | 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
 | 7 | *seed and fold diversity, averaged* | ×12, from 08-11 → w64 → w109 08-28 → w118 08-29 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
-| 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | ×8 machine-read, +3 named-but-unread (w40/w58/w76 quote it without the word `Foundation`) → w102 08-28, **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
+| 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | 0, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
 | 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×13, from 08-11 → w119 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
 | 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×13, from 08-11 → w111 08-28 → w120 08-29 · artefacts verified** (count from `w117a_handcount`) | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
 

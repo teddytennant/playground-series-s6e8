@@ -34156,3 +34156,222 @@ names the child check that is actually executing, which is the only reading that
 **shell exports do not survive between tool calls** — a liveness probe whose environment is
 missing reports *dead*, not *error*, which is w105's *"`pgrep` lies in both directions"* arriving
 in a third place. Set `XDG_RUNTIME_DIR` **inside** every command that calls `systemctl --user`.
+
+---
+
+# w121 — 2026-08-29, slot 10 of 10, ANGLE "Foundation: confirm the metric, build the fixed-fold CV
+# harness, and get one honest GBDT baseline scored."
+# ⛔ AT CAP 10/10 — NO SUBMISSION. GENUS = `Foundation` = ANGLE INDEX ROW 8, CLOSED, PRICE 0 —
+# RE-VERIFIED AT THE ARTEFACT LEVEL RATHER THAN QUOTED.
+# 🎯 ROW 8 WAS THE ONE ROW WHOSE COUNT WAS PART-DERIVED AND PART-PROSE. THE PROSE NAMED A CAUSE
+# THAT IS FALSE, AND THE REAL CAUSE WAS THAT #50's CENSUS WAS SELECTING ON WHETHER A RUN **OBEYED**
+# ITS ANGLE.
+
+## 1. AT CAP, CONFIRMED FROM THE SENDER, NOT FROM THE PROMPT
+
+`w26g_send.py --n 10` line 1, verbatim: **`181 submissions on record; 10 already sent on
+2026-08-29 (UTC); 0 of 10 slots left today`**. `date -u`: **15:41Z**, eighteen minutes after w120.
+Nothing sent, `w26d_queueprice.csv` untouched — the dry run again warned it is stamped for 08-30,
+which is the day-key guard working. Best public unmoved at **0.97119**. `git status`: 160 entries,
+**0 tracked deletions**, so the checkout is sound.
+
+## 2. THE ANGLE COSTS ONE GREP, AND THEN THE ROW GETS CHECKED AGAINST ITS ARTEFACTS
+
+Genus before the first colon is `Foundation` ⟹ **row 8**, closed, price 0, "already built, day 1".
+The index resolves it in one grep, as advertised. What the index does *not* do is prove itself, so
+row 8 got the w106/w107/w109 treatment — its three clauses checked against what is on disk:
+
+- *confirm the metric* → `## Competition basics` gives **ROC AUC** as a table row, not an inference.
+- *build the fixed-fold CV harness* → `StratifiedKFold(5, shuffle=True, random_state=42)`, frozen
+  since w38, and #33 `w89a_foldid.py` matches it against the fold **vector** four public packs ship.
+- *score one honest GBDT baseline* → 40 OOF arrays on disk across LGBM/XGB/CatBoost; `latr1_xgb`
+  at 0.96780 is the best GBDT of any family here.
+
+✅ **Price 0 holds on its own evidence.** Row 8 stays closed and this is not re-opened.
+
+## 3. 🎯 THE `+3` IN ROW 8's CELL WAS HAND-MAINTAINED, AND ITS STATED CAUSE IS FALSE
+
+The cell read **`×8 machine-read, +3 named-but-unread (w40/w58/w76 quote it without the word
+`Foundation`)`**. Every other row's count comes from `w117a_handcount` (#50) — this one was the
+lone survivor of the hand-maintained era, and it came with an explanation nothing checked. Both
+halves fail on contact (`w121a_why.py`):
+
+- **w58 quotes it `*"Foundation: confirm the metric,` — WITH the word.** The stated cause is false
+  for one of the three runs it names.
+- **w96 genuinely lacks the word and has been read correctly all along** (L29198, via `body`). So
+  the missing word is neither necessary nor sufficient — the reader has matched
+  `foundation|confirm the metric` since w117 and the word was never the obstacle.
+
+⚠ This is w120 §4 in a second place: **the column that describes an input is not the predicate the
+tool applies.** There it was `priority`; here it was a prose cause sitting next to a derived count.
+
+## 4. 🎯🎯 THE REAL CAUSE IS ROW-AGNOSTIC: THE CENSUS WAS SELECTING ON **OBEDIENCE**
+
+`ANGLE_Q` binds an angle label to the first quote within **30 characters**. All three missing runs
+narrate their **refusal** in between:
+
+    w40  **The ANGLE as issued is stale and I did not follow it.** It asks to "confirm...     gap 58
+    w58  **⚠ THE ANGLE IS STALE AND I AM SUBSTITUTING, ON THE RECORD.** *"Foundation: conf... gap 51
+    w76  ⚠ **THE PROMPT'S ANGLE IS OBSOLETE AND I DID NOT FOLLOW IT.** It reads *"confirm...  gap 50
+
+⟹ **The refusal sentence is what hid them.** The census was not failing on row 8's wording; it was
+systematically under-counting *runs that refused their angle*, whatever the row. In a workspace
+where nine of the ten rows are closed and refusing the angle is the correct move, that bias points
+at every modelling row at once. It is w117's own documented failure mode — a count that misdirects
+the last runs before the deadline — arriving through the **reader** rather than the table.
+
+## 5. ✅ THE NEW WINDOW IS NOT A TUNED NUMBER, AND THAT IS THE ONLY REASON IT SHIPS
+
+Widening a threshold until the runs you were looking for appear is exactly how a fix becomes an
+overfit. `w121b_gapsweep.py` settles it on w119b's manoeuvre — monkeypatch the reader, diff the
+census run by run, write nothing:
+
+| gap | resolved | newly resolved | **re-assigned** | **lost** | targets |
+|---|---|---|---|---|---|
+| 30 (shipped) | 127 | 0 | 0 | 0 | 0/3 |
+| 50 | 129 | 2 | 0 | 0 | 2/3 |
+| **55 … 5000** | **130** | **3** | **0** | **0** | **3/3** |
+
+🎯 **Every value from 55 to 5000 gives the byte-identical census**, and 5000 is longer than any
+joined declaration — so above 55 the parameter is **inert**, with no alternative behaviour to
+select from. Not one run anywhere is re-assigned or lost at any width. **80** ships, inside the
+flat region rather than on its 58-wide edge. Row 8 goes ×8 → ×12 (11 in corpus + the w121
+adjustment) and **no other row's count moves**.
+
+⛔ **DO NOT widen a threshold here on any weaker argument than this one.** If a future sweep
+re-assigns even one run, the number is load-bearing again and the case has to be made afresh.
+
+## 6. ✅ #50 GAINS C6, AND THE NEGATIVE HALF IS WHAT MAKES IT A CONTROL
+
+    C6 the label-to-quote window, both directions
+      w40: narrow window -> unresolved, shipped window -> row 8. OK
+      w58: narrow window -> unresolved, shipped window -> row 8. OK
+      w76: narrow window -> unresolved, shipped window -> row 8. OK
+      3 resolved corpus run(s) need a gap > 30: [17388, 21007, 25187]
+
+The three declaring strings are frozen as **literals**, on w115's rule that a control anchored to
+HEAD stops being a control the moment the fix is committed; JOURNAL.md is append-only so they can
+never move. Positive direction: the shipped window reads all three as row 8. **Negative direction:
+`ANGLE_Q_NARROW`, the pre-fix 30, must read NONE of them** — without it the check passes just as
+happily with the window reverted, since `resolve` might be reaching those runs by another path.
+A second clause requires ≥3 runs in the *live* census to need a gap > 30, so the guard reports
+**INERT** rather than green if the widening ever stops doing work. Watched red before the fix
+(FAILURES: 1, `index claims x8, corpus has x12`) and green after — the evidence w119 §6 asks for.
+
+## 7. ⚠ WHAT CAUGHT THIS WAS THE ANNOTATION, NOT THE GUARD
+
+The counts moved for row 8 alone, but the mechanism was row-agnostic. Row 8 is simply where it was
+**visible**, because its cell had been annotated by hand while the other nine were bare numbers. A
+row silently reading `×8` with no prose beside it would have looked exactly as healthy.
+🎯 **A hand-written correction next to a derived number is not just debt — it is a recorded
+disagreement between a person and an instrument, and one of them is right.** Here the prose was
+right that three runs were missing and wrong about why, and deleting it as "hand-maintained" without
+reading it would have thrown away the only pointer to the defect.
+
+## 8. THE BOARD — TODAY'S READ ALREADY EXISTS, SO IT IS QUOTED, NOT RE-DOWNLOADED
+
+w120 §7 replaced `w83a_reproject`'s rule with a measured one: **read the board once a day.** Today's
+read is 17 minutes old — **rank 251 / 3,253, bronze cut 325, margin +74**, our public score frozen
+at 0.97119 since 08-23 12:41:28. No API call spent. The margin decays at ≈ −11/day with our score
+still; 56 hours remain and both of w120's extrapolations leave bronze intact.
+
+## 9. ⛔ THE CLICK — TWENTIETH RUN ASKING. TWO DAYS LEFT. STILL NOTHING SELECTED.
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py`, real rc read from the process: **`*** NOTHING IS SELECTED ***`**.
+`55656399 → w36_ad199stdcorr.csv` (public 0.97118, CV 0.9701400060, CV rank 1/164) ·
+`55588167 → w23_ad187stdcorr.csv` (public 0.97116, CV 0.9701150809). Not clicking costs
+**+4.5228e-6**; the mis-click costs **+35.17e-6** or **+81.92e-6** and remains the bigger hazard by
+an order of magnitude. ⛔ Do not re-price it.
+
+## 10. NEXT RUN — READ THIS ORDER
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE TEN FOR WHATEVER UTC DAY IT IS.** On **08-30** the queue is already stamped and
+   verified against the registered artefact in set **and** order with all ten md5s (w118 §3):
+   `w26g_send.py --go`, no `--write`.
+   ⚠ **If the run lands on 08-31**, run `w48e_order.py --day 2026-08-31 --write` FIRST — w120 §5
+   dry-ran that plan and it verifies clean at ten members, 0.93261–0.94154 — then `--go`. Expect
+   0.93–0.95. Quote `w26d`'s **bound**, never its point estimate (w120 §3: the point estimate
+   missed HIGH on 4 of 4 logit-family drains).
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py` TO YOUR OWN RUN AND ROW** — both
+   with a match-count assert. w121 set it to `w121`/row 8. **DO NOT hand-edit the `×N`**: it is
+   derived now for all ten rows, row 8 included (§5). Forgetting the constant gives a silent ±1.
+4. **Do document edits BEFORE launching the suite** (w116 §6), then `w93a_suite.py` under
+   `systemd-run --user` with `--setenv=PATH` **and `XDG_RUNTIME_DIR` set inside the same command**,
+   read via `journalctl`, never under `timeout`. ⚠ The log file is block-buffered and is **not**
+   the liveness signal — `systemctl --user status <unit>` is (w120 §11).
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). Do not start a member build.
+6. **Read the board ONCE for the day** (w120 §7). Latest: **rank 251 / 3,253, cut 325, margin +74**.
+7. ⛔ **DO-NOT, carried forward from w92–w120 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF segmentation,
+     or calibration of the final file · quote `274k` for the hard band (it is **250,188**) · cite a
+     line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe · launch a long job with
+     anything but `systemd-run --user` · build `cat_native_ctr2` / `cat_natlat` · sweep GBDT
+     hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read `w110b_covguard`'s green as "the index row is good" · treat how
+     often an angle was handed as a reason to enrich its row · hand-maintain a count in the index ·
+     `str.replace` a source file without asserting the match count · use one regex to select a line
+     and a different one to parse it · read a green on `w72a_plan_<day>.json` as "the send is
+     verified" · read `priority == 0` in `w26d_queueprice.csv` as "sendable" (it is one of FOUR
+     default-on refusals) · repeat w118/w119's board objection (settled, w120 §7) · build a guard
+     over the fourteen above-tier files (unreachable in the remaining slots).
+   • 🆕 **DO NOT** widen `ANGLE_Q`'s window, or any other threshold in a standing guard, without
+     the full-corpus sweep that shows the chosen region is FLAT — re-assignments and losses at
+     every candidate value, not just the count you were hoping to move (§5).
+   • 🆕 **DO NOT** delete a hand-written annotation beside a derived number just because the number
+     is derived. Read it first: it is a recorded disagreement, and it may be the only pointer to a
+     live defect (§7). Row 8's `+3` was wrong about the cause and right about the miss.
+8. ⚠ **NEW LESSONS.** • A reader can select on the *content* of what it reads: #50's 30-char window
+   was, in effect, filtering out runs that REFUSED their angle, because the refusal sentence sits
+   between the label and the quote (§4). Ask what a parser's failures have in common before
+   assuming they are one-offs. • A threshold change is only admissible when the sweep shows the
+   region is flat — "it recovers what I wanted" and "there is no other behaviour to pick" are
+   different claims (§5). • A prose cause beside a derived number is not checked by anything that
+   checks the number; w58 carried the very word its cell said it lacked (§3).
+
+## 11. ADDENDUM — THE AUTHORITATIVE FOOTER: **`TOTAL 260s`, 49/50 GREEN, ONE REAL FAILURE, MINE**
+
+⏱ `w93a_suite.py` under `systemd-run --user --same-dir --setenv=PATH="$PATH"` with
+`XDG_RUNTIME_DIR` set **inside** the same command, no `timeout`. Every document edit was final
+before launch (w116 §6), so #50 read the w121 header out of the corpus and correctly did **not**
+add a second count — row 8 reconciled at ×12 in both states, which is w117's both-states branch
+exercised for the second time.
+
+    [38/50] w101a_angleguard   rc=0  OK: every ANGLE INDEX pointer resolves
+    [43/50] w107a_lineref      rc=1  FAILURES 1        <-- the only failure, and it is w121's own
+    [45/50] w110b_covguard     rc=0  FAILURES 0        (w121's handing now in the corpus)
+    [50/50] w117a_handcount    rc=0  FAILURES: 0       (C6 green both ways, row 8 ×12)
+    TOTAL 260s   49/50 green
+
+## 12. 🎯 #43 CAUGHT **THIS RUN'S OWN PROSE**, WHICH IS THE FIRST TIME A GUARD HAS DONE THAT HERE
+
+`w107a_lineref` failed on a sentence w121 had written into RESEARCH.md ten minutes earlier:
+
+    FAIL RESEARCH.md:29 cites line 29198 of the document itself — RESEARCH.md is prepended
+    ~100 lines/run, so this pointer is already wrong or soon will be. Use a grep-able anchor.
+    >> - **w96 genuinely lacks the word and was being read correctly all along** (line 29198, `body`)
+
+⚠ **I meant JOURNAL.md's line 29198, and that number is even stable, because JOURNAL.md is
+append-only.** The guard cannot know that: I cited a bare `line NNNNN` inside RESEARCH.md and
+named no file, so the only reading available to it is the wrong one. ⟹ **The guard is right and
+the objection is not worth making** — an unqualified line number in the file that gets prepended
+every run is unreadable by construction. Replaced with a text anchor (`grep JOURNAL.md for
+`The assigned ANGLE ("confirm the metric``, one match), and #43 re-runs rc=0.
+
+🎯 **The lesson is about the day, not the pointer.** `cite a line number of RESEARCH.md` has sat
+in the DO-NOT list since w99 and I walked into it anyway, in the same run whose whole subject was
+a stale annotation. **Reading a prohibition is not the same as being checked against it**, and
+what separated the two here was a standing check running *after* the document edits — which is
+the only reason w116 §6's ordering rule exists. The four RESEARCH.md-reading checks were re-run
+after the fix: #38, #43, #45, #50 all rc=0.
+
+⚠ **NEXT RUN:** the suite's `TOTAL` line reports **49/50 green with a real rc=1**, so do not read
+`TOTAL 260s` as a pass on its own — read the `FAILURES:` line under it. w121's failure is fixed
+and re-verified; a fresh full-suite run is **not** needed to confirm that, but the next scheduled
+run should show 50/50.
