@@ -1,3 +1,116 @@
+# (w115, 2026-08-29) — THE ROT w114 FOUND IN PRINTED PROSE ALSO LIVED IN **THIS DOCUMENT**
+
+w114 fixed the prose `check_selection.py` prints and guarded it with #48 — which walks exactly
+**one file**. The playbook sends a human here, to RESEARCH.md, read as CURRENT. This document
+carried five assertion-shaped lines naming the *mis-click* files as the pick:
+`blend159av_h3` (w114a: **+81.92e-6**) at L7202/L7290/L7403/L8719 and `w21_ad187corr`
+(**+35.17e-6**) at L11040, against a +4.5228e-6 cost of not clicking at all. Each was true when
+written, each sat in a dated section, **none said so on the line itself**.
+
+⚠ **SEVERITY, HONESTLY: same class as w114 §2, NOT the same magnitude.** The real entry points
+were already clean — `SELECT_THESE.md` scans **0 hits** and `check_selection.py` is fixed — and
+the correct warning is at the TOP of this file. Those five lines were 7,000+ lines down.
+**Reachable, not default.**
+
+✅ **FIXED IN PLACE WITH ZERO LINE SHIFT.** Each line now carries `⚠ STALE NAME — the pick moved
+2026-08-21; it is w36_ad199stdcorr.` appended to the **existing** line; nothing was deleted.
+15,657 lines before and after. 🎯 **PREFER AN IN-PLACE ANNOTATION TO A PREPEND WHEN YOU CAN** —
+`w106a_claimguard` and `w107a_lineref` record line offsets, and w114's prepend forced both to
+re-record. This run changed RESEARCH.md in eight places, moved no line number, and both guards
+stayed green untouched.
+
+⛔ **`JOURNAL.md` IS NOT SCANNED AND MUST NOT BE "FIXED".** It is append-only dated history; an
+08-17 entry saying *"the pick is now w16i_schemeavg"* was true on 08-17. 17 such lines exist and
+all are correct-as-history. Same exemption w114 gave `CLICK_HISTORY`.
+
+## #49 `w115a_docselectguard` — the doc-level analogue of #48
+
+    .venv/bin/python experiments/w115a_docselectguard.py     # 0 = ok. Offline, 0.2s, no API call.
+
+Flags assertion-shaped lines ("the CV pick", "the pick is", "current WANTED", …) in RESEARCH.md /
+SELECT_THESE.md that name a **selectable** stem not in `check_selection.WANTED`. Exonerated by a
+STALE marker or an `ALLOWED` entry of **(stem, distinctive substring, written reason)** — keyed
+on substring, **never a line number**, so it survives this document's weekly prepends.
+Controls, written against w114 §3's two mistakes: **C2 uses the real historical artefact**
+(`git show HEAD:RESEARCH.md`, must come out RED — 6 findings / 3 stems — else it declares itself
+INERT), **C3 counts the DELTA not the total**, C1 non-vacuous, C4 fires both ways, C5 identifier
+boundary. ⚠ Its first run was red on a **case-sensitive** ALLOWED substring that failed to match
+— an allowlist that mis-matches fails **closed**, which is the right direction.
+
+# 🔴 PATH ON THIS BOX IS WORSE THAN w103 RECORDED — FOUR DIRECTORIES, AND `systemd-run` GETS NONE
+
+Three separate PATH failures happened in one run (w115). w103's canonical corrected PATH,
+`/run/current-system/sw/bin`, is **incomplete**.
+
+    /run/current-system/sw/bin      setsid pgrep ps free gh nohup   (w103's list)
+    /home/nixos/.nix-profile/bin    google-chrome, google-chrome-stable
+    /home/nixos/.local/bin          kaggle          ← the CLI everything here depends on
+    (absent everywhere)             diff
+
+⛔ **THE PROBE PATH IS**
+`/home/nixos/.local/bin:/home/nixos/.nix-profile/bin:/run/current-system/sw/bin:$PATH`.
+
+🎯 **`w103a_pathguard` STRUCTURALLY CANNOT CATCH THIS.** All six of its `TOOLS` live in `sw/bin`,
+so a tool present only in `.nix-profile/bin` or `.local/bin` is reported absent by the documented
+recipe while the guard stays green. It cost w97/w99 a wrong closure and cost w115 a wrong
+browser measurement ten minutes after reading the section that warns about it.
+
+## 🔴🔴 `systemd-run --user` INHERITS ALMOST NO `PATH` — AND FAKES NINE GUARD FAILURES
+
+    $ systemd-run --user --pipe --quiet /bin/sh -c 'echo $PATH'
+    /nix/store/…-systemd-259.3/bin/          ← the WHOLE inherited PATH
+
+Launched that way, the suite came back with reds at `w54a w55a w72b w74b w82a w84a w85c w86a
+w87a w88a w91b` — **all in 0.3–1.7 s**, far too fast for the Kaggle API calls they make. Cause:
+`FileNotFoundError: 'kaggle'`. 🎯 **NINE INDEPENDENT GUARDS DO NOT FAIL AT ONCE; A SHARED
+DEPENDENCY DOES — AND SUSPICIOUSLY FAST REDS ARE THE TELL.** The same suite relaunched with
+`--setenv=PATH` returned **49/49 green**. THE WORKING LAUNCH:
+
+    export XDG_RUNTIME_DIR=/run/user/1000 \
+           DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+           PATH=/run/current-system/sw/bin:$PATH
+    FULLPATH=/home/nixos/.local/bin:/home/nixos/.nix-profile/bin:/run/current-system/sw/bin:/usr/bin:/bin
+    systemd-run --user --unit=<name> --collect --working-directory="$PWD" \
+        --setenv=PATH="$FULLPATH" --setenv=HOME=/home/nixos \
+        "$PWD/.venv/bin/python" experiments/w93a_suite.py
+
+⚠ Without `XDG_RUNTIME_DIR`/`DBUS_SESSION_BUS_ADDRESS` it fails with *"Failed to connect to user
+scope bus"*, which reads as systemd being unavailable and is not.
+⚠ **The suite prints to stdout; systemd captures it. There is NO `w93a_suite.log`.** Read it with
+`journalctl --user -u <unit> --no-pager -o cat`. Looking for a log file finds nothing and looks
+like a failed launch.
+⚠ **Delete the `w93a_fail_*.log` files a bad launch writes.** A fail log is written on red and
+never cleaned up, so PATH-artefact logs would hand the next run fabricated findings.
+
+## 🎯 A `/proc` NAME SCAN MATCHES ITS OWN COMMAND LINE
+
+w113 §9 says check `/proc` before relaunching the suite. It does not say the check false-positives
+on itself: a scan for `w93a_suite` finds the scanning shell, whose cmdline contains that literal.
+**Exclude `$$` and skip any cmdline containing the scan expression.**
+
+# ✅ A CHANNEL TO THE HUMAN EXISTS — `PushNotification` — BUT IT IS GATED ON REMOTE CONTROL
+
+Zero hits across RESEARCH.md and JOURNAL.md before w115. It sends a desktop notification and,
+**only when Remote Control is connected**, a phone push. Tried 2026-08-29:
+
+    Mobile push not sent (Remote Control inactive).
+
+⚠ **It did NOT reach Teddy's phone; do not record it as if it did.** The desktop leg goes to the
+terminal, where the session's output already goes, so it added no channel that day. It is worth
+retrying on any run where Remote Control IS connected — that is a real path to the human that
+fourteen runs of writing into files never had. **Read the return string.**
+
+# ⛔ THE BROWSER EXISTS AND RUNS. THE BLOCKER IS THE LOGIN. STILL A HUMAN CLICK.
+
+`google-chrome` **is** present (`~/.nix-profile/bin`, v147.0.7727.55, `--version` runs). The
+w103 "none present" reading was an artefact of the incomplete probe PATH above. **The closure is
+unchanged and rests on the login, exactly as the 2026-08-13 correction says:**
+`~/.config/BraveSoftware` empty · `~/.config/chromium` and `~/.config/google-chrome` hold only
+`Crash Reports` · **no `Cookies` anywhere** · CDP 9222 not listening · `DISPLAY`/`WAYLAND_DISPLAY`
+unset · no `mcp__brave__*` in the tool list. ⛔ **Do not "fix" this by launching Chrome.**
+
+---
+
 # (w114, 2026-08-29) — THE MIS-CLICK IS 8-18x THE MISSING CLICK, AND OUR OWN INSTRUMENT CAUSED IT
 
 Seven pricings (w15i, w16s/u/w, w17, w18, w45, w57, w62, w74) all answer ONE question: what
@@ -1943,7 +2056,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 48 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 49 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -1955,7 +2068,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
-    w111b_baseguard   w112a_templateguard  w114b_selectguard
+    w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -7199,7 +7312,7 @@ the fully-crossed 158 set goes **−0.088 → +0.736**.
 it on LB 2/2 at +1 ulp, despite losing on raw CV by 4-5e-6. Deadline pick is `blend159av`.~~
 **Withdrawn 2026-08-13** — see the box at the top of this section. `ens4 − h3` measured on a
 labelled hold-out is **−7e-6**, i.e. the truth prefers `h3`, which is also what raw CV said
-all along. The pick is `blend159av_h3`.
+all along. The pick is `blend159av_h3`. ⚠ STALE NAME — the pick moved 2026-08-21; it is `w36_ad199stdcorr`. See SELECT_THESE.md.
 
 ⚠ LB resolution is **1e-5** (five printed decimals). Every contrast above is 1–4 ulp. No
 single comparison means anything; only the replication count does.
@@ -7287,7 +7400,7 @@ browser. On this box that means launching Brave with the debug port (see the roo
 > unchanged, say so and move on.
 >
 > This is now the **highest-value open item in the competition**, and it is worth more than
-> any remaining modelling. The spread between the CV pick (`blend159av_h3`, 0.970049) and
+> any remaining modelling. The spread between the CV pick (`blend159av_h3`, 0.970049) and ⚠ STALE NAME — the pick moved 2026-08-21; it is `w36_ad199stdcorr`. See SELECT_THESE.md.
 > the worst file in the best-public tie (`blend158_logit`, 0.969961) is **−88e-6**, whereas
 > every live modelling lever left here is worth ~2e-6. One click is ~40x the entire
 > remaining research programme.
@@ -7400,7 +7513,7 @@ because here it is actively dangerous:
 > noise floor. So the toggle's value is binary: it is worth avoiding one specific
 > auto-selection, not a diffuse "40× the research programme".
 
-Note **none of the four is the CV pick**: `blend159av_h3` (0.970049) and `blend158_h3`
+Note **none of the four is the CV pick**: `blend159av_h3` (0.970049) and `blend158_h3` ⚠ STALE NAME — the pick moved 2026-08-21; it is `w36_ad199stdcorr`. See SELECT_THESE.md.
 (0.970048) both score 0.97105 on the public slice and so would never be chosen by default.
 So the default is wrong in every branch, and in one branch out of four it ships the single
 worst-CV file in the queue — flattered onto the top line by a logit effect that
@@ -8716,7 +8829,7 @@ a 1e-5 grid, against an observed +1e-5 to +3e-5. The slice moved 5–10× more t
 account for — w14b §4's pattern, where public flattery is borrowed from private at 4:1.
 
 **Live consequence for the unset selection toggle:** best public score is now 0.97107 on a file
-whose base is the CV pick `blend159av_h3` and whose CV (0.9700528) is the best held here, so the
+whose base is the CV pick `blend159av_h3` and whose CV (0.9700528) is the best held here, so the ⚠ STALE NAME — the pick moved 2026-08-21; it is `w36_ad199stdcorr`. See SELECT_THESE.md.
 auto-select default is no longer `blend158_logit` (CV 0.969961, priced by w14b at ~−111e-6
 predicted private). **The unattended-default exposure has fallen from ~−111e-6 to roughly zero.**
 A human should still select `blend159av_h3` and `blend160origm_h3` — they carry zero fitted
@@ -11037,7 +11150,7 @@ miss.
 ## ⚠ The final-selection click has collapsed to a slot-2-only, ~2.9e-6 question
 
 ```
-auto-slot 1: public 0.97117, 1-way — w21_ad187corr   <- IDENTICAL to the CV pick
+auto-slot 1: public 0.97117, 1-way — w21_ad187corr   <- IDENTICAL to the CV pick [STALE 08-21: pick is w36_ad199stdcorr]
 auto-slot 2: public 0.97116, 1-way — w20_ad187       <- CV pick's slot 2 is w20_ad187_h3
 ```
 

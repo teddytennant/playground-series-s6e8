@@ -1,21 +1,21 @@
 {
- "doc_lines": 15653,
+ "doc_lines": 15770,
  "n_cites": 12,
  "n_internal": 0,
  "n_external": 12,
  "failures": [],
  "ok": [
-  "  ok   RESEARCH.md:837 -> JOURNAL.md (32837 lines)",
-  "  ok   RESEARCH.md:854 -> w25a_cvlb_full.py (106 lines)",
-  "  ok   RESEARCH.md:854 -> w25a_cvlb_full.py (106 lines)",
-  "  ok   RESEARCH.md:854 -> w25a_cvlb_full.py (106 lines)",
-  "  ok   RESEARCH.md:854 -> w25a_cvlb_full.py (106 lines)",
-  "  ok   RESEARCH.md:912 -> agent/features.py (207 lines)",
-  "  ok   RESEARCH.md:2032 -> w25a_cvlb_full.py (106 lines)",
-  "  ok   RESEARCH.md:2032 -> w25a_cvlb_full.py (106 lines)",
-  "  ok   RESEARCH.md:3064 -> JOURNAL.md (32837 lines)",
-  "  ok   RESEARCH.md:9175 -> w15b-research.md (239 lines)",
-  "  ok   RESEARCH.md:11908 -> agent/features.py (207 lines)",
-  "  ok   RESEARCH.md:12100 -> agent/features.py (207 lines)"
+  "  ok   RESEARCH.md:954 -> JOURNAL.md (33141 lines)",
+  "  ok   RESEARCH.md:971 -> w25a_cvlb_full.py (106 lines)",
+  "  ok   RESEARCH.md:971 -> w25a_cvlb_full.py (106 lines)",
+  "  ok   RESEARCH.md:971 -> w25a_cvlb_full.py (106 lines)",
+  "  ok   RESEARCH.md:971 -> w25a_cvlb_full.py (106 lines)",
+  "  ok   RESEARCH.md:1029 -> agent/features.py (207 lines)",
+  "  ok   RESEARCH.md:2149 -> w25a_cvlb_full.py (106 lines)",
+  "  ok   RESEARCH.md:2149 -> w25a_cvlb_full.py (106 lines)",
+  "  ok   RESEARCH.md:3181 -> JOURNAL.md (33141 lines)",
+  "  ok   RESEARCH.md:9292 -> w15b-research.md (239 lines)",
+  "  ok   RESEARCH.md:12025 -> agent/features.py (207 lines)",
+  "  ok   RESEARCH.md:12217 -> agent/features.py (207 lines)"
  ]
 }

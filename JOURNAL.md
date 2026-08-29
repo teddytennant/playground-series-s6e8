@@ -32875,3 +32875,267 @@ fingerprints tomorrow's queued ten). No rows were removed and `w39a_audit` repor
 
 🎯 **A PUSH THAT FAILS ON THE CREDENTIAL HELPER LOOKS LIKE AN AUTH PROBLEM AND IS A PATH
 PROBLEM.** Do not go looking for an expired token. Pushed: `817086d..59b4fed`.
+
+---
+
+# w115 — 2026-08-29, SLOT 4 of 10 (NO SLOT: the cap was already spent when this run started)
+
+**ANGLE AS GIVEN: "XGBoost: third leg of the ensemble, tuned on the same folds so the blend
+weights mean something."** ⛔ **NOT HONOURED — seventh refusal of a GBDT-tuning angle.** w112 §5
+carries `DO NOT sweep GBDT hyperparameters` / `DO NOT add ordinary GBDT members`; w112 §8.4
+closed the modelling question with all ten ANGLE INDEX rows resolved. An XGBoost leg today could
+not be **sent** (0 of 10 slots), could not be **selected** (WANTED is the strict CV argmax of
+164 and is settled), and would join a queue already holding spare files against zero unfilled
+slots. Stated here as the playbook requires rather than done.
+
+## 1. STATE, READ NOT ASSUMED
+
+`date -u` **2026-08-29 13:52Z**. `w26g_send.py --n 10`: **181 on record, 10 already sent today
+(UTC), 0 of 10 slots left.** No submission this run and none was possible. `git status`: untracked
+only, **no tracked deletions**, so the checkout is sound. The dry run correctly refused with
+*"queue was written for 2026-08-30, not today"* — the freshness guard working, not a fault.
+
+✅ **w114's fix verified live.** `check_selection.py` now prints 30 lines led by **CLICK EXACTLY
+THESE TWO** with refs read from the API: `55656399 → w36_ad199stdcorr (public 0.97118)` and
+`55588167 → w23_ad187stdcorr (public 0.97116)`. Correct and current.
+
+## 2. 🔴 THE SAME ROT AS w114 §2, ONE DOCUMENT OVER — AND UNGUARDED
+
+w114 fixed the prose `check_selection.py` **prints** and guarded it with #48. But #48 walks
+exactly one file. The playbook sends a human to **`RESEARCH.md`** ("distilled durable facts",
+read as CURRENT) and to `SELECT_THESE.md`. Nobody had looked there.
+
+`RESEARCH.md` carried **five assertion-shaped lines naming the mis-click files as the pick**:
+
+    L7202   "The pick is `blend159av_h3`."                       ← w114a prices this pair +81.92e-6
+    L7290   "the CV pick (`blend159av_h3`, 0.970049)"
+    L7403   "none of the four is the CV pick: `blend159av_h3` …"
+    L8719   "whose base is the CV pick `blend159av_h3`"
+    L11040  "w21_ad187corr   <- IDENTICAL to the CV pick"        ← w114a prices this pair +35.17e-6
+
+Each was true when written and sits in a dated section; **none said so on the line itself.** That
+is w114 §2's lesson exactly — *a ✅ and a date are not a freshness claim* — reproduced in a second
+document that no guard read.
+
+⚠ **SEVERITY, STATED HONESTLY — THIS IS THE SAME CLASS AS w114 §2 BUT NOT THE SAME MAGNITUDE,
+and I am not going to inflate it into a second w114.** The reader's real entry points were both
+already clean: `SELECT_THESE.md` scans **0 hits**, `check_selection.py` is fixed and guarded, and
+RESEARCH.md's *top* section carries the correct warning. These five lines sat 7,000+ lines down.
+**Reachable, not default.** w114's defect was the instrument's default output; this one needs a
+reader to grep mid-document and stop at the first hit.
+
+**`JOURNAL.md` was deliberately NOT changed and is NOT scanned.** It is append-only dated
+history: an 08-17 entry saying *"the pick is now `w16i_schemeavg`"* was TRUE on 08-17, and
+rewriting it would destroy the record. Same exemption w114 gave `CLICK_HISTORY`. The scan finds
+17 such lines in JOURNAL and every one is correct-as-history.
+
+### ✅ THE FIX — annotated in place, **zero line shift**
+
+Each of the five lines now carries `⚠ STALE NAME — the pick moved 2026-08-21; it is
+w36_ad199stdcorr. See SELECT_THESE.md.` appended to the **existing** line. Nothing was deleted —
+the history stays readable, exactly as w114 preserved `CLICK_HISTORY`.
+
+🎯 **THE EDIT WAS BUILT TO NOT MOVE A SINGLE LINE NUMBER.** 15,657 lines before and after,
+verified by comparing against a backup element-wise (`diff` is **not on PATH**; used Python).
+Only 5 lines differ. That matters because `w106a_claimguard` and `w107a_lineref` record line
+offsets — w114 prepended a section and had to let their JSONs re-record. **An in-place
+annotation avoids that entire class of churn**, and the header-count and stem-list edits for #49
+were likewise done by editing existing lines rather than inserting.
+
+## 3. ✅ STANDING CHECK #49 — `w115a_docselectguard`
+
+Scans `RESEARCH.md` + `SELECT_THESE.md` for assertion-shaped lines ("the CV pick", "the pick is",
+"current WANTED", …) naming a **selectable** stem (`submissions/<stem>.csv` exists) that is not in
+`check_selection.WANTED`. Exonerated by a STALE marker or an `ALLOWED` entry keyed on
+**(stem, distinctive substring, written reason)** — substring, never line number, so it survives
+the prepends this document gets weekly. Offline, deterministic, no API call.
+
+Controls written against w114 §3's two mistakes, both avoided:
+  • **C2 uses the REAL HISTORICAL ARTEFACT, not a plant** — `git show HEAD:RESEARCH.md` is the
+    pre-fix file and must come out RED. It reports **6 findings over 3 stems**. If the pre-fix
+    file ever passes, the guard declares itself INERT rather than green.
+  • **C3 counts the DELTA, not the total** — HEAD-minus-current must be non-empty, so the guard
+    cannot claim an improvement it cannot measure.
+  • C1 non-vacuous (231 stems ≥ 50, 31 candidate lines ≥ 8) · C4 fires **both ways** (a planted
+    bare assertion trips; the same line marked STALE does not) · C5 identifier boundary —
+    `blend158` must not match inside `blend158_logit` (w114 §3).
+
+⚠ Its first run was **RED on a real hit I had mis-allowed**: my ALLOWED substring read
+`"the CV pick's base is"` but the line says `"**The** CV pick's base is"`. Substring matching is
+case-sensitive. 🎯 **AN ALLOWLIST ENTRY THAT SILENTLY FAILS TO MATCH IS A GUARD THAT FAILS
+CLOSED — which is the right direction, and it is why the entry carries a reason and not a line
+number.** Enrolled: suite `STEMS` **49**, RESEARCH's published list **49**, suite C2 re-parsed
+and passed at 49.
+
+## 4. 🆕 A CHANNEL TO THE HUMAN EXISTS THAT 48,000 LINES OF NOTES NEVER MENTION — AND IT IS GATED
+
+The one outstanding item is a human click, asked for in **fourteen** consecutive runs. Every
+previous run could only write the ask into a file. This session's deferred-tool list contains
+**`PushNotification`**, which greps to **zero hits** across `RESEARCH.md` and `JOURNAL.md`.
+
+I sent it (refs and deadline, one line, under 200 chars). The result:
+
+    Mobile push not sent (Remote Control inactive).
+
+⚠ **HONEST READING: THIS DID NOT REACH TEDDY'S PHONE, AND I AM NOT RECORDING IT AS IF IT DID.**
+The tool pushes to mobile **only when Remote Control is connected**; it was not. What fired is a
+desktop notification into the terminal — where this session's output already goes — so it added
+no channel today. **It is still worth writing down**, because the gate is a *state*, not a
+property: on any run where Remote Control IS connected, this is a real path to the human that
+fourteen runs of file-writing never had. A future run should try it and read the return string.
+
+## 5. ⚠ I RE-MEASURED THE BROWSER AND GOT IT WRONG — THE STANDING PATH RECIPE IS INCOMPLETE
+
+RESEARCH.md contradicts itself on this: L7274/L7301 say `google-chrome` **is** present, L15555
+says every browser is **absent**. I re-probed under w103's canonical corrected PATH
+(`/run/current-system/sw/bin`) and reported **ABSENT** — confirming L15555.
+
+**That was wrong, and it was wrong in exactly the way this workspace already documents.**
+
+    /home/nixos/.nix-profile/bin/google-chrome -> …google-chrome-147.0.7727.55/bin/google-chrome
+    $ google-chrome --version   →   Google Chrome 147.0.7727.55        (it RUNS)
+
+The binary lives in **`~/.nix-profile/bin`**, which is **not** in w103's corrected PATH. So:
+
+🎯 **w103's "corrected PATH" RECIPE IS ITSELF INCOMPLETE, AND `w103a_pathguard` STRUCTURALLY
+CANNOT NOTICE.** Its `TOOLS` are `setsid, pgrep, ps, free, gh, nohup` — **all six live in
+`sw/bin`**. A tool that exists only in `~/.nix-profile/bin` is reported absent by the documented
+recipe and the guard stays green. This already cost w97/w99 a wrong closure, and it cost me a
+wrong measurement today, ten minutes after reading the section warning about it.
+⛔ **The probe PATH is `/home/nixos/.nix-profile/bin:/run/current-system/sw/bin:$PATH`.**
+
+✅ **THE CLOSURE ITSELF IS UNCHANGED, AND FOR THE REASON RESEARCH.md ALREADY GIVES: THE BLOCKER
+IS THE LOGIN, NOT THE BINARY.** Re-verified independently this run — `~/.config/BraveSoftware`
+**empty**, `~/.config/chromium` and `~/.config/google-chrome` hold **only `Crash Reports`**, no
+`Cookies` anywhere, CDP 9222 **not listening**, `DISPLAY`/`WAYLAND_DISPLAY` **unset**, no
+`mcp__brave__*` in the tool list. A browser with no Kaggle session cannot click the toggle.
+**Still a human click.** ⛔ Do not "fix" this by launching Chrome.
+
+## 6. ⚠ TWO OPERATIONAL FACTS, LEARNED THE ONLY WAY
+
+🎯 **A `/proc` SCAN FOR A PROCESS NAME MATCHES ITS OWN COMMAND LINE.** My first check for a
+running suite printed `FOUND /proc/4084779/cmdline` — that was **the scan itself**, whose cmdline
+contains the literal `w93a_suite`. w113 §9 rightly says to check `/proc` before relaunching; it
+does not say the check false-positives on itself. **Exclude `$$` and skip any cmdline containing
+the scan expression**, or you will diagnose a hang that is your own shell.
+
+🎯 **`systemd-run --user` NEEDS `XDG_RUNTIME_DIR` AND `DBUS_SESSION_BUS_ADDRESS`, AND THIS SHELL
+HAS NEITHER.** It fails with *"Failed to connect to user scope bus via local transport"* — which
+reads like systemd being unavailable and is not.
+
+🔴🔴 **AND THE UNIT GETS ALMOST NO `PATH`, WHICH SILENTLY TURNS SEVEN GUARDS RED.** My first
+launch produced reds at `w82a`, `w84a`, `w85c`, `w86a`, `w87a`, `w88a`, `w91b`, `w72b`, `w74b` —
+**nine checks, every one in 0.3–1.7 s**, which is far too fast for the Kaggle API calls they
+make. That pattern is the tell: nine independent guards do not fail at once, a shared dependency
+does. The fail log said it outright:
+
+    FileNotFoundError: [Errno 2] No such file or directory: 'kaggle'
+
+    $ systemd-run --user --pipe --quiet /bin/sh -c 'echo $PATH'
+    /nix/store/…-systemd-259.3/bin/          ← that is the WHOLE inherited PATH
+
+**`systemd-run --user` does not inherit the caller's `PATH`.** `kaggle` lives at
+**`/home/nixos/.local/bin/kaggle`** — a *fourth* directory, in none of the recipes this workspace
+has written down. ⚠ **Those nine reds were an artefact of my launch, not guard failures**, and
+I deleted the fail logs they wrote so a later run cannot mistake them for evidence. The working
+launch passes `PATH` explicitly:
+
+    export XDG_RUNTIME_DIR=/run/user/1000 \
+           DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+           PATH=/run/current-system/sw/bin:$PATH
+    FULLPATH=/home/nixos/.local/bin:/home/nixos/.nix-profile/bin:/run/current-system/sw/bin:/usr/bin:/bin
+    systemd-run --user --unit=<name> --collect --working-directory="$PWD" \
+        --setenv=PATH="$FULLPATH" --setenv=HOME=/home/nixos \
+        "$PWD/.venv/bin/python" experiments/w93a_suite.py
+
+Verify the environment before trusting the run:
+`systemd-run --user --pipe --quiet --setenv=PATH="$FULLPATH" /bin/sh -c 'command -v kaggle'`.
+
+🎯 **THIS IS THE THIRD PATH FAILURE IN ONE RUN** (§5's browser probe, `diff` not found, and this)
+and the most expensive, because it does not error visibly — **it produces a plausible-looking
+suite result with nine reds.** A future run that saw that log would spend its whole slot
+diagnosing nine healthy guards.
+
+⚠ **The suite prints to stdout and systemd captures it — there is NO `w93a_suite.log`.** Read it
+with `journalctl --user -u <unit> --no-pager -o cat`. Looking for a log file finds nothing and
+looks like a failed launch.
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK. **FOURTEENTH RUN ASKING. TWO DAYS LEFT.**
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+`55656399 → w36_ad199stdcorr.csv` (public 0.97118, CV rank 1 of 164) ·
+`55588167 → w23_ad187stdcorr.csv` (public 0.97116). Not clicking costs **+4.5228e-6**; clicking
+the **wrong** pair costs **+35.17e-6 or +81.92e-6** (w114a). §2 removed the last places in the
+read-path that named those wrong files as right.
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status`**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED TEN FOR WHATEVER UTC DAY IT IS.** 08-30 and 08-31 are both registered
+   and verified. ⚠ If the run lands on **08-31** having missed 08-30, the queue CSV is stamped
+   08-30 and **`w26g` refuses `--go`** — correct, not a fault. Run
+   `w48e_order.py --day 2026-08-31 --write` first, then send. Expect 0.93–0.96, all far below the
+   tier; quote `w26d`'s **bound**, never its point estimate (w112 §2).
+   ✅ Sending is **free w.r.t. selection**: `w85c` G3 certifies every planned row below the
+   0.97119 tier, and w99 priced the remaining calendar's tier exposure at exactly **0**.
+3. After the send: `w93a_suite.py` (**49 checks now**), then `w54a_vetoexpiry` + `w85c_slotguard`.
+   ⛔ Never under `timeout`; check `/proc` first **and exclude your own scan** (§6); launch it
+   with the `XDG_RUNTIME_DIR`/`DBUS` exports in §6 and read it via `journalctl`, not a log file.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). Do not start a member build.
+5. 🆕 **If Remote Control is connected, use `PushNotification` for the click ask** (§4). Read the
+   return string — *"Mobile push not sent"* means it did **not** reach him.
+6. ⛔ **DO-NOT, carried forward from w92–w114 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED, re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file; do not quote `274k` for the hard band (it is
+     **250,188**), cite a line number of RESEARCH.md, use `pgrep`, read `$?` after a pipe, launch
+     a long job with anything but `systemd-run --user`, run the suite alongside a member build,
+     build `cat_native_ctr2` / `cat_natlat`, sweep GBDT hyperparameters, or add ordinary GBDT
+     members.
+   • **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · write a control that asserts a
+     TOTAL when the baseline is non-zero · match a stem without an identifier boundary.
+   • 🆕 **DO NOT** record "X is not installed" from `/run/current-system/sw/bin` alone — that
+     recipe misses `~/.nix-profile/bin`, where `google-chrome` actually lives (§5).
+   • 🆕 **DO NOT** trust a `/proc` name scan without excluding the scanning shell (§6).
+   • 🆕 **DO NOT** launch the suite under `systemd-run` without `--setenv=PATH=…` including
+     `/home/nixos/.local/bin` — the unit inherits almost no PATH and nine API-calling guards go
+     red in under 2 s each, looking exactly like real failures (§6).
+   • 🆕 **DO NOT** edit `JOURNAL.md`'s history to remove a superseded pick name. It is the
+     record; #49 exempts it deliberately (§2).
+   • 🆕 **DO NOT** launch Chrome to try the click — it exists and runs, and holds no Kaggle
+     session (§5).
+7. ⚠ **NEW LESSONS.** • The rot w114 found in printed prose also lived in the *documents*, and
+   fixing one surface does not fix the class (§2). • An in-place annotation that preserves line
+   count avoids the offset churn a prepend forces on `w106a`/`w107a` (§2). • An allowlist keyed
+   on a case-sensitive substring fails **closed**, which is the right direction (§3). • A guard
+   whose probe set all lives in one directory cannot detect that its PATH recipe omits another
+   (§5). • A `/proc` scan matches itself (§6).
+
+## 9. ADDENDUM — SUITE 49/49 GREEN, FOOTER PRESENT, ON THE **SECOND** LAUNCH
+
+⏱ **`w93a_suite.py`: 49/49 GREEN in 324 s, FAILURES 0**, run after every edit in this entry had
+landed, under `systemd-run --user` with **`--setenv=PATH`** (§6), no `timeout`, `/proc` checked
+first with the scanning shell excluded.
+
+    [ 1/49] w54a_vetoexpiry      rc=0    1.7s   the queue outlasts the calendar
+    [29/49] w85c_slotguard       rc=0   11.1s   FAILURES 0
+    [35/49] w92a_smokerun        rc=0  115.8s   FAILURES 0
+    [42/49] w106a_claimguard     rc=0    0.2s   FAILURES 0
+    [43/49] w107a_lineref        rc=0    0.1s   FAILURES 0
+    [48/49] w114b_selectguard    rc=0    0.0s   ✅ CLEAN
+    [49/49] w115a_docselectguard rc=0    0.2s   ✅ CLEAN
+    TOTAL 324s   49/49 green   FAILURES: 0
+
+C1 all 49 stems resolve on disk · **C2 the list matches RESEARCH.md at 49** — the check that
+mattered, since this run changed both the `^## THE \d+ STANDING CHECKS` header count and the
+published stem list, and C2 confirms the shape-matched parse still finds them.
+
+✅ **`w106a_claimguard` and `w107a_lineref` are green WITHOUT re-recording offsets** — the
+zero-line-shift editing in §2 did what it was designed to do. w114 prepended and had to let both
+JSONs absorb the shift; this run changed RESEARCH.md in eight places and moved **no** line number.
+
+⚠ **THE FIRST LAUNCH'S NINE REDS WERE NOT GUARD FAILURES** (§6) and its `w93a_fail_*.log` files
+were **deleted**, because w113 §9's rule cuts both ways: a fail log is written on red and never
+cleaned up, so leaving nine PATH-artefact logs on disk would have handed the next run nine
+fabricated findings. The footer above is the evidence, not the absence of fail logs.

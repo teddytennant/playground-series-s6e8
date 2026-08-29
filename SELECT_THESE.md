@@ -39,8 +39,8 @@ Neither is the CV-preferred pair. Priced on the live board:
 `experiments/w74a_clickprice.py`, two verbatim controls at 0.000e+00. Honest reading: **the
 click is worth about 3–4.5e-6 of expected private AUC, and it is not a large number.** At the
 current board density (rank 92 of 2,774, leader 490e-6 ahead) that is roughly a place or two,
-not a medal. It is worth doing because it costs one minute and removes a known failure mode,
-not because it wins anything.
+not a medal. ⚠ BUT THAT PRICES ONLY THE *MISSING* CLICK. Clicking the WRONG pair costs up to
+**+81.92e-6, ~18x more** (see below) — closing THAT is what the one minute actually buys.
 
 ⚠ Do not "improve" on this list by picking the higher public scores. That is the failure.
 Selection here is on CV, and the CV ordering is stable — `w36_ad199stdcorr` is argmax on
