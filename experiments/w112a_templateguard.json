@@ -1,0 +1,15 @@
+{
+  "cert_mark": "w55a certifies its public score BELOW the",
+  "failures": 0,
+  "heads": {
+    "w26g queue-drain": 74,
+    "w37 es-bias": 0,
+    "w55 tail-fill": 6
+  },
+  "n_automated": 80,
+  "n_submissions": 181,
+  "probe_marks": [
+    "not an attempt on the board",
+    "a MEASUREMENT, not a candidate"
+  ]
+}

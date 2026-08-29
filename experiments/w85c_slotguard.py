@@ -68,6 +68,8 @@ TIER = 0.97119
 PAGE = 500
 
 PLAN_RE = re.compile(r"^plan, (\d+) file\(s\):", re.M)
+# The sender's own words for "I would plan nothing", printed instead of a plan line.
+DRAINED = "nothing to send: the queue is drained of everything sendable."
 
 
 def api_rows():
@@ -91,11 +93,24 @@ def slots_left() -> tuple[int, int, int]:
 
 
 def plan_len(n: int) -> int:
-    """Ask the SENDER how many files it would actually plan. Dry run: it never sends."""
+    """Ask the SENDER how many files it would actually plan. Dry run: it never sends.
+
+    ⚠⚠ A DRAINED QUEUE PLANS ZERO AND PRINTS NO PLAN LINE (w112, 2026-08-29). `w26g_send.py`
+    has a branch that prints DRAINED and returns before `plan, N file(s):` is ever emitted, so
+    on a queue with nothing sendable this helper used to raise. Not a hypothetical: G2 hands it
+    the pre-w85 control queue, and by 181 sends **all 48 of that queue's files were sent**,
+    so the control stopped being readable at the exact moment it became maximally true.
+    🎯 THE NEGATIVE CONTROL SUCCEEDED SO COMPLETELY THAT THE INSTRUMENT READING IT BROKE --
+    G2 wants "the stale queue is SHORT", and a drained queue is short by every slot there is.
+    ⛔ Zero is READ from the sender's own sentence, not inferred from a missing match: anything
+    else unparseable still raises, because "refusing to guess" is the right default (w104).
+    """
     out = subprocess.run([sys.executable, SENDER, "--n", str(n)],
                          capture_output=True, text=True, timeout=1800).stdout
     m = PLAN_RE.search(out)
     if not m:
+        if DRAINED in out:
+            return 0
         raise SystemExit("could not parse the sender's plan length -- refusing to guess")
     return int(m.group(1))
 

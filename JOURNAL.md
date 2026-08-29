@@ -32183,3 +32183,279 @@ nothing left to check before clicking. **Human-only, and still the largest singl
    • **A "stale artefact" premise is a claim about a timestamp — check the clock's zone** (§4).
    • **Predicting which way a red-by-design guard will read is a real test of understanding it**
      (§7).
+
+---
+
+# w112 — 2026-08-29, slot 1 of 10, ANGLE "Original dataset: find the real source dataset this
+# synthetic data was generated from, and concatenate it as extra training rows. Historically the
+# single biggest edge in Playground Series."
+# ✅ THE REGISTERED 08-29 TEN **SENT**, ALL TEN SCORED · ANGLE IS INDEX ROW 1, CLOSED, PRICE 0
+# 🔴 THREE STANDING CHECKS WENT RED AND **ALL THREE HAD THE SAME ROOT CAUSE — TODAY'S OWN SEND**
+
+## 0. THE CONSTRAINTS, IN ORDER
+
+`git status` first: clean apart from the usual untracked experiment artefacts, **0 tracked
+deletions**. `date -u` → **2026-08-29 12:40Z**. `w26g_send.py --n 10`: *"171 submissions on
+record; 0 already sent on 2026-08-29 (UTC); **10 of 10 slots left today**"*, and its plan was
+**identical, file for file and order for order, to the registered 08-29 ten** that `w48e_order
+--day 2026-08-29` prints. So it went out unmodified, as nine consecutive next-run notes have
+instructed. **Daily cap re-confirmed at 10** from the CLI's own countdown.
+
+## 1. THE ANGLE — ROW 1, THE ONE THIS WORKSPACE HAS CLOSED THE MOST TIMES
+
+Genus `original dataset` → **ANGLE INDEX row 1: closed ×5 since 08-11, price 0.** Quoted, not
+re-taken, per the standing rule. The two routes and their numbers, from RESEARCH's
+*"The original dataset — CLOSED, both routes measured here"*:
+
+| route | result |
+|---|---|
+| literal concatenation, 1× / 10× / 50× | **−58e-6 / −986e-6 / −3,340e-6** — monotone in dose |
+| separate estimator `orig_binm` (MCAR-masked, the strongest version) | **−1e-6 to −2e-6** in the 160-member stack; 0 under h3. Twelve readings, none positive |
+
+⛔ **The search question is closed too**: the competition's linked original is
+`algozee/smartphone-addiction-prediction-data`, our copy is byte-identical, no other public
+dataset carries the schema. 🎯 **The single most reliable edge in the Playground Series is not
+merely absent in S6E8, it is INVERTED**, and the reason is structural — the original is a crisp
+two-threshold rule (5-fold AUC 0.9885) that the generator smeared into a ramp, so the real rows
+teach a label function that disagrees with the competition's on 86% of the frame. Adding them
+teaches the model the wrong function. **Do not re-open.**
+
+## 2. THE SEND — TEN OUT, TEN SCORED, EVERY ONE WHERE IT WAS PREDICTED TO BE
+
+12:37:12–12:37:44Z, `confirmed from the API: 10 submissions today (was 0). 0 slots left.`
+
+| # | file | pred | LB | err |
+|---|---|---|---|---|
+| 1 | `w85_cal_bolt_cat_unique` | 0.960725 | 0.96058 | −145e-6 |
+| 2 | `w85_cal_bolt_lgb_raw_d4` | 0.960827 | 0.96044 | −387e-6 |
+| 3 | `w37_cal_dkv_xgb` | 0.966243 | 0.96595 | −293e-6 |
+| 4 | `w37_cal_ravi_realmlp1c` | 0.966409 | 0.96581 | −599e-6 |
+| 5 | `w16d_membercell` | 0.971070 | **0.97107** | 0.0 |
+| 6 | `w15f_antistudent_cv` | 0.971070 | 0.97106 | −10e-6 |
+| 7 | `blend153_logit` | 0.971025 | 0.97104 | +15e-6 |
+| 8 | `blend160orig_logit` | 0.971039 | 0.97106 | +21e-6 |
+| 9 | `blend156_logit` | 0.971039 | 0.97105 | +11e-6 |
+| 10 | `blend160origm_logit` | 0.971043 | 0.97106 | +17e-6 |
+
+**Best of the day 0.97107, 120e-6 below the account best. Nothing moved; nothing was expected
+to** — every one carried `P(beat best) 0.00e+00` or was a declared measurement.
+
+🎯 **THE PRICER IS UNBIASED WHERE IT WAS FITTED AND OPTIMISTIC WHERE IT EXTRAPOLATES, AND TODAY
+QUADRUPLED THE EVIDENCE FOR THE SECOND HALF.** Over all **102** scored files that carry a
+recorded point prediction:
+
+    predicted-LB band         n   mean err     sd      min      max
+    [0.9550, 0.9620)          2   −266.0e-6  171.1    −387.0   −145.0
+    [0.9620, 0.9680)          2   −446.0e-6  216.4    −599.0   −293.0
+    [0.9705, 1.0000)         98     +1.8e-6   12.7     −41.0    +24.0
+    pearson(predicted level, signed error) = +0.7509
+
+The stack-regime arm is the w46c-corrected pricer and it is **honest to ±24e-6 over 98 files**.
+The low band is `w55a`'s spearman point estimate reaching 3–9e-3 below anything it was fitted
+on, and it reads **145–599e-6 high**. ⚠ **That is not a broken safety guarantee, and the
+direction is why.** `w55a` certifies an **upper bound**, and the point estimate erring HIGH
+makes the bound MORE conservative. Audited every certified file ever sent:
+
+| file | point | certified bound | actual | vs bound |
+|---|---|---|---|---|
+| `w85_cal_bolt_cat_unique` | 0.960725 | 0.962285 | 0.96058 | −1705e-6 |
+| `w85_cal_bolt_lgb_raw_d4` | 0.960827 | 0.962387 | 0.96044 | −1947e-6 |
+| `w37_cal_dkv_xgb` | 0.966243 | 0.967803 | 0.96595 | −1853e-6 |
+| `w37_cal_ravi_realmlp1c` | 0.966409 | 0.967969 | 0.96581 | −2159e-6 |
+| `w16d_membercell` | 0.971070 | 0.971110 | 0.97107 | −40e-6 |
+| `w15f_antistudent_cv` | 0.971070 | 0.971090 | 0.97106 | −30e-6 |
+
+**6 certified, 6 inside the bound, 0 violations** — and four of the six were sent today, so the
+certification that keeps unranked members out of auto-selection is now **empirically tested**
+rather than only argued. ⟹ **Quote the bound, never the point estimate, for anything below the
+blend band.**
+
+## 3. 🔴 THE HEADLINE: THREE REDS, ONE CAUSE — AND THE RUNNER SAID SO BEFORE I DID
+
+Suite after the send (queue already rebuilt for 08-30): **43/46 in 393 s**, red on
+`w72b_dayguard`, `w85c_slotguard`, `w92a_smokerun`. The runner's own footer refused the lazy
+reading: *"⛔ w85c is red but w54a is GREEN, so this is NOT the post-send freshness pattern.
+Read the saved output before assuming it is expected."* It was right — **none of the three was
+the post-send pattern.** All three are instruments meeting a state **this run's own ten
+created**, and none is a defect in the pipeline or the picks.
+
+**(a) `w92a_smokerun` → `w93b_cvlbaudit` exits 1 → G2: four "ATTEMPTS outside the blend band".**
+`w93b` classifies a file as a measurement rather than an attempt **by what its description
+says** — the right policy, written in its own comment, *"classifying them by SCORE would be the
+stdflag mistake (a number is not provenance)"*. But the policy was implemented as **one string
+literal**, `"not an attempt on the board"`, and the send path emits **two** templates: the
+`w37`-era probe wording and, since w55, a `tail-fill` wording that declares the same thing in
+different words. Today's ten were the **first send ever** to put tail-fill files far below the
+band, so the missing literal had never cost anything.
+🎯 **A CLASSIFIER THAT READS A DECLARATION IS ONLY AS GOOD AS ITS LIST OF WORDINGS, AND A LIST
+OF WORDINGS ROTS SILENTLY — it fails by classifying into the DEFAULT, never by erroring.**
+
+**(b) `w72b_dayguard` check 4 → the six members sent today are "certified by neither
+`w48e.CAL_ROWS` nor `w55a_unpriced.json`".** They were certified — the certification is quoted
+in all six submission descriptions. `w55a_unpriced.json` holds the rows still **UNSENT**, so
+rebuilding the queue after a send (which the post-send checklist *requires*) drops every member
+sent that day out of the artefact, and the day it was sent then reads as uncertified **forever**.
+⚠ **The same file already had the right idea one check earlier**: check 3 is scoped *"a past
+day's ten ARE sent, so only days after today can fail this"*. Check 4 never got the memo.
+
+**(c) `w85c_slotguard` G2 → `could not parse the sender's plan length -- refusing to guess`.**
+G2 is the negative control: it hands the sender the **pre-w85 queue** and requires it to come up
+SHORT. At 181 sends, **all 48 files in that control queue have now been sent**, so the sender
+takes its drained branch, prints *"nothing to send"* and never emits the `plan, N file(s):` line
+G2 parses. 🎯 **THE NEGATIVE CONTROL SUCCEEDED SO COMPLETELY THAT THE INSTRUMENT READING IT
+BROKE** — G2 wanted "short", and a drained queue is short by every slot there is.
+
+## 4. THE FIXES — THREE, EACH NARROW, EACH WITH A CONTROL THAT FIRES
+
+⛔ None of these weakens an assertion, and I checked that specifically, because "patch the guard
+until it goes green" is the failure mode this workspace exists to avoid.
+
+| file | change | and what replaced the exemption |
+|---|---|---|
+| `w93b_cvlbaudit.py` | `PROBE_MARK` → **`PROBE_MARKS`**, both templates | 🆕 **G2b**: a declared measurement is excused the blend band and then held to the property that MATTERS — it must have landed **below the auto-selection tier**, read live from `w55a_unpriced.json`. Green at **margin +120.0e-6** over 11 measurements |
+| `w72b_dayguard.py` | for a **sent** member, resolve the certification from the **submission description on the send record** | ⛔ **not a past-day exemption**: a sent member whose description carries no certification still FAILS. The witness is evidence written at registration time, before the score was known |
+| `w85c_slotguard.py` | `plan_len` returns **0** on the sender's own drained sentence | ⛔ zero is **READ**, not inferred: any other unparseable output still raises. "Refusing to guess" stays the default (w104) |
+
+Controls, all run: **G2b fires** when the tier is moved to 0.96 (and `w55a_unpriced.json` is
+md5-identical before and after). **w72b's rescue fires twice** — once with the witness string
+broken, once with the rescue set forced empty — and the guard's source is md5-untouched.
+**`plan_len` passes 4/4**: 0 on the drained sentence, 7 on a real plan line, `SystemExit` on
+garbage and on empty output.
+
+After the fixes `w93b` is rc=0 and **every headline statistic is unchanged**, which is the point:
+the six reclassified files carry no parseable CV and were never in the sample.
+
+    CV -> LB, 164 complete cases   gap mean +1037.2e-6   sd 34.6e-6   [+983.3, +1169.0]
+    pearson +0.8813   spearman +0.8064
+
+| date | n | gap mean | gap sd | pearson | spearman | auto pair | CV pair |
+|---|---|---|---|---|---|---|---|
+| 08-26 | 140 | 1036.77e-6 | 32.81e-6 | +0.9009 | +0.8005 | unchanged | unchanged |
+| 08-27 | 150 | 1038.15e-6 | 33.63e-6 | +0.8893 | +0.7782 | unchanged | unchanged |
+| 08-28 | 160 | 1035.78e-6 | 33.92e-6 | +0.8842 | +0.8061 | unchanged | unchanged |
+| **08-29** | **164** | **1037.24e-6** | **34.63e-6** | **+0.8813** | **+0.8064** | **unchanged** | **unchanged** |
+
+**24 more complete cases since 08-26 have moved the mean gap by 0.47e-6** (1036.77 → 1037.24)
+**and have never moved either pair.** Total sends over the same stretch: 171 → 181.
+Slot 1 is still **CV rank 1 of 164**.
+
+## 5. 🆕 STANDING CHECK #47 — `w112a_templateguard`, THE CLASS THAT BIT TWICE IN ONE RUN
+
+Two of the three reds were one missing string in a description-classifier, in two different
+guards. This account's submission descriptions ARE its memory across runs, three guards read
+them by grepping a LITERAL, and **nothing had ever checked that the set of literals covers the
+set of templates**. The literals are **imported from the guards that own them, never retyped**.
+
+    T1  COVERAGE -- every automated-era template head on the live record is one this file
+        classifies. A new template FAILS until it is registered (w89b/w92a-G3's shape)
+    T2  every `w26g queue-drain` description yields a CV under w84a.CV_RE -- a template change
+        that broke the parse would silently SHRINK the CV->LB audit instead of failing
+    T3  every `w55 tail-fill` description matches a `w93b.PROBE_MARKS` entry AND carries
+        `w72b.CERT_MARK`. This is the 08-29 failure, asserted directly
+    T4  NO DEAD LITERAL -- every probe mark matches at least one description ever sent
+    T5  five negative controls, one per assertion. **All five fire.**
+
+⚠ **AND T4 CAUGHT A SCOPING ERROR IN ITSELF ON ITS FIRST RUN.** I had scoped every assertion to
+the automated era (`date >= 2026-08-22`); the `w37 es-bias` template last went out **before**
+that, so inside the window its perfectly correct literal matched nothing and T4 reported it
+rotted. ⟹ **DEADNESS IS A CLAIM ABOUT THE WHOLE RECORD, NOT ABOUT THE WINDOW.** T1's window is
+right (everything before 08-22 was hand-written per slot); T4's was not. Fixed and commented at
+the assertion. 🎯 **A guard whose first run fails on its own scope is worth more than one that
+passes immediately — the second kind may simply be asserting nothing.**
+
+⚠ Also cost ten minutes: `auto["head"]` shadows **`DataFrame.head`**, so `auto.head == x` is a
+silent **`bool`**, not a mask, and every comparison against it is `False`. Renamed to `tmpl`
+and commented. **A pandas column named after a DataFrame method is a silent no-op, not an error.**
+
+## 6. THE SUITE, THE QUEUE, THE BOARD
+
+Queue rebuilt (`w23b_sendqueue.py`, rc=0) and **08-30 registered** (`w48e_order --day 2026-08-30
+--write`, rc=0) — ten certified members, all 296,302 rows, no NaN, md5 matched. 19 vetoed rows
+pushed to the back. `w23b_sendqueue.csv` is **md5-identical before and after** the w85c run that
+swaps the control queue in and out.
+
+Board at 12:44Z, **first movement at the top in ~16 hours**: Chris Deotte 0.97205 → **0.97207**,
+cstdy 0.97145 → **0.97147**; Changye Li 0.97154, MILANFX 0.97149, Keanan 0.97139 unchanged.
+Account best **0.97119**, unchanged. Full-leaderboard download: **rank 247 of 3,238 teams**.
+⚠ **The brief's "~1,326 teams" is stale by 2.4×** — quote the downloaded count.
+
+## 7. ⛔ TEDDY — STILL ONE HUMAN CLICK, **ELEVENTH RUN ASKING, TWO DAYS LEFT**
+
+`.venv/bin/python experiments/check_selection.py` → **rc=1**, read without a pipe.
+*"NOTHING IS SELECTED."* Kaggle then auto-selects on **public** score — the Rogii failure.
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+One minute, **+4.5228e-6** expected private AUC, deadline **2026-08-31 23:59**. Both candidate
+files are verified byte-for-byte reproducible from their bases (w111) and slot 1 is the strict
+CV argmax of everything sent (**rank 1 of 164** as of today). There is nothing left to check
+before clicking. **Human-only, and still the largest single item by a wide margin.**
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status` first**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED 08-30 TEN.** Built and verified by this run. Do not re-litigate it.
+   All ten are certified members; expect scores in **0.941–0.961**, all far below the tier,
+   and expect **`w26d`'s point estimates to read 150–600e-6 HIGH** (§2) — that is the known
+   extrapolation bias, not a fault. The **bound** is what is certified.
+3. After the send: re-run `w93a_suite.py` (**47 checks now**), then rebuild the queue for 08-31
+   and re-run `w54a_vetoexpiry` + `w85c_slotguard`.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED.** All ten ANGLE INDEX rows are closed or resolved and
+   seven are verified at the artefact level. Do not start a member build.
+5. ⛔ **DO-NOT, carried forward and added to.** All of w92–w111's list holds.
+   • **DO NOT** move WANTED. Slot 1 is the strict CV argmax (rank 1/164); slot 2 is the
+     w64-settled hedge and both its re-open conditions are unmet.
+   • **DO NOT** quote `w55a`'s POINT ESTIMATE for anything below the blend band — it reads
+     145–599e-6 high there. Quote the **bound**, which is 6-for-6 (§2).
+   • **DO NOT** read a red guard as a pipeline fault before reading its saved
+     `w93a_fail_<stem>.log`. Three reds today, three instrument-scope issues, zero pipeline
+     faults — and the runner's footer said so before I did (§3).
+   • **DO NOT** name a pandas column `head` (or any DataFrame method) — the comparison is a
+     silent `bool` (§5).
+   • **DO NOT** re-open the original-dataset angle (§1), error analysis, OOF segmentation,
+     calibration of the final file; do not quote `274k` for the hard band (it is **250,188**),
+     cite a line number of RESEARCH.md, use `pgrep` (it is not on this box's PATH — use
+     `/proc`), read `$?` after a pipe, launch a long job with anything but `systemd-run --user`
+     (with `XDG_RUNTIME_DIR` **and** `--setenv=PATH="$PATH"`), run the suite alongside a member
+     build, build `cat_native_ctr2` / `cat_natlat`, sweep GBDT hyperparameters, or add ordinary
+     GBDT members.
+6. ⚠ **NEW LESSONS.**
+   • **A classifier that reads a declaration is only as good as its list of wordings, and that
+     list rots silently — into the default, never into an error** (§3a). Mechanised as #47.
+   • **The live artefact is the wrong witness for a file that has already gone.** Read the
+     send record (§3b).
+   • **A negative control can succeed so completely that the instrument reading it breaks**
+     (§3c). "Nothing left to be short of" is the maximum of "short", not a parse failure.
+   • **A guard whose first run fails on its own scope is worth more than one that passes
+     immediately** (§5).
+   • **Direction matters more than magnitude in a bound.** The pricer being 599e-6 optimistic
+     is safe precisely because what is certified is an upper bound (§2).
+
+## 9. ADDENDUM — HARDENING DONE AFTER THE FIRST GREEN PASS
+
+The suite went **47/47 green in 344 s** and I then tightened three things rather than stopping
+at green:
+
+- **`w112a` parses the date instead of comparing the string.** Its era window was
+  `df["date"].astype(str) >= "2026-08-22"`, which is right for today's format and would go
+  silently wrong the day the format moves — the exact defect w91 spent a run repairing across
+  seven modules. It now goes through `w91a_subdate.parse_sub_dates`. ⟹ **This was not only a
+  correctness fix: importing that helper is what ENROLS a module in `w92a_smokerun`'s surface**,
+  so the new guard is now **executed** by the suite, not merely type-checked.
+- **`w92a_smokerun` RUN list gained `w112a_templateguard.py`**, with its rule written next to it.
+  G3 (coverage) now reads **11 modules import `w91a_subdate`, 11 classified**, and G1 executes
+  the new guard: `w112a_templateguard.py rc=0`. w92a standalone rc=0, G4 control still fires.
+- **`w93a_suite.py`'s list comment no longer carries a count.** It read *"The 45, verbatim from
+  RESEARCH.md"* while the list held 46 — the same rot the RESEARCH header avoids by being
+  matched on SHAPE (`^## THE \d+ STANDING CHECKS`). ⟹ **Do not write a count into a comment
+  next to the thing that changes it.**
+
+A confirming full-suite pass was run afterwards so that one log covers every final version.
+
+⏱ **CONFIRMING SUITE PASS: 47/47 GREEN, 336 s**, run after every edit in this entry had landed
+— including the date-parser change and the `w92a` enrolment. `w72b_dayguard` **rc=0**,
+`w85c_slotguard` **rc=0**, `w92a_smokerun` **rc=0 in 118.4 s**, `w112a_templateguard` **rc=0**.
+Nothing else was running. Both selection refs re-verified against the live record:
+**55656399 → `w36_ad199stdcorr.csv` (public 0.97118)** and
+**55588167 → `w23_ad187stdcorr.csv` (public 0.97116)**.

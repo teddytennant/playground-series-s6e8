@@ -1,17 +1,23 @@
 {
- "n_sent_stems": 171,
- "n_with_oof": 162,
- "n_without_oof": 9,
+ "n_sent_stems": 181,
+ "n_with_oof": 166,
+ "n_without_oof": 15,
  "nocv_stems": [
   "w15e_antistudent",
   "w15f_antistudent_avg",
+  "w15f_antistudent_cv",
   "w16b_cellweight",
+  "w16d_membercell",
   "w16f_armavg",
+  "w37_cal_dkv_xgb",
   "w37_cal_dm_cat",
   "w37_cal_mkt_realmlp",
   "w37_cal_om_xgb2",
   "w37_cal_omid_tabm",
-  "w37_cal_ram_hgb"
+  "w37_cal_ram_hgb",
+  "w37_cal_ravi_realmlp1c",
+  "w85_cal_bolt_cat_unique",
+  "w85_cal_bolt_lgb_raw_d4"
  ],
  "nocv_lb_max": 0.97107,
  "raw_argmax": "w36_ad199stdcorr",
@@ -52,7 +58,7 @@
   }
  ],
  "kill_era_lb6": -40.35,
- "spearman_cv_lb_all": 0.8173749596814451,
+ "spearman_cv_lb_all": 0.8147728496727047,
  "spearman_cv_lb_97": 0.8100922912048412,
  "failures": 0
 }

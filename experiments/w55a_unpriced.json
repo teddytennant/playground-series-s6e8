@@ -1,100 +1,14 @@
 {
   "account_best": 0.97119,
   "envelope": {
-    "0.99": 0.0017399999999999638,
-    "0.999": 0.00019999999999997797,
+    "0.99": 0.0023200000000000998,
+    "0.999": 0.0002500000000000835,
     "0.9999": 4.0000000000040004e-05,
     "0.99995": 4.0000000000040004e-05,
     "0.99999": 2.0000000000020002e-05
   },
-  "n_scored": 171,
+  "n_scored": 181,
   "rows": {
-    "w15f_antistudent_cv.csv": {
-      "all": {
-        "spearman": {
-          "anchor": "w15f_antistudent_avg.csv",
-          "bound": 0.97109,
-          "bucket": 0.99999,
-          "envelope": 2.0000000000020002e-05,
-          "point": 0.97107,
-          "spearman": 0.9999978230725739,
-          "valid": true
-        }
-      },
-      "bound": 0.97109,
-      "instrument": "spearman",
-      "margin_e6": 99.99999999998899,
-      "reg_lb": 0.97107,
-      "safe": true
-    },
-    "w16d_membercell.csv": {
-      "all": {
-        "spearman": {
-          "anchor": "w16b_cellweight.csv",
-          "bound": 0.97111,
-          "bucket": 0.99995,
-          "envelope": 4.0000000000040004e-05,
-          "point": 0.97107,
-          "spearman": 0.9999851209153917,
-          "valid": true
-        }
-      },
-      "bound": 0.97111,
-      "instrument": "spearman",
-      "margin_e6": 79.99999999996899,
-      "reg_lb": 0.97107,
-      "safe": true
-    },
-    "w37_cal_dkv_xgb.csv": {
-      "all": {
-        "prereg": {
-          "anchor": "prereg",
-          "bound": 0.9678029903047837,
-          "overshoot": 0.001560369528612826,
-          "point": 0.9662426207761708,
-          "valid": true
-        },
-        "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
-          "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9890526709872336,
-          "valid": false
-        }
-      },
-      "bound": 0.9678029903047837,
-      "instrument": "prereg",
-      "margin_e6": 3387.0096952163253,
-      "reg_lb": 0.9662426207761708,
-      "safe": true
-    },
-    "w37_cal_ravi_realmlp1c.csv": {
-      "all": {
-        "prereg": {
-          "anchor": "prereg",
-          "bound": 0.9679694641090268,
-          "overshoot": 0.001560369528612826,
-          "point": 0.966409094580414,
-          "valid": true
-        },
-        "spearman": {
-          "anchor": "w37_cal_dm_cat.csv",
-          "bound": 0.96987,
-          "bucket": 0.99,
-          "envelope": 0.0017399999999999638,
-          "point": 0.96813,
-          "spearman": 0.9911850517712771,
-          "valid": true
-        }
-      },
-      "bound": 0.9679694641090268,
-      "instrument": "prereg",
-      "margin_e6": 3220.535890973153,
-      "reg_lb": 0.966409094580414,
-      "safe": true
-    },
     "w85_cal_ad_gnn_note.csv": {
       "all": {
         "prereg": {
@@ -105,12 +19,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9558350498937671,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.971232979885811,
           "valid": false
         }
       },
@@ -131,9 +45,9 @@
         },
         "spearman": {
           "anchor": "w37_cal_dm_cat.csv",
-          "bound": 0.9764700000000001,
+          "bound": 0.9788800000000001,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
+          "envelope": 0.010750000000000037,
           "point": 0.96813,
           "spearman": 0.9522242057078966,
           "valid": false
@@ -143,31 +57,6 @@
       "instrument": "prereg",
       "margin_e6": 9290.177819412216,
       "reg_lb": 0.960339452651975,
-      "safe": true
-    },
-    "w85_cal_bolt_cat_unique.csv": {
-      "all": {
-        "prereg": {
-          "anchor": "prereg",
-          "bound": 0.9622851369348097,
-          "overshoot": 0.001560369528612826,
-          "point": 0.9607247674061968,
-          "valid": true
-        },
-        "spearman": {
-          "anchor": "w37_cal_dm_cat.csv",
-          "bound": 0.9764700000000001,
-          "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96813,
-          "spearman": 0.9813493091205183,
-          "valid": false
-        }
-      },
-      "bound": 0.9622851369348097,
-      "instrument": "prereg",
-      "margin_e6": 8904.863065190339,
-      "reg_lb": 0.9607247674061968,
       "safe": true
     },
     "w85_cal_bolt_dcnv2_cross.csv": {
@@ -180,12 +69,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9541046473003285,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9707693673413714,
           "valid": false
         }
       },
@@ -205,12 +94,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9586752314126489,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.971493827450311,
           "valid": false
         }
       },
@@ -230,12 +119,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9545762215696189,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9714210859432698,
           "valid": false
         }
       },
@@ -255,12 +144,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9542468151926914,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9716670776538758,
           "valid": false
         }
       },
@@ -268,31 +157,6 @@
       "instrument": "prereg",
       "margin_e6": 29485.6129892358,
       "reg_lb": 0.9401440174821514,
-      "safe": true
-    },
-    "w85_cal_bolt_lgb_raw_d4.csv": {
-      "all": {
-        "prereg": {
-          "anchor": "prereg",
-          "bound": 0.9623871309270072,
-          "overshoot": 0.001560369528612826,
-          "point": 0.9608267613983944,
-          "valid": true
-        },
-        "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
-          "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9832926740351351,
-          "valid": false
-        }
-      },
-      "bound": 0.9623871309270072,
-      "instrument": "prereg",
-      "margin_e6": 8802.86907299277,
-      "reg_lb": 0.9608267613983944,
       "safe": true
     },
     "w85_cal_bolt_neural_5fold.csv": {
@@ -305,12 +169,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.953715887828808,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9717432537307343,
           "valid": false
         }
       },
@@ -330,12 +194,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9556675962790753,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.973599728465226,
           "valid": false
         }
       },
@@ -355,12 +219,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9553890508286176,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9730076443453288,
           "valid": false
         }
       },
@@ -380,12 +244,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9551371087835143,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9722788756057785,
           "valid": false
         }
       },
@@ -405,12 +269,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w23_ad187std_h3_rescale.csv",
-          "bound": 0.97948,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.97114,
-          "spearman": 0.7531233415281187,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.7670870044518008,
           "valid": false
         }
       },
@@ -430,12 +294,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.8856667211529794,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.899362829686601,
           "valid": false
         }
       },
@@ -455,12 +319,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9566761666703737,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9742227430325653,
           "valid": false
         }
       },
@@ -480,12 +344,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_cat_unique.csv",
+          "bound": 0.97133,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9432130780270306,
+          "envelope": 0.010750000000000037,
+          "point": 0.96058,
+          "spearman": 0.9610481443749886,
           "valid": false
         }
       },
@@ -505,12 +369,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9549175841321923,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9710596187420246,
           "valid": false
         }
       },
@@ -530,12 +394,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9725410493127978,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9870883914805493,
           "valid": false
         }
       },
@@ -555,12 +419,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.966982283186609,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9797769821780303,
           "valid": false
         }
       },
@@ -580,12 +444,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9578092972168301,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9746179201120949,
           "valid": false
         }
       },
@@ -605,12 +469,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9573126654411781,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9743560640884021,
           "valid": false
         }
       },
@@ -630,12 +494,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9414511266469605,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9593377714907653,
           "valid": false
         }
       },
@@ -655,12 +519,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9132678632658259,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9207351545571517,
           "valid": false
         }
       },
@@ -680,12 +544,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w29_ad194std_rankraw.csv",
-          "bound": 0.97948,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.97114,
-          "spearman": 0.8392284132230144,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.8556943739633398,
           "valid": false
         }
       },
@@ -705,12 +569,12 @@
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_ram_hgb.csv",
-          "bound": 0.97779,
+          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.008340000000000014,
-          "point": 0.96945,
-          "spearman": 0.9417241041747906,
+          "envelope": 0.010750000000000037,
+          "point": 0.96044,
+          "spearman": 0.9584803630499065,
           "valid": false
         }
       },

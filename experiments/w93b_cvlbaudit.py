@@ -55,9 +55,23 @@ LEDGER = os.path.join(HERE, "w57a_tierprice2.json")
 # the board" -- and they land 2-9e-3 below the blend band by design. Classifying them by
 # SCORE would be the stdflag mistake (a number is not provenance), so they are classified by
 # what their description says they are.
-PROBE_MARK = "not an attempt on the board"
+# ⚠⚠ THERE ARE **TWO** DECLARATION TEMPLATES, AND UNTIL w112 ONLY ONE WAS WIRED IN (2026-08-29).
+# The principle above is right and was already written down; the implementation carried a single
+# literal. `w26g_send.py` emits the `w37`-era probe wording AND, since w55, a `tail-fill` wording
+# that declares exactly the same thing in different words -- and declares something STRONGER,
+# because it names a `w55a` bound below the auto-selection tier. On 2026-08-29 the day's ten were
+# the first send to put four tail-fill files 3.4-9.5e-3 below the band, and G2 called them
+# ATTEMPTS. 🎯 A CLASSIFIER THAT READS A DECLARATION MUST KNOW EVERY WORDING THAT DECLARES IT --
+# the bug was one missing string, in a check whose docstring had the policy exactly right.
+PROBE_MARKS = ("not an attempt on the board",      # w37-era single-member probes
+               "a MEASUREMENT, not a candidate")   # w55 tail-fill; carries a certified bound
 AUC_BAND = (0.5, 1.0)               # any valid probability AUC
 BLEND_BAND = (0.9700, 0.9720)       # where every real attempt on this board has landed
+# ⛔ NOT AN EXEMPTION. A declared measurement is excused the blend band and then held to the
+# property that actually matters: it must have landed BELOW the auto-selection tier, because a
+# measurement ABOVE the tier is a file Kaggle could auto-select while nothing is selected. The
+# tier is read live from `w55a_unpriced.json` -- the same artefact the sender certifies against.
+UNPRICED = os.path.join(HERE, "w55a_unpriced.json")
 
 
 def main() -> int:
@@ -73,7 +87,10 @@ def main() -> int:
     df["cv"] = df["description"].astype(str).str.extract(CV_RE)[0].astype(float)
     df["lb"] = pd.to_numeric(df["publicScore"], errors="coerce")
 
-    df["probe"] = df["description"].astype(str).str.contains(PROBE_MARK, regex=False)
+    desc = df["description"].astype(str)
+    df["probe"] = False
+    for mark in PROBE_MARKS:
+        df["probe"] |= desc.str.contains(mark, regex=False)
     scored = df.dropna(subset=["lb"])
     off_auc = scored[(scored.lb <= AUC_BAND[0]) | (scored.lb > AUC_BAND[1])]
     attempts = scored[~scored.probe]
@@ -89,6 +106,23 @@ def main() -> int:
               f"{BLEND_BAND}, {int(scored.probe.sum())} declared measurement probes "
               f"({scored[scored.probe].lb.min():.5f}..{scored[scored.probe].lb.max():.5f}) "
               f"excluded by their OWN description; {len(df) - len(scored)} unscored")
+
+    # ---- G2b: what the exemption is replaced by, not what it lets through -----------------
+    probes = scored[scored.probe]
+    if not os.path.exists(UNPRICED):
+        bad.append(f"G2b {os.path.basename(UNPRICED)} is missing -- the tier is unknown, so the "
+                   f"{len(probes)} declared measurement(s) cannot be held to anything")
+    elif len(probes):
+        tier = json.load(open(UNPRICED))["tier"]
+        over = probes[probes.lb >= tier]
+        if len(over):
+            bad.append(f"G2b {len(over)} DECLARED MEASUREMENT(s) scored at or above the "
+                       f"{tier} auto-selection tier -- they are auto-selectable while nothing "
+                       f"is selected: {over[['fileName', 'lb']].to_dict('records')}")
+        else:
+            print(f"✅ G2b all {len(probes)} declared measurement(s) landed below the {tier} "
+                  f"auto-selection tier; closest is {probes.lb.max():.5f}, margin "
+                  f"{(tier - probes.lb.max()) * 1e6:+.1f}e-6")
 
     # ---- G3: the description CV vs the on-disk ledger, where both carry a file ------------
     n_agree = n_dis = 0

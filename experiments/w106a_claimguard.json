@@ -1,0 +1,44 @@
+{
+  "c0": {
+    "inventory": 509
+  },
+  "c1": {
+    "findings": []
+  },
+  "c2": {
+    "absent_reported": [
+      "cat_native_ctr2",
+      "cat_natlat"
+    ],
+    "n_findings": 1
+  },
+  "c3": {
+    "absent_reported": [
+      "cat_native_ctr2",
+      "cat_natlat"
+    ],
+    "n_findings": 2
+  },
+  "c4": {
+    "spans": [
+      {
+        "found": true,
+        "header": "## \u26b0\ufe0f AND A CITATION IN THE CATBOOST CLOSURE THAT POINTS AT NOTHING",
+        "hi": 997,
+        "lo": 973
+      },
+      {
+        "found": true,
+        "header": "# \ud83d\udd3b A CLOSURE'S CITATIONS ARE NOW MACHINE-CHECKED \u2014 `w106a_claimguard`, standing check #42",
+        "hi": 832,
+        "lo": 817
+      }
+    ]
+  },
+  "c5": {
+    "claims": 33,
+    "resolved_tokens": 16
+  },
+  "failures": 0,
+  "utc": "2026-08-29T13:00:11+00:00"
+}

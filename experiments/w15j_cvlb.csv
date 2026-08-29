@@ -66,19 +66,19 @@ blend150fx_rescale,0.9700125368779352,0.97102,2071,7e85a98a125c,"range [-8.736, 
 w14a_repro159av_logit,0.969964869765448,,1101,da839d72cdfe,"range [-8.646, 16.85]",0.97106,logit,True
 blend159av_logit,0.9699647645223464,0.97106,1161,06727e8aec66,"range [-8.594, 16.7]",0.97106,logit,True
 blend159_logit,0.9699646622223984,,1080,eceda703bf46,"range [-8.74, 16.86]",0.97106,logit,True
-blend160origm_logit,0.9699635759958648,,1268,4955d2dd7ce2,"range [-8.589, 16.94]",,logit,False
-blend156_logit,0.9699618031215246,,1279,10c00b11e5fc,"range [-8.62, 16.84]",,logit,False
-blend160orig_logit,0.969961779850316,,1268,6b8013b4af90,"range [-8.587, 16.67]",,logit,False
+blend160origm_logit,0.9699635759958648,,1268,4955d2dd7ce2,"range [-8.589, 16.94]",0.97106,logit,True
+blend156_logit,0.9699618031215246,,1279,10c00b11e5fc,"range [-8.62, 16.84]",0.97105,logit,True
+blend160orig_logit,0.969961779850316,,1268,6b8013b4af90,"range [-8.587, 16.67]",0.97106,logit,True
 blend158_logit,0.9699613898723588,0.97106,1102,9c26716828b7,"range [-8.582, 16.93]",0.97106,logit,True
 blend150sx_logit,0.9699553831959208,0.97104,1107,e929a9e416bb,"range [-8.56, 16.7]",0.97104,logit,True
-blend153_logit,0.9699540296194336,,1119,218e2f648353,"range [-8.538, 16.95]",,logit,False
+blend153_logit,0.9699540296194336,,1119,218e2f648353,"range [-8.538, 16.95]",0.97104,logit,True
 blend150fx_logit,0.9699498370519284,0.97103,1112,d4c678ce6450,"range [-8.486, 17.02]",0.97103,logit,True
 stack_pub86_hybrid,0.9696778003750686,0.9708,0,e8f4ab66691d,,0.9708,hybrid,True
 stack_pub88_mine_logit,0.9696599465172034,0.97081,0,8aecc58dde9b,,0.97081,logit,True
 stack_pub74_logit,0.969641351563196,0.97081,0,09a02db8b0e3,,0.97081,logit,True
 w15e_antistudent,,0.97104,0,19f7f9fc4d5d,,0.97104,ens4,True
 w15f_antistudent_avg,,0.97107,0,cc2fdec4b011,,0.97107,ens4,True
-w15f_antistudent_cv,,,0,235add14266d,,,ens4,False
+w15f_antistudent_cv,,,0,235add14266d,,0.97106,ens4,True
 w16b_cellweight,,0.97107,0,6a4edff53096,,0.97107,ens4,True
-w16d_membercell,,,0,44833ada633b,,,ens4,False
+w16d_membercell,,,0,44833ada633b,,0.97107,ens4,True
 w16f_armavg,,0.97107,0,c3288f8b3ee9,,0.97107,ens4,True

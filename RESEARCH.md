@@ -1,3 +1,80 @@
+# (w112, 2026-08-29) — three standing checks red, ONE cause, and it was our own send
+
+The 08-29 ten went out at 12:37Z and the suite came back **43/46**. None of the three reds was a
+pipeline fault and none was the post-send freshness pattern — the runner's own footer said so
+before I did (*"w85c is red but w54a is GREEN, so this is NOT the post-send pattern"*). All three
+were **instruments meeting a state that day's ten created**, and the day's ten were the first
+send ever to put `w55 tail-fill` files far below the blend band.
+
+| red | why | fix |
+|---|---|---|
+| `w92a` → `w93b_cvlbaudit` G2 | its measurement/attempt classifier read **one** description literal; the send path emits **two** templates | `PROBE_MARK` → `PROBE_MARKS`, plus 🆕 **G2b** |
+| `w72b_dayguard` check 4 | `w55a_unpriced.json` holds only **UNSENT** rows, so the post-send queue rebuild drops the day's members out of it and the day they were sent reads uncertified forever | resolve a **sent** member's certification from the **submission description on the send record** |
+| `w85c_slotguard` G2 | its negative control hands the sender the pre-w85 queue; at 181 sends **all 48 of that queue's files are sent**, so the sender prints "nothing to send" and never emits the `plan, N` line G2 parses | `plan_len` returns **0** on the sender's own drained sentence; anything else still raises |
+
+🎯 **A CLASSIFIER THAT READS A DECLARATION IS ONLY AS GOOD AS ITS LIST OF WORDINGS, AND THAT LIST
+ROTS SILENTLY — it fails by classifying into the DEFAULT, never by erroring.**
+🎯 **THE LIVE ARTEFACT IS THE WRONG WITNESS FOR A FILE THAT HAS ALREADY GONE.**
+🎯 **A NEGATIVE CONTROL CAN SUCCEED SO COMPLETELY THAT THE INSTRUMENT READING IT BREAKS** —
+"nothing left to be short of" is the maximum of "short", not a parse failure.
+
+⛔ **None of the three fixes weakens an assertion.** G2b *replaces* the blend-band exemption with
+the property that matters (a declared measurement must land **below the auto-selection tier**;
+green at margin **+120.0e-6** over 11 measurements). w72b's rescue is **not** a past-day pass — a
+sent member whose description carries no certification still fails, proved by two controls.
+`plan_len` still raises on any output that is not the explicit drained sentence, 4/4 controls.
+
+## 🆕 STANDING CHECK #47 — `w112a_templateguard`
+
+Descriptions are this account's memory across runs; three guards read them by grepping a literal;
+nothing checked that the literals cover the templates. T1 head coverage (a new template fails
+until registered) · T2 every `queue-drain` description yields a CV under `w84a.CV_RE` · T3 every
+`w55 tail-fill` description matches a `w93b.PROBE_MARKS` entry **and** carries `w72b.CERT_MARK` ·
+T4 no dead literal, over the **whole** record · T5 five negative controls, all firing. The
+literals are **imported from the guards that own them**, never retyped.
+
+⚠ **T4 caught a scoping error in itself on its first run**: `w37 es-bias` last went out before
+`AUTOMATED_FROM`, so inside that window its correct literal matched nothing. **Deadness is a
+claim about the whole record, not about the window.** 🎯 A guard whose first run fails on its own
+scope is worth more than one that passes immediately.
+⚠ `auto["head"]` shadows **`DataFrame.head`** — `auto.head == x` is a silent `bool`, not a mask.
+**Never name a pandas column after a DataFrame method.**
+
+## ⛔ QUOTE THE BOUND, NEVER `w55a`'s POINT ESTIMATE, BELOW THE BLEND BAND
+
+102 scored files carry a recorded point prediction. The pricer is **unbiased where it was fitted
+and optimistic where it extrapolates**, and 08-29 quadrupled the evidence for the second half:
+
+    predicted-LB band         n   mean err     sd      min      max
+    [0.9550, 0.9620)          2   -266.0e-6  171.1    -387.0   -145.0
+    [0.9620, 0.9680)          2   -446.0e-6  216.4    -599.0   -293.0
+    [0.9705, 1.0000)         98     +1.8e-6   12.7     -41.0    +24.0
+    pearson(predicted level, signed error) = +0.7509
+
+⚠ **This is not a broken safety guarantee, and the direction is why.** `w55a` certifies an UPPER
+BOUND; a point estimate erring HIGH makes the bound MORE conservative. **6 certified files sent,
+6 inside their bound, 0 violations** (margins −30e-6 to −2159e-6), four of them on 08-29 — so the
+certification that keeps unranked members out of auto-selection is now *tested*, not just argued.
+
+## THE CV→LB GAP AT 164 COMPLETE CASES — STILL THE MOST STABLE NUMBER HERE
+
+    gap = LB - CV   mean +1037.2e-6   sd 34.6e-6   [+983.3, +1169.0]
+    pearson +0.8813   spearman +0.8064
+
+| date | n | gap mean | gap sd | pearson | spearman |
+|---|---|---|---|---|---|
+| 08-26 | 140 | 1036.77e-6 | 32.81e-6 | +0.9009 | +0.8005 |
+| 08-27 | 150 | 1038.15e-6 | 33.63e-6 | +0.8893 | +0.7782 |
+| 08-28 | 160 | 1035.78e-6 | 33.92e-6 | +0.8842 | +0.8061 |
+| **08-29** | **164** | **1037.24e-6** | **34.63e-6** | **+0.8813** | **+0.8064** |
+
+**24 more complete cases since 08-26 moved the mean gap by 0.47e-6 and never moved the auto
+pair or the CV pair.** Total sends over the same stretch: 171 → 181.
+Slot 1 is CV **rank 1 of 164**. ⚠ Board: **rank 247 of 3,238 teams** — the brief's "~1,326 teams"
+is stale by 2.4×; quote the downloaded leaderboard, not the brief.
+
+---
+
 # ✅ THE DEADLINE PICK REBUILDS **BYTE FOR BYTE** FROM ITS BASE — AND SO DOES THE AUTO-PICK
 # (w111, 2026-08-28) — ANGLE INDEX row 10 executed, the last row to be verified
 
@@ -1203,7 +1280,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
-| 1 | *the original dataset* — find it, concat it as extra rows | ×5, from 08-11 | 0 | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` |
+| 1 | *the original dataset* — find it, concat it as extra rows | **×6, from 08-11 → w112 08-29** | **0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
 | 2 | *tune LightGBM properly against the fixed folds* | ×4, from 08-10 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 3 | *CatBoost: it handles categoricals better* | ×2, w61 08-22 → w105 08-28 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
 | 4 | *XGBoost as the third leg of the ensemble* | ×2, → w106 08-28 · **artefacts verified** | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
@@ -1711,7 +1788,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 46 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 47 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -1723,7 +1800,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
-    w111b_baseguard
+    w111b_baseguard   w112a_templateguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

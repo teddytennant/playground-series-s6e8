@@ -53,6 +53,11 @@ from stdflag import is_member                                            # noqa:
 
 FAILURES = 0
 
+# The sentence `w48e_order` writes into every tail-fill description at registration time. It is
+# evidence written BEFORE the file scored, and it is the only witness that survives the file
+# leaving `w55a_unpriced.json`.
+CERT_MARK = "w55a certifies its public score BELOW the"
+
 
 def fail(msg: str) -> None:
     global FAILURES
@@ -85,10 +90,23 @@ def main() -> None:
     # THE AUTHORITATIVE SENT HISTORY — the live API, not the queue CSV (see the docstring).
     api = S.api_submissions()
     hist = Counter()
+    # ⚠⚠ THE CERTIFICATION OF A **SENT** FILE DOES NOT LIVE IN `w55a_unpriced.json` (w112,
+    # 2026-08-29). That artefact holds the rows still UNSENT: the moment `w23b_sendqueue.py`
+    # is rebuilt after a send -- which the post-send checklist requires -- every member sent
+    # that day drops out of it, and check 4 below then reports the day it was sent as
+    # uncertified, forever. 🎯 SAME SHAPE AS CHECK 3's OWN RULE ("a past day's ten ARE sent"):
+    # for a file already gone, the live artefact is the wrong witness. The right witness is
+    # the SUBMISSION DESCRIPTION, which `w48e_order` wrote at registration time, before the
+    # score was known, and which Kaggle now holds out of this workspace's reach.
+    # ⛔ THIS IS NOT A PAST-DAY EXEMPTION. A sent member whose description carries no
+    # certification still fails, which is the case the check is for.
+    certified_on_record = set()
     for r in api:
         f = r.get("fileName") or r.get("file_name") or ""
         if f:
             hist[f[:-4] if f.endswith(".csv") else f] += 1
+            if CERT_MARK in str(r.get("description") or ""):
+                certified_on_record.add(f[:-4] if f.endswith(".csv") else f)
     unsent = set(pd.read_csv(os.path.join(HERE, "w23b_sendqueue.csv"))
                  .file.str.replace(".csv", "", regex=False))
 
@@ -128,10 +146,17 @@ def main() -> None:
     for d, o in sorted(orders.items()):
         if set(o) & set(W.VETO):
             fail(f"{d} plans VETOED file(s): {sorted(set(o) & set(W.VETO))}")
-        mem = sorted(s for s in o if is_member(s) and s not in cal)
+        mem = sorted(s for s in o if is_member(s) and s not in cal
+                     and s not in certified_on_record)
         if mem:
-            fail(f"{d} plans member-family file(s) certified by neither w48e.CAL_ROWS nor "
-                 f"w55a_unpriced.json — no stack CV and no bound below the tier: {mem}")
+            fail(f"{d} plans member-family file(s) certified by neither w48e.CAL_ROWS, "
+                 f"w55a_unpriced.json, nor a certification on the send record — no stack CV "
+                 f"and no bound below the tier: {mem}")
+        rescued = sorted(s for s in o if is_member(s) and s not in cal
+                         and s in certified_on_record)
+        if rescued:
+            print(f"    ⓘ {d}: {len(rescued)} sent member(s) certified from the SEND RECORD, "
+                  f"not from w55a_unpriced.json (which holds unsent rows only): {rescued}")
 
     for d, o in sorted(orders.items()):
         n_sent = sum(1 for s in o if s in hist)

@@ -2615,3 +2615,22 @@ and 31 sends since 08-26 have moved it 2.4e-6 and moved neither the auto pair no
 ⛔ The final-selection click is still not done — **tenth** run asking. `check_selection.py` reads
 **rc=1, nothing selected**. Auto-selection on public score costs **+4.5228e-6** expected private
 AUC against the CV pick, and private is the score that counts.
+
+## 2026-08-29, w112 (slot 1) — the 08-29 ten SENT, board's first move in ~16 hours, rank 247/3238
+
+Top five, 12:44Z: **Chris Deotte 0.97207** (was 0.97205 — first movement at the top since
+w103 on 08-27), Changye Li 0.97154, MILANFX 0.97149, **cstdy 0.97147** (was 0.97145), Keanan
+0.97139. Two of the five moved, both by +2e-5, both irrelevant to us.
+
+**Account best 0.97119, unchanged** (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`).
+Full-leaderboard download: **rank 247 of 3,238 teams**, 181 submissions. ⚠ The brief's
+"~1,326 teams" is badly stale — the field has grown 2.4× since it was written, so quote the
+downloaded count, not the brief.
+
+The registered 08-29 ten went out 12:37:12–12:37:44Z and all ten scored. Best of the day
+**0.97107** (`w16d_membercell`), which is 120e-6 below the account best and exactly where
+`w55a` certified it would be. Nothing on the board changes the CV-based deadline pick.
+
+⛔ The final-selection click is still not done — **eleventh** run asking. `check_selection.py`
+reads **rc=1, nothing selected**. Auto-selection on public score costs **+4.5228e-6** expected
+private AUC against the CV pick, and private is the score that counts. Two days left.

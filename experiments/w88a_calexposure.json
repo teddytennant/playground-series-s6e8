@@ -1,7 +1,7 @@
 {
- "day": "2026-08-28",
+ "day": "2026-08-29",
  "tier": 0.97119,
- "n_registered": 30,
+ "n_registered": 20,
  "pred_sd_e6": 8.770000000000001,
  "p_max": 0.02,
  "base_e6": 4522768.52959767,
@@ -14,7 +14,7 @@
  "e_at": 0.0,
  "exposure_e6": 0.0,
  "sensitivity": {
-  "sd_e6": 12.669580703521543,
+  "sd_e6": 12.765457606163428,
   "any_above": 0.0,
   "any_at": 0.0,
   "exposure_e6": 0.0,
@@ -22,33 +22,33 @@
  },
  "tightest": [
   {
-   "day": "2026-08-29",
-   "stem": "w16d_membercell",
-   "margin_e6": 120.000000000009,
+   "day": "2026-08-30",
+   "stem": "w85_cal_ad_logregte",
+   "margin_e6": 10850.547348025042,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-29",
-   "stem": "w15f_antistudent_cv",
-   "margin_e6": 120.000000000009,
+   "day": "2026-08-30",
+   "stem": "w85_cal_lat_encdrop_r400",
+   "margin_e6": 17531.217678012024,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-29",
-   "stem": "blend160origm_logit",
-   "margin_e6": 147.34210838196483,
+   "day": "2026-08-30",
+   "stem": "w85_cal_lat_tedrop_r400",
+   "margin_e6": 20123.902922197234,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-29",
-   "stem": "blend156_logit",
-   "margin_e6": 150.5912724035774,
+   "day": "2026-08-30",
+   "stem": "w85_cal_bolt_extratrees_support",
+   "margin_e6": 26541.38769268799,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-29",
-   "stem": "blend160orig_logit",
-   "margin_e6": 150.63392177316894,
+   "day": "2026-08-30",
+   "stem": "w85_cal_golem_g",
+   "margin_e6": 27597.376634683646,
    "p_above": 0.0
   }
  ],

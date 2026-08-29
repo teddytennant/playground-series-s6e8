@@ -48,6 +48,10 @@ RUN = [
     "w93b_cvlbaudit.py",     # added w93: the live CV->LB gap audit. RUN, not excluded — it is
                              # read-only by construction (writes only its own JSON) and its
                              # own G1-G4 are what make it worth executing rather than trusting.
+    "w112a_templateguard.py",  # added w112: the description-template coverage guard. It reads
+                               # the submissions frame through parse_sub_dates DELIBERATELY, so
+                               # that it lands in this surface and is EXECUTED rather than only
+                               # type-checked. Read-only; writes only its own JSON.
 ]
 
 # Excluded, each with the rule that excludes it. Not a convenience list.
