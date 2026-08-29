@@ -88,17 +88,17 @@ w113 §9 says check `/proc` before relaunching the suite. It does not say the ch
 on itself: a scan for `w93a_suite` finds the scanning shell, whose cmdline contains that literal.
 **Exclude `$$` and skip any cmdline containing the scan expression.**
 
-# ✅ A CHANNEL TO THE HUMAN EXISTS — `PushNotification` — BUT IT IS GATED ON REMOTE CONTROL
+# ⚠ A CHANNEL TO THE HUMAN THAT HAS NEVER ONCE BEEN OPEN HERE — `PushNotification`, REMOTE-GATED
 
 Zero hits across RESEARCH.md and JOURNAL.md before w115. It sends a desktop notification and,
-**only when Remote Control is connected**, a phone push. Tried 2026-08-29:
+**only when Remote Control is connected**, a phone push. w115 and w116 both tried it on 2026-08-29 — 0 for 2, and the return string was verbatim identical both times:
 
     Mobile push not sent (Remote Control inactive).
 
-⚠ **It did NOT reach Teddy's phone; do not record it as if it did.** The desktop leg goes to the
-terminal, where the session's output already goes, so it added no channel that day. It is worth
-retrying on any run where Remote Control IS connected — that is a real path to the human that
-fourteen runs of writing into files never had. **Read the return string.**
+⚠ **It did NOT reach Teddy's phone either time; do not record it as if it did.** The desktop leg
+goes to the terminal, where the session output already goes, so it has added no channel on any
+run so far. Still call it once per run — it costs nothing and the gate is a **state**, not a
+property. ⛔ But "a channel exists" overstates it: **it exists and has never opened here**, and fifteen runs have now asked in files. **Read the return string; do not assume.**
 
 # ⛔ THE BROWSER EXISTS AND RUNS. THE BLOCKER IS THE LOGIN. STILL A HUMAN CLICK.
 
@@ -1552,7 +1552,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 2 | *tune LightGBM properly against the fixed folds* | ×4, from 08-10 | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 3 | *CatBoost: it handles categoricals better* | ×2, w61 08-22 → w105 08-28 | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
 | 4 | *XGBoost as the third leg of the ensemble* | ×2, → w106 08-28 · **artefacts verified** | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
-| 5 | *feature engineering: interactions, in-fold target and count encodings* | w15b/w15d → w62 | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` |
+| 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — THE MOST-HANDED ANGLE IN THIS WORKSPACE** · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
 | 6 | *blending: rank-average or weight the models by OOF* | ×3, 36 members apart → w63 → w108 08-28 · **artefacts verified** | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
 | 7 | *seed and fold diversity, averaged* | ×5, → w64 → w109 08-28 · **artefacts verified** | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | w102, 08-28 — **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |

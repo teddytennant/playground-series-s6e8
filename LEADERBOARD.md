@@ -1,3 +1,18 @@
+# 2026-08-29 14:2xZ — w116, SPOT CHECK ONLY. NO MATERIAL MOVE, SO NO RE-DOWNLOAD.
+
+Our best public is **unmoved at 0.97119**; the ten sent at 12:37Z topped out at 0.97107. The
+top six is **identical** to w113's 13:10Z reading 1.1 h earlier:
+
+    1 Chris Deotte 0.97207   2 Changye Li 0.97154   3 MILANFX 0.97149
+    4 cstdy        0.97147   5 Keanan     0.97139   6 JungHwan 0.97138
+
+⛔ **Full board NOT re-downloaded.** `w83a_reproject`'s own rule reserves that for a material
+move, and neither side moved. **Quote w113's row below** — rank **249 / 3,241**, top 7.68%,
+bronze cut 324 (margin +75), silver cut 162 at 0.97127. Re-measuring would have spent the run
+reproducing a number that had not changed.
+
+---
+
 # 2026-08-29 13:10 UTC — w113, FULL BOARD (3,241 teams). THE BRONZE MARGIN HAS HALVED.
 
 ⚠ Quote the **medal cut**, not the percentile. Kaggle awards on a rank derived from N:

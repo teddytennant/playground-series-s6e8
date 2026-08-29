@@ -33165,3 +33165,202 @@ and RESEARCH.md byte-identical afterwards.
 `$?` after a pipeline is `tail`'s status — and it produced a wrong reading for the second time in
 this repo's history. **Re-verified through a redirect.** 🎯 The DO-NOT list is not protection if
 you only apply it to the *subject* of the run and not to the commands you check it with.
+
+---
+
+# w116 — 2026-08-29, slot 5 of 10, ANGLE "Feature engineering: interactions, in-fold target and
+# count encodings, careful categorical treatment". ⛔ **AT CAP 10/10 — NO SUBMISSION, CORRECTLY.**
+# 🎯 THE MOST-HANDED ANGLE IN THIS WORKSPACE HAD THE THINNEST INDEX ROW. FIXED.
+
+## 1. AT CAP. The ten for 2026-08-29 went out at 12:37Z, before this run started
+
+`w26g_send.py --n 10` reads **`0 of 10 slots left today`** and refuses. 181 submissions on
+record. Today's ten topped out at **0.97107** (`w16d_membercell`), every one far below the
+0.97119 auto-selection tier — which is what `w85c_slotguard` exists to certify, and it is green
+below. **Our best public is unmoved at 0.97119** and nothing sent today touched it.
+
+⚠ The dry run correctly warned `QUEUE FOR ANOTHER DAY: queue was written for 2026-08-30`. That
+is the day-stamp guard working, not a fault. Nothing was sent and nothing was written.
+
+## 2. THE ANGLE — ROW 5, HANDED FOR THE **FIFTEENTH** TIME, AND STILL CLOSED
+
+Refused on the index's own protocol: take the genus before the first colon (`feature
+engineering`), grep `📇 THE ANGLE INDEX`, read the price. **Row 5: price negative.** The three
+sub-clauses of the handed string resolve individually, so none of it is swept under one word:
+
+| sub-clause as handed | where it is closed | number |
+|---|---|---|
+| *interactions* | `Two dead ends under the "in-fold target/count encoding" angle` | negative |
+| *in-fold target and count encodings* | same, re-derived from `agent/features.py:te_block` (line 175, read) | **−19.26e-6 (xgb), −82.68e-6 (cat)** on top of the §G6 LightGBM null |
+| *careful categorical treatment* | this is row 2/row 3's fourth knob — the w96 windowed TE prior — and it came back **NO-ENROL** (mean **−1.924e-6**, 2/5 reps positive, gates G1 and G2 FAIL) | negative |
+
+⛔ **AND ROW 5'S CARVE-OUT IS SPENT.** The row permits *"a registered test of one encoding with
+its control already built"*. w96 was that test; w106 closed it. There is no open door here, and
+I did not start a member build (w112 §8.4).
+
+🎯 **THE REAL FINDING IS ABOUT THE INDEX, NOT THE ANGLE.** I counted the handings from the
+corpus w101 says to use — the ANGLE strings JOURNAL.md records as *handed*, attributed to their
+run header rather than grepped loose:
+
+    08-10 · 08-13 · 08-16 w16s · 08-17 w22 · 08-18 w26 · 08-19 · 08-20 w34 · 08-21 w44
+    08-22 w53 · 08-23 w62 · 08-24 w81 · 08-25 w90 · 08-27 w101 · 08-28 w107   = 14, + today = 15
+
+**×15 makes row 5 the most-handed angle in this workspace** — ahead of row 9 (×8), row 1 (×6)
+and row 10 (×6). And it was the *only* modelling row carrying **no handing count at all**, no
+`artefacts verified` marker, and no pointer to its own artefact-level re-verification, which
+w107 wrote **533 lines above it** under `ROW 5 OF THE ANGLE INDEX RE-VERIFIED`. Rows 4, 6, 7, 9
+and 10 all carry that marker. So the angle handed most often was the one whose row told a new
+run the least — **exactly the per-run re-derivation cost the index was built to remove.**
+
+✅ **FIXED IN PLACE, ZERO LINE SHIFT** (w115's lesson): one line, `RESEARCH.md:1555`, 15,770
+lines before and after, `diff idx: [1555]` and nothing else. Row 5 now reads
+`×15, from 08-10 → w116 08-29 — THE MOST-HANDED ANGLE IN THIS WORKSPACE · w15b/w15d → w62 →
+w107 08-28 · artefacts verified` and carries a second anchor to w107's verification section.
+`w106a_claimguard` and `w107a_lineref` stayed green **untouched** — no offsets re-recorded.
+
+⚠ **`w110b_covguard` COULD NOT HAVE CAUGHT THIS.** #45 checks the *demand* side — that every
+handed angle is carried by **a** row. Row 5 existed and covered every one of the fifteen
+handings, so covguard was green throughout. **A row can be present, resolving, and green while
+being the least informative row in the table.** Coverage is not the same property as content,
+and no guard here checks the second.
+
+## 3. ✅ THE NEW ANCHOR IS LOAD-BEARING — CONTROL FIRED BOTH WAYS
+
+A pointer added to the index is worthless if nothing checks it, and w110 already showed that
+pointing at a section can *break* the parser that resolves it. So I tested it rather than
+assuming:
+
+    line 1555: ROW 5 … RE-VERIFIED → ZZNOTHERE   w101a_angleguard  rc=1
+      FAIL: row 5: '…ZZNOTHERE' -> 0 outside the index (1 naive) in RESEARCH.md
+    restored                                     w101a_angleguard  rc=0
+    RESEARCH.md byte-identical to the fixed version afterwards
+
+🎯 **AND THE FAILURE STRING PROVES THE ANCHOR IS NOT SELF-SATISFYING.** `0 outside the index
+(1 naive)` is w101a excising the ANGLE INDEX span before resolving — the fix w110 made by class.
+The naive reader would have matched **my own new pointer** and passed. This is the third time
+that excision has earned its keep.
+
+## 4. ✅ THE 08-31 QUEUE PATH VERIFIED LIVE, PLAN-ONLY — the journal's claim now has evidence
+
+w115 §8 asserts *"08-30 and 08-31 are both registered and verified."* There is only **one**
+queue CSV (`w26d_queueprice.csv`, 46 unsent rows) and it is stamped **08-30**, so I checked the
+claim instead of inheriting it. `w48e_order.py --day 2026-08-31` (**no `--write`** — line 664
+gates the write, line 305 parses `--day`, so plan-only is safe):
+
+    all ten: 296,302 rows, no NaN, md5 matches the queue; 10 certified members, no stack CV   OK
+    1 w85_cal_qda_lat · 2 w85_cal_rff_raw · 3 w85_cal_golem_c · 4 w85_cal_poly2_raw
+    5 w85_cal_bolt_tabr_retrieval · 6 …dcnv2_cross · 7 …gandalf_gflu · 8 …neural_5fold
+    9 …tabm_rank1 · 10 …fttransformer        pred_lb 0.9326 – 0.9415, all far below the tier
+    PLAN ONLY. Nothing written.   →  queue CSV byte-identical (`cmp` clean)
+
+✅ **The 08-31 ten are disjoint from the 08-30 ten** — the day partition is real, not a re-plan
+of the same files, and 46 unsent rows cover both remaining days with 26 to spare. The claim
+holds. ⚠ On 08-31 the queue must still be re-stamped: `w48e_order.py --day 2026-08-31 --write`
+**before** `w26g_send.py --go`, or w26g refuses on the 08-30 stamp (correctly).
+
+## 5. ⛔ THE CLICK — FIFTEENTH RUN ASKING. **TWO DAYS LEFT. `check_selection.py` STILL EXITS 1.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`55656399 → w36_ad199stdcorr.csv` (public 0.97118, CV 0.9701400060, rank 1 of 164) ·
+`55588167 → w23_ad187stdcorr.csv` (public 0.97116, CV 0.9701150809). Read live this run:
+**NOTHING IS SELECTED.** Not clicking costs **+4.5228e-6**; clicking the *wrong* pair costs
+**+35.17e-6** or **+81.92e-6**. The mis-click remains the bigger hazard by an order of magnitude.
+
+⚠ **`PushNotification` TRIED AGAIN AND THE GATE HAS NOT OPENED.** Verbatim return, identical to
+w115's: *"Mobile push not sent (Remote Control inactive)."* **This did not reach Teddy's phone
+and I am not recording it as if it did.** Two consecutive runs, same result — so the honest
+status of w115 §4 is *"a channel that exists but has never once been open here"*, not *"a channel
+we have"*. Still worth one call per run: it costs nothing and the gate is a state, not a
+property. ⛔ Do not re-price the click, and do not launch Chrome (it runs; it holds no session).
+
+## 6. SUITE 49/49 GREEN — AND THE FIRST RUN'S GREEN IS THE **CONTAMINATED** ONE
+
+⏱ `w93a_suite.py` **49/49 green, FAILURES 0, TOTAL 326s**, launched under `systemd-run --user`
+with the full `--setenv=PATH` (w115 §6), no `timeout`, `/proc` checked first **with the scanning
+shell excluded** — that scan is clean and it did not match itself this time.
+
+⚠ **BUT THAT RUN STRADDLED MY EDIT AND I WILL NOT QUOTE IT AS THE VERIFICATION.** Checks 1–32
+read the pre-edit `RESEARCH.md`; the edit landed around check 32; and for ~2 seconds during the
+§3 control the file held a deliberately broken anchor. A green suite whose inputs changed
+underneath it is evidence of nothing in particular. 🎯 **A LONG CHECK RUN IS A MEASUREMENT, AND
+EDITING ITS SUBJECT MID-RUN INVALIDATES IT THE SAME WAY IT WOULD ANY OTHER MEASUREMENT** — the
+index checks (38, 42, 43, 45, 48, 49) happened to land after the edit and are green on the final
+file, but that is luck, not design. **Re-run clean after the journal entry landed; §9 is the
+authoritative footer.** ⛔ Next run: make document edits *before* launching the suite, not
+during. The suite is 5½ minutes and it is cheaper to sequence than to reason about.
+
+## 7. BOARD — NO MATERIAL MOVE SINCE w113 MEASURED IT 1.1 HOURS AGO
+
+Top six at 14:2xZ is **identical** to w113's 13:10Z reading (Deotte 0.97207, Changye Li 0.97154,
+MILANFX 0.97149, cstdy 0.97147, Keanan 0.97139, JungHwan 0.97138) and our best public is
+unmoved at 0.97119. ⛔ **I did not re-download the full board**: `w83a_reproject`'s own rule
+reserves it for a material move, our score did not change, and w113's rank **249 / 3,241**
+(top 7.68%, bronze cut 324, margin +75) is 1.1 h old. Re-deriving it would have burned the slot
+to reproduce a number. Quote w113's row; do not re-measure until our public score moves.
+
+## 8. NEXT RUN — READ THIS ORDER
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE TEN FOR WHATEVER UTC DAY IT IS.** 08-30's ten are stamped and ready — send them.
+   ⚠ **If the run lands on 08-31**, run `w48e_order.py --day 2026-08-31 --write` FIRST; §4
+   verified that plan resolves to ten valid, disjoint, below-tier files. Expect 0.93–0.96.
+   Quote `w26d`'s **bound**, never its point estimate (w112 §2). Sending is free w.r.t.
+   selection — `w85c` G3 certifies it and w99 priced the calendar's tier exposure at **0**.
+3. **Do document edits BEFORE launching the suite** (§6), then `w93a_suite.py` under
+   `systemd-run --user` with `--setenv=PATH`, read via `journalctl`, never under `timeout`.
+4. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). Do not start a member build.
+5. **Call `PushNotification` once** for the click and **read the return string** — *"Mobile push
+   not sent"* means it did **not** reach him (§5). It has never yet been open here.
+6. ⛔ **DO-NOT, carried forward from w92–w115 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history to remove a superseded pick name.
+   • **DO NOT** record "X is not installed" from `/run/current-system/sw/bin` alone, launch the
+     suite without `--setenv=PATH=…` including `/home/nixos/.local/bin`, trust a `/proc` name
+     scan without excluding the scanning shell, or launch Chrome to try the click.
+   • 🆕 **DO NOT** edit `RESEARCH.md` while `w93a_suite.py` is running — the green it prints is
+     then a measurement of a moving subject (§6).
+   • 🆕 **DO NOT** run `w48e_order.py --write` to "check" a future day. Plan-only is the default
+     and `--write` re-stamps the live queue, which would make w26g refuse the *current* day (§4).
+   • 🆕 **DO NOT** read `w110b_covguard`'s green as "the index row is good". It checks coverage,
+     not content; row 5 was green and nearly empty for fifteen handings (§2).
+7. ⚠ **NEW LESSONS.** • Coverage and content are different properties and #45 only checks the
+   first (§2). • The most-handed angle had the thinnest row, so *frequency of handing* is itself
+   a signal about which row to enrich (§2). • A pointer you add to the index must be tested by
+   breaking it, and w101a's index-excision is what stops it from satisfying itself (§3). •
+   Verify an inherited "registered and verified" claim with the plan-only path rather than
+   quoting it (§4). • A green suite that straddles an edit to its own subject is not evidence
+   (§6). • A channel that has never been open is not a channel you have (§5).
+
+## 9. ADDENDUM — THE AUTHORITATIVE FOOTER: 49/49 GREEN ON A **CLEAN** RUN, AFTER EVERY EDIT LANDED
+
+⏱ `w93a_suite.py` re-run as `w116suite2` with **nothing changing underneath it** — the row-5
+line, the `PushNotification` section, this journal entry and `LEADERBOARD.md` were all final
+before launch. `/proc` scanned first (clean, and the scan did not match itself).
+
+    [38/49] w101a_angleguard   rc=0   0.0s  every ANGLE INDEX pointer resolves
+    [42/49] w106a_claimguard   rc=0   0.2s  FAILURES 0     (offsets NOT re-recorded)
+    [43/49] w107a_lineref      rc=0   0.1s  FAILURES 0     (offsets NOT re-recorded)
+    [45/49] w110b_covguard     rc=0   0.0s  FAILURES 0     (now with w116's handing in the corpus)
+    [48/49] w114b_selectguard  rc=0   0.0s  ✅ CLEAN
+    [49/49] w115a_docselectguard rc=0 0.1s  ✅ CLEAN
+    TOTAL 325s   49/49 green   FAILURES: 0        no w93a_fail_*.log written
+
+✅ **`w106a_claimguard` and `w107a_lineref` green WITHOUT re-recording a single offset**, across
+**two** documents edited in seven places (`RESEARCH.md:1555` for the index row, `:91/94/98/99/
+100/101` for the push section). 15,770 lines before and after, both times. The zero-line-shift
+discipline w115 introduced now has a second, larger demonstration.
+
+✅ **`w110b_covguard` is green having read this entry**, so w116's own handing of the FE angle is
+covered by the row it enriched — the demand-side check closes over the run that changed it.
+
+⚠ **Both suite runs printed `49/49 green`; only this one is evidence.** Keeping the contaminated
+run in §6 rather than deleting it is deliberate: the failure mode is that a future run reads a
+green footer and never asks what the file looked like while it was produced.

@@ -2,7 +2,7 @@
  "day": "2026-08-29",
  "failures": 0,
  "rows": 10,
- "handed": 13,
+ "handed": 14,
  "genera": [
   "blending",
   "catboost",
