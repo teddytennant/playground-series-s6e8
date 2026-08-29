@@ -1,3 +1,67 @@
+# (w114, 2026-08-29) — THE MIS-CLICK IS 8-18x THE MISSING CLICK, AND OUR OWN INSTRUMENT CAUSED IT
+
+Seven pricings (w15i, w16s/u/w, w17, w18, w45, w57, w62, w74) all answer ONE question: what
+does it cost if nobody clicks and Kaggle auto-selects on public score? Live answer **+4.5228e-6**
+(`w74a_clickprice.json`). Every one of them assumes that IF the click happens it lands on
+`check_selection.WANTED`. **Nothing had ever priced the click landing somewhere else.**
+
+`check_selection.py`'s NOTHING-IS-SELECTED branch printed, three lines under the correct
+`Wanted:` line, inside a green-tick box:
+
+    ## ✅ RESOLVED 2026-08-17 (w21 slot 7). WANTED HAS MOVED.  ##
+    WANTED is now {w21_ad187corr.csv, w20_ad187_h3.csv}.
+
+and further down annotated `w16i_schemeavg` / `blend159av_h3` as **"current WANTED"**. True on
+08-17; false since **08-19 (w28)** and **08-21 (w36b)**. All four are SENT, so Kaggle offers them
+and **the wrong click is reachable.** `experiments/w114a_misclick.py` prices both wrong pairs on
+w74a's own estimator — **GATE R reproduces `cost_auto_pair` to 0.000e+00**, C1 self-price 0,
+C3 a CV-dominant pair prices −0.069e-6 (so the estimator is not sign-locked), anchor drift from
+adding 4 names **−3.4e-9**:
+
+| what gets clicked | cost vs WANTED | vs not clicking |
+|---|---|---|
+| nothing (auto-select on public) | **+4.5228e-6** | 1.0x |
+| `w21_ad187corr` + `w20_ad187_h3` | **+35.170e-6** | **7.78x** |
+| `w16i_schemeavg` + `blend159av_h3` | **+81.923e-6** | **18.11x** |
+
+At w113's measured ~0.95 teams per 1e-6 that is roughly **4 / 33 / 78 board places** against a
+bronze margin of **75**. The conversion is public-density applied to a private-AUC cost and is a
+scale, not a claim — but the ORDER is not in doubt.
+
+🎯 **AN INSTRUMENT BUILT TO PREVENT A SMALL ERROR CAN BE THE LARGEST REACHABLE SOURCE OF A BIG
+ONE, AND ITS OWN CORRECTNESS IS NOT WHAT MAKES IT SAFE.** `WANTED` was right the whole time and
+seven repricings were right the whole time; what rotted was the PROSE PRINTED NEXT TO THEM. A
+guard on the constant would never have found it.
+🎯 **A ✅ AND A DATE ARE NOT A FRESHNESS CLAIM.** "RESOLVED 2026-08-17" was accurate about 08-17
+and read as current for twelve days.
+
+✅ **FIXED.** The branch now prints the two refs and public scores **read live from the API list**
+(this file hard-codes only the WANTED filenames), then the live prices out of
+`w74a_clickprice.json` and `w114a_misclick.json`, then the live auto-slot tiers — 30 lines where
+there were 180. The whole 08-16/08-17 narration is preserved VERBATIM in a module constant
+`CLICK_HISTORY`, printed only by `check_selection.py --history`.
+
+✅ **STANDING CHECK #48 — `w114b_selectguard`.** Walks `main()` with `ast`, collects every string
+LITERAL it prints, and fails if one names a stem that is selectable (`submissions/<stem>.csv`
+exists) and is not in `WANTED` or in `ALLOWED` with a written reason. Offline, deterministic, 0.0s.
+- ⚠ **ITS FIRST RUN WAS RED, AND CORRECTLY.** Three real hits: the two files the pagination
+  warning names as evidence (now `ALLOWED`, both public 0.97081) and `blend158` matching INSIDE
+  `blend158_logit` — fixed with a `(?![A-Za-z0-9_])` boundary. **A stem embedded in a longer
+  identifier is not that stem.**
+- ⚠⚠ **MY CONTROL WAS VACUOUS ON THE FIRST CUT.** It planted the defect and asserted
+  `len(bad) >= 2` — but the clean file already had those three hits, so it passed **without ever
+  seeing the plant.** It now diffs against the baseline and requires the NEW hits to be exactly
+  the two planted stems. 🎯 **A CONTROL THAT COUNTS MUST COUNT THE DELTA IT PLANTED, NOT THE
+  TOTAL.** (Sibling of w113 §5: exiting non-zero is not evidence of firing.)
+- ✅ **STRONGEST CONTROL AVAILABLE, AND IT IS NOT SYNTHETIC:** run against
+  `git show HEAD:experiments/check_selection.py`, the guard reports **41 hits over 10 distinct
+  clickable stems**, including all four priced above. It catches the real historical defect.
+
+⛔ **DO NOT** re-open the click PRICE (w74a stands, GATE R reproduces it), move `WANTED`, or
+delete `CLICK_HISTORY` — it is the record, and #48 is what keeps it from being read as an
+instruction. `w40_ad211stdcorr` appears in w114a only as C3's estimator control; it remains
+w40d-INELIGIBLE and WANTED does not move.
+
 # (w113, 2026-08-29) — THE MEDAL CUT IS A FUNCTION OF THE FIELD SIZE, AND OUR MARGIN HALVED
 
 Kaggle awards on a RANK derived from N, not on the percentile this workspace has been tracking:
@@ -1875,7 +1939,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 47 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 48 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -1887,7 +1951,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w91b_dateguard    w92a_smokerun      w93c_pickverify    w100a_complement
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
-    w111b_baseguard   w112a_templateguard
+    w111b_baseguard   w112a_templateguard  w114b_selectguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

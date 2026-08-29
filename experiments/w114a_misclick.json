@@ -1,0 +1,54 @@
+{
+ "gate_r": true,
+ "anchor": 4.522768560331315,
+ "w74a_cost": 4.522768563707359,
+ "drift": -3.3760443329811096e-09,
+ "self_price": 0.0,
+ "c3": -0.06891948927659541,
+ "c3_pair": [
+  "w36_ad199stdcorr",
+  "w40_ad211stdcorr"
+ ],
+ "n_names": 12,
+ "misclick": {
+  "w21_ad187corr+w20_ad187_h3": {
+   "label": "the \u2705 RESOLVED box's literal instruction",
+   "cost": 35.169756131246686,
+   "ratio": 7.77615649841484
+  },
+  "w16i_schemeavg+blend159av_h3": {
+   "label": "the slot-6 notice's 'current WANTED' annotation",
+   "cost": 81.92352750187274,
+   "ratio": 18.113579416911715
+  }
+ },
+ "cv": {
+  "blend159av_h3": 0.9700491721182697,
+  "w16i_schemeavg": 0.9700556662570055,
+  "w20_ad187_h3": 0.9701008149538332,
+  "w21_ad187corr": 0.9701068813712079,
+  "w21_ad187corr_ens4": 0.970103933067418,
+  "w23_ad187stdcorr": 0.9701150808744373,
+  "w27_ad190stdcorr": 0.9701181344162544,
+  "w29_ad194stdcorr": 0.9701182875261917,
+  "w36_ad199stdcorr": 0.9701400059625017,
+  "w36_ad199stdcorr_ens4": 0.970136587469679,
+  "w38_ad202stdcorr_ens4": 0.9701349000888667,
+  "w40_ad211stdcorr": 0.9701374732624002
+ },
+ "lb": {
+  "blend159av_h3": 0.97105,
+  "w16i_schemeavg": 0.97107,
+  "w20_ad187_h3": 0.97115,
+  "w21_ad187corr": 0.97117,
+  "w21_ad187corr_ens4": 0.97118,
+  "w23_ad187stdcorr": 0.97116,
+  "w27_ad190stdcorr": 0.97118,
+  "w29_ad194stdcorr": 0.97118,
+  "w36_ad199stdcorr": 0.97118,
+  "w36_ad199stdcorr_ens4": 0.97119,
+  "w38_ad202stdcorr_ens4": 0.97119,
+  "w40_ad211stdcorr": 0.97118
+ },
+ "failures": 0
+}

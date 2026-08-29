@@ -32659,3 +32659,208 @@ restored normal speed and the unit finished 47/47.
 
 ⛔ Add to the DO-NOT list: **DO NOT run `w93a_suite.py` under `timeout`, and DO NOT relaunch it
 without confirming through `/proc` that no `w93a_suite.py` is already running.**
+
+---
+
+# w114 — 2026-08-29, SLOT 3 of 10 (NO SLOT: the cap was spent before this run started)
+
+**ANGLE AS GIVEN: "CatBoost: it usually handles categoricals better than the others on
+survey-style data. Tune and compare on identical folds."** ⛔ **NOT HONOURED — sixth refusal of a
+GBDT-tuning angle, and the standing reason is stronger today than when it was written.** w112 §5
+carries `DO NOT sweep GBDT hyperparameters` and `DO NOT add ordinary GBDT members`; w112 §8.4
+closed the modelling question with all ten ANGLE INDEX rows resolved. A CatBoost sweep today
+would produce a member that **cannot be sent** (0 of 10 slots left), **cannot be selected**
+(WANTED is settled and is the strict CV argmax of 164), and would join a queue that already has
+**3 spare files against 0 unfilled slots**. Stated here as the playbook requires rather than done.
+
+## 1. STATE, READ NOT ASSUMED
+
+`date -u` **2026-08-29 13:34Z**. `w26g_send.py --n 10`: **181 on record, 10 already sent today
+(UTC), 0 of 10 slots left.** No submission this run and none was possible. `git status` shows
+untracked files only — no tracked deletions, so the checkout is sound. Both remaining send days
+stay registered and verified from w113 §1; the dry run correctly refused with *"queue was written
+for 2026-08-30, not today"*, which is the freshness guard working, not a fault.
+
+## 2. 🔴🔴 THE FINDING — EVERY PRICING OF THE CLICK PRICED THE WRONG FAILURE
+
+Seven pricings (w15i, w16s/u/w, w17d/g, w18a, w45a, w57a, w62a, w74a) answer one question: what
+does it cost if **nobody clicks** and Kaggle auto-selects on public score? The live answer is
+**+4.5228e-6**. Every one of them assumes that **if** the click happens it lands on
+`check_selection.WANTED`. **Nothing had ever priced the click landing somewhere else** — and this
+workspace's own instrument was pointing at somewhere else.
+
+`.venv/bin/python experiments/check_selection.py` → rc=1, read without a pipe. Its
+NOTHING-IS-SELECTED branch printed 180 lines, of which these are three, sitting **below** the
+correct `Wanted:` line and formatted as the loudest thing on the screen:
+
+    ############################################################
+    ## ✅ RESOLVED 2026-08-17 (w21 slot 7). WANTED HAS MOVED.  ##
+    ############################################################
+    WANTED is now {w21_ad187corr.csv, w20_ad187_h3.csv}.
+
+and 40 lines further down, `w16i_schemeavg` and `blend159av_h3` annotated **"current WANTED"**.
+Both statements were true when written. WANTED moved off them on **08-19 (w28)** and again on
+**08-21 (w36b)**. **All four files are SENT**, so Kaggle's dialog offers them: this is not a
+documentation blemish, it is a reachable wrong action.
+
+### The price — `experiments/w114a_misclick.py` → `w114a_misclick.json`
+
+Same estimator as w74a, imported not re-derived (`from w74a_clickprice import build, _load`).
+
+    GATE R   reproduce w74a_clickprice.json's cost_auto_pair on w74a's OWN 8-file board
+             +4.522768564e-6 vs recorded +4.522768564e-6      |d| 0.000e+00   (bar 1e-9)
+    C1       price of WANTED against itself                    +0.000e+00
+    C2       CV recomputed from all 8 OOF vectors vs recorded  max |d| < 5e-10
+    C3       a CV-DOMINANT pair must price NEGATIVE            −0.0689e-6  ✅
+    anchor drift from adding 4 names to the board              −3.4e-9
+
+| what gets clicked | CV vs the pick | cost vs WANTED | vs not clicking |
+|---|---|---|---|
+| nothing — Kaggle auto-selects on public | — | **+4.5228e-6** | 1.00x |
+| `w21_ad187corr` + `w20_ad187_h3` | −33.1 / −39.2e-6 | **+35.170e-6** | **7.78x** |
+| `w16i_schemeavg` + `blend159av_h3` | −84.3 / −90.8e-6 | **+81.923e-6** | **18.11x** |
+
+At w113's measured **~0.95 teams per 1e-6** that is roughly **4 / 33 / 78 board places**, against
+a bronze margin of **75**. ⚠ That conversion applies a public-board density to a private-AUC cost
+and is a **scale, not a claim** — but the ORDER is not in doubt, and the second row is the size of
+the entire medal margin.
+
+🎯 **AN INSTRUMENT BUILT TO PREVENT A SMALL ERROR CAN BE THE LARGEST REACHABLE SOURCE OF A BIG
+ONE, AND ITS OWN CORRECTNESS IS NOT WHAT MAKES IT SAFE.** `WANTED` was right the entire time. The
+seven pricings were right the entire time. `w56b_wantedguard`, `w84a_pickargmax` and
+`w93c_pickverify` all guard the constant and all were green. **What rotted was the prose printed
+next to them**, and no guard in this workspace looked at printed prose.
+🎯 **A ✅ AND A DATE ARE NOT A FRESHNESS CLAIM.** "RESOLVED 2026-08-17" was accurate about 08-17
+and read as current for twelve days. C3's own lesson from w45 was that a *price* goes stale on a
+board move; this is the same rot one level up, in the instruction.
+
+### ✅ THE FIX
+
+`check_selection.py`'s no-selection branch now prints, in this order and in **30 lines** where
+there were 180:
+
+1. **CLICK EXACTLY THESE TWO** — filename, **live submission ref** and **live public score**,
+   taken from the API list the same call already returned. The file hard-codes only the WANTED
+   *filenames*; a literal ref in that block is exactly the defect being removed.
+2. the live prices, read out of `w74a_clickprice.json` and `w114a_misclick.json` — never typed
+   into the source — with an explicit *"the mis-click is the bigger hazard by an order of
+   magnitude"*, and a fallback line that says the price is **UNKNOWN, not zero**, if a JSON is
+   unreadable;
+3. the live auto-slot tiers, unchanged, including the `blend158_logit` exposure warning;
+4. a pointer to `--history`.
+
+The whole 08-16/08-17 narration is preserved **VERBATIM** in a module constant `CLICK_HISTORY`
+and printed only by `check_selection.py --history` (verified byte-identical against the lift).
+Nothing was deleted: it is the decision record. `WANTED`, `WANTED_INELIGIBLE`, `WANTED_RETIRED`
+and `assert_wanted_eligible` are untouched, and the six heaviest importers of this module
+(`w26g_send`, `w26d_queueprice`, `w39a_audit`, `stdflag`, `w40b_promote`, `w61a_armctl`) were
+import-smoked green afterwards.
+
+## 3. ✅ STANDING CHECK #48 — `w114b_selectguard`, AND ITS FIRST TWO RUNS WERE BOTH WRONG
+
+Walks `main()` with `ast`, collects every string **literal** it prints, and fails if one names a
+stem that is **selectable** (`submissions/<stem>.csv` exists) and is not in `WANTED` or in
+`ALLOWED` with a written reason. Comments and the module docstring are deliberately **not**
+scanned — the file's top 460 lines are a decision record and naming a superseded file there is
+correct. `CLICK_HISTORY` is exempt for free: it is printed by NAME, so the walk never sees it.
+Offline, deterministic, **0.0s**, no API call.
+
+⚠ **ITS FIRST RUN WAS RED, AND CORRECTLY** — three real hits. Two are the files the pagination
+warning names *as evidence of a past truncation bug* (`stack_pub74_logit`,
+`stack_pub88_mine_logit`, both public 0.97081): now `ALLOWED`, with the reason written next to
+them. The third was **`blend158` matching inside `blend158_logit`**, because `blend158.csv` is
+also on disk. Fixed with a `(?![A-Za-z0-9_])` boundary. 🎯 **A STEM EMBEDDED IN A LONGER
+IDENTIFIER IS NOT THAT STEM.**
+
+⚠⚠ **AND MY CONTROL WAS VACUOUS — I NEARLY BANKED A GREEN THAT PROVED NOTHING.** `--control`
+plants the exact removed defect into a copy and asserted `len(bad) >= 2`. But the clean file
+**already had those three hits**, so the assertion was satisfied by the baseline and would have
+passed with the plant deleted. It now takes the **set difference against a scan of the clean
+file** and requires the new hits to be *exactly* `{w21_ad187corr, w20_ad187_h3}` and nothing
+else. 🎯 **A CONTROL THAT COUNTS MUST COUNT THE DELTA IT PLANTED, NOT THE TOTAL.** This is
+w113 §5's lesson in a third costume: there, a non-zero exit was read as firing; here, a
+correct-looking count was satisfied by pre-existing noise.
+
+✅ **THE STRONGEST CONTROL IS NOT SYNTHETIC AND IT PASSES.** Pointed at
+`git show HEAD:experiments/check_selection.py` — the file as it stood before this run — the guard
+reports **41 hits over 10 distinct clickable stems**: `blend159av_h3`, `blend159av_rankraw`,
+`w16e_aonly`, `w16i_schemeavg`, `w16q_ens4avg`, `w16t_cellens4`, `w20_ad187`, `w20_ad187_h3`,
+`w20_ad187_rankraw`, `w21_ad187corr`. It catches the real historical defect, not a plant.
+
+Enrolled: `w93a_suite.STEMS` **48**, RESEARCH's published list **48**, and the runner's own C2
+(`list matches RESEARCH.md`) re-parsed the prepended document and passed at 48.
+`w106a_claimguard` and `w107a_lineref` are green after the prepend, so no claim was stranded.
+
+## 4. ⛔ TEDDY — STILL ONE HUMAN CLICK. **THIRTEENTH RUN ASKING. TWO DAYS LEFT.**
+
+    Browser → https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on refs 55656399 and 55588167, and nothing else.
+
+Re-verified against the live record this run: **55656399 → `w36_ad199stdcorr.csv` (public
+0.97118, CV rank 1 of 164)** and **55588167 → `w23_ad187stdcorr.csv` (public 0.97116)**.
+`check_selection.py` now prints exactly those two refs, read live, as the first thing on screen.
+§2 changes what the ask is worth: the twelve previous asks were about a **+4.5e-6** exposure;
+they were also, unknowingly, standing next to a **+35 to +82e-6** one that the same click closes.
+
+## 5. NEXT RUN — READ THIS ORDER
+
+1. **`git status`**, then `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. **SEND THE REGISTERED TEN FOR WHATEVER UTC DAY IT IS.** 08-30 and 08-31 are both registered
+   and verified. ⚠ If the run lands on **08-31** having missed 08-30, the queue CSV on disk is
+   still stamped 08-30 and **`w26g` refuses `--go`** — correct, not a fault. Run
+   `w48e_order.py --day 2026-08-31 --write` first, then send. Expect 0.93–0.96, all far below the
+   tier; quote `w26d`'s **bound**, never its point estimate, below the blend band (w112 §2).
+3. After the send: `w93a_suite.py` (**48 checks now, ~340 s**), then `w54a_vetoexpiry` +
+   `w85c_slotguard`. ⛔ **Never under `timeout`; check `/proc` first** (w113 §9).
+4. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). Do not start a member build.
+5. ⛔ **DO-NOT, carried forward from w92–w113 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED, re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file; do not quote `274k` for the hard band (it is
+     **250,188**), cite a line number of RESEARCH.md, use `pgrep`, read `$?` after a pipe, launch
+     a long job with anything but `systemd-run --user`, run the suite alongside a member build,
+     build `cat_native_ctr2` / `cat_natlat`, sweep GBDT hyperparameters, or add ordinary GBDT
+     members.
+   • **DO NOT** name a pandas column after a DataFrame method (w112 §5) · write a score window as
+     two literal bounds and divide by an assumed width (w113 §4) · run a perturbed copy from a
+     directory the original does not live in (w113 §5) · report an enumerated blocklist as
+     incomplete before finding the derived gate that binds (w113 §2).
+   • 🆕 **DO NOT** re-open the click PRICE. w74a stands and w114a's GATE R reproduces it to
+     0.000e+00; what was missing was the OTHER failure, and that is now priced.
+   • 🆕 **DO NOT** delete `CLICK_HISTORY` or "tidy" it into the docstring. It is the record;
+     #48 is what stops it being read as an instruction.
+   • 🆕 **DO NOT** write a control that asserts a TOTAL when the baseline is non-zero (§3).
+   • 🆕 **DO NOT** match a stem without a trailing identifier boundary (§3).
+6. ⚠ **NEW LESSONS.** • An instrument built to prevent a small error can be the largest reachable
+   source of a big one, and its own correctness is not what makes it safe (§2). • A ✅ and a date
+   are not a freshness claim (§2). • A control that counts must count the delta it planted (§3).
+   • The strongest control is the real historical artefact — `git show HEAD:<file>` — not a plant
+   (§3).
+
+## 6. ADDENDUM — SUITE 48/48 GREEN, FOOTER PRESENT
+
+⏱ **`w93a_suite.py`: 48/48 GREEN in 324 s, FAILURES 0**, run after every edit in this entry had
+landed, under `systemd-run --user`, **no `timeout`**, with `/proc` checked first and nothing else
+running. The footer is there — w113 §9's rule is that a suite log without `TOTAL … green` is a
+*killed* run, not a passing one, and this one has it.
+
+    [ 1/48] w54a_vetoexpiry      rc=0    2.0s   the queue outlasts the calendar
+    [ 3/48] w56b_wantedguard     rc=0    0.0s   WANTED guard intact
+    [20/48] w74b_clickstaleguard rc=0    0.9s   the click price is not stale
+    [29/48] w85c_slotguard       rc=0   10.9s
+    [35/48] w92a_smokerun        rc=0  115.7s
+    [36/48] w93c_pickverify      rc=0    4.0s
+    [48/48] w114b_selectguard    rc=0    0.0s   ✅ CLEAN
+    TOTAL 324s   48/48 green   FAILURES: 0
+
+C1 all 48 stems resolve on disk · **C2 the list matches RESEARCH.md at 48** — the check that
+mattered, because this run both prepended a section to RESEARCH.md *and* changed the count in the
+`^## THE \d+ STANDING CHECKS` header, and C2 confirms the shape-matched parse still finds the
+list. `w106a_claimguard` and `w107a_lineref` are green after the prepend (their JSONs re-recorded
+the shifted line offsets, failures 0), so no claim was stranded and no citation broke.
+
+⚠ The stale `experiments/w93a_fail_*.log` files on disk are from EARLIER runs, not this one — all
+48 lines here read `rc=0`. A fail log is written on red and never cleaned up, so its presence is
+not evidence about the current run; the footer is.
+
+⚠ `experiments/w39a_audit.csv` gained 10 rows as a side effect of the import smoke in §2 (it
+fingerprints tomorrow's queued ten). No rows were removed and `w39a_audit` reported FAILURES 0.

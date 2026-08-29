@@ -46,6 +46,24 @@ not because it wins anything.
 Selection here is on CV, and the CV ordering is stable — `w36_ad199stdcorr` is argmax on
 **both** defensible CV bases (w73), so this pick does not depend on an unsettled convention.
 
+## ⚠ AND DO NOT CLICK A FILE NAMED ANYWHERE ELSE (w114, 2026-08-29)
+
+The two rows in the table above are the whole instruction. Clicking a *different* pair is a
+far larger error than not clicking at all — priced on w74a's own estimator
+(`experiments/w114a_misclick.py`, GATE R reproduces w74a's headline to 0.000e+00):
+
+| what you click | cost vs the table above |
+|---|---|
+| nothing at all (Kaggle auto-selects on public) | **+4.52e-6** |
+| `w21_ad187corr` + `w20_ad187_h3` | **+35.17e-6** — 7.8x worse |
+| `w16i_schemeavg` + `blend159av_h3` | **+81.92e-6** — 18.1x worse |
+
+Those two wrong pairs are not hypothetical: until this run `check_selection.py` printed the
+first inside a green-tick "✅ RESOLVED. WANTED HAS MOVED" box and annotated the second as
+"current WANTED". Both were true in August's first week and have been false since 08-19/08-21.
+That narration now lives behind `check_selection.py --history`, and standing check #48
+(`w114b_selectguard`) fails if any printed line names a selectable file that is not WANTED.
+
 ## How to verify it took
 
     .venv/bin/python experiments/check_selection.py > /tmp/cs.txt 2>&1; echo $?   # 0 = selected

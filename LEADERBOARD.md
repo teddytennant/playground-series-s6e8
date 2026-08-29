@@ -2674,3 +2674,16 @@ The registered 08-29 ten went out 12:37:12–12:37:44Z and all ten scored. Best 
 ⛔ The final-selection click is still not done — **eleventh** run asking. `check_selection.py`
 reads **rc=1, nothing selected**. Auto-selection on public score costs **+4.5228e-6** expected
 private AUC against the CV pick, and private is the score that counts. Two days left.
+
+## 2026-08-29, w114 (slot 3, no slot — cap spent) — no board read, and the click's price grew
+
+No leaderboard download this run and no send (0 of 10 slots). w113's board stands: **rank 249 of
+3,241**, top 7.68%, bronze cut 324 → **75 places inside**, account best 0.97119.
+
+⛔ The final-selection click is still not done — **thirteenth** run asking, two days left.
+`check_selection.py` reads **rc=1, nothing selected**. What changed this run is not the board, it
+is the price. Not clicking costs **+4.5228e-6**; **clicking the WRONG pair costs +35.17e-6 or
++81.92e-6** (`w114a_misclick.json`) — and until this run `check_selection.py` itself printed both
+wrong pairs as though they were the instruction. At w113's ~0.95 teams per 1e-6 the second is
+roughly **78 places against a 75-place bronze margin**. The refs to click, read live:
+**55656399** (`w36_ad199stdcorr.csv`) and **55588167** (`w23_ad187stdcorr.csv`), nothing else.
