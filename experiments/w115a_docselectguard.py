@@ -73,6 +73,26 @@ STALE_RE = re.compile(r"(STALE NAME\s*—|\[STALE\s)", re.I)
 MIN_STEMS = 50          # C1 floor: the submissions dir really was read
 MIN_CANDIDATES = 8      # C1 floor: assertion-shaped lines really were found
 
+# ── C2's fixture: the REAL defect, frozen ────────────────────────────────────────────────────
+# These are the five lines verbatim from RESEARCH.md at commit 0f8c398 -- the state that stood
+# for twelve days, naming the two mis-click pairs as "the pick". NOT a synthetic plant.
+#
+# ⚠ WHY THIS IS A FROZEN LITERAL AND NOT `git show HEAD:RESEARCH.md`, WHICH IS WHAT IT WAS.
+# The guard passed while the fix was uncommitted and went RED the instant the fix landed, because
+# HEAD had become the FIXED file and the control had nothing left to catch. It failed CLOSED and
+# said "INERT", which is the right direction -- but the lesson is general:
+# 🎯 A CONTROL ANCHORED TO A MOVING REFERENCE STOPS BEING A CONTROL THE MOMENT YOU COMMIT THE FIX.
+# A pinned SHA would also rot if history is ever rewritten. The artefact itself is the only
+# reference that cannot drift, so it is checked in here.
+HISTORICAL_DEFECT = [
+    "all along. The pick is `blend159av_h3`.",
+    "> any remaining modelling. The spread between the CV pick (`blend159av_h3`, 0.970049) and",
+    "Note **none of the four is the CV pick**: `blend159av_h3` (0.970049) and `blend158_h3`",
+    "whose base is the CV pick `blend159av_h3` and whose CV (0.9700528) is the best held here, so the",
+    "auto-slot 1: public 0.97117, 1-way — w21_ad187corr   <- IDENTICAL to the CV pick",
+]
+MIN_HISTORICAL = 5      # every line above must still be caught
+
 # (stem, distinctive substring on the line, reason). Substring-keyed so line shifts don't break it.
 ALLOWED = [
     ("w21_ad187corr", "WANTED is now {w21_ad187corr.csv",
@@ -171,25 +191,24 @@ def main():
         print(f"  {doc}:{i}  {stem}\n      {line}")
         fails.append(f"{doc}:{i} names non-WANTED selectable `{stem}` as the pick")
 
-    # ---- C2 / C3: the real historical artefact, and the DELTA ------------------------------
-    head = git_head("RESEARCH.md")
-    if head is None:
-        print("C2  SKIP — RESEARCH.md not resolvable at HEAD (new checkout?)")
-    else:
-        h_find, _ = scan_text(head, pool, want, "HEAD:RESEARCH.md")
-        h_stems = {(f[2], f[3][:40]) for f in h_find}
-        print(f"C2  HEAD:RESEARCH.md -> {len(h_find)} finding(s) over "
-              f"{len({f[2] for f in h_find})} distinct stem(s)")
-        if not h_find:
-            fails.append("C2: INERT — the pre-fix RESEARCH.md passes too, so this guard "
-                         "proves nothing. It must catch the real historical defect.")
-        cur = {(f[2], f[3][:40]) for f in findings if f[0] == "RESEARCH.md"}
-        delta = h_stems - cur
-        print(f"C3  delta HEAD-minus-current: {len(delta)} finding(s) fixed, "
-              f"stems {sorted({d[0] for d in delta})}")
-        if h_find and not delta:
-            fails.append("C3: the guard claims an improvement it cannot measure — "
-                         "no finding was removed between HEAD and the working tree")
+    # ---- C2: the real historical artefact, frozen so it cannot drift -----------------------
+    h_find, _ = scan_text("\n".join(HISTORICAL_DEFECT), pool, want, "HISTORICAL_DEFECT")
+    h_stems = {f[2] for f in h_find}
+    print(f"C2  frozen historical defect ({len(HISTORICAL_DEFECT)} real lines from 0f8c398) -> "
+          f"{len(h_find)} finding(s) over {len(h_stems)} stem(s): {sorted(h_stems)}")
+    if len(h_find) < MIN_HISTORICAL:
+        fails.append(f"C2: INERT — the guard catches only {len(h_find)} of "
+                     f"{MIN_HISTORICAL} lines of the REAL historical defect, so a green "
+                     f"result proves nothing about the failure it exists to prevent")
+
+    # ---- C3: the live docs must be clean of exactly that defect ----------------------------
+    # Counts the DELTA (w114 §3): the defect stems must be caught in the fixture AND absent
+    # from the live docs. A guard that cannot demonstrate both is not measuring an improvement.
+    live_bad = {f[2] for f in findings}
+    still = h_stems & live_bad
+    print(f"C3  defect stems still live in the docs: {sorted(still) or 'none'}")
+    if still:
+        fails.append(f"C3: the historical defect is still present live for {sorted(still)}")
 
     # ---- C4: fires both ways --------------------------------------------------------------
     probe_stem = sorted(pool - want)[0] if (pool - want) else None

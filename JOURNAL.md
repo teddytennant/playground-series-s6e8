@@ -33139,3 +33139,29 @@ JSONs absorb the shift; this run changed RESEARCH.md in eight places and moved *
 were **deleted**, because w113 §9's rule cuts both ways: a fail log is written on red and never
 cleaned up, so leaving nine PATH-artefact logs on disk would have handed the next run nine
 fabricated findings. The footer above is the evidence, not the absence of fail logs.
+
+## 10. ADDENDUM — #49's OWN CONTROL WAS ANCHORED TO A MOVING REFERENCE, AND IT CAUGHT ITSELF
+
+⚠ **`w115a_docselectguard` passed all run, then went RED the moment I committed the fix.** C2 read
+the "real historical artefact" as `git show HEAD:RESEARCH.md`. That WAS the pre-fix file — until
+the commit landed, at which point HEAD became the **fixed** file, C2 found 0 findings, and the
+guard declared itself `INERT` rather than green.
+
+🎯 **A CONTROL ANCHORED TO A MOVING REFERENCE STOPS BEING A CONTROL THE MOMENT YOU COMMIT THE
+FIX.** w114 §3's lesson was *"the strongest control is the real historical artefact, not a
+plant"* — true, and I applied it, but `HEAD` is not the artefact, it is a **pointer** to whatever
+is current. This is the same shape as w110's locator bug (first occurrence finds the *pointer*,
+not the target) one level up.
+
+✅ **FIXED: the five real defect lines are now a frozen literal** (`HISTORICAL_DEFECT`, verbatim
+from **0f8c398**) checked into the guard. A pinned SHA would also rot if history is rewritten;
+the artefact itself is the only reference that cannot drift. C2 now requires all 5 lines to be
+caught (6 findings / 3 stems) and C3 requires those stems to be absent from the live docs — the
+delta, still, not a total. **Verified both ways: restoring the defect → rc=1, fix back → rc=0**,
+and RESEARCH.md byte-identical afterwards.
+
+⚠ **AND I READ `$?` AFTER A PIPE WHILE VERIFYING IT** (`… | tail -4; echo $?`), which printed
+`RC=0` for a run that had just printed `FAIL 2`. That is the workspace's own documented trap —
+`$?` after a pipeline is `tail`'s status — and it produced a wrong reading for the second time in
+this repo's history. **Re-verified through a redirect.** 🎯 The DO-NOT list is not protection if
+you only apply it to the *subject* of the run and not to the commands you check it with.
