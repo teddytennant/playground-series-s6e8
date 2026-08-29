@@ -1,0 +1,27 @@
+==========================================================================================
+w113  MEDAL CUTS ON THE LIVE BOARD — playground-series-s6e8-publicleaderboard-2026-08-29T13:10:54.csv
+==========================================================================================
+
+  3241 teams, stamped 2026-08-29T13:10:54Z.  us: public 0.97119  rank 249 = top 7.68%
+
+  medal     rank cut  public score needed  places away
+  gold            14              0.97134         +235
+  silver         162              0.97127          +87
+  bronze         324              0.97113 -75 (INSIDE)
+
+  --- local density: how many teams a small AUC gain actually passes ---
+  half-width 2e-05:   35 teams over a 4e-05 span ->  0.87 teams per 1e-6
+  half-width 4e-05:   76 teams over a 8e-05 span ->  0.95 teams per 1e-6
+  half-width 1e-04:  343 teams over a 2e-04 span ->  1.71 teams per 1e-6
+  median 0.95 teams per 1e-6  ->  the 4.5228e-6 click is worth about 4 places
+  ⚠ the click's value is NOT this number. It is not repeating the Rogii failure;
+    the rank equivalent is here only so nobody reads '4.5e-6' as 'negligible'.
+
+  --- drift (public; the field grows and the cut moves with it) ---
+  date           rank   field     pct  bronze cut   margin
+  2026-08-25      140    2881   4.86%         288     +148
+  2026-08-26      171    2976   5.75%         297     +126
+  2026-08-29      249    3241   7.68%         324      +75
+
+  --- controls ---
+  [PASS] C1 board fresh (0.1h)   C2 field not shrinking   C3 rank sits at our score   C4 density stable across windows

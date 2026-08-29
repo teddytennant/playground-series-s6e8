@@ -1,0 +1,35 @@
+/home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w83a_reproject.py:126: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now = dt.datetime.utcnow()
+board   playground-series-s6e8-publicleaderboard-2026-08-29T13:10:54.csv
+stamped 2026-08-29 13:10:54 UTC, 0.1h old, 3241 teams, leader 0.97207
+us      public rank 249 at 0.97119 = top 7.68% of the field, +0.00088 vs leader
+
+=== A. matched null at OUR position (parametric; assumes a common shift sd) ===
+    shift sd source    median    p10     p90  P(top 0.5%)  P(top 5%)  P(top 10%)
+    0.000043 S6E2         254    181     320         0.0%       6.6%       91.5%
+    0.000067 S6E3         247    133     344         0.1%      17.3%       83.6%
+    0.000124 S6E5         234     84     390         1.0%      28.1%       75.5%
+  Read the sd column, not the medians: the three past AUC boards disagree about it
+  by 3x, and that spread is wider than anything this account can influence.
+
+=== B. empirical band: teams who stood in the top 5.68%-9.68% of their own board ===
+episode   metric    n  median finish     p10     p90   P(<=5%)  P(<=10%)
+S6E1            173         7.57%  1.77%  9.17%     24.9%     96.0%
+S6E2      AUC   175         3.36%  0.63%  7.60%     70.3%     94.9%
+S6E3      AUC   166         7.45%  4.79%  9.31%     12.0%     94.0%
+S6E4            172         8.03%  1.25% 10.05%     17.4%     89.5%
+S6E5      AUC   121         9.83%  2.48% 13.10%     20.7%     52.9%
+S6E6            112         8.43%  3.78% 13.27%     17.0%     72.3%
+S6E7            134        10.00%  5.12% 20.32%      9.0%     50.0%
+AUC pool  AUC   462         6.82%  1.37% 12.27%     36.4%     83.5%
+  The pooled row is printed last and should be trusted least: the per-episode rows
+  are the two populations, and pooling them describes neither.
+
+=== controls ===
+  [PASS] C1 published top-30 retention recomputes  77% 3% 53% 20% 57% 0% 0%
+  [PASS] C2 zero-noise null returns our rank  all 4000 reps = 249
+  [PASS] C3 board fresh and not truncated  0.1h, 3241 teams >= 2791
+  [PASS] C4 rank self-consistent and score is the account best  248 strictly above, score 0.97119
+  [PASS] C5 band instrument is the identity on public->public  7 episodes
+
+FAILURES 0

@@ -1,3 +1,90 @@
+# (w113, 2026-08-29) — THE MEDAL CUT IS A FUNCTION OF THE FIELD SIZE, AND OUR MARGIN HALVED
+
+Kaggle awards on a RANK derived from N, not on the percentile this workspace has been tracking:
+
+    gold <= 10 + 0.2%*(N-1000)      silver <= 5%*N      bronze <= 10%*N
+
+Board 2026-08-29T13:10:54Z, **3,241 teams**, us 0.97119 at **rank 249 = top 7.68%**:
+**gold 14** (needs 0.97134, +235 away) · **silver 162** (needs 0.97127, +87) · **bronze 324**
+(needs 0.97113, **75 INSIDE**). Derive with `.venv/bin/python experiments/w113a_medalcut.py`
+after a board download — never carry the cut, it moves with N.
+
+| date | rank | field | pct | bronze cut | margin |
+|---|---|---|---|---|---|
+| 08-25 | 140 | 2,881 | 4.86% | 288 | +148 |
+| 08-26 | 171 | 2,976 | 5.75% | 297 | +126 |
+| **08-29** | **249** | **3,241** | **7.68%** | **324** | **+75** |
+
+`w83a_reproject.py` re-run on today's board (5 controls PASS, board 0.1h old). Both instruments
+moved the same way — **quote these, not w92's**:
+
+| | w92 (08-26) | **w113 (08-29)** |
+|---|---|---|
+| P(top 5%) by shift sd | 26.3 / 34.0 / 38.8% | **6.6 / 17.3 / 28.1%** |
+| P(top 10%) = **bronze** | 99.1 / 95.3 / 85.2% | **91.5 / 83.6 / 75.5%** |
+| matched-null median rank | 180 | **254 / 247 / 234** |
+
+Empirical band B (assumption-free): AUC-pool median finish **6.82%**, P(<=10%) **83.5%**; the
+per-episode rows stay bimodal (S6E2 94.9% vs S6E7 50.0%) so the pooled row is trusted least.
+
+⛔ **NOT A LEVER.** Silver is +80e-6 of public and the CV-settled line tops out near 0.9712; the
+0.97124/0.97127 clusters were pulled, reproduced on our folds and closed at w80/w90. All 20
+remaining slots are certified fillers priced 0.94–0.96. The number changed, the action did not.
+
+⚠ **LOCAL DENSITY IS ~0.95 TEAMS PER 1e-6, NOT 12.8.** `(s > 0.97110) & (s <= 0.97120)` is a
+**1e-4** window, not the 1e-5 it reads like; dividing by 10 overstated density 10x and turned
+"the 4.5228e-6 click is worth 4 places" into "58 places". 🎯 **A window written as two literal
+scores hides its own width, and the error lands on the number a run most wants to be big.**
+w113a states half-widths and divides by `2*w`; **C4 fails if density is not stable across three
+widths** (it varies 4.2x at 0.97133, so C4 is not vacuous).
+
+⛔ **w113a IS DELIBERATELY NOT STANDING CHECK #48.** Its C1 needs a <24h board and nothing
+downloads one automatically, so in the suite it would go red for a reason unrelated to the
+pipeline. **The suite stays at 47.** Run w113a by hand; its four controls make it self-checking.
+
+## ⛔ NEVER RUN `w93a_suite.py` UNDER `timeout`, AND CHECK `/proc` BEFORE RELAUNCHING IT
+
+⏱ **47/47 green in 329 s** (w113). 336 s at w112. But w113's first attempt ran as
+`timeout 580 .venv/bin/python w93a_suite.py`, overran under contention, and was **killed at
+34/47 — every one of those 34 lines said `rc=0`**. Believing it dead I relaunched under
+`systemd-run --user` while the original was **still alive**; the two starved each other and
+`w65c_subsetcheck` (81.7 s solo) looked like a hang.
+
+🎯 **A SUITE LOG WITH NO FOOTER IS A KILLED RUN, NOT A FAILING ONE.** `TOTAL … 47/47 green` is
+the only evidence a run finished, and w93a reports its reds **in a footer a killed run never
+writes** — so a truncated log is maximally misleading: all green, no verdict.
+✅ Launch it the way the DO-NOT list already required for long jobs, with **no `timeout`**:
+
+    export PATH=/run/current-system/sw/bin:$PATH; export XDG_RUNTIME_DIR=/run/user/$(id -u)
+    systemd-run --user --unit=suite --collect -p WorkingDirectory="$PWD" \
+        --setenv=PATH="$PATH" --setenv=XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+        /bin/bash "$PWD/experiments/<runner>.sh"
+
+⛔ **Before relaunching, confirm the old one is dead through `/proc`** (`pgrep` is not on this
+box's PATH). Two suites is not twice the assurance; it is one starved suite plus a false hang.
+
+## THE TWO REMAINING SEND DAYS ARE REGISTERED — VERIFIED 08-29, NOT ASSUMED
+
+`w72a_plan_2026-08-30.json` and `w72a_plan_2026-08-31.json` each carry **10 distinct files, 0
+failures**, and the twenty do not overlap. `w72a --audit`: **0 unregistered days, 0 unfilled
+slots**, 3 spare, 19 vetoed. ⚠ If a run lands on 08-31 having missed 08-30 the queue CSV is
+stamped 08-30 and **`w26g` refuses `--go`** — correct, not a fault. Run
+`w48e_order.py --day 2026-08-31 --write` first.
+
+⛔ **THE `VETO` LIST IS A PRE-FILTER; THE BINDING GATE IS `w26g_send.above_tier_reason` +
+`hijack_risk`, DERIVED FROM THE LIVE TIER.** Two `logit` files sit at priority 0 with predicted
+LB at/above the 0.97119 tier on a CV 80–90e-6 below the pick — the veto's exact shape — and are
+*not* in `VETO`. That is not a hole: all three such rows are **refused by the sender's own gate**
+(hijack 4.10e-2 / 6.17e-1 / 6.93e-2, all >= `P_MAX` 0.02). 🎯 **Find the derived gate before
+writing an enumerated blocklist up as incomplete.**
+
+🎯 **A NEGATIVE CONTROL THAT EXITS NON-ZERO HAS PROVED NOTHING UNTIL YOU READ *WHICH* LINE
+FAILED.** w113's first control run wrote perturbed copies to `/tmp`; both exited 1 — on
+`no downloaded board found under lb_*/`, because `ROOT` derives from `__file__` and the glob
+found nothing. The controls tested the relocation. **Run the copy where the original lives.**
+
+---
+
 # (w112, 2026-08-29) — three standing checks red, ONE cause, and it was our own send
 
 The 08-29 ten went out at 12:37Z and the suite came back **43/46**. None of the three reds was a

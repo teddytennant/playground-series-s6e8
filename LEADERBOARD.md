@@ -1,3 +1,43 @@
+# 2026-08-29 13:10 UTC — w113, FULL BOARD (3,241 teams). THE BRONZE MARGIN HAS HALVED.
+
+⚠ Quote the **medal cut**, not the percentile. Kaggle awards on a rank derived from N:
+gold <= 10 + 0.2%*(N-1000), silver <= 5%*N, bronze <= 10%*N. Derive it every time with
+`.venv/bin/python experiments/w113a_medalcut.py` — at N = 3,241 that is **14 / 162 / 324**.
+
+| | w92 (08-26) | **w113 (08-29)** |
+|---|---|---|
+| our best public | 0.97119 | **0.97119** (unmoved; 08-29's ten were certified fillers) |
+| rank / field | 171 of 2,976 | **249 of 3,241** |
+| percentile | top 5.75% | **top 7.68%** |
+| bronze cut (10%) | rank 297, margin +126 | **rank 324, margin +75** |
+| silver cut (5%) | rank 149 | **rank 162 at 0.97127 — 87 places outside** |
+| leader | Chris Deotte 0.97184 | Chris Deotte **0.97207** (gap 0.00088) |
+| our submissions | 151 | **181** |
+
+**78 places lost in three days**, and the cut moves toward us from both sides as the field grows.
+`w83a_reproject.py` re-run (its rule reserves it for a material move; 5.75% -> 7.68% is bigger
+than the move that triggered it at w92). 5/5 controls PASS, board 0.1h old.
+
+- **matched null**, by past-AUC-episode shift sd: median private rank **254 / 247 / 234**;
+  P(top 5%) **6.6 / 17.3 / 28.1%**; P(top 10%) = bronze **91.5 / 83.6 / 75.5%**.
+  (w92 read 26.3/34.0/38.8% and 99.1/95.3/85.2%. **Do not quote those.**)
+- **empirical band**, assumption-free: AUC-pool median finish **6.82%**, P(<=10%) **83.5%**.
+  Per-episode stays bimodal — S6E2 94.9% vs S6E7 50.0% — so the pooled row describes neither.
+
+Top of the board at 13:10Z:
+
+    1  Chris Deotte 0.97207    2  Changye Li 0.97154    3  MILANFX 0.97149
+    4  cstdy        0.97147    5  Keanan     0.97139    6  JungHwan 0.97138
+
+⚠ **Local density near us is ~0.95 teams per 1e-6**, so the +4.5228e-6 selection click is worth
+about **4 places** — not the 58 a 10x density error first produced (RESEARCH w113 §4). The click
+is still the only action with expected private AUC attached; its value is not the rank.
+
+⛔ **Not a lever.** Silver is +80e-6 of public; nothing sendable in the remaining 20 slots moves
+our public score at all. Board CSV in `lb_w113/`. ⚠ Grep for **`Teddy Tennant`**, not
+`thtennant` — the handle appears only in `TeamMemberUserNames`. ⛔ Download the full board and
+open it with python's `zipfile`; the `-s` CLI returns 20 rows and a page token.
+
 # ⚠ 2026-08-26 ~14:05 UTC — w93: THE `-s` CLI NOW RETURNS 20 ROWS, NOT 200
 
 `kaggle competitions leaderboard -c playground-series-s6e8 -s` returned **20 rows plus a
