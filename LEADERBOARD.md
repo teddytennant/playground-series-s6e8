@@ -1,3 +1,16 @@
+# 2026-08-29 15:1xZ — w119, NOT RE-MEASURED, AND THE RULE WAS CHECKED RATHER THAN QUOTED.
+
+Our best public is **unmoved at 0.97119** (at cap 10/10, nothing sent). `w83a_reproject`'s rule
+reserves a re-download for a material move; w118 §9 noted it is under-specified, because the
+bronze cut is set by other teams and can drift while our score sits still. It is not binding here
+either — `lb_w113/` is timestamped **2026-08-29T13:10:54**, about two hours old.
+
+**Quote w113's row: rank 249 / 3,241, top 7.68%, bronze cut 324 (margin +75), silver cut 162 at
+0.97127.** ⚠ A run that finds a board older than a few hours *and* a frozen score should
+re-download anyway — the rule as written does not say so and it should.
+
+---
+
 # 2026-08-29 14:2xZ — w116, SPOT CHECK ONLY. NO MATERIAL MOVE, SO NO RE-DOWNLOAD.
 
 Our best public is **unmoved at 0.97119**; the ten sent at 12:37Z topped out at 0.97107. The
@@ -2714,3 +2727,59 @@ places inside, account best 0.97119.** Re-deriving it would only reproduce a num
 **55656399** (`w36_ad199stdcorr.csv`, public 0.97118) and **55588167** (`w23_ad187stdcorr.csv`,
 public 0.97116), and nothing else. `PushNotification` tried again and returned *"Mobile push not
 sent (Remote Control inactive)"* — **0 for 3; it has never once reached his phone from here.**
+
+## 2026-08-29, w118 (slot 7, no slot — cap spent at 12:37Z) — board rule challenged, then found not binding
+
+I set out to overturn `w83a_reproject`'s "don't re-download unless our score moved" rule, because
+the **bronze cut is set by other teams**: our margin can decay while our own score sits still, and
+the rule as written does not cover that. The objection stands in general but did not apply here —
+`lb_w113/` is stamped **2026-08-29T13:10:54**, under two hours old. **w113's board is today's:
+rank 249 of 3,241, top 7.68%, bronze cut 324 → 75 places inside, account best 0.97119.**
+
+The endgame is now audited end to end: the **last 20 submissions** (08-30 and 08-31, both frozen
+artefacts) are mutually disjoint, unsent, all present on disk at 296,302 rows, and all ten of the
+08-30 ten sit at `pred_lb ≤ 0.960339` — under the 0.97119 auto-selection tier, so they cannot
+hijack it. Across all 201 files this account has sent or will send, **201 distinct rank vectors:
+not one submission slot has ever been spent on a file the leaderboard could not tell apart.**
+
+⛔ The final-selection click is still not done — **seventeenth** run asking, two days left.
+`check_selection.py` read live this run: **rc=1, `*** NOTHING IS SELECTED ***`**. Click
+**55656399** (`w36_ad199stdcorr.csv`, public 0.97118) and **55588167** (`w23_ad187stdcorr.csv`,
+public 0.97116), and nothing else. `PushNotification` tried again and returned *"Mobile push not
+sent (Remote Control inactive)"* — **0 for 4; it has never once reached his phone from here.**
+
+## 2026-08-29, w120 (slot 9, no slot — cap spent at 12:37Z) — board re-read, and the rule that said not to is now refuted
+
+**Fresh download, `lb_w120/…2026-08-29T15:23:59.csv`: rank 251 of 3,253, top 7.72%, bronze cut
+325 → 74 places inside. Account best 0.97119, unchanged since 08-23 12:41:28.** The bronze cut
+sits at score 0.97113; 102 teams occupy [0.97113, 0.97119).
+
+w118 and w119 each objected that `w83a_reproject`'s *"don't re-download unless our score moved"*
+ignores that the cut is set by other teams, and each then quoted w113 anyway. The series settles
+it — our number has not moved once and the margin has:
+
+| date/time (UTC) | teams | rank | bronze cut | margin |
+|---|---|---|---|---|
+| 08-25 (w64) | 2,660 | 64 | 266 | +202 |
+| 08-27 (w98) | 3,075 | 198 | 307 | +109 |
+| 08-29 13:10 (w113) | 3,241 | 249 | 324 | +75 |
+| 08-29 15:24 (w120) | 3,253 | 251 | 325 | +74 |
+
+**128 places of margin gone in four days at a frozen score**, but decelerating: −93, then −34,
+then −1 in 2h13m (≈ −11/day). 56.6 hours left ⟹ −25 to −40 ⟹ margin **+34 to +49** at the
+deadline. Bronze survives on both rates, neither of which contains a deadline-eve surge. ✅ New
+rule: **read the board once per day**, not "when our score moves".
+
+🎯 **The tie-break is NOT last-submission-date.** Seven teams sit at 0.97119; ours is the *latest*
+last submission of the seven (2026-08-29 12:37:44, 181 subs) and we rank **first** in the block,
+with identical internal order in both of today's snapshots. ⟹ Draining the remaining 20 slots
+cannot cost a rank — the brief's "an unused slot is pure waste" holds down to the tie-break.
+
+The registered 08-29 ten all scored, best of the day **0.97107** (`w16d_membercell`), against a
+pre-registered point estimate of **0.971070** — exact. All ten landed below the 0.97119
+auto-selection tier and all six that carried a `w55a` bound landed inside it.
+
+⛔ The final-selection click is still not done — **nineteenth** run asking, two days left.
+`check_selection.py` read live this run: **rc=1, `*** NOTHING IS SELECTED ***`**. Click
+**55656399** (`w36_ad199stdcorr.csv`, public 0.97118, CV rank 1 of 164) and **55588167**
+(`w23_ad187stdcorr.csv`, public 0.97116), and nothing else.

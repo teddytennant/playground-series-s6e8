@@ -1,3 +1,286 @@
+# (w120, 2026-08-29) — CONSOLIDATION, ROW 10. FOUR PROPERTIES THAT WERE ASSUMED, NOW MEASURED:
+# THE TIER-SAFETY BOUND SCORED OUT-OF-SAMPLE · `priority == 0` IS NOT "SENDABLE" · A FROZEN SCORE
+# DOES NOT FREEZE A RANK · THE PUBLIC TIE-BREAK IS NOT LAST-SUBMISSION-DATE
+
+ANGLE INDEX row 10 is the only row that is not closed — it *is* the standing checklist, so it gets
+executed rather than grepped. Everything below is a live read on 2026-08-29 15:23–15:30Z, at cap
+(10/10 sent), nothing submitted, nothing in the queue written.
+
+## ✅ THE `w55a` TIER-SAFETY CERTIFICATION IS A PREDICTION, AND IT HAS NOW BEEN SCORED — 10/10
+
+Every drain carries its certification **in the submission description, written before the score
+existed**. The ten sent at 12:37Z on 08-29 are scored, so the instrument has its first
+out-of-sample read, pre-registered by construction.
+
+    file                          point      bound   realized   vs point   vs bound
+    w85_cal_bolt_cat_unique     0.960725  0.962285   0.96058     -14.5e-6   inside
+    w85_cal_bolt_lgb_raw_d4     0.960827  0.962387   0.96044     -38.7e-6   inside
+    w37_cal_dkv_xgb             0.966243  0.967803   0.96595     -29.3e-6   inside
+    w37_cal_ravi_realmlp1c      0.966409  0.967969   0.96581     -59.9e-6   inside
+    w16d_membercell             0.971070  0.971110   0.97107      +0.0e-6   inside
+    w15f_antistudent_cv         0.971070  0.971090   0.97106     -10.0e-6   inside
+    blend153_logit              0.971025      (—)    0.97104     +15.0e-6      —
+    blend160orig_logit          0.971039      (—)    0.97106     +21.0e-6      —
+    blend156_logit              0.971039      (—)    0.97105     +11.0e-6      —
+    blend160origm_logit         0.971043      (—)    0.97106     +17.0e-6      —
+
+**10 of 10 below the 0.97119 auto-selection tier; 6 of 6 inside their bound.** 🎯 But the
+**four logit-family drains all missed HIGH, +11 to +21e-6, 4 of 4 in one direction** — and those
+four are exactly the ones the older message format sent with a point estimate and **no bound**.
+⟹ **QUOTE THE BOUND, NEVER THE POINT ESTIMATE**, which the journal has said since w26d and which
+now has a directional failure behind it rather than a hunch.
+
+⚠ **The closest approach to the tier in the account's whole history is now +120e-6** —
+`w16d_membercell` at 0.97107 against 0.97119, and its point estimate 0.971070 was **exact**. The
+narrowing is confined to files already sent: both remaining day-plans are `w85_cal_*` members
+priced 0.93261–0.96034, i.e. 8,000–38,000e-6 of margin, so it cannot recur before the deadline.
+
+## ⛔ `priority == 0` IN `w26d_queueprice.csv` DOES **NOT** MEAN "THIS FILE IS SENDABLE"
+
+Fourteen unsent files price above the tier, and **four carry `priority` 0, not the veto's −1**.
+One of them, `w69_ad208std_logit` (pred 0.971197, CV 0.9700603), is also **below** the w59 hijack
+bar 0.9701349052: read off the column alone it looks like a file that could take auto-slot 1 with
+a worse model than the pick. Running the sender's own predicate instead of reading the column:
+
+    file                     pri   above_tier_reason                            hijack_risk  BLOCKED
+    w69_ad208std_logit        0    w40d-ineligible arm (w69_prereg §2.1)           0.6171     True
+    w34_ad196std_logit        0    cv < the hijack bar (w63a GATE J)               0.0693     True
+    w48_cal_hboyang_mix       0    fam=member — no cross-fitted stack CV (w53)     1.0000     True
+    w69_ad208stdcorr          0    w40d-ineligible arm (w69_prereg §2.1)           0.0410     True
+
+All four blocked, on four independent reasons, none of them the veto, all clearing `P_MAX = 0.02`.
+🎯 **`w26g_send.py` carries FOUR default-on refusals — the veto (`priority < 0`), w55's unpriced
+gate, w58's above-tier gate, and the md5/dupe scan. `priority` is the column for one of them.**
+Reading it as eligibility is w118's *check the artefact the tool actually opens* with the object
+swapped: **run the predicate the tool actually applies.**
+
+⛔ **DO NOT build a guard over these fourteen.** 46 files are unsent and **20 slots remain**; the
+08-30 ten are the pinned `priority 1` band (0.941645–0.960339) and `w48e_order.py --day 2026-08-31`
+re-dry-ran clean this run (plan-only, nothing written) as ten more members at 0.93261–0.94154.
+None of the fourteen is reachable. w118 §5's rule stands: a guard that cannot fire before the
+deadline is theatre.
+
+## 📉 A FROZEN SCORE DOES NOT FREEZE A RANK — `w83a_reproject`'s BOARD RULE IS FALSE AS WRITTEN
+
+The rule is *"don't re-download unless our public score moved"*. w118 and w119 each objected that
+the **bronze cut is set by other teams** and each then found it non-binding and quoted w113. This
+run spent the one API call. Our public score has been **frozen at 0.97119 since 2026-08-23
+12:41:28**:
+
+| date/time (UTC) | teams | our rank | bronze cut | margin |
+|---|---|---|---|---|
+| 08-25 (w64) | 2,660 | 64 | 266 | +202 |
+| 08-27 (w98) | 3,075 | 198 | 307 | +109 |
+| 08-29 13:10 (w113) | 3,241 | 249 | 324 | +75 |
+| **08-29 15:24 (w120)** | **3,253** | **251** | **325** | **+74** |
+
+**128 places of bronze margin lost in four days with our own number not moving once.** It is also
+**decelerating**: −93 across 08-25→08-27, −34 across 08-27→08-29, −1 in the 2h13m between today's
+two reads (≈ −11/day). 56.6 hours remain — at today's short-run rate **−25 → +49**, at the two-day
+rate **−40 → +34**. Both leave bronze intact; neither contains the deadline-eve surge, which is
+why this is a measured rate and **not** a forecast. ✅ **REPLACEMENT RULE: read the board ONCE PER
+DAY. Quote a snapshot from today if one exists; download one if not.** Bronze cut score is 0.97113
+against our 0.97119.
+
+## ✅ THE PUBLIC TIE-BREAK IS NOT LAST-SUBMISSION-DATE — THE LAST 20 DRAINS COST NO RANK
+
+Seven teams share our exact 0.97119. If the tie broke on last-submission date, each of the 20
+remaining filler sends would push us toward the back of that block — up to **6 ranks against a
+74-rank margin** — and the brief's *"an unused slot is pure waste"* would carry an unpriced cost.
+
+    rank 251  Teddy Tennant     last_sub 2026-08-29 12:37:44   181 subs   <- LATEST of the seven
+    rank 252  Victor Orihuel    last_sub 2026-08-23 22:33:53    22 subs
+    rank 253  yun_smart_cat     last_sub 2026-08-25 10:18:16     4 subs
+    rank 254  Matvey Morozov    last_sub 2026-08-27 03:10:14     7 subs
+    rank 255  Ezra Kho          last_sub 2026-08-29 09:30:15    14 subs
+    rank 256  Nhật Quyên        last_sub 2026-08-27 03:31:51    10 subs
+    rank 257  Shreela Sapkota   last_sub 2026-08-23 16:21:34     8 subs
+
+**We hold the most recent submission of the seven AND the most submissions of the seven, and we
+rank first in the block** — identical internal order in both of today's snapshots, 2h13m apart.
+⟹ Last-submission-date is **refuted**. The order is consistent with first-achievement time (ours
+is 08-23 12:41:28, `w36_ad199stdcorr_ens4`), which is **not** claimed as proven; the refutation is
+the operational fact. ✅ **Draining the remaining slots cannot cost a rank.**
+
+## 🔁 THE CV→LB GAP, RE-MEASURED — SUPERSEDES THE 08-28 ROW IN w111's BLOCK BELOW
+
+`w93b_cvlbaudit.py`, real rc=0. **181 sends → 11 declared measurement probes excluded by their own
+descriptions, 6 rows with no parseable CV, 164 complete cases.**
+
+    gap = LB - CV   mean +1037.2e-6   sd 34.6e-6   min +983.3e-6   max +1169.0e-6
+    pearson +0.8813   spearman +0.8064   CV span 499.0e-6   LB span 390.0e-6 over 18 values
+
+| date | n | gap mean | gap sd | pearson | spearman |
+|---|---|---|---|---|---|
+| 08-26 | 140 | 1036.77e-6 | 32.81e-6 | +0.9009 | +0.8005 |
+| 08-27 | 150 | 1038.15e-6 | 33.63e-6 | +0.8893 | +0.7782 |
+| 08-28 | 160 | 1035.78e-6 | 33.92e-6 | +0.8842 | +0.8061 |
+| **08-29** | **164** | **1037.16e-6** | **34.62e-6** | **+0.8813** | **+0.8064** |
+
+Four more complete cases moved the mean 1.4e-6 and **moved neither pair**. CV-argmax is still
+`w36_ad199stdcorr` (CV rank **1 of 164**) + `w38_ad202stdcorr`; public-argmax is still the two
+`_ens4` twins; `SELECT_THESE` is still `w36_ad199stdcorr` + `w23_ad187stdcorr` (CV rank 35, the
+w64-settled cross-base hedge — a **different quantity**, not a conflict).
+
+# (w119, 2026-08-29) — THE CENSUS THAT REPLACED THE HAND COUNTS WAS ITSELF ONE SHORT, AND THE
+# MISSING RUN WAS SITTING IN ITS OWN REPORT LABELLED "NOT ONE OF THE TEN"
+
+w117 built standing check #50 (`w117a_handcount`) because the ANGLE INDEX's handing counts were
+hand-maintained and wrong. It replaced them with a census of JOURNAL.md's run headers. Two runs
+later, handed the **error analysis** angle, I checked the census against its own subject rather
+than quoting it — and **row 9 was under-counted by one**.
+
+## THE DEFECT: `classify` REFUSED AMBIGUITY, AND REFUSAL LOOKS EXACTLY LIKE ABSENCE
+
+    def classify(genus):
+        hits = [r for r, (_, pat) in GENERA.items() if re.search(pat, genus, re.I)]
+        return hits[0] if len(hits) == 1 else None      # <- two hits: the run vanishes
+
+w14d's header, verbatim:
+
+    ## 2026-08-14 — w14d, ANGLE: error analysis on the best blend's OOF, the generator's coin-flip band
+
+The angle string carries **no colon**, so `CUT` finds nothing to cut and the entire clause becomes
+the genus. That clause names `error analysis` at offset 0 **and** `blend` at offset 27. Two hits ⟹
+`None` ⟹ the header scan fails ⟹ the body scan finds no quoted declaration ⟹ the run lands in
+**OFF_ROTATION**, the category w117's own docstring defines as *"bespoke angles that are not among
+the ten"*. It is among the ten. It is the run whose work row 9's third anchor points at.
+
+🎯 **A GUARD THAT REPORTS EVERYTHING IT COULD NOT CLASSIFY IS NOT THEREBY HONEST — IT IS HONEST
+ONLY IF SOMEBODY READS THE REPORT.** w117 was right that naming the drop beats dropping silently,
+and w118 §3's lesson (*check the artefact the tool actually opens*) has a sibling here: **read the
+residual bucket, not just the exit code.** Fifteen lines of OFF_ROTATION printed under a green rc=0
+for two days, one of them plainly beginning with the words `error analysis`.
+
+## THE BLAST RADIUS WAS MEASURED BEFORE THE FIX, NOT ARGUED
+
+`w119a_ambig.py` — of **139** run headers, exactly **one** has a genus naming two of the ten
+genera, and it is w14d. `w119b_diff.py` — re-runs the whole census with `classify` replaced and
+diffs it run by run:
+
+| | |
+|---|---|
+| assignments that change row | **1** (L4077, `None` → row 9) |
+| runs whose resolution path changes (header/body/body-bare) | **0** |
+| rows whose count moves | **row 9 only, ×11 → ×12** |
+| resolved total | 124 → 125 |
+
+⟹ **A reader change inside a standing guard is a measurement, and the corpus diff is what makes it
+one.** Nothing else in the table moved, so the fix cannot be quietly re-scoring nine other rows.
+
+## THE FIX, AND WHY IT IS THE INDEX'S OWN PROTOCOL RATHER THAN A RELAXATION
+
+`classify` now takes the genus whose pattern matches **earliest** in the string. The index has
+always said *"take the GENUS of your ANGLE string — everything before its first colon"*: a genus is
+the **leading phrase**. When the handed string has no colon, earliest-match *is* that rule applied
+to the wording the run was actually handed in. It is not "prefer the lower row number" — **C5**
+pins that down by firing the mirrored probe:
+
+    "error analysis on the best blend's OOF, …"                 -> row 9   (error analysis @0)
+    "blending: rank-average the members, then error analysis …" -> row 6   (blending @0)
+
+A lowest-row rule answers 6 to both. C5 also refuses to be vacuous: it requires ≥1 resolved run in
+the corpus to genuinely name two genera, and prints which, or declares itself **INERT**.
+
+## THE COUNT, AND WHAT IT SAYS ABOUT MACHINE-VS-HAND
+
+Row 9 now reads **×13** (12 historical + this run). The two independent counts of this row each
+contain what the other misses:
+
+| | count | misses |
+|---|---|---|
+| w110's hand list | 8 | four handings it never enumerated |
+| #50's census, as shipped | 11 | **w14d**, dropped for ambiguity |
+| union / truth | **12** before this run | — |
+
+⚠ w117 §4 drew the lesson *"a machine count that reproduces an independent hand count nobody was
+fitting to is the strongest validation available"*. That is right, and **row 9 is the case where
+they did not reproduce each other and nobody checked.** The machine count was adopted for all ten
+rows on the strength of agreement measured on one. 🎯 **Validating a census on one row licenses it
+on that row.**
+
+## ⛔ WHAT THIS IS NOT
+
+This is **not** a re-opening of the error-analysis modelling angle. Row 9's price is unchanged and
+still **0 / negative**: 76.7% of the AUC deficit is cross-cell and unreachable by any within-
+segment feature, and the within-cell 23.3% was attacked with a matched control and lost at 9 of 9
+checkpoints. The angle was closed by one grep, as the index promises. What was wrong was the
+**count**, and the count is a navigation aid, not a price.
+
+---
+
+# (w118, 2026-08-29) — THE ENDGAME SEND AUDIT: THE LAST 20 SLOTS ARE SOUND ON FOUR PROPERTIES,
+# AND **NO SLOT HAS EVER BEEN WASTED ON A RANK-DUPLICATE** — 201 FILES, 201 DISTINCT RANK VECTORS
+
+Two send days remain (08-30, 08-31) and both are registered artefacts, so the last 20 submissions
+this account will ever make are already determined. Nothing had checked them **as a set**. Four
+properties, all measured this run, none previously verified:
+
+| property | result |
+|---|---|
+| the two day-plans are disjoint | ✅ `08-30 ∩ 08-31 = ∅`, union 20 distinct stems |
+| neither plan intersects the 181 already sent | ✅ NONE, both days |
+| all 20 present on disk, 296,302 rows, no NaN | ✅ 20/20, `md5` distinct 20 of 20 |
+| the **stamped** queue == the registered 08-30 artefact | ✅ same set **and same order**, all ten `md5` MATCH on disk |
+
+⚠ **THE STAMPED QUEUE IS THE ONE THAT MATTERS AND IT IS A DIFFERENT ARTEFACT FROM THE PLAN.**
+`w26g_send.py` reads `w26d_queueprice.csv`, not `w72a_plan_<day>.json` — that separation is the
+whole reason w48e exists (its docstring: *"`w26g_send.py` does not read JOURNAL.md … it reads ONE
+file"*). Verifying the registered plan therefore does **not** verify what will be sent. Both were
+checked here, separately, and they agree. All ten stamped rows carry `pred_lb ≤ 0.960339`, well
+under the 0.97119 auto-selection tier, so the 08-30 send cannot hijack the auto-selection.
+
+## 🎯 THE NEW PROPERTY: RANK-IDENTITY, WHICH IS THE ONLY IDENTITY AUC CAN SEE
+
+`w109b_colguard` C5 established for the **member matrix** that *"AUC sees nothing but ranks, so two
+columns with different values and identical ranks are one member to this metric."* That argument
+transfers to the **send queue** and nobody had made it. Two files differing in bytes but identical
+in rank score **identically** on a deterministic public LB — a genuinely wasted slot, and neither
+the `md5` column in the queue nor the filename-keyed sent-filter would see it.
+
+Measured over all 201 files (181 sent + the 20 planned), hashing the average-rank vector:
+
+    byte-identical groups among the 181 sent      0
+    RANK-identical groups among the 181 sent      0
+    distinct rank vectors                       181 of 181     -> wasted slots: 0
+    planned-20 rank-identical to anything sent    NONE
+    rank-identical pairs within the planned 20    NONE (20 of 20 distinct)
+    max off-diagonal Spearman in the 20        0.998520  (tabm_missing <-> tabm_rank1)
+
+🎯 **THE HONEST READING IS A CLEAN BILL OF HEALTH, NOT A FINDING.** The closest pair sits at
+ρ=0.9985 against the 1.0 that would make a slot worthless — near, but the gap is real, and 0.9985
+is not a duplicate. ⛔ **AND THEREFORE #51 WAS NOT BUILT.** A guard over the send queue's rank
+identity would be **provably vacuous for its entire remaining life**: the two day-plans are frozen
+artefacts, nothing between now and the deadline can introduce a collision, and the property is
+already true. That is w108 §6's test — *a guard must prove it is covering something* — applied to
+a guard I wanted to write. The measurement is the deliverable; the check would have been theatre.
+
+## ⚠ #50'S PER-RUN CONSTANT IS THE DEFECT #50 EXISTS TO ABOLISH, ONE LEVEL UP
+
+`w117a_handcount` carries `CURRENT_RUN, CURRENT_ROW` — a hard-coded run id and row number, edited
+by hand every run, whose only job is to keep the guard green in the window **before** the current
+run's journal entry lands. w117 built it carefully (keyed on presence, so it cannot double-count)
+and it is correct. But it is a hand-maintained constant inside the guard whose entire purpose is
+that hand-maintained counts go wrong — and if a future run forgets it, the guard does not fail
+loudly, it mis-adjusts by one on the wrong row.
+
+🎯 **AND IT IS REDUNDANT WITH A STANDING RULE ALREADY IN FORCE.** w116 §6 requires document edits
+to land **before** the suite launches. Under that rule the entry is always in the corpus when the
+guard runs, `any(re.search(CURRENT_RUN, …))` is always True, and the adjustment never fires. It is
+dead code on the supported path and a hand-maintained landmine off it.
+
+⛔ **NOT REMOVED, DELIBERATELY.** Two days from the deadline, ripping a working adjustment out of a
+green guard buys nothing and risks the suite. Updated to `w118`/row 7 and verified green in **both**
+states (pre-entry, adjustment supplying the +1; post-entry, corpus supplying it). Recorded as a
+design note for a workspace with more runway, not as a change. 🎯 **"Correct but structurally wrong"
+is a real verdict, and near a deadline it resolves to *leave it alone and write it down*.**
+
+## ✅ ROW 7 OF THE ANGLE INDEX — RESOLVED BY GREP, AS THE INDEX PROMISES, AND NOT RE-OPENED
+
+This run's handed genus is `seed and fold diversity`. Row 7 prices it **structural null (stacker) ·
++2e-6 (member)**, artefact-verified by w109 08-28 on both arms. Three greps, no build. The index's
+claim that a handed angle costs one grep rather than half a run held for the twelfth time.
+
 # (w117, 2026-08-29) — THE INDEX'S HANDING COUNTS WERE WRONG ON **NINE OF TEN ROWS**, AND w116
 # HAD JUST MADE THEM A REASON TO SPEND A RUN
 
@@ -1638,10 +1921,10 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 4 | *XGBoost as the third leg of the ensemble* | ×14, from 08-10 → w115 08-29 · **artefacts verified** (count from `w117a_handcount`) | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — the most-handed, but only just: the ten counts run 8–15** (`w117a_handcount`) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
 | 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
-| 7 | *seed and fold diversity, averaged* | ×11, from 08-11 → w64 → w109 08-28 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
+| 7 | *seed and fold diversity, averaged* | ×12, from 08-11 → w64 → w109 08-28 → w118 08-29 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | ×8 machine-read, +3 named-but-unread (w40/w58/w76 quote it without the word `Foundation`) → w102 08-28, **already built, day 1** | 0 | `## Competition basics` · `Since w38 the workspace has taken every` |
-| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×11, from 08-11 → w110 08-28 · artefacts verified** (count from `w117a_handcount`) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
-| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×12, from 08-11 → w111 08-28 · artefacts verified** (count from `w117a_handcount`) | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
+| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×13, from 08-11 → w119 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
+| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×13, from 08-11 → w111 08-28 → w120 08-29 · artefacts verified** (count from `w117a_handcount`) | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
 
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
 number came from a LightGBM measurement. w106 checked it at the artefact level rather than

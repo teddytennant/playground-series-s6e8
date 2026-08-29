@@ -56,6 +56,12 @@ CONTROLS (w72 5.3: a control that can only fail is not a control; both direction
          XGB_BLEND_TRAP of the surplus must be XGBoost-genus runs, so the documented trap
          ("...so the blend weights mean something") is exercised and not just described. If both
          readers agree, the genus rule is doing nothing.
+  C5 +-  THE AMBIGUITY RULE IS POSITIONAL AND FIRES BOTH WAYS. `classify` used to return None
+         when a genus named two of the ten, which lost w14d out of row 9 and into OFF_ROTATION.
+         It now takes the one named FIRST. At least MIN_AMBIGUOUS resolved runs must actually
+         name two genera -- else the rule is INERT and says so -- and the negative direction is
+         the mirrored probe: the same two genera in the opposite order must resolve the
+         opposite way, which is what separates "positional" from "prefers the lower row".
 """
 from __future__ import annotations
 
@@ -71,10 +77,10 @@ JOURNAL = os.path.join(ROOT, "JOURNAL.md")
 OUT = os.path.join(HERE, "w117a_handcount.json")
 
 BLOCK_HEAD = "# 📇 THE ANGLE INDEX"
-MIN_RUNS, MIN_RESOLVED, MIN_HISTORICAL_BAD = 100, 110, 5
+MIN_RUNS, MIN_RESOLVED, MIN_HISTORICAL_BAD, MIN_AMBIGUOUS = 100, 110, 5, 1
 
 # The run currently executing, whose journal entry is written after this check runs.
-CURRENT_RUN, CURRENT_ROW = r"^# w117 —", 6
+CURRENT_RUN, CURRENT_ROW = r"^# w120 —", 10
 
 # Row number -> (label, pattern matched against the resolved GENUS only).
 GENERA = {
@@ -173,8 +179,29 @@ def genus_of(s: str) -> str:
 
 
 def classify(genus: str):
-    hits = [r for r, (_, pat) in GENERA.items() if re.search(pat, genus, re.I)]
-    return hits[0] if len(hits) == 1 else None
+    """The genus a string names, resolved POSITIONALLY: the pattern that matches earliest.
+
+    ⚠ THIS RETURNED None ON AMBIGUITY UNTIL 2026-08-29, AND THAT SILENTLY LOST A RUN. w14d's
+    header is `ANGLE: error analysis on the best blend's OOF, the generator's coin-flip band`.
+    The angle string carries no colon, so `CUT` never trims it and the whole clause becomes the
+    genus -- and that clause names `error analysis` at offset 0 and `blend` at offset 27. Two
+    hits, so the exactly-one rule refused it; the body scan found no quoted declaration; and a
+    ROTATION run landed in OFF_ROTATION. The census read row 9 as x11 against a true x12, and
+    the miss was sitting in this guard's own report the whole time, labelled "not one of the
+    ten" -- which is the one thing it was not.
+
+    🎯 THE INDEX'S PUBLISHED PROTOCOL IS ALREADY POSITIONAL: "take the GENUS of your ANGLE
+    string -- everything before its first colon". A genus is the LEADING phrase. When the
+    string carries no colon for `CUT` to cut on, earliest-match is that same rule applied to
+    the wording the run was actually handed in, not a relaxation of it. And it is not "prefer
+    the lowest row number": C5 hands it the mirrored string and requires the mirrored answer.
+
+    Measured over all 139 run headers before shipping (`w119b_diff.py`): exactly ONE assignment
+    changes, L4077 unresolved -> row 9; no run changes its resolution path; no other row moves.
+    """
+    hits = sorted((m.start(), r) for r, (_, pat) in GENERA.items()
+                  for m in [re.search(pat, genus, re.I)] if m)
+    return hits[0][1] if hits else None
 
 
 def resolve(lines, i, end):
@@ -357,7 +384,28 @@ def main() -> int:
             print(f"  every surplus run has a non-blending genus; {len(xgb)} are the XGBoost "
                   f"\"so the blend weights mean something\" trap. OK")
 
-    json.dump({"measured": measured, "claimed": claims,
+    print("\nC5 the ambiguity rule is positional, and it fires both ways")
+    amb = [r for r in runs if r["row"] and
+           sum(1 for _, pat in GENERA.values() if re.search(pat, r["genus"], re.I)) > 1]
+    # The mirrored pair. Probe A is w14d's own genus verbatim; probe B names the same two
+    # genera in the opposite order. A rule that merely preferred the lower row number would
+    # answer 6 to both; a positional one answers 9 and then 6.
+    probe_a = "error analysis on the best blend's OOF, the generator's coin-flip band"
+    probe_b = "blending: rank-average the members, then error analysis on what is left"
+    ga, gb = classify(probe_a), classify(probe_b)
+    if len(amb) < MIN_AMBIGUOUS:
+        fail(f"C5 INERT: only {len(amb)} resolved run(s) name two of the ten genera "
+             f"(< {MIN_AMBIGUOUS}) -- nothing in the corpus exercises the rule")
+    elif (ga, gb) != (9, 6):
+        fail(f"C5: the rule is not positional -- probe A -> {ga} (want 9), "
+             f"probe B -> {gb} (want 6)")
+    else:
+        print(f"  mirrored probes resolve to {ga} then {gb}, so the rule is positional and not "
+              f"lowest-row. {len(amb)} corpus run(s) name two genera:")
+        for r in amb:
+            print(f"     L{r['line']:6d}  row {r['row']:2d}  {r['genus'][:56]}")
+
+    json.dump({"measured": measured, "claimed": claims, "ambiguous": len(amb),
                "bad_rows": [list(b) for b in bad], "runs": len(runs),
                "resolved": len(resolved), "off_rotation": len(off)},
               open(OUT, "w"), indent=1, sort_keys=True)
