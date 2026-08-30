@@ -1,0 +1,14 @@
+{
+  "row5_cell": "\u26a0 **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** \u2014 the TE re-shrink measures \u221219.26e-6 (xgb) and \u221282.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. \u26d4 The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of",
+  "row5_missing_layers": [],
+  "prose_cells": [],
+  "unranged_pt_definitions": [],
+  "ladder_recomputed": {
+    "lat_ctraw_r400": 0.965481330634299,
+    "lat_ctfix_r400": 0.96577519451728,
+    "lat_ctdrop_r400": 0.9656895128506031,
+    "lat_encdrop_r400": 0.952228882321988,
+    "lat_tedrop_r400": 0.9496361970778027
+  },
+  "failures": []
+}

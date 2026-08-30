@@ -1,7 +1,7 @@
 {
- "n_sent_stems": 181,
+ "n_sent_stems": 191,
  "n_with_oof": 166,
- "n_without_oof": 15,
+ "n_without_oof": 25,
  "nocv_stems": [
   "w15e_antistudent",
   "w15f_antistudent_avg",
@@ -16,8 +16,18 @@
   "w37_cal_omid_tabm",
   "w37_cal_ram_hgb",
   "w37_cal_ravi_realmlp1c",
+  "w85_cal_ad_gnn_note",
+  "w85_cal_ad_logregte",
   "w85_cal_bolt_cat_unique",
-  "w85_cal_bolt_lgb_raw_d4"
+  "w85_cal_bolt_extratrees_support",
+  "w85_cal_bolt_lgb_raw_d4",
+  "w85_cal_bolt_tabm_missing",
+  "w85_cal_golem_b",
+  "w85_cal_golem_g",
+  "w85_cal_lat_encdrop_r400",
+  "w85_cal_lat_tedrop_r400",
+  "w85_cal_mkt_mlp",
+  "w85_cal_mkt_nn"
  ],
  "nocv_lb_max": 0.97107,
  "raw_argmax": "w36_ad199stdcorr",

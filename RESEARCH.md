@@ -1,3 +1,123 @@
+# (w125, 2026-08-30) — 🔴 #53 GAVE THE `price` COLUMN ITS QUANTITIES. NONE OF THEM CARRIES A
+# **LAYER**. ROW 5'S `negative` IS A *MEMBER*-LAYER WORD IN A COLUMN OF *STACK*-LAYER NUMBERS —
+# AND AT THE STACK LAYER THE FEATURE-BLOCK LADDER DOES NOT EVEN SHARE ITS SIGN.
+
+## 🔴 THE DEFECT — A PRICE IS A NUMBER, A QUANTITY, **AND A LAYER**
+
+Nine of the ten price cells hold stack-layer numbers: e-6 of blend CV, the thing that ships.
+Row 5's reads `negative`, and the readings carrying it are **member-layer solo fold AUC**:
+
+    −19.26e-6 (xgb)   −82.68e-6 (cat)   the TE re-shrink, on top of the LightGBM null at §G6
+
+The workspace already forbids exactly this, in terms — *"member-level AUC is not evidence about
+stack value ... the sign is not even guaranteed"* (w106) and *"quote a member's fold AUC as a
+member number and never as a blend number"*. Row 5 is the one cell that does it, under a shared
+heading, next to row 6's `−1.07e-6`, which is a stack number.
+
+⚠ **SIXTH RUN, SAME GENUS, AND #53 COULD NOT SEE THIS ONE.** w120 §4 `priority` naming an input ·
+w121 §3 a prose cause beside a derived count · w122 §2 `slot` printed for `tier` · w123 §3 a
+family label on a residual group · w124 §3 a magnitude with no unit · now a magnitude with a unit
+and no layer. 🎯 **#53's C1 exempts bare `0`/`negative` cells by design** — no magnitude, nothing
+to misread — so the fix that closed five runs of this genus is blind to the sixth. A predicate
+written against the last instance does not generalise to the next one on its own.
+
+## ✅ THE MEASUREMENT — THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER
+
+`w125a_row5.py`, `member_value2`'s procedure: paired 50/50, 3 splits, C=1.0, hybrid, the **same
+`base104` pool and the same seeds** w123/w124 used. 14m05s wall under `systemd-run --user`.
+The six arms are `w27r_blockdrop`'s: one model, one PARAMS, 400 rounds, seed 42, the frozen SKF5
+folds — **only the column set differs**, which is what makes them a matched set.
+
+🎯 **`+cat_only` re-measures +10.04e-6/member against w123's +10.04e-6 — gap +0.000e-6.** Without
+that these numbers would be a reading of a different instrument.
+
+| arm, enrolled ALONE into `base104` | cols | solo OOF | **STACK enrolment** | sign |
+|---|---|---|---|---|
+| `encdrop` (drop `TE_`+`CT_`) | 40 | 0.9522288823 | **+7.01e-6** | consistent 3/3 |
+| `ctraw` (control, everything) | 184 | 0.9654813306 | **+4.44e-6** | SIGN FLIPS |
+| `ctfix` (`CT_`×4/3) | 184 | 0.9657751945 | **+3.83e-6** | consistent 3/3 |
+| `rawdrop` (drop raw/derived) | 144 | 0.9631860988 | **+3.62e-6** | consistent 3/3 |
+| `ctdrop` (drop `CT_`) | 112 | 0.9656895129 | **+3.37e-6** | consistent 3/3 |
+| `tedrop` (drop `TE_`) | 112 | 0.9496361971 | **+0.54e-6** | SIGN FLIPS |
+
+⟹ **Every arm enrols POSITIVE at the stack layer**, +0.54 to +7.01e-6, where the row's published
+member-layer word is *negative*. The two layers do not share a sign, which is precisely why the
+cell has to name which one it is quoting.
+
+## 🔻 AND THE `1.4%` PASS-THROUGH IS NOT A CONSTANT — IT IS ONE POINT WITH NO RANGE
+
+`ctraw` − `encdrop` is the **whole `TE_`+`CT_` encoding channel**, and it is the largest
+member-level effect this workspace has: **+13,252e-6**, 96× the +138e-6 the pass-through was
+fitted on. At the stack layer, on the same two arrays:
+
+    per split   +0.95e-6   +7.46e-6   −0.70e-6      mean −2.57e-6 in the OTHER direction
+    the 1.4% predicts                               +186e-6
+
+⛔ **The sign flips, so the honest reading is NOT DISTINGUISHABLE FROM ZERO** — not "the ordering
+inverts", which the mean alone would let you say and three splits do not support. Bounded by the
+largest single split the channel is **under 0.06%** pass-through, against a published 1.4%.
+
+⚠ **THIS IS LOAD-BEARING, NOT TRIVIA.** Row 4's entire `+4e-7` price cell is *derived* by
+multiplying through this constant (`3e-5 × 1.4%`), and it is stated as a property of the
+workspace in 13 places. Its in-range uses (3e-5, ±84e-6) are fine and stay. What was missing is
+the **range**: nothing said it was fitted at +138e-6, so nothing stopped a later run multiplying
+a 13,000e-6 member effect by it and getting a number 72× too large with the wrong sign. Both
+definition sites now carry the range; **#54's C3 keeps them that way.**
+
+⚠ **AND A CORRECTION TO MY OWN SCRIPT, THE SAME GENUS ONE LEVEL UP.** `w125a_row5.py` as it ran
+printed *"a factor of −72"* off the contrast's **mean** without checking that the contrast holds
+its sign — an assertion where a measurement was available, in code I wrote this run, exactly as
+w124 §5 caught in its own log. The script now reports the per-split signs and the bound instead.
+The log (`w125a_run.log`) keeps the text that actually ran.
+
+## ✅ WHAT ELSE THE ARRAYS GAVE BACK — TWO PROSE CELLS IN NUMERIC COLUMNS
+
+The ablation ladder published `tedrop`'s pooled OOF as *"below `encdrop`"* — **prose in a column
+of numbers, in two tables** — which is why the `CT_`-on-raw marginal was carried as *"≈ −2,700e-6"*
+when the array on disk gives it exactly. `tedrop` is **0.9496361971**, so that marginal is
+**−2,592.7e-6**. `rawdrop` (0.9631860988) was not in the ladder at all and now is. All four
+previously-published arms reproduce from the `.npy` files to **1e-9**, and the `ext_members7pin`
+hardlinks are still the same inodes as the export they pin.
+
+## ⛔ NOTHING RE-OPENS, AND THE HANDED ANGLE STAYS CLOSED
+
+All six arms sit far under the **50e-6** floor. The highest, `encdrop` at +7.01e-6, is a
+**raw-frame** member — the ladder's own note says deleting the encodings *relocates* a member
+into the raw-frame cluster rather than creating a new kind, and the pack is already ~74 raw-frame
+members deep. ⟹ Same operational rule as rows 3 and 4: *prefer a pipeline we do not hold*, **not**
+*prefer a feature set*. **Do not build a feature-engineered member.** The modelling question
+stays closed (w112 §8.4); this section is not an exception to it, exactly as w123 §5 and w124 §4
+were not.
+
+## ✅ STANDING CHECK #54 — `w125b_layerguard`
+
+C1 the row 5 price cell must name both layers, `MEMBER` and `STACK`. Scoped to row 5 on purpose:
+TUNING/ENROLMENT/CONCAT/SEARCH are stack-layer by definition and #53 already pins them, so
+requiring the word on all ten rows would be noise. C2 no prose cells left in the ladder's numeric
+columns, and `tedrop`'s number must match the array. C3 every place that states the pass-through
+as a *property* must disclose its fitted range — definition sites only, not every use, because
+the use sites are where it is legitimately applied. C4 the five ladder arms recompute from disk
+to 1e-9. C5 `--control` runs C1/C2/C3 over **frozen inlined pre-fix text** (w115: not HEAD) and
+must fire.
+
+    (before)    FAILURES: 5   rc=1   — C1 ×1, C2 ×2, C3 ×2
+    (shipped)   FAILURES: 0   rc=0   ✅ CLEAN
+    (--control) pre-fix text fires 3/3 · shipped fires 0/3
+
+⚠ **AND THE CONTROL CAUGHT ITSELF FIRST.** C3's frozen pre-fix snippet was initially the *one*
+definition site that already named its fitted point, so it read `silent` where it had to read
+`FIRES` — a control aimed at text the predicate is designed not to match. The INERT reporting is
+what surfaced it; a `--control` that only prints green would have shipped a check whose third
+condition had never been demonstrated to do anything. **Point a control at the text the fix
+changed, not at the nearest text of the same shape.**
+
+🎯 **C3 discriminates rather than blanket-matching.** It flags **two** of the places the 1.4%
+appears — the sites that state it as a property with no range. The site that already names its
+fitted point (*"seed-averaging `xgb_latcat` bought +138e-6 solo"*) stays green untouched, and the
+use sites, where the constant is legitimately applied inside its range, are not in scope at all.
+
+Registered in `w93a_suite.STEMS` and in the published block below, **53 → 54 stems**.
+
 # (w124, 2026-08-30) — 🔴 THE ANGLE INDEX HAS ONE COLUMN HEADED `price` AND IT CARRIES TWO
 # DIFFERENT QUANTITIES. ROW 4'S **+4e-7** IS THE VALUE OF *TUNING* A GBDT YOU HOLD; ROW 3'S
 # **5.9/10.04e-6** IS THE VALUE OF *ENROLLING* ONE YOU DO NOT. SIDE BY SIDE THEY READ AS 15×.
@@ -110,7 +230,9 @@ re-derivation date beside it.
 
 ✅ **NOTHING RE-OPENS.** This is a **solo** comparison and the closure's own arithmetic is that
 solo→stack pass-through is **1.4%**: +84e-6 solo is +1.2e-6 into the stack and −2e-6 solo is
-−0.03e-6, both far under the 50e-6 floor. What changes is that the table must stop asserting a
+−0.03e-6, both far under the 50e-6 floor. ⚠ The 1.4% was **fitted on one point at +138e-6 solo**
+and ±84e-6 is inside that range, so this application is safe; it is **not a constant** and does
+not extrapolate — see w125 below, where a +13,252e-6 member effect converts to nothing. What changes is that the table must stop asserting a
 separation it no longer has, and that the right instrument for *"is this family a missing leg"*
 is the **ENROLMENT** measurement below, not a solo AUC ranking — solo AUC does not price
 marginal ensemble value, which is the thing the question is actually about.
@@ -1954,7 +2076,10 @@ like "two more redundant members" — the null the exercise existed to rule out.
 windowed prior at **+42e-6** of fold AUC and w105 re-measured it at **+86e-6**; the blend value is
 **−1.9e-6**. The registered prediction [0, +3e-6] was wrong *on the optimistic side*. This is the
 strongest instance yet of the standing rule: **member-level AUC is not evidence about stack
-value.** Solo→stack pass-through here is ~1.4% and the sign is not even guaranteed.
+value.** Solo→stack pass-through here is ~1.4% and the sign is not even guaranteed. ⚠ That 1.4%
+is **fitted on one point** (+138e-6 solo → +2e-6 stack, seed-averaging `xgb_latcat`) and holds no
+range beyond it: w125 measured a second point 96× further out (+13,252e-6 solo) and the stack
+reading there is not distinguishable from zero, against the +186e-6 the 1.4% would predict.
 
 ⛔ **CONSEQUENCE FOR THE REMAINING RUNS (deadline 2026-08-31 23:59).** All eight ANGLE INDEX rows
 are closed by measurement, rows 3 and 4 now re-verified at the artefact level, and w97 was the
@@ -2433,7 +2558,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
 | 3 | *CatBoost: it handles categoricals better* | **×15, from 08-10 → w114 08-29 → w123 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 on the group delta, sign-consistent over 3 splits), which independently corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×15, from 08-10 → w115 08-29 → w124 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** · XGBoost **+7.38e-6** · LightGBM **+4.04e-6**. ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family* | `tuning ANY GBDT is worth ~4e-7` |
-| 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — the most-handed, but only just: the ten counts run 8–15** (`w117a_handcount`) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
+| 5 | *feature engineering: interactions, in-fold target and count encodings* | **×16, from 08-10 → w116 08-29 → w125 08-30 — the most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
 | 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | a **SEARCH** price (re-weighting members already in) — **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
 | 7 | *seed and fold diversity, averaged* | ×12, from 08-11 → w64 → w109 08-28 → w118 08-29 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · **ENROLMENT** +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | 0, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
@@ -2953,7 +3078,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
-    w122a_slotguard   w123b_groupguard  w124b_priceunitguard
+    w122a_slotguard   w123b_groupguard  w124b_priceunitguard  w125b_layerguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -14157,7 +14282,8 @@ min 0.91797.
 | `ct1.3333` (4/3 fix) | 184 | 0.9657751945 | — | — | — |
 | `ctdrop` (drop `CT_`) | 112 | 0.9656895129 | 0.99941 | `lat_ctfix_r400` | **181/189** |
 | `encdrop` (drop `TE_`+`CT_`) | **40** | 0.9522288823 | **0.98607** | **`xgb`** | **27/189** |
-| `tedrop` (drop `TE_`) | 112 | *below `encdrop`* | | | |
+| `tedrop` (drop `TE_`) | 112 | **0.9496361971** | | | |
+| `rawdrop` (drop raw/derived) | 144 | **0.9631860988** | | | |
 
 **Deleting 39% of the columns (`CT_`) moves maxcorr 0.0006. Deleting the whole encoding
 channel moves it 0.010.** Decorrelation tracks how much of the model's *function* is
@@ -14179,7 +14305,7 @@ The raw-frame baseline makes the marginal decomposition possible for the first t
 | configuration | pooled OOF | marginal value of `CT_` |
 |---|---|---|
 | raw only (`encdrop`) | 0.9522289 | — |
-| raw + `CT_` (`tedrop`) | *below encdrop* | **≈ −2,700e-6** |
+| raw + `CT_` (`tedrop`) | 0.9496362 | **−2,592.7e-6** (was published as "≈ −2,700e-6") |
 | raw + `TE_` (`ctdrop`) | 0.9656895 | — |
 | raw + `TE_` + `CT_` (control) | 0.9654813 | **−208e-6** |
 | raw + `TE_` + `CT_`·(4/3) | 0.9657752 | **+86e-6** |

@@ -1,7 +1,7 @@
 {
- "day": "2026-08-29",
+ "day": "2026-08-30",
  "tier": 0.97119,
- "n_registered": 20,
+ "n_registered": 10,
  "pred_sd_e6": 8.770000000000001,
  "p_max": 0.02,
  "base_e6": 4522768.52959767,
@@ -22,33 +22,33 @@
  },
  "tightest": [
   {
-   "day": "2026-08-30",
-   "stem": "w85_cal_ad_logregte",
-   "margin_e6": 10850.547348025042,
+   "day": "2026-08-31",
+   "stem": "w85_cal_bolt_fttransformer",
+   "margin_e6": 29651.444735511846,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-30",
-   "stem": "w85_cal_lat_encdrop_r400",
-   "margin_e6": 17531.217678012024,
+   "day": "2026-08-31",
+   "stem": "w85_cal_bolt_tabm_rank1",
+   "margin_e6": 30242.40220116281,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-30",
-   "stem": "w85_cal_lat_tedrop_r400",
-   "margin_e6": 20123.902922197234,
+   "day": "2026-08-31",
+   "stem": "w85_cal_bolt_neural_5fold",
+   "margin_e6": 30532.004530140603,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-30",
-   "stem": "w85_cal_bolt_extratrees_support",
-   "margin_e6": 26541.38769268799,
+   "day": "2026-08-31",
+   "stem": "w85_cal_bolt_gandalf_gflu",
+   "margin_e6": 31045.982517848628,
    "p_above": 0.0
   },
   {
-   "day": "2026-08-30",
-   "stem": "w85_cal_golem_g",
-   "margin_e6": 27597.376634683646,
+   "day": "2026-08-31",
+   "stem": "w85_cal_bolt_dcnv2_cross",
+   "margin_e6": 31261.96190325559,
    "p_above": 0.0
   }
  ],

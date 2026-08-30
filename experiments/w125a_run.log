@@ -1,0 +1,58 @@
+Started [systemd-run] /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/.venv/bin/python experiments/w125a_row5.py.
+w125a -- ANGLE INDEX row 5 (feature engineering) against its artefacts
+[R1] row 5's citations
+    OK agent/features.py:te_block at line 175 (row 5's evidence table says 175)
+    OK anchor 'A SECOND skew in the same block': 3 occurrence(s)
+    OK anchor 'THE CT SKEW IS A PROPERTY OF THE MATRIX': 2 occurrence(s)
+    OK the xgb member-level figure 19.26e-6 at that anchor
+    OK the cat member-level figure 82.68e-6 at that anchor
+[R2] the feature-block ablation ladder, recomputed from the arrays
+    pin  lat_ctdrop_r400: ext_members7pin is the same inode as ext_members7 -> True
+    pin  lat_encdrop_r400: ext_members7pin is the same inode as ext_members7 -> True
+    OK lat_ctraw_r400       184 cols  solo 0.9654813306  (published 0.9654813306, control, 184 cols)
+    OK lat_ctfix_r400       184 cols  solo 0.9657751945  (published 0.9657751945, CT_ x 4/3 skew fix, 184 cols)
+    OK lat_ctdrop_r400      112 cols  solo 0.9656895129  (published 0.9656895129, drop CT_, 112 cols)
+    OK lat_tedrop_r400      112 cols  solo 0.9496361971  (NEVER PUBLISHED AS A NUMBER, drop TE_, 112 cols)
+    OK lat_encdrop_r400      40 cols  solo 0.9522288823  (published 0.9522288823, drop TE_+CT_, 40 cols)
+    OK lat_rawdrop_r400     144 cols  solo 0.9631860988  (NEVER PUBLISHED AS A NUMBER, drop raw/derived, 144 cols)
+    `tedrop` is published as '*below encdrop*' with no number. It is 0.9496361971, which is -2592.7e-6 below `encdrop` -- so the ladder's '~-2700e-6' marginal value of CT_ on a raw frame is exactly -2592.7e-6
+  note `lat_tedrop_r400` now has a number (0.9496361971); the ladder carried it as prose. `lat_rawdrop_r400` is not in the ladder at all and is 0.9631860988.
+    the whole ENCODING channel (TE_+CT_) is worth +13252e-6 at MEMBER level -- 96x the +138e-6 the 1.4% pass-through was fitted on
+[R3] reconstructing member_value2's base pool from the arrays on disk
+    pool 167 | base 104 | rest 35 | CatBoost subgroup 8
+    transform=hybrid over 173 columns (167 pool + 6 arms). `transform` is per-column, so the base columns are bit-identical to w123/w124's -- the control below proves it.
+  hybrid: repaired 49 of 173 members
+[R3] paired 50/50, 3 splits, C=1.0 (w123/w124's procedure, same seeds, same base pool)
+    split 0: base=0.969801  +cat_only=0.969864  +ctraw=0.969805  +ctfix=0.969806  +ctdrop=0.969805  +tedrop=0.969802  +encdrop=0.969806  +rawdrop=0.969806
+    split 1: base=0.969994  +cat_only=0.970078  +ctraw=0.969994  +ctfix=0.969995  +ctdrop=0.969996  +tedrop=0.969994  +encdrop=0.970001  +rawdrop=0.969995
+    split 2: base=0.970096  +cat_only=0.970190  +ctraw=0.970105  +ctfix=0.970101  +ctdrop=0.970100  +tedrop=0.970097  +encdrop=0.970104  +rawdrop=0.970100
+    PAIRED DELTA vs base104 (same rows; split noise cancels)
+      +cat_only      n= 8  +0.000080 +/- 0.000016   +10.04e-6/member  [consistent]
+      +ctraw         n= 1  +0.000004 +/- 0.000005    +4.44e-6/member  [SIGN FLIPS]
+      +ctfix         n= 1  +0.000004 +/- 0.000002    +3.83e-6/member  [consistent]
+      +ctdrop        n= 1  +0.000003 +/- 0.000001    +3.37e-6/member  [consistent]
+      +tedrop        n= 1  +0.000001 +/- 0.000001    +0.54e-6/member  [SIGN FLIPS]
+      +encdrop       n= 1  +0.000007 +/- 0.000002    +7.01e-6/member  [consistent]
+      +rawdrop       n= 1  +0.000004 +/- 0.000002    +3.62e-6/member  [consistent]
+    CONTROL  `+cat_only` re-measures +10.04e-6/member against w123's +10.04e-6 (gap +0.000e-6)
+    OK the control reproduces to 0.05e-6, so the arms below sit on the same footing as row 3's and row 4's enrolment prices
+[R4] MEMBER layer vs STACK layer, arm by arm (both measured here, on the same arrays)
+      arm                           solo   solo d vs encdrop   STACK enrolment  pass-through
+      lat_ctraw_r400           0.9654813           +13252e-6          +4.44e-6      -0.0194%
+      lat_ctfix_r400           0.9657752           +13546e-6          +3.83e-6      -0.0235%
+      lat_ctdrop_r400          0.9656895           +13461e-6          +3.37e-6      -0.0271%
+      lat_tedrop_r400          0.9496362            -2593e-6          +0.54e-6       0.2498%
+      lat_encdrop_r400         0.9522289               +0e-6          +7.01e-6            --
+      lat_rawdrop_r400         0.9631861           +10957e-6          +3.62e-6      -0.0310%
+    THE ENCODING CHANNEL, both ways:
+      member layer   +13252e-6  (`ctraw` 184 cols vs `encdrop` 40 cols, same model/seed/folds)
+      stack  layer   -2.57e-6  (same two arrays, each enrolled alone into base104)
+      the published 1.4% predicts +186e-6 into the stack; observed -2.57e-6, a factor of -72
+  note the 1.4% solo->stack pass-through is quoted in nine places as a conversion constant and was fitted on ONE point (+138e-6 solo -> +2e-6 stack, seed-averaging xgb_latcat). The encoding channel is a second point 96x further out and reads -0.0194%. It is not a constant.
+  note row 5's price cell reads `negative` and is carried by MEMBER-layer numbers (-19.26e-6 xgb, -82.68e-6 cat). Every other magnitude in that column is a STACK-layer number. Measured at the stack layer the arms read ctraw +4.44e-6 ctfix +3.83e-6 ctdrop +3.37e-6 tedrop +0.54e-6 encdrop +7.01e-6 rawdrop +3.62e-6, all inside the 50e-6 floor. The closure does not change; its price now names its layer.
+==============================================================================
+  note `lat_tedrop_r400` now has a number (0.9496361971); the ladder carried it as prose. `lat_rawdrop_r400` is not in the ladder at all and is 0.9631860988.
+  note the 1.4% solo->stack pass-through is quoted in nine places as a conversion constant and was fitted on ONE point (+138e-6 solo -> +2e-6 stack, seed-averaging xgb_latcat). The encoding channel is a second point 96x further out and reads -0.0194%. It is not a constant.
+  note row 5's price cell reads `negative` and is carried by MEMBER-layer numbers (-19.26e-6 xgb, -82.68e-6 cat). Every other magnitude in that column is a STACK-layer number. Measured at the stack layer the arms read ctraw +4.44e-6 ctfix +3.83e-6 ctdrop +3.37e-6 tedrop +0.54e-6 encdrop +7.01e-6 rawdrop +3.62e-6, all inside the 50e-6 floor. The closure does not change; its price now names its layer.
+FAILURES: 0
+w125a.service: Consumed 3h 33min 28.793s CPU time over 14min 5.236s wall clock time, 5.4G memory peak.

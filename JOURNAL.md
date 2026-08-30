@@ -35105,3 +35105,205 @@ git push origin main`.** Fourth place the short PATH has landed here, after `sud
 under `systemd-run`, and the browser binaries. Recorded in RESEARCH's PATH section.
 ⚠ The commit had already succeeded; only the push failed. `git log --oneline -1` before
 re-running anything, or you will commit twice.
+
+---
+
+# w125 — 2026-08-30, slot 4 of 10 · ANGLE: feature engineering (interactions, in-fold target
+# and count encodings) · **AT THE CAP, NOTHING SENT** · row 5 priced at the layer that pays
+
+**⛔ NO SUBMISSION. Ten already landed today at 12:36–12:37Z (w122's queue drain), confirmed
+from `kaggle competitions submissions -v`.** The cap is 10/day and it is spent. This run is
+measurement and documentation only, which is what the brief asks for at the cap.
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 5, AND ROW 5 IS THE MOST-HANDED ROW IN THE INDEX
+
+Sixteenth handing (`w117a_handcount`, ×15 → ×16 — the tool's number, not mine). Closed since
+08-10, price cell `negative`, re-verified at the artefact level by w107. Nothing re-opens.
+
+## 2. 🔴 THE DEFECT — #53 GAVE THE `price` COLUMN ITS QUANTITIES. NONE OF THEM CARRIES A LAYER
+
+Nine of ten price cells are stack-layer numbers. Row 5's `negative` is carried by **member-layer
+solo fold AUC** (−19.26e-6 xgb, −82.68e-6 cat). Under one heading, beside row 6's `−1.07e-6`,
+which is a stack number. The workspace already forbids the substitution in terms (w106: *"member
+-level AUC is not evidence about stack value ... the sign is not even guaranteed"*).
+
+⚠ **Sixth run, same genus** — w120 `priority` / w121 a prose cause / w122 `slot` for `tier` /
+w123 a family label on a residual / w124 a magnitude with no unit / now a magnitude with a unit
+and no layer. 🎯 **#53's C1 exempts bare `negative` cells by design**, so the fix that closed
+five runs of this genus is structurally blind to the sixth.
+
+## 3. ✅ THE MEASUREMENT — `w125a_row5.py`, 14m05s under `systemd-run --user`, FAILURES 0
+
+`member_value2`'s procedure, same `base104` pool, same three splits, same seeds as w123/w124.
+The six arms are `w27r_blockdrop`'s matched set: one model, one PARAMS, 400 rounds, seed 42,
+frozen SKF5 — only the column set differs. 🎯 **`+cat_only` re-measures +10.04e-6/member against
+w123's +10.04e-6, gap +0.000e-6**, so these sit on the same instrument as rows 3 and 4.
+
+| arm, enrolled ALONE into base104 | cols | solo OOF | STACK enrolment | sign |
+|---|---|---|---|---|
+| `encdrop` (drop TE_+CT_) | 40 | 0.9522288823 | **+7.01e-6** | consistent 3/3 |
+| `ctraw` (control) | 184 | 0.9654813306 | **+4.44e-6** | SIGN FLIPS |
+| `ctfix` (CT_×4/3) | 184 | 0.9657751945 | **+3.83e-6** | consistent 3/3 |
+| `rawdrop` | 144 | 0.9631860988 | **+3.62e-6** | consistent 3/3 |
+| `ctdrop` (drop CT_) | 112 | 0.9656895129 | **+3.37e-6** | consistent 3/3 |
+| `tedrop` (drop TE_) | 112 | 0.9496361971 | **+0.54e-6** | SIGN FLIPS |
+
+⟹ **Every arm enrols POSITIVE at the stack layer** where the row's published member-layer word
+is *negative*. The layers do not share a sign. That is what makes the label load-bearing.
+
+## 4. 🔻 THE `1.4%` PASS-THROUGH IS ONE POINT WITH NO RANGE, AND ROW 4'S PRICE IS DERIVED FROM IT
+
+`ctraw` − `encdrop` is the whole `TE_`+`CT_` encoding channel: **+13,252e-6 at member level**,
+96× the +138e-6 the constant was fitted on. At the stack layer, same two arrays:
+
+    per split  +0.95e-6  +7.46e-6  −0.70e-6      the 1.4% predicts +186e-6
+
+⛔ **The sign flips, so this is NOT DISTINGUISHABLE FROM ZERO** — not "the ordering inverts",
+which the mean alone would license and three splits do not support. Bounded by the largest single
+split the channel is under **0.06%** pass-through against a published 1.4%.
+
+⚠ **A CORRECTION TO MY OWN SCRIPT.** `w125a_row5.py` as it ran printed *"a factor of −72"* off
+that mean without checking the contrast holds its sign — an assertion where a measurement was
+available, in code I wrote today, the same thing w124 §5 caught in its own log. The script now
+reports per-split signs and the bound; `w125a_run.log` keeps the text that actually ran.
+
+## 5. ✅ TWO PROSE CELLS IN NUMERIC COLUMNS, FIXED FROM THE ARRAYS
+
+The ablation ladder published `tedrop`'s pooled OOF as *"below `encdrop`"* in **two** tables,
+which is why the CT_-on-raw marginal was carried as *"≈ −2,700e-6"*. The array gives `tedrop`
+**0.9496361971**, so the marginal is **−2,592.7e-6**. `rawdrop` (0.9631860988) was not in the
+ladder at all. All four previously-published arms reproduce from `.npy` to **1e-9**, and the
+`ext_members7pin` hardlinks are still the same inodes as the export they pin.
+
+## 6. ✅ STANDING CHECK #54 — `w125b_layerguard`, 53 → 54 stems
+
+C1 row 5 names both layers · C2 no prose left in the ladder's numeric columns · C3 every site
+that states the pass-through as a *property* discloses its fitted range (definition sites only;
+the ten use sites apply it inside its range and are not in scope) · C4 the five ladder arms
+recompute from disk to 1e-9 · C5 `--control` over frozen pre-fix text.
+
+    (before)    FAILURES: 5   rc=1
+    (shipped)   FAILURES: 0   rc=0
+    (--control) pre-fix 3/3 FIRES · shipped 0/3
+
+⚠ **The control caught itself first.** C3's frozen snippet was initially the one definition site
+that already named its fitted point, so it read `silent` where it had to read `FIRES`. The INERT
+reporting surfaced it. **Point a control at the text the fix changed, not at the nearest text of
+the same shape.**
+
+## 7. ⛔ NOTHING RE-OPENS
+
+All six arms are far under the **50e-6** floor. The highest, `encdrop` at +7.01e-6, is a
+raw-frame member and the ladder's own note says deleting the encodings *relocates* a member into
+the raw-frame cluster rather than creating a new kind. Same rule as rows 3 and 4: *prefer a
+pipeline we do not hold*, not *prefer a feature set*. **Do not build a feature-engineered
+member.** The modelling question stays closed (w112 §8.4).
+
+## 8. ✅ THE SUITE — **`TOTAL 328s`, 52/54 GREEN, BOTH REDS THE DOCUMENTED POST-SEND PAIR**
+
+    [54/54] w125b_layerguard  rc=0   ✅ CLEAN — every published price names its layer
+    TOTAL 328s   52/54 green
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+    ⚠ every failure is the post-send queue-freshness guard doing its job.
+
+Ten files went out at 12:36–12:37Z, so the queue on disk is for a day already sent, and the
+runner said so itself. This is the **both-red** pattern, which IS post-send; RESEARCH's warning
+is about **w85c red while w54a is GREEN**, which is not this. Both logs deleted after reading.
+
+## 9. 🔻 ADDENDUM — THE FIRST SUITE PASS CAME BACK **14 RED**, AND ALL TWELVE EXTRA WERE MINE
+
+    FileNotFoundError: [Errno 2] No such file or directory: 'kaggle'
+
+I launched with `--setenv=PATH=/run/current-system/sw/bin:/usr/bin:/bin`, copied from w124's
+command line. `kaggle` lives in **`~/.local/bin`**, which that PATH does not carry, so all twelve
+API-touching guards died at the same call and `w92a_smokerun`/`w112a_templateguard` inherited it
+through the modules they shell out to. Nothing was wrong with the workspace.
+
+⛔ **FIFTH PLACE THE SHORT PATH HAS LANDED, AND IT IS THE ONE ALREADY NAMED** — after `sudo`, the
+`gh` credential helper, the browser binaries, and *"kaggle under `systemd-run`"*, which is this
+one, recorded before today. 🎯 **RESEARCH.md carries the correct invocation verbatim, `FULLPATH`
+and all** (grep `FULLPATH=`), and I did not use it. Re-running it as written: **52/54**.
+
+⟹ **THE LESSON IS ABOUT READING, NOT ABOUT PATH.** Reading `40/54 green` and triaging twelve
+guards would have burned the run; reading the first *log* instead of the first *count* found one
+cause in one line. **When many checks fail at once, they share a cause, and it is usually the
+thing you just changed about how they run — not twelve new defects.** Copy the launch command
+from the document that records it, not from the last run's scrollback.
+
+## 10. ⛔ THE CLICK — TWENTY-FOURTH RUN ASKING. **TOMORROW IS THE DEADLINE.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live this run, real rc from the process, rc=1:
+**`*** NOTHING IS SELECTED ***`**. `55656399 → w36_ad199stdcorr.csv` (public 0.97118) ·
+`55588167 → w23_ad187stdcorr.csv` (public 0.97116). Auto-select takes the 0.97119 tier —
+`w36_ad199stdcorr_ens4` + `w38_ad202stdcorr_ens4` — and both WANTED files print **UNREACHABLE
+without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the mis-click costs
+**+35.17e-6** or **+81.92e-6** and remains the bigger hazard by an order of magnitude.
+⛔ Do not re-price it. **The click stays human.**
+
+## 11. THE BOARD — NOT RE-READ
+
+One board read per day (w120 §7) and w122 spent today's at 12:45Z: **rank 278 / 3,321, cut 332,
+margin +54, −22/day.** ⛔ Do not quote −11/day.
+
+## 12. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122 at 12:36–12:37Z, confirmed from the API.
+- **Row 5 now publishes both of its layers**: MEMBER `negative` and a STACK **ENROLMENT price of
+  +0.5e-6 to +7.0e-6/member** across the six `w27r_blockdrop` arms, measured on identical folds
+  with a CatBoost control that reproduced w123 to **+0.000e-6**.
+- **The `1.4%` pass-through has a range for the first time.** A second point 96× further out
+  (+13,252e-6 solo, the whole encoding channel) is not distinguishable from zero at the stack
+  layer against a 1.4%-implied +186e-6. Row 4's `+4e-7` is *derived* by multiplying through this
+  constant, so the range is load-bearing. Both definition sites now carry it; #54's C3 keeps them.
+- **Two prose cells replaced by their arrays.** `tedrop` = 0.9496361971, so the CT_-on-raw
+  marginal is **−2,592.7e-6** exactly, not "≈ −2,700e-6". `rawdrop` = 0.9631860988, added.
+- **Standing check #54**, 53 → 54 stems, with a `--control` that caught its own miss-aim.
+- ⛔ **Still nothing selected. Twenty-fourth run asking, and tomorrow is the last day.**
+
+## 13. NEXT RUN — READ THIS ORDER. **IT IS THE FINAL DAY (deadline 2026-08-31 23:59).**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. ⚠ **RUN `w48e_order.py --day 2026-08-31 --write` FIRST**, then `--go`. Quote `w26d`'s
+   **bound**, never its point estimate. **Send early: a slot unsent at 23:59 is gone.** The
+   queue as of today is drained to `w85_cal_*` raw-member tail-fills (CV `nan`, pred_lb 0.93–0.94)
+   — they are measurements, not candidates, and they cannot be auto-selected.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w125 set it to `w125`/row 5.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (grep `FULLPATH=`), not out of the last run's scrollback — w125 §9 cost a full
+   suite pass to that. Then read the `FAILURES:` line and **which stems are on it**; if more than
+   the documented pair is red, **read the first failure log before triaging anything**.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §3 above is not an exception.
+6. ⛔ **DO-NOT, carried forward from w92–w124 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct" ·
+     read **5.9e-6** as the CatBoost price (it is a residual group's average; CatBoost alone is
+     **+10.04e-6**) · treat +10.04e-6 or +7.38e-6 as a reason to build a CatBoost or XGBoost
+     member · add measured-alone group deltas together · divide by filenames rather than arrays.
+   • 🆕 **DO NOT** multiply a member-level number by **1.4%** to get a stack number without
+     checking the magnitude is near the **+138e-6** it was fitted at. At +13,252e-6 the true
+     pass-through is under 0.06% and the point estimate has the other sign (§4).
+   • 🆕 **DO NOT** read row 5's `negative` as a stack-layer price. It is the MEMBER layer. At the
+     stack layer every one of the six ablation arms enrols **positive** (§3), and neither reading
+     re-opens the angle.
+   • 🆕 **DO NOT** launch the suite with a hand-typed PATH. `kaggle` is in `~/.local/bin` and the
+     short PATH turns twelve guards red at once for one reason (§9).
+7. ⚠ **THE LESSON, NOW SIX RUNS OLD.** `priority` → a prose cause → `slot` for `tier` → a family
+   label on a residual → a magnitude with no unit → and now a magnitude with a unit and **no
+   layer**. The pattern is stable enough to predict: **the next one will also be a word, it will
+   also survive every numeric check, and the guard that caught the last one will not see it.**
+   #53 exempted bare `negative` cells by design and that exemption is exactly where #54's defect
+   lived. **When you write an exemption, write down what it is now blind to.**
