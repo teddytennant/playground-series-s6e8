@@ -1,3 +1,86 @@
+# (w123, 2026-08-30) — 🔴 ANGLE INDEX ROW 3 SELLS **5.9e-6/member** AS THE CATBOOST PRICE. THAT
+# NUMBER IS THE AVERAGE OF A **RESIDUAL** GROUP THAT IS 23% CATBOOST AND 11% NEURAL NETS.
+# MEASURED ALONE THE CATBOOSTS READ **+10.04e-6/member**, WHICH IS 1.8× WHAT THE ROW PUBLISHES.
+
+## ✅ ROW 3 OF THE ANGLE INDEX RE-VERIFIED AT THE ARTEFACT LEVEL — `w123a_row3.py`
+
+Genus `CatBoost` ⟹ row 3. It was one of exactly **two** rows (with row 1) never marked
+*artefacts verified*, and it is the row w105 caught citing two members that were never built.
+Everything cheap in the closure reproduces exactly: `oof/oof_cat_*` is `cat_lat`, `cat_native`,
+`cat_raw` and nothing else; `cat_native_ctr2` and `cat_natlat` still resolve to nothing anywhere
+on disk; `0.000206 / 35 = 5.886e-6`; `5.9e-6 / 50e-6 = 11.8%` against the published *"~12% of
+the noise floor"*. ⛔ **Still do not build the two missing arms.**
+
+## 🔴 THE DEFECT — A FAMILY LABEL ON A GROUP BUILT BY A CORRELATION TEST
+
+`member_value2.py` builds the group the price comes from as a **RESIDUAL**:
+
+    rest = [n for n in new if n not in lookup2 and n not in decorr and n not in bei]
+
+and `decorr` cuts on **`maxcorr < 0.97`**. Anything that correlates with the pack falls through
+into `rest` whatever family it is. Reconstructed from the arrays: **12 XGBoost · 8 CatBoost ·
+8 LightGBM · 4 NEURAL NETS · 2 unclassifiable · 1 sklearn histgb.** The four neural nets are
+`bolt_lookup_v1`, `bolt_realmlp_lattice`, `bolt_tabm_missing`, `bolt_tabm_rank1` — and
+`bolt_lookup_v1` is the author's **first** Lookup-Transformer, while its six v2 seeds sit three
+rows up in a group the same table labels *"six seeds of a second Lookup-Transformer"*.
+
+🎯 **This is w120 §4, w121 §3 and w122 §2 in a FOURTH place — a label naming what the run
+expected the predicate to select rather than what it selects.** The arithmetic was never wrong,
+which is exactly why four runs of numeric guards never touched it.
+
+## ✅ THE RE-MEASUREMENT — THE GROUP NUMBER HOLDS, THE **CATBOOST** NUMBER IS ~1.8× HIGHER
+
+Paired 50/50, 3 splits, C=1.0, hybrid transform — `member_value2.py`'s own procedure on the
+frozen rows. 8m53s wall, 4G peak, under `systemd-run --user`.
+
+| group added to base104 | n | paired delta | per member | sign |
+|---|---|---|---|---|
+| `rest`, whole | 35 | +0.000196 ± 0.000010 | **+5.59e-6** | consistent |
+| **`rest`, the 8 CatBoosts alone** | **8** | **+0.000080 ± 0.000016** | **+10.04e-6** | consistent |
+| `rest` minus the CatBoosts | 27 | +0.000170 ± 0.000006 | +6.30e-6 | consistent |
+
+- **The published group figure holds**: +0.000196 against +0.000206, on a base that has grown
+  **86 → 104** since w61. ⚠ Different pool, not drift — the same caveat as row 2's maxcorr.
+- ⚠ **The rows do not add.** 0.000080 + 0.000170 = 0.000250 against the whole group's 0.000196,
+  because measured-alone groups overlap in what they explain — the same overshoot w20d recorded
+  for `cat`+`note` against its own `all22`. **Read the ratio of two numbers measured the same
+  way (10.04 vs 6.30), not the difference from the average.**
+- 🎯 **+10.04e-6 lands on an independent measurement.** The only other pure-CatBoost group ever
+  priced here is w20d's foreign `cat` — 4 adarsh1077 arrays, different author, different pool,
+  different day — at **+10.3e-6/member**. That number has sat two bullets *below* row 3's own
+  citation the whole time, unpriced.
+
+## ⛔ AND IT CHANGES NO DECISION, WHICH IS THE PART THAT MATTERS
+
+Both readings are of **FOREIGN** CatBoosts (boltuzamaki, mohankrishnathalla, adarsh1077). The
+closure's operational rule is *"prefer a pipeline we do not hold, NOT prefer CatBoost"*, and a
+second independent ~10e-6 on foreign arrays **reinforces** it. All 35 are already enrolled;
+there is nothing to buy. Our own three CatBoosts are in the pack. A native CatBoost pair is
+10–20 h on the last full day and w112 §8.4 closed the modelling question.
+⛔ **Do not build a CatBoost member, and do not read +10.04e-6 as a reason to.**
+
+## ✅ STANDING CHECK #52 — `w123b_groupguard`
+
+    .venv/bin/python experiments/w123b_groupguard.py            # rc 0 = clean
+    .venv/bin/python experiments/w123b_groupguard.py --control  # exits 0, having fired
+
+  C1  the `rest` group still reconstructs member-for-member against a frozen 35-name literal.
+  C2  the composition is 8 CatBoost / 4 neural, so a pool change cannot silently invalidate the
+      disclosure C3 enforces.
+  C3  **every occurrence of the family label in RESEARCH.md must carry the word `RESIDUAL`
+      within ±2 lines.** A check on a *word* — the class of defect the last four runs kept
+      finding and that no numeric guard reaches.
+  C4  ANGLE INDEX row 3 must name **both** prices, 5.9e-6 and 10.3e-6.
+  C5  `--control` runs C3 over **frozen pre-fix line literals**, not HEAD (w115's rule), and
+      reports **INERT** rather than green if the two predicates ever agree.
+
+Watched red before the fix (**FAILURES: 5**, rc=1 — four undisclosed labels plus row 3 selling
+one price) and green after; the control reads *pre-fix 4 undisclosed · shipped 0*.
+⚠ **`JOURNAL.md` is deliberately out of scope**: it carries the same label in five places and
+those are history, which the hard rules forbid rewriting.
+
+---
+
 # (w122, 2026-08-30) — 🔴 `check_selection.py` WAS SHOWING THE READER THE CV PICK ON A LINE HEADED
 # "auto-slot 2" WHILE THE MEASURED PROBABILITY OF IT LANDING THERE WAS **0.000**. THE LABEL SAID
 # SLOTS; THE CODE COMPUTED TIERS. ROW 2 SEPARATELY RE-VERIFIED AT THE ARTEFACT LEVEL.
@@ -1858,6 +1941,7 @@ reached that stage, and a later run wrote the plan into RESEARCH as an accomplis
 
 ✅ **THE CLOSURE ITSELF SURVIVES, ON DIFFERENT EVIDENCE.** Its price comes from the w61 `rest`
 group — 35 ordinary XGB/LGBM/CatBoost members worth +0.000206 ± 0.000011 in total, i.e.
+⚠ (`rest` is a **RESIDUAL**, not a family: 8 of the 35 are CatBoost and 4 are neural nets — w123)
 **5.9e-6 each** — which does not depend on those two files existing. And the unbuilt arms' own
 registered priors (+1.5e-6, +1.0e-6) are **3% and 2% of the 5e-5 noise floor**, against 10–20 h
 of build time for a native CatBoost pair at 1–2 h per fold. ⛔ **Do not build them.** But fix the
@@ -2150,7 +2234,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 |---|---|---|---|---|
 | 1 | *the original dataset* — find it, concat it as extra rows | **×13, from 08-11 → w112 08-29** (count from `w117a_handcount`, not by hand) | **0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
 | 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
-| 3 | *CatBoost: it handles categoricals better* | ×14, from 08-10 → w114 08-29 (count from `w117a_handcount`) | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
+| 3 | *CatBoost: it handles categoricals better* | **×15, from 08-10 → w114 08-29 → w123 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 on the group delta, sign-consistent over 3 splits), which independently corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | ×14, from 08-10 → w115 08-29 · **artefacts verified** (count from `w117a_handcount`) | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — the most-handed, but only just: the ten counts run 8–15** (`w117a_handcount`) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
 | 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
@@ -2656,7 +2740,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 51 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 52 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -2669,7 +2753,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
-    w122a_slotguard
+    w122a_slotguard   w123b_groupguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -4764,6 +4848,17 @@ Fourth angle now closed by measurement rather than by opinion, alongside the ori
 (×4) and LightGBM tuning (×3):
 * the `rest` group — **35** ordinary XGB/LGBM/CatBoost members — is worth +0.000206 ± 0.000011
   **in total**, i.e. **5.9e-6 each**;
+  ⚠ **CORRECTED w123, 2026-08-30. `rest` IS A RESIDUAL, NOT A FAMILY**, and 5.9e-6 is therefore
+  a mixed-group average, not a CatBoost price. `member_value2.py` builds it as *"everything not
+  in decorr, lookup2 or bei"*, and `decorr` cuts on `maxcorr < 0.97`, which is a correlation
+  test. Reconstructed from the arrays (`w123a_row3.py`): **8 of the 35 are CatBoost-named**
+  (23%) and **4 are neural nets** — `bolt_lookup_v1`, `bolt_realmlp_lattice`,
+  `bolt_tabm_missing`, `bolt_tabm_rank1` — in the group because they correlate with the pack.
+  Re-measured on today's base104: the whole group **+0.000196 ± 0.000010 → 5.59e-6/member**
+  (the published +0.000206 was against base86, a different pool), the **8 CatBoosts alone
+  +0.000080 ± 0.000016 → +10.04e-6/member**, and the other 27 **+6.30e-6/member**, all three
+  sign-consistent across the 3 splits. ⚠ The three do not add: measured-alone groups overlap
+  in what they explain, exactly as w20d's `cat`+`note` overshot its own `all22`;
 * the CatBoost function class is already in the pack — **three ways as of 2026-08-28:
   `cat_lat`, `cat_native`, `cat_raw`** — and `run_catboost.py --inner` is the honest tuning
   path, built and run;
@@ -6886,6 +6981,7 @@ Effect on the stack, cross-fitted on the frozen folds, all four transforms:
 
 **Where a member lands is set by its function class and its pipeline, not its
 hyperparameters.** This resolves the slot-3 puzzle: 35 ordinary XGB/LGBM/CatBoost members
+(a **RESIDUAL** group — 8 CatBoost, 4 neural nets; w123)
 from `boltuzamaki` were the largest single share of that day's +0.000340, while GBDT
 hyperparameter variation inside our own pipeline is worth nothing. The difference is the
 **imputation, encoding and feature decisions upstream of the model**, not the model.
@@ -7383,7 +7479,7 @@ and the combined figure independently reproduces the cross-fitted +0.000340.
 | `decorr` — maxcorr < 0.97 (extratrees 0.811, gandalf, dcnv2, ft-transformer, ebm, tabr, deepfm, lookup_v3, neural, mkt_nn) | 10 | +0.000087 ± 0.000005 | 8.7e-6 |
 | `lookup2` — six seeds of a second Lookup-Transformer | 6 | +0.000104 ± 0.000001 | **17.3e-6** |
 | `bei` — fold-id-verified fixed-schedule models | 12 | +0.000101 ± 0.000007 | 8.4e-6 |
-| `rest` — ordinary XGB/LGBM/CatBoost | 35 | +0.000206 ± 0.000011 | 5.9e-6 |
+| `rest` — ordinary XGB/LGBM/CatBoost ⚠ a **RESIDUAL**: 8 CatBoost, 4 neural (w123) | 35 | +0.000206 ± 0.000011 | 5.9e-6 |
 | **all 63 together** | 63 | **+0.000330 ± 0.000011** | 5.2e-6 |
 
 Two things to carry forward, and they pull in different directions:

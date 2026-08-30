@@ -1,0 +1,161 @@
+{
+  "published": {
+    "rest_n": 35,
+    "rest_delta": 0.000206,
+    "rest_sd": 1.1e-05,
+    "rest_per_member": 5.9e-06,
+    "base_n": 86,
+    "noise_floor": 5e-05,
+    "floor_pct": 0.12,
+    "foreign_cat_per_member": 1.03e-05,
+    "in_pack": [
+      "cat_lat",
+      "cat_native",
+      "cat_raw"
+    ],
+    "never_built": [
+      "cat_native_ctr2",
+      "cat_natlat"
+    ]
+  },
+  "oof_cat_on_disk": [
+    "cat_lat",
+    "cat_native",
+    "cat_raw"
+  ],
+  "group_sizes": {
+    "base": 104,
+    "new": 63,
+    "decorr": 10,
+    "lookup2": 6,
+    "rest": 35,
+    "bei": 12
+  },
+  "rest_members": [
+    "bolt_cat_cpu5",
+    "bolt_cat_dual_seed81",
+    "bolt_cat_dual_view",
+    "bolt_cat_nested_te",
+    "bolt_cat_pair_evidence",
+    "bolt_cat_unique",
+    "bolt_foldsafe_te_cat",
+    "bolt_foldsafe_te_multi",
+    "bolt_foldsafe_te_wide",
+    "bolt_foldsafe_te_xgb",
+    "bolt_foldsafe_te_xgb_10f",
+    "bolt_histgb_5fold",
+    "bolt_lgb_driver_recon",
+    "bolt_lgb_missing_global",
+    "bolt_lgb_pair_lattice",
+    "bolt_lgb_raw_d4",
+    "bolt_lgb_raw_d6",
+    "bolt_lgb_te_5fold",
+    "bolt_lookup_v1",
+    "bolt_realmlp_lattice",
+    "bolt_repr_lgb_global",
+    "bolt_tabm_missing",
+    "bolt_tabm_rank1",
+    "bolt_xgb_d7_alt1",
+    "bolt_xgb_d7_alt2",
+    "bolt_xgb_dd_d4",
+    "bolt_xgb_dd_d5",
+    "bolt_xgb_dd_d6",
+    "bolt_xgb_hpo_d7",
+    "bolt_xgb_raw_bag",
+    "bolt_xgb_te_4fold",
+    "bolt_xgb_te_5fold",
+    "mkt_cat",
+    "mkt_lgb",
+    "mkt_xgb"
+  ],
+  "rest_families": {
+    "catboost": [
+      "bolt_cat_cpu5",
+      "bolt_cat_dual_seed81",
+      "bolt_cat_dual_view",
+      "bolt_cat_nested_te",
+      "bolt_cat_pair_evidence",
+      "bolt_cat_unique",
+      "bolt_foldsafe_te_cat",
+      "mkt_cat"
+    ],
+    "neural": [
+      "bolt_lookup_v1",
+      "bolt_realmlp_lattice",
+      "bolt_tabm_missing",
+      "bolt_tabm_rank1"
+    ],
+    "gbdt": [
+      "bolt_cat_cpu5",
+      "bolt_cat_dual_seed81",
+      "bolt_cat_dual_view",
+      "bolt_cat_nested_te",
+      "bolt_cat_pair_evidence",
+      "bolt_cat_unique",
+      "bolt_foldsafe_te_cat",
+      "bolt_foldsafe_te_xgb",
+      "bolt_foldsafe_te_xgb_10f",
+      "bolt_histgb_5fold",
+      "bolt_lgb_driver_recon",
+      "bolt_lgb_missing_global",
+      "bolt_lgb_pair_lattice",
+      "bolt_lgb_raw_d4",
+      "bolt_lgb_raw_d6",
+      "bolt_lgb_te_5fold",
+      "bolt_repr_lgb_global",
+      "bolt_xgb_d7_alt1",
+      "bolt_xgb_d7_alt2",
+      "bolt_xgb_dd_d4",
+      "bolt_xgb_dd_d5",
+      "bolt_xgb_dd_d6",
+      "bolt_xgb_hpo_d7",
+      "bolt_xgb_raw_bag",
+      "bolt_xgb_te_4fold",
+      "bolt_xgb_te_5fold",
+      "mkt_cat",
+      "mkt_lgb",
+      "mkt_xgb"
+    ],
+    "unclassifiable": [
+      "bolt_foldsafe_te_multi",
+      "bolt_foldsafe_te_wide"
+    ]
+  },
+  "cat_share": 0.22857142857142856,
+  "arith": {
+    "per_member": 5.885714285714285e-06,
+    "floor_pct": 0.118
+  },
+  "foreign_ratio": 1.7457627118644066,
+  "paired": {
+    "+rest": {
+      "n": 35,
+      "delta": 0.0001955741865487711,
+      "sd": 9.66596061051507e-06,
+      "per_member": 5.58783390139346e-06,
+      "sign": "consistent"
+    },
+    "+cat_only": {
+      "n": 8,
+      "delta": 8.033279953034711e-05,
+      "sd": 1.5688319867939877e-05,
+      "per_member": 1.0041599941293389e-05,
+      "sign": "consistent"
+    },
+    "+rest_nocat": {
+      "n": 27,
+      "delta": 0.00017009191050113928,
+      "sd": 5.870234692736636e-06,
+      "per_member": 6.299700388931084e-06,
+      "sign": "consistent"
+    }
+  },
+  "failures": [
+    "the label says 'ordinary XGB/LGBM/CatBoost' but 4 member(s) of `rest` are neural nets by name: ['bolt_lookup_v1', 'bolt_realmlp_lattice', 'bolt_tabm_missing', 'bolt_tabm_rank1']. `rest` is a RESIDUAL ('not decorr, not lookup2, not bei'), and maxcorr >= 0.97 is not a family test -- these four correlate with the pack, so they fell through."
+  ],
+  "notes": [
+    "the BASE has grown: published base86, on disk today base104. The re-measurement below is against a DIFFERENT POOL, so a gap against +0.000206 is pool drift, not a contradiction.",
+    "the only PURE-CatBoost group ever measured here reads 10.3e-6/member, 1.75x the price row 3 publishes -- and it sits two bullets BELOW it in the same closure.",
+    "row 3's price cell is a per-member average over a group that is 8/35 CatBoost; measured alone the CatBoost members read +10.04e-6/member here."
+  ]
+}

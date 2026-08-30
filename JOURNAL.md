@@ -34597,3 +34597,227 @@ then read *which* stems are on it.
 - The bronze decay slope corrected **−11/day → −22/day**, in `LEADERBOARD.md` and here.
 - `SELECT_THESE.md` carries a dated last-day banner and today's real board density.
 - ⛔ **Still nothing selected.** That is the only thing on this list a future run cannot fix.
+
+---
+
+# w123 — 2026-08-30, slot 2 of 10, ANGLE "CatBoost: it usually handles categoricals better than
+# the others on survey-style data. Tune and compare on identical folds."
+# ⛔ NOTHING SENT: w122 SPENT ALL TEN KAGGLE SLOTS AT 12:36–12:37Z. THE API AGREES. AT CAP.
+# 🔴 THE FIND: ROW 3 SELLS **5.9e-6/member** AS THE CATBOOST PRICE. IT IS THE AVERAGE OF A GROUP
+# THAT IS **23% CATBOOST AND 11% NEURAL NETS**. MEASURED ALONE THE CATBOOSTS READ **+10.04e-6**.
+
+## 1. THE SLOT — THERE IS NOTHING TO SEND AND THAT IS NOT A JUDGEMENT CALL
+
+`date -u` 13:03Z. `git status` 174 entries, **0 tracked deletions**, checkout sound. The API
+lists ten submissions dated 2026-08-30 12:36:52Z → 12:37:22Z, all w122's registered tail-fill
+queue, five scored 0.94203–0.94449. The prompt's own header says `Submissions the Kaggle API
+already reports for today: 10`. **The cap is ten and ten are gone**, so this run does research
+and code only. Not a skipped slot — a spent one.
+
+⚠ The deadline is **2026-08-31 23:59**. The 08-31 queue is the next run's first step
+(`w48e_order.py --day 2026-08-31 --write`, dry-run verified by w120 §5 at ten members,
+0.93261–0.94154). ⛔ I did **not** run it today: building a future day's queue to "check" it is
+on the DO-NOT list, and w54a/w85c are red-by-design until it is rebuilt anyway.
+
+## 2. THE ANGLE — GENUS `CatBoost` ⟹ ROW 3, AND ROW 3 IS THE WORST-EVIDENCED ROW IN THE INDEX
+
+Row 3 was one of exactly **two** rows (with row 1) never marked *artefacts verified*, and it is
+the row w105 caught citing **two members that were never built** (`cat_native_ctr2`,
+`cat_natlat`). w106's standard says a row's closure is not its evidence. So `w123a_row3.py`
+reads the evidence: the pack-membership citation, the group behind the price, the label on that
+group, the arithmetic, and the second CatBoost price sitting two bullets below the first.
+
+Everything cheap reproduces exactly:
+
+    oof/oof_cat_*   ['cat_lat', 'cat_native', 'cat_raw']   — all three, and nothing else
+    cat_native_ctr2 / cat_natlat                            — still nothing, anywhere on disk
+    0.000206 / 35 = 5.886e-6      (published 5.9e-6)
+    5.9e-6 / 50e-6 = 11.8%        (published "~12% of the noise floor")
+
+## 3. 🔴 THE DEFECT: `rest` IS A **RESIDUAL**, AND FOUR OF ITS "ORDINARY GBDTs" ARE NEURAL NETS
+
+RESEARCH.md described the group in four places as *"35 ordinary XGB/LGBM/CatBoost members"*.
+`member_value2.py` does not build it that way:
+
+    rest = [n for n in new if n not in lookup2 and n not in decorr and n not in bei]
+
+`decorr` is cut on **`maxcorr < 0.97`** — a correlation test, not a family test. So anything
+that correlates with the pack falls through into `rest` whatever it is. Reconstructed from the
+arrays on disk, the 35 are:
+
+| by name | n |
+|---|---|
+| XGBoost | 12 |
+| **CatBoost** | **8** |
+| LightGBM | 8 |
+| **neural** — `bolt_lookup_v1`, `bolt_realmlp_lattice`, `bolt_tabm_missing`, `bolt_tabm_rank1` | **4** |
+| unclassifiable (`bolt_foldsafe_te_multi`, `bolt_foldsafe_te_wide`) | 2 |
+| sklearn `histgb` | 1 |
+
+🎯 **`bolt_lookup_v1` is the tell.** The six seeds of the author's *second* Lookup-Transformer
+have their own group, `lookup2`, labelled in the same table as *"six seeds of a second
+Lookup-Transformer"*. The **first** implementation is sitting in the group labelled *"ordinary
+XGB/LGBM/CatBoost"*, three rows up, because it correlates 0.9837 with the pack.
+
+⚠ **This is the same defect as w120 §4, w121 §3 and w122 §2, in a FOURTH place: a label that
+names what the run expected the predicate to select, not what it selects.** There it was
+`priority`, a prose cause beside a derived count, and `slot` printed for `tier`. The arithmetic
+was never wrong here either — 0.000206/35 really is 5.9e-6 — which is exactly why four runs of
+numeric guards never touched it.
+
+## 4. ✅ AND THE RE-MEASUREMENT SAYS THE ROW UNDER-PRICES ITS OWN ANGLE BY ~1.8×
+
+Paired 50/50, 3 splits, C=1.0, hybrid transform — `member_value2.py`'s own procedure, on the
+frozen rows. 8m53s wall, 4G peak, under `systemd-run --user`.
+
+    split 0: base=0.969801  +rest=0.969988  +cat_only=0.969864  +rest_nocat=0.969969
+    split 1: base=0.969994  +rest=0.970187  +cat_only=0.970078  +rest_nocat=0.970159
+    split 2: base=0.970096  +rest=0.970302  +cat_only=0.970190  +rest_nocat=0.970273
+
+| group added to base104 | n | paired delta | per member | sign |
+|---|---|---|---|---|
+| `rest`, whole | 35 | +0.000196 ± 0.000010 | **+5.59e-6** | consistent |
+| **`rest`, the 8 CatBoosts alone** | **8** | **+0.000080 ± 0.000016** | **+10.04e-6** | consistent |
+| `rest` minus the CatBoosts | 27 | +0.000170 ± 0.000006 | +6.30e-6 | consistent |
+
+- **The published group number holds.** +0.000196 against +0.000206, on a base that has grown
+  **86 → 104** since w61. ⚠ Different pool, not drift — the same caveat w122 §6 recorded for
+  row 2's maxcorr. Row 3's arithmetic is sound.
+- 🔴 **But the price it sells is not a CatBoost price.** The 8 CatBoosts measured on their own
+  read **+10.04e-6/member**, **1.8×** the 5.59e-6 group average and above the 27 non-CatBoosts'
+  6.30e-6.
+- ⚠ **The three rows do not add**, and that is expected, not an inconsistency: 0.000080 +
+  0.000170 = 0.000250 against the whole group's 0.000196, because measured-alone groups overlap
+  in what they explain. RESEARCH already recorded the same overshoot for w20d's `cat`+`note`
+  against its own `all22`. So read the **ratio** of two numbers measured the same way
+  (10.04 vs 6.30), not the difference from the average.
+- 🎯 **It lands on an independent measurement.** The only other pure-CatBoost group ever priced
+  here is w20d's foreign `cat` — 4 adarsh1077 arrays, a *different author*, a *different pool*,
+  a *different day* — at **+10.3e-6/member**. 10.04 and 10.3. That number has been sitting two
+  bullets **below** the row's own citation the whole time, unpriced.
+
+## 5. ⛔ AND IT CHANGES NOTHING, WHICH IS THE PART TO WRITE DOWN
+
+Both measurements are of **foreign** CatBoosts — boltuzamaki, mohankrishnathalla, adarsh1077.
+The closure's own operational rule is *"prefer a pipeline we do not hold, NOT prefer CatBoost"*,
+and a second independent 10e-6 on foreign arrays **reinforces** that rule rather than reopening
+it. All 35 are already enrolled; there is nothing to buy. Our own three CatBoosts (`cat_lat`,
+`cat_native`, `cat_raw`) are in the pack. It is the last full day, a native CatBoost pair is
+10–20 h, and w112 §8.4 closed the modelling question. ⛔ **Do not build a CatBoost member.**
+What changes is the **row's price cell**, which now carries both numbers and says which is which.
+
+## 6. ✅ STANDING CHECK #52 — `w123b_groupguard`, WITH THE CONTROL THAT MAKES IT ONE
+
+C1 the `rest` group still reconstructs member-for-member against a frozen 35-name literal.
+C2 the composition is 8 CatBoost / 4 neural, so a pool change cannot silently invalidate the
+disclosure. C3 **every occurrence of the family label in RESEARCH.md must carry the word
+RESIDUAL within ±2 lines** — a check on a *word*, which is the class of defect the last four
+runs kept finding and no numeric guard reaches. C4 ANGLE INDEX row 3 must name **both** prices.
+
+Watched red before the fix and green after, and the control is against **frozen pre-fix line
+literals**, not HEAD — w115's rule that a control anchored to HEAD stops being a control the
+moment the fix is committed:
+
+    (before)    FAILURES: 5   rc=1   — four undisclosed labels + row 3 selling one price
+    (shipped)   FAILURES: 0   rc=0   ✅ CLEAN
+    (--control) pre-fix text: 4 undisclosed · shipped text: 0
+
+⚠ **JOURNAL.md is deliberately out of scope.** It carries the same label in five places and
+those are history; correcting them would be a rewrite, which the hard rules forbid. Only
+RESEARCH.md, the live document, is checked. Registered in `w93a_suite.STEMS` and in RESEARCH's
+published block, **51 → 52 stems**, C2 drift check clean.
+
+## 7. ⛔ THE CLICK — TWENTY-SECOND RUN ASKING. ONE DAY LEFT. STILL NOTHING SELECTED.
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py`, real rc from the process: **`*** NOTHING IS SELECTED ***`**.
+`55656399 → w36_ad199stdcorr.csv` (public 0.97118, CV 0.9701400060) · `55588167 →
+w23_ad187stdcorr.csv` (public 0.97116, CV 0.9701150809). Not clicking costs **+4.5228e-6**; the
+mis-click costs **+35.17e-6** or **+81.92e-6** and is still the bigger hazard by an order of
+magnitude. ⛔ Do not re-price it. The post-w122 screen now says both WANTED files are
+**UNREACHABLE without the click (P=0.000)** in as many words, so the instrument is no longer
+arguing the other way. **The click stays human.**
+
+## 8. THE BOARD — NOT RE-READ
+
+w122 read it at 12:45Z today: **rank 278 / 3,321, cut 332, margin +54, −22/day.** One board read
+per day (w120 §7), and today's is spent. ⛔ Do not quote −11/day.
+
+## 9. NEXT RUN — READ THIS ORDER. IT IS THE LAST DAY.
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. ⚠ **RUN `w48e_order.py --day 2026-08-31 --write` FIRST**, then `--go`. Quote `w26d`'s
+   **bound**, never its point estimate. **Send early: a slot unsent at 23:59 is gone.**
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w123 set it to
+   `w123`/row 3. **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6), then `w93a_suite.py` under
+   `systemd-run --user` with `--setenv=PATH` and `XDG_RUNTIME_DIR` set **inside** the same
+   command, read via `journalctl`, never under `timeout`. ⚠ `TOTAL` is not a pass: **read the
+   `FAILURES:` line under it, and then read WHICH stems are on it** (w121 §12, w122 §10).
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §5 above is not an exception to it.
+6. ⛔ **DO-NOT, carried forward from w92–w122 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct".
+   • 🆕 **DO NOT** read **5.9e-6 as the CatBoost price.** It is the average of a residual group
+     that is 23% CatBoost and 11% neural nets. The CatBoost-only reading is **+10.04e-6/member**
+     and the independent foreign one is **+10.3e-6** (§4).
+   • 🆕 **DO NOT** treat §4's +10.04e-6 as a reason to build a CatBoost member. Both readings
+     are on **foreign pipelines** and both confirm *prefer a pipeline we do not hold* (§5).
+   • 🆕 **DO NOT** add measured-alone group deltas together. They overlap in what they explain;
+     `cat_only` + `rest_nocat` overshoots the whole group by 28% (§4).
+7. ⚠ **THE LESSON, AND IT IS NOW FOUR RUNS OLD.** `priority` → a prose cause → `slot` for
+   `tier` → and now a **family label on a residual group**. Every one is a *word* describing the
+   input rather than the predicate, every one survived every numeric check, and every one was
+   found by reading the code that builds a thing against the sentence that names it. When you
+   are handed an index row, read its **noun** against the predicate, not just its number against
+   the arrays.
+
+## 10. ADDENDUM — THE AUTHORITATIVE FOOTER: **`TOTAL 334s`, 50/52 GREEN, BOTH REDS EXPECTED**
+
+⏱ `w93a_suite.py` under `systemd-run --user --setenv=PATH` with `XDG_RUNTIME_DIR` set **inside**
+the same command, no `timeout`. 5m34s wall, 6.6G peak. Every document edit was final before
+launch (w116 §6), so #50 read the w123 header out of the corpus and reconciled row 3 at ×15 —
+**the count in the index cell is the tool's number, not mine**: it reported `index claims x14,
+corpus has x15` and the cell was set to what it said.
+
+    [48/52] w114b_selectguard    rc=0   ✅ CLEAN — every printed literal names only WANTED or ALLOWED
+    [49/52] w115a_docselectguard rc=0   ✅ CLEAN — no human-read doc names a non-WANTED file as the pick
+    [50/52] w117a_handcount      rc=0   FAILURES: 0      (row 3 ×15, derived)
+    [51/52] w122a_slotguard      rc=0   ✅ CLEAN — slots are filled, not tiers listed
+    [52/52] w123b_groupguard     rc=0   ✅ CLEAN — the residual group is labelled as one
+    TOTAL 334s   50/52 green
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+
+✅ **Both reds are the documented `POST_SEND_EXPECTED` pair and the runner said so itself** — ten
+files went out at 12:36–12:37Z, so the queue on disk is for a day already sent. ⚠ This is the
+**both-red** pattern, which IS post-send; the warning in RESEARCH is about **w85c red while w54a
+is GREEN**, which is not this and would need a real diagnosis. The two `w93a_fail_*.log` files
+were deleted after reading, per the standing rule, so tomorrow does not inherit them. Rebuilding
+the queue is the next run's registered first step, not this one's.
+
+⚠ **Reading `TOTAL 334s 50/52 green` alone would still have been wrong** — it is only benign
+because the two named stems are the expected pair. Read the `FAILURES:` line, then read *which*
+stems are on it.
+
+## 11. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten already spent by w122 at 12:36–12:37Z, confirmed from the API.
+- **Row 3 verified at the artefact level** and marked as such. Only **row 1** is now unverified.
+- The row 3 price cell carries **both** prices and says which is which: 5.9e-6 is a residual
+  group's average, **+10.04e-6** is the CatBoost-only reading, **+10.3e-6** is the independent
+  foreign one. Four undisclosed labels in RESEARCH.md corrected.
+- **Standing check #52** keeps the label honest and reports INERT rather than green if it stops
+  doing work. 51 → 52 stems, in the runner and in the published block.
+- ⛔ **Still nothing selected.** Twenty-second run asking. One day left.
