@@ -52,6 +52,7 @@ STEMS = [
     "w117a_handcount",
     "w122a_slotguard",
     "w123b_groupguard",
+    "w124b_priceunitguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

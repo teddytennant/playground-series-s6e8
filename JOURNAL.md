@@ -34821,3 +34821,272 @@ stems are on it.
 - **Standing check #52** keeps the label honest and reports INERT rather than green if it stops
   doing work. 51 → 52 stems, in the runner and in the published block.
 - ⛔ **Still nothing selected.** Twenty-second run asking. One day left.
+
+---
+
+# w124 — 2026-08-30, slot 3 of 10, ANGLE "XGBoost: third leg of the ensemble, tuned on the same
+# folds so the blend weights mean something."
+# ⛔ NOTHING SENT: w122 SPENT ALL TEN KAGGLE SLOTS AT 12:36–12:37Z. THE API AGREES. AT CAP.
+# 🔴 THE FIND: THE ANGLE INDEX HAS ONE COLUMN HEADED `price` AND IT CARRIES **TWO DIFFERENT
+# QUANTITIES**. ROW 4'S +4e-7 IS A **TUNING** PRICE, ROW 3'S 5.9/10.04e-6 IS AN **ENROLMENT**
+# PRICE, AND SIDE BY SIDE THEY READ AS "CATBOOST IS 15× XGBOOST". MEASURED: XGB **+7.38e-6**.
+
+## 1. THE SLOT — SPENT, NOT SKIPPED
+
+`date -u` 13:29Z. `git status` 174 entries, **0 tracked deletions**, checkout sound. The API
+lists ten submissions dated 2026-08-30 12:36:52Z → 12:37:22Z, all w122's registered tail-fill
+queue. The prompt header says `Submissions the Kaggle API already reports for today: 10`. **The
+cap is ten and ten are gone**, so this run does research and code only.
+
+⚠ Deadline **2026-08-31 23:59**. Building the 08-31 queue is the next sending run's first step
+(`w48e_order.py --day 2026-08-31 --write`, then `--go`). ⛔ I did **not** run it: building a
+future day's queue to "check" it is on the DO-NOT list, and w54a/w85c are red-by-design until it
+is rebuilt anyway.
+
+## 2. THE ANGLE — GENUS `XGBoost` ⟹ ROW 4, WHICH w106 ALREADY VERIFIED. SO I DIDN'T REPEAT IT.
+
+Row 4 is marked *artefacts verified*; row 1 is the only unverified row left. Repeating w106
+would have bought nothing. What row 4 does **not** have is a price of its own kind. Row 3 was
+just given two CatBoost **enrolment** prices by w123. Row 4 publishes **+4e-7** and nothing
+else — and +4e-7 is not an enrolment price at all.
+
+## 3. 🔴 THE DEFECT: ONE COLUMN, FOUR QUANTITIES, NO UNITS
+
+Six of the ten rows carry a magnitude under `price`. They measure four different things:
+
+| row | cell | value of |
+|---|---|---|
+| 1 | −58e-6 … −3,340e-6 | **CONCAT** — appending extra training rows, by dose |
+| 2 | +4e-7 | **TUNING** — re-fitting a GBDT the pack already holds |
+| 3 | 5.9 / 10.04 / 10.3e-6 per member | **ENROLMENT** — adding a member it does not |
+| 4 | +4e-7 | **TUNING**, inherited from row 2 |
+| 6 | −1.07e-6 | **SEARCH** — re-weighting members already in |
+| 7 | structural null (stacker) · +2e-6 (member) | both — **and row 7 is the only row that says which** |
+
+⚠ **FIFTH RUN, SAME GENUS.** w120 §4 `priority` naming an input · w121 §3 a prose cause beside a
+derived count · w122 §2 `slot` printed for `tier` · w123 §3 a family label on a residual group ·
+now a magnitude with no unit. Every one is a **word describing the input rather than the
+predicate**; every one survived every numeric check, because `+4e-7` and `5.9e-6` are both
+correct. 🎯 **Row 7 had already solved it** — `(stacker)` / `(member)` — so the fix is the
+index's own habit applied to five more rows, not a new convention.
+
+## 4. ✅ THE MEASUREMENT — AND THE CONTROL THAT MAKES IT A COMPARISON
+
+`w124a_row4.py`, `member_value2.py`'s procedure: paired 50/50, 3 splits, C=1.0, hybrid, the same
+`base104` pool and the **same seeds** w123 used. 10m35s wall under `systemd-run --user`.
+
+🎯 **`+cat_only` re-measures +10.04e-6/member against w123's +10.04e-6 — gap +0.000e-6**, and
+split 0's `base`/`+cat_only` are byte-for-byte w123's. Without that the XGB number would be a
+reading of a different instrument.
+
+| family, measured ALONE inside `rest` | n distinct | paired delta | ENROLMENT price | sign |
+|---|---|---|---|---|
+| CatBoost | 8 | +0.000080 ± 0.000016 | **+10.04e-6** | consistent 3/3 |
+| **XGBoost** | **11** | +0.000081 ± 0.000013 | **+7.38e-6** | consistent 3/3 |
+| LightGBM | 8 | +0.000032 ± 0.000006 | **+4.04e-6** | consistent 3/3 |
+
+⟹ **As a third leg XGBoost enrols at 73% of CatBoost's rate and 1.8× LightGBM's**, on identical
+folds and an identical base. That is what the handed angle asked for and the index never had it.
+
+⛔ **AND IT BUYS NOTHING.** All three are **foreign** pipelines, all 35 are **already enrolled**,
+all three are far under the **50e-6** floor. *Prefer a pipeline we do not hold*, **not** *prefer
+a family* — now confirmed on a second family. **Do not build an XGBoost member.** The modelling
+question stays closed (w112 §8.4); §4 is not an exception to it, exactly as w123 §5 was not.
+
+## 5. 🔻 THE DENOMINATOR — 12 NAMES, 11 ARRAYS
+
+`bolt_xgb_d7_alt1` ≡ `bolt_xgb_d7_alt2`, `np.array_equal` **True on OOF and TEST**, re-verified
+(`w109a_dupscan` relation 1), and **both are inside the XGB subgroup**. So +6.74e-6 over 12
+names is **+7.38e-6** over 11 arrays. ⚠ The same pair sits inside the **35** that row 3's 5.9e-6
+divides by: 5.90e-6 over 35 names is **6.07e-6** over 34 arrays. ⟹ **Count arrays, not filenames.**
+
+⚠ **A CORRECTION TO MY OWN LOG.** `w124a_run.log` prints *"a collinear column carries nothing"*
+beside a **+0.293e-6** shift — an assertion where a measurement was available, i.e. this run's
+own defect genus one level up, in code I wrote this run. The three splits are **+1e-6, +2e-6,
+−2e-6**: the sign **flips**, so the honest reading is *not distinguishable from zero*. It is also
+not obvious a priori — under **L2** a duplicated pair shares the weight, so the ridge penalty on
+that direction is halved and the duplicate is effectively **under-regularised**. The script's
+wording is corrected; the log keeps the text that actually ran.
+
+## 6. 🔻 AND THE TABLE ROW 4'S OTHER ARGUMENT RESTS ON HAS GONE STALE
+
+Row 4 argues *"XGBoost is not a missing leg"* from `latr1_xgb` 0.96780 being the best GBDT of
+any family. Recomputed over all **94** OOF arrays on disk:
+
+| family | published 08-13 | best ARRAY 08-30 | best SINGLE MODEL 08-30 |
+|---|---|---|---|
+| LightGBM | 0.96768 `lattri_lgbm` | **0.96782** `lgbm_tuned_lat_frac` | **0.96782** same |
+| XGBoost | 0.96780 `latr1_xgb` | **0.96790** `xgb_latcat_avg3` ⚠ a seed average | **0.96780** exact |
+| CatBoost | 0.96718 `latwide_cat` | 0.96718 exact | 0.96718 exact |
+
+🔴 **The best LightGBM on disk beats the XGBoost number the table publishes.** The claim survives
+only because **both** rows are stale, and on a like-for-like **single model** basis it does not
+survive: `latr1_xgb` is **−2e-6 behind**. XGBoost's champion by array, `xgb_latcat_avg3`, is by
+`w109a_dupscan` relation 2 exactly `mean(xgb_latcat, _s17, _s23)`, `max|diff|` **0.0** — a seed
+average, in a table headed *best SINGLE models*.
+
+    XGB − LGBM margin   published +120e-6 · today by array +84e-6 · today by single model −2e-6
+    noise floor                                                                          50e-6
+
+⚠ **IT TRACES TO ROW 2'S OWN WORK.** `lgbm_tuned_lat_frac` is the tuned LightGBM w122 re-measured
+for row 2. Row 2's tuning produced the best LightGBM on disk seventeen days ago and nobody
+carried it into a table three thousand lines away. ⟹ **A table of "bests" is a snapshot with no
+expiry date, and every member built after publishing it is a chance for it to become false.**
+
+✅ **NOTHING RE-OPENS.** Solo comparison, and the closure's own pass-through is **1.4%**: ±84e-6
+solo is ±1.2e-6 into the stack. What changes is that the table stops asserting a separation it
+no longer has, and that the right instrument for *"is this family a missing leg"* is the
+**ENROLMENT** number in §4 — solo AUC does not price marginal ensemble value.
+
+## 7. ✅ STANDING CHECK #53 — `w124b_priceunitguard`, WITH THE CONTROL THAT MAKES IT ONE
+
+C1 every price cell carrying an `e-6`/`e-7` magnitude must name its quantity from a registered
+four-word vocabulary — **TUNING, ENROLMENT, CONCAT, SEARCH**; bare `0`/`negative` rows exempt.
+C2 row 4 must name both of its quantities. C3 the duplicate pair must still be byte-identical
+**and** the `11 distinct` denominator disclosed. C4 the family table must carry its
+re-derivation. C5 `--control` runs C1 over **frozen inlined pre-fix cells** — not HEAD, per
+w115 — and must fire.
+
+    (before)    FAILURES: 4   rc=1
+    (shipped)   FAILURES: 0   rc=0   ✅ CLEAN
+    (--control) pre-fix cells: 6 magnitudes with no quantity · shipped: 0
+
+⚠ JOURNAL.md is out of scope: append-only history, correcting it would be a rewrite.
+Registered in `w93a_suite.STEMS` and the published block, **52 → 53 stems**.
+
+## 8. ⛔ THE CLICK — TWENTY-THIRD RUN ASKING. ONE DAY LEFT. STILL NOTHING SELECTED.
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live this run, real rc from the process, rc=0:
+**`*** NOTHING IS SELECTED ***`**. `55656399 → w36_ad199stdcorr.csv` (public 0.97118, CV
+0.9701400060) · `55588167 → w23_ad187stdcorr.csv` (public 0.97116, CV 0.9701150809). Auto-select
+would take the 0.97119 tier — `w36_ad199stdcorr_ens4` + `w38_ad202stdcorr_ens4` — and both
+WANTED files print **UNREACHABLE without the click (P=0.000)**. Not clicking costs
+**+4.5228e-6**; the mis-click costs **+35.17e-6** or **+81.92e-6** and is still the bigger hazard
+by an order of magnitude. ⛔ Do not re-price it. **The click stays human.**
+
+## 9. THE BOARD — NOT RE-READ
+
+w122 read it at 12:45Z today: **rank 278 / 3,321, cut 332, margin +54, −22/day.** One board read
+per day (w120 §7), and today's is spent. ⛔ Do not quote −11/day.
+
+## 10. NEXT RUN — READ THIS ORDER. IT IS THE LAST DAY.
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. ⚠ **RUN `w48e_order.py --day 2026-08-31 --write` FIRST**, then `--go`. Quote `w26d`'s
+   **bound**, never its point estimate. **Send early: a slot unsent at 23:59 is gone.**
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w124 set it to
+   `w124`/row 4. **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6), then `w93a_suite.py` under
+   `systemd-run --user` with `--setenv=PATH` and `XDG_RUNTIME_DIR` set **inside** the same
+   command, read via `journalctl`, never under `timeout`. ⚠ `TOTAL` is not a pass: read the
+   `FAILURES:` line, **then read WHICH stems are on it** (w121 §12, w122 §10, w123 §10).
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §4 above is not an exception.
+6. ⛔ **DO-NOT, carried forward from w92–w123 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct" ·
+     read **5.9e-6** as the CatBoost price (it is a residual group's average; CatBoost alone is
+     **+10.04e-6**) · treat +10.04e-6 as a reason to build a CatBoost member · add
+     measured-alone group deltas together (they overlap; `cat_only`+`rest_nocat` overshoots by 28%).
+   • 🆕 **DO NOT** compare two ANGLE INDEX prices without checking they are the **same
+     quantity**. The column mixes TUNING, ENROLMENT, CONCAT and SEARCH prices (§3). #53 keeps
+     every magnitude labelled from now on.
+   • 🆕 **DO NOT** read **+7.38e-6** as a reason to build an XGBoost member. Foreign pipelines,
+     already enrolled, under the 50e-6 floor — same conclusion as CatBoost's +10.04e-6 (§4).
+   • 🆕 **DO NOT** quote *"`latr1_xgb` is the best GBDT of any family"* without the w124
+     re-derivation. On single models it is **−2e-6 behind** `lgbm_tuned_lat_frac` (§6).
+   • 🆕 **DO NOT** divide by filenames. `bolt_xgb_d7_alt1` ≡ `_alt2`, so per-member XGB prices
+     divide by **11**, and row 3's 35 are **34** arrays (§5).
+7. ⚠ **THE LESSON, NOW FIVE RUNS OLD.** `priority` → a prose cause → `slot` for `tier` → a family
+   label on a residual → and now a **column header that names a magnitude without its unit**. When
+   a table gives you a column of numbers, **the header is a claim about what they measure. Check
+   that claim the way you would check the numbers.** And when you find it in someone else's code,
+   check your own: §5's correction is to a line this run wrote today.
+
+## 11. 🔻 ADDENDUM — WRITING §3 BROKE TWO GUARDS, AT TWO DIFFERENT LAYERS
+
+The suite came back **49/53** with **four** reds, not the documented two. `w101a_angleguard` and
+`w106a_claimguard` were both green when I ran them as a pre-edit baseline at 13:38Z. Both were
+caused by this run's own document edits, and they wanted **opposite** fixes.
+
+🔴 **`w101a_angleguard` — THE GUARD WAS WRONG.** Its C2/C3 controls plant a synthetic row with
+`research.replace("| 7 |", ..., 1)` — **first occurrence over the whole document**. §3 above
+quotes the index's own rows in a table to explain the defect, so the first `| 7 |` in RESEARCH.md
+became that quotation, **above** the block. The control landed outside the span C1 reads, C1
+correctly never saw the ghost, and the guard blamed C1: *"C1 is not testing"*.
+
+🎯 **THIS IS w110's LESSON LIVE, IN A SECOND PLACE.** *"An anchor is a deliberate duplicate of
+its target's text; any parser that resolves that text by first-occurrence is broken by the act of
+pointing at it."* w110 fixed `research_stems()` that way and the same trap was sitting in the
+guard **over** the index, waiting for a run that quotes the table. Fixed **by class**: `plant()`
+inserts inside `block_span()`, and a new assertion reports the controls **vacuous** rather than
+green if the row is never planted. C2 now moves dead 0 → 1, C3 reads live=0 / naive=1.
+
+🔴 **`w106a_claimguard` — THE DOCUMENT WAS WRONG, AND THE GUARD SAID SO IN ADVANCE.** My row-2
+unit label read *"re-fitting a GBDT **the pack already holds**"* — a possession verb, exactly what
+`CLAIM` matches — and its 3-line window then swept up the backticked `rest`, `base104` and
+`w117a_handcount` from rows 2–4, none of which are members. ⛔ A third exemption was the wrong
+fix and the file warns against it by name: *"if this list reaches FOUR, stop adding to it and fix
+the root cause instead: quote broken citations WITHOUT a possession verb on the same line."*
+The cell now reads *"the value of re-fitting a GBDT that is already enrolled"*. **No exemption
+was added.**
+
+⟹ **TWO REDS, TWO LAYERS, AND THE TRIAGE IS THE POINT.** Reading `49/53 green` and moving on, or
+reflexively exempting both, would have left a broken control standing over the load-bearing
+index. ⚠ **AND THE BASELINE IS WHY I CAUGHT IT** — I ran four index-adjacent guards green at
+13:38Z *before* editing, so "new red" was a fact and not a guess. **Run the guards your edit will
+touch before you make it.**
+
+## 12. ADDENDUM — THE AUTHORITATIVE FOOTER: **`TOTAL 327s`, 51/53 GREEN, BOTH REDS EXPECTED**
+
+⏱ `w93a_suite.py` under `systemd-run --user --setenv=PATH` with `XDG_RUNTIME_DIR` set **inside**
+the same command, no `timeout`. 5m33s wall. Every document edit was final before launch
+(w116 §6), so #50 read the w124 header out of the corpus and reconciled row 4 at **×15** —
+**the count in the index cell is the tool's number, not mine**: it reported `index claims x14,
+corpus has x15` and the cell was set to what it said.
+
+    [50/53] w117a_handcount       rc=0   FAILURES: 0
+    [51/53] w122a_slotguard       rc=0   ✅ CLEAN — slots are filled, not tiers listed
+    [52/53] w123b_groupguard      rc=0   ✅ CLEAN — the residual group is labelled as one
+    [53/53] w124b_priceunitguard  rc=0   ✅ CLEAN — every published magnitude names its quantity
+    TOTAL 327s   51/53 green
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+
+✅ **Both reds are the documented `POST_SEND_EXPECTED` pair and the runner said so itself** — ten
+files went out at 12:36–12:37Z, so the queue on disk is for a day already sent. ⚠ This is the
+**both-red** pattern, which IS post-send; RESEARCH's warning is about **w85c red while w54a is
+GREEN**, which is not this and would need a real diagnosis. The two `w93a_fail_*.log` files were
+deleted after reading, per the standing rule. Rebuilding the queue is the next run's registered
+first step.
+
+⚠ **This is the run where reading `TOTAL` alone would have cost something real.** The *first*
+suite pass returned **49/53** with four reds, and the two extra ones were my own edits breaking a
+guard's control (§11). The `FAILURES:` line named them; the `TOTAL` line did not.
+
+## 13. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122 at 12:36–12:37Z, confirmed from the API.
+- **Row 4 now publishes both of its quantities**: TUNING **+4e-7** and ENROLMENT
+  **+7.38e-6/member**, the latter measured this run on identical folds with a CatBoost control
+  that reproduced w123 to **+0.000e-6**. On one footing: CatBoost 10.04 · XGBoost 7.38 · LightGBM
+  4.04e-6/member. All under the 50e-6 floor, all foreign, all already enrolled.
+- **All six magnitude-carrying price cells now name their unit.** Standing check **#53** keeps
+  them that way and reports INERT rather than green if the fix stops doing work. 52 → 53 stems.
+- **The "best single models by family" table re-derived** over 94 arrays and dated. Two of three
+  GBDT rows were stale; the XGB−LGBM separation is gone (−2e-6 on single models, +84e-6 on
+  arrays, floor 50e-6). Nothing re-opens at a 1.4% pass-through.
+- **`w101a_angleguard`'s controls actually work again** — they had been planting outside the
+  block, and nothing would have revealed it until a run quoted the index's rows.
+- ⛔ **Still nothing selected.** Twenty-third run asking. One day left.

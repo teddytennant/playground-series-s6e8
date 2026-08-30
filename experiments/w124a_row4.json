@@ -1,0 +1,198 @@
+{
+  "published": {
+    "in_pack": [
+      "xgb_lat",
+      "xgb_latcat",
+      "xgb_latcat_s17",
+      "xgb_latcat_s23",
+      "xgb_cat_lattice",
+      "xgb_raw_nan"
+    ],
+    "best_by_family": {
+      "xgboost": [
+        "latr1_xgb",
+        0.9678
+      ],
+      "lightgbm": [
+        "lattri_lgbm",
+        0.96768
+      ],
+      "catboost": [
+        "latwide_cat",
+        0.96718
+      ]
+    },
+    "auc_tol": 5e-05,
+    "noise_floor": 5e-05,
+    "tuning_solo_gain": 3e-05,
+    "passthrough": 0.014,
+    "row4_price": 4e-07,
+    "seedavg_solo": 0.000138,
+    "seedavg_stack": 2e-06,
+    "cat_only_per_member": 1.0041599941293389e-05,
+    "cat_only_n": 8,
+    "rest_per_member_pub": 5.9e-06,
+    "rest_n": 35,
+    "dup_pair": [
+      "bolt_xgb_d7_alt1",
+      "bolt_xgb_d7_alt2"
+    ]
+  },
+  "oof_xgb_on_disk": [
+    "xgb_cat_lattice",
+    "xgb_lat",
+    "xgb_latcat",
+    "xgb_latcat_avg3",
+    "xgb_latcat_s17",
+    "xgb_latcat_s23",
+    "xgb_raw_nan"
+  ],
+  "family_best": {
+    "xgboost": {
+      "name": "xgb_latcat_avg3",
+      "auc": 0.9679044620160593,
+      "n": 18,
+      "single_name": "latr1_xgb",
+      "single_auc": 0.9678009686242787
+    },
+    "lightgbm": {
+      "name": "lgbm_tuned_lat_frac",
+      "auc": 0.9678205564256707,
+      "n": 21,
+      "single_name": "lgbm_tuned_lat_frac",
+      "single_auc": 0.9678205564256707
+    },
+    "catboost": {
+      "name": "latwide_cat",
+      "auc": 0.9671803628728208,
+      "n": 16,
+      "single_name": "latwide_cat",
+      "single_auc": 0.9671803628728208
+    }
+  },
+  "derivation": {
+    "derived": 4.2e-07,
+    "passthrough": 0.014492753623188406
+  },
+  "groups": {
+    "base": 104,
+    "rest": [
+      "bolt_cat_cpu5",
+      "bolt_cat_dual_seed81",
+      "bolt_cat_dual_view",
+      "bolt_cat_nested_te",
+      "bolt_cat_pair_evidence",
+      "bolt_cat_unique",
+      "bolt_foldsafe_te_cat",
+      "bolt_foldsafe_te_multi",
+      "bolt_foldsafe_te_wide",
+      "bolt_foldsafe_te_xgb",
+      "bolt_foldsafe_te_xgb_10f",
+      "bolt_histgb_5fold",
+      "bolt_lgb_driver_recon",
+      "bolt_lgb_missing_global",
+      "bolt_lgb_pair_lattice",
+      "bolt_lgb_raw_d4",
+      "bolt_lgb_raw_d6",
+      "bolt_lgb_te_5fold",
+      "bolt_lookup_v1",
+      "bolt_realmlp_lattice",
+      "bolt_repr_lgb_global",
+      "bolt_tabm_missing",
+      "bolt_tabm_rank1",
+      "bolt_xgb_d7_alt1",
+      "bolt_xgb_d7_alt2",
+      "bolt_xgb_dd_d4",
+      "bolt_xgb_dd_d5",
+      "bolt_xgb_dd_d6",
+      "bolt_xgb_hpo_d7",
+      "bolt_xgb_raw_bag",
+      "bolt_xgb_te_4fold",
+      "bolt_xgb_te_5fold",
+      "mkt_cat",
+      "mkt_lgb",
+      "mkt_xgb"
+    ],
+    "xgb": [
+      "bolt_foldsafe_te_xgb",
+      "bolt_foldsafe_te_xgb_10f",
+      "bolt_xgb_d7_alt1",
+      "bolt_xgb_d7_alt2",
+      "bolt_xgb_dd_d4",
+      "bolt_xgb_dd_d5",
+      "bolt_xgb_dd_d6",
+      "bolt_xgb_hpo_d7",
+      "bolt_xgb_raw_bag",
+      "bolt_xgb_te_4fold",
+      "bolt_xgb_te_5fold",
+      "mkt_xgb"
+    ],
+    "lgb": [
+      "bolt_lgb_driver_recon",
+      "bolt_lgb_missing_global",
+      "bolt_lgb_pair_lattice",
+      "bolt_lgb_raw_d4",
+      "bolt_lgb_raw_d6",
+      "bolt_lgb_te_5fold",
+      "bolt_repr_lgb_global",
+      "mkt_lgb"
+    ],
+    "cat": [
+      "bolt_cat_cpu5",
+      "bolt_cat_dual_seed81",
+      "bolt_cat_dual_view",
+      "bolt_cat_nested_te",
+      "bolt_cat_pair_evidence",
+      "bolt_cat_unique",
+      "bolt_foldsafe_te_cat",
+      "mkt_cat"
+    ]
+  },
+  "dup": {
+    "identical": true,
+    "in_xgb": [
+      "bolt_xgb_d7_alt1",
+      "bolt_xgb_d7_alt2"
+    ],
+    "xgb_distinct": 11
+  },
+  "paired": {
+    "+xgb_only": {
+      "n": 12,
+      "delta": 8.083662426731457e-05,
+      "sd": 1.320294600582623e-05,
+      "per_member": 6.736385355609548e-06,
+      "sign": "consistent"
+    },
+    "+xgb_dedup": {
+      "n": 11,
+      "delta": 8.112950377225925e-05,
+      "sd": 1.3073259547182076e-05,
+      "per_member": 7.3754094338417495e-06,
+      "sign": "consistent"
+    },
+    "+lgb_only": {
+      "n": 8,
+      "delta": 3.2346257174927416e-05,
+      "sd": 5.645301235994223e-06,
+      "per_member": 4.043282146865927e-06,
+      "sign": "consistent"
+    },
+    "+cat_only": {
+      "n": 8,
+      "delta": 8.033279953034711e-05,
+      "sd": 1.5688319867939877e-05,
+      "per_member": 1.0041599941293389e-05,
+      "sign": "consistent"
+    }
+  },
+  "failures": [],
+  "notes": [
+    "the 'xgboost' row of the family table names latr1_xgb at 0.96780; the best xgboost-named array on disk today is xgb_latcat_avg3 at 0.96790 (+104e-6). The table is STALE, not wrong at the time.",
+    "the 'lightgbm' row of the family table names lattri_lgbm at 0.96768; the best lightgbm-named array on disk today is lgbm_tuned_lat_frac at 0.96782 (+141e-6). The table is STALE, not wrong at the time.",
+    "and the best LGBM array today (lgbm_tuned_lat_frac 0.96782) BEATS the XGB number the table publishes (0.96780). Anyone reading the published table against today's disk gets the opposite ordering; the claim only holds because BOTH rows are stale.",
+    "the +4e-7 is a TUNING price (value of tuning a GBDT already held). Row 3's 5.9e-6/10.04e-6 is an ENROLMENT price (value of ADDING a member). Same column of the same table, different quantities, and the table does not say so.",
+    "both halves of the duplicate are in the XGB subgroup, so its per-member denominator is 11 DISTINCT arrays, not 12 names -- and the same pair sits inside the 35 that the published 5.9e-6 divides by (5.90e-6 over 35 names becomes 6.07e-6 over 34 arrays).",
+    "row 4 has never published an enrolment price. On identical folds the XGBoosts read +7.38e-6/member over 11 distinct arrays, against CatBoost +10.04e-6 and LightGBM +4.04e-6."
+  ]
+}

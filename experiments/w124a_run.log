@@ -1,0 +1,61 @@
+w124a -- ANGLE INDEX row 4 (XGBoost) against its artefacts
+
+[R1] the pack-membership citation
+    oof/oof_xgb_*: ['xgb_cat_lattice', 'xgb_lat', 'xgb_latcat', 'xgb_latcat_avg3', 'xgb_latcat_s17', 'xgb_latcat_s23', 'xgb_raw_nan']
+    OK all 6 cited XGB members resolve
+
+[R2] 'best single models by family' -- recomputed from the arrays
+    scored 94 OOF arrays across /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/oof and /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/data/oof/oof
+    -> xgboost   best array xgb_latcat_avg3        0.96790  | best SINGLE latr1_xgb              0.96780  (published latr1_xgb 0.96780, over 18 arrays)
+  note the 'xgboost' row of the family table names latr1_xgb at 0.96780; the best xgboost-named array on disk today is xgb_latcat_avg3 at 0.96790 (+104e-6). The table is STALE, not wrong at the time.
+    -> lightgbm  best array lgbm_tuned_lat_frac    0.96782  | best SINGLE lgbm_tuned_lat_frac    0.96782  (published lattri_lgbm 0.96768, over 21 arrays)
+  note the 'lightgbm' row of the family table names lattri_lgbm at 0.96768; the best lightgbm-named array on disk today is lgbm_tuned_lat_frac at 0.96782 (+141e-6). The table is STALE, not wrong at the time.
+    OK catboost  best array latwide_cat            0.96718  | best SINGLE latwide_cat            0.96718  (published latwide_cat 0.96718, over 16 arrays)
+    OK 'XGBoost is not a missing leg' holds on today's arrays: the best XGB array beats the best LGBM and the best CatBoost
+    XGB - LGBM margin: published +120e-6, on today's arrays +84e-6  (noise floor 50e-6)
+  note and the best LGBM array today (lgbm_tuned_lat_frac 0.96782) BEATS the XGB number the table publishes (0.96780). Anyone reading the published table against today's disk gets the opposite ordering; the claim only holds because BOTH rows are stale.
+
+[R3] the derivation behind the +4e-7 PRICE cell
+    30e-6 x 1.4% = 0.42e-6  (published 0.4e-6)
+    and the 1.4% itself: 2e-6 / 138e-6 = 1.45%
+  note the +4e-7 is a TUNING price (value of tuning a GBDT already held). Row 3's 5.9e-6/10.04e-6 is an ENROLMENT price (value of ADDING a member). Same column of the same table, different quantities, and the table does not say so.
+
+[R4/R5] reconstructing member_value2's groups from the arrays on disk
+    base 104 | rest 35 = xgb 12 + lgb 8 + cat 8 + other 7
+    XGB subgroup: bolt_foldsafe_te_xgb bolt_foldsafe_te_xgb_10f bolt_xgb_d7_alt1 bolt_xgb_d7_alt2 bolt_xgb_dd_d4 bolt_xgb_dd_d5 bolt_xgb_dd_d6 bolt_xgb_hpo_d7 bolt_xgb_raw_bag bolt_xgb_te_4fold bolt_xgb_te_5fold mkt_xgb
+
+[R5] the duplicate inside the XGB subgroup
+    np.array_equal(bolt_xgb_d7_alt1, bolt_xgb_d7_alt2): OOF True  TEST True
+  note both halves of the duplicate are in the XGB subgroup, so its per-member denominator is 11 DISTINCT arrays, not 12 names -- and the same pair sits inside the 35 that the published 5.9e-6 divides by (5.90e-6 over 35 names becomes 6.07e-6 over 34 arrays).
+
+[R4] paired 50/50, 3 splits, C=1.0, transform=hybrid (w123's procedure, same seeds, same base pool)
+  hybrid: repaired 49 of 167 members
+    split 0: base=0.969801  +xgb_only=0.969866  +xgb_dedup=0.969867  +lgb_only=0.969827  +cat_only=0.969864
+    split 1: base=0.969994  +xgb_only=0.970083  +xgb_dedup=0.970085  +lgb_only=0.970026  +cat_only=0.970078
+    split 2: base=0.970096  +xgb_only=0.970184  +xgb_dedup=0.970182  +lgb_only=0.970134  +cat_only=0.970190
+
+    PAIRED DELTA vs base104 (same rows; split noise cancels)
+      +xgb_only    n=12  +0.000081 +/- 0.000013    +6.74e-6/member  [consistent]
+      +xgb_dedup   n=11  +0.000081 +/- 0.000013    +7.38e-6/member  [consistent]
+      +lgb_only    n= 8  +0.000032 +/- 0.000006    +4.04e-6/member  [consistent]
+      +cat_only    n= 8  +0.000080 +/- 0.000016   +10.04e-6/member  [consistent]
+
+    CONTROL  `+cat_only` re-measures +10.04e-6/member against w123's +10.04e-6 (gap +0.000e-6)
+    OK the control reproduces to 0.05e-6, so XGB and CatBoost below are measured on the same footing
+
+    the duplicate: dropping `bolt_xgb_d7_alt2` moves the GROUP delta by +0.293e-6 (a collinear column carries nothing) but the per-member price from +6.74e-6 to +7.38e-6
+
+    ENROLMENT PRICE, identical folds, identical base104:
+      XGBoost (distinct)   n=11   +7.38e-6/member [consistent]
+      LightGBM             n= 8   +4.04e-6/member [consistent]
+      CatBoost             n= 8  +10.04e-6/member [consistent]
+  note row 4 has never published an enrolment price. On identical folds the XGBoosts read +7.38e-6/member over 11 distinct arrays, against CatBoost +10.04e-6 and LightGBM +4.04e-6.
+
+==============================================================================
+  note the 'xgboost' row of the family table names latr1_xgb at 0.96780; the best xgboost-named array on disk today is xgb_latcat_avg3 at 0.96790 (+104e-6). The table is STALE, not wrong at the time.
+  note the 'lightgbm' row of the family table names lattri_lgbm at 0.96768; the best lightgbm-named array on disk today is lgbm_tuned_lat_frac at 0.96782 (+141e-6). The table is STALE, not wrong at the time.
+  note and the best LGBM array today (lgbm_tuned_lat_frac 0.96782) BEATS the XGB number the table publishes (0.96780). Anyone reading the published table against today's disk gets the opposite ordering; the claim only holds because BOTH rows are stale.
+  note the +4e-7 is a TUNING price (value of tuning a GBDT already held). Row 3's 5.9e-6/10.04e-6 is an ENROLMENT price (value of ADDING a member). Same column of the same table, different quantities, and the table does not say so.
+  note both halves of the duplicate are in the XGB subgroup, so its per-member denominator is 11 DISTINCT arrays, not 12 names -- and the same pair sits inside the 35 that the published 5.9e-6 divides by (5.90e-6 over 35 names becomes 6.07e-6 over 34 arrays).
+  note row 4 has never published an enrolment price. On identical folds the XGBoosts read +7.38e-6/member over 11 distinct arrays, against CatBoost +10.04e-6 and LightGBM +4.04e-6.
+FAILURES: 0

@@ -1,0 +1,12 @@
+{
+ "1": "**0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack**",
+ "2": "**+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out",
+ "3": "⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 on the group delta, sign-consistent over 3 splits), which independently corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost*",
+ "4": "**+4e-7**",
+ "5": "**negative**",
+ "6": "**−1.07e-6**",
+ "7": "structural null (stacker) · +2e-6 (member)",
+ "8": "0, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk",
+ "9": "**0 / negative**",
+ "10": "**not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID**"
+}

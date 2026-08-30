@@ -88,6 +88,28 @@ def block_span(txt: str):
     return (i, len(txt) if j < 0 else j)
 
 
+def plant(txt: str, row: str) -> str:
+    """Insert a control row INSIDE the ANGLE INDEX block.
+
+    🔻 w124: C2 and C3 used to plant with `txt.replace("| 7 |", ..., 1)` over the WHOLE
+    document. The moment any section above the index quotes the index's own rows -- which is
+    exactly what a section diagnosing a defect IN the index does -- the first `| 7 |` is that
+    quotation and the control lands outside the block. Both controls then pass vacuously: the
+    ghost is never inside the span C1 reads, so C1 correctly never reports it, and the guard
+    calls that a failure of C1 rather than of its own planting. Same first-occurrence trap
+    w110 recorded for `research_stems()`, in a second place, and it fired the first time a run
+    quoted the table (w124 §3). Anchor the plant to the span, not to the document.
+    """
+    span = block_span(txt)
+    if span is None:
+        return txt
+    lo, hi = span
+    seg = txt[lo:hi]
+    if "| 7 |" not in seg:
+        return txt
+    return txt[:lo] + seg.replace("| 7 |", row + "\n| 7 |", 1) + txt[hi:]
+
+
 def parse_rows(block: str):
     """The table rows, as (row_number, target_file, [anchors]).
 
@@ -165,10 +187,12 @@ def main() -> int:
 
     # ---- C2 +-: a planted nowhere-anchor must be caught, and its removal must restore clean.
     ghost = "ZZ_NO_SUCH_HEADER_W101A_ZZ"
-    doctored = research.replace(
-        "| 7 |", f"| 8 | *control* | — | — | `{ghost}` |\n| 7 |", 1)
+    doctored = plant(research, f"| 8 | *control* | — | — | `{ghost}` |")
     _, dead_plus, _ = audit(doctored, journal, "C2+")
     _, dead_base, _ = audit(research, journal, "C2-")
+    if ghost not in doctored:
+        fail("C2: the control row was never planted -- the ANGLE INDEX span did not parse or "
+             "carries no `| 7 |` row. Everything C2/C3 report below is vacuous.")
     caught = any(ghost in d for d in dead_plus)
     print(f"C2 planted nowhere-anchor  caught={caught}  "
           f"dead {len(dead_base)} -> {len(dead_plus)}")
@@ -181,8 +205,7 @@ def main() -> int:
     # ---- C3 +-: THE w101 BUG. An anchor present ONLY in the index must be dead, and the
     # naive reader must disagree. If the two readers agree here, the exclusion is not wired.
     self_only = "ZZ_ONLY_INSIDE_THE_INDEX_W101A_ZZ"
-    doctored3 = research.replace(
-        "| 7 |", f"| 8 | *control* | — | — | `{self_only}` |\n| 7 |", 1)
+    doctored3 = plant(research, f"| 8 | *control* | — | — | `{self_only}` |")
     span3 = block_span(doctored3)
     live_hits, naive_hits = resolve(self_only, RESEARCH, doctored3, journal, span3)
     print(f"C3 self-only anchor  live={live_hits} (want 0)  naive={naive_hits} (want >=1)")

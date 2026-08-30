@@ -1,3 +1,186 @@
+# (w124, 2026-08-30) — 🔴 THE ANGLE INDEX HAS ONE COLUMN HEADED `price` AND IT CARRIES TWO
+# DIFFERENT QUANTITIES. ROW 4'S **+4e-7** IS THE VALUE OF *TUNING* A GBDT YOU HOLD; ROW 3'S
+# **5.9/10.04e-6** IS THE VALUE OF *ENROLLING* ONE YOU DO NOT. SIDE BY SIDE THEY READ AS 15×.
+
+## 🔴 THE DEFECT — A COLUMN THAT PUBLISHES MAGNITUDES WITHOUT THEIR UNIT
+
+Six of the ten rows carry a magnitude in `price`. They are magnitudes of four different things:
+
+| row | cell | what the number is the value of |
+|---|---|---|
+| 1 | −58e-6 … −3,340e-6 | **CONCAT** — appending extra training rows, by dose |
+| 2 | +4e-7 | **TUNING** — re-fitting a GBDT that is already enrolled |
+| 3 | 5.9e-6 / 10.04e-6 / 10.3e-6 per member | **ENROLMENT** — adding a member the pack does not hold |
+| 4 | +4e-7 | **TUNING**, inherited from row 2 |
+| 6 | −1.07e-6 | **SEARCH** — re-weighting the members already in |
+| 7 | structural null (stacker) · +2e-6 (member) | both, **and row 7 is the only row that says which** |
+
+Read down the column a reader gets `5.9e-6` against `+4e-7` and concludes CatBoost is ~15×
+XGBoost. Neither measurement supports that; they are not the same quantity. 🎯 **Row 7 already
+solved this** — it writes `(stacker)` and `(member)` beside its two numbers — so the fix is the
+index's own existing habit applied to the other five rows, not a new convention.
+
+⚠ **FIFTH PLACE, SAME GENUS.** w120 §4 `priority` naming an input · w121 §3 a prose cause beside
+a derived count · w122 §2 `slot` printed for `tier` · w123 §3 a family label on a residual group
+· and now a magnitude published without its unit. Every one is a **word describing the input
+rather than the predicate**, and no numeric check reaches any of them: `+4e-7` and `5.9e-6` are
+both correct numbers. ⟹ **When a table has a column of numbers, the header is a claim about
+what they measure. Check that claim the way you would check the numbers.**
+
+## ✅ THE PRICE ROW 4 HAS NEVER PUBLISHED — XGBOOST'S **ENROLMENT** NUMBER, ON w123'S OWN FOLDS
+
+Row 4 carried a TUNING price and nothing else, while row 3 carried two CatBoost ENROLMENT
+prices. That is the side-by-side that invites the wrong ratio, and the fix is to measure the
+missing quantity rather than to caveat the cell. `member_value2.py`'s procedure — paired 50/50,
+**3 splits, C=1.0, hybrid transform**, the same `base104` pool and the **same seeds** w123 used
+for the CatBoosts. 10m35s wall under `systemd-run --user`, `w124a_run.log`.
+
+    split 0: base=0.969801  +xgb_only=0.969866  +xgb_dedup=0.969867  +lgb_only=0.969827  +cat_only=0.969864
+    split 1: base=0.969994  +xgb_only=0.970083  +xgb_dedup=0.970085  +lgb_only=0.970026  +cat_only=0.970078
+    split 2: base=0.970096  +xgb_only=0.970184  +xgb_dedup=0.970182  +lgb_only=0.970134  +cat_only=0.970190
+
+🎯 **THE CONTROL REPRODUCES TO THE DIGIT.** `+cat_only` re-measures **+10.04e-6/member** against
+w123's +10.04e-6, gap **+0.000e-6**, and split 0's `base` and `+cat_only` are byte-for-byte
+w123's. That is what makes the three families comparable at all; without it the XGB number would
+be a reading of a different instrument and this section would not exist.
+
+| family, measured ALONE inside `rest` | n distinct | paired delta | **ENROLMENT price** | sign |
+|---|---|---|---|---|
+| **CatBoost** | 8 | +0.000080 ± 0.000016 | **+10.04e-6/member** | consistent 3/3 |
+| **XGBoost** | **11** | +0.000081 ± 0.000013 | **+7.38e-6/member** | consistent 3/3 |
+| **LightGBM** | 8 | +0.000032 ± 0.000006 | **+4.04e-6/member** | consistent 3/3 |
+
+⟹ **As a third leg, XGBoost enrols at 73% of CatBoost's rate and 1.8× LightGBM's**, on identical
+folds and an identical base. That is the answer the handed angle asks for, and the index has
+never had it.
+
+⛔ **AND IT BUYS NOTHING, WHICH IS THE OPERATIONAL PART.** All three readings are **foreign**
+pipelines (boltuzamaki, mohankrishnathalla), all 35 are **already enrolled**, and every one of
+the three is far under the **50e-6** noise floor per member. The standing rule is unchanged and
+reinforced for a second family: *prefer a pipeline we do not hold*, **not** *prefer a family*.
+⛔ **Do not build an XGBoost member.** The modelling question stays closed (w112 §8.4).
+
+### 🔻 AND THE DENOMINATOR: THE XGB SUBGROUP IS **12 NAMES BUT 11 DISTINCT ARRAYS**
+
+`bolt_xgb_d7_alt1` and `bolt_xgb_d7_alt2` are byte-identical — `np.array_equal` **True on OOF
+and on TEST**, re-verified this run, `w109a_dupscan` relation 1 — and **both are inside the XGB
+subgroup**. So a per-member XGB price divides by **11 distinct** arrays, not 12 names:
++6.74e-6 over 12 becomes **+7.38e-6** over 11. ⚠ The same pair sits inside the **35** that row
+3's published 5.9e-6 divides by, so that figure is 5.90e-6 over 35 names and **6.07e-6** over 34
+arrays. ⟹ **Count arrays, not filenames, under any per-member division.**
+
+⚠ **A CORRECTION TO THIS RUN'S OWN LOG.** `w124a_run.log` prints *"a collinear column carries
+nothing"* beside a **+0.293e-6** group-delta shift. That is an assertion where a measurement was
+available, and it is this run's own defect genus one level up. The three splits behind it are
+**+1e-6, +2e-6, −2e-6** — the sign **flips**, so the honest statement is *not distinguishable
+from zero*. It is also not obvious a priori: under **L2** a duplicated pair shares the weight, so
+the ridge penalty on that direction is halved and the duplicated model is effectively
+**under-regularised**, which is a real effect and not a rank argument. The script's wording was
+corrected; the log keeps the text that actually ran.
+
+## 🔻 "BEST SINGLE MODELS BY FAMILY" WAS MEASURED ONCE AND NEVER RE-DERIVED — AND ROW 4 RESTS ON IT
+
+Row 4's own argument that *"XGBoost is not a missing leg"* is that `latr1_xgb` **0.96780** is the
+best GBDT of any family (LGBM 0.96768, CatBoost 0.96718). `w124a_row4.py` recomputed OOF AUC for
+every array on disk — **94** of them, across `oof/` and `data/oof/oof/` — instead of quoting the
+table:
+
+| family | published | best ARRAY on disk today | best SINGLE MODEL on disk today |
+|---|---|---|---|
+| XGBoost | `latr1_xgb` 0.96780 | `xgb_latcat_avg3` **0.96790** (+104e-6) | `latr1_xgb` **0.96780** — exact |
+| LightGBM | `lattri_lgbm` 0.96768 | `lgbm_tuned_lat_frac` **0.96782** (+141e-6) | same, **0.96782** |
+| CatBoost | `latwide_cat` 0.96718 | `latwide_cat` **0.96718** — exact | same |
+
+🔴 **THE BEST LIGHTGBM ON DISK BEATS THE XGBOOST NUMBER THE TABLE PUBLISHES.** 0.96782 against
+0.96780. The *"best GBDT of any family"* claim survives today only because **both** rows are
+stale — and on a like-for-like **single model** basis it does not survive at all: `latr1_xgb`
+0.96780 is **−2e-6 behind** `lgbm_tuned_lat_frac`. XGBoost's champion today, `xgb_latcat_avg3`,
+is by `w109a_dupscan` relation 2 exactly `mean(xgb_latcat, _s17, _s23)`, `max|diff|` **0.0** — a
+**seed average, not a model**, in a table headed *best SINGLE models*.
+
+    XGB − LGBM margin   published +120e-6 · today, arrays +84e-6 · today, single models −2e-6
+    noise floor                                                                        50e-6
+
+⚠ **AND IT TRACES BACK TO ROW 2'S OWN WORK.** `lgbm_tuned_lat_frac` is the tuned LightGBM w122
+re-measured for row 2. Row 2's tuning produced the best LightGBM on disk seventeen days ago and
+nobody carried the number into the family table three thousand lines away. ⟹ **A table of
+"bests" is a snapshot with no expiry date on it, and every member you build after publishing it
+is a chance for it to become false.** ⛔ Do not quote a "best by family" figure without a
+re-derivation date beside it.
+
+✅ **NOTHING RE-OPENS.** This is a **solo** comparison and the closure's own arithmetic is that
+solo→stack pass-through is **1.4%**: +84e-6 solo is +1.2e-6 into the stack and −2e-6 solo is
+−0.03e-6, both far under the 50e-6 floor. What changes is that the table must stop asserting a
+separation it no longer has, and that the right instrument for *"is this family a missing leg"*
+is the **ENROLMENT** measurement below, not a solo AUC ranking — solo AUC does not price
+marginal ensemble value, which is the thing the question is actually about.
+
+## 🔻 AND WRITING THE SECTION ABOVE BROKE A GUARD OVER THE INDEX — FIRST-OCCURRENCE, SECOND PLACE
+
+The w124 suite came back **49/53** with **four** reds, not the two documented post-send ones.
+`w101a_angleguard` and `w106a_claimguard` were both green an hour earlier. Both were caused by
+this run's own document edits, at two different layers, and they want opposite fixes.
+
+**`w101a_angleguard` — the guard is wrong.** Its C2/C3 controls plant a synthetic row with
+
+    research.replace("| 7 |", f"| 8 | *control* | … | `{ghost}` |\n| 7 |", 1)
+
+i.e. **first occurrence over the whole document**. The section above quotes the index's own
+rows in a table in order to explain the defect, so the first `| 7 |` in RESEARCH.md is now that
+quotation, sitting **above** the block. The control landed outside the span C1 reads, C1
+correctly never saw the ghost, and the guard reported that as *"C1 is not testing"* — blaming
+the check for a failure of its own planting.
+
+🎯 **THIS IS w110's LESSON, LIVE, IN A SECOND PLACE.** w110 recorded it as *"an anchor is a
+deliberate duplicate of its target's text; any parser that resolves that text by
+first-occurrence is broken by the act of pointing at it"*, and fixed `research_stems()` by
+excising the index span. The same trap was sitting in the guard **over** the index the whole
+time, and it took a section that **quotes** the table to fire it. ⟹ **Fixed by class, not by
+renaming**: `plant()` inserts inside `block_span()`, and a new assertion reports the controls
+**vacuous** rather than green if the row is never planted. C2 now moves the dead count 0 → 1
+and C3 reads live=0 / naive=1, so both controls do work again.
+
+**`w106a_claimguard` — the DOCUMENT is wrong, and the guard's own docstring says so.** Row 2's
+new unit label read *"re-fitting a GBDT **the pack already holds**"*. That is a possession verb,
+which is exactly what `CLAIM` matches, and its three-line window then swept up the backticked
+`rest`, `base104` and `w117a_handcount` from rows 2–4 — none of which are member names. The
+guard was right. ⛔ **A third exemption was the wrong fix and the file says so in advance**:
+*"if this list reaches FOUR, stop adding to it and fix the root cause instead: quote broken
+citations WITHOUT a possession verb on the same line."* The cell now reads *"the value of
+re-fitting a GBDT that is already enrolled"*. Both green, and no exemption was added.
+
+⟹ **TWO REDS, TWO LAYERS, AND THE TRIAGE IS THE POINT.** One guard was defective and one
+document was. Reading `49/53 green` and moving on, or reflexively exempting both, would have
+left a broken control in place over the load-bearing index.
+
+
+## 🆕 STANDING CHECK #53 — `w124b_priceunitguard`, AND THE CONTROL THAT MAKES IT ONE
+
+    .venv/bin/python experiments/w124b_priceunitguard.py            # rc 0 = clean
+    .venv/bin/python experiments/w124b_priceunitguard.py --control  # exits 0, having fired
+
+**C1 UNITS.** Every ANGLE INDEX price cell carrying an `e-6`/`e-7` magnitude must name its
+quantity from a registered four-word vocabulary — **TUNING, ENROLMENT, CONCAT, SEARCH**. Rows
+whose price is a bare `0` / `negative` / *not a modelling angle* are exempt: there is no
+magnitude to misread. **C2** row 4 must name both of its quantities, so the index can never
+again hold two enrolment prices for one family and none for another. **C3** the duplicate pair
+must still be byte-identical on disk **and** the `11 distinct` denominator must be disclosed.
+**C4** the family table must carry its re-derivation. **C5** `--control` runs C1 over the
+**frozen pre-fix cells**, which must fire — anchored to inlined literals, not to HEAD, because a
+control anchored to HEAD stops being a control the moment the fix is committed (w115).
+
+    (before)    FAILURES: 4   rc=1   — six unpriced magnitudes, no XGB enrolment price,
+                                        no denominator disclosure, no re-derivation date
+    (shipped)   FAILURES: 0   rc=0   ✅ CLEAN
+    (--control) pre-fix cells: 6 magnitudes with no quantity · shipped cells: 0
+
+⚠ **JOURNAL.md is deliberately out of scope** — it is append-only history and correcting it
+would be a rewrite. Only RESEARCH.md, the live document, is checked. Registered in
+`w93a_suite.STEMS` and in the published block below, **52 → 53 stems**, C2 drift check clean.
+
+
+---
+
 # (w123, 2026-08-30) — 🔴 ANGLE INDEX ROW 3 SELLS **5.9e-6/member** AS THE CATBOOST PRICE. THAT
 # NUMBER IS THE AVERAGE OF A **RESIDUAL** GROUP THAT IS 23% CATBOOST AND 11% NEURAL NETS.
 # MEASURED ALONE THE CATBOOSTS READ **+10.04e-6/member**, WHICH IS 1.8× WHAT THE ROW PUBLISHES.
@@ -2232,13 +2415,13 @@ that wrote it"* — this block is that lesson applied to navigation.
 
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
-| 1 | *the original dataset* — find it, concat it as extra rows | **×13, from 08-11 → w112 08-29** (count from `w117a_handcount`, not by hand) | **0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
-| 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
-| 3 | *CatBoost: it handles categoricals better* | **×15, from 08-10 → w114 08-29 → w123 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 on the group delta, sign-consistent over 3 splits), which independently corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
-| 4 | *XGBoost as the third leg of the ensemble* | ×14, from 08-10 → w115 08-29 · **artefacts verified** (count from `w117a_handcount`) | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
+| 1 | *the original dataset* — find it, concat it as extra rows | **×13, from 08-11 → w112 08-29** (count from `w117a_handcount`, not by hand) | a **CONCAT** price (extra training ROWS, not members). **0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
+| 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
+| 3 | *CatBoost: it handles categoricals better* | **×15, from 08-10 → w114 08-29 → w123 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 on the group delta, sign-consistent over 3 splits), which independently corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
+| 4 | *XGBoost as the third leg of the ensemble* | **×15, from 08-10 → w115 08-29 → w124 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** · XGBoost **+7.38e-6** · LightGBM **+4.04e-6**. ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family* | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — the most-handed, but only just: the ten counts run 8–15** (`w117a_handcount`) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
-| 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
-| 7 | *seed and fold diversity, averaged* | ×12, from 08-11 → w64 → w109 08-28 → w118 08-29 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
+| 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | a **SEARCH** price (re-weighting members already in) — **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
+| 7 | *seed and fold diversity, averaged* | ×12, from 08-11 → w64 → w109 08-28 → w118 08-29 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · **ENROLMENT** +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | 0, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
 | 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×13, from 08-11 → w119 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
 | 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×13, from 08-11 → w111 08-28 → w120 08-29 · artefacts verified** (count from `w117a_handcount`) | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
@@ -2246,8 +2429,11 @@ that wrote it"* — this block is that lesson applied to navigation.
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
 number came from a LightGBM measurement. w106 checked it at the artefact level rather than
 quoting it and **it holds on its own evidence**: all six XGB members its closure names exist on
-disk, `latr1_xgb` (0.96780) is the best GBDT of *any* family here so XGBoost is not a missing
-leg, and the 1.4% solo→stack pass-through in the +4e-7 was measured **on XGBoost**
+disk, `latr1_xgb` (0.96780) was the best GBDT of *any* family here so XGBoost is not a missing
+leg ⚠ (**re-derived w124**: that figure is now the best XGB *single model* and is **−2e-6 behind**
+`lgbm_tuned_lat_frac` 0.96782; the claim survives on arrays only, by +84e-6, inside the 50e-6
+floor — and the ENROLMENT reading below is the better instrument for it),
+and the 1.4% solo→stack pass-through in the +4e-7 was measured **on XGBoost**
 (`xgb_latcat` seed-averaging: +138e-6 solo → +2e-6 stack). Contrast row 3, whose closure cited
 two files that were never built. 🎯 **An inherited price is not automatically a fabricated one —
 but you only know which by looking.** `w106a_claimguard` (#42) now checks the member citations in
@@ -2740,7 +2926,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 52 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 53 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -2753,7 +2939,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
-    w122a_slotguard   w123b_groupguard
+    w122a_slotguard   w123b_groupguard  w124b_priceunitguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -6941,12 +7127,26 @@ Do not use the CV→LB offset as a leak detector any more — it is not constant
 
 ### Best single models by family (the bar to beat)
 
-| family | best OOF | name |
-|---|---|---|
-| LightGBM | 0.96768 | `lattri_lgbm` / `latmax_lgbm` |
-| XGBoost | 0.96780 | `latr1_xgb` |
-| CatBoost | 0.96718 | `latwide_cat` |
-| TabM | 0.96867 | `tabm_seed3` |
+⚠ **RE-DERIVED 2026-08-30 by `w124a_row4.py`** over all **94** OOF arrays on disk. The table as
+published on 2026-08-13 was measured once and never re-checked, and two of its three GBDT rows
+had gone stale — see the w124 section at the top of this file. Both columns are given because
+they disagree, and the disagreement is the point: the XGBoost champion by *array* is a **seed
+average**, which cannot answer a table headed *best SINGLE models*.
+
+| family | published 08-13 | best ARRAY, 08-30 | best SINGLE MODEL, 08-30 |
+|---|---|---|---|
+| LightGBM | 0.96768 `lattri_lgbm` / `latmax_lgbm` | **0.96782** `lgbm_tuned_lat_frac` | **0.96782** same |
+| XGBoost | 0.96780 `latr1_xgb` | **0.96790** `xgb_latcat_avg3` ⚠ a seed average | **0.96780** `latr1_xgb` — exact |
+| CatBoost | 0.96718 `latwide_cat` | **0.96718** same — exact | **0.96718** same |
+| TabM | 0.96867 `tabm_seed3` | not re-derived (this pass covered the three GBDT families) | — |
+
+🔴 **THE XGB−LGBM MARGIN: published +120e-6 · today by array +84e-6 · today by single model
+−2e-6, against a 50e-6 noise floor.** The best LightGBM on disk now **beats the XGBoost number
+this table publishes**. ⛔ Do not quote a "best by family" figure without the re-derivation date
+beside it, and do not read the ordering as a separation — it is inside the floor either way.
+✅ Nothing re-opens: at the closure's own **1.4%** pass-through, ±84e-6 solo is ±1.2e-6 into the
+stack. The instrument that actually answers *"is this family a missing leg"* is the **ENROLMENT**
+measurement in the w124 section, not a solo AUC ranking.
 
 #### ⚠ CLOSED 2026-08-13: tuning ANY GBDT is worth ~4e-7 into the stack
 
