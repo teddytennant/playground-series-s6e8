@@ -35987,3 +35987,195 @@ magnitude. ⛔ Do not re-price it. **The click stays human, and this is the last
    neither can the person who wrote the check. Four consecutive guards inherited one selector and
    therefore one blind spot. Before writing the next guard, read the FIRST guard's exemption
    clause and ask what it asserts about the world.**
+
+---
+
+# w129 — 2026-08-30, slot 8 of 10 · ANGLE: consolidation — re-verify the best pipeline end-to-end,
+# check the CV-to-LB gap across every experiment, make sure the strongest submission is selected ·
+# **AT THE CAP, NOTHING SENT**
+# 🔴 ROW 10 TOOK #57's OPT-OUT AND THEN CLAIMED IT **PAID**. THE OPT-OUT WAS BUILT FOR CELLS WITH
+# NOTHING TO PRICE, AND ROW 10 HAD THREE ARMS SITTING ON DISK.
+
+**⛔ NO SUBMISSION. Ten landed today at 12:36–12:37Z (w122's queue drain).** `w26g_send.py --n 10`
+prints *"191 submissions on record; 10 already sent on 2026-08-30 (UTC); 0 of 10 slots left
+today"*. The cap is 10/day and it is spent. Measurement and documentation only, which is what the
+brief asks for at the cap. ⚠ `w26g` still PRINTS a ten-file plan under the zero-slot line; that is
+what it would send tomorrow, not a permission.
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 10 — FIFTEENTH HANDING
+
+`w117a_handcount` run, not counted by hand: **×13 → ×14**. `CURRENT_RUN`/`CURRENT_ROW` moved to
+`w129`/row 10 and the tool's number was used. Row 10 is the standing checklist and it is the last
+row in the table to be priced.
+
+## 2. 🔴 THE DEFECT — AN EXEMPTION FOR "NOTHING TO MEASURE", USED FOR "NOTHING MEASURED YET"
+
+Row 10's price cell read, in full: `**NOT A PRICE — not a modelling angle** — it is the standing
+checklist, and it is the one angle that has ever PAID`.
+
+#57 made silence unspendable one run ago: carry a magnitude, or type the literal `NOT A PRICE`.
+Its own blind-spot paragraph says what it then cannot do — *"C1 accepts `NOT A PRICE` from anyone
+who types it."* Row 10 typed it and, in the same breath, asserted a **non-zero positive
+magnitude**, in the past tense, **comparatively against the other nine rows**. Row 8's opt-out is
+honest by contrast: foundation row, and the cell **states the answer is 0**.
+🎯 **THE ONE CELL ARGUING FOR ITS OWN ANGLE IS THE ONE CELL WITH NO NUMBER IN IT** — and it is the
+sentence a run reads when deciding whether this slot is worth its budget.
+
+## 3. ✅ WHAT CONSOLIDATION HAS ACTUALLY PAID — `w129a_row10.py`, FAILURES 0, ALL FIVE PREDICTIONS HELD
+
+Pre-registered in `experiments/w129_prereg.txt` (commit `2ed203d`) **before any number for this
+run existed**, falsifier included. One arm per clause of the row's own elaboration.
+
+| arm | quantity · layer · scope | denominator | baseline | price |
+|---|---|---|---|---|
+| **A** *confirm the picks* | SELECTION · FINAL-FILE · **k=2** | per competition, a **TOTAL** | Kaggle auto-selection by public score | **+4.5228e-6** (tau=0) · **+3.0704e-6** (95% upper tau) |
+| **B** *re-verify the pipeline* | VERIFICATION · PIPELINE · k=3 | per file rebuilt | the shipped file's own bytes | **+0.0000e-6 — zero is the PASS** |
+| **C** *audit CV↔LB* | PREDICTOR-AUDIT · PREDICTOR | per post-w23 build, **PREDICTED-LB units** | the corrected w25f model | **−27.4266e-6** |
+
+Arm A is live, not quoted: `w74b_clickstaleguard` ran this run and the tiers are **unchanged over
+a board that grew 131 → 191 scored files**, so the published price still applies; `w114a` re-derives
+the headline from a second estimator, drift **+3.4e-9**. Mis-click arm, same baseline: **+35.17e-6**
+and **+81.92e-6**. ⛔ **Three distinct denominators — the arms DO NOT ADD**, the same genus as the
+standing DO-NOT against adding measured-alone group deltas.
+
+🎯 **AND THE HEADLINE IS UNREALISED.** `check_selection.py` returns **rc=1**, nothing is selected,
+so arm A is contingent on one human click; arm B changes no file by construction; arm C moved a
+prediction, not a submission. **REALISED TOTAL TODAY: +0.0000e-6 on every arm.**
+🔻 *"The one angle that has ever PAID"* is true on **sign** and on **cost** — the click is free —
+and **false on magnitude**: **+4.5228e-6 is 2.2× smaller than row 3's CatBoost enrolment price of
++10.04e-6/member**, which this table publishes as a reason **not** to build. Consolidation
+dominates on **ratio**, not size, and the cell should have said so with the number attached.
+
+## 4. ✅ THE COVERAGE GAP ARM B FOUND — AND CLOSED THE SAME RUN
+
+w111's end-to-end reproduction covered `w36_ad199stdcorr` (WANTED) and `w36_ad199stdcorr_ens4`
+(**the auto-selection twin, not WANTED at all**). The second WANTED file, **`w23_ad187stdcorr`**,
+was never in it, and #46 inherited the same two. 🎯 **"2 picks" reads as complete until you
+intersect it with the list that actually matters** — `w129a` prints the intersection, not the count.
+
+**Closed, 21m59s under `systemd-run --user`**, base taken from the pick's OWN `w21a` artefact and
+never from a run script. **Thirteen days after the 08-17 original, CSV and OOF are md5-identical**
+(`4fa32c223a…` / `bb7ad06eac…`), **0 artefact fields differ outside the tag**, all five arm
+cross-fits reproduce to the digit (glob +2.649, a_only +4.310, rule +5.477, mask +3.217 e-6), and
+the dupe scan prints the w111 tell: *"rank-identical to an existing submission file?
+`['w23_ad187stdcorr.csv']`"*. Both outputs moved out of `submissions/` immediately —
+**426 files before and after** — and `w111a_reproduction.json` now carries **three picks, three
+distinct bases**, so #46 checks all of them at ~3 s. ⟹ **Both deadline picks and the auto-pick
+twin now rebuild byte for byte.**
+
+## 5. 🔴 THE SECOND READER DEFECT IN THE FAMILY, ONE RUN AFTER THE FIRST — A **CITATION** READ AS A CLAIM
+
+The rewritten row 10 names three quantities of its own — SELECTION, VERIFICATION, PREDICTOR —
+**none of which was in #53's vocabulary.** #53 went **GREEN anyway**, because the cell cites
+*"row 3's CatBoost **ENROLMENT** price"* and the shared `claims()` reader counted that borrowed
+word as row 10's own. Delete those six words and **#53 fires**. #56 was dragged the same way: it
+skips any cell that does not claim ENROLMENT, and the citation pulled row 10 into its scope.
+
+🎯 **w128's defect was a NEGATION read as a claim; this is a CITATION read as a claim, in the same
+reader — found by writing the cell and then asking WHY the guard was quiet rather than being
+satisfied that it was.** ✅ Fixed in the shared reader (`w128b.CITED`, skipping any occurrence
+preceded within 24 characters by `row N's`), **not** in the cell, and the three new quantities
+joined #53's vocabulary. **All four frozen controls still fire.**
+
+## 6. ✅ STANDING CHECK #58 — `w129b_optoutguard`, 57 → 58 stems
+
+C1 a cell containing `NOT A PRICE` must not claim PAID/paid/pays/worth/gain/value unless it also
+carries a magnitude or the bare `0` — row 8 passes on the `0`, pre-fix row 10 fires · C2 row 10
+publishes all **fifteen** required tokens · C3 `w129a_row10.json` against literals frozen in the
+guard, **INERT** if the artefact is missing · C4 `--control` over the frozen pre-fix cell · C5
+**all four siblings imported and measured BLIND on the pre-fix row 10 — #57 included, because the
+opt-out satisfies it** — each still firing on its own frozen defect in the same call · C6 the
+citation reader, both directions, required to **disagree with the naive `in` test** (2 of 4 probes).
+
+⚠ **BLIND TO:** a finite VALUE vocabulary, and — like the other four — **only the price column**.
+🎯 Five guards now share one column. The next defect in this genus is a value claim in a vocabulary
+I did not enumerate, or it is in the `closed` column.
+
+## 7. ✅ THE SUITE — **282s, 58/58 GREEN, ZERO FAILURES.** THE FIRST CLEAN SWEEP ON RECORD
+
+`w54a_vetoexpiry` and `w85c_slotguard` are the documented post-send pair and they went **green**
+this run, because the queue was rebuilt for the next unsent day before the suite ran:
+`w23b_sendqueue.py` then `w48e_order.py --day 2026-08-31 --write` — **ten ranked, 19 vetoed**, all
+ten `w85_cal_*` DRAIN members. ⚠ Both reds clearing is not a new property of the guards; it is what
+"rebuild for the next unsent day" was always supposed to produce, and no previous run had done it
+before launching. Launch command copied out of RESEARCH.md (`grep FULLPATH=`), not scrollback.
+
+## 8. ⛔ THE CLICK — TWENTY-EIGHTH RUN ASKING. **THE DEADLINE IS TOMORROW.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live, rc read from the process and not through a pipe, **rc=1**:
+`*** NOTHING IS SELECTED ***`. `55656399 → w36_ad199stdcorr.csv` (public 0.97118) · `55588167 →
+w23_ad187stdcorr.csv` (public 0.97116). Auto-select takes the 0.97119 tier and both WANTED files
+print **UNREACHABLE without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the mis-click
+costs **+35.17e-6** or **+81.92e-6** and stays the bigger hazard by an order of magnitude.
+🆕 **As of this run both WANTED files have been rebuilt byte-for-byte from their bases**, so there
+is now nothing unverified left in the chain between the CV number and the file Kaggle scores. The
+only remaining link is the click, and it is human.
+
+## 9. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122, confirmed from the API.
+- **Row 10 priced for the first time**: three arms, three currencies, `+4.5228e-6` / `+0.0000e-6` /
+  `−27.4266e-6`, **realised total +0.0000e-6**, and the honest comparison against row 3.
+- **The last unreproduced deadline file rebuilt byte-for-byte after 13 days**; #46 now covers 3.
+- **A citation read as a claim, found and fixed in the shared reader** (§5), with #53 falsely
+  green for the length of one edit.
+- **#58 registered**, closing the opt-out loophole #57 wrote down about itself.
+- **58/58 green**, the two post-send reds cleared by rebuilding the queue first.
+- ⛔ **Still nothing selected. Twenty-eighth run asking, and the deadline is tomorrow.**
+
+## 10. NEXT RUN — READ THIS ORDER. **IT IS THE FINAL DAY (deadline 2026-08-31 23:59).**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10` and read
+   the **slots-left line**, not the plan it prints under it.
+2. ⚠ **THE 08-31 QUEUE IS ALREADY WRITTEN** by this run (`w26d_queueprice.csv`, ten DRAIN members).
+   Do **not** rebuild it for 08-31 a second time — go straight to `w26g_send.py --go`. **Send
+   early: a slot unsent at 23:59 is gone.** Quote `w26d`'s **bound**, never its point estimate.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w129 set it to `w129`/row 10.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (grep `FULLPATH=`). ⚠ After this run the baseline is **58/58 with zero reds** —
+   any red at all is now a finding, and the "documented post-send pair" excuse no longer applies
+   unless the day's ten have already been sent.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §3 above is not an exception — it prices the
+   checklist, not a candidate, and its realised total is zero.
+6. ⛔ **DO-NOT, carried forward from w92–w128 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct" ·
+     read **5.9e-6** as the CatBoost price (CatBoost alone is **+10.04e-6/member**) · treat
+     +10.04e-6 or +7.38e-6 as a reason to build a CatBoost or XGBoost member · add measured-alone
+     group deltas together · divide by filenames rather than arrays · multiply a member-level
+     number by **1.4%** far from the **+138e-6** it was fitted at · read row 5's `negative` as a
+     stack-layer price · read row 6's **−1.07e-6** as the price of re-weighting members · read row
+     7's **+2e-6** as a per-member rate · read row 9's **−118e-6** without its baseline (against
+     the permuted-cell control the same arm is **+6e-6**) · read row 9's **+3.95e-6** as evidence
+     the segmentation does anything (the permuted null takes **+3.17e-6** of it) · call
+     `load_members(drop=DEFAULT_DROP)`'s output `base104` · launch the suite with a hand-typed PATH.
+   • 🆕 **DO NOT ADD ROW 10's THREE ARMS TOGETHER.** `+4.5228e-6`, `+0.0000e-6` and `−27.4266e-6`
+     are in **three different currencies** — realised AUC at k=2, bytes per file, and predicted LB
+     per build. Arm C was never converted to AUC at all (§3).
+   • 🆕 **DO NOT read row 10's +4.5228e-6 as "consolidation paid".** It is **unrealised**: nothing
+     is selected, so the realised total on every arm is **+0.0000e-6** until somebody clicks (§3).
+   • 🆕 **DO NOT let a quantity word inside a citation of another row satisfy #53.** `claims()`
+     now skips `row N's <word>`, but the guard family still reads one column and one vocabulary,
+     and a green bought by a cross-reference looks exactly like a green earned by a label (§5).
+7. ⚠ **THE LESSON, TEN RUNS OLD, AND THIS TIME IT CAME FROM MY OWN EDIT TWICE IN ONE RUN.** w128
+   predicted the next defect would be in the `closed` column or a pool disclosure. It was in the
+   **price** column again — but not in a number: in the **opt-out**, the one branch of #57's C1
+   that a human types instead of measuring. Then the fix I wrote for it went green for the wrong
+   reason, on a word borrowed from another row. 🎯 **A guard's exemption branch and a guard's
+   vocabulary are the two places where a green means "I did not look", and neither is visible from
+   the passing line. After writing a cell that turns a guard green, delete the part you think
+   earned the green and check that it goes red.**

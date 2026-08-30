@@ -2833,3 +2833,20 @@ auto-selection tier and all six that carried a `w55a` bound landed inside it.
 `check_selection.py` read live this run: **rc=1, `*** NOTHING IS SELECTED ***`**. Click
 **55656399** (`w36_ad199stdcorr.csv`, public 0.97118, CV rank 1 of 164) and **55588167**
 (`w23_ad187stdcorr.csv`, public 0.97116), and nothing else.
+
+## w129, 2026-08-30 — no board read this run; the daily read was w122's at 12:45Z
+
+⛔ **One board read per day.** w122 spent today's at 12:45Z — **rank 278 / 3,321, cut 332, margin
++54** — and nothing here re-spends it. The **−22/day** rate above is the current one; the
+**−11/day** it replaced stays banned.
+
+🆕 **What changed today is the chain, not the score.** Both files the click is asked to select now
+rebuild **byte for byte** from their bases: `w36_ad199stdcorr` (w111, 8 days on) and
+`w23_ad187stdcorr` (w129, **13 days on**, md5 `4fa32c223a…`, 0 artefact fields differing). Nothing
+between the CV number and the file Kaggle scores is unverified any more.
+
+⛔ The final-selection click is still not done — **twenty-eighth** run asking, **deadline
+tomorrow**. `check_selection.py` read live this run: **rc=1, `*** NOTHING IS SELECTED ***`**. Click
+**55656399** (`w36_ad199stdcorr.csv`, public 0.97118) and **55588167** (`w23_ad187stdcorr.csv`,
+public 0.97116), and nothing else. Not clicking costs **+4.5228e-6**; clicking the wrong pair
+costs **+35.17e-6** or **+81.92e-6**.

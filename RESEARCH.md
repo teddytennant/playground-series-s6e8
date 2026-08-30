@@ -28,7 +28,7 @@ by the pricer itself.
 | arm | clause | quantity · layer · scope | denominator | baseline | price |
 |---|---|---|---|---|---|
 | **A** | *confirm the picks* | SELECTION · FINAL-FILE · **k=2** | per competition, a **TOTAL** | Kaggle auto-selection by public score | **+4.5228e-6** (tau=0) · **+3.0704e-6** (95% upper tau) |
-| **B** | *re-verify the pipeline* | VERIFICATION · PIPELINE · k=3 | per file rebuilt | the shipped file's own bytes | **+0.0000e-6 — and zero is the PASS** |
+| **B** | *re-verify the pipeline* | VERIFICATION · PIPELINE · k=3 | per file rebuilt | the shipped file's own bytes | **+0.0000e-6 — and zero is the PASS** (3/3, both WANTED files and the auto-pick twin) |
 | **C** | *audit CV↔LB* | PREDICTOR-AUDIT · PREDICTOR · n/a | per post-w23 build, **PREDICTED-LB units** | the corrected w25f model | **−27.4266e-6** |
 
 Arm A is live, not quoted: `w74b_clickstaleguard` ran this run and reports the tiers **unchanged
@@ -57,14 +57,32 @@ SMALLER than row 3's CatBoost enrolment price of +10.04e-6/member**, which this 
 publishes as a reason **not** to build. Consolidation dominates on **ratio**, not on size, and the
 cell should have said so with the number attached.
 
-## 🔻 ARM B's COVERAGE GAP — ONE OF THE TWO **WANTED** FILES HAD NEVER BEEN REBUILT
+## ✅ ARM B's COVERAGE GAP — ONE OF THE TWO **WANTED** FILES HAD NEVER BEEN REBUILT. IT HAS NOW.
 
 w111's end-to-end reproduction covered `w36_ad199stdcorr` (a WANTED file) and
 `w36_ad199stdcorr_ens4` (**the auto-selection twin, which is not WANTED at all**). The second
-WANTED file, **`w23_ad187stdcorr`**, was never in it — `w111a_reproduction.json` has two picks and
-neither is that one, and #46 inherits the same two. 🎯 **A COVERAGE COUNT OF "2 PICKS" LOOKS
+WANTED file, **`w23_ad187stdcorr`**, was never in it — `w111a_reproduction.json` held two picks and
+neither was that one, and #46 inherited the same two. 🎯 **A COVERAGE COUNT OF "2 PICKS" READS AS
 COMPLETE UNTIL YOU INTERSECT IT WITH THE LIST THAT ACTUALLY MATTERS.** `w129a`'s arm B prints the
 intersection rather than the count, so this cannot read as covered again.
+
+✅ **CLOSED THE SAME RUN, 21m59s under `systemd-run --user`.**
+`W21A_BASE=w23_ad187std_h3 W21A_TAG=w129repro_h3` — the base taken from the pick's OWN
+`w21a_w23_ad187stdcorr.json`, never from a run script (w111's three-minute mistake). **Thirteen
+days after the 08-17 original, CSV and OOF are md5-identical:**
+
+    4fa32c223adaa3d58ac3221c82c825cb  w23_ad187stdcorr.csv   ==  w129repro_h3.csv
+    bb7ad06eac453bab817c2a48b4b6ee72  oof_…                  ==  oof_w129repro_h3.npy
+
+Every scalar in the two `w21a_*.json` artefacts is equal (`base`, `base_auc` 0.9701092750631359,
+all five arm xfits, the nested picks, the shipped combo CV 0.9701150808744373) — **0 differing
+fields outside the tag**. The five per-arm cross-fits reproduce to the digit: glob +2.649e-6,
+a_only +4.310e-6, rule +5.477e-6, mask +3.217e-6. The dupe scan prints the tell w111 documented:
+*"rank-identical to an existing submission file? `['w23_ad187stdcorr.csv']`"* — the reproduction
+finding the original. Both outputs were moved out of `submissions/` the moment the run ended and
+**the directory is 426 files before and after**; they live in `experiments/w111_repro_out/`, and
+`w111a_reproduction.json` now carries three picks with **three distinct bases**, so #46 checks
+all of them at ~3 s. ⟹ **Both deadline picks and the auto-pick twin now rebuild byte for byte.**
 
 ## 🔴 THE SECOND READER DEFECT IN THE FAMILY, ONE RUN AFTER THE FIRST — A **CITATION** READ AS A CLAIM
 

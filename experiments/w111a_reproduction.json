@@ -20,7 +20,17 @@
    "repro_csv_md5": "4cb5145849f7d3fcc0243a3737272bc8",
    "repro_oof_md5": "b35e6a7957d2525d25972e50e7343752",
    "artefact_fields_match_repro": true
+  },
+  "w23_ad187stdcorr": {
+   "base": "w23_ad187std_h3",
+   "base_auc": 0.9701092750631359,
+   "pick_csv_md5": "4fa32c223adaa3d58ac3221c82c825cb",
+   "pick_oof_md5": "bb7ad06eac453bab817c2a48b4b6ee72",
+   "repro_tag": "w129repro_h3",
+   "repro_csv_md5": "4fa32c223adaa3d58ac3221c82c825cb",
+   "repro_oof_md5": "bb7ad06eac453bab817c2a48b4b6ee72",
+   "artefact_fields_match_repro": true
   }
  },
- "note": "digests read from disk; see JOURNAL w111 for the run that made them"
+ "note": "digests read from disk; see JOURNAL w111 for the w36 pair and w129 for w23_ad187stdcorr, the second WANTED file, rebuilt 13 days after the original"
 }

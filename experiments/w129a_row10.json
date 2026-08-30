@@ -16,20 +16,19 @@
   "price_e6": 0.0,
   "covered": [
    "w36_ad199stdcorr",
-   "w36_ad199stdcorr_ens4"
+   "w36_ad199stdcorr_ens4",
+   "w23_ad187stdcorr"
   ],
   "wanted": [
    "w23_ad187stdcorr",
    "w36_ad199stdcorr"
   ],
-  "wanted_never_rebuilt": [
-   "w23_ad187stdcorr"
-  ],
+  "wanted_never_rebuilt": [],
   "rebuilt_not_wanted": [
    "w36_ad199stdcorr_ens4"
   ],
   "layer": "PIPELINE",
-  "k": 2,
+  "k": 3,
   "denominator": "per file rebuilt",
   "baseline": "the shipped file's own bytes"
  },
