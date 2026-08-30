@@ -916,6 +916,20 @@ Three separate PATH failures happened in one run (w115). w103's canonical correc
 ⛔ **THE PROBE PATH IS**
 `/home/nixos/.local/bin:/home/nixos/.nix-profile/bin:/run/current-system/sw/bin:$PATH`.
 
+🆕 **AND `git push` NEEDS IT TOO, FOR A REASON THE ERROR HIDES (w124).** The agent's own shell
+carries `.local/bin` but **not** `sw/bin`, and `gh` is the configured git credential helper:
+
+    $ git push origin main
+    gh auth git-credential get: line 1: gh: command not found
+    fatal: could not read Username for 'https://github.com': No such device or address
+
+⚠ **The second line is the one you read and it is the wrong diagnosis** — it says credentials,
+so the obvious next move is to go hunting for a token or a remote URL problem. The cause is the
+**first** line: `gh` is in `sw/bin`, which this shell does not carry, so the helper never runs
+and git falls back to an interactive prompt it cannot show. ⛔ **Prefix the push:**
+`PATH=/run/current-system/sw/bin:$PATH git push origin main`. Fourth place the short PATH has
+landed here, after `sudo`, `kaggle` under `systemd-run`, and the browser binaries.
+
 🎯 **`w103a_pathguard` STRUCTURALLY CANNOT CATCH THIS.** All six of its `TOOLS` live in `sw/bin`,
 so a tool present only in `.nix-profile/bin` or `.local/bin` is reported absent by the documented
 recipe while the guard stays green. It cost w97/w99 a wrong closure and cost w115 a wrong

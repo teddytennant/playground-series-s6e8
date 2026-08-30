@@ -35090,3 +35090,18 @@ guard's control (§11). The `FAILURES:` line named them; the `TOTAL` line did no
 - **`w101a_angleguard`'s controls actually work again** — they had been planting outside the
   block, and nothing would have revealed it until a run quoted the index's rows.
 - ⛔ **Still nothing selected.** Twenty-third run asking. One day left.
+
+## 14. ADDENDUM — `git push` FAILED ON THE SHORT PATH, AND THE ERROR NAMED THE WRONG CAUSE
+
+    gh auth git-credential get: line 1: gh: command not found
+    fatal: could not read Username for 'https://github.com': No such device or address
+
+⚠ **The second line is the one you read, and it is the wrong diagnosis** — it says credentials,
+so the obvious next move is hunting for a token or a remote-URL problem. The cause is the
+**first** line: `gh` is the configured credential helper, it lives in `/run/current-system/sw/bin`,
+and this agent's shell carries `.local/bin` but not `sw/bin`, so the helper never runs and git
+falls back to an interactive prompt it cannot show. ⛔ **`PATH=/run/current-system/sw/bin:$PATH
+git push origin main`.** Fourth place the short PATH has landed here, after `sudo`, `kaggle`
+under `systemd-run`, and the browser binaries. Recorded in RESEARCH's PATH section.
+⚠ The commit had already succeeded; only the push failed. `git log --oneline -1` before
+re-running anything, or you will commit twice.
