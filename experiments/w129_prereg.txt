@@ -1,0 +1,77 @@
+w129 PRE-REGISTRATION — 2026-08-30, written BEFORE any number for this run existed.
+ANGLE (row 10): "Consolidation: no new ideas. Re-verify the best pipeline end-to-end, check
+the CV-to-LB gap across every experiment so far, and make sure the strongest submission is
+the one selected." Row 10 is the standing checklist. This registers a MEASUREMENT of the
+row's own price cell, not a candidate, and no submission can follow from it (0 of 10 slots
+left today, confirmed from `w26g_send.py --n 10`).
+
+THE CLAIM UNDER TEST. ANGLE INDEX row 10's price cell reads, in full:
+
+    **NOT A PRICE — not a modelling angle** — it is the standing checklist, and it is the
+    one angle that has ever PAID
+
+Rows 1..7 and 9 each name a QUANTITY, a MAGNITUDE with a unit, a LAYER, a SCOPE, a
+DENOMINATOR and (since w128) a BASELINE. Row 10 names none of the six and instead makes a
+COMPARATIVE VALUE CLAIM against the other nine rows — "the one angle that has ever PAID" —
+in the past tense, with no number attached to it.
+
+  (a) THE OPT-OUT WAS DESIGNED FOR CELLS WITH NOTHING TO PRICE, AND ROW 10 HAS SOMETHING
+      TO PRICE. #57 (`w128b_pricedguard`) C1 accepts the literal `NOT A PRICE` from anyone
+      who types it, and #57's own "what I am blind to" paragraph says so in terms. Row 8's
+      opt-out is honest: it is a foundation row and its cell states the answer is 0. Row
+      10's opt-out sits next to a claim that the angle PAID, which is a claim of a
+      NON-ZERO POSITIVE magnitude, unpriced.
+  (b) THE CLAIM IS THE JUSTIFICATION FOR SPENDING SLOTS. Consolidation has been handed
+      x14 times, more than any row except 2/3/4/5. "The one angle that has ever PAID" is
+      the sentence a run reads when deciding whether this slot is worth its budget, and it
+      is the only cell in the table that argues FOR its own angle without a number.
+
+REGISTERED QUESTION. What has consolidation actually paid, in e-6 of AUC, with a quantity,
+a layer, a scope, a denominator and a baseline — and is the number bigger or smaller than
+the prices the other nine rows publish as reasons NOT to act?
+
+ARMS. All three are arithmetic over artefacts already on disk plus one live API call; no
+model is fitted, no member is enrolled, no file is rebuilt.
+
+  A  "confirm the picks" (the click). Price = cost of the WANTED pair vs Kaggle's
+     auto-selection by public score. Source `w74a_clickprice.json` (tau=0 and the 95%
+     upper tau), freshness from `w74b_clickstaleguard.py` run LIVE this run. Second arm:
+     the MIS-CLICK costs in `w114a_misclick.json`, same estimator, same baseline.
+  B  "re-verify the pipeline" (the end-to-end reproduction). Price = the AUC difference
+     between the shipped deadline pick and its independent rebuild. Source
+     `w111b_baseguard` C3 (byte identity, shipped vs `w111_repro_out/`), run live.
+  C  "audit CV<->LB". Price = the w27 slot-3 `standardised`-flag correction, -27.43e-6 of
+     PREDICTED LB per post-w23 build. Source: the w26d/w25f coefficient and the corrected
+     P(beat) pair 0.367 -> 1.6e-4 recorded 2026-08-19.
+
+REGISTERED PREDICTION, with reasons, before the numbers exist:
+  1. THE THREE ARMS ARE IN THREE DIFFERENT CURRENCIES AND MUST NOT BE ADDED. A is realised
+     AUC on the private slice at k=2 files; B is an identity check whose price is 0 by
+     construction when it passes; C is in predicted-LB units and was never converted to
+     AUC. Reason: the same defect genus as the standing DO-NOT "add measured-alone group
+     deltas together".
+  2. ARM A's HEADLINE IS BELOW ROW 3's CATBOOST ENROLMENT PRICE. Predicted: the click's
+     +4.5228e-6 is SMALLER than +10.04e-6/member, i.e. smaller than a number the index
+     publishes as a reason NOT to build a member. Reason: both are on disk and 4.52 < 10.04;
+     registered anyway because the CONCLUSION (that "the one angle that has ever PAID" is
+     true on sign and on cost, not on magnitude) depends on it and could come out the other
+     way if the live pricer has drifted.
+  3. ARM B PRICES AT EXACTLY +0.0000e-6 AND THAT IS A PASS, NOT A NULL. Reason: w111
+     rebuilt both picks byte-for-byte; a reproduction that differs would be a defect, so
+     the only good value of this arm is zero.
+  4. THE REALISED TOTAL TODAY IS 0.0e-6 ON EVERY ARM. Reason: `check_selection.py` returns
+     rc=1, nothing is selected, so arm A's positive number is CONTINGENT on a human action
+     that has not been taken in 28 runs of asking; arm B changed no file by construction;
+     arm C changed a prediction, not a submission.
+  5. THE DECIDING READING. If arm A's live price comes back ABOVE the 50e-6 floor, or if
+     `w74b_clickstaleguard` reports the price VOID, then row 10's headline is a large
+     number rather than a small one and the journal must say so in those words, because
+     the argument for the click changes from "free and positive" to "large".
+
+WHAT WOULD FALSIFY THE DEFECT CLAIM RATHER THAN THE PRICE. If every published consolidation
+gain turns out to be unmeasurable in AUC — no arm has a number in e-6 at all — then "NOT A
+PRICE" is the correct cell after all and the defect is only that the sentence "has ever PAID"
+should be struck. Recorded here so the finding can lose.
+
+NO DECISION IS ATTACHED TO ANY ARM. WANTED does not move, the deadline pick does not move,
+nothing is enrolled, no drop list is edited, and no submission is sent (0 slots).
