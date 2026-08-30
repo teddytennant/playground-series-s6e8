@@ -1,3 +1,159 @@
+# (w126, 2026-08-30) — 🔴 ROW 6'S PRICE CELL PUTS A **k=4 TOP-LEVEL** NUMBER UNDER A
+# **k=104 MEMBER-LAYER** LABEL. THE TWO SEARCHES DIFFER IN SIGN AND BY ~2,000×, AND THE
+# POSITIVE ONE IS THE SHIPPED STACKER.
+
+## 🔴 THE DEFECT — A SEARCH PRICE IS A NUMBER, A QUANTITY, A LAYER, **AND A SCOPE**
+
+Row 6 reads, in full:  `a **SEARCH** price (re-weighting members already in) — **−1.07e-6**`
+
+The magnitude and the parenthetical are about **different searches**:
+
+- **−1.07e-6** is w36d's cross-arm number: honestly cross-fitted `all4` over **k=4 TRANSFORM
+  arms** against the zero-parameter equal-weight `h3`. That is clause 3 of the handed string.
+- *"re-weighting members already in"* is clause 1, and w108 recorded its status in terms —
+  ***"ALREADY THE SHIPPED ARCHITECTURE … the incumbent IS an OOF-fitted weighted blend"*** —
+  i.e. **104+ MEMBER weights**, fitted inside the frozen folds by `agent/stack.py`.
+
+⚠ **SEVENTH RUN, SAME GENUS.** w120 `priority` naming an input · w121 a prose cause beside a
+derived count · w122 `slot` printed for `tier` · w123 a family label on a residual group ·
+w124 a magnitude with no unit · w125 a magnitude with no layer · now a magnitude with a unit,
+a layer, and **the wrong scope**. 🎯 **#53 and #54 are both structurally blind to it**: the cell
+names `SEARCH` so #53's C1 passes, and #54's C1 is scoped to row 5 by construction. The
+predicate that closed six runs of this genus does not see the seventh — again.
+
+🎯 **AND IT IS NOT COSMETIC.** The workspace's own scaling rule for search cost is
+`optimism ≈ 0.55(k−1) e-6`. Read the parenthetical literally, take k=104, and it multiplies out
+to **+57e-6 — above the 50e-6 floor**, which would re-open the row. Read the number's real
+scope, k=4, and it is +1.65e-6. **The mislabelled word decides which side of the floor the row
+lands on.** Same shape as w125 §4's 1.4% pass-through, on a different constant, one run later.
+
+## ✅ ROW 6 RE-VERIFIED AT THE ARTEFACT LEVEL — `w126a_row6.py`, FAILURES 0, 14m15s
+
+`fit_w` copied from `w36d_wsearch.py` **verbatim** — same method, same options, same objective —
+and re-run on the OOF arrays in `submissions/`. **All eight published cells reproduce to 1e-9**,
+and so does the cross-arm number the row actually publishes:
+
+| arm | k | equal | fitted IN-SAMPLE | fitted **CROSS-FITTED** | optimism |
+|---|---|---|---|---|---|
+| h3 = hybrid+rankraw+rescale | 3 | 0.9701205753 | 0.9701208766 | 0.9701196117 | +1.2649e-6 |
+| all4 = h3 + logit | 4 | 0.9701181652 | 0.9701213202 | 0.9701195043 | +1.8159e-6 |
+
+    CROSS-ARM   fitted-all4 (k=4) − equal-h3 (k=3, zero parameters) = −1.0710e-6
+
+⟹ **The closure survives on its own evidence, exactly as w108 left it.** Nothing here re-opens
+clause 3. What was wrong was the label over the number, not the number.
+
+## ✅ THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED — `+2,343e-6` AT k=104
+
+Same rank representation as the arms above; `base104`, the pool w123/w124/w125 priced on; a
+**nested** k ladder (one seed-42 shuffle, first k taken, so every rung contains every smaller
+rung and the curve is not a subset-selection artefact); the **shipped combiner**
+(`LogisticRegression`, C=1.0) on the frozen SKF5 folds — at the member layer this is not an
+analogue of clause 1's search, it **is** that search.
+
+| k | equal | cross-fitted | **xfit − equal** | optimism | `0.55(k−1)` |
+|---|---|---|---|---|---|
+| 2 | 0.9680297244 | 0.9688582769 | **+828.55e-6** | +4.32e-6 | 0.55e-6 |
+| 4 | 0.9690129415 | 0.9691401572 | **+127.22e-6** | +0.97e-6 | 1.65e-6 |
+| 8 | 0.9688188393 | 0.9692686899 | **+449.85e-6** | +6.57e-6 | 3.85e-6 |
+| 16 | 0.9673656878 | 0.9692905813 | **+1,924.89e-6** | +9.71e-6 | 8.25e-6 |
+| 32 | 0.9668610420 | 0.9694105095 | **+2,549.47e-6** | −1.65e-6 | 17.05e-6 |
+| 64 | 0.9673748819 | 0.9695809566 | **+2,206.07e-6** | +35.90e-6 | 34.65e-6 |
+| 104 | 0.9673551564 | 0.9696984475 | **+2,343.29e-6** | +45.35e-6 | 56.65e-6 |
+
+⟹ **The honest search beats equal weights at 13/13 rungs**, by +127e-6 to +2,549e-6. Against
+row 6's published **−1.07e-6** that is the **opposite sign and ~2,000× the magnitude**.
+⛔ **This is not a door.** The positive number is the **INCUMBENT** — `agent/stack.py` already
+runs this search, cross-fitted, and has since w38. It is what the pack is worth, not what a
+candidate would add. **Nothing re-opens.** But a reader who takes row 6's parenthetical at face
+value is holding a number that describes the incumbent's price with the incumbent's sign flipped.
+
+## 🔻 THE `0.55(k−1)` RULE — RIGHT ORDER AT k=104, AND ITS INDIVIDUAL RUNGS ARE NOT USABLE
+
+    at k=104   rule predicts +56.6e-6   ·   measured +45.4e-6   ·   ratio 0.80
+
+✅ Within 20% at a **26× extrapolation** from a **two-point fit at k=3,4**, which is better than
+the 1.4% pass-through managed at 96× (w125 §4). ⚠ But the rule and the measurement fall on
+**opposite sides of the 50e-6 floor** at k=104, so the extrapolation decides the closure by
+itself and must be quoted with its range.
+
+🔻 **THE RUNG-BY-RUNG READINGS ARE NOT.** `meas/rule` over the ladder runs 7.85 · 4.35 · 0.59 ·
+2.35 · 1.71 · 1.28 · 1.18 · 2.21 · **−0.10** · 2.08 · 1.04 · 0.75 · 0.80. **Two of the twenty
+optimism readings in this run come back NEGATIVE**, and selection optimism cannot be: `insample`
+is a maximiser scored on the rows it maximised over. ⟹ **At single-e-6 magnitudes the
+`insample − xfit` instrument is noise-dominated, and no single rung of it is evidence.**
+🎯 **The `xfit − equal` column does not use the in-sample arm at all**, is sign-consistent 13/13,
+and is 36–1,541× larger. **That is the column this section is argued from.**
+
+## ✅ THE ONE MECHANISM I COULD HAVE ASSERTED, MEASURED INSTEAD — `w126b_budget.py`
+
+`fit_w` passes `maxiter=150` to Nelder-Mead, a budget that does not scale with k while the
+simplex has k vertices. The obvious story for the negative simplex optimism at k=8 is that 150
+iterations do not converge there, so `insample` is not a maximum. **Measured, in-sample only:**
+
+    k=4   nit=100 at every budget            converged      2400 finds +0.000e-6 more
+    k=8   nit=150 at 150, nit=310 at 600     BUDGET-LIMITED 2400 finds +0.348e-6 more
+
+⟹ **The budget IS limiting at k=8** — `nit` stops on the cap exactly — **and it explains 13% of
+the −2.70e-6.** The other 87% is not the budget and this run did not find what it is. ⚠ The
+standing hypothesis, recorded as a hypothesis: the cross-fitted arm fits **5×k** weights (one
+vector per fold) where the in-sample arm fits k, so it is not a strictly-poorer model and the
+difference is not bounded below by zero. **Not measured. Do not quote it as a finding.**
+
+⚠ **This is why the section above is argued from `xfit − equal`.** I set out to confirm a clean
+mechanism and confirmed a small one; the honest consequence was to move the argument onto the
+column that does not depend on it, not to keep the story.
+
+## 🔴 AND THE RESTATEMENT ROW 6 SENDS READERS TO STILL CARRIED THE **SUPERSEDED** RATE
+
+`BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` is row 6's second grep anchor. Until this
+run it read *"at a measured **+0.45e-6 of optimism per free parameter**"* — the divisor error
+**w108 corrected on 2026-08-28**, sitting uncorrected for 22 runs in the one-line restatement
+that the index points a reader at. The corrected figure is **+0.55e-6**.
+
+🎯 **This is the failure w108 itself named, on w108's own correction.** Its words: *"a compressed
+restatement that keeps the conclusion and drops the arm arguing against it is indistinguishable
+from the full account until you open the artefact."* w108 fixed the anchor so row 6 pointed at
+the evidence **as well as** the restatement, and did not go back and fix the restatement's
+number. ⟹ **Correcting a number in the document that derives it does not correct the document
+that repeats it.** #55's C3 now covers both phrasings of the rate, so this cannot go stale twice.
+
+## 🔻 AND THE STANDING-CHECKS HEADING HAD BEEN COUNTING 53 OVER A LIST OF 54
+
+Found while registering #55. `THE 53 STANDING CHECKS, FULL STEMS` sat above a table holding
+**54** stems, and `STEMS` in `w93a_suite.py` held 54 too. w125 added `w125b_layerguard` to the
+list and to the runner and not to the number over them. The suite's C2 compares the two **sets**
+and is silent about the count, so nothing could see it.
+
+🎯 **Same defect class as w117's handing counts, one document up: a hand-maintained number
+describing a machine-maintained list.** The suite now carries **C2b** — the heading's integer
+must equal `len(STEMS)` — and it is a hard `return 1`, not a note, because a stem count is what
+a run quotes when it says how much of this workspace is guarded.
+
+## ✅ STANDING CHECK #55 — `w126c_scopeguard`, 54 → 55 stems
+
+    .venv/bin/python experiments/w126c_scopeguard.py            # rc 0 = clean
+    .venv/bin/python experiments/w126c_scopeguard.py --control  # exits 0, having fired
+
+**C1 SCOPE.** Every ANGLE INDEX price cell carrying an `e-6`/`e-7` magnitude **and** the word
+`SEARCH` must name the search's scope: a layer word (`TOP-LEVEL`/`TRANSFORM` or `MEMBER`) and a
+`k=`. **C2** row 6 must publish **both** searches, so the index can never again hold a top-level
+number under a member-layer label. **C3** every site stating `0.55(k−1)` as a **property** must
+disclose the k it was fitted at — definition sites only, the same scoping #54's C3 uses. **C4**
+w36d's eight published cells and the cross-arm −1.0710e-6 must still be what `w126a_row6.json`
+measured from the arrays. **C5** `--control` runs C1/C2/C3 over the **frozen pre-fix text**,
+inlined as literals rather than read from HEAD, because a control anchored to HEAD stops being
+a control the moment the fix is committed (w115).
+
+⚠ **WHAT #55's C1 IS BLIND TO, WRITTEN DOWN BECAUSE #53's UNWRITTEN EXEMPTION IS WHERE #54's
+DEFECT LIVED AND #54's IS WHERE THIS ONE DID.** C1 fires only on cells that carry **both** a
+magnitude and the word `SEARCH`. Today that is one cell, row 6. A price cell whose quantity is
+`ENROLMENT` or `TUNING` can still be scoped wrongly — enrolling into a 104-member pool and
+enrolling into a 12-member one are different prices — and **C1 will not look at it.** Rows 3, 4
+and 5 all disclose `base104` in prose; **nothing checks that they keep doing so.**
+
+---
+
 # (w125, 2026-08-30) — 🔴 #53 GAVE THE `price` COLUMN ITS QUANTITIES. NONE OF THEM CARRIES A
 # **LAYER**. ROW 5'S `negative` IS A *MEMBER*-LAYER WORD IN A COLUMN OF *STACK*-LAYER NUMBERS —
 # AND AT THE STACK LAYER THE FEATURE-BLOCK LADDER DOES NOT EVEN SHARE ITS SIGN.
@@ -1867,6 +2023,7 @@ argues against it is indistinguishable from the full account until you open the 
    clear**, so understating it admits searches that should be refused. Details under
    `THE PRICE OF A TOP-LEVEL SEARCH`. ✅ w34's independent +2.54e-6 corroboration **survives and
    tightens**: predicted 2.25e-6 before, 2.44e-6 now.
+   ⚠ **FITTED AT k=3 AND k=4 ONLY** — two points, both from the same top-level transform blend. w126 carried it out to k=104 at the member layer on a different combiner: rule +56.6e-6, measured +45.4e-6, ratio 0.80 — right order at a 26× extrapolation, but the two land on **opposite sides of the 50e-6 floor**, and the rung-by-rung `meas/rule` runs 7.85 → −0.10 → 0.80. **Quote the range with the rule.**
 2. **The stacking note's "1,540-point simplex" is the pre-bugfix grid** — cut range one position
    short, every row summing to 0.95, so **neither baseline it was compared against was on it**.
    1,771 is the fixed grid. Annotated in place; the scores were valid, the search space was not.
@@ -2559,7 +2716,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 3 | *CatBoost: it handles categoricals better* | **×15, from 08-10 → w114 08-29 → w123 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 on the group delta, sign-consistent over 3 splits), which independently corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×15, from 08-10 → w115 08-29 → w124 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** · XGBoost **+7.38e-6** · LightGBM **+4.04e-6**. ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family* | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×16, from 08-10 → w116 08-29 → w125 08-30 — the most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
-| 6 | *blending: rank-average or weight the models by OOF* | ×11, 36 members apart → w63 → w108 08-28 → w117 08-29 · **artefacts verified** (count from `w117a_handcount`) | a **SEARCH** price (re-weighting members already in) — **−1.07e-6** | `THE PRICE OF A TOP-LEVEL SEARCH` (the evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) |
+| 6 | *blending: rank-average or weight the models by OOF* | **×12, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
 | 7 | *seed and fold diversity, averaged* | ×12, from 08-11 → w64 → w109 08-28 → w118 08-29 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · **ENROLMENT** +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | 0, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
 | 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×13, from 08-11 → w119 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
@@ -3065,7 +3222,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 53 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 55 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -3078,7 +3235,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
-    w122a_slotguard   w123b_groupguard  w124b_priceunitguard  w125b_layerguard
+    w122a_slotguard   w123b_groupguard  w124b_priceunitguard  w125b_layerguard  w126c_scopeguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -4946,7 +5103,7 @@ Closed **twice, 36 members apart**: `experiments/transform_weights.py` (2026-08-
 simplex on the 159av pack) — the search *"does not beat `h3`, it rediscovers `h3`"*; w36d
 (2026-08-20, Nelder-Mead at 195 members, weights fitted INSIDE the frozen folds) — equal-weight
 h3 **0.9701205753** vs honestly cross-fitted **0.9701196117**, the fitted weights **0.96e-6
-WORSE**, at a measured **+0.45e-6 of optimism per free parameter**. Hill-climbing is closed
+WORSE**, at a measured **+0.55e-6 of optimism per free parameter** ⚠ (**the rate w108 corrected on 2026-08-28 — the divisor is k−1, not k. This restatement carried the superseded `+0.45e-6` for 22 runs, under the very anchor row 6 sends readers to. FITTED AT k=3 AND k=4 ONLY; w126 measured +45.4e-6 at k=104 against the rule's +56.6e-6**). Hill-climbing is closed
 separately with its own mechanism (a climber can only ADD; the stack needs negative coefficients
 and loses −0.00104 by the time the last one is gone). Sixth angle closed by measurement, after
 the original dataset (×4), LightGBM tuning (×3), CatBoost (w61) and feature engineering (w62).
@@ -15435,6 +15592,8 @@ search would have claimed.
 baseline by more than ~0.45k e-6 before it is worth anything, and the in-sample number it
 prints will overstate it by exactly that much.
 
+⚠ **FITTED AT k=3 AND k=4 ONLY** — two points, both from the same top-level transform blend. w126 carried it out to k=104 at the member layer on a different combiner: rule +56.6e-6, measured +45.4e-6, ratio 0.80 — right order at a 26× extrapolation, but the two land on **opposite sides of the 50e-6 floor**, and the rung-by-rung `meas/rule` runs 7.85 → −0.10 → 0.80. **Quote the range with the rule.**
+
 ### ⚠ w108 CORRECTION — THE DIVISOR IS k−1, NOT k, AND THE BAR ABOVE IS THEREFORE TOO EASY
 
 A weight vector constrained to the simplex has **k−1** free parameters, not k. Dividing the two
@@ -15452,6 +15611,8 @@ which is why this went unnoticed — they cross at k≈3.9, exactly where both m
 separate as k grows: at k=10 the written rule asks a search to clear 4.5e-6 and the measured slope
 asks 5.0e-6. ⚠ **The error is in the unsafe direction: the bar is used to REFUSE candidate
 searches, so understating it admits searches that should be refused.**
+
+⚠ **FITTED AT k=3 AND k=4 ONLY** — two points, both from the same top-level transform blend. w126 carried it out to k=104 at the member layer on a different combiner: rule +56.6e-6, measured +45.4e-6, ratio 0.80 — right order at a 26× extrapolation, but the two land on **opposite sides of the 50e-6 floor**, and the rung-by-rung `meas/rule` runs 7.85 → −0.10 → 0.80. **Quote the range with the rule.**
 
 ✅ **AND THE CORROBORATION THE PARAGRAPH ABOVE RESTS ON SURVIVES — IT IMPROVES.** w34's
 scheme-selection optimism for the 5-arm correction is **+2.54e-6** measured. The written rule

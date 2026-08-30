@@ -35307,3 +35307,241 @@ margin +54, −22/day.** ⛔ Do not quote −11/day.
    also survive every numeric check, and the guard that caught the last one will not see it.**
    #53 exempted bare `negative` cells by design and that exemption is exactly where #54's defect
    lived. **When you write an exemption, write down what it is now blind to.**
+
+---
+
+# w126 — 2026-08-30, slot 5 of 10 · ANGLE: blending — rank-average or weight the tuned models by
+# OOF, search blend weights on OOF and never on the LB · **AT THE CAP, NOTHING SENT**
+# 🔴 ROW 6's PRICE IS A k=4 TOP-LEVEL NUMBER UNDER A k=104 MEMBER-LAYER LABEL
+
+**⛔ NO SUBMISSION. Ten already landed today at 12:36–12:37Z (w122's queue drain), confirmed from
+`kaggle competitions submissions -v` and from `w26g_send.py --n 10`: *"10 already sent on
+2026-08-30 (UTC); 0 of 10 slots left today"*.** The cap is 10/day and it is spent. Measurement and
+documentation only, which is what the brief asks for at the cap.
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 6 — TWELFTH HANDING
+
+`w117a_handcount` run, not counted by hand: **×11 → ×12**. Closed since w63 (2026-08-23), verified
+at the artefact level once already by w108. Nothing re-opens.
+
+## 2. 🔴 THE DEFECT — A SEARCH PRICE IS A NUMBER, A QUANTITY, A LAYER, **AND A SCOPE**
+
+Row 6 read, in full: `a **SEARCH** price (re-weighting members already in) — **−1.07e-6**`
+
+The magnitude and the parenthetical describe **different searches**:
+
+- **−1.07e-6** is w36d's cross-arm number over **k=4 TRANSFORM arms** — clause 3 of the handed
+  string.
+- *"re-weighting members already in"* is clause 1, which **w108 had already recorded** as
+  *"ALREADY THE SHIPPED ARCHITECTURE … the incumbent IS an OOF-fitted weighted blend"* — 104+
+  **MEMBER** weights fitted inside the frozen folds by `agent/stack.py`.
+
+⚠ **Seventh run, same genus** — w120 `priority` / w121 a prose cause / w122 `slot` for `tier` /
+w123 a family label on a residual / w124 no unit / w125 no layer / now no scope. 🎯 **#53 and #54
+are both structurally blind to it**: the cell says `SEARCH`, so #53's C1 passes, and #54's C1 is
+scoped to row 5 by construction.
+
+🎯 **AND IT DECIDES A CLOSURE.** The search-cost rule is `optimism ≈ 0.55(k−1) e-6`. Read the
+parenthetical literally at k=104 → **+57e-6, ABOVE the 50e-6 floor**. Read the number's real
+scope, k=4 → +1.65e-6. **The mislabelled word picks the side of the floor the row lands on.**
+
+## 3. ✅ THE VERIFICATION — `w126a_row6.py`, 14m05s under `systemd-run --user`, FAILURES 0
+
+`fit_w` copied **verbatim** from `w36d_wsearch.py` and re-run on the OOF arrays in
+`submissions/`. **All eight published cells reproduce to 1e-9**, and so does the cross-arm number
+row 6 actually publishes: **fitted-all4 (k=4) − equal-h3 (k=3) = −1.0710e-6**.
+⟹ **The closure survives on its own evidence, exactly as w108 left it.** What was wrong was the
+label over the number, not the number.
+
+## 4. ✅ THE SEARCH THE PARENTHETICAL NAMES, PRICED — **+2,343e-6 AT k=104**
+
+Same rank representation as the arms above · `base104`, the pool w123/w124/w125 priced on · a
+**nested** k ladder (one seed-42 shuffle, first k taken, so every rung contains every smaller
+rung and the curve is not a subset-selection artefact) · the **shipped combiner**
+(`LogisticRegression`, C=1.0) on the frozen SKF5 folds.
+
+| k | equal | cross-fitted | **xfit − equal** | optimism | `0.55(k−1)` |
+|---|---|---|---|---|---|
+| 4 | 0.9690129415 | 0.9691401572 | **+127.22e-6** | +0.97e-6 | 1.65e-6 |
+| 16 | 0.9673656878 | 0.9692905813 | **+1,924.89e-6** | +9.71e-6 | 8.25e-6 |
+| 32 | 0.9668610420 | 0.9694105095 | **+2,549.47e-6** | −1.65e-6 | 17.05e-6 |
+| 104 | 0.9673551564 | 0.9696984475 | **+2,343.29e-6** | +45.35e-6 | 56.65e-6 |
+
+⟹ **13/13 rungs positive**, +127e-6 to +2,549e-6. Against row 6's published **−1.07e-6** that is
+the **opposite sign and ~2,000× the magnitude**. ⛔ **NOT A DOOR** — the positive number is the
+**INCUMBENT**; `agent/stack.py` has run exactly this search, cross-fitted, since w38. It is what
+the pack is worth, not what a candidate would add. **Nothing re-opens.**
+
+## 5. 🔻 THE `0.55(k−1)` RULE HOLDS AT 26× — AND ITS INDIVIDUAL RUNGS ARE NOT USABLE
+
+    at k=104   rule +56.6e-6   ·   measured +45.4e-6   ·   ratio 0.80
+
+✅ Within 20% at a **26× extrapolation from a two-point fit at k=3,4** — much better than the
+1.4% pass-through managed at 96× (w125 §4). ⚠ But rule and measurement fall on **opposite sides
+of the 50e-6 floor**, so the extrapolation decides the closure by itself and must be quoted with
+its range. All four definition sites now carry it; #55's C3 keeps them that way.
+
+🔻 **`meas/rule` runs 7.85 · 4.35 · 0.59 · 2.35 · 1.71 · 1.28 · 1.18 · 2.21 · −0.10 · 2.08 ·
+1.04 · 0.75 · 0.80.** **Two of the twenty optimism readings this run come back NEGATIVE**, and
+selection optimism cannot be — `insample` is a maximiser scored on the rows it maximised over.
+⟹ **At single-e-6 magnitudes the `insample − xfit` instrument is noise-dominated and no single
+rung of it is evidence.** 🎯 **`xfit − equal` does not use the in-sample arm at all**, is
+sign-consistent 13/13 and is 36–1,541× larger. **§4 is argued from that column.**
+
+## 6. ✅ THE ONE MECHANISM I COULD HAVE ASSERTED, MEASURED INSTEAD — `w126b_budget.py`
+
+`fit_w` passes `maxiter=150` to Nelder-Mead, a budget that does not scale with k. The obvious
+story for the negative simplex optimism at k=8 is non-convergence. **Measured, in-sample only:**
+
+    k=4   nit=100 at every budget          converged        maxiter 2400 finds +0.000e-6 more
+    k=8   nit=150 at 150, nit=310 at 600   BUDGET-LIMITED   maxiter 2400 finds +0.348e-6 more
+
+⟹ **The budget IS limiting at k=8** — `nit` stops on the cap exactly — **and it explains 13% of
+the −2.70e-6.** The other 87% is not the budget and this run did not find what it is. ⚠ The
+standing hypothesis, recorded **as a hypothesis**: the cross-fitted arm fits **5×k** weights (one
+per fold) where the in-sample arm fits k, so it is not a strictly-poorer model and the difference
+is not bounded below by zero. **Not measured. Do not quote it as a finding.**
+
+⚠ I set out to confirm a clean mechanism and confirmed a small one. **The honest consequence was
+to move §4's argument onto the column that does not depend on it, not to keep the story.**
+
+## 7. 🔴 THE RESTATEMENT ROW 6 SENDS READERS TO CARRIED THE **SUPERSEDED** RATE FOR 22 RUNS
+
+`BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` is row 6's second grep anchor. It read
+*"at a measured **+0.45e-6 of optimism per free parameter**"* — the **divisor error w108
+corrected on 2026-08-28**, uncorrected in the one-line restatement the index points readers at.
+Corrected to **+0.55e-6**.
+
+🎯 **This is the failure w108 itself named, on w108's own correction:** *"a compressed restatement
+that keeps the conclusion and drops the arm arguing against it is indistinguishable from the full
+account until you open the artefact."* w108 fixed the anchor and not the restatement's number.
+⟹ **Correcting a number in the document that DERIVES it does not correct the document that
+REPEATS it.**
+
+## 8. 🔻 AND THE STANDING-CHECKS HEADING HAD BEEN COUNTING 53 OVER A LIST OF 54
+
+Found while registering #55. `THE 53 STANDING CHECKS, FULL STEMS` sat above a table of **54**
+stems; `STEMS` in `w93a_suite.py` held 54 too. w125 added `w125b_layerguard` to the list and to
+the runner and not to the number over them. **The suite's C2 compares the two SETS and is silent
+about the count.** Same defect class as w117's handing counts, one document up: a hand-maintained
+number describing a machine-maintained list. The suite now carries **C2b** (`heading integer ==
+len(STEMS)`), a hard `return 1`.
+
+## 9. ✅ STANDING CHECK #55 — `w126c_scopeguard`, 54 → 55 stems
+
+C1 every priced `SEARCH` cell names a LAYER word and a `k=` (vacuous if no such cell) · C2 row 6
+publishes **both** searches and the word `INCUMBENT` · C3 every site stating the search-cost rate
+as a property discloses the k it was fitted at, **both phrasings**, quotations excluded · C4
+w36d's eight cells and the cross-arm reproduce from `w126a_row6.json`, reporting **INERT** if the
+artefact is missing · C5 `--control` over frozen pre-fix text.
+
+    (shipped)   FAILURES: 0   rc=0
+    (--control) C1 FIRES · C2 FIRES · C3 FIRES on 4 sites incl. the w63 restatement · shipped silent on all three
+
+⚠ **The control caught two of my own mistakes.** (1) C3 first fired on **my own block**, which
+*quotes* the superseded rate as history — a quotation issues no licence, so `*"…"*` spans are now
+skipped, and the exemption is written down along with what it is blind to. (2) The control
+originally blanket-stripped every line carrying the range token, which **deleted the w63 line
+entirely** and silently lost the control's most important site. It now restores that line from a
+frozen literal. **A control that removes the evidence it is meant to detect passes for the wrong
+reason.**
+
+## 10. ✅ THE SUITE — **`TOTAL 534s`, 53/55 GREEN, BOTH REDS THE DOCUMENTED POST-SEND PAIR**
+
+    [55/55] w126c_scopeguard  rc=0   ✅ CLEAN — every SEARCH price names which search, at which layer, over how many parameters
+    TOTAL 534s   53/55 green
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+    ⚠ every failure is the post-send queue-freshness guard doing its job.
+
+Ten files went out at 12:36–12:37Z, so the queue on disk is for a day already sent, and the runner
+said so itself. This is the **both-red** pattern, which IS post-send; RESEARCH's warning is about
+**w85c red while w54a is GREEN**, which is not this. Both logs read (`w54a`: *"Refusing. Rebuild
+first"*; `w85c` G4: *"w54a rejects the LIVE queue"*) and deleted, per the standing rule.
+
+⚠ The launch command was **copied out of RESEARCH.md** (`grep FULLPATH=`), not out of scrollback.
+w125 §9 lost a whole suite pass to the other choice. First pass came back clean at 53/55.
+
+## 11. ⛔ THE CLICK — TWENTY-FIFTH RUN ASKING. **TOMORROW IS THE DEADLINE.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live this run, real rc from the process, **rc=1**:
+`*** NOTHING IS SELECTED ***`. `55656399 → w36_ad199stdcorr.csv` (public 0.97118) ·
+`55588167 → w23_ad187stdcorr.csv` (public 0.97116). Auto-select takes the 0.97119 tier —
+`w36_ad199stdcorr_ens4` + `w38_ad202stdcorr_ens4` — and both WANTED files print **UNREACHABLE
+without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the mis-click costs
+**+35.17e-6** or **+81.92e-6** and remains the bigger hazard by an order of magnitude.
+⛔ Do not re-price it. **The click stays human.**
+
+`PushNotification` called once, as the standing rule says. Return string, verbatim and identical
+to w115/w116: *"Mobile push not sent (Remote Control inactive)."* **0 for 3.** It did not reach a
+phone. Do not record it as if it did.
+
+## 12. THE BOARD — NOT RE-READ
+
+One board read per day (w120 §7) and w122 spent today's at 12:45Z: **rank 278 / 3,321, cut 332,
+margin +54, −22/day.** ⛔ Do not quote −11/day.
+
+## 13. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122 at 12:36–12:37Z, confirmed from the API.
+- **Row 6 now publishes both of its searches**: TOP-LEVEL k=4 **−1.07e-6** and MEMBER k=104
+  **+2,343e-6**, the latter measured this run over 13 nested rungs on the frozen folds, with
+  w36d's eight published cells reproduced from the OOF arrays to **1e-9**.
+- **The `0.55(k−1)` rule has a range for the first time**, at all four definition sites, and a
+  reading 26× past it (0.80 of prediction) — better than the 1.4% constant managed at 96×.
+- **The w63 restatement's rate corrected**, +0.45e-6 → +0.55e-6, stale for 22 runs under the
+  anchor row 6 points at.
+- **The standing-checks heading corrected**, 53 → 55, and `C2b` added to the suite so a
+  hand-maintained count can never again drift from the list under it.
+- **Standing check #55**, 54 → 55 stems, with a `--control` that caught two of its own faults.
+- ⛔ **Still nothing selected. Twenty-fifth run asking, and tomorrow is the last day.**
+
+## 14. NEXT RUN — READ THIS ORDER. **IT IS THE FINAL DAY (deadline 2026-08-31 23:59).**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. ⚠ **RUN `w48e_order.py --day 2026-08-31 --write` FIRST**, then `--go`. Quote `w26d`'s
+   **bound**, never its point estimate. **Send early: a slot unsent at 23:59 is gone.** The queue
+   on disk is for 08-30 and already sent; it must be rebuilt before anything goes out, and the
+   two suite reds clear when it is.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w126 set it to `w126`/row 6.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (grep `FULLPATH=`). Then read the `FAILURES:` line and **which stems are on it**;
+   more than the documented pair red ⟹ **read the first failure log before triaging anything**.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §4 above is not an exception — the
+   +2,343e-6 is the incumbent's own price, not a candidate's.
+6. ⛔ **DO-NOT, carried forward from w92–w125 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct" ·
+     read **5.9e-6** as the CatBoost price (it is a residual group's average; CatBoost alone is
+     **+10.04e-6**) · treat +10.04e-6 or +7.38e-6 as a reason to build a CatBoost or XGBoost
+     member · add measured-alone group deltas together · divide by filenames rather than arrays ·
+     multiply a member-level number by **1.4%** far from the **+138e-6** it was fitted at · read
+     row 5's `negative` as a stack-layer price · launch the suite with a hand-typed PATH.
+   • 🆕 **DO NOT** read row 6's **−1.07e-6** as the price of re-weighting members. It is a **k=4
+     TRANSFORM-arm** number. The member-layer search is **+2,343e-6 at k=104** and it is the
+     **INCUMBENT** — `agent/stack.py` already runs it. Neither reading re-opens the angle (§4).
+   • 🆕 **DO NOT** quote a single `insample − xfit` optimism reading as evidence at single-e-6
+     magnitudes. Two of twenty came back negative this run, which the quantity cannot be (§5).
+   • 🆕 **DO NOT** build a `--control` that strips whole lines to synthesise a "before". It
+     deleted the site the control existed to catch, and passed (§9).
+7. ⚠ **THE LESSON, NOW SEVEN RUNS OLD, AND IT PREDICTED ITSELF.** w125 wrote: *"the next one will
+   also be a word, it will also survive every numeric check, and the guard that caught the last
+   one will not see it."* It was a word (`members`), it survived #53 and #54, and both were blind
+   for the reason w125 named: **#53 exempted bare cells, #54 scoped itself to row 5.** 🎯 **The
+   prediction is now four-for-four. Write down what your exemption is blind to** — #55's docstring
+   does: it only looks at cells carrying both a magnitude and `SEARCH`, so a wrongly-scoped
+   `ENROLMENT` price walks straight past it, and rows 3/4/5's `base104` disclosures are prose that
+   nothing checks.

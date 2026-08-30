@@ -54,6 +54,7 @@ STEMS = [
     "w123b_groupguard",
     "w124b_priceunitguard",
     "w125b_layerguard",
+    "w126c_scopeguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).
@@ -81,9 +82,10 @@ def research_stems():
     if k >= 0:                                  # drop the index block from the search corpus
         e = txt.find("\n# ", txt.find("\n|", k))
         txt = txt[:k] + txt[(len(txt) if e < 0 else e):]
-    m = re.search(r"^## THE \d+ STANDING CHECKS, FULL STEMS", txt, re.M)
+    m = re.search(r"^## THE (\d+) STANDING CHECKS, FULL STEMS", txt, re.M)
     if m is None:
         return None
+    claimed = int(m.group(1))
     i = m.start()
     block = txt[i:txt.find("\n⚠", i)]
     # ONLY the 4-space-indented table rows. The section also carries prose that names
@@ -91,7 +93,7 @@ def research_stems():
     # standing check -- w91b's own bug, in a different file: a MENTION is not a USE.
     rows = [l for l in block.splitlines() if l.startswith("    ") and l.strip()
             and not l.strip().startswith(("#", "`", ".venv", "*", "-"))]
-    return set(re.findall(r"\bw\d+[a-z]_[a-z0-9]+\b", "\n".join(rows)))
+    return set(re.findall(r"\bw\d+[a-z]_[a-z0-9]+\b", "\n".join(rows))), claimed
 
 
 def main() -> int:
@@ -106,14 +108,23 @@ def main() -> int:
     print(f"w93a suite — {len(stems)} checks, {TIMEOUT}s each, python {PY}")
 
     # C2 -- the two copies of the list agree.
-    pub = research_stems()
-    if pub is None:
+    got = research_stems()
+    if got is None:
         print("⛔ C2 could not locate the stem block in RESEARCH.md")
         return 1
+    pub, claimed = got
     if pub != set(STEMS):
         print(f"⛔ C2 DRIFT  only-here {sorted(set(STEMS) - pub)}  only-RESEARCH {sorted(pub - set(STEMS))}")
         return 1
-    print(f"C2 list matches RESEARCH.md ({len(pub)} stems)  PASS")
+    # C2b -- the HEADING's count too. It is hand-maintained prose and nothing checked it: on
+    # 2026-08-30 the list held 54 stems under a heading reading 53, because w125 added its
+    # stem to the table and not to the number above it. A published count that disagrees with
+    # the published list is the same defect class as w117's handing counts, one document up.
+    if claimed != len(STEMS):
+        print(f"⛔ C2b COUNT DRIFT  the heading claims {claimed} standing checks; the list and "
+              f"STEMS both hold {len(STEMS)}. Fix the number in the heading.")
+        return 1
+    print(f"C2 list matches RESEARCH.md ({len(pub)} stems, heading says {claimed})  PASS")
 
     # C1 -- resolve every stem before running anything, so a typo is never a FAIL line.
     missing = [s for s in stems if not os.path.exists(os.path.join(HERE, s + ".py"))]
