@@ -1,0 +1,52 @@
+w127 PRE-REGISTRATION — 2026-08-30, written BEFORE any number for this run existed.
+ANGLE (row 7): "Seed and fold diversity: same models across multiple seeds and fold splits,
+averaged." Row 7 is CLOSED. This registers a MEASUREMENT of the row's own price cell, not a
+candidate, and no submission can follow from it (0 of 10 slots left today).
+
+THE CLAIM UNDER TEST. The ANGLE INDEX row 7 price cell reads:
+
+    structural null (stacker) · **ENROLMENT** +2e-6 (member)
+
+Rows 3 and 4 publish ENROLMENT prices as PER-MEMBER RATES ("5.9e-6/member", "+10.04e-6/member",
+"+7.38e-6/member"). Rows 5 and 6 put a LAYER word in the parenthetical ("MEMBER layer",
+"TOP-LEVEL layer, k=4"). Row 7's "(member)" is in that position and is neither: the +2e-6 is a
+STACK-layer total for ONE member's seed average (w110-era: +138e-6 solo -> +2e-6 stack,
+`xgb_latcat`), i.e. k=1.
+
+REGISTERED QUESTION. What is the ENROLMENT price of seed diversity, measured in rows 3/4's
+units, with rows 3/4's instrument, on rows 3/4's pool?
+
+ARMS (paired 50/50 StratifiedShuffleSplit, random_state 0,1,2 -- the same three splits w123 and
+w124 used; LogisticRegression C=1.0, max_iter=3000; transform `hybrid`; base104 pool from
+`load_members(..., drop=DEFAULT_DROP)`; fit on half A, score AUC on half B):
+
+  P  pack WITHOUT the four xgb_latcat arrays          (the reference)
+  Q  P + `xgb_latcat`                                 (one seed, the base member)
+  R  Q + `xgb_latcat_s17` + `xgb_latcat_s23`          (seed diversity ADDED as members)
+  S  Q + `xgb_latcat_avg3`                            (the seed AVERAGE added instead)
+  T  R + `xgb_latcat_avg3`                            (the SHIPPED configuration, arm A)
+
+  ENROLMENT rate of seed diversity as added members  = (R - Q) / 2
+  ENROLMENT rate of the seed AVERAGE                 = (S - Q) / 1
+  ENROLMENT rate of the average ON TOP of the seeds  = (T - R) / 1
+
+REGISTERED PREDICTION, with reasons, before the numbers exist:
+  1. (T - R) is a STRUCTURAL null, not merely a small one. `xgb_latcat_avg3` is EXACTLY
+     mean(xgb_latcat, _s17, _s23) (`w109a_dupscan` relation 2, max|diff| exactly 0.0), so its
+     column lies in the span of three columns arm R already holds. A linear combiner cannot
+     gain from a column in its own span; anything nonzero here is refit/split noise.
+     Registered interval: |T - R| < 5e-6.
+  2. (R - Q)/2 and (S - Q) are NOT structurally constrained and are the honest ENROLMENT
+     numbers. Registered interval for both: [-5e-6, +15e-6] per member, i.e. under the
+     workspace's 50e-6 floor. Reason: w123/w124 measured every foreign GBDT family in this
+     pool at +4.04 .. +10.04e-6/member, and seed twins of a member already held are strictly
+     MORE redundant than a foreign pipeline, so this should sit at or below that band.
+  3. THE DECIDING READING. If (R - Q)/2 exceeds +50e-6/member the row re-opens and I must say
+     so. I do not expect it to.
+
+WHAT WOULD FALSIFY THE DEFECT CLAIM RATHER THAN THE PRICE. If (S - Q) comes back at +2e-6
++/- noise AND (R - Q)/2 comes back at +2e-6/member, then "+2e-6 (member)" is a per-member rate
+after all and the cell is merely terse, not mislabelled. Recorded here so the finding can lose.
+
+NO DECISION IS ATTACHED TO ANY ARM. Row 7 stays closed unless arm 3 above fires. Nothing is
+rebuilt, no drop list is edited, the deadline pick does not move.
