@@ -1,0 +1,103 @@
+w130 PRE-REGISTRATION — 2026-08-30, written BEFORE any number for this run existed.
+ANGLE (row 8): "Foundation: confirm the metric, build the fixed-fold CV harness, and get one
+honest GBDT baseline scored. Everything later depends on this being right." Row 8 is the
+foundation row. This registers a MEASUREMENT of the row's own price cell, not a candidate,
+and no submission can follow from it (0 of 10 slots left today, confirmed live from
+`w26g_send.py --n 10`: "10 already sent on 2026-08-30 (UTC); 0 of 10 slots left today").
+
+THE CLAIM UNDER TEST. ANGLE INDEX row 8's price cell reads, in full:
+
+    **NOT A PRICE** — a foundation row, and the answer is **0**, and it holds on its own
+    artefacts: the metric is a table row, the folds are frozen since w38 and verified
+    against four public packs by #33, and the GBDT baselines are on disk
+
+w129 read this cell as the honest counterexample to row 10's opt-out — "row 8 passes on the
+`0`" — and five standing guards (#53, #55, #56, #57, #58) are green on it. That is the reason
+to look at it, not the reason to skip it: w129's own closing lesson is that after writing a
+cell that turns a guard green you delete the part you think earned the green and check that
+it goes red. Here the part that earns the green is one character.
+
+  (a) THE `0` HAS NO BASELINE. Rows 3, 4, 5, 7, 9 and 10 each name the thing their price is
+      measured AGAINST — base104 without the member, the uncorrected stack, the shipped
+      file's own bytes, Kaggle's auto-selection. Row 8 names none. A price of 0 is only
+      readable against a baseline, and the one row 8 is silently using is "the foundation
+      ALREADY EXISTS": it was built once, at w38, and re-doing it now buys nothing. That is
+      a REPEAT price, not the value of the manoeuvre.
+  (b) THE READING IT INVITES IS THE OPPOSITE OF THE TRUTH. The price column is what a run
+      reads when deciding where to spend a slot. A `0` in the foundation row, sitting in a
+      column where +10.04e-6 is published as a reason NOT to build, says the foundation is
+      the cheapest thing in the table. If the manoeuvre is priced against its own absence
+      the number is the LARGEST in the table and every other row is competing for the
+      remainder.
+  (c) THE GUARD FAMILY CANNOT SEE THIS. #57's C1 is satisfied by "a magnitude OR the bare
+      `0`", so the literal `0` buys the green outright, and all five guards read only the
+      price column's MAGNITUDE and a finite VALUE vocabulary. None of them asks what the
+      number is measured against. w129 predicted the next defect in this genus would be a
+      value claim in a vocabulary it had not enumerated, or in the `closed` column. This is
+      neither: it is a magnitude that satisfies every check and denotes nothing.
+
+REGISTERED QUESTION. What is the foundation worth, in e-6 of AUC, priced against its own
+absence — one arm per clause of the row's own elaboration ("confirm the metric, build the
+fixed-fold CV harness, score one honest GBDT baseline") — and how does that compare with the
+prices the other nine rows publish?
+
+ARMS. All three are arithmetic over OOF arrays and submission files already on disk. No
+model is fitted, no member is enrolled, no file is rebuilt, nothing is submitted.
+
+  A  "confirm the metric". Price = what the metric decision is worth on the FINAL FILE.
+     Baseline: the same shipped predictions under the failure the brief names — treating the
+     target as a hard class and thresholding, i.e. what a run that had NOT confirmed the
+     metric would ship. Measured on `submissions/oof_w36_ad199stdcorr.npy` against the train
+     labels, over a sweep of cut points including the base rate and the AUC-optimal cut.
+     FINAL-FILE layer, k=1, a per-competition TOTAL and not a rate.
+  B  "build the fixed-fold CV harness". Price = the measurement noise the fixed shared folds
+     remove from a comparison. Baseline: an un-paired harness that evaluates two candidates
+     on independently drawn row sets, versus the shipped paired one that evaluates both on
+     the identical frozen SKF5 assignment. Measured by bootstrap over rows on a real pair of
+     members whose true difference the index already publishes (row 2's LightGBM
+     tuned-vs-fixed). Reported as the sd of the measured delta in each regime, and their
+     ratio. CV-ESTIMATE layer, per comparison. Second sub-arm: the sd of a fold-MEAN AUC
+     across re-drawn stratified 5-way partitions of the same OOF vector, which is the noise
+     a harness that re-draws its folds carries into every number it prints.
+  C  "score one honest GBDT baseline". Price = the AUC the first honest GBDT puts on the
+     board, against chance. Baseline: a constant prediction, which is what `sample_submission`
+     ships and what AUC scores at 0.5. Measured from `oof/oof_lgbm_fixed_lat_frac.npy`.
+     Companion number, same layer and same units so the two are comparable: the shipped
+     stack's OOF AUC minus the best single member's, which is everything the other nine rows
+     have bought on top of the foundation.
+
+REGISTERED PREDICTION, with reasons, before the numbers exist:
+  1. ARM A IS ABOVE 50,000e-6 — a THOUSAND times the 50e-6 floor this table reads every
+     other price against. Reason: AUC of a hard 0/1 vector collapses to the single
+     (FPR,TPR) corner that one cut produces, discarding all within-class ordering; with a
+     0.709 base rate and a score this well separated the corner cannot sit near 0.9701.
+     Falsifier: if any cut point scores within 50e-6 of the continuous file, the metric
+     clause is worth nothing on the final file and prediction 1 is dead.
+  2. ARM B's PAIRED sd IS AT LEAST 2x SMALLER than the unpaired sd of the same delta.
+     Reason: the two members correlate ~0.99, so row-level noise is common-mode and cancels
+     in a paired difference; that cancellation IS what "same folds across every experiment"
+     buys. Falsifier: a ratio under 2 means the fixed-fold discipline is worth little and
+     the honest cell says so.
+  3. ARM C IS ABOVE 400,000e-6 against chance, and the stack-minus-best-member companion is
+     UNDER 10,000e-6, so the foundation holds more than 97% of the total AUC above chance
+     and the other nine rows share less than 3%. Reason: `oof_lgbm_fixed_lat_frac` is a
+     0.96-something model and the shipped stack is 0.9701; the gap between them is the whole
+     of the workspace's modelling history.
+  4. THEREFORE ROW 8's `0` IS A REPEAT PRICE, NOT THE ROW'S VALUE, and the corrected cell
+     must publish BOTH: 0 against "the foundation already exists", and the arm A/B/C numbers
+     against "it does not". Both are true, they differ by orders of magnitude, and only one
+     of them is currently printed.
+  5. THE THREE ARMS ARE IN THREE CURRENCIES AND MUST NOT BE ADDED. A is final-file AUC at
+     k=1, B is an sd of a measurement and not a gain at all, C is OOF AUC against chance.
+     Same defect genus as the standing DO-NOT against adding measured-alone group deltas,
+     and as w129's three-currency arms in row 10.
+
+WHAT WOULD FALSIFY THE DEFECT CLAIM RATHER THAN THE PRICES. If arms A, B and C all come back
+under the 50e-6 floor — the metric decision costs nothing on the final file, the fixed folds
+remove no noise, and one honest GBDT is near chance — then the foundation really is worth 0
+on every axis, the cell is right as written, and the only thing wrong with it is that it
+never said against what. Recorded here so the finding can lose.
+
+NO DECISION IS ATTACHED TO ANY ARM. WANTED does not move. The deadline picks do not move.
+Nothing is enrolled, no drop list is edited, no fold assignment is touched (touching it would
+invalidate every oof_*.npy on disk), and no submission is sent — there are 0 slots left today.

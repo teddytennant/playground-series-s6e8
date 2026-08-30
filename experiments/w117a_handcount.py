@@ -80,7 +80,7 @@ BLOCK_HEAD = "# 📇 THE ANGLE INDEX"
 MIN_RUNS, MIN_RESOLVED, MIN_HISTORICAL_BAD, MIN_AMBIGUOUS = 100, 110, 5, 1
 
 # The run currently executing, whose journal entry is written after this check runs.
-CURRENT_RUN, CURRENT_ROW = r"^# w129 —", 10
+CURRENT_RUN, CURRENT_ROW = r"^# w130 —", 8
 
 # Row number -> (label, pattern matched against the resolved GENUS only).
 GENERA = {
