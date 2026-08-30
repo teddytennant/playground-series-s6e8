@@ -1,3 +1,79 @@
+# (w131, 2026-08-30) — 🔴 ROW 1's PRICE IS A `0` MEASURED AGAINST ITSELF. I WROTE THAT
+# BASELINE ONE RUN AGO TO TURN #59 GREEN. THE MANOEUVRE IT PRICES LOSES AUC AT EVERY DOSE.
+
+## 🔴 THE DEFECT — A BASELINE THAT NAMES THE ARM
+
+w130 registered #59 (*a headline zero must name its baseline*) and, in the same pass,
+hand-edited row 1's cell to satisfy it. The cell then read:
+
+    a **CONCAT** price (extra training ROWS, not members). **0 measured against the same
+    stack trained on `train.csv` alone (0× dose), and the usual Playground edge is INVERTED
+    here: −58e-6 at 1× dose, −3,340e-6 at 50×; ...**
+
+`0× dose` **is** "the same stack trained on `train.csv` alone". `orig_concat.py` makes it
+literal — its dose loop is `if w:`, so at w=0 no augmented frame is constructed at all. The
+headline therefore compares a frame with **itself**: zero for any model, any metric, any seed,
+with **zero degrees of freedom**, before anything is fitted.
+
+🎯 **#59 asks that a zero NAME a baseline. It never asks that the baseline be a CONTRAST** —
+and the first cell ever written to satisfy #59 named the arm. That is the **fourth** place a
+green means "I did not look", after w130's three (an exemption branch, a vocabulary, a pass
+message): **a cell edited by hand to satisfy a guard, because the only reader it was ever
+tested against is the one it was written for.**
+
+## ✅ WHAT THE CONCAT ROW ACTUALLY COSTS — `w131a_row1.py`, FAILURES 0, ALL FIVE PREDICTIONS HELD
+
+Pre-registered in `experiments/w131_prereg.txt` **before any number for this run existed**,
+falsifier included. One arm per clause of the row's own elaboration. 13m29s wall under
+`systemd-run --user`, 5.5G peak.
+
+| arm | quantity · layer · scope | baseline | price |
+|---|---|---|---|
+| **A** *the headline* | FRAME · not a price | — | dose 0 appends **exactly 0 rows**, frame identical to `train.csv`; doses 1/10/50 append 7,500 / 75,000 / 375,000 and none is identical |
+| **B** *concat as extra rows* | CONCAT · MEMBER-TRAINING-SET · **k=1**, a per-competition TOTAL | the same stack at 0× dose | **−58.0e-6 at 1×** · **−986.0e-6 at 10×** · **−3,340.0e-6 at 50×**, monotone |
+| **C** *separate estimator* | ENROLMENT · STACK · **per member** | the full 167-member pack without `origmodel` | **−1.02e-6/member**, sd 1.83e-6, sign-flipping (+0.80 / −2.86 / −1.00) |
+| **D** *find the original* | IDENTITY · not a price | — | md5 **d831a326bc6f0ab76056a12279cb0047**, 7,500 × 16, the deleted official file |
+
+⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash. THE ARMS DO
+NOT ADD**, same genus as w130's row-8 arms, w129's row-10 arms, and the standing DO-NOT
+against adding measured-alone group deltas.
+
+**A** is the finding, not a price: the cell's headline number carries no measurement. **B**
+re-derives the ladder from `logs_orig_concat.txt` against literals frozen in the checker, and
+the **1× rung is 1.16× the 50e-6 floor** — the minimum dose is already a measurable loss.
+The row published the 1× and 50× rungs and omitted the 10× one, which is the rung that makes
+monotonicity checkable rather than asserted. **C** puts the separate-estimator route in rows
+3/4/7/9's units for the first time; the in-process base104 CatBoost control reproduced w123's
+**+10.0416e-6/member to +0.0000e-6**, so the arm really is in their currency, and it lands
+inside the row's long-published −1e-6 to −2e-6 from a completely different instrument.
+⟹ Both readings of the cell are true and they differ in **sign**. The column printed the one
+that is true by construction.
+
+## ✅ STANDING CHECK #60 — `w131b_selfbaselineguard`, 59 → 60 stems
+
+C1 a price cell whose headline is a zero (#59's reader, imported) **and** whose baseline names
+a **NULL SETTING of the row's own manoeuvre** must carry a CONSTRUCTION-ZERO disclosure
+**before the cell's first non-zero magnitude** · C2 fires both ways, per row, on an in-memory
+copy · C3 the frozen pre-fix row 1 — w130's cell, the one that **passes** #59 — must fire ·
+C4 **position is measured**: the same disclosure clause moved behind the first magnitude must
+turn C1 red · C5 **all six siblings imported and run BLIND on the pre-fix row 1 cell**, #59
+included on purpose, each returning zero findings for row 1 while C1 fires and each still
+firing on its own frozen defect · C6 the identity reader must split the three headline-zero
+rows the way #59 cannot.
+
+🎯 **C6's live proof is rows 1, 8 and 9.** #59 calls all three GROUNDED and is right about all
+three. Rows 1 and 8 name **IDENTITY** baselines (`0× dose`, `already exists`); row 9 names a
+**CONTRAST** (`the uncorrected stack`, a `size-matched permuted-cell control`). Row 8 is the
+positive example — it carries a construction zero *and discloses it first*, which is why it is
+honest and row 1 was not.
+
+⚠ **BLIND TO:** a null setting phrased outside the hand-written vocabulary, or an innocent use
+of a token inside it; a construction zero introduced late in a cell (inherited from #59's
+headline reader); a decoy carrying the word `CONSTRUCTION`; and — like all six siblings —
+**only the price column**. 🎯 **Seven guards now share one column. Every one checks the SHAPE
+of a claim; not one checks that a stated baseline is the one the number was actually measured
+against.** That is still the open genus.
+
 # (w130, 2026-08-30) — 🔴 ROW 8's PRICE IS THE ONE CHARACTER `0`, AND IT NEVER SAID AGAINST
 # WHAT. w129 CALLED IT THE HONEST CELL. FIVE GUARDS ARE GREEN ON IT. IT IS THE LARGEST NUMBER
 # IN THE TABLE.
@@ -3262,7 +3338,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
-| 1 | *the original dataset* — find it, concat it as extra rows | **×13, from 08-11 → w112 08-29** (count from `w117a_handcount`, not by hand) | a **CONCAT** price (extra training ROWS, not members). **0 measured against the same stack trained on `train.csv` alone (0× dose), and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
+| 1 | *the original dataset* — find it, concat it as extra rows | **×14, from 08-11 → w112 08-29 → w131 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED THE ONE THAT IS TRUE BY CONSTRUCTION AS ITS HEADLINE.** The `0` is a **CONSTRUCTION ZERO**: the baseline it names — *the same stack trained on `train.csv` alone, 0× dose* — **IS the arm**. `orig_concat.py`'s dose loop is `if w:`, so at 0× no augmented frame is built at all, and w131a measured that dose 0 appends **exactly 0 rows** and reproduces the training frame exactly: **zero degrees of freedom**, true for any model, any metric and any seed before anything is fitted. **THE MANOEUVRE'S price** is a **CONCAT** price (extra training ROWS, not members) at the **MEMBER-TRAINING-SET layer, k=1, a per-competition TOTAL and not a rate**, baseline that same 0× stack, and it is **NEGATIVE at every dose anyone ran and MONOTONE in dose**: **−58.0e-6 at 1×** (1.16× the 50e-6 floor, so even one copy is a measurable loss and not a null), **−986.0e-6 at 10×** (19.7×, the rung the row used to omit and the one that makes the monotonicity checkable), **−3,340.0e-6 at 50×** (66.8×). The usual Playground edge is **INVERTED** here, and row 1 is the **only** row in this table whose manoeuvre is measured to LOSE AUC at every setting — printed as `0` it ranked as the column's cheapest row. **THE SEPARATE-ESTIMATOR ROUTE**, priced in rows 3/4/7/9's units for the first time (w131a arm C: paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the **full 167-member pack**, `origmodel` fitted on the 7,500 originals alone and never shown a competition label, solo AUC 0.8510): an **ENROLMENT price of −1.02e-6/member**, sd 1.83e-6, **SIGN-FLIPPING** across the three splits (+0.80 / −2.86 / −1.00), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6** — an independent instrument landing inside the row's published −1e-6 to −2e-6. **IDENTITY**: the CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so there is nothing else to find. ⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash — the arms do NOT add** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) · `WHAT THE CONCAT ROW ACTUALLY COSTS` (w131, the ladder, the construction zero and the enrolment price) |
 | 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
 | 3 | *CatBoost: it handles categoricals better* | **×15, from 08-10 → w114 08-29 → w123 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 on the group delta, sign-consistent over 3 splits), which independently corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×15, from 08-10 → w115 08-29 → w124 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** · XGBoost **+7.38e-6** · LightGBM **+4.04e-6**. ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family* | `tuning ANY GBDT is worth ~4e-7` |
@@ -3773,7 +3849,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 59 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 60 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -3788,6 +3864,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
     w122a_slotguard   w123b_groupguard  w124b_priceunitguard  w125b_layerguard  w126c_scopeguard
     w127b_rateguard   w128b_pricedguard  w129b_optoutguard  w130b_zerobaselineguard
+    w131b_selfbaselineguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

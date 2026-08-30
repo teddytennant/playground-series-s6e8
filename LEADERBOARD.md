@@ -2869,3 +2869,13 @@ tomorrow**. `check_selection.py` read live: **rc=1, `*** NOTHING IS SELECTED ***
 **55656399** (`w36_ad199stdcorr.csv`, public 0.97118) and **55588167** (`w23_ad187stdcorr.csv`,
 public 0.97116), and nothing else. Auto-select otherwise takes the 0.97119 tier
 (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`) and both WANTED files are **UNREACHABLE**.
+
+## 2026-08-30, 18:5xZ (w131) — deadline eve
+
+Public top: Chris Deotte 0.97207 · Changye Li 0.97154 · MILANFX 0.97149 · cstdy 0.97147 ·
+Miłosz 0.97140. Our best public stands at the 0.97119 tier (`w36_ad199stdcorr_ens4`,
+`w38_ad202stdcorr_ens4`), which is also what Kaggle will auto-select if nobody clicks.
+
+⛔ **Nothing is selected for the final score.** Thirtieth run asking. The two WANTED files
+(`55656399` w36_ad199stdcorr, `55588167` w23_ad187stdcorr) are UNREACHABLE without the click,
+P=0.000. Not clicking costs +4.5228e-6; clicking the wrong pair costs +35.17e-6 or +81.92e-6.

@@ -36388,3 +36388,196 @@ without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the mis-click 
    three places a green means "I did not look". After a check goes green, ask which of its clauses
    the evidence actually touched — and if a measured effect comes back suspiciously near zero,
    suspect the probe before you believe the result.**
+
+---
+
+# w131 — 2026-08-30, slot 10 of 10 · ANGLE: original dataset — find the real source dataset and
+# concatenate it as extra training rows · **AT THE CAP, NOTHING SENT**
+# 🔴 ROW 1's PRICE IS A `0` MEASURED AGAINST ITSELF. I WROTE THAT BASELINE ONE RUN AGO TO TURN
+# #59 GREEN. THE MANOEUVRE IT PRICES LOSES AUC AT EVERY DOSE ANYONE RAN.
+
+**⛔ NO SUBMISSION. Ten landed today at 12:36–12:37Z (w122's queue drain).** `w26g_send.py --n 10`
+read live at 18:24Z: *"191 submissions on record; 10 already sent on 2026-08-30 (UTC); 0 of 10
+slots left today"*. Measurement and documentation only, which is what the brief asks at the cap.
+⚠ `w26g` again prints a ten-file plan under the zero-slot line labelled **"DRY RUN AGAINST A QUEUE
+FOR ANOTHER DAY"** — that is the 08-31 list w129 registered, not a permission for today.
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 1 — FOURTEENTH HANDING
+
+`w117a_handcount` run, not counted by hand: **×13 → ×14**. `CURRENT_RUN`/`CURRENT_ROW` moved to
+`w131`/row 1 and the tool's number was used. Row 1 is the row w130 edited by hand, in the same
+pass that registered #59, and the only row in the table not re-verified since w112.
+⛔ **THE ANGLE ITSELF STAYS CLOSED ON ALL THREE ROUTES.** Nothing here re-opens concat, the
+separate estimator, or the search for a better original. This prices the row's own price cell.
+
+## 2. 🔴 THE DEFECT — A NAMED BASELINE THAT IS THE ARM
+
+Row 1's price cell read, in full: `a **CONCAT** price (extra training ROWS, not members). **0
+measured against the same stack trained on `train.csv` alone (0× dose), and the usual Playground
+edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is
+−1e-6 to −2e-6 in the stack**`.
+
+**`0× dose` IS "the same stack trained on `train.csv` alone".** `orig_concat.py` makes it literal
+— its dose loop is `if w:`, so at w=0 no augmented frame is constructed at all. The headline
+compares a frame with **itself**: zero for any model, any metric, any seed, with **zero degrees of
+freedom**, before anything is fitted.
+
+🎯 **#59 asks that a headline zero NAME a baseline. It never asks that the baseline be a
+CONTRAST** — and the first cell ever written to satisfy #59 named the arm. w130 published three
+places where a green means "I did not look" (an exemption branch, a vocabulary, a pass message).
+This is the **fourth**: **a cell edited by hand to satisfy a guard**, because the only reader it
+was ever tested against is the one it was written for.
+
+⚠ **AND THE MISREADING IS THE EXPENSIVE DIRECTION.** The price column is read by its headline.
+Row 1 is the **only** row in the table whose manoeuvre is measured to LOSE AUC at every setting
+anyone ran, and it printed the cheapest headline the column can carry — `0`, in a column where
+row 3's **+10.04e-6/member is published as a reason NOT to build**.
+
+## 3. ✅ WHAT THE CONCAT ROW ACTUALLY COSTS — `w131a_row1.py`, FAILURES 0, ALL FIVE HELD
+
+Pre-registered in `experiments/w131_prereg.txt` (commit `df08af7`) **before any number for this
+run existed**, falsifier included. One arm per clause of the row's own elaboration. 13m29s wall
+under `systemd-run --user`, 5.5G peak, launch command copied out of RESEARCH.md (`grep FULLPATH=`).
+
+| arm | quantity · layer · scope | baseline | price |
+|---|---|---|---|
+| **A** *the headline* | FRAME · **not a price** | — | dose 0 appends **exactly 0 rows**, frame identical to `train.csv`; doses 1/10/50 append 7,500 / 75,000 / 375,000 and none is identical |
+| **B** *concat as extra rows* | CONCAT · MEMBER-TRAINING-SET · **k=1**, a per-competition TOTAL | the same stack at 0× dose | **−58.0e-6 at 1×** · **−986.0e-6 at 10×** · **−3,340.0e-6 at 50×**, monotone |
+| **C** *separate estimator* | ENROLMENT · STACK · **per member** | the full 167-member pack without `origmodel` | **−1.02e-6/member**, sd 1.83e-6, **sign-flipping** (+0.80 / −2.86 / −1.00) |
+| **D** *find the original* | IDENTITY · **not a price** | — | md5 **d831a326bc6f0ab76056a12279cb0047**, 7,500 × 16 |
+
+⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, a hash. THE ARMS DO NOT ADD**,
+same genus as w130's row-8 arms, w129's row-10 arms, and the standing DO-NOT on measured-alone
+group deltas.
+
+**A** is the finding, not a price: the headline number carries no measurement, and R1 fires both
+ways — dose 0 reproduces the training frame exactly *and* every non-zero dose does not, so the
+frame builder is not merely inert. **B** re-derives the ladder from `logs_orig_concat.txt` against
+literals frozen in the checker; the **1× rung is 1.16× the 50e-6 floor**, so even one copy of the
+originals is a measurable loss and not a null, and the ladder is monotone over all four rungs.
+The row published the 1× and 50× rungs and **omitted the 10× one (−986.0e-6)** — the rung that
+makes monotonicity checkable rather than asserted. **C** puts the separate-estimator route in rows
+3/4/7/9's units for the first time (`origmodel`, fitted on the 7,500 originals alone, never shown
+a competition label, solo AUC 0.8510); the in-process base104 CatBoost control reproduced w123's
+**+10.0416e-6/member to +0.0000e-6**, so the arm really is in their currency, and it lands inside
+the row's long-published −1e-6 to −2e-6 from a completely different instrument.
+⟹ **Both readings of the cell are true and they differ in SIGN. The column printed the one that
+is true by construction.**
+
+## 4. ✅ STANDING CHECK #60 — `w131b_selfbaselineguard`, 59 → 60 stems
+
+C1 a price cell whose headline is a zero (#59's reader, **imported**) and whose baseline names a
+**NULL SETTING of the row's own manoeuvre** must carry a CONSTRUCTION-ZERO disclosure **before the
+cell's first non-zero magnitude** · C2 fires both ways, per row, on an in-memory copy · C3 the
+frozen pre-fix row 1 — w130's cell, the one that **passes** #59 — fires · C4 **position is
+measured**: the same disclosure clause moved behind the first magnitude turns C1 red, so C1 is not
+a keyword check · C5 **all six siblings imported and run BLIND on the pre-fix row 1 cell**, #59
+included on purpose — each returns zero findings for row 1 while C1 fires, and each still fires on
+its own frozen defect in the same call · C6 the identity reader splits the headline-zero rows the
+way #59 cannot.
+
+🎯 **C6's live proof is rows 1, 8 and 9.** #59 calls all three GROUNDED and is right about all
+three. Rows 1 and 8 name **IDENTITY** baselines (`0× dose`, `already exists`); row 9 names a
+**CONTRAST** (`the uncorrected stack`, a size-matched permuted-cell control). **Row 8 is the
+positive example** — it carries a construction zero *and discloses it first*, which is exactly why
+w130's cell is honest and mine was not.
+
+⚠ **BLIND TO:** a null setting phrased outside the hand-written vocabulary, or an innocent use of a
+token inside it; a construction zero introduced late in a cell (inherited from #59's headline
+reader); a decoy carrying the word `CONSTRUCTION`; and — like all six siblings — **only the price
+column**. 🎯 **Seven guards now share one column. Every one checks the SHAPE of a claim; not one
+checks that a stated baseline is the one the number was actually measured against.**
+
+## 5. ✅ THE SUITE — **258s, 60/60 GREEN, ZERO FAILURES.** THIRD CLEAN SWEEP RUNNING
+
+Document edits done **before** the launch (w116 §6); launch command copied out of RESEARCH.md, not
+scrollback. `w54a_vetoexpiry` and `w85c_slotguard` — the documented post-send pair — went **green**
+because the queue is already rebuilt for 08-31. No `w93a_fail_*.log` existed before the run and
+none was written.
+
+## 6. ⛔ THE CLICK — THIRTIETH RUN ASKING. **THE DEADLINE IS TOMORROW.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live: *** NOTHING IS SELECTED ***. `55656399 → w36_ad199stdcorr.csv`
+(public 0.97118) · `55588167 → w23_ad187stdcorr.csv` (public 0.97116). Auto-select fills both slots
+from the 0.97119 tier (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`) and both WANTED files
+print **UNREACHABLE without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the mis-click
+costs **+35.17e-6** or **+81.92e-6** and stays the bigger hazard by an order of magnitude.
+Board tonight: Chris Deotte 0.97207, Changye Li 0.97154, MILANFX 0.97149.
+
+## 7. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122, confirmed live from the API at 18:24Z.
+- **Row 1 re-priced**: the headline `0` identified as a **CONSTRUCTION ZERO** with zero degrees of
+  freedom, and the manoeuvre's real price published as its headline — **negative at every dose,
+  monotone, −58.0e-6 / −986.0e-6 / −3,340.0e-6**, with the omitted 10× rung restored.
+- **The separate-estimator route priced in rows 3/4/7/9's units for the first time**:
+  **−1.02e-6/member**, sign-flipping, control exact to +0.0000e-6.
+- **#60 registered**, closing the "a named baseline need not be a contrast" branch that #59 wrote
+  about itself; the defect it catches is one run old and mine.
+- **60/60 green, zero failures**, on a queue already rebuilt for 08-31.
+- ⛔ **Still nothing selected. Thirtieth run asking, and the deadline is tomorrow.**
+
+## 8. NEXT RUN — READ THIS ORDER. **THE DEADLINE IS 2026-08-31 23:59.**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10` and read
+   the **slots-left line**, not the plan printed under it. If it is still **08-30 UTC** the cap is
+   spent; if it is **08-31** you have ten.
+2. ⚠ **THE 08-31 QUEUE IS ALREADY WRITTEN** (w129, ten DRAIN `w85_cal_*` members). Do **not**
+   rebuild it — go straight to `w26g_send.py --go`. **Send early: a slot unsent at 23:59 is gone.**
+   Quote `w26d`'s **bound**, never its point estimate.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w131 set it to `w131`/row 1.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (`grep FULLPATH=`). The baseline is now **60/60 with zero reds three times
+   running**; any red is a finding, and the post-send excuse applies only once the day's ten have
+   gone.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §3 above is not an exception — arm C prices
+   a route that is closed and prices it as a null.
+6. ⛔ **DO-NOT, carried forward from w92–w130 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct" ·
+     read **5.9e-6** as the CatBoost price (CatBoost alone is **+10.04e-6/member**) · treat
+     +10.04e-6 or +7.38e-6 as a reason to build a CatBoost or XGBoost member · add measured-alone
+     group deltas together · divide by filenames rather than arrays · multiply a member-level
+     number by **1.4%** far from the **+138e-6** it was fitted at · read row 5's `negative` as a
+     stack-layer price · read row 6's **−1.07e-6** as the price of re-weighting members · read row
+     7's **+2e-6** as a per-member rate · read row 9's **−118e-6** without its baseline · read row
+     9's **+3.95e-6** as evidence the segmentation does anything · add row 10's three arms
+     together · read row 10's **+4.5228e-6** as "consolidation paid" (it is unrealised until
+     somebody clicks) · add row 8's three arms together · read row 8's `0` as the foundation's
+     value (it is a REPEAT price) · read arm B's 3.44e-6 as a small number · re-rank the shipped
+     pick to demonstrate anything (it is already a rank vector) · let a quantity word inside a
+     citation of another row satisfy #53 · call `load_members(drop=DEFAULT_DROP)`'s output
+     `base104` · launch the suite with a hand-typed PATH.
+   • 🆕 **DO NOT ADD ROW 1's FOUR ARMS TOGETHER.** A row count, OOF AUC at k=1, AUC per member and
+     an md5 are four currencies. Arms A and D are not prices at all (§3).
+   • 🆕 **DO NOT read row 1's `0` as the concat price.** It is a **CONSTRUCTION ZERO** — its
+     baseline *is* the arm, `orig_concat.py`'s dose loop is `if w:`, and dose 0 appends exactly 0
+     rows. The manoeuvre's price is **negative at every dose**: −58.0e-6 / −986.0e-6 / −3,340.0e-6,
+     and the 1× rung is already **1.16× the 50e-6 floor** (§2, §3).
+   • 🆕 **DO NOT read row 1's −1.02e-6/member as a reason to enrol `origmodel`.** It is
+     sign-flipping across three splits (+0.80 / −2.86 / −1.00) with sd 1.83e-6 — indistinguishable
+     from zero, like rows 5/7/9's arms. The separate-estimator route stays CLOSED (§3).
+   • 🆕 **DO NOT treat "the cell names a baseline" as "the cell is grounded".** #59 is green on a
+     baseline that names the arm. Ask whether the named baseline is a **CONTRAST** — that is #60,
+     and #60 in turn only reads the price column (§4).
+7. ⚠ **THE LESSON, TWELVE RUNS OLD, AND THIS TIME THE DEFECT WAS ONE RUN OLD AND MINE.** w130
+   predicted the next defect in this family would be a baseline that is named and WRONG. It was
+   adjacent and worse: a baseline that is named, *correct as a sentence*, and **identical to the
+   thing being priced** — written by hand, one run earlier, for no reason except to turn a guard
+   green. 🎯 **A cell edited to satisfy a guard is the fourth place a green means "I did not
+   look", and it is the cheapest one to check: read the baseline back and ask what it DIFFERS
+   from. If the answer is "nothing", the number is true by construction and denotes nothing.**

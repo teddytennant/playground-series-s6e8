@@ -1,0 +1,89 @@
+{
+ "published": {
+  "ladder": {
+   "0": 0.962639,
+   "1": 0.962581,
+   "10": 0.961653,
+   "50": 0.959299
+  },
+  "cell_1x_e6": -58.0,
+  "cell_50x_e6": -3340.0,
+  "ladder_tol_e6": 1.0,
+  "noise_floor_e6": 50.0,
+  "row3_catboost_e6": 10.04159994129339,
+  "control_tol_e6": 0.05,
+  "orig_rows": 7500,
+  "orig_md5": "d831a326bc6f0ab76056a12279cb0047",
+  "pred_enrol_abs_max_e6": 50.0
+ },
+ "arm_a": {
+  "0": {
+   "appended": 0,
+   "identical": true
+  },
+  "1": {
+   "appended": 7500,
+   "identical": false
+  },
+  "10": {
+   "appended": 75000,
+   "identical": false
+  },
+  "50": {
+   "appended": 375000,
+   "identical": false
+  }
+ },
+ "arm_b": {
+  "0": {
+   "auc": 0.962639,
+   "delta_e6": 0.0,
+   "floor_multiple": 0.0
+  },
+  "1": {
+   "auc": 0.962581,
+   "delta_e6": -58.000000000002494,
+   "floor_multiple": 1.1600000000000499
+  },
+  "10": {
+   "auc": 0.961653,
+   "delta_e6": -986.0000000000424,
+   "floor_multiple": 19.720000000000848
+  },
+  "50": {
+   "auc": 0.959299,
+   "delta_e6": -3340.0000000000095,
+   "floor_multiple": 66.8000000000002
+  }
+ },
+ "arm_d": {
+  "md5": "d831a326bc6f0ab76056a12279cb0047",
+  "rows": 7500,
+  "origmodel_solo_auc": 0.8510234640942973
+ },
+ "arm_c": {
+  "pool_n": 167,
+  "per_split_e6": [
+   0.7950939731049544,
+   -2.8573613540805454,
+   -1.0037523523465097
+  ],
+  "mean_e6": -1.0220065777740335,
+  "sd_e6": 1.826296085477627,
+  "sign_flipping": true,
+  "control_e6": 10.041599941293388,
+  "control_gap_e6": 1.7763568394002505e-15,
+  "cat_n": 8,
+  "catbase_n": 104
+ },
+ "two_readings": {
+  "headline": 0.0,
+  "min_dose_e6": -58.000000000002494,
+  "max_dose_e6": -3340.0000000000095
+ },
+ "failures": [],
+ "notes": [
+  "the headline `0` compares a frame with ITSELF. Degrees of freedom: 0. It is true before any model is fitted, for any metric and any seed, and it is not a measurement of the manoeuvre.",
+  "the cell publishes the 1x and 50x rungs and omits the 10x rung (-986e-6), which is the one that makes the monotonicity checkable rather than asserted."
+ ]
+}
