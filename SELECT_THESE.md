@@ -1,5 +1,9 @@
 # ⏳ ONE MANUAL ACTION IS OUTSTANDING — final-submission selection
 
+> 🔴 **2026-08-30. TOMORROW IS THE LAST DAY.** Twenty-one runs have now asked for this and
+> nothing is selected. It is two ticks in a browser and it cannot be done from this machine:
+> no Kaggle write API, no browser tool attached to the agent, no logged-in profile on the box.
+
 **Deadline 2026-08-31 23:59. Needs a browser. It cannot be done from the Kaggle API** (the
 write path was probed and falsified 2026-08-13; only the *read* is exposed, which is what
 `experiments/check_selection.py` uses).
@@ -38,8 +42,9 @@ Neither is the CV-preferred pair. Priced on the live board:
 
 `experiments/w74a_clickprice.py`, two verbatim controls at 0.000e+00. Honest reading: **the
 click is worth about 3–4.5e-6 of expected private AUC, and it is not a large number.** At the
-current board density (rank 92 of 2,774, leader 490e-6 ahead) that is roughly a place or two,
-not a medal. ⚠ BUT THAT PRICES ONLY THE *MISSING* CLICK. Clicking the WRONG pair costs up to
+board density measured 2026-08-30 12:45Z (rank **278 of 3,321**, bronze cut 332, margin
+**+54**) that is roughly **four places** against a cushion that is shrinking ~22/day — so it
+is worth doing and it is still not, on its own, the medal. ⚠ BUT THAT PRICES ONLY THE *MISSING* CLICK. Clicking the WRONG pair costs up to
 **+81.92e-6, ~18x more** (see below) — closing THAT is what the one minute actually buys.
 
 ⚠ Do not "improve" on this list by picking the higher public scores. That is the failure.

@@ -178,6 +178,16 @@
 "w69_ad208std_hybrid.csv",
 "w69_ad208std_rankraw.csv",
 "w69_ad208std_rescale.csv",
+"w85_cal_ad_gnn_note.csv",
+"w85_cal_ad_logregte.csv",
 "w85_cal_bolt_cat_unique.csv",
-"w85_cal_bolt_lgb_raw_d4.csv"
+"w85_cal_bolt_extratrees_support.csv",
+"w85_cal_bolt_lgb_raw_d4.csv",
+"w85_cal_bolt_tabm_missing.csv",
+"w85_cal_golem_b.csv",
+"w85_cal_golem_g.csv",
+"w85_cal_lat_encdrop_r400.csv",
+"w85_cal_lat_tedrop_r400.csv",
+"w85_cal_mkt_mlp.csv",
+"w85_cal_mkt_nn.csv"
 ]

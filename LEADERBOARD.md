@@ -1,3 +1,29 @@
+# 2026-08-30 12:45Z — w122, MEASURED. THE DECAY SLOPE IS TWICE WHAT w120/w121 CARRIED.
+
+Board downloaded once for the day (`lb_w122/`, 12:45:11Z), which is the w120 §7 rule.
+**Rank 278 / 3,321, bronze cut 332, margin +54.** Our public score is unmoved at **0.97119**,
+frozen since 08-23 12:41:28; today's ten sends came back 0.94203–0.94449, nowhere near the tier
+and not meant to be.
+
+⚠ **w121 quoted ≈ −11/day and that number is now wrong.** Re-derived off every saved board:
+
+| when | teams | rank | cut | margin |
+|---|---|---|---|---|
+| 08-26 12:56 | 2,976 | 171 | 297 | +126 |
+| 08-29 13:10 | 3,241 | 249 | 324 | +75 |
+| 08-29 15:23 | 3,253 | 251 | 325 | +74 |
+| **08-30 12:45** | **3,321** | **278** | **332** | **+54** |
+
+08-26 → 08-30 is **−18/day**; the last 21 hours alone are **−22/day**. ⛔ The −11/day figure came
+from a 2h13m window in which our rank moved by one, and a one-place move over two hours is not a
+slope — it is a rounding. With ~35 hours to the deadline at −22/day the margin closes near
+**+20**. Positive on every row above, so bronze survives and nothing here changes a decision,
+but the cushion is thinner than the last two runs recorded.
+
+The click is worth ≈4 places against that ~20-place cushion. Still nothing selected.
+
+---
+
 # 2026-08-29 15:4xZ — w121, NOT RE-MEASURED. THE ONCE-A-DAY RULE IS NOW SATISFIED BY w120's READ.
 
 Our best public is **unmoved at 0.97119** (at cap 10/10, nothing sent). w120 §7 retired

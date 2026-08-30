@@ -34375,3 +34375,225 @@ after the fix: #38, #43, #45, #50 all rc=0.
 `TOTAL 260s` as a pass on its own — read the `FAILURES:` line under it. w121's failure is fixed
 and re-verified; a fresh full-suite run is **not** needed to confirm that, but the next scheduled
 run should show 50/50.
+
+---
+
+# w122 — 2026-08-30, slot 1 of 10, ANGLE "LightGBM: tune it properly against the fixed folds —
+# learning rate, leaves, regularisation, categorical handling."
+# ✅ ALL TEN SENT (10/10). GENUS = `LightGBM` = ANGLE INDEX ROW 2, CLOSED, PRICE +4e-7 — AND
+# RE-VERIFIED AT THE ARTEFACT LEVEL, WHICH IT HAD NEVER BEEN WHILE ROW 4 BORROWED ITS PRICE.
+# 🔴 THE REAL FIND IS NOT THE ANGLE. `check_selection.py` HAS BEEN SHOWING A HUMAN THE CV PICK
+# UNDER A HEADING THAT READS "auto-slot 2" WHILE THE MEASURED PROBABILITY OF IT LANDING IS 0.000.
+
+## 1. THE SEND — TEN OUT, FROM THE REGISTERED QUEUE, CONFIRMED FROM THE API
+
+`date -u` 12:40Z. `git status` 161 entries, **0 tracked deletions**, so the checkout is sound.
+`w26g_send.py --n 10` line 1: `181 submissions on record; 0 already sent on 2026-08-30 (UTC);
+10 of 10 slots left today`. The dry-run plan matched `w72a_plan_2026-08-30.json` in **set and
+order**, so it went out with `--go` and no `--write`, exactly as w121 §10.2 registered.
+
+    confirmed from the API: 10 submissions today (was 0). 0 slots left.
+
+Five had scored by the time the sender re-read the board: 0.94203 / 0.94231 / 0.94262 / 0.94449
+/ 0.94329, inside `w26d`'s quoted **bound** of 0.93–0.96 and nowhere near the 0.97119 tier — as
+designed, these are pinned exploratory files, **not deadline picks**. Best public unmoved.
+
+## 2. 🔴 THE DEFECT: THE LABEL SAID "SLOT", THE CODE COMPUTED "TIER"
+
+Running `check_selection.py` for the day's mandated re-check, the auto-pick block read:
+
+    auto-slot 1: public 0.97119, 2-way tie — w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4
+    auto-slot 2: public 0.97118, 5-way tie — w21_ad187corr_ens4, w27_ad190stdcorr,
+                 w29_ad194stdcorr, w36_ad199stdcorr, w40_ad211stdcorr
+
+**`w36_ad199stdcorr` on that second line is the CV pick.** But tier 1 holds two files and there
+are two final slots, so tier 2 is never drawn from at all — and `RESEARCH.md`'s own w62 section
+has said since 08-23 that **P(our CV pick is in the final pair) went 0.400 → 0.000**. The
+instrument was contradicting the document, and the document was right.
+
+    tiers = sorted({sc for sc, _ in scored}, reverse=True)[:2]      # top two DISTINCT SCORES
+    print(f"  auto-slot {rank}: ...")                                # printed as SLOTS
+
+Slots and tiers coincide only when every tier holds exactly one file. 🎯 **The arithmetic was
+never wrong — `[:2]` really does return two tiers. The word was wrong,** and no check here tests
+a word. This is w120 §4 (`priority` describing an input, not the predicate) and w121 §3 (a prose
+cause beside a derived count) arriving in a **third** place, and the worst one: the screen a
+human reads immediately before an irreversible choice.
+
+⚠ **THE COST OF THE AVAILABLE MISREADING IS THE WHOLE CLICK.** "It's on the auto-slot 2 line, so
+it gets selected anyway" is the one inference that makes **+4.5228e-6** permanent, and it was the
+most natural reading on the screen.
+
+## 3. ⚠ TWO GUARDS OVER THE CLICK WERE GREEN THE ENTIRE TIME, AND BOTH WERE RIGHT
+
+#48 `w114b_selectguard` walks `main()` with `ast` and scans printed string **literals** for
+non-WANTED stems. The tier members are printed from a computed variable, so there was no literal
+to see. #49 `w115a_docselectguard` scans `RESEARCH.md` and `SELECT_THESE.md` — not this branch.
+Neither was broken; neither predicate reached the defect.
+🎯 **A guard's silence is exactly as wide as its predicate, and two green guards over "the click"
+did not mean the click's own screen was safe.** w114 built #48 after the mis-click hazard and
+priced the wrong pairs at +35.17e-6 and +81.92e-6; the surviving hazard was not a wrong *name*,
+it was a right name under a wrong *heading*.
+
+## 4. ✅ THE FIX, AND WHAT IT NOW SAYS OUT LOUD
+
+`fill_final_slots(scored, limit)` is a module-level pure function now: walk tiers by descending
+score, hand out slots, and return `(certain, draw)` — `draw` non-`None` only when a tie really
+straddles the last slot. Output, byte-checked against the live board after the refactor:
+
+    slot 1: public 0.97119  CERTAIN — w36_ad199stdcorr_ens4
+    slot 2: public 0.97119  CERTAIN — w38_ad202stdcorr_ens4
+    ** The auto-selected pair is DETERMINED: tier 0.97119 alone fills all 2 slot(s). No tie is
+       broken, and NO file below that score is reachable without the click. **
+    WANTED w23_ad187stdcorr             UNREACHABLE without the click (P=0.000)
+    WANTED w36_ad199stdcorr             UNREACHABLE without the click (P=0.000)
+
+The per-WANTED verdict line is new and is the part that matters: the old block left the reader
+to derive reachability from a tier listing that pointed the other way. The `blend158_logit`
+hazard warning was re-pointed at the same predicate — it fired on *"is in the top two tiers"*
+and now fires on **reachability**, so it correctly goes quiet today and would still fire if a
+tier ever handed that file a slot outright.
+
+## 5. ✅ STANDING CHECK #51 — `w122a_slotguard`, WITH THE NEGATIVE HALF THAT MAKES IT A CONTROL
+
+C1 exact on five hand-checked synthetic boards (singletons · tier-1-fills-all · a tie straddling
+the last slot at P=1/3 · a tie wider than the limit · a short board) plus slot conservation.
+**C2 runs both predicates on the FROZEN 2026-08-30 board**: the shipped one must call the pick
+UNREACHABLE *and* the reconstructed pre-fix one must call it PRESENT — if they ever agree it
+reports **INERT**, not green, because a fix with no alternative behaviour to select from is not
+a fix. C3 no file below the slot floor may be reachable. C4 the `[:2]` idiom has not returned.
+
+Watched red before the fix and green after, which is the evidence w119 §6 asks for:
+
+    (reverted copy)  FAIL C4 check_selection.py has regained a `sorted(...)[:2]` tier slice
+                     FAILURES: 1   rc=1
+    (shipped)        FAILURES: 0   ✅ CLEAN
+    (--control)      pre-fix predicate reaches 5 file(s) below the slot floor 0.97119;
+                     the shipped predicate reaches none of them.
+
+The board shape is a **frozen literal** — w115's rule that a control anchored to HEAD stops
+being a control the moment the fix is committed. Registered in `w93a_suite.STEMS` **and** in
+RESEARCH.md's published block (50 → 51 stems, C2 drift check clean, all 51 on disk).
+
+## 6. ✅ ROW 2 AT THE ARTEFACT LEVEL — `w122b_row2.py`. IT HOLDS, AND ROW 4 WAS BORROWING FROM IT
+
+The angle's own deliverable. w106's standard is that a row's closure is not its evidence; row 2
+had never been checked, and **row 4's price is inherited from row 2**, so the entire +4e-7 rested
+on an unaudited LightGBM measurement. Re-measured from the arrays on the frozen folds:
+
+| claim | published | re-measured |
+|---|---|---|
+| tuning for solo AUC | +3e-5 | `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` **+0.000031**; `lgbm_tuned_lat` − `lgbm_fixed_lat` **+0.000001** |
+| `lgbm_stump_lat_frac` solo | 0.96735 | **0.967349** |
+| stump cost vs fixed | 0.00044 | **0.000440** |
+| stump maxcorr | 0.9961 | **0.9959** |
+| 3e-5 × 1.4% | +4e-7, ~1% of the 5e-5 floor | **4.2e-7**, **0.80%** |
+| the fourth knob (`categorical handling`) | NO-ENROL, w97 gate | **zero** `teprior` arrays in `oof/` |
+
+✅ Row 2 goes ×14 → **×15** (derived by `w117a_handcount`, not hand-edited; the tool reported
+`index claims x14, corpus has x15` and the cell was set to what it said) and is marked
+**artefacts verified**. ⚠ **One discrepancy recorded rather than smoothed:** the maxcorr is over
+the **19** same-shaped arrays in `oof/`, not the 149 the 2026-08-11 note ranged over — 0.9959 vs
+0.9961 and median 0.9912 vs 0.9816 are **different pools, not drift**. The conclusion is
+unaffected; the median is the number that must not be quoted across the two.
+
+## 7. THE BOARD — READ ONCE, AND THE SLOPE HAS DOUBLED
+
+`lb_w122/`, 12:45:11Z. **Rank 278 / 3,321, cut 332, margin +54.** w120 carried ≈ −11/day; the
+realised rate 08-26 → 08-30 is **−18/day** and over the last 21 hours **−22/day**. At −22/day
+with ~35 hours left the margin closes near **+20**. Positive on every slope in the table, so
+**no decision changes** — but ⛔ do not quote −11/day again.
+
+## 8. ⛔ THE CLICK — TWENTY-FIRST RUN ASKING. ONE DAY LEFT. STILL NOTHING SELECTED.
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py`, real rc from the process: **`*** NOTHING IS SELECTED ***`**.
+`55656399 → w36_ad199stdcorr.csv` (public 0.97118, CV 0.9701400060, CV rank 1/164) ·
+`55588167 → w23_ad187stdcorr.csv` (public 0.97116, CV 0.9701150809). Not clicking costs
+**+4.5228e-6**; the mis-click costs **+35.17e-6** or **+81.92e-6** and remains the bigger hazard
+by an order of magnitude. ⛔ Do not re-price it. `PushNotification` returned
+`Mobile push not sent (Remote Control inactive).` for the **third** identical time (w115/w116/
+w122) — it has never reached a phone from here. `ToolSearch` for a browser tool: nothing but
+`WebFetch`, which fails on authenticated URLs by construction. **The click stays human.**
+
+## 9. NEXT RUN — READ THIS ORDER. IT IS THE LAST DAY.
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. ⚠ **THE DEADLINE IS 2026-08-31 23:59.** If the run lands on 08-31, run
+   `w48e_order.py --day 2026-08-31 --write` FIRST — w120 §5 dry-ran that plan and it verifies
+   clean at ten members, 0.93261–0.94154 — then `--go`. Quote `w26d`'s **bound**, never its
+   point estimate. **Send early in the day; a slot unsent at 23:59 is gone.**
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py` TO YOUR OWN RUN AND ROW.**
+   w122 set it to `w122`/row 2. **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Do document edits BEFORE launching the suite** (w116 §6), then `w93a_suite.py` under
+   `systemd-run --user` with `--setenv=PATH` and `XDG_RUNTIME_DIR` set **inside** the same
+   command, read via `journalctl`, never under `timeout`. ⚠ The log file is block-buffered and
+   is **not** the liveness signal — `systemctl --user status <unit>` is (w120 §11). ⚠ And
+   `TOTAL` is not a pass: **read the `FAILURES:` line under it** (w121 §12).
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). Do not start a member build.
+6. **Read the board ONCE for the day.** Latest: rank 278 / 3,321, cut 332, margin +54, −22/day.
+7. ⛔ **DO-NOT, carried forward from w92–w121 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · repeat w118/w119's board
+     objection (settled, w120 §7) · widen a standing guard's threshold without the full-corpus
+     sweep showing the region is FLAT · delete a hand-written annotation beside a derived number
+     without reading it first.
+   • 🆕 **DO NOT** print a runner-up score tier under a heading containing the word `slot`, or
+     "add context" to the auto-pick block by listing tiers again. The extra context is what did
+     the damage (§2). If a tier is unreachable, the heading must say UNREACHABLE.
+   • 🆕 **DO NOT** quote **−11/day** for the bronze margin decay. It is **−22/day** (§7).
+   • 🆕 **DO NOT** read "the guards over the click are green" as "the click screen is correct".
+     #48 checks literals and #49 checks documents; neither reaches a computed heading (§3).
+8. ⚠ **NEW LESSONS.** • The three biggest finds of the last three runs are the same defect:
+   **a label that describes the input rather than the predicate the tool applies** (`priority`,
+   a prose cause beside a derived count, and now `slot` for `tier`). When auditing an
+   instrument, read its *headings* against its *code*, not just its numbers against reality.
+   • A number can be right while the sentence around it is misleading, and no numeric check
+   will ever catch that. • An inherited price is worth re-measuring even when you expect it to
+   hold: row 2 held, but nothing had ever asked, and row 4 had been spending it for three weeks.
+
+## 10. ADDENDUM — THE AUTHORITATIVE FOOTER: **`TOTAL 357s`, 49/51 GREEN, BOTH REDS EXPECTED**
+
+⏱ `w93a_suite.py` under `systemd-run --user --same-dir --setenv=PATH="$PATH"` with
+`XDG_RUNTIME_DIR` set **inside** the same command, no `timeout`. Every document edit was final
+before launch (w116 §6), so #50 read the w122 header out of the corpus and correctly did **not**
+add a second count — row 2 reconciled at ×15 in both states.
+
+    [48/51] w114b_selectguard    rc=0   ✅ CLEAN — every printed literal names only WANTED or ALLOWED
+    [49/51] w115a_docselectguard rc=0   ✅ CLEAN — no human-read doc names a non-WANTED file as the pick
+    [50/51] w117a_handcount      rc=0   FAILURES: 0      (row 2 ×15, derived)
+    [51/51] w122a_slotguard      rc=0   ✅ CLEAN — slots are filled, not tiers listed
+    TOTAL 357s   49/51 green
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+    ⚠ every failure is the post-send queue-freshness guard doing its job.
+
+✅ **Both reds are the documented `POST_SEND_EXPECTED` pair and the runner said so itself** —
+ten files went out today, so the queue on disk is for a day already sent. ⚠ Note this is the
+**both-red** pattern, which IS post-send; RESEARCH's warning is about **w85c red while w54a is
+GREEN**, which is *not* and would need a real diagnosis. Rebuilding the queue is the next run's
+registered first step, not this one's — `w48e_order.py --day 2026-08-31 --write`.
+
+⚠ **Reading the `TOTAL` line alone would have been wrong here too** (w121 §12): `49/51 green`
+is only benign because the two named stems are the expected pair. Read the `FAILURES:` line and
+then read *which* stems are on it.
+
+## 11. WHAT THIS RUN LEAVES BEHIND
+
+- **10/10 sent**, from the registered 08-30 queue, confirmed against the API.
+- `check_selection.py` no longer argues against clicking. Standing check **#51** keeps it that
+  way and reports **INERT** rather than green if the fix ever stops doing work.
+- **Row 2 verified at the artefact level** and marked as such; the +4e-7 that **row 4 inherits**
+  now rests on a re-measurement rather than a three-week-old sentence.
+- The bronze decay slope corrected **−11/day → −22/day**, in `LEADERBOARD.md` and here.
+- `SELECT_THESE.md` carries a dated last-day banner and today's real board density.
+- ⛔ **Still nothing selected.** That is the only thing on this list a future run cannot fix.

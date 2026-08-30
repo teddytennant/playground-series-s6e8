@@ -1,3 +1,141 @@
+# (w122, 2026-08-30) — 🔴 `check_selection.py` WAS SHOWING THE READER THE CV PICK ON A LINE HEADED
+# "auto-slot 2" WHILE THE MEASURED PROBABILITY OF IT LANDING THERE WAS **0.000**. THE LABEL SAID
+# SLOTS; THE CODE COMPUTED TIERS. ROW 2 SEPARATELY RE-VERIFIED AT THE ARTEFACT LEVEL.
+
+## 🔴 THE DEFECT, AND WHY IT IS THE WORST PLACE IN THE WORKSPACE FOR THIS PARTICULAR ERROR
+
+`check_selection.py` is the artefact a human reads in the minutes before the one irreversible
+decision left here. Its NOTHING-IS-SELECTED branch ended with:
+
+    tiers = sorted({sc for sc, _ in scored}, reverse=True)[:2]
+    for rank, sc in enumerate(tiers, start=1):
+        print(f"  auto-slot {rank}: public {sc}, {len(members)}-way tie — ...")
+
+That prints the **top two distinct public scores**. Slots and tiers coincide only when every
+tier holds exactly one file. On the live 2026-08-30 board they did not:
+
+    0.97119   2 files   <- fills BOTH final slots on its own
+    0.97118   5 files   <- never reached, and w36_ad199stdcorr (THE CV PICK) is one of the five
+
+⟹ the reader was shown the pick under the heading **"auto-slot 2"**, i.e. as something already
+being selected, at the exact moment `RESEARCH.md`'s own w62 section says **P(our CV pick is in
+the final pair) went 0.400 → 0.000**. The instrument and the document contradicted each other
+and only the document was right. The reachable inference from the screen is *"it gets picked
+anyway, no need to click"*, and that inference is what makes the **+4.5228e-6** permanent.
+
+🎯 **THIS IS w120 §4 AND w121 §3 IN A THIRD PLACE: THE LABEL DESCRIBED THE INPUT, NOT THE
+PREDICATE THE TOOL APPLIED.** There it was `priority`, then a prose cause beside a derived
+count. Here the arithmetic was never wrong — `sorted(...)[:2]` really does return two tiers.
+The word `slot` was wrong, and a word is not covered by any check that tests a number.
+
+⚠ **AND NOTE WHICH GUARDS WERE GREEN THROUGHOUT.** #48 `w114b_selectguard` scans printed string
+LITERALS for non-WANTED stems; the tier members are printed from a computed variable, so it saw
+nothing. #49 `w115a_docselectguard` scans documents, not this branch. Both were right about what
+they check. **Two guards over the click, both green, and the click's own screen still argued
+against clicking.** A guard's silence is only as wide as its predicate.
+
+## ✅ THE FIX — FILL SLOTS, THEN SAY PER WANTED FILE WHETHER THE CLICK IS THE ONLY ROUTE
+
+`fill_final_slots(scored, limit)` is now a module-level pure function in `check_selection.py`:
+walk tiers by descending score, hand out slots, return `(certain, draw)` where `draw` is
+`(score, members, k)` only when a tie genuinely straddles the last slot. The branch prints:
+
+    slot 1: public 0.97119  CERTAIN — w36_ad199stdcorr_ens4
+    slot 2: public 0.97119  CERTAIN — w38_ad202stdcorr_ens4
+    ** The auto-selected pair is DETERMINED: tier 0.97119 alone fills all 2 slot(s). No tie is
+       broken, and NO file below that score is reachable without the click. **
+    WANTED w23_ad187stdcorr             UNREACHABLE without the click (P=0.000)
+    WANTED w36_ad199stdcorr             UNREACHABLE without the click (P=0.000)
+
+which now **agrees with w62's measurement** instead of contradicting it. The `blend158_logit`
+hazard warning was re-pointed at the same predicate: it fired on "is in one of the top two
+tiers" and now fires on **reachability**, so it correctly stays silent today (blend158_logit is
+in the unreachable 0.97118 tier) and would fire if a tier ever handed it a slot outright.
+
+⛔ **DO NOT re-widen this to tiers to "show more context".** The extra context is what did the
+damage. If a future run wants the runner-up tier on screen, print it under a heading that says
+UNREACHABLE, never under a heading that says slot.
+
+## ✅ STANDING CHECK #51 — `w122a_slotguard`, AND ITS NEGATIVE HALF IS THE WHOLE POINT
+
+    .venv/bin/python experiments/w122a_slotguard.py            # rc 0 = clean
+    .venv/bin/python experiments/w122a_slotguard.py --control  # exits 0, having fired
+
+  C1  exact on five hand-checked synthetic boards, including the boundary where a tie straddles
+      the last slot (`P=1/3`) and one wider than the whole limit (nothing certain at all), plus
+      slot conservation: `len(certain) + draw_k == limit`.
+  C2  **both directions on the FROZEN 2026-08-30 board.** The shipped predicate must report the
+      pick UNREACHABLE *and* the reconstructed pre-fix predicate must report it PRESENT. If the
+      two ever agree the guard reports **INERT** rather than green — a fix with no alternative
+      behaviour to select from is not a fix, which is w121 §5's rule applied to a predicate
+      instead of a threshold.
+  C3  no file scoring below the slot floor may be reachable — the property the defect violated.
+  C4  `check_selection.py` has not regained the `sorted(...)[:2]` idiom.
+
+The board shape is a **frozen literal**, on w115's rule that a control anchored to HEAD stops
+being a control the moment the fix is committed. Watched red before the fix (C4 fired, rc=1 on
+a deliberately reverted copy) and green after; the control run reports the pre-fix predicate
+reaching **5 files below the slot floor**, the shipped one reaching none.
+
+## ✅ ROW 2 OF THE ANGLE INDEX RE-VERIFIED (this run's handed angle) — `w122b_row2.py`
+
+Genus `LightGBM` ⟹ row 2, closed, price **+4e-7**. w106 set the standard that a row's *closure*
+is not the same as its *evidence*, and row 2 had never been checked — while **row 4 inherited its
+price from row 2**, so the whole +4e-7 rested on an unaudited LightGBM measurement. Checked:
+
+| claim | published | re-measured here |
+|---|---|---|
+| tuning for solo AUC on these folds | +3e-5 | `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` = **+0.000031**; the other pair, `lgbm_tuned_lat` − `lgbm_fixed_lat`, = **+0.000001** |
+| `lgbm_stump_lat_frac` solo | 0.96735 | **0.967349** |
+| stump cost vs `lgbm_fixed_lat_frac` | 0.00044 | **0.000440** |
+| stump maxcorr against the pack | 0.9961 | **0.9959** (`lgbm_tuned_lat_frac`) |
+| 3e-5 × 1.4% pass-through | +4e-7, ~1% of the 5e-5 floor | **4.2e-7**, **0.80%** of the floor |
+| the fourth knob, `categorical handling` | NO-ENROL (w97 gate) | **zero** `teprior` arrays in `oof/` |
+
+✅ **Row 2 holds on its own artefacts, and the +3e-5 is if anything the generous end** — one of
+the two tuned/fixed pairs moves by a single 1e-6. ⚠ **One honest discrepancy, recorded rather
+than smoothed:** the maxcorr here is over the **19** same-shaped arrays in `oof/`, not the 149
+the 2026-08-11 note ranged over, so 0.9959 vs 0.9961 and median 0.9912 vs 0.9816 are *different
+pools*, not a drift. The conclusion (the stump never left the dense part of the pack) is
+unaffected; the median is the number you must not quote across the two pools.
+⛔ Still **do not sweep the three closed knobs.** Re-verifying the price is not re-opening it.
+
+## ⚠ THE BRONZE MARGIN IS DECAYING AT TWICE THE RATE w120 EXTRAPOLATED FROM
+
+One board read for the day (w120 §7), `lb_w122/`, 12:45:11Z. **Rank 278 / 3,321, bronze cut 332,
+margin +54**, our public score frozen at 0.97119 since 08-23. The full history off the saved
+boards:
+
+| when | teams | rank | cut | margin |
+|---|---|---|---|---|
+| 08-26 12:56 | 2,976 | 171 | 297 | +126 |
+| 08-29 13:10 | 3,241 | 249 | 324 | +75 |
+| 08-29 15:23 | 3,253 | 251 | 325 | +74 |
+| **08-30 12:45** | **3,321** | **278** | **332** | **+54** |
+
+⚠ w120 carried **≈ −11/day**. The realised rate 08-26 → 08-30 is **−18/day**, and over the last
+21 hours alone **−22/day**. At −22/day with ~35 hours to the deadline the margin closes at about
+**+20**, not the comfortable number the older slope implies. It is still positive on every slope
+in the table, so **nothing here changes a decision** — bronze survives, and the click is worth
+~4 places against a ~20-place cushion. ⛔ Recorded so the last run does not re-derive the slope,
+and so nobody quotes −11/day again.
+
+## ⛔ THE PUSH CHANNEL: 0 FOR 3, AND THE STRING IS STILL IDENTICAL
+
+`PushNotification` returned, verbatim, for the third time across w115/w116/w122:
+`Mobile push not sent (Remote Control inactive).` ⚠ It has **never** reached a phone from this
+workspace. Keep calling it once per run — the gate is a state, not a property — and keep reading
+the return string rather than recording the call as a delivery.
+
+## ⛔ NO BROWSER MCP, RE-CHECKED THIS RUN, AND THE CLOSURE IS UNCHANGED
+
+`ToolSearch` for `mcp__brave__*` returns nothing; the only fetch tool attached is `WebFetch`,
+which fails on authenticated URLs by construction. Combined with the standing finding (no
+`Cookies` anywhere, CDP 9222 not listening, `DISPLAY` unset), **the click remains a human
+action.** ⛔ Do not "fix" this by launching Chrome.
+
+---
+
 # (w121, 2026-08-29) — FOUNDATION, ROW 8. THE ROW VERIFIES AT THE ARTEFACT LEVEL, AND THE `+3` IT
 # CARRIED WAS A HAND-WRITTEN COUNT WITH A CAUSE THAT IS FALSE. THE CENSUS WAS SELECTING ON WHETHER
 # A RUN OBEYED ITS ANGLE.
@@ -2011,7 +2149,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
 | 1 | *the original dataset* — find it, concat it as extra rows | **×13, from 08-11 → w112 08-29** (count from `w117a_handcount`, not by hand) | **0, and the usual Playground edge is INVERTED here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to −2e-6 in the stack** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) |
-| 2 | *tune LightGBM properly against the fixed folds* | ×14, from 08-10 → w113 08-29 (count from `w117a_handcount`) | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
+| 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
 | 3 | *CatBoost: it handles categoricals better* | ×14, from 08-10 → w114 08-29 (count from `w117a_handcount`) | 5.9e-6/member | `CATBOOST TUNING IS CLOSED` |
 | 4 | *XGBoost as the third leg of the ensemble* | ×14, from 08-10 → w115 08-29 · **artefacts verified** (count from `w117a_handcount`) | **+4e-7** | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×15, from 08-10 → w116 08-29 — the most-handed, but only just: the ten counts run 8–15** (`w117a_handcount`) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | **negative** | `Two dead ends under the "in-fold target/count encoding" angle` (the price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) |
@@ -2518,7 +2656,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 50 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 51 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -2531,6 +2669,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w101a_angleguard  w103a_pathguard    w104a_cgroupguard  w105a_liveguard
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
+    w122a_slotguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

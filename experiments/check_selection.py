@@ -676,6 +676,40 @@ print(json.dumps(out))
 """ % COMP
 
 
+def fill_final_slots(scored, limit):
+    """Hand out `limit` final-entry slots by descending PUBLIC score.
+
+    w122 (2026-08-30). Kaggle auto-selects the best `limit` submissions by public score.
+    The old caller printed the top two DISTINCT SCORES and called them "auto-slot 1" and
+    "auto-slot 2", which is only the same thing when every tier holds exactly one file.
+    On the 2026-08-30 board tier 1 was a 2-way tie that filled BOTH slots, so tier 2 was
+    unreachable -- and tier 2 was a 5-way tie containing the CV pick. The reader about to
+    click was shown the pick on the "auto-slot 2" line while w62 measured its probability
+    of landing at 0.000.
+
+    `scored` is [(public_score, filename)]. Returns `(certain, draw)`:
+      certain -- [(score, filename)] that take a slot outright, best first
+      draw    -- (score, sorted_members, k) when k slots are left to a tie, else None
+    A tier is only reached when every higher tier together leaves a slot open.
+    """
+    by_score = {}
+    for sc, fn in scored:
+        by_score.setdefault(sc, []).append(fn)
+
+    certain, draw, left = [], None, limit
+    for sc in sorted(by_score, reverse=True):
+        if left <= 0:
+            break
+        members = sorted(by_score[sc])
+        if len(members) <= left:
+            certain += [(sc, m) for m in members]
+            left -= len(members)
+        else:
+            draw = (sc, members, left)
+            left = 0
+    return certain, draw
+
+
 def _price_lines():
     """The live click price, out of the JSON artefacts — never a literal in this file.
 
@@ -769,21 +803,67 @@ def main() -> int:
             print(line)
 
         # ------------------------------------------------------------------ THE AUTO-PICK
-        print("\nIf nobody clicks, Kaggle auto-selects by best PUBLIC score. The two tiers it")
-        print("would draw from, computed live rather than quoted from a stale journal entry:")
+        #
+        # w122 (2026-08-30). This block printed the top TWO DISTINCT PUBLIC SCORES and
+        # labelled them "auto-slot 1" and "auto-slot 2". Those are SCORE TIERS, not slots.
+        # When tier 1 already holds >= FINAL_LIMIT files it fills every slot by itself and
+        # tier 2 is never drawn from at all -- yet the old wording invited a reader to see
+        # the second line as "the other file that gets selected". On 2026-08-30 tier 2 was
+        # a 5-way tie CONTAINING w36_ad199stdcorr, i.e. the CV pick itself, so the reader
+        # about to click was being shown the pick as already-selected when w62 measured
+        # P(pick in the final pair) = 0.000. That reads as "no need to click", which is the
+        # one inference that makes the +4.5228e-6 permanent.
+        #
+        # Fill the slots for real instead: walk tiers in descending score, hand out slots,
+        # and separate what is CERTAIN from what is still a draw.
+        FINAL_LIMIT = 2
+        print("\nIf nobody clicks, Kaggle auto-selects by best PUBLIC score. Filling the "
+              f"{FINAL_LIMIT} final")
+        print("slot(s) live, tier by tier -- not quoted from a stale journal entry:")
         scored = [(sc, fn) for _, fn, sc in data["successful"] if sc is not None]
-        tiers = sorted({sc for sc, _ in scored}, reverse=True)[:2]
-        for rank, sc in enumerate(tiers, start=1):
-            members = sorted(fn for s, fn in scored if s == sc)
-            print(f"  auto-slot {rank}: public {sc}, {len(members)}-way tie — "
-                  + ", ".join(m.replace(".csv", "") for m in members))
+        by_score = {}
+        for sc, fn in scored:
+            by_score.setdefault(sc, []).append(fn)
+
+        certain, draw = fill_final_slots(scored, FINAL_LIMIT)
+
+        for rank, (sc, fn) in enumerate(certain, start=1):
+            print(f"  slot {rank}: public {sc}  CERTAIN — {fn[:-4]}")
+        if draw:
+            sc, members, k = draw
+            first = FINAL_LIMIT - k + 1
+            print(f"  slot(s) {first}..{FINAL_LIMIT}: public {sc} — {k} drawn from a "
+                  f"{len(members)}-way tie, P={k/len(members):.3f} each:")
+            print("      " + ", ".join(m[:-4] for m in members))
+        else:
+            print(f"  ** The auto-selected pair is DETERMINED: tier {certain[0][0]} alone "
+                  f"fills all {FINAL_LIMIT} slot(s). No tie is broken, and NO file below "
+                  f"that score is reachable without the click. **")
+
+        # Say plainly, per WANTED file, whether the click is the only route to it. The old
+        # block left this to the reader and the tier listing pointed the wrong way.
+        reachable = {fn for _, fn in certain} | (set(draw[1]) if draw else set())
+        for w in sorted(WANTED):
+            if w in {fn for _, fn in certain}:
+                verdict = "auto-selected anyway — the click is NOT needed for this one"
+            elif draw and w in draw[1]:
+                verdict = (f"only P={draw[2]/len(draw[1]):.3f} via the tie — "
+                           f"the click makes it certain")
+            else:
+                verdict = "UNREACHABLE without the click (P=0.000)"
+            print(f"  WANTED {w[:-4]:<28} {verdict}")
+
         # The one file that must never reach a slot. w15j enumerated six tiebreak rules
         # and it is uniquely selected under none of them, but the exposure is real.
-        risk = [fn for sc, fn in scored if fn == "blend158_logit.csv" and sc in tiers]
-        if risk:
-            tier = 1 + tiers.index(next(sc for sc, fn in scored if fn == risk[0]))
-            print(f"  ** blend158_logit (CV 0.969961, ~88e-6 below the CV pick) is in "
-                  f"auto-slot {tier}'s tie. **")
+        # w122: the predicate is now REACHABILITY, not "is in one of the top two tiers" --
+        # a file sitting in an unreachable tier was being warned about, and a file that
+        # tier 1 hands a slot to outright was not.
+        if "blend158_logit.csv" in reachable:
+            where = ("holds a slot OUTRIGHT"
+                     if "blend158_logit.csv" in {fn for _, fn in certain}
+                     else f"is in the {len(draw[1])}-way tie being drawn from")
+            print(f"  ** blend158_logit (CV 0.969961, ~88e-6 below the CV pick) "
+                  f"{where}. **")
 
         if "--history" in sys.argv:
             print("\n" + CLICK_HISTORY)

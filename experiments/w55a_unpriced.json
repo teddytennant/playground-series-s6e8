@@ -1,86 +1,86 @@
 {
   "account_best": 0.97119,
   "envelope": {
-    "0.99": 0.0023200000000000998,
+    "0.99": 0.0024600000000000177,
     "0.999": 0.0002500000000000835,
     "0.9999": 4.0000000000040004e-05,
     "0.99995": 4.0000000000040004e-05,
     "0.99999": 2.0000000000020002e-05
   },
-  "n_scored": 181,
+  "n_scored": 191,
   "rows": {
     "w85_cal_ad_gnn_note.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9450806292292289,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9451582685557777,
+          "overshoot": 0.0016380088551616323,
           "point": 0.943520259700616,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.971232979885811,
-          "valid": false
+          "anchor": "w85_cal_ad_gnn_note.csv",
+          "bound": 0.94331,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.94329,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9450806292292289,
-      "instrument": "prereg",
-      "margin_e6": 26109.370770771133,
-      "reg_lb": 0.943520259700616,
+      "bound": 0.94331,
+      "instrument": "spearman",
+      "margin_e6": 27880.000000000015,
+      "reg_lb": 0.94329,
       "safe": true
     },
     "w85_cal_ad_logregte.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9618998221805878,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9619774615071366,
+          "overshoot": 0.0016380088551616323,
           "point": 0.960339452651975,
           "valid": true
         },
         "spearman": {
-          "anchor": "w37_cal_dm_cat.csv",
-          "bound": 0.9788800000000001,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96813,
-          "spearman": 0.9522242057078966,
-          "valid": false
+          "anchor": "w85_cal_ad_logregte.csv",
+          "bound": 0.96013,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.96011,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9618998221805878,
-      "instrument": "prereg",
-      "margin_e6": 9290.177819412216,
-      "reg_lb": 0.960339452651975,
+      "bound": 0.96013,
+      "instrument": "spearman",
+      "margin_e6": 11059.999999999958,
+      "reg_lb": 0.96011,
       "safe": true
     },
     "w85_cal_bolt_dcnv2_cross.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9414884076253572,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.941566046951906,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9399280380967444,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9707693673413714,
-          "valid": false
+          "anchor": "w85_cal_bolt_tabm_missing.csv",
+          "bound": 0.94449,
+          "bucket": 0.99,
+          "envelope": 0.0024600000000000177,
+          "point": 0.94203,
+          "spearman": 0.9941623610504255,
+          "valid": true
         }
       },
-      "bound": 0.9414884076253572,
+      "bound": 0.941566046951906,
       "instrument": "prereg",
-      "margin_e6": 29701.59237464276,
+      "margin_e6": 29623.953048093954,
       "reg_lb": 0.9399280380967444,
       "safe": true
     },
@@ -88,49 +88,49 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9462089818359248,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9462866211624736,
+          "overshoot": 0.0016380088551616323,
           "point": 0.944648612307312,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.971493827450311,
-          "valid": false
+          "anchor": "w85_cal_bolt_extratrees_support.csv",
+          "bound": 0.9450000000000001,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.94498,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9462089818359248,
-      "instrument": "prereg",
-      "margin_e6": 24981.018164075165,
-      "reg_lb": 0.944648612307312,
+      "bound": 0.9450000000000001,
+      "instrument": "spearman",
+      "margin_e6": 26189.999999999935,
+      "reg_lb": 0.94498,
       "safe": true
     },
     "w85_cal_bolt_fttransformer.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.943098924793101,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9431765641196498,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9415385552644882,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
+          "anchor": "w85_cal_mkt_nn.csv",
+          "bound": 0.97147,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9714210859432698,
+          "envelope": 0.029159999999999964,
+          "point": 0.94231,
+          "spearman": 0.9886546074150645,
           "valid": false
         }
       },
-      "bound": 0.943098924793101,
+      "bound": 0.9431765641196498,
       "instrument": "prereg",
-      "margin_e6": 28091.07520689902,
+      "margin_e6": 28013.43588035021,
       "reg_lb": 0.9415385552644882,
       "safe": true
     },
@@ -138,24 +138,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9417043870107642,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.941782026337313,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9401440174821514,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9716670776538758,
-          "valid": false
+          "anchor": "w85_cal_bolt_tabm_missing.csv",
+          "bound": 0.94449,
+          "bucket": 0.99,
+          "envelope": 0.0024600000000000177,
+          "point": 0.94203,
+          "spearman": 0.9937116464455356,
+          "valid": true
         }
       },
-      "bound": 0.9417043870107642,
+      "bound": 0.941782026337313,
       "instrument": "prereg",
-      "margin_e6": 29485.6129892358,
+      "margin_e6": 29407.973662686993,
       "reg_lb": 0.9401440174821514,
       "safe": true
     },
@@ -163,24 +163,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9422183649984722,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.942296004325021,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9406579954698594,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9717432537307343,
-          "valid": false
+          "anchor": "w85_cal_bolt_tabm_missing.csv",
+          "bound": 0.94449,
+          "bucket": 0.99,
+          "envelope": 0.0024600000000000177,
+          "point": 0.94203,
+          "spearman": 0.9971639350085567,
+          "valid": true
         }
       },
-      "bound": 0.9422183649984722,
+      "bound": 0.942296004325021,
       "instrument": "prereg",
-      "margin_e6": 28971.635001527775,
+      "margin_e6": 28893.995674978967,
       "reg_lb": 0.9406579954698594,
       "safe": true
     },
@@ -188,49 +188,49 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9432061224528129,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9432837617793617,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9416457529242,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.973599728465226,
-          "valid": false
+          "anchor": "w85_cal_bolt_tabm_missing.csv",
+          "bound": 0.94205,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.94203,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9432061224528129,
-      "instrument": "prereg",
-      "margin_e6": 27983.87754718712,
-      "reg_lb": 0.9416457529242,
+      "bound": 0.94205,
+      "instrument": "spearman",
+      "margin_e6": 29139.999999999945,
+      "reg_lb": 0.94203,
       "safe": true
     },
     "w85_cal_bolt_tabm_rank1.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.94250796732745,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9425856066539988,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9409475977988372,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9730076443453288,
-          "valid": false
+          "anchor": "w85_cal_bolt_tabm_missing.csv",
+          "bound": 0.94449,
+          "bucket": 0.99,
+          "envelope": 0.0024600000000000177,
+          "point": 0.94203,
+          "spearman": 0.9985199775107142,
+          "valid": true
         }
       },
-      "bound": 0.94250796732745,
+      "bound": 0.9425856066539988,
       "instrument": "prereg",
-      "margin_e6": 28682.032672549984,
+      "margin_e6": 28604.39334600118,
       "reg_lb": 0.9409475977988372,
       "safe": true
     },
@@ -238,24 +238,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9409842577042956,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9410618970308444,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9394238881756828,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9722788756057785,
-          "valid": false
+          "anchor": "w85_cal_bolt_tabm_missing.csv",
+          "bound": 0.94449,
+          "bucket": 0.99,
+          "envelope": 0.0024600000000000177,
+          "point": 0.94203,
+          "spearman": 0.9944926795387831,
+          "valid": true
         }
       },
-      "bound": 0.9409842577042956,
+      "bound": 0.9410618970308444,
       "instrument": "prereg",
-      "margin_e6": 30205.742295704385,
+      "margin_e6": 30128.102969155578,
       "reg_lb": 0.9394238881756828,
       "safe": true
     },
@@ -263,24 +263,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.82455914856129,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.8246367878878388,
+          "overshoot": 0.0016380088551616323,
           "point": 0.8229987790326772,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
+          "anchor": "w85_cal_golem_b.csv",
+          "bound": 0.97178,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.7670870044518008,
+          "envelope": 0.029159999999999964,
+          "point": 0.94262,
+          "spearman": 0.7902492395537517,
           "valid": false
         }
       },
-      "bound": 0.82455914856129,
+      "bound": 0.8246367878878388,
       "instrument": "prereg",
-      "margin_e6": 146630.85143871003,
+      "margin_e6": 146553.2121121612,
       "reg_lb": 0.8229987790326772,
       "safe": true
     },
@@ -288,24 +288,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.8993312157846811,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.8994088551112299,
+          "overshoot": 0.0016380088551616323,
           "point": 0.8977708462560683,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
+          "anchor": "w85_cal_golem_b.csv",
+          "bound": 0.97178,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.899362829686601,
+          "envelope": 0.029159999999999964,
+          "point": 0.94262,
+          "spearman": 0.9199549549610282,
           "valid": false
         }
       },
-      "bound": 0.8993312157846811,
+      "bound": 0.8994088551112299,
       "instrument": "prereg",
-      "margin_e6": 71858.78421531888,
+      "margin_e6": 71781.14488877008,
       "reg_lb": 0.8977708462560683,
       "safe": true
     },
@@ -313,49 +313,49 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9438011070097136,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9438787463362625,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9422407374811008,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9742227430325653,
-          "valid": false
+          "anchor": "w85_cal_golem_b.csv",
+          "bound": 0.94264,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.94262,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9438011070097136,
-      "instrument": "prereg",
-      "margin_e6": 27388.89299028635,
-      "reg_lb": 0.9422407374811008,
+      "bound": 0.94264,
+      "instrument": "spearman",
+      "margin_e6": 28549.999999999964,
+      "reg_lb": 0.94262,
       "safe": true
     },
     "w85_cal_golem_c.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9373742400958184,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9374518794223672,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9358138705672056,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_cat_unique.csv",
-          "bound": 0.97133,
+          "anchor": "w85_cal_golem_g.csv",
+          "bound": 0.97412,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96058,
-          "spearman": 0.9610481443749886,
+          "envelope": 0.029159999999999964,
+          "point": 0.94496,
+          "spearman": 0.9680975137062843,
           "valid": false
         }
       },
-      "bound": 0.9373742400958184,
+      "bound": 0.9374518794223672,
       "instrument": "prereg",
-      "margin_e6": 33815.75990418162,
+      "margin_e6": 33738.12057763281,
       "reg_lb": 0.9358138705672056,
       "safe": true
     },
@@ -363,99 +363,99 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9451529928939292,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.945230632220478,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9435926233653164,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9710596187420246,
-          "valid": false
+          "anchor": "w85_cal_golem_g.csv",
+          "bound": 0.94498,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.94496,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9451529928939292,
-      "instrument": "prereg",
-      "margin_e6": 26037.00710607082,
-      "reg_lb": 0.9435926233653164,
+      "bound": 0.94498,
+      "instrument": "spearman",
+      "margin_e6": 26209.999999999956,
+      "reg_lb": 0.94496,
       "safe": true
     },
     "w85_cal_lat_encdrop_r400.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9552191518506008,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9552967911771496,
+          "overshoot": 0.0016380088551616323,
           "point": 0.953658782321988,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9870883914805493,
-          "valid": false
+          "anchor": "w85_cal_lat_encdrop_r400.csv",
+          "bound": 0.95301,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.95299,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9552191518506008,
-      "instrument": "prereg",
-      "margin_e6": 15970.848149399197,
-      "reg_lb": 0.953658782321988,
+      "bound": 0.95301,
+      "instrument": "spearman",
+      "margin_e6": 18179.999999999975,
+      "reg_lb": 0.95299,
       "safe": true
     },
     "w85_cal_lat_tedrop_r400.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9526264666064156,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9527041059329644,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9510660970778028,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9797769821780303,
-          "valid": false
+          "anchor": "w85_cal_lat_tedrop_r400.csv",
+          "bound": 0.95133,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.95131,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9526264666064156,
-      "instrument": "prereg",
-      "margin_e6": 18563.533393584406,
-      "reg_lb": 0.9510660970778028,
+      "bound": 0.95133,
+      "instrument": "spearman",
+      "margin_e6": 19859.99999999999,
+      "reg_lb": 0.95131,
       "safe": true
     },
     "w85_cal_mkt_mlp.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9444123606734512,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.94449,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9428519911448384,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9746179201120949,
-          "valid": false
+          "anchor": "w85_cal_mkt_mlp.csv",
+          "bound": 0.9445100000000001,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.94449,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9444123606734512,
+      "bound": 0.94449,
       "instrument": "prereg",
-      "margin_e6": 26777.639326548753,
+      "margin_e6": 26699.999999999945,
       "reg_lb": 0.9428519911448384,
       "safe": true
     },
@@ -463,49 +463,49 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9433908255725524,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9434684648991012,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9418304560439396,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9743560640884021,
-          "valid": false
+          "anchor": "w85_cal_mkt_nn.csv",
+          "bound": 0.94233,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.94231,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.9433908255725524,
-      "instrument": "prereg",
-      "margin_e6": 27799.174427447615,
-      "reg_lb": 0.9418304560439396,
+      "bound": 0.94233,
+      "instrument": "spearman",
+      "margin_e6": 28859.999999999996,
+      "reg_lb": 0.94231,
       "safe": true
     },
     "w85_cal_poly2_raw.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9380471247287082,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.938124764055257,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9364867552000954,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
+          "anchor": "w85_cal_golem_b.csv",
+          "bound": 0.97178,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9593377714907653,
+          "envelope": 0.029159999999999964,
+          "point": 0.94262,
+          "spearman": 0.9842389131427938,
           "valid": false
         }
       },
-      "bound": 0.9380471247287082,
+      "bound": 0.938124764055257,
       "instrument": "prereg",
-      "margin_e6": 33142.875271291785,
+      "margin_e6": 33065.23594474298,
       "reg_lb": 0.9364867552000954,
       "safe": true
     },
@@ -513,24 +513,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9341702521539472,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.934247891480496,
+          "overshoot": 0.0016380088551616323,
           "point": 0.9326098826253344,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
+          "anchor": "w85_cal_lat_tedrop_r400.csv",
+          "bound": 0.98047,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9207351545571517,
+          "envelope": 0.029159999999999964,
+          "point": 0.95131,
+          "spearman": 0.9321005572717376,
           "valid": false
         }
       },
-      "bound": 0.9341702521539472,
+      "bound": 0.934247891480496,
       "instrument": "prereg",
-      "margin_e6": 37019.74784605278,
+      "margin_e6": 36942.10851950397,
       "reg_lb": 0.9326098826253344,
       "safe": true
     },
@@ -538,24 +538,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.8974497073328964,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.8975273466594452,
+          "overshoot": 0.0016380088551616323,
           "point": 0.8958893378042836,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
-          "bound": 0.97119,
+          "anchor": "w85_cal_golem_b.csv",
+          "bound": 0.97178,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.8556943739633398,
+          "envelope": 0.029159999999999964,
+          "point": 0.94262,
+          "spearman": 0.8799933199420973,
           "valid": false
         }
       },
-      "bound": 0.8974497073328964,
+      "bound": 0.8975273466594452,
       "instrument": "prereg",
-      "margin_e6": 73740.29266710358,
+      "margin_e6": 73662.65334055477,
       "reg_lb": 0.8958893378042836,
       "safe": true
     },
@@ -563,24 +563,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9366984609325788,
-          "overshoot": 0.001560369528612826,
+          "bound": 0.9367761002591276,
+          "overshoot": 0.0016380088551616323,
           "point": 0.935138091403966,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_bolt_lgb_raw_d4.csv",
+          "anchor": "w85_cal_bolt_tabm_missing.csv",
           "bound": 0.97119,
           "bucket": 0.0,
-          "envelope": 0.010750000000000037,
-          "point": 0.96044,
-          "spearman": 0.9584803630499065,
+          "envelope": 0.029159999999999964,
+          "point": 0.94203,
+          "spearman": 0.9786423384558616,
           "valid": false
         }
       },
-      "bound": 0.9366984609325788,
+      "bound": 0.9367761002591276,
       "instrument": "prereg",
-      "margin_e6": 34491.539067421196,
+      "margin_e6": 34413.89974087239,
       "reg_lb": 0.935138091403966,
       "safe": true
     }
