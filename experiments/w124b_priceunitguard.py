@@ -86,7 +86,10 @@ ANGLE_HEAD = "# 📇 THE ANGLE INDEX"
 
 # C1. The registered vocabulary. Four words, deliberately few: a price here is the value of
 # tuning a model you hold, enrolling one you do not, concatenating rows, or searching weights.
-UNITS = ("TUNING", "ENROLMENT", "CONCAT", "SEARCH", "CORRECTION")
+# w129 adds row 10's own three. Row 10 was GREEN before they existed, on the word
+# `ENROLMENT` borrowed from a citation of row 3 -- see the CITED reader in w128b.
+UNITS = ("TUNING", "ENROLMENT", "CONCAT", "SEARCH", "CORRECTION",
+         "SELECTION", "VERIFICATION", "PREDICTOR")
 MAGNITUDE = re.compile(r"\d\s*e-[67]|\d,\d{3}e-[67]")
 
 # C2/C3. Frozen literals -- w124a_row4.json, base104, paired 50/50, 3 splits, C=1.0, hybrid.

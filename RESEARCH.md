@@ -1,3 +1,106 @@
+# (w129, 2026-08-30) — 🔴 ROW 10 TOOK #57's OPT-OUT AND THEN CLAIMED IT **PAID**. THE OPT-OUT
+# WAS BUILT FOR CELLS WITH NOTHING TO PRICE, AND ROW 10 HAD THREE ARMS SITTING ON DISK.
+
+## 🔴 THE DEFECT — AN EXEMPTION FOR "NOTHING TO MEASURE" USED FOR "NOTHING MEASURED YET"
+
+Row 10's price cell read, in full:
+
+    **NOT A PRICE — not a modelling angle** — it is the standing checklist, and it is the
+    one angle that has ever PAID
+
+#57 (`w128b_pricedguard`) made silence unspendable one run earlier: every price cell carries an
+`e-6`/`e-7` magnitude **or** types the literal `NOT A PRICE`. Its own blind-spot paragraph, same
+day, says what it then cannot do — *"C1 accepts `NOT A PRICE` from anyone who types it."*
+
+Row 10 typed it, and in the same breath asserted a **non-zero positive magnitude**, in the past
+tense, **comparatively against the other nine rows**. Contrast row 8, whose opt-out is honest: it
+is a foundation row and its cell **states that the answer is 0**. 🎯 **THE CELL ARGUING FOR ITS
+OWN ANGLE IS THE ONE CELL WITH NO NUMBER IN IT** — and it is the sentence a run reads when
+deciding whether this slot is worth its budget. Consolidation has been handed **×14**, and the
+three clauses of the row's own elaboration each had a price sitting on disk the whole time.
+
+## ✅ WHAT CONSOLIDATION HAS ACTUALLY PAID — `w129a_row10.py`, FAILURES 0, ALL FIVE PREDICTIONS HELD
+
+Pre-registered in `experiments/w129_prereg.txt` (commit `2ed203d`) **before any number for this
+run existed**, falsifier included. One arm per clause; no model is fitted and no file is rebuilt
+by the pricer itself.
+
+| arm | clause | quantity · layer · scope | denominator | baseline | price |
+|---|---|---|---|---|---|
+| **A** | *confirm the picks* | SELECTION · FINAL-FILE · **k=2** | per competition, a **TOTAL** | Kaggle auto-selection by public score | **+4.5228e-6** (tau=0) · **+3.0704e-6** (95% upper tau) |
+| **B** | *re-verify the pipeline* | VERIFICATION · PIPELINE · k=3 | per file rebuilt | the shipped file's own bytes | **+0.0000e-6 — and zero is the PASS** |
+| **C** | *audit CV↔LB* | PREDICTOR-AUDIT · PREDICTOR · n/a | per post-w23 build, **PREDICTED-LB units** | the corrected w25f model | **−27.4266e-6** |
+
+Arm A is live, not quoted: `w74b_clickstaleguard` ran this run and reports the tiers **unchanged
+across a board that grew 131 → 191 scored files**, so the published price still applies. `w114a`
+re-derives the same headline from a second estimator with drift **+3.4e-9**. The MIS-CLICK arm,
+same baseline: **+35.17e-6** and **+81.92e-6**.
+
+⛔ **THE THREE DENOMINATORS ARE DISTINCT AND THE ARMS DO NOT ADD.** A is a per-competition total
+in realised AUC, B is per file in bytes, C is per build in predicted LB and **was never converted
+to AUC at all**. Summing them is the same defect genus as the standing DO-NOT *"add measured-alone
+group deltas together"*, arriving in a new column.
+
+## 🎯 THE HEADLINE IS **UNREALISED**, AND THAT IS THE ARGUMENT FOR THE CLICK, IN THE INDEX'S CURRENCY
+
+`check_selection.py` returns **rc=1** — nothing is selected. So:
+
+    arm A   priced +4.5228e-6    realised +0.0000e-6   CONTINGENT on one human click
+    arm B   priced +0.0000e-6    realised +0.0000e-6   an identity check changes no file
+    arm C   priced in predicted-LB units, realised +0.0000e-6 of AUC
+    ───────────────────────────────────────────────────────────────
+    REALISED TOTAL TODAY                    +0.0000e-6
+
+🔻 **AND THE COMPARISON THE OLD CELL WAS AVOIDING.** *"The one angle that has ever PAID"* is true
+on **sign** and on **cost** — the click is free — and **false on magnitude**: **+4.5228e-6 is 2.2×
+SMALLER than row 3's CatBoost enrolment price of +10.04e-6/member**, which this same table
+publishes as a reason **not** to build. Consolidation dominates on **ratio**, not on size, and the
+cell should have said so with the number attached.
+
+## 🔻 ARM B's COVERAGE GAP — ONE OF THE TWO **WANTED** FILES HAD NEVER BEEN REBUILT
+
+w111's end-to-end reproduction covered `w36_ad199stdcorr` (a WANTED file) and
+`w36_ad199stdcorr_ens4` (**the auto-selection twin, which is not WANTED at all**). The second
+WANTED file, **`w23_ad187stdcorr`**, was never in it — `w111a_reproduction.json` has two picks and
+neither is that one, and #46 inherits the same two. 🎯 **A COVERAGE COUNT OF "2 PICKS" LOOKS
+COMPLETE UNTIL YOU INTERSECT IT WITH THE LIST THAT ACTUALLY MATTERS.** `w129a`'s arm B prints the
+intersection rather than the count, so this cannot read as covered again.
+
+## 🔴 THE SECOND READER DEFECT IN THE FAMILY, ONE RUN AFTER THE FIRST — A **CITATION** READ AS A CLAIM
+
+The rewritten row 10 names three quantities of its own — **SELECTION**, **VERIFICATION**,
+**PREDICTOR** — none of which was in #53's vocabulary. #53 went **GREEN anyway.** Why: the cell
+cites *"row 3's CatBoost **ENROLMENT** price"*, and the shared `claims()` reader counted that
+borrowed word as row 10's own quantity. Delete those six words and **#53 fires on row 10.**
+#56 was dragged the same way — it skips any cell that does not claim ENROLMENT, and the citation
+pulled row 10 into its scope.
+
+🎯 **w128's defect was a NEGATION read as a claim; this is a CITATION read as a claim, in the same
+reader, found the same way — by writing the cell and then asking WHY the guard was quiet instead
+of being satisfied that it was.** ✅ Fixed in the shared reader (`w128b.CITED`, skipping any
+occurrence preceded within 24 characters by `row N's`), **not** in the cell, and `SELECTION` /
+`VERIFICATION` / `PREDICTOR` joined #53's vocabulary so row 10 now passes on its own words.
+**All four frozen controls still fire.**
+
+## ✅ STANDING CHECK #58 — `w129b_optoutguard`, 57 → 58 stems
+
+C1 a cell containing `NOT A PRICE` must not claim **PAID / paid / pays / worth / gain / value**
+unless it also carries a magnitude or the bare `0` — row 8 passes on the `0`, pre-fix row 10
+fires · C2 row 10 publishes all fifteen required tokens (three quantities, three layers, a `k=`,
+three denominators, three baselines, `NOT addable`, `CONTINGENT`, `REALISED`) · C3
+`w129a_row10.json` against literals frozen in the guard, **INERT** if the artefact is missing ·
+C4 `--control` over the frozen pre-fix cell · C5 **all four siblings imported and measured BLIND
+on the pre-fix row 10** — #57 included, because the opt-out satisfies it — each still firing on
+its own frozen defect in the same call · C6 the citation reader, both directions, required to
+**disagree with the naive `word in cell` test** (it disagrees on 2 of 4 probes).
+
+⚠ **WHAT #58 IS BLIND TO.** C1's VALUE vocabulary is finite — a cell can still assert worth in
+words it does not know (*"the only row that has moved the board"*). Like the other four it reads
+**only the price column**: the `closed` column is checked by nothing but `w117a_handcount`, and
+rows 3/4/5's `base104` pool disclosures are prose that nothing parses. 🎯 **Five guards now share
+one column. The next defect in this genus is a value claim in a vocabulary I did not enumerate,
+or it is in the closed column.**
+
 # (w128, 2026-08-30) — 🔴 ROW 9'S PRICE CELL WAS **`0 / negative`** AND THAT IS THE WHOLE CELL.
 # ONE WORD OVER **SIX INSTRUMENT READINGS SPANNING 340×, WITH BOTH SIGNS PRESENT** — AND
 # BECAUSE IT CARRIES NO MAGNITUDE, **#53, #55 AND #56 ARE ALL STRUCTURALLY BLIND TO IT.**
@@ -3042,7 +3145,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 7 | *seed and fold diversity, averaged* | ×13, from 08-11 → w64 → w109 08-28 → w118 08-29 → w127 08-30 · **artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO LAYERS OF ONE MANOEUVRE, AND THE ROW USED TO PUBLISH ONE NUMBER AT THE OTHER ONE'S SCOPE.** stacker arm: **structural null**. member arm, seed-averaging `xgb_latcat`: **MEMBER layer +138e-6** — the solo probability-mean gain, re-measured w127 at **+138.2e-6** from the OOF arrays, and it is **ABOVE** the 50e-6 floor — converting to **STACK layer +2e-6, at k=1**. That +2e-6 is a **SUBSTITUTION** price (w109 arm B *replaced* three seed twins by their mean; nothing was added, the pack lost two columns) and it is **NOT a per-member rate** — read as one at k=104 it multiplies out to **+208e-6, four times the floor**. The genuine **ENROLMENT** rate, measured w127 with w123/w124's instrument (paired 50/50, splits 0/1/2, C=1.0, hybrid) on the full **167-member** pack: **+0.49e-6/member** for the two extra seeds, **+1.72e-6** for the average alone, **−0.51e-6** for the average on top of the seeds — all three **SIGN-FLIPPING** across the 3 splits and none distinguishable from zero, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. ⛔ Nothing re-opens on any arm | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | **NOT A PRICE** — a foundation row, and the answer is **0**, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
 | 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×14, from 08-11 → w119 08-29 → w128 08-30 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | ⚠ **A CORRECTION PRICE, AND THE ROW USED TO PUBLISH NEITHER A MAGNITUDE NOR A BASELINE — IT SAID `0 / negative` AND NOTHING ELSE.** The manoeuvre is a **CORRECTION** applied on top of the shipped file — not an ENROLMENT, not a SEARCH, not a TUNING — so every number here is a **STACK layer** total at **k=1** and none of them is a per-member rate. ⚠ **TWO BASELINES, AND THEY DO NOT SHARE A SIGN.** Cross-fitted per-cell isotonic over the generator's seven rule cells: **−118e-6 against the uncorrected stack** and **+6e-6 against a size-matched permuted-cell control** — w128 rebuilt both columns from scratch and re-measured **−110.9e-6** and **+5.1e-6**. Priced as an ENROLMENT in rows 3/4's units for the first time (paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the full 167-member pack, w128a): isotonic column **+3.95e-6**, residual column **+2.36e-6**, **the PERMUTED null +3.17e-6 — the null takes 80% of it, so the gain is capacity, not segmentation** — and the deciding contrast **real − null = +0.79e-6 ± 4.16e-6, SIGN-FLIPPING**, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. The other two instruments read **−307e-6 … −2,043e-6** (cell-local LightGBM, negative 9/9) and **−74e-6 … −526e-6** (global residual booster, negative 8/8). ⛔ **And the structural cap that kills the angle's premise before any model is fitted: 76.7% of the AUC deficit is CROSS-cell** — pairs of rows in different segments — which no within-segment feature, monotone map or cell-local booster can reach | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` · `THE CELL THAT NO GUARD COULD SEE` (w128, the price, both baselines and the permuted null) |
-| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×13, from 08-11 → w111 08-28 → w120 08-29 · artefacts verified** (count from `w117a_handcount`) | **NOT A PRICE — not a modelling angle** — it is the standing checklist, and it is the one angle that has ever PAID | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
+| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×14, from 08-11 → w120 08-29 → w129 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **A PRICE AFTER ALL, IN THREE CURRENCIES THAT MUST NOT BE ADDED — AND THE ROW USED TO PUBLISH NONE OF THEM, ONLY THE WORDS "the one angle that has ever PAID".** One arm per clause of the row's own elaboration, all three measured w129 from artefacts on disk. **ARM A, "confirm the picks" — a SELECTION price at the FINAL-FILE layer, k=2 slots, a per-competition TOTAL and not a rate, baseline Kaggle's auto-selection by public score: +4.5228e-6** at tau=0 and **+3.0704e-6** at the 95% upper tau, re-verified live by `w74b_clickstaleguard` (tiers unchanged over a board that grew 131 → 191 scored files), with the MIS-CLICK arm against the same baseline at **+35.17e-6** and **+81.92e-6**. **ARM B, "re-verify the pipeline" — a VERIFICATION price at the PIPELINE layer, k=3 files, per file rebuilt, baseline the shipped file's own bytes: +0.0000e-6, and zero is the PASS**, CSV and OOF byte-identical 8 and 13 days after the originals. **ARM C, "audit CV↔LB" — a PREDICTOR-layer bias in PREDICTED-LB units and NOT in AUC, per post-w23 build, baseline the corrected w25f model: −27.4266e-6**, which moved P(beat 0.97118) for `w27_ad188std` from 0.367 to 1.6e-4. ⛔ **Three distinct denominators, so the arms are NOT addable** — the same defect genus as adding measured-alone group deltas. 🎯 **AND THE HEADLINE IS UNREALISED: nothing is selected, so arm A is CONTINGENT on one human click, and consolidation's REALISED total today is +0.0000e-6 on every arm.** ⛔ *"The one angle that has ever PAID"* is true on **sign** and on **cost** (the click is free) and false on **magnitude**: +4.5228e-6 is **2.2× SMALLER** than row 3's CatBoost ENROLMENT price of +10.04e-6/member, which this table publishes as a reason NOT to build | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) · `WHAT CONSOLIDATION HAS ACTUALLY PAID` (w129, the three arms, their currencies and the realised total) |
 
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
 number came from a LightGBM measurement. w106 checked it at the artefact level rather than
@@ -3544,7 +3647,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 57 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 58 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -3558,7 +3661,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
     w122a_slotguard   w123b_groupguard  w124b_priceunitguard  w125b_layerguard  w126c_scopeguard
-    w127b_rateguard   w128b_pricedguard
+    w127b_rateguard   w128b_pricedguard  w129b_optoutguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

@@ -120,12 +120,27 @@ PREFIX_ROW9 = "**0 / negative**"
 # from the outside and the cheap one wins). Shared from here so the four guards cannot drift.
 NEGATED = re.compile(r"\bnot\s+an?\s+$", re.I)
 
+# 🔴 THE SECOND READER DEFECT, w129, ONE RUN LATER AND IN THE OPPOSITE DIRECTION. Row 10's
+# rewritten cell names three quantities of its own -- SELECTION, VERIFICATION, PREDICTOR -- and
+# then CITES row 3: "row 3's CatBoost ENROLMENT price of +10.04e-6/member". #53's vocabulary
+# held none of row 10's own three, so the cell was UNPRICED by #53's definition; it went GREEN
+# anyway, on the word `ENROLMENT` borrowed from a citation of a DIFFERENT ROW. Delete those six
+# words and #53 fires. #56 was dragged the same way: it skips every cell that does not claim
+# ENROLMENT, and the citation put row 10 inside its scope.
+# 🎯 A CROSS-REFERENCE IS NOT A CLAIM. w128's defect was a NEGATION read as a claim; this is a
+# CITATION read as a claim, in the same reader, found by the same manoeuvre -- writing the cell
+# and then asking WHY the guard is quiet rather than being satisfied that it is.
+CITED = re.compile(r"\brows?\s+\d+(?:'s|s')?\s+[^.;|]{0,24}$", re.I)
+
 
 def claims(cell, word):
-    """True if `word` appears in `cell` at least once as a CLAIM rather than a denial."""
+    """True if `word` appears in `cell` at least once as THIS row's own CLAIM -- not as a
+    denial (`not a SEARCH`) and not inside a citation of another row (`row 3's ENROLMENT`)."""
     for m in re.finditer(re.escape(word), cell):
-        if not NEGATED.search(cell[max(0, m.start() - 12):m.start()]):
-            return True
+        before = cell[max(0, m.start() - 40):m.start()]
+        if NEGATED.search(before[-12:]) or CITED.search(before):
+            continue
+        return True
     return False
 
 

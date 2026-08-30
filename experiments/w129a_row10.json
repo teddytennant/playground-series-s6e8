@@ -1,0 +1,48 @@
+{
+ "arm_a": {
+  "cost_no_click_e6": 4.522768563707359,
+  "cost_no_click_tau_hi_e6": 3.070397390634753,
+  "misclick_e6": {
+   "w21_ad187corr+w20_ad187_h3": 35.169756131246686,
+   "w16i_schemeavg+blend159av_h3": 81.92352750187274
+  },
+  "worst_misclick_e6": 81.92352750187274,
+  "layer": "SELECTION",
+  "k": 2,
+  "denominator": "per competition, TOTAL, not a rate",
+  "baseline": "Kaggle auto-selection by public score"
+ },
+ "arm_b": {
+  "price_e6": 0.0,
+  "covered": [
+   "w36_ad199stdcorr",
+   "w36_ad199stdcorr_ens4"
+  ],
+  "wanted": [
+   "w23_ad187stdcorr",
+   "w36_ad199stdcorr"
+  ],
+  "wanted_never_rebuilt": [
+   "w23_ad187stdcorr"
+  ],
+  "rebuilt_not_wanted": [
+   "w36_ad199stdcorr_ens4"
+  ],
+  "layer": "PIPELINE",
+  "k": 2,
+  "denominator": "per file rebuilt",
+  "baseline": "the shipped file's own bytes"
+ },
+ "arm_c": {
+  "coef_e6": -27.426558533962574,
+  "handed_e6": 27.426558533962574,
+  "layer": "PREDICTOR",
+  "k": null,
+  "denominator": "per post-w23 build, in PREDICTED-LB units",
+  "baseline": "the corrected w25f model",
+  "p_beat_before": 0.367,
+  "p_beat_after": 0.00016
+ },
+ "realised_total_e6": 0.0,
+ "nothing_selected": true
+}
