@@ -30,6 +30,15 @@ WHAT THIS GUARD ENFORCES.
       Rows whose price is a bare `0` / `negative` / `not a modelling angle` are exempt -- there
       is no magnitude to misread. This is a check on a WORD, which is the class of defect the
       last five runs kept finding.
+      🔴 THAT EXEMPTION IS WRONG AND #57 `w128b_pricedguard` NOW COVERS IT (w128, 2026-08-30).
+      "There is no magnitude to misread" is a claim about the world and nobody checked it.
+      Row 9's bare `negative` covered SIX instrument readings spanning 340x, from +6e-6 to
+      -2,043e-6, with BOTH SIGNS present and the two ends on opposite sides of the 50e-6
+      floor. #55 and #56 inherited this exemption verbatim, so for four runs the most
+      under-specified cell in the table was the one cell no guard could see. The exemption
+      stays here -- C1 is about naming a quantity, and a magnitude-free cell has none -- but
+      it is no longer the last word: #57 requires every cell to carry a magnitude or type
+      `NOT A PRICE` out loud.
   C2  ROW 4's ENROLMENT PRICE. Row 4 published a TUNING price and nothing else, so the index
       had no XGBoost enrolment number at all while row 3 had two CatBoost ones. w124a measured
       it on the same base104 pool, the same paired 50/50 procedure and the same three splits,
@@ -63,6 +72,8 @@ import sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from w128b_pricedguard import claims  # noqa: E402  -- the negation-aware reader, #57
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "agent"))
@@ -75,7 +86,7 @@ ANGLE_HEAD = "# 📇 THE ANGLE INDEX"
 
 # C1. The registered vocabulary. Four words, deliberately few: a price here is the value of
 # tuning a model you hold, enrolling one you do not, concatenating rows, or searching weights.
-UNITS = ("TUNING", "ENROLMENT", "CONCAT", "SEARCH")
+UNITS = ("TUNING", "ENROLMENT", "CONCAT", "SEARCH", "CORRECTION")
 MAGNITUDE = re.compile(r"\d\s*e-[67]|\d,\d{3}e-[67]")
 
 # C2/C3. Frozen literals -- w124a_row4.json, base104, paired 50/50, 3 splits, C=1.0, hybrid.
@@ -125,7 +136,7 @@ def index_rows(txt):
 def unpriced(rows):
     """Price cells that carry a magnitude and name no quantity. The C1 predicate."""
     return [(n, c) for n, c in sorted(rows.items())
-            if MAGNITUDE.search(c) and not any(u in c for u in UNITS)]
+            if MAGNITUDE.search(c) and not any(claims(c, u) for u in UNITS)]
 
 
 def main() -> int:

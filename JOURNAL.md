@@ -35765,3 +35765,225 @@ RESEARCH.md (`grep FULLPATH=`), not out of scrollback.
 cell without re-running the suite. Three of the ten rows sit on consecutive lines and #42's
 window used to cross them; the reader is fixed, but the table is still the densest place in the
 document for a window-crossing bug to live.
+
+---
+
+# w128 — 2026-08-30, slot 7 of 10 · ANGLE: error analysis — find where the current best model is
+# wrong, segment the OOF errors and look for structure a feature could capture · **AT THE CAP,
+# NOTHING SENT**
+# 🔴 ROW 9'S PRICE CELL WAS `0 / negative` AND CARRIED NO MAGNITUDE, SO #53, #55 AND #56 WERE
+# ALL STRUCTURALLY BLIND TO THE MOST UNDER-SPECIFIED CELL IN THE TABLE
+
+**⛔ NO SUBMISSION. Ten already landed today at 12:36–12:37Z (w122's queue drain), confirmed
+twice: `kaggle competitions submissions -v` lists the ten `w55 tail-fill` sends, and
+`w26g_send.py --n 10` prints *"191 submissions on record; 10 already sent on 2026-08-30 (UTC);
+0 of 10 slots left today"*.** The cap is 10/day and it is spent. Measurement and documentation
+only, which is what the brief asks for at the cap. ⚠ `w26g` still PRINTS a ten-file plan under
+the zero-slot line; the plan is what it *would* send tomorrow, not a permission.
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 9 — FOURTEENTH HANDING
+
+`w117a_handcount` run, not counted by hand: **×13 → ×14**. Closed since 2026-08-14, four
+instruments, re-verified at the artefact level by w110 and re-indexed by w119. Nothing re-opens.
+`CURRENT_RUN`/`CURRENT_ROW` moved to `w128`/row 9 and the tool's number was used, not a hand edit.
+
+## 2. 🔴 THE DEFECT — A PRICE IS A NUMBER, A QUANTITY, A LAYER, A SCOPE, A DENOMINATOR, **AND A
+## BASELINE** — AND A CELL WITH NO NUMBER IS EXEMPT FROM EVERY CHECK THAT READS NUMBERS
+
+Row 9 read, in full: `**0 / negative**`. That is the entire cell.
+
+- **NO BASELINE, AND THE ROW'S OWN INSTRUMENT PUBLISHES BOTH SIGNS.** `w14d_bandmap`'s
+  cross-fitted per-cell isotonic read **−118e-6 against the uncorrected stack** and **+6e-6
+  against a size-matched permuted-cell control**. `negative` is true of the first and **false of
+  the second**, and the cell never said which. **Ninth run, ninth missing facet of a price.**
+- 🎯 **NO MAGNITUDE, THEREFORE NO GUARD, AND THIS IS THE BIGGER FINDING.** #53 (units), #55
+  (scope) and #56 (denominator) all open by selecting cells that carry an `e-6`/`e-7` token.
+  Row 9 carries none. **All three skip it in silence.** #57's C5 imports the three and runs
+  their own predicates: `#53 BLIND · #55 BLIND · #56 BLIND`, each still firing on its own frozen
+  defect in the same call so the reading cannot come from three broken importers.
+- 🔴 **AND THE EXEMPTION WAS WRITTEN INTO THE FIRST GUARD OF THE FAMILY, IN TERMS.** #53's
+  docstring: *"Rows whose price is a bare `0` / `negative` / `not a modelling angle` are exempt
+  — **there is no magnitude to misread**."* That second clause is a claim about the world and
+  nobody checked it. **There were six readings to misread.** #55 and #56 inherited the predicate
+  verbatim, and each then wrote a careful "what my exemption is blind to" paragraph pointing at
+  other **numbered** cells. w127 predicted rows 1 or 2 for exactly that reason. Both carry
+  magnitudes. ⟹ **WHEN A GUARD FAMILY SHARES A SELECTOR IT SHARES ONE BLIND SPOT, AND IT IS THE
+  SELECTOR'S COMPLEMENT. Adding guards does not shrink it; auditing the first one's exemption
+  clause is the only thing that does.**
+
+## 3. ✅ THE VERIFICATION — `w128a_row9.py`, 22m06s under `systemd-run --user`, FAILURES 0
+
+Pre-registered in `experiments/w128_prereg.txt` (commit `499b88d`) **before any number for this
+run existed**, falsifier included.
+
+**R1** — every published figure recomputes from the saved vectors: `errormap`'s four segment
+readings (0.974025 / 0.974071 / 0.961145 / 0.933423), the per-level endpoints (0 missing
+0.977541, 5+ 0.913295, base rate 0.2421 → 0.9997), the hard band at **250,188** with the
+adjacent pair printed alongside at **274,034** so w110's corrected 274k defect cannot return,
+and `bandmap`'s within-cell 0.006964 / cross-cell 0.022988 ⟹ **cross-cell share 76.75%**.
+
+**R2** — both columns rebuilt from scratch on the frozen SKF5: per-cell isotonic **−110.9e-6**
+against the stack, size-matched permuted null **−116.0e-6**, so **real − null = +5.1e-6**.
+w14d's `−118e-6 / +6e-6` reproduced by independent code seventeen days later.
+
+**R3, the ENROLMENT arms** — paired 50/50 at random_state 0/1/2, C=1.0, `hybrid`, full
+167-member pack. **k=1 on every arm.**
+
+| arm | Δ | sign |
+|---|---|---|
+| per-cell isotonic `(R−Q)` | **+3.95e-6** ± 2.0e-6 | consistent |
+| per-cell residual `(S−Q)` | **+2.36e-6** ± 1.4e-6 | consistent |
+| **the PERMUTED null `(T−Q)`** | **+3.17e-6** ± 2.9e-6 | consistent |
+| **real minus null `(R−T)`** | **+0.79e-6** ± 4.16e-6 | **SIGN FLIPS** |
+
+🎯 **THE PERMUTED NULL TAKES 80% OF THE REAL SEGMENTATION'S GAIN.** A column whose cell
+membership is random buys +3.17e-6 of the +3.95e-6, so whatever the correction is worth at the
+stack layer is **capacity, not structure** — w14d's verdict at a different layer, now reproduced
+in the currency the rest of the index uses. The deciding contrast is **5.3× under its own sd,
+sign-flipping across the three splits, and 13× below CatBoost's +10.04e-6/member** measured in
+the same process on the same splits. ⟹ **All four registered predictions HELD, the falsifier
+did not fire, nothing re-opens on any arm.**
+
+## 4. ✅ THE CONTROL HIT w123 EXACTLY — **+0.0000e-6** — THIRD CONSECUTIVE RUN
+
+`catbase+cat − catbase` over the same 8 CatBoost members re-measures **+10.0416e-6/member**
+against w123's **+10.0416e-6**. The pool for arms Q..T is the **full 167-member pack**, not
+`base104` — these columns were built in this process and base104 is a frozen subset. The docstring
+and the `[pool]` print both say so, which is the mistake w127 caught in itself one run ago.
+
+## 5. ✅ STANDING CHECK #57 — `w128b_pricedguard`, 56 → 57 stems
+
+C1 every price cell carries a magnitude **or** the literal opt-out `NOT A PRICE`, which a human
+has to type — **silence must not be spendable** · C2 row 9 publishes `CORRECTION`, `STACK layer`,
+`k=1`, both baselines and the 76.7% cap · C3 `w128a_row9.json` against literals frozen in the
+guard, **INERT** if the artefact is missing · C4 `--control` over the frozen pre-fix cell · C5
+the siblings' blindness, imported and measured · C6 the shared negation reader, both directions.
+
+Rows 8 and 10 now carry `NOT A PRICE` in words: row 8 is a foundation row whose answer is 0, row
+10 is the standing checklist.
+
+⚠ **WHAT #57 IS BLIND TO, AND WHAT THE FAMILY IS.** C1 accepts `NOT A PRICE` from anyone who
+types it. More usefully: **all four guards read only the `price` column.** The `closed` column's
+counts and dates are checked only by `w117a_handcount`, and rows 3/4/5's `base104` pool
+disclosures are prose that nothing parses — w127 nearly shipped a wrong one. 🎯 **If the next
+defect is in this genus it is in the closed column or in a pool disclosure.**
+
+## 6. 🔴 THE FIXED CELL TURNED #55 RED AND #53 FALSELY GREEN, FOR THE SAME REASON
+
+First suite pass: **53/57, FOUR reds**, two more than the documented pair, so the logs were read
+before anything was triaged. `w101a_angleguard` was mine and trivial (I published a grep anchor
+before writing the section it points at). **`w126c_scopeguard` was not.**
+
+Row 9's corrected cell says *"not an ENROLMENT, not a **SEARCH**, not a TUNING"* — it names the
+three quantities **to deny them**. #53/#55/#56 all test `WORD in cell`.
+
+- **#55 went RED**, demanding a scope for a SEARCH the cell disowns.
+- 🎯 **#53 went GREEN for the same reason, and that direction is worse.** It saw quantity words
+  in the denials, concluded the cell was labelled, and stopped — while the cell's real quantity,
+  `CORRECTION`, **was not in #53's vocabulary at all.** A false pass bought by a negation.
+
+✅ **Fixed in the reader, not in the cell.** `claims(cell, word)` skips occurrences preceded by
+`not a/an`, is **shared** by all four guards rather than copied three times, `CORRECTION` joins
+#53's vocabulary, `STACK` joins #55's layer words, and C6 requires the reader to **disagree with
+the naive `in` test** on at least one synthetic probe (it disagrees on 2 of 4) else the change is
+decoration. **All four frozen controls still fire**, so green was not bought by blunting.
+⚠ **Second run running where a guard reddened by my own edit was right about a reader and wrong
+about my cell. The one-minute fix both times was to reword the cell and leave the reader broken.**
+
+## 7. ✅ THE SUITE — **TOTAL 258s, 55/57 GREEN**, both reds the documented post-send pair
+
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+
+Both logs read (`w54a`: *"Refusing. Rebuild first"*; `w85c` G4: *"w54a rejects the LIVE queue"*)
+and deleted. **Both-red IS the post-send pattern**; the hazardous one is w85c red while w54a is
+GREEN. Launch command copied out of RESEARCH.md (`grep FULLPATH=`), not scrollback.
+
+## 8. 🔻 LEADERBOARD.md WAS STILL SELLING **−11/day** AND THE JOURNAL HAS BANNED IT SINCE w124
+
+w122 read the board today at 12:45Z — **rank 278 / 3,321, cut 332, margin +54** — and that row
+never reached `LEADERBOARD.md`, which still published a **−11/day** decay fitted on a **2h13m**
+window. Added the row and corrected the rate: **+74 → +54 over 21h21m is −22/day.** From +54 with
+35h14m to the deadline that is **−32 ⟹ margin ≈ +22** at 08-31 23:59. Bronze survives on that
+rate, **which does not contain a deadline-eve surge, and the last day of a Playground competition
+is exactly when one happens.** ⛔ One board read per day; today's was w122's and it was not
+re-spent.
+
+## 9. ⛔ THE CLICK — TWENTY-SEVENTH RUN ASKING. **THE DEADLINE IS TOMORROW.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live this run, rc read from the process and not through a pipe, **rc=1**:
+`*** NOTHING IS SELECTED ***`. `55656399 → w36_ad199stdcorr.csv` (public 0.97118) · `55588167 →
+w23_ad187stdcorr.csv` (public 0.97116). Auto-select takes the 0.97119 tier and both WANTED files
+print **UNREACHABLE without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the
+mis-click costs **+35.17e-6** or **+81.92e-6** and stays the bigger hazard by an order of
+magnitude. ⛔ Do not re-price it. **The click stays human, and this is the last full day to make it.**
+
+## 10. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122 at 12:36–12:37Z, confirmed from the API twice.
+- **Row 9 now publishes a quantity (`CORRECTION`), a layer (STACK), a scope (k=1), both
+  baselines with their opposite signs, four instruments' ranges, and the 76.7% cross-cell cap.**
+- **The angle priced in the index's own currency for the first time**: `+3.95e-6` isotonic,
+  `+2.36e-6` residual, **`+3.17e-6` for the permuted null**, deciding contrast `+0.79e-6`
+  sign-flipping — against a CatBoost control that reproduced w123 to `+0.0000e-6`.
+- **The family's shared blind spot found and closed** (#57), and the exemption clause that
+  created it traced back to #53's own docstring four runs ago.
+- **A reader defect in three shipped guards fixed once, shared, and controlled** (§6).
+- **LEADERBOARD.md's −11/day corrected to −22/day** with w122's missing row added.
+- ⛔ **Still nothing selected. Twenty-seventh run asking, and the deadline is tomorrow.**
+
+## 11. NEXT RUN — READ THIS ORDER. **IT IS THE FINAL DAY (deadline 2026-08-31 23:59).**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10` and read
+   the **slots-left line**, not the plan it prints under it.
+2. ⚠ **RUN `w48e_order.py --day 2026-08-31 --write` FIRST**, then `--go`. Quote `w26d`'s
+   **bound**, never its point estimate. **Send early: a slot unsent at 23:59 is gone.** The queue
+   on disk is for 08-30 and already sent; the two suite reds clear when it is rebuilt.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w128 set it to `w128`/row 9.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (grep `FULLPATH=`). Read the `FAILURES:` line **and which stems are on it**;
+   more than the documented pair ⟹ read the first failure log before triaging.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §3 above is not an exception — the
+   permuted null takes 80% of the only positive arm and the contrast sign-flips.
+6. ⛔ **DO-NOT, carried forward from w92–w127 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**; 274,034 is the ADJACENT pair) · cite a line number of RESEARCH.md · use
+     `pgrep` · read `$?` after a pipe · launch a long job with anything but `systemd-run --user` ·
+     build `cat_native_ctr2` / `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT
+     members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**, and `LEADERBOARD.md` now says so too) · read "the guards over the click are
+     green" as "the click screen is correct" · read **5.9e-6** as the CatBoost price (CatBoost
+     alone is **+10.04e-6/member**) · treat +10.04e-6 or +7.38e-6 as a reason to build a CatBoost
+     or XGBoost member · add measured-alone group deltas together · divide by filenames rather
+     than arrays · multiply a member-level number by **1.4%** far from the **+138e-6** it was
+     fitted at · read row 5's `negative` as a stack-layer price · read row 6's **−1.07e-6** as
+     the price of re-weighting members · read row 7's **+2e-6** as a per-member rate · quote
+     *"avg3 is in the span of its three seeds"* as an argument about the stack · call
+     `load_members(drop=DEFAULT_DROP)`'s output `base104` · launch the suite with a hand-typed
+     PATH.
+   • 🆕 **DO NOT** read row 9's **−118e-6** without its baseline. It is measured **against the
+     uncorrected stack**; **against the permuted-cell control the same arm is +6e-6**. The two
+     readings of one manoeuvre have **opposite signs** and the cell used to publish neither (§2).
+   • 🆕 **DO NOT** read row 9's **+3.95e-6** as evidence the segmentation does anything. The
+     size-matched **permuted null takes +3.17e-6 of it**; the contrast is +0.79e-6 and it
+     sign-flips (§3).
+   • 🆕 **DO NOT** add a quantity word to an ANGLE INDEX cell in order to DENY it without
+     re-running the suite. All four guards now use `claims()`, but the vocabulary is finite and
+     a quantity outside it still walks past #53 (§6).
+7. ⚠ **THE LESSON, NOW NINE RUNS OLD, AND THIS TIME THE PREDICTION MISSED — INSTRUCTIVELY.**
+   w127 wrote down #56's blind spot and pointed at rows 1 and 2. **Both carry magnitudes, and so
+   does every cell w127 could see.** The defect was in the one cell with no number at all.
+   🎯 **A check that triggers on a number cannot see a cell that declines to give one, and
+   neither can the person who wrote the check. Four consecutive guards inherited one selector and
+   therefore one blind spot. Before writing the next guard, read the FIRST guard's exemption
+   clause and ask what it asserts about the world.**

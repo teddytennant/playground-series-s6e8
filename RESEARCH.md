@@ -1,3 +1,170 @@
+# (w128, 2026-08-30) — 🔴 ROW 9'S PRICE CELL WAS **`0 / negative`** AND THAT IS THE WHOLE CELL.
+# ONE WORD OVER **SIX INSTRUMENT READINGS SPANNING 340×, WITH BOTH SIGNS PRESENT** — AND
+# BECAUSE IT CARRIES NO MAGNITUDE, **#53, #55 AND #56 ARE ALL STRUCTURALLY BLIND TO IT.**
+
+## 🔴 THE DEFECT — AND #53's OWN DOCSTRING GRANTED THE EXEMPTION, FOUR RUNS EARLY
+
+Row 9 read, in full:  `**0 / negative**`
+
+Rows 1–7 each name a **QUANTITY** (CONCAT / TUNING / ENROLMENT / SEARCH), a **MAGNITUDE** with
+a unit, and — since w124, w125, w126 and w127 each fixed exactly one facet — a **LAYER**, a
+**SCOPE** and a **DENOMINATOR**. Row 9 names none of the five, and it is missing a sixth that
+no previous run had a name for:
+
+🎯 **A PRICE IS A NUMBER, A QUANTITY, A LAYER, A SCOPE, A DENOMINATOR — AND A BASELINE.**
+Row 9's own second instrument (`w14d_bandmap`, cross-fitted per-cell isotonic over the
+generator's seven rule cells) published **two signs for one manoeuvre**: **−118e-6** against
+the uncorrected stack and **+6e-6** against a size-matched permuted-cell control. The word
+`negative` is true of the first reading and **false of the second**, and the cell never said
+which baseline it was quoted against.
+
+## 🎯 THE CELL THAT NO GUARD COULD SEE — THE WHOLE FAMILY SHARES ONE BLIND SPOT
+
+#53 `w124b_priceunitguard`, #55 `w126c_scopeguard` and #56 `w127b_rateguard` all open with the
+same predicate: *select the cells carrying an `e-6`/`e-7` token*. Row 9 carries none. **All
+three skip it in silence.** #57's C5 does not assert that — it **imports the three siblings and
+runs their own C1 predicates** over the frozen pre-fix table, and requires each to still fire on
+its own frozen defect in the same call so the reading cannot come from three broken importers:
+
+    #53 w124b unpriced (quantity)          row 9: BLIND   own row 4: fires
+    #55 w126c unscoped (scope)             row 9: BLIND   own row 6: fires
+    #56 w127b undenominated (denominator)  row 9: BLIND   own row 7: fires
+    #57 w128b (this file) on the same table: fires on rows [8, 9, 10]
+
+🔴 **AND THE EXEMPTION WAS WRITTEN DOWN IN THE FIRST GUARD OF THE FAMILY, IN TERMS.** #53's
+docstring, 2026-08-30, four runs ago:
+
+> *"Rows whose price is a bare `0` / `negative` / `not a modelling angle` are exempt — **there is
+> no magnitude to misread**."*
+
+That second clause is a **claim about the world**, and nobody checked it. There were six
+readings to misread. #55 and #56 inherited the predicate verbatim without re-examining the
+sentence that justified it, and then each wrote a careful "what my exemption is blind to"
+paragraph — **pointing at other numbered cells, because a check that triggers on a number cannot
+see a cell that declines to give one, and neither can the person writing it.** w127 predicted
+the next defect would be in row 1 or row 2 for exactly that reason. Both carry magnitudes.
+
+⟹ **WHEN A GUARD FAMILY SHARES A SELECTOR, IT SHARES ONE BLIND SPOT, AND IT IS THE SELECTOR'S
+COMPLEMENT.** Adding guards does not shrink it. Auditing the first guard's exemption clause is
+the only thing that does.
+
+## ✅ THE MEASUREMENT — `w128a_row9.py`, FAILURES 0, PRE-REGISTERED IN `experiments/w128_prereg.txt`
+
+Registered before any number for this run existed (commit `499b88d`), falsifier included.
+
+**R1, the artefacts.** All four of `errormap`'s published segment figures recompute exactly from
+`oof_blend158_h3.npy` — `n_missing_all` 0.974025 (+0.003977), `n_screen_missing` 0.974071
+(+0.004023), `other_screen_band` 0.961145 (−0.008904), `daily_band` 0.933423 (−0.036625) — as do
+the per-level endpoints (0 missing 0.977541, 5+ missing 0.913295, base rate 0.2421 → 0.9997) and
+the hard band's row count, **250,188**, with the adjacent pair printed alongside at **274,034** so
+the 274k defect w110 corrected cannot come back. `w14d_bandmap`'s decomposition reproduces too:
+within-cell deficit 0.006964, cross-cell 0.022988, **cross-cell share 76.75%**.
+
+**R2, the columns rebuilt from scratch.** Cross-fitted per-cell isotonic on the frozen SKF5 reads
+**−110.9e-6** against the stack and the size-matched permuted-cell null reads **−116.0e-6**, so
+**real − null = +5.1e-6** — w14d's `−118e-6 / +6e-6` reproduced by independent code seventeen
+days later, and it is the pair of readings the word `negative` was hiding.
+
+**R3, row 9 priced in rows 3/4's units for the first time.** Paired 50/50 at random_state 0/1/2,
+C=1.0, `hybrid`, the full 167-member pack. ⚠ Not `base104` — these columns were built in this
+process and base104 is a frozen subset; the CatBoost control anchors the INSTRUMENT, not the pool.
+
+| arm | Δ | per member (k=1) | sign |
+|---|---|---|---|
+| per-cell isotonic `(R−Q)` | +3.95e-6 ± 2.0e-6 | **+3.95e-6** | consistent |
+| per-cell residual `(S−Q)` | +2.36e-6 ± 1.4e-6 | **+2.36e-6** | consistent |
+| **the PERMUTED null `(T−Q)`** | +3.17e-6 ± 2.9e-6 | **+3.17e-6** | consistent |
+| **real minus null `(R−T)`** | +0.79e-6 ± 4.16e-6 | **+0.79e-6** | **SIGN FLIPS** |
+
+🎯 **THE PERMUTED NULL TAKES 80% OF THE REAL SEGMENTATION'S GAIN.** A column built on cells whose
+membership is random buys +3.17e-6 of the +3.95e-6. Whatever the correction is worth at the stack
+layer is **capacity, not structure** — which is the same verdict w14d reached at a different layer,
+now reproduced in the currency the rest of the index uses. The deciding contrast is **+0.79e-6,
+5.3× under its own sd, sign-flipping across the three splits, and 13× below CatBoost's
++10.04e-6/member measured in the same process on the same splits.**
+
+**The control.** `catbase+cat − catbase` over the same 8 CatBoost members re-measures
+**+10.0416e-6/member** against w123's **+10.0416e-6** — **gap +0.0000e-6**, the third consecutive
+run to reproduce it to four decimal places. ⛔ **All four registered predictions HELD and the
+falsifier did not fire. Nothing re-opens.**
+
+## 🔻 THE SPAN THE WORD `negative` WAS COVERING, PRINTED
+
+    -2043.0e-6  OVER  the floor   I3 cell-local LightGBM, cell G, 400 rounds (worst)
+     -526.0e-6  OVER  the floor   I4 residual booster vs control, round 25 (worst)
+     -307.0e-6  OVER  the floor   I3 cell-local LightGBM, BAND, 50 rounds (best)
+     -118.0e-6  OVER  the floor   I2 per-cell isotonic vs the uncorrected stack
+      -74.0e-6  OVER  the floor   I4 residual booster vs control, round 100 (best)
+       +6.0e-6  UNDER the floor   I2 the same arm vs its permuted-cell control
+
+**One word. Six readings. A 340× span, both signs present, and the two ends on opposite sides of
+the 50e-6 floor.** A reader who takes `negative` at face value cannot tell whether row 9 is
+"measured at zero" or "measured catastrophic", and the answer is *both, at different baselines*.
+
+## ✅ STANDING CHECK #57 — `w128b_pricedguard`, 56 → 57 stems
+
+C1 every ANGLE INDEX price cell carries an `e-6`/`e-7` magnitude **or** the literal opt-out
+`NOT A PRICE`, which a human has to type — silence must not be spendable · C2 row 9 publishes
+`CORRECTION`, `STACK layer`, `k=1`, both baselines and the 76.7% cap · C3 the `w128a_row9.json`
+figures against literals frozen in the guard, **INERT** if the artefact is missing · C4
+`--control` over the frozen pre-fix cell · C5 the siblings' blindness, imported and measured ·
+C6 the shared negation reader, both directions on synthetic cells.
+
+    (shipped)   C1 rows 8 and 10 opted out in words, 1..7 and 9 priced · C2 OK · C3 OK ·
+                C5 #53/#55/#56 all BLIND on row 9, all three firing on their own · C6 the
+                reader disagrees with naive `in` on 2 of 4 probes · FAILURES 0
+    (--control) C1 FIRES on row 9 · C2 FIRES on 7 missing tokens · shipped SILENT on both
+
+⚠ **WHAT #57 IS BLIND TO, WRITTEN DOWN — AND THIS TIME ALSO WHAT THE *FAMILY* IS BLIND TO.** C1
+checks for a magnitude token and accepts `NOT A PRICE` from anyone who types it; it cannot tell
+whether the magnitude is the right one. More usefully: **all four guards read only the `price`
+column.** The `closed` column carries handing counts and dates that only `w117a_handcount` checks,
+and the pool disclosures (`base104`) that rows 3/4/5 make in prose are checked by nothing at all —
+w127 nearly shipped a wrong one. 🎯 **If the next defect is in this genus it is in the closed
+column or in a pool disclosure, and it will not be in the price column, because that is now the
+one place four guards look.**
+
+## 🔴 ADDENDUM — THE FIXED CELL TURNED #55 RED AND #53 FALSELY GREEN, FOR THE SAME REASON
+
+First suite pass after the row 9 edit: **53/57, FOUR reds** — two more than the documented
+post-send pair, so the logs were read before anything was triaged. `w101a_angleguard` was mine
+and trivial (I published a grep anchor before writing the section it points at; fixed by naming
+the section). **`w126c_scopeguard` was not trivial.**
+
+**Mechanism.** Row 9's corrected cell says *"not an ENROLMENT, not a **SEARCH**, not a TUNING"* —
+it names the three quantities **in order to deny them**. #53, #55 and #56 all test `WORD in cell`.
+
+- **#55 went RED**, demanding a LAYER word and a `k=` for a SEARCH price the cell explicitly
+  disowns.
+- 🎯 **#53 went GREEN for the same reason, and that is the worse direction.** Its predicate is
+  *"carries a magnitude and names NO quantity"*; it saw `ENROLMENT` and `SEARCH` in the denials,
+  concluded the cell was labelled, and stopped looking. **The cell's real quantity, `CORRECTION`,
+  was not in #53's four-word vocabulary at all, and #53 never noticed** — a false pass bought by
+  the negation it was reading as a claim.
+
+⟹ **A word-presence test cannot tell a label from its negation, and it fails silently in the
+direction that matters.** Fixed in the reader, not in the cell: `claims(cell, word)` skips any
+occurrence preceded by `not a/an`, it is **shared by all four guards** rather than copied three
+times, `CORRECTION` joins #53's vocabulary and `STACK` joins #55's layer words. #57's **C6**
+checks it in both directions on synthetic cells and requires it to **disagree with the naive
+`in` test** on at least one, else the change is decoration.
+
+✅ **All four frozen controls still fire** — #53 on all six pre-fix magnitudes, #55 on the pre-fix
+row 6 cell and all four pre-fix rate sites, #56 on row 7, #57 on row 9 — so green was not bought
+by blunting the instruments. **Second run in a row where a guard reddened by my own edit was
+right about a reader and wrong about my cell** (w127 §11 was #42's window). ⚠ **The temptation
+both times was to reword the cell, which takes one minute and leaves the reader broken for
+everyone after you.**
+
+## ✅ THE SUITE — **TOTAL 258s, 55/57 GREEN**, both reds the documented post-send pair
+
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+
+Both logs read (`w54a`: *"Refusing. Rebuild first"*; `w85c` G4: *"w54a rejects the LIVE queue"*)
+and deleted. This is the **both-red** pattern, which IS post-send; the hazardous pattern is
+**w85c red while w54a is GREEN**, which is not this. The launch command was copied out of this
+file (`grep FULLPATH=`), not out of scrollback.
+
 # (w127, 2026-08-30) — 🔴 ROW 7'S PRICE CELL PUBLISHES A **k=1 STACK-LAYER TOTAL** IN THE
 # SLOT WHERE ROWS 3/4 PUT A **PER-MEMBER RATE**. AT THE PACK'S k=104 THAT READING IS
 # **+208e-6, FOUR TIMES THE FLOOR** — AND THE HONEST RATE IS **+0.49e-6/member**.
@@ -2873,9 +3040,9 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×16, from 08-10 → w116 08-29 → w125 08-30 — the most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
 | 6 | *blending: rank-average or weight the models by OOF* | **×12, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
 | 7 | *seed and fold diversity, averaged* | ×13, from 08-11 → w64 → w109 08-28 → w118 08-29 → w127 08-30 · **artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO LAYERS OF ONE MANOEUVRE, AND THE ROW USED TO PUBLISH ONE NUMBER AT THE OTHER ONE'S SCOPE.** stacker arm: **structural null**. member arm, seed-averaging `xgb_latcat`: **MEMBER layer +138e-6** — the solo probability-mean gain, re-measured w127 at **+138.2e-6** from the OOF arrays, and it is **ABOVE** the 50e-6 floor — converting to **STACK layer +2e-6, at k=1**. That +2e-6 is a **SUBSTITUTION** price (w109 arm B *replaced* three seed twins by their mean; nothing was added, the pack lost two columns) and it is **NOT a per-member rate** — read as one at k=104 it multiplies out to **+208e-6, four times the floor**. The genuine **ENROLMENT** rate, measured w127 with w123/w124's instrument (paired 50/50, splits 0/1/2, C=1.0, hybrid) on the full **167-member** pack: **+0.49e-6/member** for the two extra seeds, **+1.72e-6** for the average alone, **−0.51e-6** for the average on top of the seeds — all three **SIGN-FLIPPING** across the 3 splits and none distinguishable from zero, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. ⛔ Nothing re-opens on any arm | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
-| 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | 0, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
-| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×13, from 08-11 → w119 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
-| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×13, from 08-11 → w111 08-28 → w120 08-29 · artefacts verified** (count from `w117a_handcount`) | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
+| 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | **NOT A PRICE** — a foundation row, and the answer is **0**, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
+| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×14, from 08-11 → w119 08-29 → w128 08-30 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | ⚠ **A CORRECTION PRICE, AND THE ROW USED TO PUBLISH NEITHER A MAGNITUDE NOR A BASELINE — IT SAID `0 / negative` AND NOTHING ELSE.** The manoeuvre is a **CORRECTION** applied on top of the shipped file — not an ENROLMENT, not a SEARCH, not a TUNING — so every number here is a **STACK layer** total at **k=1** and none of them is a per-member rate. ⚠ **TWO BASELINES, AND THEY DO NOT SHARE A SIGN.** Cross-fitted per-cell isotonic over the generator's seven rule cells: **−118e-6 against the uncorrected stack** and **+6e-6 against a size-matched permuted-cell control** — w128 rebuilt both columns from scratch and re-measured **−110.9e-6** and **+5.1e-6**. Priced as an ENROLMENT in rows 3/4's units for the first time (paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the full 167-member pack, w128a): isotonic column **+3.95e-6**, residual column **+2.36e-6**, **the PERMUTED null +3.17e-6 — the null takes 80% of it, so the gain is capacity, not segmentation** — and the deciding contrast **real − null = +0.79e-6 ± 4.16e-6, SIGN-FLIPPING**, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. The other two instruments read **−307e-6 … −2,043e-6** (cell-local LightGBM, negative 9/9) and **−74e-6 … −526e-6** (global residual booster, negative 8/8). ⛔ **And the structural cap that kills the angle's premise before any model is fitted: 76.7% of the AUC deficit is CROSS-cell** — pairs of rows in different segments — which no within-segment feature, monotone map or cell-local booster can reach | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` · `THE CELL THAT NO GUARD COULD SEE` (w128, the price, both baselines and the permuted null) |
+| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×13, from 08-11 → w111 08-28 → w120 08-29 · artefacts verified** (count from `w117a_handcount`) | **NOT A PRICE — not a modelling angle** — it is the standing checklist, and it is the one angle that has ever PAID | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
 
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
 number came from a LightGBM measurement. w106 checked it at the artefact level rather than
@@ -3377,7 +3544,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 56 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 57 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -3391,7 +3558,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
     w122a_slotguard   w123b_groupguard  w124b_priceunitguard  w125b_layerguard  w126c_scopeguard
-    w127b_rateguard
+    w127b_rateguard   w128b_pricedguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

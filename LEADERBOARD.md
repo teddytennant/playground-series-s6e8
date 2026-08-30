@@ -2806,11 +2806,19 @@ it — our number has not moved once and the margin has:
 | 08-27 (w98) | 3,075 | 198 | 307 | +109 |
 | 08-29 13:10 (w113) | 3,241 | 249 | 324 | +75 |
 | 08-29 15:24 (w120) | 3,253 | 251 | 325 | +74 |
+| 08-30 12:45 (w122) | 3,321 | 278 | 332 | +54 |
 
-**128 places of margin gone in four days at a frozen score**, but decelerating: −93, then −34,
-then −1 in 2h13m (≈ −11/day). 56.6 hours left ⟹ −25 to −40 ⟹ margin **+34 to +49** at the
-deadline. Bronze survives on both rates, neither of which contains a deadline-eve surge. ✅ New
-rule: **read the board once per day**, not "when our score moves".
+🔴 **THE −11/day BELOW WAS FITTED ON A 2h13m WINDOW AND IT IS WRONG. THE MEASURED RATE IS
+−22/day** (w122, 2026-08-30): +74 → +54 over 21h21m. The old reading survived here for a day
+because a rate quoted from a two-hour window looks like a trend and reads like one. ⛔ Do not
+quote −11/day; the journal has carried a standing DO-NOT against it since w124.
+
+**128 places of margin gone in four days at a frozen score**, and the deceleration was an
+artefact of the short window: −93, then −34, then −22/day and holding. From +54 at 08-30
+12:45Z the deadline is 35h14m away ⟹ **−32 ⟹ margin ≈ +22** at 08-31 23:59. Bronze survives on
+that rate, which does not contain a deadline-eve surge — and a surge is exactly what the last
+day of a Playground competition produces. ✅ Standing rule: **read the board once per day**, not
+"when our score moves".
 
 🎯 **The tie-break is NOT last-submission-date.** Seven teams sit at 0.97119; ours is the *latest*
 last submission of the seven (2026-08-29 12:37:44, 181 subs) and we rank **first** in the block,

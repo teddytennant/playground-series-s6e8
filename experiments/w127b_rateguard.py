@@ -69,8 +69,11 @@ import argparse
 import json
 import os
 import re
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from w128b_pricedguard import claims  # noqa: E402  -- the negation-aware reader, #57
 ROOT = os.path.dirname(HERE)
 
 RESEARCH = os.path.join(ROOT, "RESEARCH.md")
@@ -120,7 +123,7 @@ def undenominated(rows):
     """C1 predicate: priced ENROLMENT cells that state no denominator."""
     bad = []
     for n, c in sorted(rows.items()):
-        if not (MAGNITUDE.search(c) and ENROL_WORD in c):
+        if not (MAGNITUDE.search(c) and claims(c, ENROL_WORD)):
             continue
         if not (RATE_TOKEN.search(c) or K_TOKEN.search(c)):
             bad.append((n, c[:120]))

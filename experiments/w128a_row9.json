@@ -1,0 +1,105 @@
+{
+ "published": {
+  "global": 0.970048,
+  "seg": {
+   "n_missing_all": 0.974025,
+   "n_screen_missing": 0.974071,
+   "other_screen_band": 0.961145,
+   "daily_band": 0.933423
+  },
+  "seg_tol": 1e-05,
+  "lvl_0missing": 0.977541,
+  "lvl_5missing": 0.913295,
+  "rate_lo": 0.2421,
+  "rate_hi": 0.9997,
+  "hard_band_n": 250188,
+  "within_deficit": 0.006964,
+  "cross_deficit": 0.022987,
+  "cross_share": 0.767,
+  "deficit_tol": 2e-05,
+  "cat_only_per_member": 1.0041599941293389e-05,
+  "cat_only_n": 8,
+  "control_tol": 5e-08,
+  "negative_span": {
+   "I2 per-cell isotonic vs the uncorrected stack": -0.000118,
+   "I2 the same arm vs its permuted-cell control": 6e-06,
+   "I4 residual booster vs control, round 100 (best)": -7.4e-05,
+   "I4 residual booster vs control, round 25 (worst)": -0.000526,
+   "I3 cell-local LightGBM, BAND 50 rounds (best)": -0.000307,
+   "I3 cell-local LightGBM, G 400 rounds (worst)": -0.002043
+  },
+  "noise_floor": 5e-05,
+  "pack_k": 104,
+  "pred_enrol_lo": -3e-05,
+  "pred_enrol_hi": 3e-05
+ },
+ "r1": {
+  "global": 0.9700483189336571,
+  "seg": {
+   "n_missing_all": 0.9740248800592736,
+   "n_screen_missing": 0.9740712434974158,
+   "other_screen_band": 0.9611447995631672,
+   "daily_band": 0.9334228652794734
+  },
+  "within": 0.006963799467361578,
+  "cross": 0.022987881598981352,
+  "share": 0.7674988775442428,
+  "hard_band_n": 250188,
+  "adjacent_n": 274034
+ },
+ "r2": {
+  "cellIso": {
+   "solo": 0.9699373807595595,
+   "vs_stack": -0.00011093817409757456
+  },
+  "cellRes": {
+   "solo": 0.9615433861322009,
+   "vs_stack": -0.008504932801456144
+  },
+  "cellIsoP": {
+   "solo": 0.969932366829018,
+   "vs_stack": -0.00011595210463910544
+  }
+ },
+ "pool_n": 170,
+ "control": {
+  "per_member": 1.0041599941293389e-05,
+  "gap": 0.0,
+  "n": 8,
+  "comparable": true
+ },
+ "arms": {
+  "per-cell isotonic      (R-Q)": {
+   "delta": 3.953765063346992e-06,
+   "sd": 2.3459320804000953e-06,
+   "sign": "consistent"
+  },
+  "per-cell residual      (S-Q)": {
+   "delta": 2.3637394973944717e-06,
+   "sd": 5.237168316886366e-07,
+   "sign": "consistent"
+  },
+  "the PERMUTED null      (T-Q)": {
+   "delta": 3.1676290572398478e-06,
+   "sd": 3.304250948898758e-06,
+   "sign": "consistent"
+  },
+  "real minus null        (R-T)": {
+   "delta": 7.861360061071446e-07,
+   "sd": 4.1632360673543985e-06,
+   "sign": "SIGN FLIPS"
+  }
+ },
+ "reopen": false,
+ "r4": {
+  "span_ratio": 340.5,
+  "readings": {
+   "I2 per-cell isotonic vs the uncorrected stack": -0.000118,
+   "I2 the same arm vs its permuted-cell control": 6e-06,
+   "I4 residual booster vs control, round 100 (best)": -7.4e-05,
+   "I4 residual booster vs control, round 25 (worst)": -0.000526,
+   "I3 cell-local LightGBM, BAND 50 rounds (best)": -0.000307,
+   "I3 cell-local LightGBM, G 400 rounds (worst)": -0.002043
+  }
+ }
+}

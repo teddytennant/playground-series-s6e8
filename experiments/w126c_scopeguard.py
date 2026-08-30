@@ -64,6 +64,8 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from w128b_pricedguard import claims  # noqa: E402  -- the negation-aware reader, #57
 ROOT = os.path.dirname(HERE)
 
 RESEARCH = os.path.join(ROOT, "RESEARCH.md")
@@ -73,7 +75,7 @@ ANGLE_HEAD = "# 📇 THE ANGLE INDEX"
 # C1. Same magnitude predicate as #53, so the two guards agree on what "priced" means.
 MAGNITUDE = re.compile(r"\d\s*e-[67]|\d,\d{3}e-[67]")
 SEARCH_WORD = "SEARCH"
-LAYER_WORDS = ("TOP-LEVEL", "TRANSFORM", "MEMBER")
+LAYER_WORDS = ("TOP-LEVEL", "TRANSFORM", "MEMBER", "STACK")
 K_TOKEN = re.compile(r"\bk=\d+")
 
 # C2. Row 6 carries two searches; both must be legible from the cell alone.
@@ -137,7 +139,7 @@ def unscoped(rows):
     """C1 predicate: priced SEARCH cells that name no layer, or no k, or neither."""
     bad = []
     for n, c in sorted(rows.items()):
-        if not (MAGNITUDE.search(c) and SEARCH_WORD in c):
+        if not (MAGNITUDE.search(c) and claims(c, SEARCH_WORD)):
             continue
         miss = []
         if not any(w in c for w in LAYER_WORDS):
