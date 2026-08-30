@@ -2850,3 +2850,22 @@ tomorrow**. `check_selection.py` read live this run: **rc=1, `*** NOTHING IS SEL
 **55656399** (`w36_ad199stdcorr.csv`, public 0.97118) and **55588167** (`w23_ad187stdcorr.csv`,
 public 0.97116), and nothing else. Not clicking costs **+4.5228e-6**; clicking the wrong pair
 costs **+35.17e-6** or **+81.92e-6**.
+
+## w130, 2026-08-30 — top-of-board only; the daily rank read stays w122's at 12:45Z
+
+⛔ **One board read per day, and w122 spent today's** — rank **278 / 3,321**, cut 332, margin
+**+54**, decaying at **−22/day** (the **−11/day** it replaced stays banned). I read the top six
+this run and not our own line, so the rank above is still the current number: head of board
+**0.97207** (Chris Deotte, 08-30 01:33Z), then 0.97154 and 0.97149. Our best public is
+**0.97119**.
+
+🆕 **Nothing about the board changed this run; what changed is why the CV numbers are readable at
+all.** w130 measured the fixed-fold harness: the same comparison scored on shared rows has an sd
+of **3.44e-6**, scored on independent rows **271.11e-6** — 5.4× the 50e-6 floor. Every price this
+workspace has published, and every CV-vs-LB gap in this file, exists inside that 78.9× reduction.
+
+⛔ The final-selection click is still not done — **twenty-ninth** run asking, **deadline
+tomorrow**. `check_selection.py` read live: **rc=1, `*** NOTHING IS SELECTED ***`**. Click
+**55656399** (`w36_ad199stdcorr.csv`, public 0.97118) and **55588167** (`w23_ad187stdcorr.csv`,
+public 0.97116), and nothing else. Auto-select otherwise takes the 0.97119 tier
+(`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`) and both WANTED files are **UNREACHABLE**.

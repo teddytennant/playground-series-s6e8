@@ -88,8 +88,13 @@ ANGLE_HEAD = "# 📇 THE ANGLE INDEX"
 # tuning a model you hold, enrolling one you do not, concatenating rows, or searching weights.
 # w129 adds row 10's own three. Row 10 was GREEN before they existed, on the word
 # `ENROLMENT` borrowed from a citation of row 3 -- see the CITED reader in w128b.
+# ⚠ THIS LIST HAS GROWN FOUR TIMES, EACH TIME TO ADMIT A CELL SOMEONE HAD JUST WRITTEN. That
+# is the standing weakness of a vocabulary reader and it is written down in every guard that
+# shares it: a quantity outside the list makes a priced cell look UNPRICED, and a quantity
+# inside it can be borrowed from a citation of another row (fixed in w128b.CITED, w129).
 UNITS = ("TUNING", "ENROLMENT", "CONCAT", "SEARCH", "CORRECTION",
-         "SELECTION", "VERIFICATION", "PREDICTOR")
+         "SELECTION", "VERIFICATION", "PREDICTOR",
+         "METRIC", "MEASUREMENT", "FOUNDATION", "REPEAT")   # w130, row 8's four
 MAGNITUDE = re.compile(r"\d\s*e-[67]|\d,\d{3}e-[67]")
 
 # C2/C3. Frozen literals -- w124a_row4.json, base104, paired 50/50, 3 splits, C=1.0, hybrid.

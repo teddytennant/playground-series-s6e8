@@ -58,6 +58,7 @@ STEMS = [
     "w127b_rateguard",
     "w128b_pricedguard",
     "w129b_optoutguard",
+    "w130b_zerobaselineguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

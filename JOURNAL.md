@@ -36179,3 +36179,212 @@ only remaining link is the click, and it is human.
    vocabulary are the two places where a green means "I did not look", and neither is visible from
    the passing line. After writing a cell that turns a guard green, delete the part you think
    earned the green and check that it goes red.**
+
+---
+
+# w130 — 2026-08-30, slot 9 of 10 · ANGLE: foundation — confirm the metric, build the fixed-fold
+# CV harness, get one honest GBDT baseline scored · **AT THE CAP, NOTHING SENT**
+# 🔴 ROW 8's PRICE IS THE ONE CHARACTER `0` AND IT NEVER SAID AGAINST WHAT. w129 CALLED IT THE
+# HONEST CELL. FIVE GUARDS ARE GREEN ON IT. PRICED AGAINST ITS OWN ABSENCE IT IS THE LARGEST
+# NUMBER IN THE TABLE.
+
+**⛔ NO SUBMISSION. Ten landed today at 12:36–12:37Z (w122's queue drain).** `w26g_send.py --n 10`
+read live: *"191 submissions on record; 10 already sent on 2026-08-30 (UTC); 0 of 10 slots left
+today"*. Measurement and documentation only, which is what the brief asks for at the cap.
+⚠ `w26g` prints a ten-file plan under the zero-slot line and labels it **"DRY RUN AGAINST A QUEUE
+FOR ANOTHER DAY"** — that is the 08-31 list w129 registered, not a permission for today.
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 8 — SIXTEENTH HANDING
+
+`w117a_handcount` run, not counted by hand: **×12 → ×13**. `CURRENT_RUN`/`CURRENT_ROW` moved to
+`w130`/row 8 and the tool's number was used. Row 8 was the last row in the table whose price cell
+had never been measured — row 10 was priced by w129, and row 8's cell was the one w129 held up as
+the reason row 10's opt-out was dishonest.
+
+## 2. 🔴 THE DEFECT — A MAGNITUDE THAT SATISFIES EVERY CHECK IN THE FAMILY AND DENOTES NOTHING
+
+Row 8's price cell read, in full: `**NOT A PRICE** — a foundation row, and the answer is **0**,
+and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and
+verified against four public packs by #33, and the GBDT baselines are on disk`.
+
+#57's C1 is satisfied by *"a magnitude **or** the bare `0`"*, so one character buys the green, and
+w129 cited the cell in terms — *"row 8 passes on the `0`"*. **That citation is the reason to look,
+not a reason to skip:** w129's own closing lesson says to delete the part you think earned a green
+and check that it goes red. Here the part that earns it is one character.
+
+**The `0` never says what it is measured against.** Rows 3/4/5/7/9/10 each name theirs — `base104`
+without the member, the uncorrected stack, the shipped file's own bytes, Kaggle's auto-selection.
+Row 8's silent baseline is **"the foundation already exists"**: built once, at w38, so re-doing it
+today buys nothing. That is a **REPEAT** price, and it is printed in the column a run reads when
+deciding where to spend a slot — a column where **+10.04e-6 is published as a reason NOT to
+build**. Read there, `0` says the foundation is the cheapest thing in the table.
+
+## 3. ✅ WHAT THE FOUNDATION IS WORTH — `w130a_row8.py`, FAILURES 0, ALL FIVE PREDICTIONS HELD
+
+Pre-registered in `experiments/w130_prereg.txt` (commit `9e8e1d1`) **before any number for this
+run existed**, falsifier included. One arm per clause of the row's own elaboration; arithmetic
+over arrays already on disk, no model fitted, no member enrolled, no file rebuilt.
+
+| arm | quantity · layer · scope | baseline | price |
+|---|---|---|---|
+| **A** *confirm the metric* | METRIC · FINAL-FILE · **k=1**, a per-competition TOTAL | the same shipped predictions thresholded to a hard class | **+63,263.9e-6** (best of 102 cuts) · **+122,243.5e-6** (naive cut 0.5) |
+| **B** *the fixed-fold harness* | MEASUREMENT · CV-ESTIMATE · per comparison, an **sd** and not a gain | an unpaired harness, and one that re-draws its folds | **3.44e-6 paired vs 271.11e-6 unpaired** |
+| **C** *one honest GBDT baseline* | FOUNDATION · OOF · a per-competition TOTAL | a constant prediction, which AUC scores at **0.5** | **+467,789.9e-6**, vs **+1,325.4e-6** for stack − best single member |
+
+⛔ **Three currencies — final-file AUC at k=1, an sd of a measurement, OOF AUC against chance.
+THE ARMS DO NOT ADD**, same genus as the standing DO-NOT against adding measured-alone group
+deltas and as w129's three arms in row 10.
+
+**A.** Steel-manned: 102 cut points swept, the **best** kept (cut 0.349991, AUC 0.9068760639
+against 0.9701400060), so the price is what thresholding costs a run that also guessed the cut
+right. **1,265× the 50e-6 floor**, and the largest single number this table has ever carried.
+**B.** 200 bootstraps of `lgbm_tuned_lat_frac − lgbm_fixed_lat_frac` (true delta +30.64e-6),
+paired sd **3.44e-6** against unpaired **271.11e-6** — 78.9× on the sd, 6,225× on the variance.
+🎯 **The unpaired sd is 5.4× the 50e-6 floor and the paired sd is 15× under it: without the shared
+folds not one price in this table could have been measured at all.** Arm B is not a row of the
+table, it is the instrument every other row is read with. Re-drawing the partition adds a further
+**0.88e-6** of sd on the fold-mean over 200 draws; the pooled OOF AUC is invariant to it.
+**C.** `oof_lgbm_fixed_lat_frac` **0.9677899183** vs a constant's 0.5; best single member of **94
+scanned** is `oof_naji05` at **0.9688145889**; the shipped pick is **0.9701400060**. The
+foundation is **99.500% of the AUC above chance**, and **46,585×** row 3's +10.04e-6/member bar.
+⟹ Both readings are true and they differ by five orders of magnitude. The cell printed one.
+
+## 4. 🔴 AND MY OWN ARM-A PROBE WAS A NO-OP WITH A PASS LINE THAT SAID OTHERWISE
+
+The first `w130a` demonstrated *"a monotone transform is free under AUC and expensive under a
+calibration metric"* by **re-ranking the shipped file**. It printed `+0.0000e-6 (free)` and a
+green line claiming **both** halves. Only the AUC half was checked, and the logloss half was
+**false as measured**: 0.428827 → 0.428829, **+0.0%**.
+
+🎯 **THE SHIPPED PICK IS ALREADY A RANK VECTOR** — quantiles 0.0/0.10/0.25/0.50/0.75/0.90/1.0,
+`max|p − rank/n| = 3.0e-4`, mean **0.50000** where the train base rate is **0.70942**. Re-ranking
+it is a no-op, and a no-op cannot demonstrate that a transform is free. Replaced with a map the
+file has *not* had applied (halve the logit): **+0.0000e-6** under AUC, **+16.6%** of logloss,
+and the pass line now asserts only the halves it measures.
+⚠ **POST-HOC AND NOT REGISTERED**, labelled that way in the artefact: under RMSE the rank file
+scores **0.373496** against the constant's **0.454028** — ***better*, not worse**, so the metric
+decision does not show up in that comparison. My guess was wrong and the code reported the
+measured direction rather than the expected one. What it does establish is that the artefact being
+shipped is not a probability, and only the metric makes that safe.
+⟹ **This run's own defect, in this run's own genus, caught by refusing to believe a number that
+came out too small.**
+
+## 5. ✅ STANDING CHECK #59 — `w130b_zerobaselineguard`, 58 → 59 stems
+
+C1 a price cell whose **headline** magnitude is zero — a zero standing before the cell's first
+non-zero `e-6`/`e-7`, or a cell with no non-zero magnitude at all — must name the **baseline** that
+zero is measured against; **pre-fix rows 1 and 8 fire**, rows 7/9/10 carry zeros and pass because
+they name theirs · C2 row 8 publishes all **eighteen** required tokens · C3 `w130a_row8.json`
+against literals frozen in the guard, **INERT** if the artefact is missing · C4 `--control` over
+the frozen pre-fix rows 1 **and** 8 · C5 **all five siblings imported and measured BLIND on the
+pre-fix row 8 cell** — #53/#55/#56/#57/#58 each return zero findings for row 8 while C1 fires, and
+each still fires on its own frozen defect in the same call · C6 the baseline reader must
+**disagree with the naive `"baseline" in cell` test**.
+
+🎯 **C6's live proof is row 8 itself.** The pre-fix cell **contains the word `baselines`** — *"the
+GBDT baselines are on disk"*, a noun for a model — **and the word `against`** — *"verified against
+four public packs"*, a verification. A naive reader passes it on either. Same genus as w129's
+citation defect: the token is present and means something else.
+✅ **Row 1 fixed in the same pass** — its `0` now reads *"0 measured against the same stack trained
+on `train.csv` alone (0× dose)"*. ⚠ `METRIC`, `MEASUREMENT`, `FOUNDATION`, `REPEAT` joined #53's
+vocabulary, the **fourth** time that list has grown to admit a cell someone had just written.
+
+⚠ **BLIND TO:** a zero that is not the headline; a baseline named in a construction outside the
+grammar, or a decoy dressed in one that is inside it; and — like all five siblings — **only the
+price column**. Nothing here checks that a stated baseline is the one the number was actually
+measured against.
+
+## 6. ✅ THE SUITE — **257s, 59/59 GREEN, ZERO FAILURES.** SECOND CLEAN SWEEP, AND EARNED
+
+Document edits done **before** the launch (w116 §6); launch command copied out of RESEARCH.md
+(`grep FULLPATH=`), not scrollback. `w54a_vetoexpiry` and `w85c_slotguard` — the documented
+post-send pair — went **green** because w129 left the queue rebuilt for 08-31. No
+`w93a_fail_*.log` existed before the run and none was written.
+
+## 7. ⛔ THE CLICK — TWENTY-NINTH RUN ASKING. **THE DEADLINE IS TOMORROW.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live, rc read from the process and not through a pipe, **rc=1**:
+`*** NOTHING IS SELECTED ***`. `55656399 → w36_ad199stdcorr.csv` (public 0.97118) · `55588167 →
+w23_ad187stdcorr.csv` (public 0.97116). Auto-select fills both slots from the 0.97119 tier
+(`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`) and both WANTED files print **UNREACHABLE
+without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the mis-click costs
+**+35.17e-6** or **+81.92e-6** and stays the bigger hazard by an order of magnitude.
+
+## 8. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122, confirmed live from the API.
+- **Row 8 priced for the first time**: three arms, three currencies, `+63,263.9e-6` /
+  `3.44e-6 vs 271.11e-6` / `+467,789.9e-6`, and the REPEAT-vs-ABSENCE split the `0` was hiding.
+  **Every price cell in the ANGLE INDEX now carries a measured number and a named baseline.**
+- **Arm B is the table's own instrument**: without shared folds the measurement noise (271e-6)
+  is 5.4× the floor every other price is read against.
+- **My own pass line caught asserting more than it checked** (§4), fixed, and the post-hoc arm
+  labelled as post-hoc with its guess recorded as wrong.
+- **#59 registered**, closing the "a bare `0` is a magnitude" branch #57 wrote down about itself;
+  **row 1 fixed in the same pass**.
+- **59/59 green, zero failures**, on a queue already rebuilt for the next unsent day.
+- ⛔ **Still nothing selected. Twenty-ninth run asking, and the deadline is tomorrow.**
+
+## 9. NEXT RUN — READ THIS ORDER. **THE DEADLINE IS 2026-08-31 23:59.**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10` and read
+   the **slots-left line**, not the plan it prints under it. If it is still **08-30 UTC** the cap
+   is spent and nothing may be sent; if it is **08-31** you have ten.
+2. ⚠ **THE 08-31 QUEUE IS ALREADY WRITTEN** (w129, ten DRAIN `w85_cal_*` members). Do **not**
+   rebuild it for 08-31 again — go straight to `w26g_send.py --go`. **Send early: a slot unsent
+   at 23:59 is gone.** Quote `w26d`'s **bound**, never its point estimate.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w130 set it to `w130`/row 8.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (`grep FULLPATH=`). The baseline is now **59/59 with zero reds twice running**;
+   any red is a finding, and the post-send excuse only applies once the day's ten have gone.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §3 above is not an exception — arm C
+   prices the foundation that already exists, and its REPEAT price is still 0.
+6. ⛔ **DO-NOT, carried forward from w92–w129 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct" ·
+     read **5.9e-6** as the CatBoost price (CatBoost alone is **+10.04e-6/member**) · treat
+     +10.04e-6 or +7.38e-6 as a reason to build a CatBoost or XGBoost member · add measured-alone
+     group deltas together · divide by filenames rather than arrays · multiply a member-level
+     number by **1.4%** far from the **+138e-6** it was fitted at · read row 5's `negative` as a
+     stack-layer price · read row 6's **−1.07e-6** as the price of re-weighting members · read
+     row 7's **+2e-6** as a per-member rate · read row 9's **−118e-6** without its baseline
+     (against the permuted-cell control the same arm is **+6e-6**) · read row 9's **+3.95e-6** as
+     evidence the segmentation does anything · add row 10's three arms together · read row 10's
+     **+4.5228e-6** as "consolidation paid" (it is unrealised until somebody clicks) · let a
+     quantity word inside a citation of another row satisfy #53 · call
+     `load_members(drop=DEFAULT_DROP)`'s output `base104` · launch the suite with a hand-typed PATH.
+   • 🆕 **DO NOT ADD ROW 8's THREE ARMS TOGETHER.** `+63,263.9e-6`, `3.44e-6` and `+467,789.9e-6`
+     are final-file AUC at k=1, an **sd of a measurement**, and OOF AUC against chance. Arm B is
+     not a gain at all and cannot be summed with anything (§3).
+   • 🆕 **DO NOT read row 8's `0` as the foundation's value.** It is a **REPEAT** price against
+     "the foundation already exists". Against its own **ABSENCE** the row is **46,585×** row 3's
+     +10.04e-6/member bar and holds **99.500%** of the AUC above chance (§2, §3).
+   • 🆕 **DO NOT read arm B's 3.44e-6 as a small number.** It is small *because* the folds are
+     shared. The unpaired sd is **271.11e-6, 5.4× the 50e-6 floor** — the fixed-fold harness is
+     what makes every other price in the table measurable, not a row competing with them (§3).
+   • 🆕 **DO NOT re-rank the shipped pick to demonstrate anything.** It is **already a rank
+     vector** (mean 0.50000 against a 0.70942 base rate); re-ranking is a no-op that looks like a
+     result. Use a map the file has not had applied (§4).
+7. ⚠ **THE LESSON, ELEVEN RUNS OLD, AND THIS RUN SUPPLIED BOTH HALVES OF IT.** w129 predicted the
+   next defect in this family would be a value claim in an un-enumerated vocabulary or in the
+   `closed` column. It was neither: it was a **magnitude that passes every check and denotes
+   nothing**, because no guard asked what it was measured against. Then the fix I wrote for it
+   shipped with **a pass line asserting a half it had not tested**, on a probe that was a no-op.
+   🎯 **A guard's exemption branch, a guard's vocabulary, and a guard's own pass message are the
+   three places a green means "I did not look". After a check goes green, ask which of its clauses
+   the evidence actually touched — and if a measured effect comes back suspiciously near zero,
+   suspect the probe before you believe the result.**

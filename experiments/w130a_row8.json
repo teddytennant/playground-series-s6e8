@@ -1,0 +1,65 @@
+{
+ "run": "w130",
+ "row": 8,
+ "written": "2026-08-30",
+ "arm_a": {
+  "auc_continuous": 0.9701400059625016,
+  "auc_best_hard": 0.9068760638805787,
+  "best_cut": 0.349990641755705,
+  "n_cuts": 102,
+  "threshold_cost_e6": 63263.942081922876,
+  "threshold_cost_naive_e6": 122243.48908409821,
+  "monotone_map": "logit halved",
+  "monotone_auc_e6": 0.0,
+  "logloss_shipped": 0.428826583330508,
+  "logloss_mapped": 0.49982129191997704,
+  "logloss_pct": 16.55557545851852,
+  "posthoc_unregistered": {
+   "shipped_mean": 0.5000007232028049,
+   "base_rate": 0.7094243450313797,
+   "rmse_shipped": 0.37349579293209795,
+   "rmse_constant": 0.45402802084031946,
+   "shipped_worse_than_constant_under_rmse": false,
+   "rank_probe_max_abs_diff": 0.0003008523668258656
+  },
+  "layer": "FINAL-FILE",
+  "k": 1,
+  "scope": "per-competition TOTAL, not a rate",
+  "baseline": "the same shipped predictions thresholded to a hard class (best cut)"
+ },
+ "arm_b": {
+  "delta_true_e6": 30.63814436821133,
+  "sd_paired_e6": 3.4362624733717047,
+  "sd_unpaired_e6": 271.10725772166234,
+  "sd_ratio": 78.89596904268154,
+  "n_boot": 200,
+  "pooled_auc": 0.9701400059625016,
+  "fold_mean_sd_e6": 0.8779237281683441,
+  "fold_mean_range_e6": 4.841685295131626,
+  "n_partitions": 200,
+  "layer": "CV-ESTIMATE",
+  "scope": "per comparison; an sd, NOT a gain",
+  "baseline": "an unpaired harness, and one that re-draws its folds each experiment"
+ },
+ "arm_c": {
+  "auc_gbdt_baseline": 0.9677899182813025,
+  "auc_shipped": 0.9701400059625016,
+  "best_single_member": "oof_naji05",
+  "auc_best_single": 0.968814588855316,
+  "n_scanned": 94,
+  "foundation_vs_chance_e6": 467789.9182813025,
+  "stack_minus_best_member_e6": 1325.4171071855892,
+  "foundation_share": 0.9950013024814005,
+  "layer": "OOF",
+  "scope": "per competition, a TOTAL",
+  "baseline": "a constant prediction, which AUC scores at 0.5"
+ },
+ "reading": {
+  "arms_do_not_add": true,
+  "repeat_price_e6": 0.0,
+  "repeat_baseline": "the foundation already exists (built once, w38)",
+  "catboost_bar_e6": 10.0416,
+  "floor_e6": 50.0
+ },
+ "failures": 0
+}
