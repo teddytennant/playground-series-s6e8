@@ -1,0 +1,112 @@
+w131 PRE-REGISTRATION — 2026-08-30, written BEFORE any number for this run existed.
+ANGLE (row 1): "Original dataset: find the real source dataset this synthetic data was
+generated from, and concatenate it as extra training rows. Historically the single biggest
+edge in Playground Series." Row 1 is closed since 2026-08-11 and NOTHING HERE RE-OPENS IT —
+this registers a MEASUREMENT of the row's own PRICE CELL, not a candidate. No submission can
+follow: `w26g_send.py --n 10` read live at 18:24Z — "191 submissions on record; 10 already
+sent on 2026-08-30 (UTC); 0 of 10 slots left today".
+
+`w117a_handcount` (CURRENT_RUN moved to w131/row 1, tool re-run, number not typed by hand)
+reports row 1 at corpus x14 against a claimed x13. This is its fourteenth handing.
+
+THE CLAIM UNDER TEST. ANGLE INDEX row 1's price cell reads, in full:
+
+    a **CONCAT** price (extra training ROWS, not members). **0 measured against the same
+    stack trained on `train.csv` alone (0× dose), and the usual Playground edge is INVERTED
+    here: −58e-6 at 1× dose, −3,340e-6 at 50×; the best separate-estimator route is −1e-6 to
+    −2e-6 in the stack**
+
+⚠ THE BASELINE CLAUSE IN THAT CELL IS ONE RUN OLD AND I WROTE IT. w130 added "measured
+against the same stack trained on `train.csv` alone (0× dose)" by hand, in the same pass that
+registered #59, to turn #59 green on this row. w130's own closing lesson says a guard's
+exemption branch, its vocabulary and its pass message are the three places a green means "I
+did not look". This adds the fourth: A CELL EDITED BY HAND TO SATISFY A GUARD IS THE FIRST
+PLACE TO LOOK, because the only reader it was ever tested against is the one it was written
+for.
+
+  (a) THE NAMED BASELINE IS THE ARM. `0× dose` IS "the same stack trained on train.csv
+      alone". The cell therefore prices the manoeuvre at dose 0 against itself. That
+      difference is zero for any model, any metric, any seed, and it is zero BEFORE ANY
+      MODEL IS FITTED — it has zero degrees of freedom. #59 asks only that a zero NAME a
+      baseline; it does not ask that the baseline be a CONTRAST.
+  (b) THE HEADLINE IS THE NULL ARM, AND THE PRICE COLUMN IS READ BY ITS HEADLINE. Row 1 is
+      the one row in the table whose manoeuvre is measured to LOSE AUC at every setting
+      anyone ran. Printed as `0` in a column where +10.04e-6 is published as a reason NOT to
+      build, it ranks as the CHEAPEST row in the table. Read as the manoeuvre's price it is
+      negative, and at 50x dose it is the second-largest magnitude in the table.
+  (c) ROW 8 GOT THIS TREATMENT ONE RUN AGO AND ROW 1 DID NOT. w130 demoted row 8's `0` to a
+      labelled REPEAT price and published the ABSENCE numbers ahead of it. Row 1's `0` was
+      given a baseline clause and nothing else. The two cells are the same defect and only
+      one of them was fixed.
+
+REGISTERED QUESTION. What does row 1's manoeuvre actually cost, in the units the rest of the
+table now publishes, and how far is that from the `0` the column prints?
+
+ARMS. Arithmetic over arrays and logs already on disk plus one paired stack fit. No model is
+fitted on the competition frame, no member is enrolled, no drop list is edited, no fold
+assignment is touched, nothing is submitted.
+
+  A  THE HEADLINE IS A CONSTRUCTION ZERO. Rebuild the concat frame at dose 0/1/10/50 from
+     `train.csv` and `data/orig/`, and report the rows appended at each dose and
+     max|frame(0) − train| over every column. LAYER: FRAME. This is not a price and that is
+     the finding — the cell's headline number carries no measurement.
+  B  THE MANOEUVRE'S PRICE AT THE DOSES THAT WERE RUN, re-derived from `logs_orig_concat.txt`
+     against the 50e-6 floor: 0x 0.962639, 1x 0.962581, 10x 0.961653, 50x 0.959299. LAYER:
+     MEMBER-TRAINING-SET, k=1, a per-competition TOTAL and not a rate. Baseline: the same
+     stack trained on train.csv alone — the SAME baseline the `0` names, which is exactly why
+     the `0` is degenerate: it is that baseline's own rung on this ladder. The row publishes
+     the 1x and 50x rungs and omits the 10x one, and the 10x rung is what makes monotonicity
+     checkable rather than asserted.
+  C  THE SEPARATE-ESTIMATOR ROUTE, PRICED IN ROWS 3/4/7/9's UNITS FOR THE FIRST TIME.
+     `data/orig/origmodel_train.npy` / `_test.npy` is a model fitted on the 7,500 originals
+     alone; it never sees a competition label, so it is honest on both splits and is a
+     legitimate member. Priced as an ENROLMENT with rows 3/4's instrument — paired 50/50
+     StratifiedShuffleSplit at random_state 0,1,2; LogisticRegression C=1.0; transform
+     `hybrid`; the FULL loaded pack from `load_members(drop=DEFAULT_DROP)` (⚠ NOT `base104`,
+     which is only the control group carved out of it) — with the base104 CatBoost control
+     re-measured IN THE SAME PROCESS and required to reproduce w123's +10.0416e-6/member to
+     0.05e-6. A number in someone else's units needs their instrument verified in-process,
+     not cited. LAYER: STACK, per member.
+  D  "THERE IS NOTHING ELSE TO FIND." md5 of
+     `data/orig/Smartphone_Usage_And_Addiction_Analysis_7500_Rows.csv` against the frozen
+     literal d831a326bc6f0ab76056a12279cb0047 recorded when the deleted official original was
+     identified, plus the solo AUC of `origmodel_train` against the competition labels.
+     LAYER: IDENTITY. Not a price.
+
+REGISTERED PREDICTION, with reasons, before the numbers exist:
+  1. ARM A: dose 0 appends EXACTLY 0 rows and max|frame(0) − train| is exactly 0.0, so the
+     headline compares a frame with itself. Falsifier: if dose 0 appends any row at all the
+     baseline is a real contrast, the `0` is a measurement, and the defect claim is dead.
+  2. ARM B: every non-zero dose is NEGATIVE and the ladder is MONOTONE DECREASING in dose.
+     Reason: RESEARCH already records that the 7,500 rows are a sample of a different joint
+     distribution — the original enforces weekend = daily + U(0.5,3) with independent
+     components, the competition enforces a budget instead, and the two frames have different
+     label functions on 86.07% of the rows. More of them is more harm, not more data.
+     Falsifier: a non-negative rung, or a non-monotone ladder, and "monotone harm" is the
+     wrong description of this row.
+  3. ARM B: |−58e-6| at the MINIMUM dose is ABOVE the 50e-6 floor, so even one copy of the
+     originals is a measurable loss and not a null. Falsifier: under 50e-6, and then `0` and
+     the 1x rung are indistinguishable and the headline is defensible as written.
+  4. ARM C: the ENROLMENT price of `origmodel` comes back UNDER the 50e-6 floor AND
+     SIGN-FLIPPING across the three splits, like the arms of rows 5, 7 and 9; and the
+     CatBoost control reproduces +10.0416e-6/member to 0.05e-6. Falsifier: a sign-consistent
+     price above the floor would RE-OPEN the separate-estimator route, and this run would
+     have to say so and put it in WANTED's queue rather than in the price column.
+  5. ARM D: the md5 matches the frozen literal exactly.
+  6. THE FOUR ARMS ARE IN FOUR CURRENCIES AND MUST NOT BE ADDED: rows appended (a count),
+     OOF AUC at k=1 (a per-competition total), AUC per member (a rate), and a hash. Same
+     genus as w130's row-8 arms and w129's row-10 arms, and as the standing DO-NOT against
+     adding measured-alone group deltas.
+  7. THEREFORE the corrected cell must lead with the MANOEUVRE's price, negative, and demote
+     the `0` to a labelled CONSTRUCTION ZERO — the treatment w130 gave row 8 and did not give
+     row 1.
+
+WHAT WOULD FALSIFY THE DEFECT CLAIM RATHER THAN THE PRICES. If dose 0 turns out to append
+rows (prediction 1's falsifier), or if the 1x rung sits under the 50e-6 floor (prediction 3's
+falsifier), then the headline `0` is a real measurement against a real contrast, the cell is
+right as written, and the only thing this run found is that the 10x rung was omitted.
+Recorded here so the finding can lose.
+
+NO DECISION IS ATTACHED TO ANY ARM. WANTED does not move. The deadline picks do not move. The
+original-dataset angle stays CLOSED on all three routes. Nothing is enrolled and nothing is
+sent — there are 0 slots left today, and the day's ten landed at 12:36–12:37Z.
