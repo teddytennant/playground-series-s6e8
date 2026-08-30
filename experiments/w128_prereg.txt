@@ -1,0 +1,75 @@
+w128 PRE-REGISTRATION — 2026-08-30, written BEFORE any number for this run existed.
+ANGLE (row 9): "Error analysis: find where the current best model is wrong. Segment the
+out-of-fold errors and look for structure a feature could capture." Row 9 is CLOSED
+(2026-08-14, four instruments, re-verified at the artefact level by w110/w119). This
+registers a MEASUREMENT of the row's own price cell, not a candidate, and no submission can
+follow from it (0 of 10 slots left today, confirmed twice).
+
+THE CLAIM UNDER TEST. The ANGLE INDEX row 9 price cell reads, in full:
+
+    **0 / negative**
+
+That is the whole cell. Rows 1..7 each name a QUANTITY (CONCAT / TUNING / ENROLMENT /
+SEARCH), a MAGNITUDE with a unit, and since w124-w127 a LAYER, a SCOPE and a DENOMINATOR.
+Row 9 names none of the six. Two consequences, and the second is why this run exists:
+
+  (a) NO BASELINE. Row 9's own second instrument (`w14d_bandmap`, cross-fitted per-cell
+      isotonic) published TWO signs for one manoeuvre: -118e-6 against the uncorrected
+      stack, and +6e-6 against a size-matched permuted-cell control. The word "negative"
+      is true of the first reading and FALSE of the second, and the cell does not say
+      which baseline it is quoted against.
+  (b) NO MAGNITUDE, THEREFORE NO GUARD. Standing checks #53 (w124b, units), #55 (w126c,
+      scope) and #56 (w127b, denominator) all key on a cell carrying an `e-6`/`e-7` token.
+      Row 9 carries none, so all three skip it. The most under-specified cell in the table
+      is the one cell the entire guard family is structurally unable to see.
+
+REGISTERED QUESTION. What is row 9's price in the currency the rest of the table uses —
+an ENROLMENT rate, in e-6 per member, measured with rows 3/4's instrument?
+
+ARMS (paired 50/50 StratifiedShuffleSplit, random_state 0,1,2 — the same three splits w123,
+w124, w125 and w127 used; LogisticRegression C=1.0, max_iter=3000; transform `hybrid`; the
+FULL loaded pack from `load_members(..., drop=DEFAULT_DROP)`, NOT base104, because the arms
+are new columns built this run and base104 is a frozen subset; fit on half A, score on half B):
+
+  Q  the pack alone                                       (the reference)
+  R  Q + `cellIso`   — the stack `blend158_h3` re-mapped by a per-cell isotonic fitted
+                       OUT OF FOLD on the frozen SKF5 folds, cells = `w14d_bandmap.cells`
+                       (the generator's 7 rule cells)
+  S  Q + `cellRes`   — the out-of-fold per-cell mean residual (y - p) of the same stack,
+                       broadcast to its rows: the segment-level correction as a column
+  T  Q + `cellIsoP`  — arm R's construction on SIZE-MATCHED PERMUTED cells (the null)
+
+  ENROLMENT price of the segmentation correction   = (R - Q), k=1
+  ENROLMENT price of the segment residual column   = (S - Q), k=1
+  THE DECIDING CONTRAST                            = (R - T)
+
+CONTROL, in-process, on base104: `catbase + 8 CatBoosts` - `catbase` must reproduce w123's
++10.0416e-6/member to 0.05e-6, else these arms are not in rows 3/4's units and must not be
+published there.
+
+REGISTERED PREDICTION, with reasons, before the numbers exist:
+  1. R1 REPRODUCES. errormap's four published segment figures (n_missing_all 0.974025,
+     n_screen_missing 0.974071, other_screen_band 0.961145, daily_band 0.933423) and the
+     hard-band count 250,188 recompute to 1e-6 / exactly; bandmap's within-cell 0.006964
+     and cross-cell 0.022987 recompute to 1e-5, giving the 76.7% cross-cell share.
+  2. (R - Q) AND (S - Q) LAND IN [-30e-6, +30e-6], i.e. under the 50e-6 floor. Reason: both
+     columns are deterministic functions of a stack the pack already spans, differing from
+     it only by a 7-step monotone re-map or a 7-valued offset. w123/w124 measured genuinely
+     FOREIGN GBDT pipelines in this pool at +4.04..+10.04e-6/member; a re-map of a column
+     the pack already holds must be at most comparable and should be smaller.
+  3. (R - T) IS NOT DISTINGUISHABLE FROM ZERO — |mean| < 2 * sd over the three splits, or
+     the sign flips across them. Reason: w14d already measured real - ctrl = +6e-6 at the
+     STACK layer with both arms negative. A permuted-cell column carries the same capacity
+     and the same number of free parameters; if the real cells beat it, the segmentation is
+     doing work, and w14d says it does not.
+  4. THE DECIDING READING. If (R - T) is POSITIVE, sign-consistent 3/3, AND above the 50e-6
+     floor, row 9 RE-OPENS on the last working day and I must say so in the journal in those
+     words. I do not expect it to.
+
+WHAT WOULD FALSIFY THE DEFECT CLAIM RATHER THAN THE PRICE. If every arm here comes back
+within 1e-6 of zero AND w14d's two readings (-118e-6 vs baseline, +6e-6 vs control) are
+reproduced with the SAME sign as each other, then "0 / negative" is unambiguous after all
+and the cell is merely terse, not baseline-less. Recorded here so the finding can lose.
+
+NO DECISION IS ATTACHED TO ANY ARM. Row 9 stays closed unless prediction 4 fires. Nothing is
+rebuilt, no drop list is edited, no member is enrolled, the deadline pick does not move.
