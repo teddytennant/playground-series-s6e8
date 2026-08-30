@@ -1,0 +1,91 @@
+{
+ "published": {
+  "solo": {
+   "xgb_latcat": 0.967696,
+   "xgb_latcat_s17": 0.96775,
+   "xgb_latcat_s23": 0.967766
+  },
+  "probmean": 0.967904,
+  "seedavg_solo": 0.0001382,
+  "solo_tol": 1e-06,
+  "row7_stack": 2e-06,
+  "noise_floor": 5e-05,
+  "pack_k": 104,
+  "cat_only_per_member": 1.0041599941293389e-05,
+  "cat_only_n": 8,
+  "control_tol": 5e-08,
+  "pred_span_max": 5e-06,
+  "pred_enrol_lo": -5e-06,
+  "pred_enrol_hi": 1.5e-05
+ },
+ "member_arm": {
+  "solo": {
+   "xgb_latcat": 0.9676963323857853,
+   "xgb_latcat_s17": 0.967750105262562,
+   "xgb_latcat_s23": 0.9677662151143603
+  },
+  "probmean": 0.9679044620160593,
+  "gain": 0.00013824690169894627
+ },
+ "pool_n": 167,
+ "span": {
+  "sv": 6.871172838354211,
+  "resid": 0.15012093135199578,
+  "ctrl_sv": 281.4535774036233,
+  "ctrl_resid": 4.696139492324127,
+  "ctrl_names": [
+   "altview",
+   "cat",
+   "cat_tuned",
+   "digit_cat"
+  ]
+ },
+ "control": {
+  "per_member": 1.0041599941293389e-05,
+  "gap": 0.0,
+  "n": 8,
+  "comparable": true
+ },
+ "arms": {
+  "seeds added as members  (R-Q)/2": {
+   "n": 2,
+   "delta": 9.809514855222783e-07,
+   "sd": 3.899048292254996e-06,
+   "per_member": 4.904757427611391e-07,
+   "sign": "SIGN FLIPS"
+  },
+  "the seed AVERAGE alone  (S-Q)/1": {
+   "n": 1,
+   "delta": 1.7244221305704837e-06,
+   "sd": 3.7093050092346587e-06,
+   "per_member": 1.7244221305704837e-06,
+   "sign": "SIGN FLIPS"
+  },
+  "the average ON TOP      (T-R)/1": {
+   "n": 1,
+   "delta": -5.102928760288469e-07,
+   "sd": 2.2832045342776148e-06,
+   "per_member": -5.102928760288469e-07,
+   "sign": "SIGN FLIPS"
+  },
+  "the whole family        (T-P)/4": {
+   "n": 4,
+   "delta": 9.905183775045974e-07,
+   "sd": 7.659395839748686e-07,
+   "per_member": 2.4762959437614934e-07,
+   "sign": "consistent"
+  }
+ },
+ "reopen": false,
+ "misreading": {
+  "as_rate": 0.000208,
+  "as_total": 2e-06,
+  "k": 104
+ },
+ "fails": [],
+ "notes": [
+  "the MEMBER-layer number for this manoeuvre is +138.2e-6, which is ABOVE the 50e-6 floor. The row's cell publishes +2e-6 under the word `(member)`. They are different layers of the same manoeuvre and differ by 69x.",
+  "in the `hybrid` transform `avg3` is NOT an exact linear function of its three seeds -- the transform is applied per column, and rank-averaging is not linear. The span argument holds in PROBABILITY space (R1, max|diff| 0.0) and is approximate here; R3 is the measurement that decides, not this.",
+  "the parenthetical decides which side of the floor the row lands on: +208e-6 against +2e-6, a factor of 104."
+ ]
+}

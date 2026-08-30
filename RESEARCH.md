@@ -1,3 +1,158 @@
+# (w127, 2026-08-30) — 🔴 ROW 7'S PRICE CELL PUBLISHES A **k=1 STACK-LAYER TOTAL** IN THE
+# SLOT WHERE ROWS 3/4 PUT A **PER-MEMBER RATE**. AT THE PACK'S k=104 THAT READING IS
+# **+208e-6, FOUR TIMES THE FLOOR** — AND THE HONEST RATE IS **+0.49e-6/member**.
+
+## 🔴 THE DEFECT — AND #55's OWN DOCSTRING NAMED THE CELL SHAPE ONE RUN BEFORE IT WAS HANDED
+
+Row 7 read, in full:  `structural null (stacker) · **ENROLMENT** +2e-6 (member)`
+
+Three things are wrong with the parenthetical, and the third decides a closure:
+
+- **THE LAYER.** +2e-6 is a **STACK**-layer number — the 2026-08-13 reading `+138e-6 solo →
+  +2e-6 stack` for seed-averaging `xgb_latcat`, which is where the workspace's 1.4%
+  pass-through constant was fitted. The **MEMBER**-layer number for the same manoeuvre is
+  **+138e-6**, which the row never published and which is **above the 50e-6 floor**.
+- **THE GENUS.** Rows 3 and 4 define ENROLMENT as *"the value of ADDING a member the pack does
+  not hold"*. The +2e-6 is w109's **arm B** — three seed twins **replaced** by their mean.
+  Nothing is added; the pack loses two columns. That is a **SUBSTITUTION** price, and w118 had
+  already recorded that the configuration it was measured in stopped shipping.
+- 🎯 **THE SCOPE, WHICH IS THE ONE THAT MATTERS.** Rows 3/4 put a rate denominator in exactly
+  that parenthetical (`5.9e-6/member`, `+10.04e-6/member`, `+7.38e-6/member`); rows 5/6 put a
+  LAYER word there (`MEMBER layer`, `TOP-LEVEL layer, k=4`). Row 7's `(member)` is neither.
+  Read with rows 3/4's convention at the pack's k=104 it multiplies out to **+208e-6, four
+  times the 50e-6 floor** — which re-opens the row on the last working day before the deadline.
+  Its real scope is **k=1**.
+
+⚠ **EIGHTH RUN, SAME GENUS** — w120 `priority` / w121 a prose cause / w122 `slot` for `tier` /
+w123 a family label on a residual / w124 no unit / w125 no layer / w126 no scope / now a scope
+that belongs to a different denominator. 🎯 **AND #55 PREDICTED THE SITE IN TERMS.** Its
+docstring says: *"C1 fires only on cells carrying BOTH a magnitude and the word SEARCH. A cell
+whose quantity is ENROLMENT or TUNING can be scoped just as wrongly … and C1 will not look at
+it."* w126 wrote that one run before the harness handed row 7. **The prediction is five-for-five,
+and this time the exemption was written down and still nobody looked until the angle forced it.**
+
+## ✅ THE VERIFICATION — `w127a_row7.py`, 39m58s under `systemd-run --user`, **FAILURES 0**
+
+Pre-registered in `experiments/w127_prereg.txt` (commit `53e183a`) **before any number for this
+run existed**, including the falsifier: *"if (S−Q) comes back at +2e-6 ± noise AND (R−Q)/2 comes
+back at +2e-6/member, then `+2e-6 (member)` is a per-member rate after all and the cell is
+merely terse, not mislabelled."*
+
+**R1, w118's member arm, recomputed from `oof/`:** solo 0.967696 / 0.967750 / 0.967766,
+probability mean **0.967904**, over the best single **+138.2e-6**, and
+`max|xgb_latcat_avg3 − mean(seeds)| = 0.000e+00`. **Every published figure reproduces.**
+
+**R3, the ENROLMENT arms** — five nested arms P/Q/R/S/T, paired 50/50
+`StratifiedShuffleSplit` at random_state 0/1/2, `LogisticRegression` C=1.0, transform `hybrid`,
+on the **full 167-member pack**:
+
+| arm | n | paired Δ | per member | sign over 3 splits |
+|---|---|---|---|---|
+| seeds added as members `(R−Q)/2` | 2 | +0.98e-6 ± 3.90e-6 | **+0.49e-6/member** | **SIGN FLIPS** |
+| the seed AVERAGE alone `(S−Q)` | 1 | +1.72e-6 ± 3.71e-6 | **+1.72e-6** | **SIGN FLIPS** |
+| the average ON TOP of the seeds `(T−R)` | 1 | −0.51e-6 ± 2.28e-6 | **−0.51e-6** | **SIGN FLIPS** |
+| the whole family `(T−P)/4` | 4 | +0.99e-6 ± 0.77e-6 | **+0.25e-6/member** | consistent |
+
+⟹ **All three registered predictions HELD and the falsifier did not fire.** The honest
+ENROLMENT rate for seed diversity is **+0.49e-6/member**, **20× below** the CatBoost rate on
+the same splits, and every arm is sign-flipping at an sd 2–4× its own mean. ⛔ **Nothing
+re-opens on any arm.**
+
+## ✅ THE CONTROL REPRODUCED w123 TO **+0.0000e-6** — AN EXACT HIT, IN-PROCESS
+
+`catbase+cat − catbase` over the same 8 CatBoost members re-measures **+10.0416e-6/member**
+against w123's **+10.0416e-6**, gap **+0.0000e-6**. 🎯 **A number quoted in someone else's
+units needs their instrument verified in the same process, not cited** — without this the arms
+above would be four small numbers with nothing anchoring them to rows 3/4.
+
+⚠ **AND THE POOL IS *NOT* base104 — SAYING SO WOULD HAVE BEEN THIS RUN'S OWN DEFECT.**
+`load_members(drop=DEFAULT_DROP)` returns the **full 167-member** pack; rows 3/4's `base104` is
+the subset not in `_vetting.csv`, and **base104 holds no `xgb_latcat` at all**, so arms P..T
+cannot live there. Only the control arms are base104. The script's `[pool]` line said `base104`
+on the first draft and was corrected before this section was written; the docstring now carries
+the distinction. **The control anchors the INSTRUMENT, not the pool.**
+
+## 🔻 THE SPAN ARGUMENT DID NOT SURVIVE THE TRANSFORM, AND THE RUN SAID SO INSTEAD OF KEEPING IT
+
+`xgb_latcat_avg3` is exactly `mean(xgb_latcat, _s17, _s23)` in **probability** space
+(`max|diff|` 0.0, R1 above), so the obvious argument is that arm T can gain nothing over arm R:
+a linear combiner cannot use a column already in its span. **Measured, it does not hold in the
+space the stacker actually fits.** `hybrid` is applied per column and rank-averaging is not
+linear, so the four-column block's smallest singular value is **6.87**, not machine zero,
+against **281** for a non-derived control block — more nearly dependent, not exactly.
+
+⟹ **The structural claim is downgraded to what it is: `(T−R)` is small because it MEASURES
+small (−0.51e-6, sign-flipping), not because rank forbids it.** ⛔ **DO NOT** quote "avg3 is in
+the span of its seeds" as an argument about the stack. It is true in probability space and
+false in `hybrid`, and the stacker fits `hybrid`.
+
+## ✅ STANDING CHECK #56 — `w127b_rateguard`, 55 → 56 stems
+
+    .venv/bin/python experiments/w127b_rateguard.py            # rc 0 = clean
+    .venv/bin/python experiments/w127b_rateguard.py --control  # exits 0, having fired
+
+**C1** every priced `ENROLMENT` cell states a denominator (`/member`, `per member`, or a `k=`),
+vacuous if none exists · **C2** row 7 publishes `+138e-6`, `+2e-6`, `MEMBER layer`,
+`STACK layer`, `k=1` and `SUBSTITUTION` · **C3** the member-arm gain and the control gap are
+compared against `w127a_row7.json` with the expectations frozen in the guard, reporting
+**INERT** if the artefact is missing · **C4** `--control` over the frozen pre-fix cell.
+
+    (shipped)   C1 rows [3, 4, 5, 7] priced, all denominated · C2 OK · C3 +138.25e-6, gap +0.0000e-6 · FAILURES 0
+    (--control) C1 FIRES on row 7 · C2 FIRES on 5 missing tokens · shipped SILENT on both
+
+⚠ **WHAT #56's C1 IS BLIND TO, WRITTEN DOWN**, because that is where each of the last five
+defects lived. C1 asks for a denominator **token**; it cannot tell whether the denominator is
+the **right** one — row 3's `5.9e-6/member` divides by 35 names over 34 distinct arrays and C1
+passes it. C1 also ignores `TUNING` and `CONCAT` cells entirely: **row 1's dose ladder**
+(`−58e-6 at 1×, −3,340e-6 at 50×`) is a rate in a unit no token here matches, and **rows 2/4's
+`+4e-7` is a per-tune total with no `k` at all**. 🎯 **If the next defect is in this genus, it
+is in row 1 or row 2.**
+
+## 🔴 AND THE ROW 7 EDIT TURNED #42 RED — A 3-LINE WINDOW THAT CROSSES MARKDOWN TABLE ROWS
+
+First suite pass came back **53/56 with THREE reds**, one more than the documented post-send
+pair, so the log was read before anything was triaged (w116's rule). `w106a_claimguard` (#42)
+reported **FAILURES 3**, and its own C2/C3 controls said what kind of failure it was: *"more
+than that means the sibling rule has started admitting noise."*
+
+**THE MECHANISM.** #42 finds lines making a possession claim (*"the pack already holds …"*),
+collects the backticked tokens in a **3-line window**, and fires when some resolve to an
+`oof_*.npy` and others do not. The ANGLE INDEX puts rows 5, 6 and 7 on **three consecutive
+lines**. Row 5's line carries `pack already holds`, so its window swallowed rows 6 and 7 whole.
+Until this run row 7's cell had no backticked member name in it; adding **`xgb_latcat`**
+supplied the "present" sibling row 5's window had always lacked, and five tokens belonging to
+rows 5 and 6 — `base104`, `all4`, `w117a_handcount`, `w27r_blockdrop`, `encdrop` — became
+findings against a claim none of them is part of.
+
+🎯 **IT FIRES BOTH WAYS AND THE QUIET DIRECTION IS THE DANGEROUS ONE.** A genuinely broken
+citation on a table row could be **rescued** by a valid member name two rows below it, and #42
+would go green on a claim it never checked. That argument does not depend on today's red and is
+the reason the fix is in the reader rather than in the cell.
+
+✅ **THE FIX, AND IT IS VERIFIED BY THE GUARD'S OWN FROZEN CONTROLS.** A markdown table row is a
+self-contained cell: the window is now a single line when the claim is itself in one, and stops
+at the next table row otherwise. **C2 and C3 still return exactly `['cat_native_ctr2',
+'cat_natlat']`** — the 2026-08-26 defect #42 exists for — so the change did not buy green by
+blunting the instrument. Same genus as w121's identifier-boundary rule and w119's positional
+`classify`: **a reader whose window crosses a boundary it does not know about.**
+
+⚠ **A GUARD THAT GOES RED AFTER YOUR EDIT IS NOT AUTOMATICALLY WRONG.** The rule that saved this
+one is that #42 carries frozen controls it must still fire on. Without them, "widen the
+exemption" and "fix the reader" look identical from the outside and the cheap one wins.
+
+## ✅ THE SUITE — **`TOTAL 263s`, 54/56 GREEN, BOTH REDS THE DOCUMENTED POST-SEND PAIR**
+
+    [56/56] w127b_rateguard  rc=0   ✅ CLEAN — every ENROLMENT price says what it is divided by
+    TOTAL 263s   54/56 green
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+    ⚠ every failure is the post-send queue-freshness guard doing its job.
+
+Ten files went out at 12:36–12:37Z, so the queue on disk is for a day already sent. Both logs
+read (`w54a`: *"Refusing. Rebuild first"*; `w85c` G4: *"w54a rejects the LIVE queue"*) and
+deleted, per the standing rule. This is the **both-red** pattern, which IS post-send; RESEARCH's
+warning is about **w85c red while w54a is GREEN**, which is not this.
+
+---
 # (w126, 2026-08-30) — 🔴 ROW 6'S PRICE CELL PUTS A **k=4 TOP-LEVEL** NUMBER UNDER A
 # **k=104 MEMBER-LAYER** LABEL. THE TWO SEARCHES DIFFER IN SIGN AND BY ~2,000×, AND THE
 # POSITIVE ONE IS THE SHIPPED STACKER.
@@ -2717,7 +2872,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 4 | *XGBoost as the third leg of the ensemble* | **×15, from 08-10 → w115 08-29 → w124 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** · XGBoost **+7.38e-6** · LightGBM **+4.04e-6**. ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family* | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×16, from 08-10 → w116 08-29 → w125 08-30 — the most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
 | 6 | *blending: rank-average or weight the models by OOF* | **×12, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
-| 7 | *seed and fold diversity, averaged* | ×12, from 08-11 → w64 → w109 08-28 → w118 08-29 · **artefacts verified** (count from `w117a_handcount`) | structural null (stacker) · **ENROLMENT** +2e-6 (member) | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
+| 7 | *seed and fold diversity, averaged* | ×13, from 08-11 → w64 → w109 08-28 → w118 08-29 → w127 08-30 · **artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO LAYERS OF ONE MANOEUVRE, AND THE ROW USED TO PUBLISH ONE NUMBER AT THE OTHER ONE'S SCOPE.** stacker arm: **structural null**. member arm, seed-averaging `xgb_latcat`: **MEMBER layer +138e-6** — the solo probability-mean gain, re-measured w127 at **+138.2e-6** from the OOF arrays, and it is **ABOVE** the 50e-6 floor — converting to **STACK layer +2e-6, at k=1**. That +2e-6 is a **SUBSTITUTION** price (w109 arm B *replaced* three seed twins by their mean; nothing was added, the pack lost two columns) and it is **NOT a per-member rate** — read as one at k=104 it multiplies out to **+208e-6, four times the floor**. The genuine **ENROLMENT** rate, measured w127 with w123/w124's instrument (paired 50/50, splits 0/1/2, C=1.0, hybrid) on the full **167-member** pack: **+0.49e-6/member** for the two extra seeds, **+1.72e-6** for the average alone, **−0.51e-6** for the average on top of the seeds — all three **SIGN-FLIPPING** across the 3 splits and none distinguishable from zero, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. ⛔ Nothing re-opens on any arm | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×12, from 08-14 → w102 08-28 → w121 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | 0, and it holds on its own artefacts: the metric is a table row, the folds are frozen since w38 and verified against four public packs by #33, and the GBDT baselines are on disk | `## Competition basics` · `Since w38 the workspace has taken every` |
 | 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×13, from 08-11 → w119 08-29 · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | **0 / negative** | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` |
 | 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×13, from 08-11 → w111 08-28 → w120 08-29 · artefacts verified** (count from `w117a_handcount`) | **not a modelling angle — it is the standing checklist, and it is the one angle that has ever PAID** | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) |
@@ -3222,7 +3377,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 55 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 56 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -3236,6 +3391,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w106a_claimguard  w107a_lineref     w109b_colguard    w110b_covguard
     w111b_baseguard   w112a_templateguard  w114b_selectguard  w115a_docselectguard  w117a_handcount
     w122a_slotguard   w123b_groupguard  w124b_priceunitguard  w125b_layerguard  w126c_scopeguard
+    w127b_rateguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

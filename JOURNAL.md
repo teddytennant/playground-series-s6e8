@@ -35545,3 +35545,223 @@ margin +54, −22/day.** ⛔ Do not quote −11/day.
    does: it only looks at cells carrying both a magnitude and `SEARCH`, so a wrongly-scoped
    `ENROLMENT` price walks straight past it, and rows 3/4/5's `base104` disclosures are prose that
    nothing checks.
+
+---
+
+# w127 — 2026-08-30, slot 6 of 10 · ANGLE: seed and fold diversity — same models across multiple
+# seeds and fold splits, averaged · **AT THE CAP, NOTHING SENT**
+# 🔴 ROW 7'S PRICE IS A k=1 STACK-LAYER TOTAL IN THE SLOT WHERE ROWS 3/4 PUT A PER-MEMBER RATE
+
+**⛔ NO SUBMISSION. Ten already landed today at 12:36–12:37Z (w122's queue drain), confirmed
+twice: `kaggle competitions submissions -v` shows the ten `w55 tail-fill` sends, and
+`w26g_send.py --n 10` prints *"191 submissions on record; 10 already sent on 2026-08-30 (UTC);
+0 of 10 slots left today"*.** The cap is 10/day and it is spent. Measurement and documentation
+only, which is what the brief asks for at the cap.
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 7 — THIRTEENTH HANDING
+
+`w117a_handcount` run, not counted by hand: **×12 → ×13**. Closed since w64 (2026-08-11),
+re-verified at the artefact level by w118. Nothing re-opens. `CURRENT_RUN`/`CURRENT_ROW` moved
+to `w127`/row 7 and the tool's number was used, not a hand edit.
+
+## 2. 🔴 THE DEFECT — A PRICE IS A NUMBER, A QUANTITY, A LAYER, A SCOPE, **AND A DENOMINATOR**
+
+Row 7 read, in full: `structural null (stacker) · **ENROLMENT** +2e-6 (member)`
+
+- **THE LAYER.** +2e-6 is a **STACK**-layer number (`+138e-6 solo → +2e-6 stack`, 2026-08-13,
+  seed-averaging `xgb_latcat`; it is where the 1.4% pass-through constant was fitted). The
+  **MEMBER**-layer number for the same manoeuvre is **+138e-6** — never published by the row,
+  and **above the 50e-6 floor**.
+- **THE GENUS.** ENROLMENT is defined by rows 3/4 as *adding* a member. The +2e-6 is w109's
+  **arm B** — three seed twins *replaced* by their mean. Nothing is added; the pack loses two
+  columns. A **SUBSTITUTION** price under an ENROLMENT label.
+- 🎯 **THE DENOMINATOR, AND IT DECIDES A CLOSURE.** Rows 3/4 put a rate in that exact
+  parenthetical (`5.9e-6/member`, `+10.04e-6/member`, `+7.38e-6/member`). Read `+2e-6 (member)`
+  that way at the pack's k=104 and it is **+208e-6 — four times the floor**, which re-opens
+  row 7 on the last working day. Its real scope is **k=1**.
+
+⚠ **Eighth run, same genus** (w120 `priority` / w121 a prose cause / w122 `slot` for `tier` /
+w123 a family label / w124 no unit / w125 no layer / w126 no scope / now no denominator).
+🎯 **#55's docstring named this cell shape in terms, one run early:** *"C1 fires only on cells
+carrying BOTH a magnitude and the word SEARCH. A cell whose quantity is ENROLMENT or TUNING can
+be scoped just as wrongly … and C1 will not look at it."* **Five-for-five — and this time the
+exemption was written down and still nobody looked until the angle forced it.**
+
+## 3. ✅ THE VERIFICATION — `w127a_row7.py`, 39m58s under `systemd-run --user`, FAILURES 0
+
+Pre-registered in `experiments/w127_prereg.txt` (commit `53e183a`) **before any number for this
+run existed**, falsifier included. **R1:** w118's member arm reproduces from `oof/` — solo
+0.967696 / 0.967750 / 0.967766, probability mean **0.967904**, **+138.2e-6** over the best
+single, and `max|avg3 − mean(seeds)| = 0.000e+00`.
+
+**R3, the ENROLMENT arms** — paired 50/50 at random_state 0/1/2, C=1.0, `hybrid`, full
+167-member pack:
+
+| arm | n | paired Δ | per member | sign |
+|---|---|---|---|---|
+| seeds added as members `(R−Q)/2` | 2 | +0.98e-6 ± 3.90e-6 | **+0.49e-6/member** | **FLIPS** |
+| the seed AVERAGE alone `(S−Q)` | 1 | +1.72e-6 ± 3.71e-6 | **+1.72e-6** | **FLIPS** |
+| the average ON TOP `(T−R)` | 1 | −0.51e-6 ± 2.28e-6 | **−0.51e-6** | **FLIPS** |
+| the whole family `(T−P)/4` | 4 | +0.99e-6 ± 0.77e-6 | **+0.25e-6/member** | consistent |
+
+⟹ **All three registered predictions HELD, the falsifier did not fire.** The honest ENROLMENT
+rate for seed diversity is **+0.49e-6/member**, **20× below** CatBoost's on the same splits,
+every arm sign-flipping at an sd 2–4× its own mean. ⛔ **Nothing re-opens on any arm.**
+
+## 4. ✅ THE CONTROL HIT w123 EXACTLY — **+0.0000e-6** — AND THE POOL IS NOT base104
+
+`catbase+cat − catbase` over the same 8 CatBoost members re-measures **+10.0416e-6/member**
+against w123's **+10.0416e-6**. 🎯 **A number quoted in someone else's units needs their
+instrument verified in the same process, not cited.**
+
+⚠ **AND I NEARLY SHIPPED THIS RUN'S OWN VERSION OF THE DEFECT.** The script's `[pool]` line said
+`base104`; `load_members(drop=DEFAULT_DROP)` returns the **full 167-member pack**, and base104
+(the subset not in `_vetting.csv`) **holds no `xgb_latcat` at all**, so arms P..T cannot live
+there. Corrected in the docstring and the print before this section was written. **The control
+anchors the INSTRUMENT, not the pool** — and writing a section about mislabelled scopes is no
+protection against writing one.
+
+## 5. 🔻 THE SPAN ARGUMENT DIED AND THE RUN REPORTED IT INSTEAD OF KEEPING IT
+
+`avg3` is exactly `mean(seeds)` in **probability** space, so the tidy story is that arm T can
+gain nothing over arm R — a linear combiner cannot use a column in its own span. **In the space
+the stacker actually fits it is false.** `hybrid` is per-column and rank-averaging is not
+linear: the four-column block's smallest singular value is **6.87**, not machine zero, against
+**281** for a non-derived control block. ⟹ **`(T−R)` is small because it MEASURES small, not
+because rank forbids it**, and §3's argument runs on the measurement alone. ⛔ **DO NOT** quote
+"avg3 is in the span of its seeds" as an argument about the stack.
+
+## 6. ✅ STANDING CHECK #56 — `w127b_rateguard`, 55 → 56 stems
+
+C1 every priced `ENROLMENT` cell states a denominator (vacuous if none) · C2 row 7 publishes
+`+138e-6`, `+2e-6`, `MEMBER layer`, `STACK layer`, `k=1`, `SUBSTITUTION` · C3 the member-arm
+gain and the control gap against `w127a_row7.json`, **INERT** if the artefact is missing · C4
+`--control` over the frozen pre-fix cell.
+
+    (shipped)   C1 rows [3,4,5,7] priced, all denominated · C2 OK · C3 +138.25e-6, gap +0.0000e-6 · FAILURES 0
+    (--control) C1 FIRES on row 7 · C2 FIRES on 5 missing tokens · shipped SILENT on both
+
+⚠ **WHAT C1 IS BLIND TO, WRITTEN DOWN.** It asks for a denominator **token**, not the right
+one — row 3's `5.9e-6/member` divides 35 names over 34 distinct arrays and C1 passes it. It
+ignores `TUNING` and `CONCAT` entirely: **row 1's dose ladder is a rate in a unit no token here
+matches, and rows 2/4's `+4e-7` is a per-tune total with no `k`.** 🎯 **If the next defect is in
+this genus it is in row 1 or row 2.**
+
+## 7. ⛔ THE CLICK — TWENTY-SIXTH RUN ASKING. **TOMORROW IS THE DEADLINE.**
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live this run, real rc read from the process and not through a pipe,
+**rc=1**: `*** NOTHING IS SELECTED ***`. `55656399 → w36_ad199stdcorr.csv` (public 0.97118) ·
+`55588167 → w23_ad187stdcorr.csv` (public 0.97116). Auto-select takes the 0.97119 tier —
+`w36_ad199stdcorr_ens4` + `w38_ad202stdcorr_ens4` — and both WANTED files print **UNREACHABLE
+without the click (P=0.000)**. Not clicking costs **+4.5228e-6**; the mis-click costs
+**+35.17e-6** or **+81.92e-6** and remains the bigger hazard by an order of magnitude.
+⛔ Do not re-price it. **The click stays human, and there is one day left to make it.**
+
+## 8. THE BOARD — NOT RE-READ
+
+One board read per day (w120 §7) and w122 spent today's at 12:45Z: **rank 278 / 3,321, cut 332,
+margin +54, −22/day.** ⛔ Do not quote −11/day.
+
+## 9. WHAT THIS RUN LEAVES BEHIND
+
+- **Nothing sent — at the cap**, ten spent by w122 at 12:36–12:37Z, confirmed from the API twice.
+- **Row 7 now publishes both layers of its one manoeuvre and the scope of each**: MEMBER
+  **+138e-6** (above the floor) → STACK **+2e-6 at k=1**, labelled **SUBSTITUTION**, with the
+  explicit note that reading it as a rate gives **+208e-6** and is wrong.
+- **The genuine ENROLMENT rate for seed diversity measured for the first time**: **+0.49e-6 per
+  member**, sign-flipping, against an in-process CatBoost control that reproduced w123 exactly.
+- **The span argument retired**, measured false in `hybrid` and reported rather than kept.
+- **Standing check #56**, 55 → 56 stems, with both directions exercised and its blind spot
+  written down and pointed at rows 1 and 2.
+- ⛔ **Still nothing selected. Twenty-sixth run asking, and tomorrow is the last day.**
+
+## 10. NEXT RUN — READ THIS ORDER. **IT IS THE FINAL DAY (deadline 2026-08-31 23:59).**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10`.
+2. ⚠ **RUN `w48e_order.py --day 2026-08-31 --write` FIRST**, then `--go`. Quote `w26d`'s
+   **bound**, never its point estimate. **Send early: a slot unsent at 23:59 is gone.** The
+   queue on disk is for 08-30 and already sent; it must be rebuilt before anything goes out,
+   and the two suite reds clear when it is.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w127 set it to `w127`/row 7.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (grep `FULLPATH=`). Then read the `FAILURES:` line and **which stems are on
+   it**; more than the documented pair red ⟹ **read the first failure log before triaging**.
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4). §3 above is not an exception — every arm
+   is sign-flipping and 20× under the CatBoost rate that is itself under the floor.
+6. ⛔ **DO-NOT, carried forward from w92–w126 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · run `w48e_order.py --write` to
+     "check" a future day · read a green on `w72a_plan_<day>.json` as "the send is verified" ·
+     read `priority == 0` in `w26d_queueprice.csv` as "sendable" · print a runner-up score tier
+     under a heading containing the word `slot` · quote **−11/day** for the bronze decay (it is
+     **−22/day**) · read "the guards over the click are green" as "the click screen is correct" ·
+     read **5.9e-6** as the CatBoost price (CatBoost alone is **+10.04e-6/member**) · treat
+     +10.04e-6 or +7.38e-6 as a reason to build a CatBoost or XGBoost member · add measured-alone
+     group deltas together · divide by filenames rather than arrays · multiply a member-level
+     number by **1.4%** far from the **+138e-6** it was fitted at · read row 5's `negative` as a
+     stack-layer price · read row 6's **−1.07e-6** as the price of re-weighting members ·
+     launch the suite with a hand-typed PATH.
+   • 🆕 **DO NOT** read row 7's **+2e-6** as a per-member rate. It is a **k=1 STACK-layer
+     SUBSTITUTION total**; at k=104 that misreading gives +208e-6 and re-opens a closed row.
+     The measured ENROLMENT rate is **+0.49e-6/member and sign-flipping** (§3).
+   • 🆕 **DO NOT** quote *"avg3 is in the span of its three seeds"* as an argument about the
+     stack. True in probability space, **false in `hybrid`** — smallest singular value 6.87,
+     not zero (§5).
+   • 🆕 **DO NOT** call `load_members(drop=DEFAULT_DROP)`'s output `base104`. It is the **full
+     167-member pack**; base104 is the subset not in `_vetting.csv` and it holds no
+     `xgb_latcat` (§4).
+7. ⚠ **THE LESSON, NOW EIGHT RUNS OLD, AND #55 NAMED THE SITE.** w126 wrote down what its
+   exemption was blind to — ENROLMENT cells — and the very next angle landed on one. Writing the
+   exemption down did not stop the defect; it made it findable in one grep instead of half a run.
+   🎯 **That is the whole return on writing it down, and it is worth it. #56's blind spot is
+   rows 1 and 2. Look there.**
+
+## 11. 🔴 ADDENDUM — THE ROW 7 EDIT TURNED #42 RED, AND THE FIX WENT IN THE READER
+
+First suite pass: **53/56, THREE reds** — one more than the documented pair, so the log was read
+before anything was triaged. `w106a_claimguard` reported **FAILURES 3**, and its own controls
+named the failure class: *"more than that means the sibling rule has started admitting noise."*
+
+**Mechanism.** #42 opens a **3-line window** on any possession claim (*"the pack already
+holds …"*) and fires when some backticked tokens in it resolve to an `oof_*.npy` and others do
+not. The ANGLE INDEX puts rows 5, 6 and 7 on **three consecutive lines**; row 5's line carries
+`pack already holds`, so its window swallowed rows 6 and 7. Row 7's cell had never held a
+backticked member name — adding **`xgb_latcat`** supplied the "present" sibling that row 5's
+window had always lacked, and `base104` / `all4` / `w117a_handcount` / `w27r_blockdrop` /
+`encdrop` became findings against a claim none of them belongs to.
+
+🎯 **It fires both ways and the quiet direction is worse:** a genuinely broken citation on a
+table row could be **rescued** by a valid member name two rows down, and #42 would go green on a
+claim it never checked. That holds regardless of today's red, which is why the fix is in the
+reader, not in my cell.
+
+✅ **Fixed:** a markdown table row is self-contained — the window is one line when the claim is
+in a table row, and stops at the next table row otherwise. **C2 and C3 still return exactly
+`['cat_native_ctr2', 'cat_natlat']`**, the frozen 2026-08-26 defect #42 exists for, so green was
+not bought by blunting the instrument. ⚠ **A guard that reds after your edit is not
+automatically wrong — and without frozen controls, "widen the exemption" and "fix the reader"
+look identical from the outside and the cheap one wins.**
+
+## 12. ✅ THE SUITE — **TOTAL 263s, 54/56 GREEN**, both reds the documented post-send pair
+
+    FAILURES: w54a_vetoexpiry(rc=1)  w85c_slotguard(rc=1)
+
+Both logs read (`w54a`: *"Refusing. Rebuild first"*; `w85c` G4: *"w54a rejects the LIVE queue"*)
+and deleted. This is the **both-red** pattern, which IS post-send; the hazardous pattern is
+**w85c red while w54a is GREEN**, which is not this. The launch command was copied out of
+RESEARCH.md (`grep FULLPATH=`), not out of scrollback.
+
+⚠ **ADD TO §10's DO-NOT:** 🆕 **DO NOT** add a backticked member name to an ANGLE INDEX table
+cell without re-running the suite. Three of the ten rows sit on consecutive lines and #42's
+window used to cross them; the reader is fixed, but the table is still the densest place in the
+document for a window-crossing bug to live.

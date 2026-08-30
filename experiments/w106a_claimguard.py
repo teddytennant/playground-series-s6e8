@@ -118,6 +118,16 @@ TOK = re.compile(r"`([^`]+)`")
 SHAPE = re.compile(r"^[a-z][a-z0-9_]{2,}\*?$")
 NEVER_BUILT = {"cat_native_ctr2", "cat_natlat"}  # w26 E1/E2: pre-registered, never built
 WINDOW = 3  # a claim's names may spill onto the next couple of lines
+# ⚠ BUT NOT ACROSS A TABLE ROW (w127). A markdown table row is a self-contained cell: the
+# ANGLE INDEX puts rows 5, 6 and 7 on three consecutive lines, and a 3-line window opened on
+# row 5's "pack already holds" swallowed rows 6 and 7 whole. That fires BOTH ways and the
+# quiet direction is the dangerous one -- a broken citation on row 5 can be RESCUED by a
+# valid member name three rows down, and the guard goes green on a claim it never checked.
+# w127 hit the loud direction: adding `xgb_latcat` to row 7 supplied the "present" sibling
+# that row 5's window needed, and five non-member tokens from rows 5/6 became findings.
+# Same genus as w121's identifier-boundary rule and w119's positional `classify`: a reader
+# whose window crosses a boundary it does not know about.
+TABLE_ROW = re.compile(r"^\s*\|")
 
 FAILS = 0
 NOTES: dict = {}
@@ -174,7 +184,18 @@ def scan(text: str, inv: set, use_exempt: bool = True) -> dict:
         if not CLAIM.search(line) or i in skip:
             continue
         n_claims += 1
-        group = [t for t in TOK.findall(" ".join(lines[i:i + WINDOW])) if SHAPE.match(t)]
+        # The window stops at the next table row, and is a single line when the claim is
+        # itself in one. See TABLE_ROW above for why; C2/C3 check the change did not
+        # also stop the guard finding the defect it exists for.
+        if TABLE_ROW.match(line):
+            win = [line]
+        else:
+            win = []
+            for l in lines[i:i + WINDOW]:
+                if win and TABLE_ROW.match(l):
+                    break
+                win.append(l)
+        group = [t for t in TOK.findall(" ".join(win)) if SHAPE.match(t)]
         present = [t for t in group
                    if (fnmatch.filter(inv, t) if t.endswith("*") else t in inv)]
         absent = [t for t in group if t not in present]
