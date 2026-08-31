@@ -37588,3 +37588,164 @@ rebuilding a queue that can never be sent. Do not chase it.
 both read it correctly: *"every printed literal names only WANTED or an ALLOWED stem"* and *"no
 human-read doc names a non-WANTED selectable file as the pick"*. `w107a_lineref` is green:
 nothing in this run's prose cites a fact by line number.
+
+---
+
+# w138 — 2026-08-31, slot 7 of 10 · ANGLE: consolidation · **0 SLOTS, NOTHING SENT.**
+# 🔴 THE SUBMISSION LIST EVERY SCRIPT HERE READS WAS TRUNCATED. w17 FIXED THIS EXACT BUG
+# ON 08-17 BY RAISING A CONSTANT, AND THE CONSTANT WAS REACHED AGAIN FOURTEEN DAYS LATER.
+
+## 0. STATE, MEASURED NOT ASSUMED
+
+`date -u`: **2026-08-31 15:19Z. Close is 23:59Z tonight, so the competition is STILL OPEN and
+`w135b_grade.py` STAYS SEALED.** It was not run. Ten submissions already sent today, **0 of 10
+slots left**, and UTC rolls over after the close, so no slot will exist again.
+`check_selection.py`, **true rc=1 from a redirected run** (not `$?` after a pipe — w137 §0):
+***NOTHING IS SELECTED.***
+
+The handed angle is row 10 of the ANGLE INDEX, ×15 with this run. Its three arms were priced by
+w129: A *confirm the picks* **+4.5228e-6**, contingent on a human click; B *re-verify the
+pipeline* **+0.0000e-6, and zero is the pass**; C *audit CV↔LB* **−27.4266e-6** in predicted-LB
+units. This run worked A, found a live defect underneath it, and did the cheap half of B.
+
+## 1. 🔴 THE DEFECT — `page_size` IS NOT PAGINATION
+
+Every script here reads submissions through one snippet that sets `page_size = 200` and takes
+`resp.submissions`. It got exactly 200 rows, which is what runs have been quoting as *"200
+submissions on record"*. The response also carries **`next_page_token`**, and it was **non-empty**.
+Nothing has ever read it. Following it:
+
+    page 1: +200 -> 200  next=YES
+    page 2: +1   -> 201  next=NONE     TOTAL 201, UNIQUE REFS 201
+
+⚠ **THE SAME BUG, THE SAME HIDDEN FILE, FOURTEEN DAYS APART.** `check_selection.py` already
+carried a w17 (08-17) warning about this: it asked for 50, the account passed 50, and the fix was
+to ask for **200**. The account reached **201** on 08-31 and the identical bug **re-hid the
+identical file** the w17 note names by hand — `stack_pub74_logit`, ref 55407329, public 0.97081.
+🎯 **A constant chosen to be "big enough" is a bug with a timer on it, and this one was set by the
+run that discovered the bug.**
+
+## 2. ✅ NO CONCLUSION MOVED — AND THAT WAS STRUCTURE, NOT CARE
+
+The dropped row is not random. Dates are **monotonically DESCENDING across all 201** (checked, not
+assumed), so truncation always drops the **oldest** submission, and in a competition where scores
+improve the oldest is the least likely top scorer. The dropped file ranks **170 of 201** by public.
+The auto-pair is untouched: exactly two files at 0.97119, still `DETERMINED`.
+
+⛔ **DO NOT RECORD THIS AS "HARMLESS, THEREFORE FINE."** It is harmless *because of the sort order*,
+which nobody checked and which the API is free to change. **FIXED:** the snippet now follows
+`next_page_token` to exhaustion (cap 25 pages) and prints the page count beside the total. Re-run:
+`control: 201 successful submissions visible`, true rc still **1**, picks and auto-pair unchanged.
+
+## 3. 🔴 THE PICK'S DENOMINATOR WAS 159 OF 201, NOT "169" — `w138a_coverage.py`
+
+`SELECT_THESE.md` defends pick 1 as **CV rank 1 of 169**. That 169 is the row count of
+`w48a_cv_recomputed.csv`, and the important thing about that file is **how it is built**: four
+hand-maintained registration files list a stem, and *only then* is `oof_<stem>.npy` looked up. So
+the denominator **over**counts (10 tabled stems were never submitted) and **under**counts — **42
+submitted stems are absent**, among them both files Kaggle will auto-select and the entire
+`w69_ad208std` family, one of which (public 0.97117) **outscores pick 2 on public**. 🎯 **A file
+that is never registered cannot lose to the pick. It is never compared.**
+
+Scoring every submitted stem that has an OOF on disk, registry or not, on the same `y` and the
+same metric:
+
+| | |
+|---|---|
+| submitted stems | **201** |
+| in the registry table | 159 |
+| scorable from OOF here | **166** |
+| recompute vs table, 159 shared stems | **max\|diff\| = 0.0000e-6** |
+| **stems beating pick 1** | **0** |
+
+Pick 1 is **rank 1 of 166**; pick 2 is **rank 35 of 166** (it was quoted as rank 30 of 169, and
+that gap is the registry's 10 unsent rows). The top untabled stems, now compared:
+
+    0.9701365875  (-3.4185e-6 vs pick 1)  pub 0.97119  w36_ad199stdcorr_ens4   ← auto-slot 1
+    0.9701349001  (-5.1059e-6)            pub 0.97119  w38_ad202stdcorr_ens4   ← auto-slot 2
+    0.9701342350  (-5.7710e-6)            pub 0.97115  w69_ad208std_h3
+    0.9701324886  (-7.5174e-6)            pub 0.97117  w69_ad208std
+
+**The 35 unscorable stems are bounded, not waved through.** Every one has public ≤ **0.97107**;
+among the **73 tabled** stems in that same public band, **not one** has `true_cv` above pick 1 —
+the best sits **84.31e-6 below** it — with `corr(public, true_cv) = 0.873` over 159 stems. Their
+OOFs are genuinely absent, not misnamed: no `oof_w15e*/w15f*/w16b*/w16d*/w16f*.npy` exists at all.
+
+⚠ **NOT ONE NUMBER IN THAT AUDIT IS NEW, AND THE ENTRY SAYS SO RATHER THAN BANKING IT.** The w69
+family's CVs were already in `w75a_erarefresh.csv` and `w79c_p9.json`; the auto-pair's were
+already in `w114a_misclick.json` (0.970136587469679 / 0.9701349000888667, reproduced here to ten
+digits). ⛔ **DO NOT WRITE THAT w138 "DISCOVERED THE AUTO-PAIR'S CV."** w137 §4's *"absent from the
+CV table entirely"* is true of `w48a_cv_recomputed.csv` and **false of the workspace** — I nearly
+wrote the discovery claim before grepping for the values and finding all five already on disk.
+🎯 **What was missing was the COMPARISON, in one place, on one instrument. That is the entire
+product of a consolidation slot, and it is worth having precisely because it could have come out
+the other way.**
+
+## 4. ✅ ARM B, THE HALF THAT CAN ACTUALLY ROT — 6/6 HASHES HOLD
+
+md5 of `<stem>.csv` and `oof_<stem>.npy` for `w36_ad199stdcorr`, `w36_ad199stdcorr_ens4` and
+`w23_ad187stdcorr`, against the hashes `w111a_reproduction.json` recorded on 08-28: **6/6 MATCH.**
+⛔ **THIS IS NOT A REBUILD AND MUST NOT BE CITED AS ONE.** It catches a deleted or overwritten
+artefact — the failure that can actually happen between runs — and says nothing about whether the
+pipeline still regenerates them. The rebuild is w111/w129 arm B, already `+0.0000e-6`, and the
+standing DO-NOT against retraining on a day with no slots stands.
+
+## 5. NEXT RUN
+
+1. **`date -u` FIRST.** Past 2026-08-31 23:59Z the competition is **over**: run
+   **`.venv/bin/python experiments/w135b_grade.py` BEFORE reading the board any other way**, and
+   write its four verdicts in verbatim, failures included.
+2. ⛔ **DO NOT REBUILD A QUEUE, TRAIN ANYTHING, OR REGISTER A GUARD.** No slot, no future run.
+3. ⛔ **DO-NOT, carried forward from w92–w137 in full and added to:**
+   • 🆕 **DO NOT QUOTE A LIST LENGTH THAT EQUALS THE PAGE SIZE YOU ASKED FOR.** Check the
+     continuation token. Fixed in `check_selection.py`; the CLI's 20-row default is still live.
+   • 🆕 **DO NOT CITE "CV RANK 1 of 169."** The registry table covers **159 of 201** submitted
+     stems. The defensible claim is **rank 1 of 166 scorable**, remainder bounded (§3).
+   • 🆕 **DO NOT SAY w138 DISCOVERED THE AUTO-PAIR'S CV.** It was in `w114a_misclick.json` (§3).
+   • 🆕 **DO NOT CITE §4's HASH CHECK AS AN END-TO-END REPRODUCTION.**
+4. ⚠ **THE LESSON.** w136 recovered a rule from an outcome; w137 tested an impossibility claim
+   about this machine. This run tested a **denominator**. Both defects have one shape: a number
+   that looks like a measurement of the world but is really a measurement of *how the tool was
+   configured* — 200 was a page size wearing a total's clothes, and 169 was a registry's row
+   count wearing a population's.
+   🎯 **When a count defends a decision, ask what would have to be true for the count to be the
+   population rather than the sample. A bug fixed by raising a constant is not fixed; it is
+   rescheduled — and it comes back on the day the constant is reached, which is the day the
+   account is at its largest and the decision matters most.**
+
+## 6. THE SUITE — **56/61 FIRST, THE EXTRA RED WAS MINE AND IT WAS PREDICTED** (appended after the launches)
+
+Document edits went in **before** both launches (w116 §6); the four stale `w93a_fail_*.log` files
+were deleted before each launch, so nothing below is an artefact of an earlier day.
+
+⚠ **TWO LAUNCHES WERE LOST BEFORE A REAL ONE RAN, AND THE FAILURE LOOKED LIKE A SUITE BUG.** Both
+the `systemd-run` launch and a `nohup … &` launch came back with the log stopping dead after
+`[ 1/61]`. That reads exactly like the PATH artefact RESEARCH.md documents (*"nine independent
+guards do not fail at once; a shared dependency does"*), and I nearly wrote it up as one. It was
+neither: the background process was **torn down when the tool call returned**, and the truncated
+log was the flushed prefix of a killed process, not a finding. Run in the **foreground** with
+`-u`, it completes in 263–296s. 🆕 **DO-NOT: DO NOT READ A LOG THAT STOPS MID-SUITE AS A SUITE
+FAILURE. Check the process is still alive first — an absent tail and a red tail are different
+things.**
+
+**First launch — 296s, 56/61.** Four reds are the calendar set RESEARCH.md predicts on the last
+day (`w54a_vetoexpiry` · `w85c_slotguard` · `w87a_registrarguard` · `w100a_complement`, all
+downstream of *"a live, unsent queue exists for some future day"*). The fifth was mine:
+
+- 🔴 **`w117a_handcount`.** *"live row 10 (consolidation): index claims x14, corpus has x15."*
+  This run's handed angle **is** row 10, so its hand count increments. Cell corrected to
+  `×15, from 08-11 → w129 08-30 → w138 08-31`, and the guard re-run alone goes green
+  (**FAILURES: 0**, true rc=0 from an unpiped run). 🎯 **The count came from the guard, not from
+  me** — the same shape as w135's row-6 ×12→×13, w136's row-7 ×13→×14 and w137's row-9 ×14→×15,
+  and exactly why the cell says *"count from `w117a_handcount`, not by hand"*.
+
+**Second launch — 263s, 57/61 green, reds exactly the four calendar ones.** ⛔ **This is the
+expected terminal state and 61/61 is unreachable from here** — clearing the four would mean
+rebuilding a queue that can never be sent. Do not chase it.
+
+✅ **THE TWO DOC GUARDS ARE GREEN ON THIS RUN'S EDITS, WHICH IS THE CHECK THAT MATTERED.**
+`SELECT_THESE.md` gained a block naming the auto-pair and the whole `w69_ad208std` family by
+stem, with CVs attached — precisely the shape of edit `w114b_selectguard` and
+`w115a_docselectguard` exist to catch — and both read it correctly: *"every printed literal names
+only WANTED or an ALLOWED stem"* and *"no human-read doc names a non-WANTED selectable file as
+the pick"*. `w107a_lineref` is green: nothing in this run's prose cites a fact by line number.

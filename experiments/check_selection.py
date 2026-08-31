@@ -662,16 +662,29 @@ from kagglesdk.competitions.types.competition_enums import SubmissionGroup
 cfg = os.environ.get("KAGGLE_CONFIG_DIR", "~/.kaggle")
 tok = json.load(open(os.path.expanduser(cfg + "/credentials.json")))["access_token"]
 
-out = {}
+# w138 (08-31): FOLLOW next_page_token. w17 hit this at page_size 50 and "fixed" it by
+# asking for 200. The account reached 201 on 08-31 and the same bug re-hid the same file
+# (stack_pub74_logit, the oldest submission). A page size is not a pagination fix.
+out, pages = {}, {}
 for name, g in (("selected", SubmissionGroup.SUBMISSION_GROUP_SELECTED),
                 ("successful", SubmissionGroup.SUBMISSION_GROUP_SUCCESSFUL)):
-    with KaggleClient(env=KaggleEnv.PROD, api_token=tok) as c:
-        r = ApiListSubmissionsRequest()
-        r.competition_name = %r
-        r.group = g
-        r.page_size = 200   # ⚠ was 50; see the pagination note below (w17, 08-17 slot 2)
-        resp = c.competitions.competition_api_client.list_submissions(r)
-        out[name] = [(s.ref, s.file_name, s.public_score) for s in resp.submissions]
+    rows, page_token, n_pages = [], None, 0
+    while True:
+        with KaggleClient(env=KaggleEnv.PROD, api_token=tok) as c:
+            r = ApiListSubmissionsRequest()
+            r.competition_name = %r
+            r.group = g
+            r.page_size = 200
+            if page_token:
+                r.page_token = page_token
+            resp = c.competitions.competition_api_client.list_submissions(r)
+        rows += [(s.ref, s.file_name, s.public_score) for s in resp.submissions]
+        page_token = resp.next_page_token
+        n_pages += 1
+        if not page_token or n_pages >= 25:
+            break
+    out[name], pages[name] = rows, n_pages
+out["_pages"] = pages
 print(json.dumps(out))
 """ % COMP
 
@@ -750,14 +763,14 @@ def main() -> int:
     n_ok = len(data["successful"])
     selected = data["selected"]
     print(f"control: {n_ok} successful submissions visible")
-    print("  ⚠ PAGINATION (w17 slot 2, 2026-08-17). This request now asks for page_size 200.")
-    print("  It asked for 50 until this slot, and the account passed 50 submissions on 08-17,")
-    print("  so the count above was silently a PAGE LENGTH and the tier computation below was")
-    print("  reading a truncated list. The CLI path (`kaggle competitions submissions -v`) has")
-    print("  the same default and hid stack_pub74_logit and stack_pub88_mine_logit from every")
-    print("  API-reading script here. Both score 0.97081, so no tier ever moved — but COUNT the")
-    print("  number above against `kaggle competitions submissions -v --page-size 200 | wc -l`")
-    print("  before quoting it, and do not trust any list you did not ask a page size for.")
+    print(f"  ✓ PAGINATION: followed next_page_token to exhaustion "
+          f"({data.get('_pages', {}).get('successful', '?')} page(s)); the count above is a")
+    print("  TOTAL, not a page length. w17 (08-17) hit this at page_size 50 and raised the")
+    print("  constant to 200; the account reached 201 on 08-31 and the identical bug re-hid the")
+    print("  identical file (stack_pub74_logit, 0.97081, the OLDEST submission). The list is")
+    print("  sorted date-DESCENDING, so truncation always drops the oldest and no tier has ever")
+    print("  moved because of it — but that was structure, not care. The CLI path")
+    print("  (`kaggle competitions submissions -v`) still has a 20-row default and truncates.")
     if n_ok == 0:
         print("CONTROL FAILED — treat the selection reading below as unknown.")
         return 2

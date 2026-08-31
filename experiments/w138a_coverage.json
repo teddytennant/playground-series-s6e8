@@ -1,0 +1,10 @@
+{
+ "n_submitted": 201,
+ "n_in_table": 159,
+ "n_scored": 166,
+ "n_newly_scorable": 7,
+ "pick_cv": 0.9701400059625016,
+ "n_beating_pick": 0,
+ "beating": [],
+ "max_table_recompute_diff_e6": 0.0
+}

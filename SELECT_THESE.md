@@ -30,10 +30,27 @@ Both are already submitted; this only flags them.
 ✅ **BOTH REFS RE-VERIFIED LIVE AGAINST THE KAGGLE API, 2026-08-31 ~15:05Z (w137)** — the first run
 to check the ref → filename mapping rather than re-quoting this table. `55656399` resolves to
 `w36_ad199stdcorr.csv` and `55588167` to `w23_ad187stdcorr.csv`, both `NAME_MATCH=YES` in the live
-`SUBMISSION_GROUP_SUCCESSFUL` listing of 200 submissions, and both CVs above match
+`SUBMISSION_GROUP_SUCCESSFUL` listing, and both CVs above match
 `experiments/w48a_cv_recomputed.csv` to **all ten digits**. The table is current, not stale.
 
-⚠ **Pick 2 sits at CV rank 30 of 169 on purpose.** It is the zero-parameter hedge against the
+✅ **AND THE PICK IS THE CV ARGMAX OVER EVERY SUBMITTED FILE, NOT JUST THE REGISTERED ONES
+(w138, 08-31 ~15:40Z, `experiments/w138a_coverage.py`).** `w48a_cv_recomputed.csv` is built from a
+registry — four hand-maintained files list a stem, and only then is its OOF looked up — so it
+covers **159 of the 201 submitted stems** and carries 10 that were never sent. Scoring every
+submitted stem with an OOF on disk, registry or not, on the same `y` and the same metric:
+**166 scorable, 0 beat pick 1.** The recompute reproduces the table on all 159 shared stems to
+`max|diff| = 0.0000e-6`, so it is the same instrument and not a second opinion.
+
+The 35 with no OOF are bounded rather than ignored: every one has public ≤ **0.97107**, and among
+the 73 *tabled* stems in that same public band not one has `true_cv` above pick 1 — the best is
+**84.31e-6 below** it, with `corr(public, true_cv) = 0.873` over 159 stems.
+
+⚠ **NOTHING IN THAT AUDIT IS A NEW NUMBER.** The w69 family's CVs were already in
+`w75a_erarefresh.csv` and `w79c_p9.json`; the auto-pair's were already in `w114a_misclick.json`.
+What was missing was the **comparison**, in one place, on one instrument.
+
+⚠ **Pick 2 sits at CV rank 30 of 169 in the registry table (rank 35 of the 166 scorable
+submitted stems) on purpose.** It is the zero-parameter hedge against the
 whole fitted-correction family failing (w16c). CV rank 2 (`w38_ad202stdcorr`) is nearly the same
 file as pick 1 and buys almost no E[max]. **This is not an error in the table — do not "fix" it.**
 
