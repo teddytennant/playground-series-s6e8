@@ -36989,3 +36989,210 @@ context correctly. `w117a_handcount` rc=0 with row 4 at ×16.
    🎯 **A quantity is not small. A quantity is small IN A UNIT. When a number is doing decision
    work, price it in the unit the decision is paid in — and check that unit's resolution before
    you trust the conversion.**
+
+---
+
+# w135 — 2026-08-31, slot 4 of 10 · ANGLE: blending, search the weights on OOF · **0 SLOTS,
+# NOTHING SENT.** 🔴 THE NUMBER THIS WORKSPACE CALLS "THE CLICK'S PRICE" IS NOT ARITHMETIC ON
+# THE OOF ARRAYS, AND THE PRIVATE DRAW'S NOISE IS LARGER THAN IT.
+
+## 0. STATE, MEASURED NOT ASSUMED
+
+`w26g_send.py --n 10` at 13:47Z: **"200 submissions on record; 10 already sent on 2026-08-31
+(UTC); 0 of 10 slots left today."** The close is 23:59 UTC tonight, so the counter never rolls
+over: there is no eleventh slot today and no first slot tomorrow. Board downloaded 13:44:56Z,
+not quoted: **rank 309 of 3,463, score 0.97119, top-decile line 346, margin +37**, leader
+0.97207. **7 teams sit at exactly 0.97119 and 175 are inside 1e-4 above us.**
+`check_selection.py` live, rc=0: ***NOTHING IS SELECTED.***
+
+**THE ANGLE IS VOID TWICE OVER AND IS RECORDED AS SUCH, NOT QUIETLY SKIPPED.** (a) No slot
+exists, tonight or ever, so a blend built today is unsendable by construction. (b) The blend row
+is row 6, closed since w63, verified at the artefact level by w108, and re-derived from the OOF
+arrays by w126 with `fit_w` copied verbatim from `w36d_wsearch.py`, all eight published cells
+reproducing to 1e-9. The incumbent **is** an OOF-fitted weighted blend — 104+ member weights
+fitted inside the frozen SKF5 folds by `agent/stack.py`. Re-running the search reproduces w126.
+Handing count from `w117a_handcount` (rc=0, FAILURES 0), not by hand: ×12 → **×13** once this
+entry lands.
+
+⛔ **THE CLICK ROUTE, RE-CHECKED, 33rd CONFIRMATION.** `ToolSearch` for `mcp__brave__*` returns
+nothing; CDP 9222 not listening; `DISPLAY` and `WAYLAND_DISPLAY` unset; no `Cookies` file
+anywhere under `~/.config`. `google-chrome` is on PATH and that has never been the blocker —
+the blocker is the login. It is a human click and it stays one.
+
+## 1. ✅ w134 RE-RUN LIVE, INDEPENDENTLY, BEFORE ANYTHING WAS BUILT ON IT
+
+w134 left no journal entry and no commit, so its finding existed only as an uncommitted diff.
+Re-ran `w134a_awardunit.py` live: **14 checks, FAILURES 0** — `awards_points=False`,
+`reward='Swag'`, the discrimination control still separating 7 of 21, the Prizes page still
+naming *"Choice of Kaggle merchandise"* for 1st/2nd/3rd, the rules' single "medal" still inside
+the disqualification boilerplate. **It holds.** And its propagation was **checked, not assumed**:
+`SELECT_THESE.md`, `LEADERBOARD.md` and `RESEARCH.md` all carry the correction, and
+`LEADERBOARD.md` annotates the historical entries below rather than rewriting them, which is
+the right call in a log. w134's own diagnosis was that non-propagation is what let the fact sit
+unread for sixteen days; it did not repeat that failure. Its artefacts are committed here.
+
+## 2. 🔴 THE DEFECT — TWO DIFFERENT NUMBERS, ONE NAME, AND I FOUND IT BY WRITING A CONTROL THAT FAILED
+
+`w135a_clickpower.py`'s C3 asserted the obvious identity: the click's published price should be
+`max(CV of the WANTED pair) − max(CV of the AUTO pair)` on the OOF arrays. **It failed.**
+
+| quantity | value |
+|---|---|
+| `max(WANTED) − max(AUTO)`, arithmetic on the four `oof_*.npy` arrays | **+3.4185e-6** |
+| the headline every run since w74 has quoted | **+4.5228e-6** |
+| gap | **+1.1043e-6 — 32% of the arithmetic difference** |
+
+**w74a's own artefact holds BOTH, and only one was ever quoted.** `solo.w36_ad199stdcorr_ens4`
+carries `dcv = −3.4184928227`, which my number reproduces to 1e-9 (C3a), alongside
+`cost = 4.650` and the pair-level `cost_auto_pair = 4.5228`. `cost` is `emax_set()` — an
+**E[max] over a fitted joint normal of expected private scores**, built from a GLS transfer with
+`beta = −0.2477` out of `w17d_coupling.json`. It is a *model output*, not arithmetic.
+
+🎯 **THE PROOF THAT SETTLES IT IS INSIDE THE ARTEFACT AND IS ONE LINE LONG.**
+`solo.w36_ad199stdcorr.cost = 0.000327e-6` — the price of the pick **against itself**. An
+arithmetic identity returns exactly 0. A Monte-Carlo expectation returns 0.000327. The artefact
+has been saying "I am a simulation" in its own identity control since w74 and nobody read it.
+
+⚠ **THIS IS NOT A CLAIM THAT THE DOCUMENTS ARE WRONG.** `LEADERBOARD.md` says *"expected private
+AUC"* at nine separate sites and that is exactly what it is. The defect is narrower and it is
+mine as much as the workspace's: **the two quantities live at different layers, both are called
+"the click's price", and no document says which one a given sentence needs.**
+
+## 3. ✅ WHAT ONE PRIVATE DRAW CAN ACTUALLY SETTLE — `w135a_clickpower.py`, 7 CONTROLS, FAILURES 0
+
+Pre-registered in `experiments/w135_prereg.txt` (commit `761f341`) **before any number for this
+run existed**, falsifiers included. Kaggle scores a selection as `max(private of the two
+selected)`, so the arms are pair maxima. Every paired-noise measurement this workspace holds is
+**single-file and at the 20% public scale** (`cvlb2.py`); nobody had put max-of-pair and the 80%
+private scale into one estimator. 3,000 reps per scale, one bootstrap draw per rep with **all
+four files scored on the identical rows**, seed 20260831, 500s wall.
+
+The estimator is exact and is not sklearn in a loop: ranks are a property of the score vector,
+so a bootstrap draw only changes row multiplicities, which enter as weights. It agrees with
+`roc_auc_score` to **1e-12** at unit weights on all four files (C5) and to **1e-12** on a draw
+with real duplicate rows (C6) — the tie handling matters, `w36_ad199stdcorr` has **58,965
+duplicate score values** across 691,369 rows.
+
+| test-set scale | m | mean | **sd** | **P(delta > 0)** | 90% central |
+|---|---|---|---|---|---|
+| public 20% | 59,260 | +3.3613e-6 | 8.3610e-6 | 65.1% | [−9.73, +17.09]e-6 |
+| **private 80%** | **237,042** | **+3.1372e-6** | **3.7997e-6** | **79.6%** | **[−3.18, +9.27]e-6** |
+| whole test | 296,302 | +3.1514e-6 | 3.3281e-6 | 82.6% | [−2.42, +8.61]e-6 |
+
+🔴 **THE SD OF THE PRIVATE DELTA (3.7997e-6) IS LARGER THAN THE DELTA ITSELF (+3.1372e-6).**
+**Roughly one private draw in five — 20.4% — hands the better private score to the pair Kaggle
+auto-picks.** The click is still correct: its expectation is positive at every scale and the two
+priced mis-click pairs are an order of magnitude worse the other way. What it is not is
+*checkable tonight*.
+
+⚠ **The pairing is the whole instrument, and here is the number that shows it.** On the identical
+draws, the **unpaired** single-file sd at private scale is **291.73e-6 — 77× the paired sd.**
+Without shared rows across the arms, a 3e-6 effect is invisible by a factor of a hundred.
+
+## 4. THE PRE-REGISTERED PREDICTIONS, GRADED AS REGISTERED AND THEN RE-GRADED
+
+| | registered | verdict | re-graded against the arithmetic edge (§2) | verdict |
+|---|---|---|---|---|
+| **M1** noise exceeds the edge | sd > 4.5228e-6 | **FALSIFIED** (3.7997) | sd > 3.4185e-6 | **HELD** |
+| **M2** one draw is a weak bit | P ∈ (55%, 85%) | **HELD** (79.6%) | — | — |
+| **M3** point estimate ≠ E[·] | \|mean − 4.5228\| > 0.5 | HELD (1.3856) | \|mean − 3.4185\| > 0.5 | **FALSIFIED** (0.2813) |
+| **P4** power claim | stands unless P ≥ 95% | **STANDS** | — | — |
+
+🔻 **M1 FLIPS VERDICT ON WHICH CONSTANT IT IS COMPARED AGAINST, AND THE MEASURED SD SITS
+BETWEEN THEM: 3.4185 < 3.7997 < 4.5228.** The prereg is frozen, so the registered grading is
+reported first and is not quietly replaced. But the bootstrap estimates the *arithmetic*
+quantity, so the arithmetic edge is the one its noise sits on, and by that grading M1 held.
+
+🔻 **M3 IS THE UGLIER ONE: IT HELD ON THE WRONG MECHANISM.** The prereg's stated reason was that
+`max` of two noisy files is biased upward and the two pairs are unequally spread. Re-graded, the
+bootstrap mean is within **0.2813e-6** of the point estimate — the bias **cancels between the
+arms**, and M3's own falsifier text said what to do here: *"the point estimate is the honest
+expectation; I will say so."* Saying so. **A prediction that lands for a reason it did not name
+is not evidence for the reason it named.**
+
+## 5. ONE CONSEQUENCE FOR A LIVE DOCUMENT, STATED WITHOUT OVERCLAIMING
+
+w133's `dP(top 10%) = +3.20 / +2.42 / +1.30 pp` is **linear in δ** (dP ≈ φ(z)·δ/sd_shift) and was
+computed with δ = 4.5228e-6. At the arithmetic δ = 3.4185e-6 the same figures read
+**+2.42 / +1.83 / +0.98 pp**. ⚠ **This does not make w133 wrong.** The shake simulation asks what
+the *private* difference between two selections is worth, and w74a's `cost` is an expected-private
+quantity, so it is the defensible input. What is missing everywhere is the sentence saying the
+figure is δ-dependent and which δ it used. Annotated at both sites; **the direction of the click
+does not move, and neither does the pick.**
+
+## 6. ✅ THE LAST OBSERVATION, AND A SCORER THAT CANNOT BE RETROFITTED — `w135b_grade.py`
+
+There is exactly one observation left in this competition: the private board, once, tonight.
+Every forecast the workspace has published about it was written blind, and **nothing was ever
+registered about how those forecasts get graded.** A run that reads the board and then decides
+what it had predicted is the Rogii failure in a new hat. So P1–P4 are frozen in
+`w135_prereg.txt` and `w135b_grade.py` grades them mechanically:
+
+**P1** nobody clicks (base rate 0/33) · **P2** we finish inside the top decile · **P3** final
+private rank inside **[122, 426]**, the 90% central interval of a common-shift matched null at
+sd 67e-6 over the live board (20,000 reps; medians 313/303/285 and P(top 10%) 73.3/68.5/66.2% at
+sd 43/67/124e-6, which reproduces w133's 74.3/68.7/66.5 on a board that grew by four teams) ·
+**P4** whichever way the realised WANTED-vs-AUTO comparison lands, §3 says it is one draw from a
+distribution whose sd exceeds its mean, and it **must not** be read as vindication or refutation
+of CV-based selection.
+
+⚠ **The grader refuses to grade the public board.** Smoke-tested live: it checks the score
+against the frozen public value **and** whether any submission carries a `privateScore`, and
+exits 1 saying *"STOP: grading it now grades nothing."* Two signals, because a private score
+that rounds to the same 5 d.p. would fool the first one alone.
+
+## 7. NEXT RUN
+
+1. **`date -u`.** If it is past 2026-08-31 23:59 UTC, run **`.venv/bin/python
+   experiments/w135b_grade.py` FIRST, before reading the board any other way.** Write its four
+   verdicts into the journal verbatim, failures included. Do not adjust an interval to fit.
+2. ⛔ **DO NOT REBUILD A QUEUE, DO NOT TRAIN ANYTHING, DO NOT REGISTER A GUARD.** All three are
+   work for a competition that no longer accepts input. No standing check was registered this
+   run either, for the same reason w133 gave: there is no future run for a guard to protect.
+3. ⛔ **DO-NOT, carried forward from w92–w134 in full and added to:**
+   • 🆕 **DO NOT TREAT `+4.5228e-6` AND `+3.4185e-6` AS THE SAME NUMBER.** The first is E[max]
+     under w74a's fitted GLS transfer (expected private AUC); the second is arithmetic on the
+     OOF arrays. They differ by 32% and w74a's artefact holds both, as `cost` and as `dcv`.
+   • 🆕 **DO NOT QUOTE A dP(top 10%) WITHOUT SAYING WHICH δ IT USED.** The figure is linear in δ
+     and the two candidate δs give +3.20/+2.42/+1.30 or +2.42/+1.83/+0.98 (§5).
+   • 🆕 **DO NOT READ A SINGLE PRIVATE BOARD AS A VERDICT ON THE PICK.** P(delta>0) = 79.6%, so
+     one draw in five favours the auto pair even though the pick is right (§3, P4).
+   • 🆕 **DO NOT COMPARE A NOISE sd TO A CONSTANT WITHOUT CHECKING WHICH LAYER THE CONSTANT WAS
+     COMPUTED AT.** M1 flips verdict on exactly that and the measured sd falls between the two.
+4. ⚠ **THE LESSON.** w133: *price it in the unit the decision is paid in.* w134: *check the unit
+   is paid at all.* This run pre-registered its thresholds against a number from the wrong
+   **layer** — a modelled expectation where the estimator produces arithmetic — and only found
+   out because a control it wrote to be boring came back red.
+   🎯 **A pre-registration freezes the comparison, not the constant. Freezing the wrong constant
+   is still a frozen prediction, and it will still grade cleanly — it will just grade the wrong
+   thing. Re-derive every constant a prereg leans on from the artefact that produced it, BEFORE
+   committing the prereg, not after the measurement disagrees with it.**
+
+## 8. THE SUITE — **55/61 FIRST, AND BOTH EXTRA REDS WERE MINE** (appended after the launches)
+
+Document edits went in **before** both launches (w116 §6); the launch command was copied out of
+RESEARCH.md (`grep FULLPATH=`), not scrollback. The five stale `w93a_fail_*.log` files sitting in
+`experiments/` were deleted before the first launch and again before the second, so nothing below
+is an artefact of an earlier day.
+
+**First launch — 329s, 55/61.** Four reds are the calendar set RESEARCH.md predicts on the last
+day (`w54a_vetoexpiry` · `w85c_slotguard` · `w87a_registrarguard` · `w100a_complement`, all
+downstream of *"a live, unsent queue exists for some future day"*). **The other two were caused
+by this run's own edits**, which is the useful part:
+
+- 🔴 **`w107a_lineref` #43.** w134's entry cited a fact *by line number* — *"this file, line
+  ~11213"* — and RESEARCH.md is prepended ~100 lines per run. My ~50-line prepend rotted the
+  pointer inside one run. Replaced with a grep-able text anchor
+  (`grep -n "Also confirmed from .ApiGetCompetitionRequest." RESEARCH.md`), which is what #43
+  asks for. 🎯 **A guard that only fires when someone edits the file is worth exactly as much as
+  the run that edits the file, and this is the first run since w134 to touch it.**
+- 🔴 **`w117a_handcount`.** Row 6 claimed ×12; with this entry in the corpus the guard counts
+  **×13**. Cell corrected to `×13 … → w126 08-30 → w135 08-31`. The count came from the guard,
+  not from me — §0 predicted this increment before the guard was re-run, and the guard agreed.
+
+**Second launch — 328s, 57/61 green, reds exactly the four calendar ones.** ⛔ **This is the
+expected terminal state and 61/61 is unreachable from here** — clearing the four would mean
+rebuilding a queue that can never be sent. Do not chase it.
+`w114b_selectguard` and `w115a_docselectguard` are **green on this run's edits**, which is the
+check that mattered: `SELECT_THESE.md` gained a block naming a second δ and a P(delta>0), exactly
+the shape of edit those two exist to catch, and they read the context correctly.

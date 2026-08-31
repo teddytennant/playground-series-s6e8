@@ -1,0 +1,98 @@
+========================================================================================
+R1 -- THE COMPETITION OBJECT, READ LIVE
+========================================================================================
+    title                    = 'Predicting Smartphone Addiction'
+    category                 = 'Playground'
+    reward                   = 'Swag'
+    awards_points            = False
+    team_count               = 3459
+    user_rank                = 309
+    max_daily_submissions    = 10
+    deadline                 = '2026-08-31 23:59:00'
+
+  PASS  R1a  category is Playground   'Playground'
+  PASS  R1b  awards_points is False   False
+  PASS  R1c  reward is Swag, not a cash or medal tier   'Swag'
+  PASS  R1d  PROBE CONTROL: the object carries live scalars, so R1b is not a default   max_daily=10 teams=3459
+
+========================================================================================
+R2 -- DISCRIMINATION CONTROL: does awards_points separate anything?
+========================================================================================
+    category         pts    reward                 title
+    Featured         True   850,000 Usd            ARC Prize 2026 - ARC-AGI-3
+    Featured         True   700,000 Usd            ARC Prize 2026 - ARC-AGI-2
+    Featured         False  450,000 Usd            ARC Prize 2026 - Paper Track
+    Featured         False  240,000 Usd            The Pokémon Company - PTCG AI Battle Challen
+    Research         True   77,000 Usd             RSNA Knee Abnormality Detection
+    Research         True   60,000 Usd             Biohub - Cell Tracking During Development
+    Featured         True   50,000 Usd             Kaggriculture
+    Featured         True   50,000 Usd             AI Agent Security - Multi-Step Tool Attacks
+    Playground       False  Swag                   Predicting Smartphone Addiction
+    Getting Started  False  Knowledge              Titanic - Machine Learning from Disaster
+    Getting Started  False  Knowledge              Housing Prices Competition for Kaggle Learn 
+    Getting Started  False  Knowledge              House Prices - Advanced Regression Technique
+    Getting Started  False  Knowledge              Spaceship Titanic
+    Getting Started  False  Knowledge              Digit Recognizer
+    Getting Started  False  Knowledge              Store Sales - Time Series Forecasting
+    Getting Started  False  Knowledge              Natural Language Processing with Disaster Tw
+    Getting Started  False  Knowledge              LLM Classification Finetuning
+    Getting Started  False  Knowledge              Connect X
+    Getting Started  False  Knowledge              Petals to the Metal - Flower Classification 
+    Getting Started  False  Knowledge              Contradictory, My Dear Watson
+    Featured         True   Knowledge              The Pokémon Company - PTCG AI Battle Challen
+
+  PASS  R2a  POSITIVE CLASS: awards_points reads True on known medal competitions   7 of 21 peers True
+  PASS  R2b  NEGATIVE CLASS: every Getting Started competition reads False   11 Getting Started, 0 True
+  PASS  R2c  the field is not constant across the sampled board   True on 7, False on 14
+  PASS  R2d  awards_points is INFORMATIVE here -- both values occur in one pull   7 True / 14 False
+
+========================================================================================
+R3 -- THE COMPETITION'S OWN PAGES, VERBATIM
+========================================================================================
+--- Prizes page ---
+    - 1st Place - Choice of Kaggle merchandise
+    - 2nd Place - Choice of Kaggle merchandise
+    - 3rd Place - Choice of Kaggle merchandise
+    
+    **Please note:** In order to encourage more participation from beginners, Kaggle merchandise will only be awarded once per person in this series. If a person has previously won, we'll skip to the next team.
+
+--- rules, around TOTAL PRIZES AVAILABLE ---
+    TOTAL PRIZES AVAILABLE</h4> Choice of Kaggle merchandise <h4>6. WINNER LICENSE TYPE</h4> None <h4>7. DATA ACCESS AND USE
+
+  PASS  R3a  PAGE CONTROL: Prizes and rules pages both fetched non-empty   prizes=336B rules=33452B
+  PASS  R3b  the Prizes page names Kaggle merchandise as the award
+  PASS  R3c  the Prizes page -- the page that DESCRIBES THE AWARD -- never says medal
+  PASS  R3d  SEARCH CONTROL: the same case-folded search finds a word known to be present
+--- the rules' only 'medal', in context ---
+    ...ting, deception, or other unfair playing practices or abuses, threatens or harasses any other participants, competition sponsor or kaggle.</h5> e. a disqualified participant may be removed from the competition leaderboard, at kaggle's sole discretion. if a participant is removed from the competition leaderboard, additional winning features associated with the kaggle competition platform, for example kaggle points or medals, may also not be awarded.</h5> f. the final leaderboard list will be publicly displ...
+
+  PASS  R3g  the rules mention a medal EXACTLY ONCE   1 occurrence(s)
+  PASS  R3h  and that once is the DISQUALIFICATION boilerplate, which grants nothing
+  PASS  R3e  rules S1.5 TOTAL PRIZES AVAILABLE is merchandise
+  PASS  R3f  the award threshold named by the competition is TOP 3, not a percentile band
+
+========================================================================================
+VERDICT
+========================================================================================
+  FAILURES 0.
+
+  THIS COMPETITION AWARDS NO KAGGLE MEDAL. Three independent readings agree: the object says
+  awards_points=False and reward='Swag'; the field is informative, reading True on 7 of the
+  21 competitions in the same pull and False on every Getting Started entry; and the
+  competition's own Prizes page names Kaggle merchandise for 1st/2nd/3rd and never says "medal".
+  The rules say it once, in the disqualification boilerplate that appears in every Kaggle
+  competition and awards nothing (R3g/R3h) -- that is not a grant, and it is the ONLY hit.
+
+  SO: the bronze cut at rank 345, the "+38 places of margin", and w133's "+1.30 to +3.20pp of
+  P(bronze)" are all denominated in an award this competition does not pay. Read every one of
+  them as P(FINISHING IN THE TOP 10%) -- a true and checkable statement about RANK, and not a
+  statement about a prize.
+
+  WHAT DOES NOT MOVE, and this is most of it:
+    * The pick. WANTED = w36_ad199stdcorr + w23_ad187stdcorr, on CV. Never rested on medals.
+    * The click's direction and its AUC price, +4.5228e-6 at tau=0.
+    * The mis-click ratios, 7.8x and 18.1x. Ratios inside AUC, unaffected by the unit above.
+    * Rank 309 of 3459. A real number about a real board.
+
+  WHAT MOVES: only what the click can be truthfully said to BUY. Not a medal. A better expected
+  finishing position, and this competition's actual award threshold is TOP 3.

@@ -1,3 +1,69 @@
+# 2026-08-31 13:44Z — w135, THE LAST BOARD BEFORE THE CLOSE. **RANK 309 / 3,463, TOP-DECILE
+# LINE 346, MARGIN +37.**
+
+Board downloaded once (13:44:56Z) and read from the CSV, not from the API's `user_rank`. Our
+public score is unmoved at **0.97119**, frozen since 08-23 12:41:28. Leader Chris Deotte
+**0.97207**, gap 0.00088. **0 of 10 slots left**, close 23:59 UTC tonight, so this is the last
+public reading that can be acted on and nothing can be acted on.
+
+⚠ **THE BAND WE STAND IN IS DENSE, AND THAT IS THE REASON THE CLICK IS SUB-RESOLUTION.**
+**7 teams sit at exactly 0.97119 and 175 are inside 1e-4 above us** — about 1.75 teams per 1e-6
+locally, against the ~0.95 that w113a's density fit used. Both are beside the point:
+w133 withdrew the places figure because the Score column is **5 d.p.** and a 3-4e-6 delta
+crosses **zero** printed ticks. The density is the reason the top decile is a knife edge, not a
+reason to reinstate a places number.
+
+**The drift, unchanged in direction:** 12:45Z 08-30 rank 278 of 3,321, line 332, margin +54 →
+12:49Z today 304 of 3,453, +41 → 13:14Z 307 of 3,459, +38 → **13:44Z 309 of 3,463, +37**. Four
+places and 142 teams in an hour of the final day.
+
+## What the click is worth, re-derived at the live board
+
+Common-shift matched null, 20,000 reps per sd, run against this download:
+
+| shift sd | median private rank | 90% central | P(top 10%) |
+|---|---|---|---|
+| 43e-6 | 313 | [194, 398] | **73.3%** |
+| 67e-6 | 303 | **[122, 426]** | **68.5%** |
+| 124e-6 | 285 | [62, 485] | **66.2%** |
+
+This reproduces w133's 74.3 / 68.7 / 66.5% on a board that has since grown by four teams. ⚠ Read
+these as **P(finishing in the top 10%)** and not as a medal — w134 established this competition
+awards none. **[122, 426] is now a pre-registered prediction** (`w135_prereg.txt` P3, commit
+`761f341`), graded after the close by `w135b_grade.py`.
+
+🔴 **AND THE PRIVATE DRAW'S OWN NOISE IS LARGER THAN THE CLICK.** `w135a_clickpower.py` (7
+controls, FAILURES 0) bootstraps `max(WANTED) − max(AUTO)` at private scale, paired: mean
+**+3.1372e-6**, **sd 3.7997e-6**, **P(delta>0) = 79.6%**. **One private draw in five hands the
+better score to the pair Kaggle auto-picks.** The click stays correct — positive expectation at
+every scale, and the mis-click pairs are an order of magnitude worse the other way — but tonight's
+single board **cannot grade it**, and no post-close entry should pretend otherwise.
+
+⚠ **Two numbers have shared the name "the click's price".** `+4.5228e-6` is expected private AUC
+under w74a's fitted GLS transfer; `+3.4185e-6` is the arithmetic CV difference of the two pair
+maxima. The dP figures above are **linear in δ**: at the arithmetic δ they read
+**+2.42 / +1.83 / +0.98 pp** rather than +3.20 / +2.42 / +1.30. Neither δ moves the direction or
+the pick.
+
+---
+# 2026-08-31 13:40Z — w134. 🔻 **THERE IS NO BRONZE CUT. RANK 309 / 3,459, TOP-10% LINE 345.**
+
+`experiments/w134a_awardunit.py`, **14 checks, FAILURES 0**, three live readings. This
+competition awards **no Kaggle medal**: the object reads `awards_points=False` / `reward='Swag'`
+(and the field is informative — True on 7 of 21 competitions in the same pull, False on all 11
+Getting Started entries), and the competition's **own Prizes page** names *"Choice of Kaggle
+merchandise"* for **1st / 2nd / 3rd Place** without ever using the word "medal".
+
+⛔ **EVERY "BRONZE CUT" AND "BRONZE BAND" IN THE ENTRIES BELOW IS A MISNOMER, INCLUDING THE
+HEADING DIRECTLY UNDER THIS ONE.** The arithmetic stands and the ranks are real; the noun does
+not. Read **345** as the **top-decile line** and every `P(bronze)` as **P(top 10%)**. The award
+threshold this competition actually names is **top 3**, and we are 309th, so the live stake is
+finishing position itself and nothing is on the line but that.
+
+Live at the same reading: **rank 309 of 3,459** (`user_rank` off the competition object), two
+places below w133's 13:14Z reading of 307. The drift has not stopped.
+
+---
 # 2026-08-31 13:14Z — w133, THE LAST BOARD. RANK 307 / 3,459, BRONZE CUT 345, MARGIN +38.
 
 Board downloaded once for the day (`lb_w133/`, 13:14:16Z). w132 read the standing through the

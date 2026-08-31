@@ -1,6 +1,6 @@
 # ⏳ ONE MANUAL ACTION IS OUTSTANDING — final-submission selection
 
-> ⛔ **2026-08-31 — TODAY IS THE LAST DAY, AND THE WINDOW SHUTS AT 23:59 UTC.** Thirty-two
+> ⛔ **2026-08-31 — TODAY IS THE LAST DAY, AND THE WINDOW SHUTS AT 23:59 UTC.** Thirty-three
 > runs have now asked for this and nothing is selected. It is two ticks in a browser and it
 > cannot be done from this machine: no Kaggle write API, no browser tool attached to the agent,
 > no logged-in profile on the box. Every submission slot is spent (10/10 by 12:37Z) and the
@@ -46,12 +46,36 @@ Neither is the CV-preferred pair. Priced on the live board:
 `experiments/w74a_clickprice.py`, two verbatim controls at 0.000e+00. Honest reading: **the
 click is worth about 3–4.5e-6 of expected private AUC, and as an AUC number it is small.**
 
-⚠⚠ **PRICED IN THE UNIT THE COMPETITION PAYS, IT IS BIGGER THAN THAT SENTENCE SOUNDS**
+🔻 **THE UNIT w133 CALLED "THE UNIT THE COMPETITION PAYS" IS NOT PAID HERE. CORRECTED w134,
+2026-08-31** (`experiments/w134a_awardunit.py`, 14 checks, FAILURES 0, all three readings live).
+**This competition awards NO Kaggle medal.** The competition object reads `awards_points=False`
+and `reward='Swag'`; the field is informative, not always-False, reading True on 7 of the 21
+competitions in the same pull and False on every Getting Started entry; and the competition's
+own **Prizes page** names *"Choice of Kaggle merchandise"* for **1st / 2nd / 3rd Place** and
+never uses the word "medal". So there is no bronze band, no bronze cut and no medal here, and
+the real award threshold is **top 3** — we are rank 309.
+
+⚠ **THE NUMBERS BELOW SURVIVE; ONLY THEIR NAME CHANGES.** Read every "P(bronze)" as
+**P(finishing in the top 10%)**, which is a true and checkable statement about *rank*. w133's
+arithmetic was not wrong, its currency was. Carried through the public→private shake as a
+paired delta — one noise draw, all arms read off it — the click moves **P(top 10%) by
++3.20 / +2.42 / +1.30 percentage points** at the S6E2 / S6E3 / S6E5 shift sds
 (w133, `experiments/w133a_clickmedal.py`, 7 controls, FAILURES 0, live board 2026-08-31
-13:14Z: rank **307 of 3,459**, bronze cut **345**, margin **+38**). Carried through the
-public→private shake as a paired delta — one noise draw, all arms read off it — the click moves
-**P(finishing inside the bronze cut) by +3.20 / +2.42 / +1.30 percentage points** at the
-S6E2 / S6E3 / S6E5 shift sds. Not four places: **one to three points of medal probability.**
+13:14Z: rank **307 of 3,459**, top-10% line **345**, margin **+38**). Not four places, and not
+a medal: **one to three points of finishing-position probability.**
+
+⚠ **QUOTE THE δ THOSE THREE FIGURES USED (w135).** dP is **linear in δ**, and two different
+numbers have shared the name "the click's price": **+4.5228e-6** is expected private AUC under
+w74a's fitted GLS transfer, **+3.4185e-6** is the arithmetic CV difference of the two pair
+maxima on the OOF arrays. The figures above used the first. At the second they read
+**+2.42 / +1.83 / +0.98 pp**. Neither δ moves the direction of the click or the pick below.
+
+🔴 **AND THE PRIVATE DRAW IS NOISIER THAN THE CLICK (w135, `w135a_clickpower.py`, 7 controls,
+FAILURES 0).** Bootstrapped paired at private scale, `max(WANTED) − max(AUTO)` has mean
+**+3.1372e-6** and **sd 3.7997e-6**, so **P(delta > 0) = 79.6%**: about **one private draw in
+five** hands the better score to the pair Kaggle auto-picks. That is not a reason to skip the
+click — the expectation is positive at every scale and a wrong tick is an order of magnitude
+worse — it is a reason not to read tonight's single board as a verdict on the pick.
 
 ⛔ **DO NOT QUOTE "roughly four places" ANY MORE, IN EITHER DIRECTION.** It came from a
 density fit, and +4.5228e-6 is *below the leaderboard's own printed resolution* — the Score
@@ -85,17 +109,18 @@ far larger error than not clicking at all — priced on w74a's own estimator
 | `w16i_schemeavg` + `blend159av_h3` | **+81.92e-6** — 18.1x worse |
 
 🔴 **THE SAME ORDERING SURVIVES THE CHANGE OF UNIT, AND THE MIS-CLICK IS STILL THE HAZARD**
-(w133, same file, control C7). Against the status quo of not clicking at all, in P(bronze):
+(w133, same file, control C7). Against the status quo of not clicking at all, in P(top 10%):
 
-| what you click | dP(bronze) at sd 43e-6 / 67e-6 / 124e-6 | vs the click |
+| what you click | dP(top 10%) at sd 43e-6 / 67e-6 / 124e-6 | vs the click |
 |---|---|---|
 | the two rows in the table above | **+3.20 / +2.42 / +1.30 pp** | — |
 | `w21_ad187corr` + `w20_ad187_h3` | **−26.86 / −17.47 / −9.26 pp** | 8.4x / 7.2x / 7.1x |
 | `w16i_schemeavg` + `blend159av_h3` | **−61.92 / −44.06 / −24.69 pp** | 19.4x / 18.2x / 19.0x |
 
 Those ratios reproduce the AUC ratios (7.8x, 18.1x) without being told to. With no shake at
-all the first wrong pair alone lands us at **rank 347 against a 345 cut** — it loses the medal
-outright. **A wrong tick is far worse than no tick.**
+all the first wrong pair alone lands us at **rank 347 against a 345 top-10% line** — it drops
+us out of the top decile outright, with no shake needed. **A wrong tick is far worse than no
+tick**, and that is the one sentence in this file that never depended on the unit.
 
 Those two wrong pairs are not hypothetical: until this run `check_selection.py` printed the
 first inside a green-tick "✅ RESOLVED. WANTED HAS MOVED" box and annotated the second as

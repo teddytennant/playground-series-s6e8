@@ -1,0 +1,53 @@
+============================================================================================
+CONTROLS
+============================================================================================
+  PASS  C1  all four OOF arrays are 691369 rows, matching train.csv
+        w36_ad199stdcorr             pooled OOF AUC 0.9701400060
+        w36_ad199stdcorr_ens4        pooled OOF AUC 0.9701365875
+        w38_ad202stdcorr_ens4        pooled OOF AUC 0.9701349001
+        w23_ad187stdcorr             pooled OOF AUC 0.9701150809
+  PASS  C2  the two WANTED files reproduce their published CV to 1e-9
+  PASS  C3a  the OOF pair-max difference +3.4185e-6 reproduces w74a's own `dcv` field +3.4185e-6 to 1e-9
+  PASS  C3b  and is NOT the quoted headline +4.5228e-6 -- gap +1.1043e-6, 32% of the arithmetic difference. `cost` is E[max] under w74a's fitted GLS transfer (beta -0.2477), not arithmetic on the OOF arrays; its own identity control `solo[pick].cost` returns 0.000327e-6 rather than exactly 0, which is what a Monte-Carlo expectation looks like and what an arithmetic identity does not
+  PASS  C4  all four arrays are distinct objects, so no arm compares a file to itself
+  PASS  C5  the weighted estimator agrees with sklearn to 1e-12 at unit weights, all four files
+  PASS  C6  and agrees with sklearn to 1e-12 on a bootstrap draw with real duplicate rows
+  PASS  C7  paired null: the same pair against itself is exactly 0 on a shared draw
+
+============================================================================================
+PAIRED BOOTSTRAP OF max(WANTED) - max(AUTO), AT THREE TEST-SET SCALES
+============================================================================================
+  public 20%   m= 59,260  mean  +3.3613e-6   sd  8.3610e-6   P(delta>0)  65.1%   90% [  -9.732,  +17.085]e-6
+                        unpaired single-file sd, same draws: 589.74e-6
+  private 80%  m=237,042  mean  +3.1372e-6   sd  3.7997e-6   P(delta>0)  79.6%   90% [  -3.183,   +9.271]e-6
+                        unpaired single-file sd, same draws: 291.73e-6
+  whole test   m=296,302  mean  +3.1514e-6   sd  3.3281e-6   P(delta>0)  82.6%   90% [  -2.424,   +8.607]e-6
+                        unpaired single-file sd, same draws: 257.33e-6
+
+============================================================================================
+THE PRE-REGISTERED PREDICTIONS
+============================================================================================
+  M1  noise exceeds the edge      sd 3.7997e-6 vs edge 4.5228e-6                FALSIFIED
+  M2  one draw is a weak bit      P(delta>0) = 79.6%, registered band 55-85%             HELD
+  M3  point estimate is not E[.]  bootstrap mean +3.1372e-6 vs point +4.5228e-6   HELD
+  P4  power claim stands unless P(delta>0) >= 95%: STANDS
+
+  RE-GRADED against the edge the bootstrap actually estimates (C3b), stated second
+  because the prereg is frozen and this is a correction to it, not a replacement:
+  M1' sd 3.7997e-6 vs arithmetic edge 3.4185e-6                    HELD
+  M3' bootstrap mean +3.1372e-6 vs arithmetic edge +3.4185e-6      FALSIFIED
+
+============================================================================================
+VERDICT
+============================================================================================
+  FAILURES 0.
+  wall 500s, 3000 reps per scale, seed 20260831
+
+  The click stays CORRECT and stays FREE: its expected delta is positive at every scale,
+  and the two priced mis-click pairs are an order of magnitude worse the other way.
+  What this measures is that the ONE realisation arriving tonight cannot GRADE it. The
+  sd of the delta is comparable to the delta itself, so a private board that happens to
+  favour the auto pair is not evidence the CV pick was wrong.
+  BOUNDED BY: bootstrapping OOF rows models the test set as a finite sample from the
+  same distribution. It does not model train/test shift, and it is not the common-shift
+  null used for the rank forecast -- that instrument lives in w135_prereg.txt P3.
