@@ -96,6 +96,41 @@ matter more.
 Selection here is on CV, and the CV ordering is stable — `w36_ad199stdcorr` is argmax on
 **both** defensible CV bases (w73), so this pick does not depend on an unsettled convention.
 
+## 🔴 THIS HAS ALREADY HAPPENED TO THIS ACCOUNT, ONE COMPETITION AGO (w136, 2026-08-31)
+
+Everything above prices the click against one counterfactual: *nobody clicks, and Kaggle
+auto-selects the best two by **public** score.* Until today that sentence had never been read
+off Kaggle. It has now been checked two ways (`experiments/w136a_autorule.py`, 23 checks,
+FAILURES 0, all readings live).
+
+⚠ **The rules do NOT state the criterion.** They confirm the limit — *"You may select up to two
+(2) Final Submissions for judging"* — and they confirm automatic selection happens — *"the
+Submission selected by the user, **or automatically selected by Kaggle in the event not selected
+by the user**"* — and then they stop. The word *"public"* never appears in that clause, and
+*"most recent"* appears nowhere in the rules at all.
+
+✅ **So the rule was recovered from an outcome Kaggle actually produced**, on this account:
+`rogii-wellbore-geology-prediction`, closed 2026-08-05, 8 scored submissions, nothing manually
+selected, metric MSE so "best" points the opposite way from AUC.
+
+| | public | private |
+|---|---|---|
+| best private available (submitted a day earlier) | 7.073 | **9.529** |
+| what auto-selection took (the two best public) | 7.003 / 7.004 | **9.606** |
+| **realised final placement, read off the private board** | — | **9.606, rank 2,781 of 6,125** |
+
+Of the 28 possible pairs, **exactly one** reproduces 9.606, and it is the best-two-by-public
+pair. "Most recent two" predicts 9.573 and is refuted; "best two by private" predicts 9.529 and
+is refuted. Chance of matching by accident: **1 in 28**.
+
+🎯 **The account held a strictly better file, by 0.077 MSE, and the default selection threw it
+away.** That is the mechanism this click exists to defeat, and it is not hypothetical here.
+
+⛔ **Do not over-read it either.** This does not prove clicking would have saved Rogii — that
+file ranked 5th of 8 on public, and there are no Rogii CV artefacts to say whether any honest
+criterion would have picked it. What it proves is that **the default is real, it is public-score
+based, and on this account it has already chosen the worst available outcome once.**
+
 ## ⚠ AND DO NOT CLICK A FILE NAMED ANYWHERE ELSE (w114, 2026-08-29)
 
 The two rows in the table above are the whole instruction. Clicking a *different* pair is a

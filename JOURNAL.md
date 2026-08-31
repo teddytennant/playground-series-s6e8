@@ -37196,3 +37196,216 @@ rebuilding a queue that can never be sent. Do not chase it.
 `w114b_selectguard` and `w115a_docselectguard` are **green on this run's edits**, which is the
 check that mattered: `SELECT_THESE.md` gained a block naming a second δ and a P(delta>0), exactly
 the shape of edit those two exist to catch, and they read the context correctly.
+
+---
+
+# w136 — 2026-08-31, slot 5 of 10 · ANGLE: seed and fold diversity · **0 SLOTS, NOTHING SENT.**
+# 🔴 THE COUNTERFACTUAL EVERY PRICE IN THIS WORKSPACE SUBTRACTS HAD NEVER BEEN READ OFF KAGGLE.
+# IT IS TRUE — BUT THE RULES DO NOT SAY IT, AND THE PROOF IS IN THIS ACCOUNT'S OWN HISTORY.
+
+## 0. STATE, MEASURED NOT ASSUMED
+
+`date -u` at 14:28Z: **2026-08-31, the close is 23:59Z tonight, so the competition is still
+open and `w135b_grade.py` stays sealed.** `w26g_send.py --n 10`: **"200 submissions on record;
+10 already sent on 2026-08-31 (UTC); 0 of 10 slots left today."** The counter does not roll over
+before the close. `check_selection.py` live, rc=0: ***NOTHING IS SELECTED.*** Competition object
+read live: rank **309 of 3,469**, so the top-decile line is 346 and the margin **+37**.
+
+**THE ANGLE IS VOID AND IS RECORDED AS SUCH, NOT QUIETLY SKIPPED.** No slot exists tonight or
+ever again, so a seed/fold average built today is unsendable by construction. The row is also
+closed on its merits: `agent/stack.py` already fits 104+ member weights inside frozen SKF5 folds
+and the seed-diversity row has been priced and shut since well before w126 re-derived it.
+
+## 1. 🔴 THE DEFECT — A LOAD-BEARING SENTENCE WITH NO SOURCE, AT 30+ SITES
+
+Every number this workspace has ever published about the click is a **difference against one
+counterfactual**: *"if nobody clicks, Kaggle auto-selects the best TWO submissions by PUBLIC
+score."* The click's +4.5228e-6, the mis-click's +35.17e-6 and +81.92e-6, w133's dP(top 10%),
+the auto-selection **TIER** that decides in `w26g_send.py` whether a send is free or a liability,
+w50b's entire enumeration — all of them subtract that arm.
+
+I could not find anywhere it was **read off Kaggle** rather than assumed from convention. Its
+earliest statement here is `w15i_cvlb.py`'s docstring on **2026-08-15**: *"If that holds, Kaggle
+auto-selects on best PUBLIC score"*, asserted with no source, and inherited unexamined for
+sixteen days.
+
+⚠ **This is w134's defect one door down.** w134 asked whether the **unit** the click is priced
+in is paid at all. This asks whether the **counterfactual it is priced against** actually
+happens. Pre-registered in `experiments/w136_prereg.txt` (commit `761f341`'s successor, pushed
+**before** any page or field was read), with the falsifier written in advance: *"If NO page
+states the fallback at all, the honest verdict is 'still unsourced, and now known to be
+unsourced' — NOT 'confirmed'. An absent contradiction is not a confirmation."*
+
+## 2. THE DOCUMENTARY LAYER SETTLES THE LIMIT AND **NOT** THE RULE
+
+`experiments/w136a_autorule.py`, **23 checks, FAILURES 0**, every reading live, no cached
+artefact. The competition's own Rules page, fetched through `ApiListCompetitionPagesRequest`:
+
+| clause | verbatim | what it settles |
+|---|---|---|
+| §2a | *"You may submit a maximum of ten (10) Submissions per day."* | the daily cap, **10** |
+| §2b | *"You may select up to two (2) Final Submissions for judging."* | 🎯 **the limit is 2, SOURCED** |
+| defn c | *"A 'Final Submission' is the Submission selected by the user, **or automatically selected by Kaggle in the event not selected by the user**, that is/are used for final placement."* | auto-selection **happens** |
+
+🔴 **AND THAT IS WHERE THE RULES STOP. THEY NEVER STATE THE CRITERION.** The word *"public"*
+does not occur in the definition clause. Neither does *"most recent"*, anywhere in 33,452
+characters. **Q1 as registered — "the rules state the fallback and those words name the PUBLIC
+leaderboard" — is FALSIFIED.** The competition object is no help either: it exposes
+`max_daily_submissions` but **no final-submission-limit field at all** (R1c), so the 2 could
+never have come from there.
+
+⚠ **THE DISCRIMINATION CONTROL, BECAUSE A CONSTANT FIELD IS NOT EVIDENCE.** Same regexes against
+three other live competitions: `pokemon-tcg-ai-battle`, `kaggriculture`,
+`rsna-knee-abnormality-detection`. The **daily** cap reads **5** on all three against our **10**,
+so the parse is genuinely per-competition and not matching a constant string (R3a). The
+**final** limit reads **2** on all three — so **2 is a Kaggle-wide default, not something S6E8
+chose**, and the run says so rather than dressing it up (R3b). The fallback clause is present in
+all three, so **Q4 HELD**: it is boilerplate, which is why it is silent on the criterion.
+
+## 3. ✅ THE TEST THAT ACTUALLY SETTLES IT — THIS ACCOUNT'S OWN CLOSED COMPETITION
+
+If the criterion is undocumented, it has to be **recovered from an outcome Kaggle actually
+produced**. `rogii-wellbore-geology-prediction` is the probe: closed **2026-08-05**, this same
+account, **8 scored submissions**, a real public/private split, and nothing manually selected.
+
+**Why rogii is the right probe and not a lucky one.** Its metric is **MSE — lower is better** —
+so "best" points the *opposite* way from S6E8's AUC, and a rule that only resembled argmax by
+coincidence would break on it. And the three candidate rules predict **three different** realised
+scores, so the test can fail.
+
+| submission | public | private |
+|---|---|---|
+| 54787236 *"Public top-1: Pilkwang dual-track"* | 7.073 | **9.529** ← best private available |
+| 54787237 | 7.170 | 9.559 |
+| 54787586 | 7.022 | 9.602 |
+| **54815271** *"v2-01 … bias-0.40"* | **7.003** ← best public | **9.606** |
+| 54815274 | 7.027 | 9.602 |
+| **54815489** *"v2-03 … RMSE-calibrated package"* | **7.004** ← 2nd public | **9.606** |
+| 54815491 | 7.010 | 9.604 |
+| 54815663 *"v2-05 … soft midhedge"* | 7.077 | 9.573 |
+
+**The realised outcome, read live off the PRIVATE board** (paged to our row, not quoted):
+`Teddy Tennant`, **rank 2,781 of 6,125, final score 9.606**. Control R4c: the private board's top
+is **5.639** against the public board's **4.608**, so it is genuinely the final board and not the
+public one re-served.
+
+| candidate rule | pair it picks | predicts | verdict |
+|---|---|---|---|
+| **best 2 by PUBLIC** | 54815271 + 54815489 | **9.606** | ✅ **REPRODUCES IT** |
+| most recent 2 | 54815663 + 54815491 | 9.573 | 🔴 **REFUTED** |
+| best 2 by PRIVATE (an oracle) | — | 9.529 | 🔴 **REFUTED** |
+
+🎯 **AND IT IS A UNIQUE FIT, WHICH IS WHAT MAKES ONE OBSERVATION WORTH SOMETHING.** Of the
+**28** possible pairs of 8 submissions, **exactly 1** reproduces 9.606 — every other submission
+scores strictly below it, so `min` of any other pair lands lower. The chance of matching by
+accident is **1/28 = 3.6%**, and the unique pair **is** the best-2-by-public pair (R4h, R4i).
+
+✅ **THE BASELINE ARM IS REAL.** Every price in this workspace subtracts a counterfactual that
+Kaggle demonstrably applies. **Nothing moves: not the pick, not the click's direction, not
++4.5228e-6, not the tier machinery.** The finding is that a 30-site assumption finally has
+provenance — and that its provenance is **empirical, not documentary**, which nobody had noticed.
+
+## 4. 🔴 A NEW FACT ABOUT THE ACCOUNT'S OWN HISTORY, AND IT IS NOT THE ONE THE BRIEF TELLS
+
+The brief's account of Rogii is that hedging was tuned against public-LB feedback and did not
+survive the private split. True, and visible in the descriptions above. **But R5 finds a second,
+distinct failure stacked on top of it, and the brief does not mention it:**
+
+    best private available    9.529   (54787236, submitted a DAY EARLIER)
+    realised, auto-selected   9.606
+    worst private available   9.606
+
+🔴 **AUTO-SELECTION LANDED ON THE WORST PRIVATE SCORE OF ALL EIGHT — and it is a tie of exactly
+the two files it took.** The account *held* a strictly better file, by **0.077 MSE**, and lost it
+to the selection rule. Two failures, not one: the modelling chased the public slice, **and then
+the default selection chased it again.**
+
+⚠ **STATED WITHOUT OVERCLAIMING, BECAUSE THE OBVIOUS INFERENCE IS NOT LICENSED.** This does
+**not** show that clicking would have saved Rogii — recovering 9.529 needed a rule that preferred
+a file ranked 5th of 8 on public, and there are no CV artefacts for Rogii here to say whether any
+honest criterion would have found it. What it shows is that **the mechanism S6E8's click exists
+to defeat is not hypothetical on this account; it has already fired once, one competition ago.**
+
+## 5. ✅ A BY-PRODUCT THAT MATTERS TONIGHT — `w135b_grade.py`'s TWO SIGNALS ARE VALIDATED
+
+w135's grader decides the private board is out from two signals: the board score moving off its
+frozen public value, **and** any submission carrying a `privateScore`. Both were assumptions
+about post-close Kaggle behaviour that had never been observed. rogii is a closed competition, so
+it can answer (R6): **8 of 8 submissions carry a `privateScore`**, and the board score moves
+**7.003 → 9.606** with rank **2,071 → 2,781**. ✅ **Both signals fire. The grader will work.**
+
+⚠ **AND A TRAP IT IS RIGHT TO AVOID.** `SUBMISSION_GROUP_SELECTED` returns **0 rows for rogii**,
+a closed competition where auto-selection unambiguously determined placement. **That group
+records MANUAL selection only; it never shows Kaggle's automatic pick.** `check_selection.py` is
+still correct to read it — the manual click is exactly what it is alarming on — but ⛔ **a
+post-close run must NOT read "SELECTED is empty" as "no final submissions exist".** w135b does
+not make that mistake: it grades P1 from private scores, not from this flag.
+
+## 6. THE PRE-REGISTERED PREDICTIONS, GRADED AS REGISTERED
+
+| | registered | verdict |
+|---|---|---|
+| **Q1** rules state the fallback and name the PUBLIC leaderboard | HOLDS | 🔴 **FALSIFIED** — auto-selection is stated, the criterion never is |
+| **Q2** the stated fallback is "best-scoring", not "most recent" | HOLDS | ⚠ **NOT GRADEABLE AS REGISTERED** — nothing is *stated*, so there is no stated fallback to grade. The substantive claim holds **empirically** (§3): recency is refuted |
+| **Q3** the final-submission limit is readable live and equals 2 | HOLDS | ✅ **HELD** — rules §2b, verbatim |
+| **Q4** the fallback clause is Kaggle-wide boilerplate | HOLDS | ✅ **HELD** — present in all 3 peers |
+
+⚠ **Q2 IS REPORTED AS UNGRADEABLE RATHER THAN QUIETLY CONVERTED INTO THE EMPIRICAL WIN.** The
+prereg asked a question about a document. The document does not answer it. Answering a different
+question and scoring it against the frozen prediction is precisely w135's M3 failure — *"a
+prediction that lands for a reason it did not name is not evidence for the reason it named"* —
+and it would have been very easy to write "Q2 HELD" here and move on.
+
+## 7. NEXT RUN
+
+1. **`date -u` FIRST.** If it is past 2026-08-31 23:59 UTC the competition is **over**: run
+   **`.venv/bin/python experiments/w135b_grade.py` BEFORE reading the board any other way**, and
+   write its four verdicts into the journal verbatim, failures included. §5 confirms both of its
+   private-board signals fire on real post-close data. Do not adjust an interval to fit.
+2. ⛔ **DO NOT REBUILD A QUEUE, DO NOT TRAIN ANYTHING, DO NOT REGISTER A GUARD.** All three are
+   work for a competition that no longer accepts input. No standing check was registered this
+   run, for w133's reason: there is no future run for a guard to protect.
+3. ⛔ **DO-NOT, carried forward from w92–w135 in full and added to:**
+   • 🆕 **DO NOT SAY "THE RULES SAY KAGGLE AUTO-SELECTS ON PUBLIC SCORE."** They do not. They say
+     automatic selection happens and stop. The criterion is **empirical**, from §3.
+   • 🆕 **DO NOT READ AN EMPTY `SUBMISSION_GROUP_SELECTED` AS "NO FINAL SUBMISSIONS EXIST."** It
+     reads empty on a closed competition where auto-selection decided placement (§5).
+   • 🆕 **DO NOT CLAIM CLICKING WOULD HAVE SAVED ROGII.** §4 does not license it and there are no
+     Rogii CV artefacts here to settle it.
+   • 🆕 **DO NOT CITE THE FINAL-SUBMISSION LIMIT OF 2 AS AN S6E8 FACT.** It is a Kaggle-wide
+     default, identical on all three peers sampled (R3b).
+4. ⚠ **THE LESSON.** w134 checked whether the unit is paid. w135 checked which layer a constant
+   came from. This run checked the **counterfactual** — and found the documentary layer, the one
+   everybody would reach for, is **silent** on exactly the clause that matters, while the answer
+   was sitting in the account's own closed-competition history the whole time.
+   🎯 **When a load-bearing assumption has no source, look for an OUTCOME the system has already
+   produced, not just a document that describes it. A rule you can watch execute is better
+   evidence than a rule you can read — and the test is only worth running if the candidate rules
+   predict different things and you can say, in advance, how likely a match is by chance.**
+
+## 8. THE SUITE — **56/61 FIRST, THE EXTRA RED WAS MINE AND IT WAS PREDICTED** (appended after the launches)
+
+Document edits went in **before** both launches (w116 §6); the launch command was copied out of
+RESEARCH.md (`grep FULLPATH=`), not scrollback. The four stale `w93a_fail_*.log` files sitting in
+`experiments/` were deleted before the first launch and all five before the second, so nothing
+below is an artefact of an earlier day.
+
+**First launch — 329s, 56/61.** Four reds are the calendar set RESEARCH.md predicts on the last
+day (`w54a_vetoexpiry` · `w85c_slotguard` · `w87a_registrarguard` · `w100a_complement`, all
+downstream of *"a live, unsent queue exists for some future day"*). The fifth was mine:
+
+- 🔴 **`w117a_handcount`.** *"live row 7 (seed and fold): index claims x13, corpus has x14."*
+  This run's entry names **seed and fold diversity** as its angle, so row 7's hand count
+  increments. Cell corrected to `×14 … → w127 08-30 → w136 08-31`, and the guard re-run alone
+  goes green. 🎯 **The count came from the guard, not from me** — the same shape as w135's row-6
+  ×12 → ×13, and the reason the cell says *"count from `w117a_handcount`, not by hand"*.
+
+**Second launch — 329s, 57/61 green, reds exactly the four calendar ones.** ⛔ **This is the
+expected terminal state and 61/61 is unreachable from here** — clearing the four would mean
+rebuilding a queue that can never be sent. Do not chase it.
+
+⚠ **The two doc guards are GREEN on this run's edits**, which is the check that mattered:
+`SELECT_THESE.md` gained a whole new section naming a *different competition's* submissions and
+scores, which is exactly the shape of edit `w114b_selectguard` and `w115a_docselectguard` exist
+to catch, and both read the context correctly and did not mistake a Rogii ref for a selectable
+S6E8 stem. `w107a_lineref` #43 is green: nothing in this run's prose cites a fact by line number.

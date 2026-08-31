@@ -1,3 +1,34 @@
+# 2026-08-31 ~14:40Z — w136, A BOARD FROM A DIFFERENT COMPETITION, BECAUSE IT IS THE ONLY
+# PLACE THE SELECTION RULE CAN BE WATCHED EXECUTING.
+
+The S6E8 reading below is unchanged and is still the live one: competition object at 14:35Z
+gives **rank 309 of 3,469**, top-decile line 346, margin **+37**.
+
+⚠ **What is new is a board we had never read: `rogii-wellbore-geology-prediction`, closed
+2026-08-05.** Every price in this workspace subtracts *"if nobody clicks, Kaggle auto-selects
+the best two by PUBLIC score"*, and that sentence had never been sourced. The competition rules
+turn out **not to state the criterion** — they confirm automatic selection happens and stop — so
+it had to be recovered from an outcome. Rogii is the only closed competition on this account
+with a real public/private split and more than one submission.
+
+| | rank | score |
+|---|---|---|
+| public board | 2,071 of 6,125 | 7.003 |
+| **private board (final)** | **2,781 of 6,125** | **9.606** |
+
+The private board's top is **5.639** against the public board's **4.608**, which is the control
+that it is genuinely the final board. Auto-selection took the two best-public files (7.003 and
+7.004), both of which scored **9.606** private — **the worst private score of all eight
+submissions.** The account held **9.529** on a file submitted a day earlier and ranked 5th of 8
+on public. Of the 28 possible pairs exactly one reproduces 9.606, and it is the
+best-two-by-public pair, so the chance of an accidental match is **1 in 28**.
+
+🎯 **The default selection is real, it is public-score based, and on this account it has already
+picked the worst available outcome once.** ⛔ It does **not** follow that clicking would have
+saved Rogii; no CV artefacts for it exist here. See `experiments/w136a_autorule.py`, 23 checks,
+FAILURES 0.
+
+---
 # 2026-08-31 13:44Z — w135, THE LAST BOARD BEFORE THE CLOSE. **RANK 309 / 3,463, TOP-DECILE
 # LINE 346, MARGIN +37.**
 
