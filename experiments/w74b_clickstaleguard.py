@@ -39,6 +39,8 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads; see its docstring
+sys.path.insert(0, HERE)
 COMP = "playground-series-s6e8"
 ART = os.path.join(HERE, "w74a_clickprice.json")
 
@@ -53,10 +55,9 @@ def fail(msg: str) -> None:
 
 def live_tiers():
     """The two top public-score tiers on the live board, derived exactly as w62a/w74a do."""
-    raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                          "--page-size", "500"], capture_output=True, text=True).stdout
-    sub = pd.read_csv(io.StringIO(raw))
-    assert len(sub) < 500, "hit the page size -- the window is truncated"
+    # w140: paginated -- see kaggle_list.py. The old capped read could not detect its
+    # own truncation at any page size above 200.
+    sub = pd.DataFrame(kaggle_list.submissions())
     sub = sub[sub["status"] == "SubmissionStatus.COMPLETE"].dropna(subset=["publicScore"])
     sub["stem"] = sub["fileName"].str.replace(r"\.csv$", "", regex=True)
     top = sub.groupby("stem")["publicScore"].max().sort_values(ascending=False)

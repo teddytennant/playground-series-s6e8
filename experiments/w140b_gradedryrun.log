@@ -1,0 +1,45 @@
+============================================================================================
+w140b — DRY RUN. Every private number below is FABRICATED and grades nothing.
+============================================================================================
+
+P1's three branches, plus P2/P3 on both sides of the frozen interval:
+
+  PASS  S1 auto-selected, rank 300 (inside P3)  (exit 0, wanted 0)
+          HELD       P1  nobody clicks; Kaggle auto-selects on public score
+          HELD       P2  the account finishes inside the top decile
+          HELD       P3  final private rank inside (122, 426)
+          HELD       P4  one realisation cannot grade the CV-selection thesis
+  PASS  S2 the click happened, rank 300  (exit 0, wanted 0)
+          FALSIFIED  P1  nobody clicks; Kaggle auto-selects on public score
+          HELD       P2  the account finishes inside the top decile
+          HELD       P3  final private rank inside (122, 426)
+          HELD       P4  one realisation cannot grade the CV-selection thesis
+  PASS  S3 pairs tie at 5 d.p., rank 300  (exit 0, wanted 0)
+          UNGRADED   P1  nobody clicks; Kaggle auto-selects on public score
+          HELD       P2  the account finishes inside the top decile
+          HELD       P3  final private rank inside (122, 426)
+          HELD       P4  one realisation cannot grade the CV-selection thesis
+  PASS  S4 private scores unpublished, rank 300  (exit 0, wanted 0)
+          UNGRADED   P1  nobody clicks; Kaggle auto-selects on public score
+          HELD       P2  the account finishes inside the top decile
+          HELD       P3  final private rank inside (122, 426)
+          HELD       P4  one realisation cannot grade the CV-selection thesis
+  PASS  S5 rank 900: outside P3 and outside the decile  (exit 0, wanted 0)
+          HELD       P1  nobody clicks; Kaggle auto-selects on public score
+          FALSIFIED  P2  the account finishes inside the top decile
+          FALSIFIED  P3  final private rank inside (122, 426)
+          HELD       P4  one realisation cannot grade the CV-selection thesis
+
+The board-identity gate, end to end through the real code path:
+
+  PASS  S6 PUBLIC board + private scores -> must REFUSE  (exit 1, wanted 1)
+  PASS  S7 same, with --force-private -> must grade and say so  (exit 0, wanted 0)
+          HELD       P1  nobody clicks; Kaggle auto-selects on public score
+          HELD       P2  the account finishes inside the top decile
+          HELD       P3  final private rank inside (122, 426)
+          HELD       P4  one realisation cannot grade the CV-selection thesis
+
+============================================================================================
+FAILURES: 0
+⛔ Nothing above is a result. The real grading happens once, after the close.
+============================================================================================

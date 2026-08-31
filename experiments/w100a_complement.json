@@ -2,7 +2,6 @@
  "bar": 0.970134905249569,
  "buckets": {
   "COMPLEMENT": [
-   "stack_pub74_logit",
    "w85_cal_gmm_raw",
    "w85_cal_gnb_raw",
    "w85_cal_qda_raw"
@@ -46,21 +45,17 @@
   ],
   "wrong-rows": []
  },
- "control_veto_removed_complement": 8,
+ "control_veto_removed_complement": 7,
  "day": "2026-08-31",
  "days_open": [
   "2026-08-31"
  ],
- "failures": 5,
- "n_api": 200,
+ "failures": 4,
+ "n_api": 201,
  "n_disk": 231,
- "n_unsent": 31,
+ "n_unsent": 30,
  "n_veto": 19,
  "sender_reasons": {
-  "stack_pub74_logit": [
-   null,
-   null
-  ],
   "w48_cal_hboyang_mix": [
    "fam=member \u2014 a raw member's OOF AUC is not a cross-fitted stack CV (w53), so it cannot be compared against the pick at all",
    0.9999653736842734

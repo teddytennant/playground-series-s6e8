@@ -55,6 +55,8 @@ import tempfile
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads
 COMP = "playground-series-s6e8"
 QUEUE = os.path.join(HERE, "w26d_queueprice.csv")
 STALE = os.path.join(HERE, "w26d_queueprice.csv.bak.w85")
@@ -65,7 +67,10 @@ W54A = os.path.join(HERE, "w54a_vetoexpiry.py")
 DAILY_CAP = 10
 DEADLINE = dt.date(2026, 8, 31)
 TIER = 0.97119
-PAGE = 500
+PAGE = 200   # w140: AT the server cap, not above it. The endpoint caps a page at 200 and
+             # returns a next_page_token the CLI never prints, so at 500 this file's own
+             # `len(rows) >= PAGE` read `200 >= 500 -> False` and could NEVER fire.
+             # Measured in w140c_pagetruth.py (T1/T2/T5).
 
 PLAN_RE = re.compile(r"^plan, (\d+) file\(s\):", re.M)
 # The sender's own words for "I would plan nothing", printed instead of a plan line.
@@ -73,13 +78,12 @@ DRAINED = "nothing to send: the queue is drained of everything sendable."
 
 
 def api_rows():
-    out = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                          "--page-size", str(PAGE)],
-                         capture_output=True, text=True, timeout=300).stdout
-    rows = list(csv.reader(io.StringIO(out)))
-    if len(rows) - 1 >= PAGE:
-        raise SystemExit(f"submission list came back at the page size ({len(rows)-1}); truncated.")
-    return rows
+    # ⚠ w140: paginated. This was a capped CLI read whose `>= PAGE` check could not fire
+    # above the server's 200-row page cap. Returned in the CLI's own list-of-lists shape
+    # (header first) so callers indexing rows[0] are untouched.
+    rows = kaggle_list.submissions(COMP)
+    cols = ["ref", "fileName", "date", "description", "status", "publicScore", "privateScore"]
+    return [cols] + [[r[c] for c in cols] for r in rows]
 
 
 def slots_left() -> tuple[int, int, int]:

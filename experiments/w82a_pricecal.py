@@ -42,6 +42,8 @@ import numpy as np
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads
 COMP = "playground-series-s6e8"
 OUT = os.path.join(HERE, "w82a_pricecal.json")
 
@@ -50,19 +52,21 @@ PRED_RE = re.compile(r"predicted LB (0\.\d+)")
 LB_DP = 5                # Kaggle reports the public score to 5 decimal places
 
 
-# ⚠ THE CAP. Without --page-size the CLI returns 50 rows here and says nothing about it
-# (RESEARCH "The Kaggle submission list is PAGINATED"). This file shipped without it and
-# measured 44 sends over 5 days when 62 over 7 days existed. C4 below pins the argv.
+# ⚠ w140: fetch() no longer uses this. It is now ONLY the source of C4's deliberately
+# CAPPED arm, which has to be truncated to be a control -- C4 requires the paginated read to
+# beat it. The real read goes through kaggle_list and follows next_page_token.
+# w86a: capped-control
 SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", "500"]
 
 
 def fetch() -> pd.DataFrame:
-    """Live submission list. Reads only; never sends."""
-    raw = subprocess.run(SUBS_ARGV, capture_output=True, text=True, check=True).stdout
-    # the CLI can print a pagination token line above the header -- strip anything before it
-    lines = raw.splitlines()
-    head = next(i for i, l in enumerate(lines) if l.startswith("ref,"))
-    return pd.read_csv(io.StringIO("\n".join(lines[head:])))
+    """Live submission list, PAGINATED. Reads only; never sends.
+
+    ⚠ w140: this used to pass `--page-size 500`. The server caps a page at 200, so the
+    read was silently short and nothing in this file could tell. C4 below still fetches
+    the deliberately capped way and requires this one to return strictly more rows.
+    """
+    return pd.DataFrame(kaggle_list.submissions(COMP))
 
 
 def residuals(df: pd.DataFrame) -> pd.DataFrame:

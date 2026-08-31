@@ -1,0 +1,66 @@
+============================================================================================
+w140a — auditing the sealed grader against inputs that exist BEFORE the close
+============================================================================================
+
+A. IS THE GRADER'S SUBMISSION READ COMPLETE?
+  submissions: 201 rows over 2 page(s), 201 unique refs — paginated to exhaustion
+  PASS  A  the grader's `submissions()` returns every submission
+          grader read -> 201 rows (err=None); kagglesdk paginated -> 201 (2 pages)
+  PASS  A-ctl  the pre-fix read (`--page-size 300`) is CAUGHT by the same invariant
+          CLI at page_size 300 -> 200 rows vs true total 201
+          dropped: stack_pub74_logit.csv (ref 55407329)
+  PASS  A-cap  the shortfall was a SERVER CAP, not a too-small constant
+          page_size 200 -> 200, 300 -> 200, 1000 -> 200; true total 201
+          raising the constant could never have fixed this; only following next_page_token can
+
+B. DOES THE PAGINATED READ SATISFY GATE A? (the fix, measured)
+  PASS  B  the paginated read is complete and free of duplicate refs
+          201 rows, 201 unique refs, 2 pages
+
+C. DOES GATE A's DEFECT ACTUALLY MOVE A VERDICT? (the anti-overclaim gate)
+  PASS  C  all four graded stems survive the truncated read, so P1 does NOT move
+          w36_ad199stdcorr           rows in truncated read = 1
+          w23_ad187stdcorr           rows in truncated read = 1
+          w36_ad199stdcorr_ens4      rows in truncated read = 1
+          w38_ad202stdcorr_ens4      rows in truncated read = 1
+          the dropped row is the OLDEST submission and is none of the four.
+          => gate A is a REAL defect with a BENIGN effect today. Do not report it as
+             having changed a verdict.
+  PASS  C-ctl  gate C detects a truncation that DOES hit a graded stem
+          with w36_ad199stdcorr removed, present counts = {'w36_ad199stdcorr': 0, 'w23_ad187stdcorr': 1, 'w36_ad199stdcorr_ens4': 1, 'w38_ad202stdcorr_ens4': 1} -> gate C would FAIL
+
+D. CAN THE GRADER TELL WHICH BOARD IT DOWNLOADED?
+  PASS  D  the patched rule REFUSES a known-public board that carries private scores
+          board in hand: playground-series-s6e8-publicleaderboard-2026-08-31T16:38:58.csv
+          our score 0.97119 vs frozen public 0.97119; leader 0.97207 vs frozen public leader 0.97207
+            [board] our score moved off public: False
+            [board] leader's score moved off public: False
+            [board] filename does not say publicleaderboard: False
+            [submission list] n_priv > 0: True (corroborating only)
+          => patched rule says is_private=False
+  PASS  D-ctl  the PRE-FIX rule ACCEPTS that same public board (the control still fires)
+          `(score != PUBLIC_AT_CLOSE) or n_priv > 0` -> (False) or (True) = True
+          `n_priv` counts rows in the SUBMISSION LIST, so after the close it carries the whole
+          decision on its own and P2/P3 would report PUBLIC ranks under a PRIVATE label.
+  PASS  D-name  the board's identity is in the filename, and the grader now picks and prints it
+          playground-series-s6e8-publicleaderboard-2026-08-31T16:38:58.csv
+          `private_board()` returns (df, filename), sorts the glob, and prefers a CSV that does
+          not announce itself as public.
+
+E. WILL THE GRADER FIND ITS TEAM AND ITS COLUMNS?
+  PASS  E  the leaderboard carries TeamName/Score and matches TEAM exactly once
+          columns: ['Rank', 'TeamId', 'TeamName', 'LastSubmissionDate', 'Score', 'SubmissionCount', 'TeamMemberUserNames']
+          exact matches for 'Teddy Tennant': 1  (rank 312 of 3490)
+
+F. IS P4's INPUT ON DISK AND DOES IT RESOLVE?
+  PASS  F  `w135a_clickpower.csv` has the row P4 indexes
+          private 80%: ppos=0.7957, sd=3.80e-6 -> P4 verdict computable and reads HELD (ppos < 0.95)
+
+G. DOES THE GRADER SURVIVE ITS OWN PARSE PATH?
+  PASS  G  `pd.io.common.StringIO` exists and the CSV parses to 7 columns
+          pandas 3.0.5; columns ['ref', 'fileName', 'date', 'description', 'status', 'publicScore', 'privateScore']
+          descriptions containing commas are quoted by the CLI and do not misalign the parse
+
+============================================================================================
+FAILURES: 0
+============================================================================================

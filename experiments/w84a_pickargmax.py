@@ -36,11 +36,13 @@ GUARDS
 """
 from __future__ import annotations
 
-import io, json, os, re, subprocess, sys
+import csv, io, json, os, re, subprocess, sys
 
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads; see its docstring
 COMP = "playground-series-s6e8"
 OUT = os.path.join(HERE, "w84a_pickargmax.json")
 LEDGER = os.path.join(HERE, "w57a_tierprice2.json")
@@ -52,7 +54,10 @@ CHECKSEL = os.path.join(HERE, "check_selection.py")
 # 2026-08-31, so on the one day this guard decides anything it would have read 200 of 201 and
 # G2 would still have passed, because G2 only ever compared the cap against 50 (w86 §1).
 # `fetch_raw` now refuses at the cap itself -- the only test that detects its own truncation.
-PAGE = 500
+PAGE = 200   # w140: AT the server cap, not above it. The endpoint caps a page at 200 and
+             # returns a next_page_token the CLI never prints, so at 500 this file's own
+             # `len(rows) >= PAGE` read `200 >= 500 -> False` and could NEVER fire.
+             # Measured in w140c_pagetruth.py (T1/T2/T5).
 SUBS_ARGV = ["kaggle", "competitions", "submissions", "-c", COMP, "-v", "--page-size", str(PAGE)]
 
 CV_RE = re.compile(r"CV (0\.\d{6,})")
@@ -63,6 +68,14 @@ MIN_SAMPLE = 60                          # below this the list is not the accoun
 
 
 def fetch_raw(argv, *, capped: bool = False) -> str:
+    """⚠ w140: the UNCAPPED path now paginates (kaggle_list). `argv` is still honoured
+    for the deliberately-capped control in G2, which must keep hitting the cap."""
+    if not capped:
+        rows = kaggle_list.submissions()
+        buf = io.StringIO()
+        w = csv.DictWriter(buf, fieldnames=list(rows[0]))
+        w.writeheader(); w.writerows(rows)
+        return buf.getvalue()
     raw = subprocess.run(argv, capture_output=True, text=True, check=True).stdout
     if not capped and len(parse(raw)) >= PAGE:
         raise SystemExit(f"submission list came back at the page size ({PAGE}); it is "
@@ -163,11 +176,20 @@ def main() -> int:
         # ⚠ G2b IS THE PART G2 WAS MISSING. Beating 50 says nothing about beating the history;
         # only the cap compared against itself does (w86). This is what fetch_raw enforces, and
         # asserting it here too makes the failure legible instead of an exception.
-        if len(df) >= PAGE:
-            bad.append(f"G2b the fetch is AT its own cap ({len(df)} >= {PAGE}) -- truncated")
+        # ⚠ w140 REPLACED G2b's TEST, NOT ITS INTENT. It used to require the read to sit
+        # strictly under its own page size. That is the right test for a CAPPED read and
+        # it is unsatisfiable for a COMPLETE one: the paginated fetch is 201 rows and the
+        # server's page cap is 200, so "under the cap" now means "truncated". The intent
+        # -- the read must not be silently short -- is now enforced where it belongs, by
+        # kaggle_list.submissions(), which follows next_page_token and RAISES rather than
+        # returning a partial list. What is left to check here is that pagination really
+        # bought rows the capped call could not reach.
+        if len(df) <= kaggle_list.PAGE_CAP < len(capped) + 1 and len(df) == len(capped):
+            bad.append(f"G2b paginated and capped agree at {len(df)} rows while the cap "
+                       f"is {kaggle_list.PAGE_CAP} -- pagination bought nothing")
         else:
-            print(f"  ✅ G2b {len(df)} rows is strictly under the cap {PAGE}, headroom "
-                  f"{PAGE - len(df)}")
+            print(f"  ✅ G2b paginated {len(df)} rows vs the server page cap "
+                  f"{kaggle_list.PAGE_CAP}; the read is not bounded by a page size")
 
     # ---- G3: negative control -- a planted better send must TRIP G1 ---------------------
     planted = pd.concat([df, pd.DataFrame([{

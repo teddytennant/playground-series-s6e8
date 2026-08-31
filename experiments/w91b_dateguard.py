@@ -53,6 +53,8 @@ import tempfile
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 COMP = "playground-series-s6e8"
@@ -247,10 +249,8 @@ with tempfile.TemporaryDirectory() as td:
 
 
 print("\nG4  LIVE the real column parses")
-raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                      "--page-size", "500"],
-                     capture_output=True, text=True, timeout=300).stdout
-live = pd.read_csv(io.StringIO(raw))
+# w140: paginated -- the old capped read silently stopped at 200 rows.
+live = pd.DataFrame(kaggle_list.submissions(COMP))
 assert len(live) >= 141, f"page-size truncation or auth failure: {len(live)} rows"
 col = live["date"].astype(str)
 with_frac = int(col.str.contains(r"\.\d").sum())

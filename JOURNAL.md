@@ -37877,3 +37877,324 @@ it correctly: *"every printed literal names only WANTED or an ALLOWED stem"* and
 doc names a non-WANTED selectable file as the pick"*. `w101a_angleguard` still resolves every
 ANGLE INDEX pointer after the row 8 edit, and `w107a_lineref` is green: nothing in this run's
 prose cites a fact by line number.
+
+---
+
+# w140 — 2026-08-31, slot 9 of 10 · ANGLE: the original dataset · **0 SLOTS, NOTHING SENT.**
+# 🔴 THE ONE SCRIPT THAT RUNS EXACTLY ONCE, TONIGHT, AFTER NOTHING CAN BE FIXED, HAD NEVER
+# BEEN RUN — AND IT CARRIED **BOTH** THE PAGINATION BUG w138 FIXED AND A PRIVATE-BOARD CHECK
+# THAT A PUBLIC BOARD PASSES.
+
+## 0. STATE, MEASURED NOT ASSUMED
+
+`date -u`: **2026-08-31 15:58Z. Close is 23:59Z tonight, so the competition is STILL OPEN and
+`w135b_grade.py` STAYS SEALED** as a grading instrument. It was **not** used to grade anything;
+see §4 for the one pre-close execution and exactly what it did.
+
+`check_selection.py`, **true rc=1 from a redirected run** (never `$?` after a pipe):
+***NOTHING IS SELECTED.*** Both WANTED files print `UNREACHABLE without the click (P=0.000)`;
+the auto-pair is still **DETERMINED** by a 2-file tie at 0.97119. **The click still changes the
+outcome and it still has not happened.** ⛔ **WANTED WAS NOT MOVED.**
+
+Browser route re-checked, one call each, per the standing rule: no `mcp__brave__*` in the
+deferred registry; `command -v brave brave-browser chromium google-chrome google-chrome-stable
+firefox` → **zero hits**; `DISPLAY` and `WAYLAND_DISPLAY` both **empty**. `PushNotification`
+called once, return string verbatim and identical to w115/w116/w117/w118/w119/…:
+***"Mobile push not sent (Remote Control inactive)."*** ⛔ **DO NOT SAY THE USER WAS NOTIFIED.**
+
+The handed angle is ANGLE INDEX **row 1** (*the original dataset — find it, concat it*).
+⛔ **NOT RE-OPENED**, resolved by grep per the index's own instruction: the row is `closed`,
+its headline `0` is a **CONSTRUCTION ZERO** (at dose 0× `orig_concat.py`'s `if w:` builds no
+augmented frame, so the baseline **is** the arm), the manoeuvre's real price is **negative and
+monotone at every dose anyone ran** — −58.0e-6 at 1×, −986.0e-6 at 10×, −3,340.0e-6 at 50× —
+the separate-estimator route prices at **−1.02e-6/member, t = 0.56, sign-flipping**, and the
+CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so
+there is nothing else to find. Row 1 is the **only** row in the table whose manoeuvre is
+measured to LOSE AUC at every setting. Count incremented **×14 → ×15** in the `closed` column.
+
+## 1. 🔴 THE DEFECT — A SEALED SCRIPT IS AN UNTESTED SCRIPT, AND SEALING IS WHY
+
+There is exactly one observation left in this competition and exactly one instrument that
+reads it: `w135b_grade.py`, sealed since w135 so that the post-close run cannot choose what it
+predicted. 🎯 **The seal is right about the predictions and it created a second problem nobody
+priced: the script's FIRST execution is also its ONLY one, at the single moment in this
+competition when nothing can be fixed.** Thirty-odd runs have re-verified a pick that has not
+moved since 08-19. Not one had run the thing that reads the result.
+
+⚠ **AND EVERY INPUT IT DEPENDS ON WAS READABLE PRE-CLOSE.** The submission list is our own
+account. The leaderboard CSV's columns, filename and team-name spelling all download today.
+`w135a_clickpower.csv` is on disk. **None of that requires a private number**, so auditing it
+costs nothing and forfeits nothing.
+
+## 2. 🔴 DEFECT A — `--page-size 300` AGAINST A SERVER THAT CAPS A PAGE AT 200
+
+The grader's entire submission read was one call:
+
+    subs = pd.read_csv(pd.io.common.StringIO(
+        sh("kaggle","competitions","submissions","-c",COMP,"-v","--page-size","300")))
+
+**This is w138's bug at a third site**, and it was already live: 201 submissions on the
+account, that call returns **200**. Measured, not assumed — `--page-size` **200 → 200,
+300 → 200, 1000 → 200**, against a paginated `kagglesdk` total of **201 over 2 pages**.
+
+🎯 **SO THE CONSTANT WAS NOT MERELY TOO SMALL, IT WAS ABOVE A CEILING IT CAN NEVER EXCEED.**
+w139's lesson was *"a bug fixed by raising a constant is rescheduled, and it comes back on the
+day the constant is reached."* Here the constant had **already been raised past the cap**, so
+the bug was not rescheduled — it was permanent, and it was sitting in the one script whose
+mistakes cannot be caught by a later run. The dropped row is the same one both prior runs
+found: **`stack_pub74_logit.csv`, ref 55407329, public 0.97081, the OLDEST submission.**
+
+⚠ **AND ITS EFFECT TODAY IS BENIGN, WHICH THE AUDIT GATES ON RATHER THAN GLOSSES.** Gate C
+checks all four graded stems (both WANTED, both AUTO) survive the truncated read: **4/4 present,
+so P1 does NOT move.** ⛔ **DO NOT REPORT DEFECT A AS HAVING CHANGED A VERDICT.** It is a real
+defect with no consequence on today's data, exactly like w138's, and it is benign because of the
+**date-descending sort order** — structure, not care. Gate C carries a control (`C-ctl`): with a
+WANTED stem deleted the gate FAILS, so its green is a measurement and not a shrug.
+
+**FIXED:** the read now follows `next_page_token` to exhaustion through the same `KAGGLE_PY`
+interpreter `check_selection.py` uses (the workspace `.venv` has **no `kagglesdk`** — importing
+it there is a `ModuleNotFoundError`), asserts the page cap was not hit, rejects duplicate refs,
+and **prints the row and page count** so the next reader sees the completeness claim rather than
+trusting it. `s.private_score` is on the paginated object, so nothing was lost by dropping the
+CLI. Verified live: **201 rows over 2 pages, 201 unique refs.**
+
+## 3. 🔴 DEFECT D — THE PRIVATE-BOARD CHECK COULD BE SATISFIED WITHOUT LOOKING AT THE BOARD
+
+This is the one that could have put wrong numbers in the journal under a true-sounding label.
+
+    n_priv = int(subs["privateScore"].notna().sum())
+    is_private = (score != PUBLIC_AT_CLOSE["score"]) or n_priv > 0
+
+The guard exists to refuse to grade a **public** board. Its second disjunct counts rows in the
+**SUBMISSION LIST**, and after the close that is true *whichever board `lb` holds*. 🎯 **So the
+guard that exists to reject a public leaderboard is switched off by a fact about a different
+object, at exactly the moment it is needed** — and P2 and P3 would then report **PUBLIC ranks
+under a PRIVATE label**, with no later run to catch it. The comment above it defends the OR on
+the grounds that a private score could round to the public one at 5 d.p.; that reasoning is
+sound and the shape it bought is not.
+
+⚠ **AND THE ANSWER WAS IN THE FILENAME.** `private_board()` did `csvs[0]` on an **unsorted**
+glob and never printed the name. Today's download is literally
+`playground-series-s6e8-publicleaderboard-2026-08-31T16:03:56.csv` — **the board says which
+board it is, in the string the function threw away.** Same genus as w139: two facts on the same
+page that nobody put next to each other.
+
+**FIXED**, and deliberately not by tightening into a script that can only refuse:
+
+- `private_board()` returns `(df, filename)`, **sorts** the glob, prefers a CSV that does not
+  announce itself as public, warns if the download ever carries more than one, and the filename
+  is **printed**.
+- `is_private` now needs **evidence from the board itself** — our score moved off the frozen
+  public value, *or* the leader's score did, *or* the filename does not say `publicleaderboard`
+  — **AND** `n_priv > 0` as **corroboration only**. Each signal prints with its own verdict, and
+  the top 3 of the loaded board print, so a human can see in one line which board it read.
+- ⚠ **The filename only ever argues FOR private**, so a post-close rename cannot on its own
+  cause a false refusal.
+- The refusal is **recoverable**: `--force-private` overrides it, prints
+  `⚠ OVERRIDDEN`, and the message tells the operator to record the override in the journal.
+  🎯 **The asymmetry is the whole design: a false "it is private" writes silent fiction into the
+  record, a false "it is public" prints STOP and can be overridden after a human reads the
+  evidence.** Only one of those is recoverable, so the refusal is the safe default.
+- 🆕 One new constant, `PUBLIC_TOP_AT_AUDIT = 0.97207` (the leader's public score, read 15:59Z,
+  **pre-close**). ⛔ **IT IS PLUMBING, NOT A PREDICTION**, and it is in a clearly marked w140
+  block. **THE FROZEN BLOCK FROM COMMIT 761f341 — `WANTED`, `AUTO`, `P3_INTERVAL`,
+  `P3_UNION_INTERVAL`, `PUBLIC_AT_CLOSE` — WAS NOT TOUCHED.**
+
+## 4. ✅ THE INSTRUMENTS — 10/10 GATES AND 7/7 SCENARIOS, CONTROLS FIRING BOTH WAYS
+
+**`w140a_gradeaudit.py` — FAILURES 0.** It execs the grader's own header, so gates A and D test
+**the shipped code**, not a copy of it.
+
+| gate | check | result |
+|---|---|---|
+| **A** | the grader's `submissions()` returns every submission | **201 == 201**, 2 pages ✅ |
+| **A-ctl** | the **pre-fix** read is still CAUGHT by that invariant | **200 != 201**, names `stack_pub74_logit` ✅ |
+| **A-cap** | the shortfall is a SERVER CAP, not a small constant | 200/300/1000 → **200, 200, 200** ✅ |
+| **B** | the paginated read is complete, no duplicate refs | 201 rows, 201 unique ✅ |
+| **C** | all four graded stems survive truncation → **P1 does not move** | 4/4 present ✅ |
+| **C-ctl** | gate C detects a truncation that DOES hit a graded stem | fails on sabotage ✅ |
+| **D** | the **patched** rule REFUSES a public board carrying private scores | `is_private=False` ✅ |
+| **D-ctl** | the **pre-fix** rule ACCEPTS that same board | `(False) or (True) = True` ✅ |
+| **D-name** | the board's identity is in the filename | `…-publicleaderboard-…` ✅ |
+| **E/F/G** | team matches exactly once; P4's CSV row resolves; parse path holds | rank 311/3487; ppos 0.7957, sd 3.80e-6; pandas 3.0.5, 7 cols ✅ |
+
+🎯 **`A-ctl` AND `D-ctl` ARE THE POINT.** Both fixes could have been faked by blunting the
+check. The controls re-run the exact pre-fix logic and **require it to still fail**, so green
+means the code changed and not that the instrument got softer.
+
+**`w140b_gradedryrun.py` — FAILURES 0, 7/7.** w140a proves the grader can **parse**; that is
+not proof it can **grade**. The grading section — four verdicts, P1's **three** branches, the
+movement footer — had never executed at all. w140b splits the source at its first top-level
+banner, execs the header, swaps the two I/O functions for fixtures, and execs the body.
+⛔ **EVERY PRIVATE NUMBER IN IT IS FABRICATED; IT GRADES NOTHING AND WRITES NOTHING.** The
+frozen constants come from the file, not the fixture.
+
+    S1 auto-selected, rank 300      P1 HELD       P2 HELD       P3 HELD       P4 HELD
+    S2 the click happened           P1 FALSIFIED  P2 HELD       P3 HELD       P4 HELD
+    S3 pairs tie at 5 d.p.          P1 UNGRADED   P2 HELD       P3 HELD       P4 HELD
+    S4 private scores unpublished   P1 UNGRADED   P2 HELD       P3 HELD       P4 HELD
+    S5 rank 900                     P1 HELD       P2 FALSIFIED  P3 FALSIFIED  P4 HELD
+    S6 PUBLIC board + private scores            -> exit 1, REFUSED  ✅
+    S7 same, with --force-private               -> exit 0, "OVERRIDDEN"  ✅
+
+⚠ **S3 IS NOT A HYPOTHETICAL.** Kaggle publishes 5 d.p. and the WANTED/AUTO gap is **4.5e-6**,
+i.e. **below the last printed digit**. The most likely single outcome tonight is that P1 comes
+back **UNGRADED because the board cannot tell the two pairs apart** — and that branch existed,
+untested, in a script that runs once.
+
+⚠ **THE FIRST DRY-RUN PASS WENT 2 RED AND BOTH REDS WERE MINE, WHICH IS WHY THEY MATTER.**
+`S1 P3 FALSIFIED` at a rank I had set to 300, and `S5 P2 HELD` at a rank I had set to 900. I
+had written the team's score into row `team_rank-1` of a descending array **without making it
+survive the grader's own `sort_values("Score")`** — at 0.97105 the team jumped to rank ~2 and
+both verdicts were correct about a board I had built wrong. 🎯 **A fixture that does not
+survive the code's own normalisation is not a fixture, and it fails in the direction that looks
+like a finding.** Fixed by constructing exactly `k-1` scores above and the rest below, with an
+assert on both the placement and the monotonicity.
+
+**THE PRE-CLOSE EXECUTION OF `w135b_grade.py`, STATED PLAINLY BECAUSE THE SEAL IS THE POINT.**
+It was run once, live, at 16:05Z. It printed the board file, the completeness line
+(**201 rows / 2 pages**), our public rank, the four evidence signals — **all four `no`** — and
+**exited 1** at the board-identity gate. ⛔ **IT REACHED NO PREDICTION AND GRADED NO P**, because
+it exits before the grading section. ✅ **That is not a breach of the seal, it is the seal
+working**, and it is the only way to learn pre-close that the script does not crash.
+
+## 5. NEXT RUN
+
+1. **`date -u` FIRST.** Past 2026-08-31 23:59Z the competition is **over**: run
+   **`.venv/bin/python experiments/w135b_grade.py` BEFORE reading the board any other way**,
+   and write its four verdicts in verbatim, failures included.
+   🆕 **Expect P1 = UNGRADED.** The gap is 4.5e-6 and the board prints 5 d.p. (§4, S3). That is
+   a **property of the instrument, not a result**, and it is not a reason to go looking for a
+   sharper one after the fact.
+   🆕 **If it exits 1 saying the board does not look private, READ THE FOUR EVIDENCE LINES
+   before reaching for `--force-private`**, and if you override it, say so in the entry.
+2. ⛔ **DO NOT REBUILD A QUEUE, TRAIN ANYTHING, OR REGISTER A GUARD.** `num_allowed_now = 0`,
+   there is no slot and no future day.
+3. ⛔ **DO-NOT, carried forward from w92–w139 in full and added to:**
+   • 🆕 **DO NOT TREAT A SEALED SCRIPT AS A VERIFIED ONE.** Sealing forbids *grading* early; it
+     never forbade *executing* it against inputs that exist pre-close (§1).
+   • 🆕 **DO NOT SAY w140 FOUND THE PAGINATION BUG.** That is w138's. w140 found a **third
+     site** of it, already live at 201 (§2).
+   • 🆕 **DO NOT REPORT DEFECT A AS HAVING MOVED A VERDICT.** Gate C: 4/4 stems survive (§2).
+   • 🆕 **DO NOT LET A FACT ABOUT THE SUBMISSION LIST VOUCH FOR THE LEADERBOARD** (§3).
+   • 🆕 **DO NOT BUILD A FIXTURE THAT THE CODE'S OWN SORT REORDERS** (§4).
+   • 🆕 **DO NOT SAY THE USER WAS NOTIFIED.** `PushNotification`: *"not sent"* (§0).
+4. ⚠ **THE LESSON.** w138 found a page size wearing a total's clothes; w139 found the antidote
+   printed three lines below the endpoint that caused it. This run asked a different question:
+   **which artefact's mistakes can no future run catch?** There is exactly one — the script
+   that runs after the last deadline — and it had never been executed, *because* the discipline
+   protecting it was working.
+   🎯 **A seal against premature USE reads, from the inside, exactly like a seal against
+   TESTING, and the two are opposites: one protects the result, the other protects the
+   instrument. Every run had a reason not to touch the grader, and the reason was correct, and
+   thirty of them stacked into a single-shot instrument nobody had ever fired. When a rule says
+   "do not run this yet", the question it does not answer is "then when is it checked?" — and
+   if the answer is "the one time it counts", the rule has quietly bought a coin flip.**
+
+## 6. 🔴 THE SUITE FOUND THE REAL DEFECT, AND IT WAS THE PAGE-SIZE GUARD ITSELF
+##    (appended after the launches — this is the larger half of the run)
+
+First launch, **56/61**. Four reds are the calendar set. The fifth was **`w86a_pagecap`**, and
+it was **not** mine in the usual sense — it fired on my new `w140a_gradeaudit.py` for two
+reader defects. Chasing those turned up why §2's defect existed at all.
+
+⚠ **`w117a_handcount` WAS GREEN**, so the row 1 count edit (×14 → ×15) was right; ⛔ **the
+count still came from the guard, not from me.**
+
+### 6.1 🔴 `len(rows) >= PAGE` CANNOT FIRE ABOVE 200, SO THE WHOLE DOCTRINE WAS VOID
+
+`w86a_pagecap`'s docstring calls `len(rows) >= PAGE -> raise` *"THE ONLY TEST THAT DETECTS ITS
+OWN TRUNCATION"*, and G4 requires it of seven deadline-day scripts. **`w140c_pagetruth.py`
+(6 gates + control, FAILURES 0) measured that it is unbuyable.** The endpoint caps a page at
+**200**: requested 199→199, 200→200, **201→200**, 500→200, 1000→200, true total **201**. The
+server returns a `next_page_token` at page 500 and **the CLI never prints it**, stdout or
+stderr.
+
+🎯 **YOU NEVER GET 200+ ROWS BACK, SO A `>= 500` CHECK HAS NOTHING TO FIRE ON.** At PAGE=500 it
+reads `200 >= 500 -> False -> not truncated` over a list that is short. **Raising the page size
+does not widen the read, it switches off the detector** — which is exactly why one row
+(`stack_pub74_logit`) was re-hidden by four consecutive fixes at w17, w138, w139 and w140.
+**T5 is the control and it is what makes this a finding rather than a complaint:** at page 150
+the same idiom fires correctly, so the idiom is sound and the **cap** is what disables it.
+
+**ALL 7/7 CERTIFIED SCRIPTS WERE IN THAT STATE**, including `w23b_sendqueue.py` — the one site
+that thought to check a token, reading for a `Next Page Token` line the CLI does not emit, so
+its `tok` was always None. ⚠ **AND `w86a` WAS A VICTIM OF ITS OWN RULE:** `api_rows(500)`
+returned 200, its self-check read `200 >= 500 -> False`, and it printed `live rows 200` while
+the account held 201 — **the bar it enforced was computed from a truncated read** — and it
+passed the grader's `--page-size 300` because 300 cleared a bar of 240.
+
+⚠ **AND THE ANSWER HAD BEEN ON THE PAGE SINCE 08-26.** RESEARCH's section headed **"TWO CLI
+CAPS, RE-MEASURED"** records `leaderboard --page-size 5000` → **exactly 200 rows**, then two
+bullets later `submissions --page-size 500` → *"141 rows. **Still under the cap**"*.
+🎯 **"The cap" means the ACCOUNT'S ROW COUNT in one sentence and the SERVER'S PAGE CEILING in
+the other. They were the same number, on the same page, under a heading that says there are
+two of them.** Corrected in place, along with the three *"always pass `--page-size 500`"*
+instructions that would have handed the same bug to the next reader.
+
+### 6.2 ✅ THE FIX, AND THE FOUR REGRESSIONS IT CAUSED, ALL FOUND BY THE SUITE
+
+`experiments/kaggle_list.py` — one paginated reader: follows the token, **raises rather than
+returning a partial list**, hands back the CLI's own column names so call sites swap untouched.
+Wired into all **7** deadline-day scripts plus `w62b`, `w82a`, `w91b`, `w93b`, `w88a`.
+`w86a` rewritten: `SERVER_PAGE_CAP` re-measured live **across** the boundary (200 **and** 201 —
+the old G5 probed `n-1`, always *below* the ceiling, which is why it never saw it); G1/G2 demand
+pagination or a bound at or below the cap; **G3 now requires a planted page-500 site guarded by
+`len(rows) >= 500` to be REJECTED**, the exact shape the file used to certify. Both reader
+defects fixed: a `leaderboard -d` **download** read as a paginated list, and `str(<parameter>)`
+reported as *"NO page size"*.
+
+⚠ **I CAUSED FOUR REGRESSIONS AND DID NOT FIND ONE OF THEM BY READING.** Changing `PAGE`
+500→200 first made the checks *fire*, correctly, with advice — *"Raise PAGE"* — that is now the
+trap itself. Then the suite went **55/61**: `w88a_calexposure` and `w92a_smokerun` (via
+`w93b_cvlbaudit`) both import `PAGE` from `w84a_pickargmax`, so my edit reached them. `w93b`'s
+`len(df) >= PAGE` **inverted** once the fetch paginated — at 201 rows against a 200 cap it
+called a **complete** read truncated. Then `w54a`/`w85c` went red for *truncation* instead of
+their documented calendar reason, which would have quietly replaced a known terminal state with
+a different one. 🎯 **Every one of the four was caught by running the suite again rather than by
+reasoning about the diff, and the last is the one I would never have predicted: a fix that
+changes WHY a red is red is a regression even when the red count is unchanged.**
+
+**FINAL: 57/61, reds exactly the four calendar ones**, `w54a` *"Refusing. Rebuild first"* and
+`w85c` G4 *"w54a rejects the LIVE queue (rc=1)"* — the **both-red** post-send pattern, not the
+hazardous *w85c red while w54a is green*. `w86a_pagecap` **green**, and green for the right
+reason: **0 unsafe among 63 LIVE files, G3/G3b/G4/G5 all firing.**
+
+⚠ **THE BACKLOG IS REPORTED, NOT EXCUSED.** 40 call sites in 39 one-off analyses still read the
+capped way; `w86a` prints and JSONs every one. **Their committed numbers are sound, for a dated
+and checkable reason: the account only passed 200 TODAY** (191 sends before 2026-08-31, 201
+after), so every read they ever made was complete. Re-running one now would not be.
+⛔ **DO NOT READ "0 unsafe among LIVE files" AS "the corpus is clean."**
+
+⚠ **A DELIBERATELY CAPPED READ IS A REAL CATEGORY** — a negative control must be truncated to be
+a control. `w86a` recognises it **only** via a `# w86a: capped-control` marker a human typed,
+the same design as the ANGLE INDEX's `NOT A PRICE` opt-out: **silence must not be spendable.**
+
+### 6.3 ✅ THE PICK, RE-VERIFIED THROUGH INSTRUMENTS THAT NOW READ 201 ROWS
+
+⛔ **NOTHING MOVED, AND THIS IS THE CHECK THAT MATTERED MOST** — I changed the fetch under every
+guard that reads the submission list. `w84a_pickargmax` on the complete list: **slot 1
+`w36_ad199stdcorr` CV rank 1 of 164, slot 2 `w23_ad187stdcorr`** — the WANTED pair. `w93b`:
+*"SELECT_THESE.md names ['w36_ad199stdcorr.csv', 'w23_ad187stdcorr.csv']"*. `check_selection.py`
+true rc=1: **201 visible, NOTHING IS SELECTED**, auto-pair still **DETERMINED**, both WANTED
+files still `UNREACHABLE without the click`. The click is still worth **+4.5228e-6** and still
+needs Teddy.
+
+### 6.4 ⚠ ADDENDUM TO §5's DO-NOT LIST
+
+• 🆕 **DO NOT PASS `--page-size 500`, OR ANY PAGE SIZE, AS A TRUNCATION FIX.** Above 200 it
+  disables the detector. Use `experiments/kaggle_list.py`.
+• 🆕 **DO NOT PROBE A CEILING FROM BELOW IT.** w86a's old G5 measured `n-1` and could never see
+  the cap. Measure **across** the boundary.
+• 🆕 **DO NOT ASSUME A FIX THAT KEEPS THE RED COUNT THE SAME IS INERT.** w54a/w85c stayed red
+  while the *reason* changed (§6.2).
+• 🆕 **DO NOT SAY w140 INVENTED THE 200-ROW CAP.** It was measured on the leaderboard endpoint
+  at w92 and written down; what was missing was applying it to the other endpoint (§6.1).
+
+🎯 **THE LESSON, AND IT SUBSUMES §5's.** §5 said a seal against premature use reads from the
+inside like a seal against testing. §6 is the same shape one level down: **a remedy nobody can
+buy looks exactly like a remedy everybody has bought**, because the check that would reveal the
+difference is the one the remedy disabled. Six days of green over `PAGE = 500` were not
+evidence the corpus was safe; they were evidence the corpus could not tell. **When a guard has
+never fired, that is not a clean bill of health until you have made it fire on purpose** — and
+the cheapest way is to ask where the quantity it measures runs out.

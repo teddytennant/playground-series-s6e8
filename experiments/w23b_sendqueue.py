@@ -34,10 +34,15 @@ from common import SUB, TARGET, load_raw  # noqa: E402
 from w16b_cellweight import fast_auc  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads
 N_TEST = 296_302
 
 
-PAGE = 500
+PAGE = 200   # w140: AT the server cap, not above it. The endpoint caps a page at 200 and
+             # returns a next_page_token the CLI never prints, so at 500 this file's own
+             # `len(rows) >= PAGE` read `200 >= 500 -> False` and could NEVER fire.
+             # Measured in w140c_pagetruth.py (T1/T2/T5).
 
 
 def sent_filenames():
@@ -56,21 +61,12 @@ def sent_filenames():
     pointless. The `Next Page Token` guard below did not save it, so the guard is now a
     hard failure on a full page rather than a printed warning. Do not remove the
     --page-size argument, and do not trust any Kaggle list you did not ask a size for."""
-    out = subprocess.run(
-        ["kaggle", "competitions", "submissions", "-c", "playground-series-s6e8", "-v",
-         "--page-size", str(PAGE)],
-        capture_output=True, text=True, check=True).stdout.splitlines()
-    tok = None
-    while out and not out[0].startswith("ref,"):
-        line = out.pop(0)
-        if "Next Page Token" in line:
-            tok = line.split("=")[-1].strip()
-    rows = list(csv.DictReader(out))
-    if len(rows) >= PAGE or tok:
-        raise SystemExit(
-            f"submission list is TRUNCATED: {len(rows)} rows at page size {PAGE}"
-            + (f", next-page token {tok[:12]}..." if tok else "")
-            + ". Raise PAGE. Every 'unsent' verdict below this line would be wrong.")
+    # ⚠ w140: the `Next Page Token` guard below never fired, and could not. The CLI does
+    # not print that line at all (measured, w140c T3) while the server DOES return a
+    # token, so `tok` was always None and `len(rows) >= PAGE` was False at PAGE=500.
+    # This file was right that a token is the thing to check; it was reading for it in
+    # the one place it never appears. kaggle_list reads it from the API.
+    rows = kaggle_list.submissions()
     return {r["fileName"] for r in rows}, rows
 
 

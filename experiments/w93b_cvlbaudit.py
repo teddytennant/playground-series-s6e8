@@ -47,6 +47,7 @@ sys.path.insert(0, HERE)
 
 from w84a_pickargmax import PAGE, SUBS_ARGV, CV_RE, SLOT1, SLOT2, fetch_raw, parse  # noqa: E402
 from w91a_subdate import parse_sub_dates                                            # noqa: E402
+import kaggle_list                                                                  # noqa: E402
 
 OUT = os.path.join(HERE, "w93b_cvlbaudit.json")
 LEDGER = os.path.join(HERE, "w57a_tierprice2.json")
@@ -79,10 +80,18 @@ def main() -> int:
     df = parse(fetch_raw(SUBS_ARGV))
     df["date"] = parse_sub_dates(df["date"])
 
-    if len(df) >= PAGE:
-        bad.append(f"G1 fetch is AT its cap ({len(df)} >= {PAGE}) -- the history is truncated")
+    # ⚠ w140: this used to read `len(df) >= PAGE -> truncated`. The fetch now paginates
+    # (w84a -> kaggle_list), so the row count legitimately EXCEEDS the server's page cap and
+    # the old test inverted: at 201 rows against a 200-row cap it called a COMPLETE read
+    # truncated. Completeness is enforced at the source -- kaggle_list follows
+    # next_page_token and raises rather than returning a partial list -- so what is worth
+    # asserting here is that the read is not bounded by a page size at all.
+    if len(df) <= kaggle_list.PAGE_CAP:
+        print(f"⚠ G1 {len(df)} submissions, at or under the server page cap "
+              f"{kaggle_list.PAGE_CAP} -- pagination is untested this run, not passing")
     else:
-        print(f"✅ G1 {len(df)} submissions fetched, cap {PAGE}, headroom {PAGE - len(df)}")
+        print(f"✅ G1 {len(df)} submissions fetched, past the server page cap "
+              f"{kaggle_list.PAGE_CAP}; the read is paginated, not capped")
 
     df["cv"] = df["description"].astype(str).str.extract(CV_RE)[0].astype(float)
     df["lb"] = pd.to_numeric(df["publicScore"], errors="coerce")

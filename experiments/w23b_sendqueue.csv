@@ -22,16 +22,6 @@ w40_ad211std_logit.csv,False,0.970057844058492,296302,034ee2a374e5ef72c9e47dce92
 w38_ad202std_logit.csv,False,0.9700575874003036,296302,8c39ae0c145223b139497e74a851849c
 w36_ad199std_logit.csv,False,0.9700571065601006,296302,043688873facdb60af2f52865562c2f8
 w34_ad196std_logit.csv,False,0.9700495032230128,296302,54a14dea76a6aa1de201b214603ef87a
-w85_cal_bolt_dcnv2_cross.csv,False,,296302,b9053dcc64f7a2776a47f2789a6dd64b
-w85_cal_bolt_fttransformer.csv,False,,296302,dc447271de7e82750e50457d50564d62
-w85_cal_bolt_gandalf_gflu.csv,False,,296302,bad6a7d7357a19b92044bfc1a762456e
-w85_cal_bolt_neural_5fold.csv,False,,296302,785be79274e0f57bb9cc8410ea954ac6
-w85_cal_bolt_tabm_rank1.csv,False,,296302,914a8a5871b70a079d051ed7fc857ad6
-w85_cal_bolt_tabr_retrieval.csv,False,,296302,b46b36608b2406960f636b3e906c4e21
 w85_cal_gmm_raw.csv,False,,296302,1df8866d60b5d1523c3d1bac6f6d448e
 w85_cal_gnb_raw.csv,False,,296302,f91208165a3debb138fb793da4bce330
-w85_cal_golem_c.csv,False,,296302,1589f827ea735a7c808446529a4f1123
-w85_cal_poly2_raw.csv,False,,296302,d7bf997134e82361b36d072e56e18e7e
-w85_cal_qda_lat.csv,False,,296302,6d1d71c1a8680f1d4bef22bd17f4471f
 w85_cal_qda_raw.csv,False,,296302,41239abcaf298bc641c2ae423281f3e3
-w85_cal_rff_raw.csv,False,,296302,5f944390aa6bbdc0683db16e545cdd5c

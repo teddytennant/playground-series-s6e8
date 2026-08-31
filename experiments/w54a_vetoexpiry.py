@@ -25,6 +25,8 @@ import csv, io, os, subprocess, sys, datetime as dt
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads
 QUEUE = os.path.join(HERE, "w26d_queueprice.csv")
 DAILY_CAP = 10
 DEADLINE = dt.date(2026, 8, 31)          # last UTC day on which a submission can land
@@ -34,21 +36,20 @@ def today_utc():
     return dt.datetime.now(dt.timezone.utc).date()
 
 
-PAGE = 500   # ⚠ the API defaults to 50 and TRUNCATES SILENTLY -- w26g_send.py already passes an
+PAGE = 200   # ⚠ w140: AT the server cap (200), not above it -- above it the
+             # self-check can never fire. The API defaults to 50 and TRUNCATES
+             # SILENTLY -- w26g_send.py already passes an
              # explicit page size for this reason, and the first cut of this script did not.
              # A truncated list undercounts what has been sent and overstates the slack.
 
 
 def api_rows(comp="playground-series-s6e8"):
-    out = subprocess.run(["kaggle", "competitions", "submissions", "-c", comp, "-v",
-                          "--page-size", str(PAGE)],
-                         capture_output=True, text=True, timeout=300).stdout
-    rows = list(csv.reader(io.StringIO(out)))
-    if len(rows) < 2:
-        raise SystemExit("could not read the submission list")
-    if len(rows) - 1 >= PAGE:
-        raise SystemExit(f"submission list came back at the page size ({len(rows)-1}); truncated.")
-    return rows
+    # ⚠ w140: paginated. This was a capped CLI read whose `>= PAGE` check could not fire
+    # above the server's 200-row page cap. Returned in the CLI's own list-of-lists shape
+    # (header first) so callers indexing rows[0] are untouched.
+    rows = kaggle_list.submissions(comp)
+    cols = ["ref", "fileName", "date", "description", "status", "publicScore", "privateScore"]
+    return [cols] + [[r[c] for c in cols] for r in rows]
 
 
 def sent_today(comp="playground-series-s6e8"):

@@ -64,6 +64,8 @@ import pandas as pd
 from scipy.stats import rankdata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads; see its docstring
 ROOT = os.path.dirname(HERE)
 SUB = os.path.join(ROOT, "submissions")
 QUEUE = os.path.join(HERE, "w26d_queueprice.csv")
@@ -71,7 +73,10 @@ SENDER = os.path.join(HERE, "w26g_send.py")
 DST = os.path.join(HERE, "w55a_unpriced.json")
 
 # w54: the submissions API silently truncates to 50 rows. Always pass a page size and guard.
-PAGE = 500
+PAGE = 200   # w140: AT the server cap, not above it. The endpoint caps a page at 200 and
+             # returns a next_page_token the CLI never prints, so at 500 this file's own
+             # `len(rows) >= PAGE` read `200 >= 500 -> False` and could NEVER fire.
+             # Measured in w140c_pagetruth.py (T1/T2/T5).
 # Deterministic subsample of the 296,302 test rows. A stride, not an RNG draw: the bound has to
 # be reproducible by any later run without carrying a seed around.
 STRIDE = 5
@@ -82,15 +87,9 @@ GUARD = "w55: unpriceable"
 def _api_rows():
     env = dict(os.environ)
     env.setdefault("KAGGLE_CONFIG_DIR", os.path.expanduser("~/.kaggle"))
-    out = subprocess.run(
-        ["kaggle", "competitions", "submissions", "-c", "playground-series-s6e8", "-v",
-         "--page-size", str(PAGE)],
-        capture_output=True, text=True, env=env, timeout=180)
-    if out.returncode != 0:
-        raise SystemExit(f"submissions API failed: {out.stderr.strip()[:300]}")
-    rows = pd.read_csv(io.StringIO(out.stdout))
-    if len(rows) >= PAGE:
-        raise SystemExit(f"submissions API returned {len(rows)} >= page size {PAGE}; raise PAGE")
+    # w140: paginated. A page size cannot fix truncation here -- the server caps a page
+    # at 200 and the CLI hides the next_page_token, so `len(rows) >= PAGE` never fired.
+    rows = pd.DataFrame(kaggle_list.submissions())
     return rows
 
 

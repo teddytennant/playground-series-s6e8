@@ -73,6 +73,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(HERE), "agent"))
 
 import w26g_send as SND                                                     # noqa: E402
 from w84a_pickargmax import PAGE, SUBS_ARGV                                 # noqa: E402
+import kaggle_list                                                          # noqa: E402
 
 OUT = os.path.join(HERE, "w88a_calexposure.json")
 QUEUEPRICE = os.path.join(HERE, "w26d_queueprice.csv")
@@ -116,14 +117,12 @@ def sent_stems():
     The day-string slice is deliberate and is `w54a_vetoexpiry`'s idiom: it never parses a
     time, so it cannot meet the two-spelling `date` hazard `w91a_subdate` exists for.
     """
-    raw = subprocess.run(SUBS_ARGV, capture_output=True, text=True, check=True).stdout
-    lines = raw.splitlines()
-    head = next(i for i, l in enumerate(lines) if l.startswith("ref,"))
-    d = pd.read_csv(io.StringIO("\n".join(lines[head:])))
-    if len(d) >= PAGE:
-        # never silently treat a truncated history as "nothing else was sent"
-        raise SystemExit(f"w88a: the submission list came back at its page size ({PAGE}); it "
-                         f"is truncated and spent days could not be identified. Raise PAGE.")
+    # ⚠ w140: this was a capped CLI read guarded by `len(d) >= PAGE`. The guard was right --
+    # it fired the day the account passed the server's 200-row page cap -- but its advice
+    # ("Raise PAGE") is the trap: above 200 the server returns 200 anyway and the check can
+    # no longer fire, so raising it would have restored a SILENT truncation. Paginated
+    # instead; kaggle_list raises rather than returning a partial list.
+    d = pd.DataFrame(kaggle_list.submissions())
     return {str(f).replace(".csv", "") for f in d["fileName"]}
 
 

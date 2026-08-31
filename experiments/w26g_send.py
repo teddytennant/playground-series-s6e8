@@ -44,10 +44,15 @@ sys.path.insert(0, os.path.join(ROOT, "agent"))
 from common import SUB  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads
 COMP = "playground-series-s6e8"
 DAILY_CAP = 10
 N_TEST = 296_302
-PAGE = 500
+PAGE = 200   # w140: AT the server cap, not above it. The endpoint caps a page at 200 and
+             # returns a next_page_token the CLI never prints, so at 500 this file's own
+             # `len(rows) >= PAGE` read `200 >= 500 -> False` and could NEVER fire.
+             # Measured in w140c_pagetruth.py (T1/T2/T5).
 QUEUE = os.path.join(HERE, "w26d_queueprice.csv")
 TIERPRICE = os.path.join(HERE, "w57a_tierprice2.json")
 
@@ -301,17 +306,14 @@ def md5(path):
 
 
 def api_submissions():
-    """The live list, with an explicit page size and a truncation guard."""
-    r = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                        "--page-size", str(PAGE)],
-                       capture_output=True, text=True, timeout=300)
-    if r.returncode != 0 or "id,fileName" not in r.stdout and "ref,fileName" not in r.stdout:
-        raise SystemExit(f"kaggle submissions failed:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
-    rows = list(csv.DictReader(io.StringIO(r.stdout)))
-    if len(rows) >= PAGE:
-        raise SystemExit(f"submission list came back at exactly the page size ({len(rows)}); "
-                         f"it is truncated. Raise PAGE before trusting anything below.")
-    return rows
+    """The live list, paginated.
+
+    ⚠ w140: this used to pass `--page-size PAGE` and refuse on `len(rows) >= PAGE`.
+    The server caps a page at 200 and the CLI hides the next_page_token, so at the old
+    PAGE=500 the check read `200 >= 500 -> False` and passed a truncated list. There is
+    no page size that fixes this; kaggle_list follows the token instead.
+    """
+    return kaggle_list.submissions(COMP)
 
 
 def sent_today(rows):

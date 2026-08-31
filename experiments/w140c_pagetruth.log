@@ -1,0 +1,64 @@
+============================================================================================
+w140c — where the page ceiling actually is, and what it does to the doctrine
+============================================================================================
+
+T1. WHERE IS THE CEILING?
+  PASS  T1  the server caps a page at exactly 200 rows
+          requested   150 ->  150 rows
+          requested   199 ->  199 rows
+          requested   200 ->  200 rows
+          requested   201 ->  200 rows
+          requested   500 ->  200 rows
+          requested  1000 ->  200 rows
+          true total (paginated) = 201
+          the ceiling sits between 201 and 200: asking for 201 already truncates.
+
+T2. THE DOCTRINE'S OWN TEST, AT THE PAGE SIZE THE WORKSPACE STANDARDISED ON
+  PASS  T2  at PAGE=500 the read IS truncated and `len(rows) >= PAGE` CANNOT fire
+          rows returned 200, true total 201 -> truncated by 1 row(s)
+          `200 >= 500` is False -> the guard reports NOT TRUNCATED
+          raising PAGE past the ceiling disables the detector instead of widening the read.
+
+T3. DOES THE CLI SURFACE THE TOKEN THE SERVER RETURNS?
+  PASS  T3  the server returns a next_page_token at page 500 and the CLI never prints it
+          kagglesdk single page at 500: 200 rows, next_page_token present = True
+          CLI at 500: token surfaced on stdout/stderr = None
+          so `w23b_sendqueue.py`'s `if len(rows) >= PAGE or tok:` -- the ONE site that thought
+          to check a token -- reads tok=None and passes a truncated list too.
+
+T4. CAN THE CERTIFIED SCRIPTS READ A COMPLETE LIST?
+  PASS  T4  every deadline-day script now reads a COMPLETE list
+          w84a_pickargmax.py         paginated=True  raw page sizes=[200]  complete: True
+          w26g_send.py               paginated=True  raw page sizes=-  complete: True
+          w23b_sendqueue.py          paginated=True  raw page sizes=-  complete: True
+          w55a_unpriced.py           paginated=True  raw page sizes=-  complete: True
+          w54a_vetoexpiry.py         paginated=True  raw page sizes=-  complete: True
+          w85c_slotguard.py          paginated=True  raw page sizes=-  complete: True
+          w74b_clickstaleguard.py    paginated=True  raw page sizes=-  complete: True
+          7/7 read the full list.
+  PASS  T4-ctl  the pre-w140 corpus is condemned by the same predicate
+          w84a_pickargmax.py         PAGE=500  above the 200 ceiling -> `len(rows) >= 500` unfireable
+          w26g_send.py               PAGE=500  above the 200 ceiling -> `len(rows) >= 500` unfireable
+          w23b_sendqueue.py          PAGE=500  above the 200 ceiling -> `len(rows) >= 500` unfireable
+          w55a_unpriced.py           PAGE=500  above the 200 ceiling -> `len(rows) >= 500` unfireable
+          w54a_vetoexpiry.py         PAGE=500  above the 200 ceiling -> `len(rows) >= 500` unfireable
+          w85c_slotguard.py          PAGE=500  above the 200 ceiling -> `len(rows) >= 500` unfireable
+          w74b_clickstaleguard.py    PAGE=500  above the 200 ceiling -> `len(rows) >= 500` unfireable
+          7/7 were undetectably truncated while G4 called them protected.
+
+T5. CONTROL — IS THE IDIOM ITSELF BROKEN, OR ONLY BROKEN ABOVE THE CEILING?
+  PASS  T5  BELOW the ceiling the same `len(rows) >= PAGE` idiom fires correctly
+          requested 150 -> 150 rows; `150 >= 150` is True -> TRUNCATION DETECTED
+          so the idiom is sound and the CAP is what disables it. Without this control,
+          'the check does not work' and 'the check is switched off by the cap' look the same.
+
+T6. WHAT DOES WORK — three independent reads of the same total
+  PASS  T6  pagination and an outside witness agree, and neither depends on a page size
+          paginated read (follow next_page_token): 201 over 2 pages
+          public leaderboard SubmissionCount column: 201
+          ⟹ THE REMEDY IS NOT A BIGGER NUMBER. Follow the token, or compare the length against
+            a total obtained some other way (`num_total`, or the board's own SubmissionCount).
+
+============================================================================================
+FAILURES: 0
+============================================================================================

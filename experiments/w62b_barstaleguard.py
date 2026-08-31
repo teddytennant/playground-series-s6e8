@@ -29,6 +29,8 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import kaggle_list   # noqa: E402  paginated submission reads
+sys.path.insert(0, HERE)
 
 import w26g_send as S                                            # noqa: E402
 
@@ -125,9 +127,9 @@ def main():
     # ⚠ NOT asserted. Whether the artefact is stale RIGHT NOW is a fact about today, and a guard
     # that asserted it would start failing the moment the pricer chain is correctly re-run.
     try:
-        raw = subprocess.run(["kaggle", "competitions", "submissions", "-c", COMP, "-v",
-                              "--page-size", "500"], capture_output=True, text=True).stdout
-        sub = pd.read_csv(io.StringIO(raw))
+        # w140: paginated. At "--page-size 500" this read came back capped at 200 with no
+        # way to tell -- see kaggle_list.py.
+        sub = pd.DataFrame(kaggle_list.submissions(COMP))
         live = S.live_tier1(sub.dropna(subset=["publicScore"]).to_dict("records"))
         if live:
             lv, lset = live

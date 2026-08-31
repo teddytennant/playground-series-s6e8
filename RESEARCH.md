@@ -1779,6 +1779,121 @@ and so nobody quotes −11/day again.
 workspace. Keep calling it once per run — the gate is a state, not a property — and keep reading
 the return string rather than recording the call as a delivery.
 
+# (w140, 2026-08-31) — 🔴 THE POST-CLOSE GRADER IS A SINGLE-SHOT INSTRUMENT AND IT HAD
+# NEVER BEEN FIRED. TWO DEFECTS, BOTH FIXED, BOTH WITH CONTROLS.
+
+`w135b_grade.py` is sealed until after the close so the post-close run cannot choose what it
+predicted. That seal is right, and it has a cost nobody priced: **the script's first execution
+is also its only one, at the moment nothing can be fixed.** Every input it needs is readable
+pre-close (our own submission list, the leaderboard's columns/filename/team spelling,
+`w135a_clickpower.csv`), so auditing it forfeits nothing.
+
+**DEFECT A — a page size above a ceiling it can never reach.** The whole submission read was
+`kaggle competitions submissions -v --page-size 300`. **The server caps a page at 200**:
+measured `--page-size 200 → 200, 300 → 200, 1000 → 200` against a paginated `kagglesdk` total
+of **201 over 2 pages**. Third site of w138's bug, and already live. Dropped row:
+`stack_pub74_logit.csv` (ref 55407329, public 0.97081, the oldest). ⛔ **BENIGN TODAY AND SAY
+SO** — all four graded stems survive the truncation, so no verdict moves; it is benign because
+of the date-descending sort, i.e. structure not care. Fixed by following `next_page_token`
+through `KAGGLE_PY` (**the workspace `.venv` has no `kagglesdk`**; `s.private_score` is on the
+paginated object, so nothing was lost by dropping the CLI).
+
+**DEFECT D — the private-board guard could be satisfied without looking at the board.**
+`is_private = (score != PUBLIC_AT_CLOSE["score"]) or n_priv > 0`, where `n_priv` counts rows in
+the **submission list**. After the close that disjunct is true whichever board `lb` holds, so
+the guard that exists to reject a public leaderboard switches itself off exactly when needed,
+and P2/P3 would print **public ranks under a private label**. `private_board()` compounded it
+with `csvs[0]` on an unsorted glob and never printed the name — while the download is literally
+named `…-publicleaderboard-….csv`. Fixed: the board must testify about itself (our score moved
+/ the leader's score moved / the filename does not say public), with `n_priv` as
+**corroboration only**; the filename argues only FOR private so a rename cannot cause a false
+refusal; every signal and the board's top 3 are printed; and the refusal is recoverable with
+`--force-private`. 🎯 **The asymmetry is the design: a false "private" writes silent fiction, a
+false "public" prints STOP. Only one is recoverable.** One new constant,
+`PUBLIC_TOP_AT_AUDIT = 0.97207` (leader's public score, read pre-close). ⛔ **THE FROZEN BLOCK
+FROM COMMIT 761f341 WAS NOT TOUCHED.**
+
+## 🔴 THE SAME BUG'S REAL HOME — THE ANTI-TRUNCATION DOCTRINE WAS VOID (w140, 2026-08-31)
+
+The grader's `--page-size 300` was the third site. Chasing it into the guard that polices page
+sizes turned up the cause of all of them.
+
+**THE MEASUREMENT** (`w140c_pagetruth.py`, 6 gates + a control, FAILURES 0). The submissions
+endpoint caps a page at **200**: requested 199→199, 200→200, **201→200**, 500→200, 1000→200,
+true total 201. The server returns a `next_page_token` at page 500 and **the CLI never prints
+it** — not on stdout, not on stderr.
+
+🎯 **SO `len(rows) >= PAGE` — the idiom `w86a_pagecap.py`'s docstring calls "THE ONLY TEST THAT
+DETECTS ITS OWN TRUNCATION" — CANNOT FIRE ABOVE 200, BECAUSE YOU NEVER GET 200+ ROWS BACK TO
+COMPARE.** At PAGE=500 it reads `200 >= 500 -> False -> not truncated` over a list missing a
+row. Raising the page size does not widen the read; it **switches off the detector**. That is
+why one row (`stack_pub74_logit`) was re-hidden by four consecutive "fixes" at w17, w138, w139
+and w140. **T5 is the control**: at page 150 the same idiom fires correctly, so the idiom is
+sound and the CAP is what disables it.
+
+**HOW WIDE IT WENT.** All **7/7** deadline-day scripts `w86a` G4 certified as protected stood
+at PAGE=500 and could not detect their own truncation — including `w23b_sendqueue.py`, the one
+site that thought to check a token: it reads for a `Next Page Token` line the CLI does not
+emit, so its `tok` was always None. **`w86a` was a victim of its own rule**: `api_rows(500)`
+returned 200, its self-check read `200 >= 500 -> False`, and it printed `live rows 200` while
+the account held 201, so the bar it enforced came from a truncated read. It passed the grader's
+`--page-size 300` because 300 cleared a bar of 240.
+
+**WHY IT SURVIVED SIX DAYS.** The RESEARCH section headed *"TWO CLI CAPS, RE-MEASURED"* records
+`leaderboard --page-size 5000` → **exactly 200 rows**, and two bullets later `submissions
+--page-size 500` → *"141 rows. Still under the cap"*. 🎯 **"The cap" meant the account's row
+count in one sentence and the server's page ceiling in the other. They were the same number,
+on the same page, under a heading that says there are two of them.**
+
+**THE FIX.** `experiments/kaggle_list.py` — one paginated reader that follows the token, raises
+rather than returning a partial list, and hands back the CLI's own column names so call sites
+swap with no other change. Wired into all 7 deadline-day scripts plus `w62b`, `w82a`, `w91b`,
+`w93b`, `w88a`. `w86a` rewritten: `SERVER_PAGE_CAP` measured live **across** the boundary
+(200 and 201, not 199, which is where the old G5 looked and why it never saw the ceiling);
+G1/G2 now demand pagination or a bound at or below the cap; G3 requires a planted page-500 site
+with a `len(rows) >= 500` check to be **rejected** — the exact shape the file used to certify.
+Two reader defects fixed: a `leaderboard -d` **download** was being read as a paginated list,
+and `str(<parameter>)` was reported as "NO page size".
+
+⚠ **THE DORMANT BACKLOG IS REPORTED, NOT EXCUSED.** 40 call sites in 39 one-off analyses still
+read the capped way. `w86a` prints and JSONs every one. **Their committed numbers are sound and
+the reason is dated and checkable: the account only passed 200 today** (191 sends before
+2026-08-31, 201 after), so every read they ever made was complete. Re-running one now would
+not be.
+
+⚠ **A DELIBERATELY CAPPED READ IS A REAL CATEGORY** — a negative control has to be truncated to
+be a control. `w86a` recognises it **only** by a `# w86a: capped-control` marker a human typed.
+Silence is not spendable: an unmarked capped read is indistinguishable from a bug and is
+treated as one.
+
+⛔ **DO NOT FIX A TRUNCATION FAILURE BY RAISING A PAGE SIZE.** There is no page size that works.
+⛔ **DO NOT READ "0 unsafe among LIVE files" AS "the corpus is clean."** It means the files that
+   can still feed a decision are clean; the backlog line is the rest.
+
+**THE INSTRUMENTS.** `w140a_gradeaudit.py` (10 gates, FAILURES 0) execs the grader's own header
+so it tests the shipped code; `A-ctl` and `D-ctl` re-run the **pre-fix** logic and require it to
+**still fail**, so green means the code changed and not that the check got softer.
+`w140b_gradedryrun.py` (7 scenarios, FAILURES 0) splits the source at its first top-level
+banner, swaps the two I/O functions for fixtures and execs the grading section — which had never
+run at all. Every private number in it is **fabricated**; it grades and writes nothing.
+
+⚠ **EXPECT P1 = UNGRADED TONIGHT.** The WANTED/AUTO gap is **4.5e-6** and Kaggle publishes
+**5 d.p.**, so the most likely outcome is the tie branch: *"both pairs land on the same value at
+5 d.p., so the board cannot tell them apart."* That is a property of the instrument, not a
+result, and it is not a licence to go looking for a sharper one after the fact.
+
+⚠ **A FIXTURE THAT THE CODE'S OWN SORT REORDERS IS NOT A FIXTURE.** The first dry-run pass went
+2 red; both reds were correct verdicts about a board built wrong — the team's score was written
+at index `k-1` of a descending array without surviving the grader's `sort_values("Score")`.
+It fails in the direction that looks like a finding.
+
+🎯 **THE GENERAL LESSON. A seal against premature USE is indistinguishable, from the inside,
+from a seal against TESTING — and they are opposites: one protects the result, the other
+protects the instrument. Thirty runs each had a correct reason not to touch the grader, and
+they stacked into a single-shot instrument nobody had ever fired. When a rule says "do not run
+this yet", ask what it does not answer: then when is it checked? If the answer is "the one time
+it counts", the rule has bought a coin flip.**
+
 ## ⛔ NO BROWSER MCP, RE-CHECKED THIS RUN, AND THE CLOSURE IS UNCHANGED
 
 `ToolSearch` for `mcp__brave__*` returns nothing; the only fetch tool attached is `WebFetch`,
@@ -3866,7 +3981,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
-| 1 | *the original dataset* — find it, concat it as extra rows | **×14, from 08-11 → w112 08-29 → w131 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED THE ONE THAT IS TRUE BY CONSTRUCTION AS ITS HEADLINE.** The `0` is a **CONSTRUCTION ZERO**: the baseline it names — *the same stack trained on `train.csv` alone, 0× dose* — **IS the arm**. `orig_concat.py`'s dose loop is `if w:`, so at 0× no augmented frame is built at all, and w131a measured that dose 0 appends **exactly 0 rows** and reproduces the training frame exactly: **zero degrees of freedom**, true for any model, any metric and any seed before anything is fitted. **THE MANOEUVRE'S price** is a **CONCAT** price (extra training ROWS, not members) at the **MEMBER-TRAINING-SET layer, k=1, a per-competition TOTAL and not a rate**, baseline that same 0× stack, and it is **NEGATIVE at every dose anyone ran and MONOTONE in dose**: **−58.0e-6 at 1×** (1.16× the 50e-6 floor, so even one copy is a measurable loss and not a null), **−986.0e-6 at 10×** (19.7×, the rung the row used to omit and the one that makes the monotonicity checkable), **−3,340.0e-6 at 50×** (66.8×). The usual Playground edge is **INVERTED** here, and row 1 is the **only** row in this table whose manoeuvre is measured to LOSE AUC at every setting — printed as `0` it ranked as the column's cheapest row. **THE SEPARATE-ESTIMATOR ROUTE**, priced in rows 3/4/7/9's units for the first time (w131a arm C: paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the **full 167-member pack**, `origmodel` fitted on the 7,500 originals alone and never shown a competition label, solo AUC 0.8510): an **ENROLMENT price of −1.02e-6/member**, sd 1.83e-6, **t = 0.56**, **SIGN-FLIPPING** across the three splits (+0.80 / −2.86 / −1.00), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6** — an independent instrument landing inside the row's published −1e-6 to −2e-6. **IDENTITY**: the CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so there is nothing else to find. ⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash — the arms do NOT add** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) · `WHAT THE CONCAT ROW ACTUALLY COSTS` (w131, the ladder, the construction zero and the enrolment price) |
+| 1 | *the original dataset* — find it, concat it as extra rows | **×15, from 08-11 → w112 08-29 → w131 08-30 → w140 08-31 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED THE ONE THAT IS TRUE BY CONSTRUCTION AS ITS HEADLINE.** The `0` is a **CONSTRUCTION ZERO**: the baseline it names — *the same stack trained on `train.csv` alone, 0× dose* — **IS the arm**. `orig_concat.py`'s dose loop is `if w:`, so at 0× no augmented frame is built at all, and w131a measured that dose 0 appends **exactly 0 rows** and reproduces the training frame exactly: **zero degrees of freedom**, true for any model, any metric and any seed before anything is fitted. **THE MANOEUVRE'S price** is a **CONCAT** price (extra training ROWS, not members) at the **MEMBER-TRAINING-SET layer, k=1, a per-competition TOTAL and not a rate**, baseline that same 0× stack, and it is **NEGATIVE at every dose anyone ran and MONOTONE in dose**: **−58.0e-6 at 1×** (1.16× the 50e-6 floor, so even one copy is a measurable loss and not a null), **−986.0e-6 at 10×** (19.7×, the rung the row used to omit and the one that makes the monotonicity checkable), **−3,340.0e-6 at 50×** (66.8×). The usual Playground edge is **INVERTED** here, and row 1 is the **only** row in this table whose manoeuvre is measured to LOSE AUC at every setting — printed as `0` it ranked as the column's cheapest row. **THE SEPARATE-ESTIMATOR ROUTE**, priced in rows 3/4/7/9's units for the first time (w131a arm C: paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the **full 167-member pack**, `origmodel` fitted on the 7,500 originals alone and never shown a competition label, solo AUC 0.8510): an **ENROLMENT price of −1.02e-6/member**, sd 1.83e-6, **t = 0.56**, **SIGN-FLIPPING** across the three splits (+0.80 / −2.86 / −1.00), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6** — an independent instrument landing inside the row's published −1e-6 to −2e-6. **IDENTITY**: the CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so there is nothing else to find. ⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash — the arms do NOT add** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) · `WHAT THE CONCAT ROW ACTUALLY COSTS` (w131, the ladder, the construction zero and the enrolment price) |
 | 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
 | 3 | *CatBoost: it handles categoricals better* | **×16, from 08-10 → w123 08-30 → w132 08-31 · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 **on the group delta**, i.e. **per-member sd 1.96e-6, t = 5.12** — published here for the first time by w132a, and the number that makes rows 1/7/9's *indistinguishable from zero* verdicts checkable rather than asserted, since it is the control they all quote). ⚠ **`sign-consistent` IS NOT A TEST**: over 3 paired splits it is a **25% false-positive rate** (2·(1/2)³) and row 9's PERMUTED NULL — a null by construction — carries the same label at **t = 0.96**. On 3 splits **df = 2**, so the two-tailed critical t is **4.303 at 5% and 9.925 at 1%**: this rate clears 5% with a thin margin and **no single-family enrolment rate in this table clears 1%**. t is scale-invariant, so publishing it moves no verdict. This corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×16, from 08-10 → w115 08-29 → w124 08-30 → w133 08-31 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** (t = 5.12) · XGBoost **+7.38e-6** (t = 6.21) · LightGBM **+4.04e-6** (t = 5.73), all three on **df = 2** where the 5% critical t is 4.303 and the 1% is 9.925 — every one clears 5%, none clears 1% (w132a). ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family*. ⛔ **w133 (08-31) is the 16th handing and it built nothing**: 0 submission slots remained and the competition closed that night, so an XGBoost leg would have been unsendable by construction on top of being under the floor | `tuning ANY GBDT is worth ~4e-7` |
@@ -4544,6 +4659,19 @@ instead of string mentions minus a hardcoded 2.
 
   `w83a_reproject` globs `lb_*/**/*publicleaderboard*.csv`, so extracting is all it needs.
 - `kaggle competitions submissions --page-size 500` → 141 rows. Still under the cap (w86).
+  🔴 **CORRECTED 2026-08-31 (w140). "THE CAP" IN THAT SENTENCE MEANT THE ACCOUNT'S ROW COUNT,
+  AND THE SAME BULLET LIST HAD ALREADY MEASURED A 200-ROW *SERVER PAGE* CAP ONE ENDPOINT
+  ABOVE.** They are the same cap and it applies to both endpoints. Measured
+  (`w140c_pagetruth.py` T1): submissions at `--page-size` **201 → 200, 500 → 200, 1000 → 200**,
+  true total **201**, and the CLI **never prints the `next_page_token`** the server returns
+  (T3). 🎯 **So `--page-size 500` did not read 500 rows; it read 200 and the workspace's whole
+  defence — `len(rows) >= PAGE -> raise` — CANNOT FIRE above 200, because you never get 200+
+  rows back to compare.** Raising PAGE past the ceiling does not widen the read, it **disables
+  the detector**, which is why the identical row (`stack_pub74_logit`, the oldest) was re-hidden
+  at w17, w138, w139 and w140 by four separate "fixes". ⛔ **DO NOT PASS `--page-size 500`.**
+  Use `experiments/kaggle_list.py`, which follows the token, or compare the length against a
+  total obtained some other way (`num_total`, or the public board's `SubmissionCount` column —
+  both read **201** in T6). The section title says TWO CAPS; there was only ever one.
 
 **THE LESSONS.** A per-item tolerance is not a policy until somebody adds it up — 31 checks
 asked "is this file safe?" and none asked "is the calendar safe?", and the gap survived because
@@ -17186,7 +17314,9 @@ family is within ~40e-6 of gap and does not create this hazard.
   `w36a_value.log` going 85s/fit on reps 0–2 and 206–289s on reps 3–4. **Check `/proc` for a
   neighbour before timing any build against a historical number**, and do not kill it.
 - **kaggle CLI is `~/.local/bin/kaggle`, NOT `.venv/bin/kaggle`**, and needs
-  `KAGGLE_CONFIG_DIR=/home/nixos/.kaggle`. Always pass `--page-size 500` to
+  `KAGGLE_CONFIG_DIR=/home/nixos/.kaggle`. ⛔ **w140: do NOT pass `--page-size 500`** — the
+  server caps a page at 200 and the check that was supposed to catch that cannot fire above
+  it. Use `experiments/kaggle_list.py`. Formerly: always pass `--page-size 500` to
   `competitions submissions`; the account is past the CLI's silent default truncation.
 
 ## The public member pool was NOT exhausted (w40)
@@ -18094,7 +18224,8 @@ against member-level effects that are routinely 10–50× larger. Solo-to-stack 
 
 - **kaggle CLI is `~/.local/bin/kaggle`**, needs `KAGGLE_CONFIG_DIR=/home/nixos/.kaggle`, and is
   **not importable from `.venv`** — `.venv/bin/python -m kaggle` is `No module named kaggle` and
-  `.venv/bin/kaggle` does not exist. Always pass `--page-size 500`.
+  `.venv/bin/kaggle` does not exist. ⛔ **w140: `--page-size 500` is VOID** — the server caps
+  a page at 200 and returns a token the CLI hides. Use `experiments/kaggle_list.py`.
 - **The browser route to the final-selection toggle is still shut.** brave / brave-browser /
   google-chrome / chromium / firefox / curl all absent from PATH; `~/.config/{chromium,
   google-chrome}` contain only `Crash Reports`; no `BraveSoftware` dir; CDP 9222 refused; no
@@ -18157,7 +18288,8 @@ it lands in tier 1 while nothing is selected, Kaggle auto-selects it. That is wh
 ⚠ **`w23b_sendqueue.csv`'s `sent` column is not an authority** — it reads `False` on all 66 rows
 while 161 files have gone out. `w72a_planday._vetoed_sent` was fixed for this once; the lesson
 did not propagate to hand-reads. **Dedup against `kaggle competitions submissions -v
---page-size 500`, always.**
+--page-size 500`, always.** ⛔ **SUPERSEDED w140: the server caps a page at 200; a page size
+cannot fix truncation and above 200 it disables the detector. Use `experiments/kaggle_list.py`.**
 
 ## Where the field is: the data ceiling, and the public notebooks that are NOT worth pulling
 
