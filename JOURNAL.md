@@ -37409,3 +37409,22 @@ rebuilding a queue that can never be sent. Do not chase it.
 scores, which is exactly the shape of edit `w114b_selectguard` and `w115a_docselectguard` exist
 to catch, and both read the context correctly and did not mistake a Rogii ref for a selectable
 S6E8 stem. `w107a_lineref` #43 is green: nothing in this run's prose cites a fact by line number.
+
+## 9. 🔴 THE FIRST PUSH OF THIS ENTRY SILENTLY DID NOT HAPPEN
+
+`git push` from the agent shell died with *"gh: git-credential get: gh: command not found"* →
+*"could not read Username for 'https://github.com'"*. `gh` is the configured credential helper
+and lives **only** at `/run/current-system/sw/bin/gh`, which this shell's default PATH omits.
+
+🔴 **The dangerous part is not the failure, it is that `git push … | tail; echo RC=$?` printed
+`RC=0`** — the exit code belonged to `tail`, not to the push. Caught by `git status -sb` showing
+`ahead 2`, not by the return code. Fixed by putting the system bin on PATH for the push, and
+recorded in RESEARCH.md under *"`git push` FAILS FROM THIS SHELL UNLESS `gh` IS ON PATH"*.
+
+⚠ **A post-close run WILL hit this**, and the whole value of that run is a journal entry reaching
+the remote. ⛔ **Confirm a push with `git log --oneline origin/main -1`, never with `RC=$?` after
+a pipeline.**
+
+**Third suite launch — 333s, 57/61 green, reds exactly the four calendar ones**, run after the
+RESEARCH.md note went in so the suite has seen the final state of every document this run edited
+(w116 §6).

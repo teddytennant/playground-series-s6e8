@@ -77,6 +77,21 @@ right to read it (the manual click is what it alarms on), but ⛔ **a post-close
 "SELECTED is empty" as "no final submissions exist."** w135b grades P1 from private scores, not
 from this flag.
 
+## ⚠ `git push` FAILS FROM THIS SHELL UNLESS `gh` IS ON PATH (w136, 2026-08-31)
+
+The remote uses `gh` as its git credential helper, and `gh` lives **only** at
+`/run/current-system/sw/bin/gh` — not in `~/.local/bin` or `~/.nix-profile/bin`. The agent
+shell's default PATH omits it, so a plain `git push` dies with:
+
+    gh auth git-credential get: line 1: gh: command not found
+    fatal: could not read Username for 'https://github.com': No such device or address
+
+🔴 **AND IT EXITS 0 WHEN PIPED**, so `git push … | tail; echo RC=$?` prints `RC=0` on a push that
+did not happen. **Confirm with `git status -sb` (look for `ahead N`) or `git log --oneline
+origin/main -1`, never with the exit code of a pipeline.** THE WORKING PUSH:
+
+    PATH=/run/current-system/sw/bin:/usr/bin:/bin:$PATH git push origin main
+
 ## 🎯 THE LESSON
 
 w134 checked whether the unit is paid. w135 checked which layer a constant came from. This run
