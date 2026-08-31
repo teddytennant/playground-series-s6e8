@@ -36581,3 +36581,238 @@ Board tonight: Chris Deotte 0.97207, Changye Li 0.97154, MILANFX 0.97149.
    green. 🎯 **A cell edited to satisfy a guard is the fourth place a green means "I did not
    look", and it is the cheapest one to check: read the baseline back and ask what it DIFFERS
    from. If the answer is "nothing", the number is true by construction and denotes nothing.**
+
+---
+
+# w132 — 2026-08-31, slot 1 of 10 · ANGLE: CatBoost — tune and compare on identical folds
+# ✅ **THE DAY'S TEN SENT AT 12:36–12:37Z, EARLY, ON THE DEADLINE DAY.**
+# 🔴 THE PRICE COLUMN'S ONLY EVIDENCE STANDARD IS A BRACKETED WORD WITH A 25% FALSE-POSITIVE
+# RATE, AND ROW 9's PERMUTED NULL — A NULL BY CONSTRUCTION — CARRIES IT.
+
+**Deadline read live from the API: `2026-08-31 23:59:00` UTC, 3,452 teams, rank 304.**
+`w26g_send.py --n 10` at 12:40Z: *"191 submissions on record; 0 already sent on 2026-08-31
+(UTC); 10 of 10 slots left today"*. Queue drained with `--go`, exit 0, **all ten landed**
+(55915490 … 55915512), the w129-registered `w85_cal_*` DRAIN members. Public 0.93232 … 0.94156,
+every one far under the **0.97119** auto-selection tier, so none can hijack the auto-pick.
+⛔ **Cap now spent. Nothing further may be sent today, and the competition ends tonight.**
+
+## 1. THE HANDED ANGLE RESOLVES TO ROW 3 — SIXTEENTH HANDING
+
+`w117a_handcount` run, not counted by hand: **×15 → ×16**. `CURRENT_RUN`/`CURRENT_ROW` moved to
+`w132`/row 3 and the tool's number was used; the census is green on all ten rows again.
+⛔ **THE MODELLING QUESTION STAYS CLOSED.** No CatBoost member was built, no GBDT
+hyperparameter was swept. +10.04e-6/member is under the 50e-6 floor and is a standing DO-NOT.
+What this run priced is not CatBoost — it is the **instrument** row 3 has become.
+
+## 2. 🔴 THE DEFECT — TEN RUNS OF CLOSURES REST ON A WORD THAT IS NOT A TEST
+
+Row 3's `+10.04e-6/member` is quoted verbatim in rows **1, 7 and 9** as the control:
+*"against the same-process base104 CatBoost control at +10.04e-6/member that reproduced w123 to
++0.0000e-6"*. That sentence certifies **reproducibility**. It says nothing about **discriminating
+power** — and each of those three cells then dismisses its own arms as *sign-flipping, none
+distinguishable from zero* against it.
+
+**The standard is a bracketed word.** `[consistent]` / `consistent 3/3` when a number is to be
+believed, `SIGN FLIPS` / `SIGN-FLIPPING` when it is to be dismissed. Under a symmetric null,
+sign-consistency over 3 paired splits happens with probability **2·(1/2)³ = 0.25**. It is a
+**25% false-positive rate wearing the costume of a test**, and in ten runs of prices **not one
+closure has ever carried a t**.
+
+🎯 **AND THE TABLE HOLDS ITS OWN COUNTEREXAMPLE, LIVE.** Row 9's **PERMUTED NULL** — a
+size-matched permuted-cell control, a null *by construction*, the arm whose entire job is to be
+nothing — is labelled `consistent` in `w128a_row9.json`. **Its t is 0.96.** The label passes the
+null it was built to reject. Two more `consistent` arms sit under |t| = 1.7.
+
+## 3. ✅ WHAT THE INSTRUMENT IS ACTUALLY WORTH — `w132a_row3.py`, FAILURES 0, ALL SIX HELD
+
+Pre-registered in `experiments/w132_prereg.txt` (commit `f2d42e8`) **before any w132 number
+existed**, falsifiers included. Reads only artefacts already on disk, fits nothing, so it is
+deterministic and runs in under a second — no `systemd-run` needed and none used.
+
+| arm | claim | result |
+|---|---|---|
+| **A0/A** | the frozen split lines still match `w124a_run.log` | 15/15 literals present; all four arms reproduce the published delta/sd/price inside the log's 6-dp quantisation budget |
+| **R1** | the stored `sd` is at GROUP scope | `sd`/`per_member` ÷ `sd`/`delta` = **exactly n**, on 7/7 arms in `w123a`+`w127a`. Both keys sit in one dict with **no scope key** |
+| **R2** | the number nobody has published | control **per-member sd 1.9610e-6**, **t = 5.1205** (registered 1.96 ± 0.02 and 5.12 ± 0.05) |
+| **R3** | t is scale-invariant | max \|t_group − t_member\| over 11 arms = **3.6e-15**. ⟹ a **REPORTING** finding. **NOTHING RE-OPENS** |
+| **R4** | the yardstick discriminates | control **\|t\| = 5.12**; every arm the artefacts' own `sign` field calls `SIGN FLIPS` is **≤ 0.56** |
+| **R6** | `consistent` does not | 5 arms labelled `consistent`, **3 of them under \|t\| = 3**, the lowest being row 9's permuted null at **0.96** |
+
+⛔ **R3 IS THE LOAD-BEARING ONE AND IT HELD.** t is invariant to the scope the sd is reported at,
+so publishing it **moves no published verdict**. Every closure in the table survives. Had R3
+falsified, this would have been a value finding and the closures would have had to re-open.
+
+⚠ **AND THE SOBERING HALF, WHICH IS NEW.** Three splits means **df = 2**. The two-tailed critical
+t is **4.303 at 5%** and **9.925 at 1%**. On identical folds: CatBoost **5.12**, XGBoost
+**6.21**, LightGBM **5.73** — every one clears 5%, the CatBoost control by a thin margin, and
+**no single-family enrolment rate in this table clears 1%**. That does not re-open anything: all
+three are under the 50e-6 floor, so *do not build* is unchanged and, if anything, reinforced.
+
+## 4. ✅ STANDING CHECK #61 — `w132b_significanceguard`, 60 → 61 stems
+
+C1 every ANGLE INDEX price cell carrying both an e-6/e-7 magnitude **and** a sign verdict must
+also carry a **significance token** (a t, or the criterion's own false-positive rate) —
+**5 cells are in scope: rows 1, 3, 4, 7, 9, and before this run all five were ABSENT** · C2 fires
+both ways, per row, on an in-memory copy: shipped table 0 bad, each in-scope row stripped alone
+**exactly +1** · C3 the frozen pre-fix row 3 — the cell that passes all seven siblings — **fires**
+· C4 **the label's discriminating power is measured, not asserted**: t computed for all **16**
+arms across five artefacts and split by the artefacts' **own** `sign` field, and if `consistent`
+had separated cleanly the guard declares itself **INERT** and fails · C5 **all seven siblings
+imported and run BLIND on the pre-fix row 3** — each returns zero findings for row 3 while #61
+fires, and each still fires on its own frozen defect in the same call · C6 **scope-invariance**,
+max gap 3.6e-15, which is *why* #61 asks for a t and not for a scope label.
+
+Rows 1/3/4/7/9 were then fixed: every one now carries its t, and row 3 carries the control's
+per-member sd, the df = 2 critical values, and the permuted null's 0.96 as the live proof.
+
+⚠ **BLIND TO:** a consistency argument phrased outside the hand-written vocabulary; a `t` worn
+innocently without one being computed; **whether a published t is the RIGHT t** — #61 never
+re-derives one from arrays; **df**, so a t of 5.12 on 2 degrees of freedom and on 200 read
+identically to it; and, like all seven siblings, **only the price column**.
+🎯 **Eight guards now share one column. Every one checks a CLAIM ABOUT a number. Not one
+re-derives the number itself, so a cell well-formed in all eight vocabularies and simply WRONG
+passes every check this workspace owns.**
+
+## 5. THE SUITE
+
+(recorded below, after the launch — document edits went in first, per w116 §6)
+
+## 6. ⛔ THE CLICK — THIRTY-FIRST RUN ASKING, AND THERE IS NO THIRTY-SECOND
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`check_selection.py` run live at 12:41Z: *** NOTHING IS SELECTED ***.
+`55656399 → w36_ad199stdcorr.csv` (public 0.97118) · `55588167 → w23_ad187stdcorr.csv` (0.97116).
+Auto-select fills both slots from the 0.97119 tier (`w36_ad199stdcorr_ens4`,
+`w38_ad202stdcorr_ens4`) and both WANTED files print **UNREACHABLE without the click (P=0.000)**.
+Not clicking costs **+4.5228e-6**; the mis-click costs **+35.17e-6** or **+81.92e-6** and stays
+the bigger hazard by an order of magnitude. **The window closes at 23:59 UTC tonight.**
+⛔ Re-confirmed this run: no browser MCP attached, no cookie session on this box, no Kaggle API
+route to final selection. It is a human click and always was.
+
+## 7. WHAT THIS RUN LEAVES BEHIND
+
+- **Ten sent at 12:36–12:37Z**, early on the deadline day, exit 0, all far below the 0.97119 tier.
+- **The control's own uncertainty published for the first time**: per-member sd **1.96e-6**,
+  **t = 5.12**, and the df = 2 critical values (**4.303 at 5%, 9.925 at 1%**) that put every
+  enrolment rate in this table in its place.
+- **The evidence standard priced**: `sign-consistent over 3 splits` is a **25% false-positive
+  rate**, demonstrated live by row 9's **permuted null carrying `consistent` at t = 0.96**.
+- **Rows 1/3/4/7/9 fixed** — every closure in the table now carries a t.
+- **#61 registered**, closing the "the column checks the point estimate and never its noise"
+  branch that #60's own docstring named.
+- ⛔ **Still nothing selected. Thirty-first run asking, and tonight is the last night.**
+
+## 8. NEXT RUN — READ THIS ORDER. **THE COMPETITION ENDS 2026-08-31 23:59 UTC.**
+
+1. **`git status`**, `date -u`, then `.venv/bin/python experiments/w26g_send.py --n 10` and read
+   the **slots-left line**, not the plan printed under it. **w132 spent all ten at 12:36–12:37Z.**
+   If it still says 08-31, there is nothing to send — measurement and documentation only.
+2. ⛔ **DO NOT REBUILD A QUEUE.** There is no 09-01. Any queue you build will never be sent.
+3. ⚠ **UPDATE `CURRENT_RUN`/`CURRENT_ROW` IN `w117a_handcount.py`.** w132 set it to `w132`/row 3.
+   **DO NOT hand-edit the `×N`** — run the tool and use its number.
+4. **Document edits BEFORE launching the suite** (w116 §6). ⚠ **COPY THE LAUNCH COMMAND OUT OF
+   RESEARCH.md** (`grep FULLPATH=`).
+5. ⚠ **THE MODELLING QUESTION IS CLOSED** (w112 §8.4), and on the last day it is closed twice
+   over: nothing built after 23:59 can be submitted at all.
+6. ⛔ **DO-NOT, carried forward from w92–w131 and added to.** All of it holds, in particular:
+   • **DO NOT** move WANTED · re-open the original-dataset angle, error analysis, OOF
+     segmentation, or calibration of the final file · quote `274k` for the hard band (it is
+     **250,188**) · cite a line number of RESEARCH.md · use `pgrep` · read `$?` after a pipe ·
+     launch a long job with anything but `systemd-run --user` · build `cat_native_ctr2` /
+     `cat_natlat` · sweep GBDT hyperparameters · add ordinary GBDT members.
+   • ⛔ **DO NOT** re-open the click PRICE · delete `CLICK_HISTORY` · assert a TOTAL when the
+     baseline is non-zero · match a stem without an identifier boundary · edit `JOURNAL.md`'s
+     history · edit `RESEARCH.md` while the suite is running · read a green on
+     `w72a_plan_<day>.json` as "the send is verified" · read `priority == 0` in
+     `w26d_queueprice.csv` as "sendable" · print a runner-up score tier under a heading
+     containing the word `slot` · quote **−11/day** for the bronze decay (it is **−22/day**) ·
+     read "the guards over the click are green" as "the click screen is correct" · read
+     **5.9e-6** as the CatBoost price (CatBoost alone is **+10.04e-6/member**) · treat
+     +10.04e-6 or +7.38e-6 as a reason to build a CatBoost or XGBoost member · add measured-alone
+     group deltas together · divide by filenames rather than arrays · multiply a member-level
+     number by **1.4%** far from the **+138e-6** it was fitted at · read row 5's `negative` as a
+     stack-layer price · read row 6's **−1.07e-6** as the price of re-weighting members · read
+     row 7's **+2e-6** as a per-member rate · read row 9's **−118e-6** without its baseline ·
+     read row 9's **+3.95e-6** as evidence the segmentation does anything · add row 10's three
+     arms together · read row 10's **+4.5228e-6** as "consolidation paid" · add row 8's three
+     arms together · read row 8's `0` as the foundation's value · re-rank the shipped pick to
+     demonstrate anything · add row 1's four arms together · read row 1's `0` as the concat
+     price (it is a CONSTRUCTION ZERO; the real price is −58.0 / −986.0 / −3,340.0e-6) · read
+     row 1's −1.02e-6/member as a reason to enrol `origmodel` · treat "the cell names a
+     baseline" as "the cell is grounded" · call `load_members(drop=DEFAULT_DROP)`'s output
+     `base104` · launch the suite with a hand-typed PATH.
+   • 🆕 **DO NOT READ `[consistent]` OR `consistent 3/3` AS A SIGNIFICANCE CLAIM.** Over 3 paired
+     splits it is a **25% false-positive rate** and it is the only standard this column has ever
+     used. Row 9's **PERMUTED NULL** — a null by construction — carries it at **t = 0.96** (§2).
+   • 🆕 **DO NOT READ THE `sd` IN A RUN ARTEFACT AS THE PER-MEMBER sd.** In `w123a_row3.json`,
+     `w124a_row4.json` and `w127a_row7.json` the `sd` key is at **GROUP** scope and sits in the
+     same dict as a **MEMBER**-scope `per_member`, with no scope key. The ratio is off by
+     **exactly n** (§3, R1). Divide by `n` before comparing it to anything per-member.
+   • 🆕 **DO NOT READ w132 AS RE-OPENING ANYTHING.** t is **scale-invariant** (max gap 3.6e-15
+     over 11 arms), so every published verdict survives unchanged. It is a REPORTING finding.
+     Equally, do not read "every family clears 5%" as encouragement: **df = 2**, the 1% critical
+     t is **9.925**, and **no single-family enrolment rate clears it** (§3).
+   • 🆕 **DO NOT READ #61's GREEN AS "THE NUMBER IS RIGHT".** #61 never re-derives a price from
+     arrays; it checks that a *claim about noise* is present. Eight guards now share the price
+     column and all eight check claims **about** numbers (§4).
+7. ⚠ **THE LESSON, THIRTEEN RUNS OLD.** w131 predicted the next defect would be a stated baseline
+   that is not the one the number was measured against. It was the neighbouring hole and a wider
+   one: the column has **no notion of noise at all**. Ten runs of closures, five cells resting on
+   a bracketed word, and the word passes a control that is a null by construction.
+   🎯 **When a table decides things, ask what its evidence standard would do to a number that is
+   nothing. If you cannot state the standard's false-positive rate, it is not a standard —
+   and the cheapest place to find out is the table's own permuted control.**
+
+## 5 (recorded after the launch, as §5 said it would be) — **THE SUITE: 57/61, AND #61 IS GREEN**
+
+Document edits went in **before** both launches (w116 §6); the launch command was copied out of
+RESEARCH.md (`grep FULLPATH=`), not scrollback. No `w93a_fail_*.log` existed before the first
+launch; the ones the first launch wrote were deleted before the second.
+
+**First launch — 630s, 56/61, five reds:** `w54a_vetoexpiry` · `w85c_slotguard` ·
+`w87a_registrarguard` · `w88a_calexposure` · `w100a_complement`.
+
+🎯 **FOUR OF THE FIVE ARE ONE CAUSE, AND IT IS THE CALENDAR.** Every one is downstream of *"a
+live, unsent queue exists for some future day"*, and after today's drain there is no future day.
+They say so themselves: w54a `STALE QUEUE — 10 row(s) ... have already been sent`; w85c
+`SLOTS REMAINING 0`, with G4 failing *because* w54a rejects the live queue and G2 inert at zero
+slots; w87a C4 `the pool holds 0 file(s) for 0 slot(s)`; w100a's rows UNACCOUNTED because the
+plan is empty. ⛔ **Four reds, one finding, and the finding is "the competition is over", not
+"the pipeline is broken".** Rebuilding a queue to clear them would build something that can
+never be sent — see §8.2.
+
+## 5b. 🔴 **THE FIFTH RED WAS A REAL BUG, AND IT WAS IN A GUARD'S PASS MESSAGE — AGAIN**
+
+`w88a_calexposure` did not fail a check. It **crashed**: `KeyError: 'src'` at the G1 **success**
+branch. With zero files still registered for a future send, `registered()` returns
+`pd.DataFrame([])` — a frame with **no columns** — and three separate sites dereference one:
+`df['src']` inside G1's pass message, `df['pred_lb']` inside `expose()`, and `max()` over an
+empty list at C3. Each was uncovered in turn as the previous one was fixed.
+
+**The path exists on exactly one day** — the day the calendar runs out — which is why it lived
+to the deadline undetected. Fixed at the source (`pd.DataFrame(out, columns=REG_COLS)`) plus one
+early exit that says what it did and did not test:
+
+    ℹ NOTHING IN SCOPE: the calendar is spent — 0 file(s) remain registered for a future
+      send, so there is no tier exposure to price. G2–C3 are not evaluated; this is an
+      empty scope, not a clean bill of health.
+
+⚠ The early exit still returns 1 if any registered file is unpriceable, so **G1 keeps biting**,
+and the guard is unchanged on every non-empty calendar.
+🎯 **Third sighting of w130's genus. A guard's own PASS MESSAGE was the thing that broke — and
+this time it did not merely assert something it had not tested, it dereferenced a column that
+was not there, turning a clean state into a red.**
+
+**Second launch — 352s, 57/61 green, `w132b_significanceguard` rc=0.** Reds exactly the four
+calendar ones, measured and not predicted. ⛔ **This is the expected terminal state of the suite
+and 61/61 is unreachable from here.** Do not chase it.
+
+## 9. THE BOARD AT 12:49Z, DOWNLOADED NOT QUOTED
+
+**3,453 teams; we are rank 304, public 0.97119, 201 submissions.** Chris Deotte leads at
+0.97207 — a gap of 0.00088. **Rank 304 is inside the bronze band** (top 10% = rank ≤ 345), with
+**41 places of margin**, on the day the field compresses hardest and against a standing decay
+estimate of **−22 places/day**. Today's ten scored 0.93232 … 0.94275; **none is within
+0.028 of the 0.97119 auto-selection tier**, which is exactly why they were safe to send.

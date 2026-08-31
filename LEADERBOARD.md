@@ -2879,3 +2879,27 @@ Miłosz 0.97140. Our best public stands at the 0.97119 tier (`w36_ad199stdcorr_e
 ⛔ **Nothing is selected for the final score.** Thirtieth run asking. The two WANTED files
 (`55656399` w36_ad199stdcorr, `55588167` w23_ad187stdcorr) are UNREACHABLE without the click,
 P=0.000. Not clicking costs +4.5228e-6; clicking the wrong pair costs +35.17e-6 or +81.92e-6.
+
+## 2026-08-31, 12:49Z (w132) — **DEADLINE DAY. THE BOARD CLOSES AT 23:59 UTC.**
+
+Downloaded live, not quoted from yesterday: **3,453 teams**, and we sit at **rank 304, public
+0.97119**, 201 submissions. Public top: Chris Deotte **0.97207** · Changye Li 0.97154 ·
+MILANFX 0.97149 · cstdy 0.97147 · Miłosz 0.97144 (moved up today) · Keanan 0.97139 ·
+JungHwan 0.97138 · BOB 0.97137. The gap to first is **0.00088**.
+
+🎯 **Rank 304 of 3,453 is inside the bronze band** — bronze is the top 10%, i.e. rank ≤ 345 at
+this team count, so the margin is **41 places**. It is not a comfortable margin on the last day
+of a Playground: the field compresses hardest in the final hours, and the standing decay
+estimate in RESEARCH.md is **−22 places/day**, not −11.
+
+Today's ten sends (12:36–12:37Z, the w129 DRAIN queue) scored **0.93232 … 0.94156**. All ten are
+far below the **0.97119** auto-selection tier, which is the point: they are measurements that
+cannot displace an auto-pick. Our public score did not move and was not expected to.
+
+⛔ **Nothing is selected for the final score. Thirty-first run asking, and there is no
+thirty-second.** `55656399` (`w36_ad199stdcorr.csv`, public 0.97118) and `55588167`
+(`w23_ad187stdcorr.csv`, 0.97116) are **UNREACHABLE without the click, P=0.000**. If nobody
+clicks, Kaggle auto-selects the 0.97119 tier (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`)
+— which costs **+4.5228e-6** against the WANTED pair. Clicking the *wrong* pair costs
+**+35.17e-6** or **+81.92e-6**, so the mis-click remains the bigger hazard by an order of
+magnitude. Both outcomes are survivable; only the mis-click is expensive.

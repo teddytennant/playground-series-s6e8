@@ -1,0 +1,118 @@
+{
+  "run": "w132",
+  "row": 3,
+  "handings": 16,
+  "w124_arms": {
+    "+xgb_only": {
+      "n": 12,
+      "per_split_e6": [
+        64.99999999998174,
+        89.00000000000574,
+        88.00000000008801
+      ],
+      "delta_group_e6": 80.66666666669182,
+      "sd_group_e6": 13.5769412363136,
+      "per_member_e6": 6.722222222224319,
+      "sd_member_e6": 1.1314117696928,
+      "t": 5.94144625528293,
+      "t_member": 5.941446255282929
+    },
+    "+xgb_dedup": {
+      "n": 11,
+      "per_split_e6": [
+        66.00000000001049,
+        90.99999999995222,
+        86.0000000000305
+      ],
+      "delta_group_e6": 80.99999999999774,
+      "sd_group_e6": 13.228756555304711,
+      "per_member_e6": 7.363636363636158,
+      "sd_member_e6": 1.2026142323004283,
+      "t": 6.123024462757754,
+      "t_member": 6.123024462757754
+    },
+    "+lgb_only": {
+      "n": 8,
+      "per_split_e6": [
+        25.99999999997049,
+        32.000000000032,
+        38.000000000093515
+      ],
+      "delta_group_e6": 32.000000000032,
+      "sd_group_e6": 6.000000000061512,
+      "per_member_e6": 4.000000000004,
+      "sd_member_e6": 0.750000000007689,
+      "t": 5.33333333328399,
+      "t_member": 5.33333333328399
+    },
+    "+cat_only": {
+      "n": 8,
+      "per_split_e6": [
+        62.99999999992423,
+        83.99999999997299,
+        94.0000000000385
+      ],
+      "delta_group_e6": 80.3333333333119,
+      "sd_group_e6": 15.821925715129426,
+      "per_member_e6": 10.041666666663987,
+      "sd_member_e6": 1.9777407143911783,
+      "t": 5.077342339971589,
+      "t_member": 5.077342339971589
+    }
+  },
+  "control": {
+    "n": 8,
+    "delta_group": 8.033279953034711e-05,
+    "sd_group": 1.5688319867939877e-05,
+    "per_member": 1.0041599941293389e-05,
+    "sd_per_member": 1.9610399834924847e-06,
+    "t": 5.120548293671174
+  },
+  "t_scale": {
+    "row 3  CONTROL 8 CatBoosts": {
+      "t": 5.120548293671173,
+      "sign": "consistent"
+    },
+    "row 1  origmodel enrolment": {
+      "t": 0.5596061810025457,
+      "sign": "SIGN FLIPS"
+    },
+    "row 7  seeds added as members  (R-Q": {
+      "t": 0.25158741620893077,
+      "sign": "SIGN FLIPS"
+    },
+    "row 7  the seed AVERAGE alone  (S-Q": {
+      "t": 0.4648908963477996,
+      "sign": "SIGN FLIPS"
+    },
+    "row 7  the average ON TOP      (T-R": {
+      "t": 0.2234985382903065,
+      "sign": "SIGN FLIPS"
+    },
+    "row 7  the whole family        (T-P": {
+      "t": 1.2932069294085438,
+      "sign": "consistent"
+    },
+    "row 9  per-cell isotonic      (R-Q)": {
+      "t": 1.6853706449475228,
+      "sign": "consistent"
+    },
+    "row 9  per-cell residual      (S-Q)": {
+      "t": 4.513392265383168,
+      "sign": "consistent"
+    },
+    "row 9  the PERMUTED null      (T-Q)": {
+      "t": 0.9586526889840363,
+      "sign": "consistent"
+    },
+    "row 9  real minus null        (R-T)": {
+      "t": 0.1888281119275344,
+      "sign": "SIGN FLIPS"
+    }
+  },
+  "sign_consistency_fpr": 0.25,
+  "scale_invariance_max_gap": 3.552713678800501e-15,
+  "audit_sites": 14,
+  "audit_bare": 13,
+  "failures": []
+}

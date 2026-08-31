@@ -177,7 +177,14 @@ def registered(fail_on_missing=True, plant=None, sent=None):
         if plant[2] is None:
             missing.append((plant[0], plant[1]))
     registered.spent = spent          # what the filter removed, for the caller to print
-    return pd.DataFrame(out), missing
+    # An empty `out` yields a frame with NO COLUMNS, so every downstream df["pred_lb"] /
+    # df["src"] raises KeyError instead of iterating nothing. That happens exactly once --
+    # when the calendar is spent and nothing is left registered -- so it stayed hidden until
+    # 2026-08-31, and it made a clean state read as a red.
+    return pd.DataFrame(out, columns=REG_COLS), missing
+
+
+REG_COLS = ["day", "stem", "pred_lb", "src", "fam", "cv", "reg_tier"]
 
 
 def expose(df, tier, sd, above_cost, at_cost):
@@ -248,6 +255,21 @@ def main():
     else:
         print(f"✅ G1 all {len(df)} registered files carry a pred_lb "
               f"({df['src'].value_counts().to_dict()})")
+
+    # THE CALENDAR CAN RUN OUT. Every block below prices the exposure of files that are
+    # still registered for a future send; with none left there is no exposure to price, and
+    # three separate sites (df["pred_lb"], df["src"], max() over an empty list) raise instead
+    # of reporting nothing. This is NOT a check that passed -- it is a check with nothing in
+    # scope, and it says so, because a pass message that claims more than it tested is the
+    # defect w130 registered.
+    if not len(df):
+        print("ℹ NOTHING IN SCOPE: the calendar is spent — 0 file(s) remain registered for a "
+              "future send, so there is no tier exposure to price. G2–C3 are not evaluated; "
+              "this is an empty scope, not a clean bill of health.")
+        if missing:
+            print(f"⛔ G1 still holds: {len(missing)} unpriceable file(s) remain: {missing[:5]}")
+            return 1
+        return 0
 
     live = expose(df, tier, SND.PRED_SD, above_cost, at_cost)
 
