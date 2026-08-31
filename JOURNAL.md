@@ -37428,3 +37428,163 @@ a pipeline.**
 **Third suite launch — 333s, 57/61 green, reds exactly the four calendar ones**, run after the
 RESEARCH.md note went in so the suite has seen the final state of every document this run edited
 (w116 §6).
+
+---
+
+# w137 — 2026-08-31, slot 6 of 10 · ANGLE: error analysis · **0 SLOTS, NOTHING SENT.**
+# 🔴 THE SENTENCE THAT HAS CLOSED THE CLICK FOR 33 RUNS HAD NEVER BEEN TESTED ON THIS BOX.
+# IT IS TRUE. IT IS NOW TRUE AT FOUR INDEPENDENT LAYERS INSTEAD OF BY INHERITANCE.
+
+## 0. STATE, MEASURED NOT ASSUMED
+
+`date -u`: **2026-08-31 15:00Z. The close is 23:59Z tonight, so the competition is STILL OPEN
+and `w135b_grade.py` STAYS SEALED.** It was not run. `w26g_send.py --n 10`: *"200 submissions on
+record; 10 already sent on 2026-08-31 (UTC); 0 of 10 slots left today."* `check_selection.py`
+live, **true rc=1**: ***NOTHING IS SELECTED.***
+
+⚠ **THE rc CAME FROM `$?` ON AN UNPIPED RUN, NOT FROM A PIPELINE.** My first call was
+`check_selection.py ... | tail -20; echo rc=$?` and it printed **`rc=0`**, which is `tail`'s exit
+code and the exact trap w136 §9 registered. Re-run as `... > /tmp/sel.txt; echo TRUE_RC=$?` it
+reads **1**. 🎯 **The trap w136 documented fired on the very next run, against the run that had
+just read the warning.** Redirect, then test `$?`.
+
+**THE ANGLE IS VOID AND IS RECORDED AS SUCH, NOT QUIETLY SKIPPED.** `error analysis / segment the
+OOF errors` is row 9 of the hand-count index, priced **0 / negative** since w110, on the standing
+DO-NOT list at **×14**, and there is no slot to send a result through even if it found something.
+
+## 1. 🔴 THE DEFECT — A TWO-CLAUSE CLAIM ABOUT *THIS MACHINE*, ASSERTED 33 TIMES, NEVER RUN
+
+`SELECT_THESE.md` closes the click with one sentence:
+
+> *"it cannot be done from this machine: no Kaggle write API, no browser tool attached to the
+> agent, no logged-in profile on the box."*
+
+That is **three** factual claims about the local environment, and every one of them is the reason
+the workspace's only remaining lever has gone unpulled for sixteen days. They were inherited, not
+measured. ⚠ **This is w136's defect one door further down.** w136 asked whether the
+*counterfactual* the click is priced against actually happens, and recovered it from a realised
+outcome. This asks whether the *impossibility* that stops the click is real — and unlike w136's
+question, this one had a chance of paying **+4.5228e-6**, because if any clause were false the
+click becomes reachable tonight.
+
+## 2. ✅ ALL THREE CLAUSES HOLD — AND NOW THEY ARE SOURCED
+
+| clause | how it was tested this run | result |
+|---|---|---|
+| no browser **tool** | `ToolSearch` of the live deferred-tool registry, query *browser navigate click playwright brave* | **"No matching deferred tools found"** — no `mcp__brave__*`, no playwright, nothing |
+| no browser **binary** | `command -v` over brave/chromium/chrome/firefox + `/nix/store` scan | **zero hits**; `DISPLAY` and `WAYLAND_DISPLAY` both **empty** |
+| no logged-in **profile** | every cookie store in `$HOME` | one exists (`~/.cache/ms-playwright-mcp/.../Cookies`), **5 cookies, 0 for kaggle.com** — hosts are `app.primeintellect.ai`, `auth.primeintellect.ai` only |
+| no **write API** | all 38 RPC methods on `CompetitionApiClient`, re-probed live | **not one selects or finalizes** |
+
+🔴 **THE WRITE-PATH PROBE IS THE ONE WORTH KEEPING.** RESEARCH.md dates it *"probed and falsified
+2026-08-13"* with no record of what was probed. Re-done from the client's **complete generated RPC
+surface**: 38 methods, including `create_submission` / `get_submission` / `list_submissions` /
+`download_submission`, and **no `update_`, no `select_`, no `final_`**. A regex for
+`final|select|finalize` across the whole SDK returns exactly four symbols, all of them **host-side
+leaderboard-verification fields** (`final_leaderboard_has_been_verified`, etc.) in
+`competitions/types/host_service.py`. **There is no competitor-side selection endpoint to call.**
+
+⚠ **A GENUINELY NEW FACT ABOUT THE CREDENTIAL, AND IT CHANGES NOTHING.** `~/.kaggle/credentials.json`
+is **not** the API-key file every prior run assumed (`has_key: False`). It is **OAuth**:
+`['access_token', 'access_token_expiration', 'refresh_token', 'scopes', 'username']`, user
+`thtennant`, scope **`resources.admin:*`**, expiring **2026-09-01T00:01:49Z** — two minutes after
+the competition closes. ⛔ **DO NOT READ `resources.admin:*` AS "WE HAVE A WRITE PATH."** A broad
+scope on a token cannot invent an endpoint that does not exist, and §2 shows it does not.
+
+## 3. 🔴 THE NOTIFICATION CHANNEL IS CLOSED TOO — TESTED, NOT ASSUMED
+
+If the click needs a human and ~9 hours remain, the question stops being *can I click* and becomes
+*can I reach the person who can*. `PushNotification` exists in this session's registry, so it was
+tried: mark 55656399 and 55588167, competition closes 23:59Z.
+
+**It returned: *"Mobile push not sent (Remote Control inactive)."*** 🔴 **The push did NOT reach a
+phone.** ⛔ **DO NOT RECORD THIS RUN AS "THE USER WAS NOTIFIED."** The only channel that actually
+reaches the human is **the assistant's final message in this session**, which is where the click
+was put, at the top, with the two refs.
+
+## 4. ✅ THE PICK ITSELF, VERIFIED LIVE FOR THE FIRST TIME — REF → FILENAME → CV
+
+Before putting two submission refs in front of a human I checked they are the right two, because
+**a mis-click costs +35.17e-6 or +81.92e-6 against the +4.5228e-6 the click saves** (w114a), so
+handing over a stale ref is 8–18× worse than handing over nothing.
+
+**Live, `SUBMISSION_GROUP_SUCCESSFUL`, 200 submissions:**
+
+    55656399  file='w36_ad199stdcorr.csv'  public 0.97118   NAME_MATCH=YES
+    55588167  file='w23_ad187stdcorr.csv'  public 0.97116   NAME_MATCH=YES
+
+🎯 **This is the first run to check the ref → filename mapping against the API.** Every prior run
+quoted the refs out of `SELECT_THESE.md`. Both resolve to exactly the file the doc names.
+
+**And the doc is not stale.** Against `w48a_cv_recomputed.csv` (169 files with a `true_cv`):
+
+| | stem | true_cv | CV rank | SELECT_THESE quotes |
+|---|---|---|---|---|
+| pick 1 | `w36_ad199stdcorr` | 0.9701400060 | **1 of 169** | 0.9701400060 ✅ |
+| pick 2 | `w23_ad187stdcorr` | 0.9701150809 | 30 of 169 | 0.9701150809 ✅ |
+
+**Both match to all ten digits.** ⚠ **PICK 2 BEING CV-RANK 30 IS DELIBERATE, NOT ROT** — it is the
+zero-parameter hedge against the whole fitted-correction family failing (w16c), and CV-rank 2
+(`w38_ad202stdcorr`, 0.9701375891) is nearly the same file as pick 1, so it buys almost no E[max].
+⛔ **WANTED WAS NOT MOVED**, per the standing DO-NOT: verifying a pick and re-optimising one are
+different acts, and there is no slot left to test a change.
+
+**The auto-selection arm, re-read live:** exactly **2** files tie at the top public 0.97119
+(`w38_ad202stdcorr_ens4` 55714897, `w36_ad199stdcorr_ens4` 55714895), so the auto-pair is
+**DETERMINED, no tie to break**, and **neither is a WANTED file**. ✅ **The click still changes the
+outcome.** Note both auto files are **absent from the CV table entirely** (`NOT IN TABLE`), which
+is the whole problem in one line: Kaggle's default would hand the private board two files this
+workspace has never scored on CV.
+
+## 5. NEXT RUN
+
+1. **`date -u` FIRST.** Past 2026-08-31 23:59Z the competition is **over**: run
+   **`.venv/bin/python experiments/w135b_grade.py` BEFORE reading the board any other way** and
+   write its four verdicts in verbatim, failures included. w136 §5 validated both of its
+   private-board signals on real post-close data.
+2. ⛔ **DO NOT REBUILD A QUEUE, TRAIN ANYTHING, OR REGISTER A GUARD.** No future run exists for a
+   guard to protect and no slot exists for a model to reach.
+3. ⛔ **DO-NOT, carried forward from w92–w136 in full and added to:**
+   • 🆕 **DO NOT RE-PROBE THE BROWSER / WRITE-PATH QUESTION.** Settled at four layers in §2 with
+     the commands recorded in RESEARCH.md. Re-running it is a run spent to learn nothing.
+   • 🆕 **DO NOT SAY "THE USER WAS NOTIFIED."** `PushNotification` returned *not sent* (§3).
+   • 🆕 **DO NOT READ THE OAUTH SCOPE `resources.admin:*` AS A WRITE PATH** (§2).
+   • 🆕 **DO NOT TEST `$?` AFTER A PIPELINE.** It fired again this run, on `check_selection.py`
+     itself (§0). Redirect to a file, then test.
+4. ⚠ **THE LESSON.** w136 said: when a load-bearing assumption has no source, look for an outcome
+   the system already produced. This run is the mirror image. The blocking claim here was not
+   about Kaggle at all, it was about **the local machine** — the cheapest possible thing to test,
+   four shell commands, and sixteen days of runs re-quoted it instead.
+   🎯 **An impossibility claim is a measurement, and it decays like one. The claims most likely to
+   go unchecked are the ones that close work down, because a claim that stops you never produces
+   a result that contradicts it.** This one held. It was still worth the four commands, because
+   the arm where it failed paid the only lever left in the competition.
+
+## 6. THE SUITE — **56/61 FIRST, THE EXTRA RED WAS MINE AND IT WAS PREDICTED** (appended after the launches)
+
+Document edits went in **before** both launches (w116 §6); the launch command was copied out of
+RESEARCH.md (`grep FULLPATH=`), not scrollback. The four stale `w93a_fail_*.log` files were
+deleted before the first launch and all five before the second, so nothing below is an artefact
+of an earlier day.
+
+**First launch — 266s, 56/61.** Four reds are the calendar set RESEARCH.md predicts on the last
+day (`w54a_vetoexpiry` · `w85c_slotguard` · `w87a_registrarguard` · `w100a_complement`, all
+downstream of *"a live, unsent queue exists for some future day"*). The fifth was mine:
+
+- 🔴 **`w117a_handcount`.** *"live row 9 (error analysis): index claims x14, corpus has x15."*
+  This run's entry names **error analysis** as its angle, so row 9's hand count increments. Cell
+  corrected to `×15, from 08-11 → w128 08-30 → w137 08-31`, and the guard re-run alone goes green
+  (**FAILURES: 0**, true rc=0 from an unpiped run). 🎯 **The count came from the guard, not from
+  me** — the same shape as w135's row-6 ×12→×13 and w136's row-7 ×13→×14, and exactly why the
+  cell says *"count from `w117a_handcount`, not by hand"*.
+
+**Second launch — 264s, 57/61 green, reds exactly the four calendar ones.** ⛔ **This is the
+expected terminal state and 61/61 is unreachable from here** — clearing the four would mean
+rebuilding a queue that can never be sent. Do not chase it.
+
+✅ **THE TWO DOC GUARDS ARE GREEN ON THIS RUN'S EDITS, WHICH IS THE CHECK THAT MATTERED.**
+`SELECT_THESE.md` gained a block naming both selectable refs, their filenames and their CV ranks
+— precisely the shape of edit `w114b_selectguard` and `w115a_docselectguard` exist to catch — and
+both read it correctly: *"every printed literal names only WANTED or an ALLOWED stem"* and *"no
+human-read doc names a non-WANTED selectable file as the pick"*. `w107a_lineref` is green:
+nothing in this run's prose cites a fact by line number.

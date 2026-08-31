@@ -27,6 +27,16 @@ on exactly these two, and on nothing else:
 
 Both are already submitted; this only flags them.
 
+✅ **BOTH REFS RE-VERIFIED LIVE AGAINST THE KAGGLE API, 2026-08-31 ~15:05Z (w137)** — the first run
+to check the ref → filename mapping rather than re-quoting this table. `55656399` resolves to
+`w36_ad199stdcorr.csv` and `55588167` to `w23_ad187stdcorr.csv`, both `NAME_MATCH=YES` in the live
+`SUBMISSION_GROUP_SUCCESSFUL` listing of 200 submissions, and both CVs above match
+`experiments/w48a_cv_recomputed.csv` to **all ten digits**. The table is current, not stale.
+
+⚠ **Pick 2 sits at CV rank 30 of 169 on purpose.** It is the zero-parameter hedge against the
+whole fitted-correction family failing (w16c). CV rank 2 (`w38_ad202stdcorr`) is nearly the same
+file as pick 1 and buys almost no E[max]. **This is not an error in the table — do not "fix" it.**
+
 ## What happens if nobody clicks
 
 Kaggle takes the top two by public score, which today is **determined** — exactly two files
