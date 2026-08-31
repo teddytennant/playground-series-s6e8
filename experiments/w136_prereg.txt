@@ -1,0 +1,51 @@
+w136 PRE-REGISTRATION -- written 2026-08-31 ~14:35Z, BEFORE any page or field was read.
+Committed before w136a_autorule.py was run.
+
+WHAT IS UNDER TEST
+------------------
+Every price in this workspace -- the click's +4.5228e-6, the mis-click's +35.17e-6 and
++81.92e-6, the whole veto and tier machinery in w26g_send.py -- is a difference against ONE
+baseline arm: "if nobody clicks, Kaggle auto-selects the best TWO submissions by PUBLIC score."
+
+That sentence is used as a given in at least 30 sites across RESEARCH.md and experiments/.
+Its earliest statement is w15i_cvlb.py's docstring (2026-08-15), which asserts it without a
+source. I cannot find anywhere that it was read off Kaggle rather than assumed from convention.
+
+This is the same shape as w134's defect: a foundational fact carried by the frame rather than
+checked against the thing that decides. w134 checked whether the unit is PAID. This checks
+whether the COUNTERFACTUAL is real.
+
+TWO CONSTANTS, BOTH ASSUMED, BOTH UNDER TEST
+--------------------------------------------
+  A1  the RULE      -- auto-selection ranks by PUBLIC score (not by recency, not by nothing)
+  A2  the LIMIT     -- the final-submission limit is exactly 2
+
+REGISTERED PREDICTIONS
+----------------------
+  Q1  The competition's own Rules page states the no-selection fallback in words, and those
+      words name the PUBLIC leaderboard.                        PREDICT: HOLDS.
+  Q2  The stated fallback is "best-scoring", NOT "most recent".  PREDICT: HOLDS.
+  Q3  The final-submission limit is readable live and equals 2.  PREDICT: HOLDS.
+  Q4  DISCRIMINATION CONTROL. The fallback sentence is Kaggle-wide boilerplate, so it must
+      appear in OTHER competitions' rules too. If it appears nowhere else, the sentence I
+      found is competition-specific and Q1 is weak evidence, not strong.
+                                                                PREDICT: appears elsewhere.
+
+FALSIFIERS, STATED NOW SO THEY CANNOT BE SOFTENED LATER
+-------------------------------------------------------
+  * If the fallback names RECENCY rather than public score, the entire baseline arm is wrong,
+    every price above is measured against a counterfactual that does not happen, and I will
+    say so at the top of the journal entry and recompute what the click is worth.
+  * If the limit is not 2, check_selection.py's slot filling is wrong and SELECT_THESE.md
+    names the wrong number of files to click.
+  * If NO page states the fallback at all, the honest verdict is "still unsourced, and now
+    known to be unsourced" -- NOT "confirmed". An absent contradiction is not a confirmation
+    and I will not report it as one.
+  * A NULL RESULT IS THE EXPECTED OUTCOME AND IS A REAL RESULT. If all four hold, the finding
+    is that a 30-site load-bearing assumption now has live provenance for the first time in
+    16 days. I will report that plainly and will NOT inflate it into a defect.
+
+WHAT THIS CANNOT CHANGE
+-----------------------
+Not the pick. WANTED = {w36_ad199stdcorr, w23_ad187stdcorr} was chosen on CV and does not
+depend on what the fallback is. What moves, if anything moves, is the PRICE of not clicking.
