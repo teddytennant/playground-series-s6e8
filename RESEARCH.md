@@ -1963,6 +1963,15 @@ adding 4 names **−3.4e-9**:
 At w113's measured ~0.95 teams per 1e-6 that is roughly **4 / 33 / 78 board places** against a
 bronze margin of **75**. The conversion is public-density applied to a private-AUC cost and is a
 scale, not a claim — but the ORDER is not in doubt.
+⛔ **SUPERSEDED AS A QUOTABLE FIGURE, 2026-08-31 (w133).** Do not quote "4 places" for the click.
+The board's `Score` column is 5 d.p., so +4.5228e-6 is *below the leaderboard's own resolution*
+and on the live board it crosses **zero** teams: the deterministic answer is **0 places**. The
+density fit and the deterministic count disagree because both are pricing a sub-resolution
+quantity in a resolution-limited unit, and neither is the honest reading. The honest reading is
+a probability under the shake — **+3.20 / +2.42 / +1.30 pp of P(bronze)** — see the w133 section.
+⚠ The 33 / 78 mis-click figures are ABOVE the resolution (30.6e-6 and 77.4e-6 net) and do not
+have this problem; w133 measures them at **40** and **116** places at sd = 0, so the ORDER
+stated above survives and only the click's own row is withdrawn.
 
 🎯 **AN INSTRUMENT BUILT TO PREVENT A SMALL ERROR CAN BE THE LARGEST REACHABLE SOURCE OF A BIG
 ONE, AND ITS OWN CORRECTNESS IS NOT WHAT MAKES IT SAFE.** `WANTED` was right the whole time and
@@ -3379,7 +3388,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 1 | *the original dataset* — find it, concat it as extra rows | **×14, from 08-11 → w112 08-29 → w131 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED THE ONE THAT IS TRUE BY CONSTRUCTION AS ITS HEADLINE.** The `0` is a **CONSTRUCTION ZERO**: the baseline it names — *the same stack trained on `train.csv` alone, 0× dose* — **IS the arm**. `orig_concat.py`'s dose loop is `if w:`, so at 0× no augmented frame is built at all, and w131a measured that dose 0 appends **exactly 0 rows** and reproduces the training frame exactly: **zero degrees of freedom**, true for any model, any metric and any seed before anything is fitted. **THE MANOEUVRE'S price** is a **CONCAT** price (extra training ROWS, not members) at the **MEMBER-TRAINING-SET layer, k=1, a per-competition TOTAL and not a rate**, baseline that same 0× stack, and it is **NEGATIVE at every dose anyone ran and MONOTONE in dose**: **−58.0e-6 at 1×** (1.16× the 50e-6 floor, so even one copy is a measurable loss and not a null), **−986.0e-6 at 10×** (19.7×, the rung the row used to omit and the one that makes the monotonicity checkable), **−3,340.0e-6 at 50×** (66.8×). The usual Playground edge is **INVERTED** here, and row 1 is the **only** row in this table whose manoeuvre is measured to LOSE AUC at every setting — printed as `0` it ranked as the column's cheapest row. **THE SEPARATE-ESTIMATOR ROUTE**, priced in rows 3/4/7/9's units for the first time (w131a arm C: paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the **full 167-member pack**, `origmodel` fitted on the 7,500 originals alone and never shown a competition label, solo AUC 0.8510): an **ENROLMENT price of −1.02e-6/member**, sd 1.83e-6, **t = 0.56**, **SIGN-FLIPPING** across the three splits (+0.80 / −2.86 / −1.00), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6** — an independent instrument landing inside the row's published −1e-6 to −2e-6. **IDENTITY**: the CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so there is nothing else to find. ⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash — the arms do NOT add** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) · `WHAT THE CONCAT ROW ACTUALLY COSTS` (w131, the ladder, the construction zero and the enrolment price) |
 | 2 | *tune LightGBM properly against the fixed folds* | **×15, from 08-10 → w113 08-29 → w122 08-30 · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
 | 3 | *CatBoost: it handles categoricals better* | **×16, from 08-10 → w123 08-30 → w132 08-31 · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 **on the group delta**, i.e. **per-member sd 1.96e-6, t = 5.12** — published here for the first time by w132a, and the number that makes rows 1/7/9's *indistinguishable from zero* verdicts checkable rather than asserted, since it is the control they all quote). ⚠ **`sign-consistent` IS NOT A TEST**: over 3 paired splits it is a **25% false-positive rate** (2·(1/2)³) and row 9's PERMUTED NULL — a null by construction — carries the same label at **t = 0.96**. On 3 splits **df = 2**, so the two-tailed critical t is **4.303 at 5% and 9.925 at 1%**: this rate clears 5% with a thin margin and **no single-family enrolment rate in this table clears 1%**. t is scale-invariant, so publishing it moves no verdict. This corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
-| 4 | *XGBoost as the third leg of the ensemble* | **×15, from 08-10 → w115 08-29 → w124 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** (t = 5.12) · XGBoost **+7.38e-6** (t = 6.21) · LightGBM **+4.04e-6** (t = 5.73), all three on **df = 2** where the 5% critical t is 4.303 and the 1% is 9.925 — every one clears 5%, none clears 1% (w132a). ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family* | `tuning ANY GBDT is worth ~4e-7` |
+| 4 | *XGBoost as the third leg of the ensemble* | **×16, from 08-10 → w115 08-29 → w124 08-30 → w133 08-31 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** (t = 5.12) · XGBoost **+7.38e-6** (t = 6.21) · LightGBM **+4.04e-6** (t = 5.73), all three on **df = 2** where the 5% critical t is 4.303 and the 1% is 9.925 — every one clears 5%, none clears 1% (w132a). ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family*. ⛔ **w133 (08-31) is the 16th handing and it built nothing**: 0 submission slots remained and the competition closed that night, so an XGBoost leg would have been unsendable by construction on top of being under the floor | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×16, from 08-10 → w116 08-29 → w125 08-30 — the most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
 | 6 | *blending: rank-average or weight the models by OOF* | **×12, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
 | 7 | *seed and fold diversity, averaged* | ×13, from 08-11 → w64 → w109 08-28 → w118 08-29 → w127 08-30 · **artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO LAYERS OF ONE MANOEUVRE, AND THE ROW USED TO PUBLISH ONE NUMBER AT THE OTHER ONE'S SCOPE.** stacker arm: **structural null**. member arm, seed-averaging `xgb_latcat`: **MEMBER layer +138e-6** — the solo probability-mean gain, re-measured w127 at **+138.2e-6** from the OOF arrays, and it is **ABOVE** the 50e-6 floor — converting to **STACK layer +2e-6, at k=1**. That +2e-6 is a **SUBSTITUTION** price (w109 arm B *replaced* three seed twins by their mean; nothing was added, the pack lost two columns) and it is **NOT a per-member rate** — read as one at k=104 it multiplies out to **+208e-6, four times the floor**. The genuine **ENROLMENT** rate, measured w127 with w123/w124's instrument (paired 50/50, splits 0/1/2, C=1.0, hybrid) on the full **167-member** pack: **+0.49e-6/member** (t = 0.25) for the two extra seeds, **+1.72e-6** (t = 0.46) for the average alone, **−0.51e-6** (t = 0.22) for the average on top of the seeds — all three **SIGN-FLIPPING** across the 3 splits and none distinguishable from zero, against a 5% critical t of 4.303 on df = 2 (w132a), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. ⛔ Nothing re-opens on any arm | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
@@ -9077,6 +9086,80 @@ the CV ordering is settled (`SELECT_THESE.md`), and nothing on either side of th
 lever. It changes only what this workspace is allowed to claim about its own finish, which as
 of 08-25 is: **a coin-flip on top 5%, and a top-10% finish that is likely but not the ~100%
 the superseded table above asserted.**
+
+### ✅ LIVE — the click priced in MEDALS, and the two instruments re-read at rank 307 (w133, 08-31)
+
+    .venv/bin/python experiments/w133a_clickmedal.py   # ~60 s, 7 controls, FAILURES 0
+    .venv/bin/python experiments/w83a_reproject.py     # re-run at the live band, FAILURES 0
+
+⚠ **EVERY NUMBER IN THE w83 SECTION ABOVE IS BAND-CONDITIONAL AND WE NO LONGER STAND IN THAT
+BAND.** w83 was measured at rank **139 of 2,874** (top 4.84%, band 2.84–6.84%). The live board
+(`lb_w133/`, 2026-08-31T13:14:16Z) puts us at **307 of 3,459** — top **8.88%**, band
+**6.88–10.88%**, bronze cut **345**, margin **+38**. Instrument B's whole method is the band, so
+its published column describes a position this account left a week ago.
+
+**A. matched null at the live position** — P(top 0.5% / 5% / 10%):
+
+| shift sd | source | median | p10 | p90 | P(top 0.5%) | P(top 5%) | P(top 10%) |
+|---|---|---|---|---|---|---|---|
+| 0.000043 | S6E2 | 309 | 224 | 377 | 0.0% | 3.2% | **74.2%** |
+| 0.000067 | S6E3 | 300 | 160 | 400 | 0.1% | 12.1% | **69.2%** |
+| 0.000124 | S6E5 | 280 | 96 | 444 | 0.9% | 24.1% | **66.9%** |
+
+**B. empirical band, top 6.88–10.88% of each finished board** — P(≤10%) by episode: S6E1 81.5%,
+**S6E2 90.3%**, **S6E3 78.3%**, S6E4 74.6%, **S6E5 69.4%**, S6E6 85.0%, S6E7 73.9%.
+
+🎯 **THE TWO INSTRUMENTS NOW AGREE, AND THE DISAGREEMENT WAS w83's HEADLINE FINDING.** At the old
+band A said 89–100% and B said 17–98% with **three wipeout boards**; the spans were disjoint at
+the bottom and w83's honest verdict was "we do not know". At the live band A spans **66.9–74.2%**,
+B's AUC episodes span **69.4–90.3%**, they **overlap at 69.4–74.2%**, and **no episode is a
+wipeout** — B's minimum went 17.2% → 69.4%. ⛔ **This is not good news; it is a narrower forecast
+of a worse position.** The mechanism is that the top of a board is where the reshuffle is violent
+and the 7–11% band is where it is not, so drifting down traded upside for predictability.
+
+**THE CLICK, PRICED IN THE UNIT KAGGLE PAYS.** Arms are PAIRED — one noise draw per rep, all four
+deltas read off it — so what is reported is a difference and not the difference of two noisy
+estimates. Reference is the STATUS QUO (nothing selected ⇒ Kaggle auto-picks on public), because
+that is the live state and the decision is "what does each action do from here":
+
+| action | delta vs status quo | dP(bronze) at sd 43 / 67 / 124 e-6 | rank at sd = 0 |
+|---|---|---|---|
+| **click the WANTED pair** | **+4.5228e-6** | **+3.20 / +2.42 / +1.30 pp** | 307 (+0) |
+| no click | 0 | — (74.3% / 68.7% / 66.5%) | 307 |
+| mis-click `w21_ad187corr`+`w20_ad187_h3` | −30.647e-6 | **−26.86 / −17.47 / −9.26 pp** | **347 — past the cut** |
+| mis-click `w16i_schemeavg`+`blend159av_h3` | −77.397e-6 | **−61.92 / −44.06 / −24.69 pp** | 423 |
+
+⚠ **THE PREREGISTERED PREDICTION FAILED AND THE FAILURE IS THE RESULT.** `w133_prereg.txt` R3
+predicted |dP| < 1.0pp for the click at every sd. It is **1.30–3.20pp**, over the bar at all
+three. Eleven runs have called the click "not a large number" on the strength of a 4.5e-6 AUC
+figure; in medal probability it is worth up to **3.2 points**, which is **41% of the entire
+7.85pp spread between the three shift-sd assumptions** — i.e. comparable to the largest
+uncertainty in the whole forecast. R1, R2, R4 and R5 held.
+
+🎯 **THE CLICK IS WORTH MOST WHEN THE BOARD HOLDS STILL.** dP ≈ φ(z)·δ/sd_shift, so it is
+largest at the *smallest* shake (+3.20pp at 43e-6) and smallest at the largest (+1.30pp at
+124e-6) — the reverse of the intuition that a violent shake makes small edges matter more.
+⚠ The closed form agrees with the simulation to **−0.03pp at 67e-6 and +0.03pp at 124e-6**, and
+**overshoots by +0.19pp at 43e-6**. That residual is expected and not noise: φ(z)·δ/sd treats our
+own draw as the only source of rank variance, and the smaller the common shift sd the more of
+that variance the other 3,458 teams contribute, so the closed form overstates sensitivity to our
+own score exactly where sd is smallest. **The simulation is the measurement; the closed form is
+the sanity check.**
+
+⚠ **C7: THE MIS-CLICK RATIOS SURVIVE THE CHANGE OF UNIT WITHOUT BEING TOLD TO.** 8.4x/7.2x/7.1x
+and 19.4x/18.2x/19.0x against the AUC ratios 7.78x and 18.11x. **A wrong tick remains the
+larger hazard by an order of magnitude**, and at sd = 0 the *first* wrong pair alone puts us at
+rank **347 against a 345 cut** — it loses the medal outright.
+
+⛔ **DECIDES NOTHING.** The pick is on CV and is settled; a dP is a REPORTING result and is not a
+licence to re-open it. What it changes is what this workspace is allowed to say about the click:
+not "worth about four places", but **one to three points of medal probability, against a
+mis-click that costs nine to sixty-two.**
+
+⚠ **THE CAVEAT THAT APPLIES TO EVERY ROW AND CANNOT BE REMOVED.** The public board shows each
+team's best-of-all-submissions while their private score comes from two selected entries, so the
+whole board is optimistically biased, not just us. The matched null cannot represent that. It is
+the same assumption w83a makes; it is stated, not fixed.
 
 ### Pool status as of 2026-08-11 08:00 UTC
 

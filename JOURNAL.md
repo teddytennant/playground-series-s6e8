@@ -36816,3 +36816,176 @@ and 61/61 is unreachable from here.** Do not chase it.
 **41 places of margin**, on the day the field compresses hardest and against a standing decay
 estimate of **−22 places/day**. Today's ten scored 0.93232 … 0.94275; **none is within
 0.028 of the 0.97119 auto-selection tier**, which is exactly why they were safe to send.
+
+---
+
+# w133 — 2026-08-31, slot 2 of 10 (ANGLE: XGBoost as the third leg). **0 SLOTS. THE CLICK IS THE ONLY THING LEFT, AND IT IS WORTH MORE THAN ELEVEN RUNS HAVE SAID.**
+
+## 0. ⚠ THE PREREGISTERED PREDICTION FAILED, AND THE PREREG SAID TO PUT THAT FIRST
+
+`w133_prereg.txt` R3 predicted the selection click would move P(bronze) by **less than 1.0
+percentage point** at every shift sd — i.e. that it was a rounding error in the unit that pays,
+just as it is in AUC. It is **+3.20 / +2.42 / +1.30 pp** at the S6E2 / S6E3 / S6E5 sds. Over the
+bar at all three, by up to 3.2x. The prereg's own instruction on that branch was *"the click is
+worth escalating far harder than eleven runs of prose have, and I will say so at the top"*, so:
+
+🔴 **THE CLICK IS WORTH UP TO 3.2 POINTS OF MEDAL PROBABILITY, WHICH IS 41% OF THE ENTIRE SPREAD
+BETWEEN THE THREE SHAKE ASSUMPTIONS (7.85pp).** "+4.5228e-6, not a large number" is a true
+sentence about AUC and it has been quietly doing duty as a claim about the medal since w74. It
+is not one. Every run since has under-sold the only action left on the board.
+
+## 1. STATE, MEASURED NOT ASSUMED
+
+`w26g_send.py --n 10` at 13:16Z: **"10 already sent on 2026-08-31 (UTC); 0 of 10 slots left
+today."** The close is 23:59 UTC tonight, so the counter never rolls over. `check_selection.py`
+live: ***NOTHING IS SELECTED.*** Board at 13:14:16Z: **rank 307 / 3,459, bronze cut 345, margin
++38** (12:49Z was 304/3,453/+41 — three places in twenty-five minutes).
+
+**THE ANGLE IS VOID AND IT IS RECORDED AS SUCH, NOT QUIETLY SKIPPED.** Two independent blocks,
+either alone sufficient: (a) no slot exists, tonight or ever, so an XGBoost leg built today
+could not be sent; (b) an ordinary XGBoost member measures **+7.38e-6/member** against a **50e-6**
+enrolment floor and is a standing DO-NOT. Row 4 is now **×16** — count from `w117a_handcount`
+(rc=0, C1–C6), not by hand — and the cell records that the 16th handing built nothing.
+
+## 2. WHAT THIS RUN MEASURED, AND WHY IT WAS THE RIGHT THING TO MEASURE
+
+The click has been priced in **AUC** since w74 and in **board places** since w113. Neither is
+what Kaggle awards. Nobody had put the click's delta and the public→private shake into the same
+expression, so nobody knew whether 4 places against a 38-place cushion was decisive or noise.
+
+`experiments/w133a_clickmedal.py` — 7 controls, **FAILURES 0**, 20,000 reps. Arms are **PAIRED**:
+one noise draw per rep, all four deltas read off it, so what is reported is a difference and not
+the difference of two noisy estimates (C1 verifies this at delta 0 on every rep). Reference is
+the **STATUS QUO** — nothing is selected, so Kaggle auto-picks on public — because that is the
+live state and the question is what each action does *from here*:
+
+| action | delta vs status quo | dP(bronze) at sd 43 / 67 / 124 e-6 | rank at sd = 0 |
+|---|---|---|---|
+| **click the WANTED pair** | **+4.5228e-6** | **+3.20 / +2.42 / +1.30 pp** | 307 (+0) |
+| no click | 0 | *(74.3% / 68.7% / 66.5%)* | 307 |
+| mis-click `w21_ad187corr`+`w20_ad187_h3` | −30.647e-6 | **−26.86 / −17.47 / −9.26 pp** | **347 — PAST THE CUT** |
+| mis-click `w16i_schemeavg`+`blend159av_h3` | −77.397e-6 | **−61.92 / −44.06 / −24.69 pp** | 423 |
+
+🎯 **THE CLICK IS WORTH MOST WHEN THE BOARD HOLDS STILL.** dP ≈ φ(z)·δ/sd_shift, so it is
+largest at the *smallest* shake and smallest at the largest — the reverse of the intuition that
+a violent shake makes small edges matter more.
+
+🔻 **CORRECTED BEFORE COMMIT, AND THE CORRECTION IS ITSELF THE POINT.** I wrote "both arithmetic
+rows reproduce the simulation to 0.1pp" and then checked it, which is the wrong order. Measured:
+**−0.03pp at 67e-6, +0.03pp at 124e-6, and +0.19pp at 43e-6** — the closed form *overshoots* at
+the smallest sd, by 6x the tolerance I had claimed. The overshoot has a cause and it is not
+noise: φ(z)·δ/sd treats our own draw as the only source of rank variance, and the smaller the
+common shift sd, the larger the share of that variance contributed by the *other* 3,458 teams'
+draws, so the sensitivity to our own score is overstated exactly where the sd is smallest. The
+simulation is the measurement; the closed form is a sanity check that agrees to 0.03pp over two
+thirds of the range and explains its own residual on the third.
+
+⛔ **This is the workspace's own standing genus, committed by the run that catalogued it.** A
+tolerance stated from a plausible-feeling calculation, in a document that decides things, before
+any array was touched. It survived about four minutes.
+
+⚠ **C7 — THE MIS-CLICK RATIOS SURVIVE THE CHANGE OF UNIT WITHOUT BEING TOLD TO.** 8.4x/7.2x/7.1x
+and 19.4x/18.2x/19.0x, against the AUC ratios 7.78x and 18.11x. **A wrong tick is still the
+larger hazard by an order of magnitude**, and at sd = 0 the *first* wrong pair alone lands at
+rank **347 against a 345 cut** — it loses the medal outright, with no shake needed.
+
+## 3. 🔻 A FIGURE THIS WORKSPACE HAS QUOTED FOR FOUR RUNS IS WITHDRAWN
+
+**"The click is worth roughly four places."** w113a got it from a density fit (~0.95 teams per
+1e-6) after correcting an earlier 10x error that had made it 58. Both readings are wrong for the
+same reason and neither correction touched it: **the board's `Score` column is 5 d.p., so
++4.5228e-6 is BELOW the leaderboard's own printed resolution.** On the live board the delta
+crosses **zero** teams; the deterministic answer is **0 places**. A density fit says 4, a literal
+count says 0, and the disagreement is not a bug in either — it is what happens when you price a
+sub-resolution quantity in a resolution-limited unit.
+
+🎯 **BEFORE CONVERTING A QUANTITY INTO A UNIT, ASK WHAT THAT UNIT'S RESOLUTION IS. IF THE
+QUANTITY IS SMALLER THAN ONE TICK, EVERY ANSWER YOU GET IS AN ARTEFACT OF THE CONVERSION.** The
+probability under a shake has no ticks and is the honest reading. ⚠ The 33 / 78 mis-click
+figures are **above** the resolution (30.6 and 77.4e-6 net) and do not have this problem —
+w133 measures them at **40** and **116** places — so only the click's own row is withdrawn.
+
+## 4. 🎯 THE TWO INSTRUMENTS NOW AGREE, AND w83's HEADLINE FINDING WAS THAT THEY DID NOT
+
+`w83a_reproject.py` re-run live (FAILURES 0, 5 controls). Its instrument B is **band-conditional**
+and was last read at rank **139 of 2,874** (top 4.84%, band 2.84–6.84%). We stand at **307 of
+3,459** — top **8.88%**, band **6.88–10.88%**. Every number B has published is about a band this
+account left a week ago, and nobody had noticed the instrument had gone stale underneath.
+
+| | at w83's band (rank 139) | at the live band (rank 307) |
+|---|---|---|
+| A, matched null, P(top 10%) | 89.2 – 99.8% | **66.9 – 74.2%** |
+| B, empirical band, P(≤10%) | 17.2 – 97.6%, **three wipeout boards** | **69.4 – 90.3%, none** |
+| verdict | disjoint at the bottom; *"we do not know"* | **overlap at 69.4 – 74.2%** |
+
+⛔ **THIS IS NOT GOOD NEWS AND MUST NOT BE READ AS ANY.** It is a narrower forecast of a worse
+position. The mechanism is that the top of a board is where the reshuffle is violent and the
+7–11% band is where it is not, so four days of drift traded upside for predictability. Both
+instruments now put this account at roughly **two-thirds to nine-tenths** of a bronze, on a
+cushion of 38 places that has been closing all week.
+
+## 5. ⛔ THE CLICK — THIRTY-SECOND RUN ASKING, AND THERE IS NO THIRTY-THIRD
+
+    https://www.kaggle.com/competitions/playground-series-s6e8/submissions
+    "Use for Final Score" on 55656399 and 55588167, and on nothing else.
+
+`55656399 → w36_ad199stdcorr.csv` (CV 0.9701400060) · `55588167 → w23_ad187stdcorr.csv`
+(CV 0.9701150809, the deliberate pack hedge). Auto-select fills both slots from the 0.97119
+tier (`w36_ad199stdcorr_ens4`, `w38_ad202stdcorr_ens4`) and both WANTED files print
+**UNREACHABLE without the click (P=0.000)**. ⛔ Re-confirmed this run: no browser MCP attached,
+no cookie session on this box, no Kaggle write API. It is a human click and always was.
+**Worth +1.30 to +3.20pp of bronze. The window shuts at 23:59 UTC tonight.**
+
+## 6. WHAT I DELIBERATELY DID NOT DO
+
+**No standing check #62 was registered, and that is a decision, not an omission.** Every guard
+in this suite exists to stop a *future* run misreading the table. There is no future run: the
+competition closes tonight and the suite will not be launched again. Registering a guard against
+§3's genus would be ceremony billed to a run that has ten hours to live. The finding is written
+into RESEARCH.md and the withdrawn figure is annotated at both of its sites instead.
+
+## 7. THE SUITE — **57/61, AND THE FOUR REDS ARE THE ONES w132 PREDICTED IN WRITING**
+
+Document edits went in **before** the launch (w116 §6); the launch command was copied out of
+RESEARCH.md (`grep FULLPATH=`), not scrollback. The four `w93a_fail_*.log` files left by w132
+were deleted before launching, so nothing below is a stale artefact.
+
+**338s, 57/61, reds `w54a_vetoexpiry` · `w85c_slotguard` · `w87a_registrarguard` ·
+`w100a_complement`** — byte-for-byte the set RESEARCH.md's "ON THE LAST DAY THE SUITE CANNOT
+REACH 61/61" table names, all four downstream of *"a live, unsent queue exists for some future
+day"*. ⛔ **This is the expected terminal state. 61/61 is unreachable and chasing it would mean
+rebuilding a queue that can never be sent.** w132 wrote that prediction down before the state
+existed and it landed exactly; recording that it held is the whole value of having written it.
+
+⚠ **The two doc guards are GREEN on this run's edits**, which is the check that mattered:
+`w114b_selectguard` and `w115a_docselectguard` both pass after `SELECT_THESE.md` gained a
+second table naming `w21_ad187corr`, `w20_ad187_h3`, `w16i_schemeavg` and `blend159av_h3`. A new
+table of wrong pairs is exactly the shape of edit those guards exist to catch, and they read the
+context correctly. `w117a_handcount` rc=0 with row 4 at ×16.
+
+## 8. NEXT RUN — IF THERE IS ONE, IT IS AFTER THE CLOSE
+
+1. **`date -u`.** If it is past 2026-08-31 23:59 UTC the competition is **over**: no submission,
+   no selection, no queue. The only remaining act is to read the **private** leaderboard and
+   write down what actually happened, against §4's forecast of 66.9–90.3%. Do that and stop.
+2. ⛔ **DO NOT REBUILD A QUEUE, DO NOT TRAIN ANYTHING, DO NOT REGISTER A GUARD.** All three are
+   work for a competition that no longer accepts input.
+3. ⛔ **DO-NOT, carried forward from w92–w132 in full and added to.** In particular, everything
+   in w132 §8.6 holds unchanged, and additionally:
+   • 🆕 **DO NOT QUOTE "the click is worth about four places."** Withdrawn in §3 — the delta is
+     below the board's 5-d.p. resolution and the figure is an artefact of the conversion. The
+     live figure is **+1.30 to +3.20pp of P(bronze)**.
+   • 🆕 **DO NOT QUOTE ANY NUMBER FROM w83's PUBLISHED B COLUMN.** It is conditional on the
+     2.84–6.84% band and we have not stood there since 08-25. The live band is 6.88–10.88% (§4).
+   • 🆕 **DO NOT READ §4's "the instruments now agree" AS REASSURANCE.** It is a narrower
+     forecast of a *worse* position, and the agreement is at 69–74%, not at 100%.
+   • 🆕 **DO NOT READ THE +3.20pp AS A REASON TO RE-OPEN THE PICK.** It prices a decision already
+     made on CV. A dP is a reporting result.
+4. ⚠ **THE LESSON.** w132 found that the price column had no notion of noise. This run found the
+   neighbouring thing one level out: a number that was *correct in its own unit* and had been
+   silently carrying a claim in a **different** unit for eleven runs. "+4.5228e-6 is not a large
+   number" is true of AUC and false of medals, and nothing in the workspace could tell the two
+   apart because the conversion had never been done.
+   🎯 **A quantity is not small. A quantity is small IN A UNIT. When a number is doing decision
+   work, price it in the unit the decision is paid in — and check that unit's resolution before
+   you trust the conversion.**

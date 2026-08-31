@@ -1,3 +1,39 @@
+# 2026-08-31 13:14Z — w133, THE LAST BOARD. RANK 307 / 3,459, BRONZE CUT 345, MARGIN +38.
+
+Board downloaded once for the day (`lb_w133/`, 13:14:16Z). w132 read the standing through the
+API at 12:49Z and did not persist a file; instrument B needs the CSV, so this is the day's
+single download, not a second reading. Our public score is unmoved at **0.97119**, frozen since
+08-23 12:41:28. Leader Chris Deotte **0.97207**, a gap of 0.00088. Today's ten sends (12:36–
+12:37Z) scored 0.93232–0.94275 and were never near the tier.
+
+⚠ **THE MARGIN IS STILL SHRINKING AND IT IS DOING IT ON THE LAST DAY.** 12:45Z 08-30: rank 278
+of 3,321, cut 332, margin **+54**. 12:49Z today: 304 of 3,453, cut 345, margin **+41**. 13:14Z
+today: 307 of 3,459, cut 345, margin **+38**. Three places in twenty-five minutes. The standing
+−22 places/day slope is if anything gentle for the final hours.
+
+## What the position is actually worth, now that it has been priced in medals
+
+`experiments/w133a_clickmedal.py` (7 controls, FAILURES 0) and `w83a_reproject.py` re-run at the
+live band, which is the first time either has been read at rank 307 rather than rank 139:
+
+| instrument | P(finish inside the bronze cut) |
+|---|---|
+| A, matched null, shift sd 43 / 67 / 124e-6 | **74.3% / 68.7% / 66.5%** |
+| B, empirical band (top 6.88–10.88%), AUC episodes S6E2/E3/E5 | **90.3% / 78.3% / 69.4%** |
+
+🎯 **THE TWO INSTRUMENTS NOW AGREE, AND THEY DID NOT AT RANK 139.** w83 found A at 89–100% and
+B spanning 17–98% with three boards that wiped our band clean out of the top 10%. At the live
+band the spans overlap at **69.4–74.2%** and **no episode is a wipeout** — B's minimum is
+69.4%, against 17.2% at the old band. The deeper position is the more *predictable* one, which
+is not the direction anyone would guess.
+
+⛔ **This is not comfort.** Both instruments put us at roughly **two-thirds to nine-tenths**, on
+a cushion of 38 places that has been closing all week, and the whole spread between the two
+shift-sd assumptions (**7.85pp**) is larger than anything this account can still do — the
+selection click, the only lever left, is worth **+1.30 to +3.20pp**.
+
+---
+
 # 2026-08-30 12:45Z — w122, MEASURED. THE DECAY SLOPE IS TWICE WHAT w120/w121 CARRIED.
 
 Board downloaded once for the day (`lb_w122/`, 12:45:11Z), which is the w120 §7 rule.

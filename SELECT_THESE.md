@@ -1,8 +1,11 @@
 # ⏳ ONE MANUAL ACTION IS OUTSTANDING — final-submission selection
 
-> 🔴 **2026-08-30. TOMORROW IS THE LAST DAY.** Twenty-one runs have now asked for this and
-> nothing is selected. It is two ticks in a browser and it cannot be done from this machine:
-> no Kaggle write API, no browser tool attached to the agent, no logged-in profile on the box.
+> ⛔ **2026-08-31 — TODAY IS THE LAST DAY, AND THE WINDOW SHUTS AT 23:59 UTC.** Thirty-two
+> runs have now asked for this and nothing is selected. It is two ticks in a browser and it
+> cannot be done from this machine: no Kaggle write API, no browser tool attached to the agent,
+> no logged-in profile on the box. Every submission slot is spent (10/10 by 12:37Z) and the
+> counter does not roll over before the close, so **this click is the only thing left that can
+> change the private score.**
 
 **Deadline 2026-08-31 23:59. Needs a browser. It cannot be done from the Kaggle API** (the
 write path was probed and falsified 2026-08-13; only the *read* is exposed, which is what
@@ -41,10 +44,28 @@ Neither is the CV-preferred pair. Priced on the live board:
 | tau = 5.0e-6 (far above anything measured) | −0.50e-6 |
 
 `experiments/w74a_clickprice.py`, two verbatim controls at 0.000e+00. Honest reading: **the
-click is worth about 3–4.5e-6 of expected private AUC, and it is not a large number.** At the
-board density measured 2026-08-30 12:45Z (rank **278 of 3,321**, bronze cut 332, margin
-**+54**) that is roughly **four places** against a cushion that is shrinking ~22/day — so it
-is worth doing and it is still not, on its own, the medal. ⚠ BUT THAT PRICES ONLY THE *MISSING* CLICK. Clicking the WRONG pair costs up to
+click is worth about 3–4.5e-6 of expected private AUC, and as an AUC number it is small.**
+
+⚠⚠ **PRICED IN THE UNIT THE COMPETITION PAYS, IT IS BIGGER THAN THAT SENTENCE SOUNDS**
+(w133, `experiments/w133a_clickmedal.py`, 7 controls, FAILURES 0, live board 2026-08-31
+13:14Z: rank **307 of 3,459**, bronze cut **345**, margin **+38**). Carried through the
+public→private shake as a paired delta — one noise draw, all arms read off it — the click moves
+**P(finishing inside the bronze cut) by +3.20 / +2.42 / +1.30 percentage points** at the
+S6E2 / S6E3 / S6E5 shift sds. Not four places: **one to three points of medal probability.**
+
+⛔ **DO NOT QUOTE "roughly four places" ANY MORE, IN EITHER DIRECTION.** It came from a
+density fit, and +4.5228e-6 is *below the leaderboard's own printed resolution* — the Score
+column is 5 d.p., so on the live board the delta crosses **zero** teams and the deterministic
+answer is **0 places**, not 4. Both figures are artefacts of pricing a sub-resolution quantity
+in a resolution-limited unit. The probability under a shake is the honest reading and the
+places figure is not.
+
+🎯 **The click is worth MOST when the board holds STILL.** dP ≈ φ(z)·δ/sd_shift, so it is
+largest at the *smallest* shift sd (+3.20pp at S6E2's 43e-6) and smallest at the largest
+(+1.30pp at S6E5's 124e-6) — the opposite of the intuition that a big shake makes small edges
+matter more.
+
+⚠ **ALL OF THAT PRICES ONLY THE *MISSING* CLICK.** Clicking the WRONG pair costs up to
 **+81.92e-6, ~18x more** (see below) — closing THAT is what the one minute actually buys.
 
 ⚠ Do not "improve" on this list by picking the higher public scores. That is the failure.
@@ -62,6 +83,19 @@ far larger error than not clicking at all — priced on w74a's own estimator
 | nothing at all (Kaggle auto-selects on public) | **+4.52e-6** |
 | `w21_ad187corr` + `w20_ad187_h3` | **+35.17e-6** — 7.8x worse |
 | `w16i_schemeavg` + `blend159av_h3` | **+81.92e-6** — 18.1x worse |
+
+🔴 **THE SAME ORDERING SURVIVES THE CHANGE OF UNIT, AND THE MIS-CLICK IS STILL THE HAZARD**
+(w133, same file, control C7). Against the status quo of not clicking at all, in P(bronze):
+
+| what you click | dP(bronze) at sd 43e-6 / 67e-6 / 124e-6 | vs the click |
+|---|---|---|
+| the two rows in the table above | **+3.20 / +2.42 / +1.30 pp** | — |
+| `w21_ad187corr` + `w20_ad187_h3` | **−26.86 / −17.47 / −9.26 pp** | 8.4x / 7.2x / 7.1x |
+| `w16i_schemeavg` + `blend159av_h3` | **−61.92 / −44.06 / −24.69 pp** | 19.4x / 18.2x / 19.0x |
+
+Those ratios reproduce the AUC ratios (7.8x, 18.1x) without being told to. With no shake at
+all the first wrong pair alone lands us at **rank 347 against a 345 cut** — it loses the medal
+outright. **A wrong tick is far worse than no tick.**
 
 Those two wrong pairs are not hypothetical: until this run `check_selection.py` printed the
 first inside a green-tick "✅ RESOLVED. WANTED HAS MOVED" box and annotated the second as

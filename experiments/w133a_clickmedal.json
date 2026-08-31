@@ -1,0 +1,61 @@
+{
+ "board": "playground-series-s6e8-publicleaderboard-2026-08-31T13:14:16.csv",
+ "stamp": "2026-08-31 13:14:16",
+ "teams": 3459,
+ "our_rank": 307,
+ "our_score": 0.97119,
+ "cuts": {
+  "gold": 14,
+  "silver": 172,
+  "bronze": 345
+ },
+ "arms_e6": {
+  "click WANTED": 4.5228,
+  "no click (status quo)": 0.0,
+  "mis-click A": -30.6472,
+  "mis-click B": -77.3972
+ },
+ "sd0_ranks": {
+  "click WANTED": 307,
+  "no click (status quo)": 307,
+  "mis-click A": 347,
+  "mis-click B": 423
+ },
+ "p_bronze": {
+  "S6E2|click WANTED": 0.77505,
+  "S6E2|no click (status quo)": 0.74305,
+  "S6E2|mis-click A": 0.4745,
+  "S6E2|mis-click B": 0.1238,
+  "S6E2|silver_statusquo": 0.0327,
+  "S6E2|gold_statusquo": 0.0,
+  "S6E3|click WANTED": 0.7114,
+  "S6E3|no click (status quo)": 0.68725,
+  "S6E3|mis-click A": 0.51255,
+  "S6E3|mis-click B": 0.2466,
+  "S6E3|silver_statusquo": 0.1164,
+  "S6E3|gold_statusquo": 0.0002,
+  "S6E5|click WANTED": 0.67755,
+  "S6E5|no click (status quo)": 0.66455,
+  "S6E5|mis-click A": 0.572,
+  "S6E5|mis-click B": 0.41765,
+  "S6E5|silver_statusquo": 0.22895,
+  "S6E5|gold_statusquo": 0.00545
+ },
+ "click_dp_pp": [
+  3.2,
+  2.415,
+  1.3
+ ],
+ "misclickA_dp_pp": [
+  -26.855,
+  -17.47,
+  -9.255
+ ],
+ "misclickB_dp_pp": [
+  -61.925,
+  -44.065,
+  -24.69
+ ],
+ "reps": 20000,
+ "failures": []
+}
