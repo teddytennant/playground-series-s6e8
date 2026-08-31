@@ -37749,3 +37749,131 @@ stem, with CVs attached — precisely the shape of edit `w114b_selectguard` and
 `w115a_docselectguard` exist to catch — and both read it correctly: *"every printed literal names
 only WANTED or an ALLOWED stem"* and *"no human-read doc names a non-WANTED selectable file as
 the pick"*. `w107a_lineref` is green: nothing in this run's prose cites a fact by line number.
+
+---
+
+# w139 — 2026-08-31, slot 8 of 10 · ANGLE: foundation · **0 SLOTS, NOTHING SENT.**
+# 🔴 THE CHECK THAT WOULD HAVE CAUGHT YESTERDAY'S TRUNCATION BUG WAS PRINTED IN RESEARCH.md
+# ON 08-15 AND NEVER SUBTRACTED FROM ANYTHING.
+
+## 0. STATE, MEASURED NOT ASSUMED
+
+`date -u`: **2026-08-31 15:42Z. Close is 23:59Z tonight, so the competition is STILL OPEN and
+`w135b_grade.py` STAYS SEALED.** It was not run.
+
+🎯 **AND FOR THE FIRST TIME THE "NO SLOTS" CLAIM WAS READ OFF THE COUNTER INSTEAD OF COUNTED.**
+Every run since 08-15 has established the day is spent by counting rows in the submission list —
+the same instrument that was wrong on 08-17 (prompt said 10 used, true count 0) and wrong again
+on 08-31 (w138: a page size read as a total). `get_submission_limits`, live at 15:44Z:
+
+    num_total 201 · num_today 10 · num_allowed_now 0 · limited_by_total False
+
+✅ **`num_allowed_now = 0`. The claim HOLDS.** 0 of 10 slots, UTC rolls after the close, no slot
+will exist again. ⚠ **I expected to overturn it and did not, and that is a result, not a wasted
+probe** — w137's lesson is that a claim which closes work down never produces a contradiction to
+itself, so it has to be attacked deliberately. Two runs have now attacked one and both held.
+`check_selection.py`, **true rc=1 from a redirected run** (never `$?` after a pipe):
+***NOTHING IS SELECTED.***
+
+The handed angle is ANGLE INDEX **row 8** (foundation: confirm the metric, build the fixed-fold
+CV harness, score one honest GBDT baseline). ⛔ **NOT RE-OPENED, and the index itself says why:**
+the row is `closed`, its price is **`0` as a REPEAT** against the baseline *the foundation already
+exists* — the metric is a table row, the folds have been frozen since w38 and are checked by #33
+against four public packs, the GBDT baselines are on disk — and w130 measured all three of its
+arms at the artefact level (`w130a_row8.py`, FAILURES 0). Resolved by grep, per the index's own
+instruction, and the run spent on something live.
+
+## 1. 🔴 THE DEFECT — AN ORACLE NOBODY SUBTRACTED
+
+w138 fixed the truncated submission list by following `next_page_token`. The fix is right. What
+was missing *after* it is any way to **know** a read is complete without already knowing the
+answer: a full page and a truncated page are byte-identical from inside the read. The tell has to
+come from outside, and it was already on the page — the `get_submission_limits` block in
+RESEARCH.md has carried **`num_total`** since **08-15**, where it read `39`.
+
+🎯 **One comparison — list length vs `num_total` — is a complete check on the read, and it would
+have fired on 08-17 AND on 08-31, on any day, for the cost of one RPC.** Sixteen days of runs had
+both numbers available and never put them next to each other.
+
+## 2. ✅ THE INSTRUMENT — `w139a_completeness.py`, 3 GATES, FAILURES 0
+
+| gate | check | result |
+|---|---|---|
+| **A** | paginated read length == `num_total` | **201 == 201**, 2 pages, 201 unique refs ✅ |
+| **B** | the pre-w138 single-page read is CAUGHT by gate A | **200 != 201 → CAUGHT** ✅ |
+| **C** | rows dated today == `num_today` | **10 == 10** ✅ |
+
+**Gate B is the one that makes it an instrument.** It re-runs the exact code w138 replaced
+(`page_size=200`, token ignored), gets 200 rows with `next_page_token` **present**, and requires
+the invariant to detect the shortfall. It then names the hidden row independently: **ref 55407329,
+`stack_pub74_logit.csv`, public 0.97081** — the same file w138 identified by hand, reproduced
+here by the guard rather than quoted from the entry.
+
+⛔ **DO NOT WRITE THAT w139 FOUND THE PAGINATION BUG.** w138 found it and fixed it.
+⛔ **DO NOT CALL `num_total` A SECOND OPINION ON THE LIST'S CONTENT.** It bounds the row *count*
+only and says nothing about whether the rows are the right ones — gate A would pass on 201 wrong
+rows.
+
+## 3. ✅ THE PICK IS UNCHANGED AND THE HANDOVER WAS RE-READ, NOT RE-QUOTED
+
+`check_selection.py` live: both refs resolve to the WANTED filenames, both public scores read off
+the same listing, and the auto-pair is still **DETERMINED** by a 2-file tie at the top public
+score, so **the click still changes the outcome**. Both WANTED files print `UNREACHABLE without
+the click (P=0.000)`. ⛔ **WANTED WAS NOT MOVED** — no slot exists to test a change, and verifying
+a pick is not licence to re-optimise one. Nothing in §1–2 touches the selection: `num_total` was
+already 201 in w138's corrected read, so **no conclusion moves** and this entry does not claim one
+does.
+
+## 4. NEXT RUN
+
+1. **`date -u` FIRST.** Past 2026-08-31 23:59Z the competition is **over**: run
+   **`.venv/bin/python experiments/w135b_grade.py` BEFORE reading the board any other way**, and
+   write its four verdicts in verbatim, failures included.
+2. ⛔ **DO NOT REBUILD A QUEUE, TRAIN ANYTHING, OR REGISTER A GUARD.** `num_allowed_now = 0` is
+   now sourced from the counter, not inferred — there is no slot and no future run to protect.
+3. ⛔ **DO-NOT, carried forward from w92–w138 in full and added to:**
+   • 🆕 **DO NOT ESTABLISH "THE DAY IS SPENT" BY COUNTING ROWS.** `get_submission_limits` is free
+     and authoritative: `num_allowed_now`. The row count is the instrument that was wrong twice.
+   • 🆕 **DO NOT CREDIT w139 WITH THE PAGINATION BUG** (§2). That is w138's.
+   • 🆕 **DO NOT READ GATE A AS A CHECK ON CONTENT.** It bounds the count only.
+4. ⚠ **THE LESSON.** w137 tested an impossibility claim about this machine; w138 found a page
+   size wearing a total's clothes; this run went looking for a third such number and found the
+   **antidote to w138's bug printed three lines under the endpoint that caused it**, in a
+   RESEARCH.md block written on 08-15 that every later run read past.
+   🎯 **A fact in your notes is not a check. The gap that survives longest is not a missing
+   measurement — it is two numbers on the same page that nobody ever subtracted. When a defect
+   gets fixed, ask what would have caught it WITHOUT the discovery; if the answer is "nothing",
+   the same bug is scheduled to come back under a different constant.**
+
+## 5. THE SUITE — **56/61 FIRST, THE EXTRA RED WAS MINE AND IT WAS PREDICTED** (appended after the launches)
+
+Document edits went in **before** both launches (w116 §6); the launch command was copied out of
+RESEARCH.md (`grep FULLPATH=`), not scrollback, and run in the **foreground** with `-u` (w138's
+tear-down trap). Stale `w93a_fail_*.log` files were deleted before each launch, so nothing below
+is an artefact of an earlier day.
+
+**First launch — 263s, 56/61.** Four reds are the calendar set RESEARCH.md predicts on the last
+day (`w54a_vetoexpiry` · `w85c_slotguard` · `w87a_registrarguard` · `w100a_complement`, all
+downstream of *"a live, unsent queue exists for some future day"*). All four logs were read before
+triage — `w54a`: *"Refusing"*; `w85c` G4: *"w54a rejects the LIVE queue (rc=1)"*, which is the
+**both-red** post-send pattern and not the hazardous *w85c red while w54a is green*. The fifth was
+mine:
+
+- 🔴 **`w117a_handcount`.** *"live row 8 (foundation): index claims x13, corpus has x14."* This
+  run's handed angle **is** row 8, so its hand count increments. Cell corrected to
+  `×14, from 08-14 → w121 08-29 → w130 08-30 → w139 08-31 · artefacts verified`, and the guard
+  re-run alone goes green (**FAILURES: 0**, true rc=0 from an unpiped run). 🎯 **The count came
+  from the guard, not from me** — the same shape as w135's row-6, w136's row-7, w137's row-9 and
+  w138's row-10, and exactly why the cell says *"count from `w117a_handcount`, not by hand"*.
+
+**Second launch — 262s, 57/61 green, reds exactly the four calendar ones.** ⛔ **This is the
+expected terminal state and 61/61 is unreachable from here** — clearing the four would mean
+rebuilding a queue that can never be sent. Do not chase it.
+
+✅ **THE FOUR DOC GUARDS ARE GREEN ON THIS RUN'S EDITS.** This entry and the RESEARCH.md section
+both name a **non-WANTED submitted file** (`stack_pub74_logit`, the row gate B recovers), which is
+precisely the shape `w114b_selectguard` and `w115a_docselectguard` exist to catch, and both read
+it correctly: *"every printed literal names only WANTED or an ALLOWED stem"* and *"no human-read
+doc names a non-WANTED selectable file as the pick"*. `w101a_angleguard` still resolves every
+ANGLE INDEX pointer after the row 8 edit, and `w107a_lineref` is green: nothing in this run's
+prose cites a fact by line number.
