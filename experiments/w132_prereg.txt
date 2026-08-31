@@ -1,0 +1,51 @@
+w132 PRE-REGISTRATION — 2026-08-31, slot 1 of 10, ANGLE: CatBoost (row 3, 16th handing)
+Written BEFORE any w132 number exists. Falsifiers included. Commit this before running w132a.
+
+WHAT IS BEING PRICED. Not CatBoost. Row 3's +10.04e-6/member is quoted verbatim in rows 1, 7
+and 9 as the CONTROL that certifies their instruments:
+
+    "against the same-process base104 CatBoost control at +10.04e-6/member that reproduced
+     w123 to +0.0000e-6"
+
+That sentence certifies REPRODUCIBILITY (gap 0.000e-6). It does not certify DISCRIMINATING
+POWER. The three cells then declare their own arms "sign-flipping / none distinguishable from
+zero" against that control. For that comparison to mean anything the control must itself be
+distinguishable from zero at the SAME SCOPE the arms are judged at — per member — and that
+number has never been published in any cell, any journal entry, or any of the four artefacts.
+
+R1  SCOPE OF THE STORED sd. In w123a_row3.json and w127a_row7.json the key `sd` sits in the
+    same dict as `per_member` and is at GROUP scope: sd is NOT divided by n. Prediction:
+    w123a `+cat_only` sd/per_member = 1.5688e-5 / 1.0042e-5 = 1.5624, which is NOT a t-statistic
+    and IS 15.624/10 — i.e. sd_group / (delta_group/n) = n * (sd_group/delta_group). Concretely
+    sd_group / delta_group = 0.19529 and n = 8, so the ratio is 8 * 0.19529.
+    FALSIFIER: if sd/delta at group scope differs from sd/per_member divided by n for any arm
+    in either file, the stored sd is not at group scope and this whole framing is wrong.
+
+R2  THE NUMBER NOBODY HAS PUBLISHED. CatBoost control, per-member sd = sd_group / n =
+    1.5688e-5 / 8. Prediction: 1.96e-6 (+/- 0.02e-6), and t = per_member / per_member_sd = 5.12
+    (+/- 0.05). FALSIFIER: |t| < 3.0 — the control would not be distinguishable from zero at
+    the scope it is quoted in, and rows 1/7/9's "indistinguishable" verdicts would lose their
+    yardstick.
+
+R3  t IS SCALE-INVARIANT, SO NO PUBLISHED VERDICT MOVES. delta/sd at group scope equals
+    per_member/(sd/n) exactly, for every arm in w123a/w124a/w127a/w128a/w131a.
+    Prediction: max |t_group - t_member| over all arms < 1e-9. FALSIFIER: any arm where the
+    two differ. If R3 falsifies, this is a VALUE finding and the closures must be re-opened;
+    if R3 holds, it is a REPORTING finding and NOTHING re-opens. I predict it holds.
+
+R4  THE YARDSTICK ACTUALLY DISCRIMINATES. On one t-scale, at member scope: the control's |t|
+    exceeds every certified-null arm's |t| in rows 1, 7 and 9. Prediction: control |t| > 3 and
+    every certified-null arm |t| < 2. FALSIFIER: any certified-null arm with |t| >= 3, or
+    control |t| below any arm's.
+
+R5  THE COLUMN AUDIT. Every price cell in the ANGLE INDEX that prints BOTH an e-6 magnitude and
+    an uncertainty (`±`, `sd`, `+/-`) must name the scope of the uncertainty. Prediction: row 3
+    passes (it says "on the group delta"), and the audit finds at least one site that does not
+    — otherwise #61 is registered on a defect that does not exist and I will say so and not
+    register it. FALSIFIER: zero unlabelled sites anywhere in RESEARCH.md's price column, the
+    w124 family table, and the four run artefacts' JSON keys.
+
+WHAT DOES NOT HAPPEN HERE. No CatBoost member is built (+10.04e-6/member is under the 50e-6
+floor and is a DO-NOT). No GBDT hyperparameter is swept. No submission — the day's ten landed
+12:36-12:37Z. The modelling question stays closed; this measures a number the price column
+uses as an instrument, not a manoeuvre.
