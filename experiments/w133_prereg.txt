@@ -1,0 +1,66 @@
+w133 PRE-REGISTRATION — 2026-08-31, slot 2 of 10, ANGLE AS ASSIGNED: "XGBoost: third leg of the
+ensemble, tuned on the same folds so the blend weights mean something."
+Written BEFORE any w133 number exists. Falsifiers included. Commit this before running w133a.
+
+THE ANGLE IS VOID AND THIS IS THE REASON, STATED ONCE. Two independent blocks, either alone
+sufficient:
+  (a) NO SLOT. `w26g_send.py --n 10` at 13:16Z: "10 already sent on 2026-08-31 (UTC); 0 of 10
+      slots left today". The competition closes 23:59 UTC tonight, so the counter never rolls
+      over. Anything built after this line is unsendable by construction.
+  (b) THE MODELLING QUESTION IS CLOSED (w112 §8.4), and XGBoost specifically is a standing
+      DO-NOT: an ordinary XGBoost member measures +7.38e-6 against a 50e-6 enrolment floor.
+Building an XGBoost leg today would produce a file that cannot be sent, from a family already
+priced below the floor. It is not built. This slot measures instead.
+
+WHAT IS BEING PRICED. The only quantity left that can still change tonight is WHICH TWO FILES
+ARE SELECTED, and that is a human click. The click has been priced in AUC for eleven runs
+(+4.5228e-6 at tau=0, w74a) and in board places for four (~0.95 teams per 1e-6 -> ~4 places,
+w113a). It has NEVER been priced in the unit the competition actually pays: P(the account
+finishes inside the bronze cut). A gain of 4 places against a 41-place margin is either
+decisive or a rounding error depending entirely on the width of the public->private shake, and
+no run has put those two numbers in the same expression.
+
+Two further facts make this the right slot for it. First, `w83a_reproject.py`'s empirical-band
+instrument was last run at rank 139 of 2,874 (top 4.84%); we are now at 307 of 3,459 (top
+8.88%) and instrument B's whole method is BAND-CONDITIONAL, so every number it published is
+about a band we no longer stand in. Second, w83's headline finding was that the two instruments
+DISAGREE (A optimistic at 89-100%, B spanning 17-98% with three wipeout boards). Whether that
+disagreement survives the move is not knowable without running it.
+
+R1  THE BAND MOVED, SO INSTRUMENT B'S PUBLISHED SPREAD IS STALE. Re-run at the live band
+    (6.88-10.88%), the per-episode P(<=10%) column will NOT reproduce w83's 17.2-97.6% range.
+    Prediction: the live range is strictly narrower and its MINIMUM is above 50%, i.e. no
+    episode in the live band is a wipeout. FALSIFIER: any episode with P(<=10%) < 50%, or a
+    live range wider than w83's.
+
+R2  THE TWO INSTRUMENTS NOW AGREE. w83's disagreement was A 89-100% vs B 17-98%: disjoint at
+    the bottom. Prediction: at the live band the two ranges OVERLAP, and specifically A's
+    P(top 10%) span and B's AUC-episode P(<=10%) span intersect. FALSIFIER: disjoint spans.
+    If R2 falsifies, the honest close-out is "we do not know", and I will write that.
+
+R3  THE CLICK IS NOT THE BINDING QUANTITY. Priced as a PAIRED delta inside the matched null
+    (same noise draw both arms; the click adds +4.5228e-6 to our row only), the change in
+    P(inside the bronze cut) is small against the instrument spread.
+    Prediction: |dP(bronze)| for the click < 1.0 percentage point at every one of the three
+    shift sds, against an A-vs-B disagreement of at least 5 points.
+    FALSIFIER: dP >= 1.0pp at any sd. If R3 falsifies, the click is worth escalating far
+    harder than eleven runs of prose have, and I will say so at the top of the entry.
+
+R4  THE MIS-CLICK REMAINS THE BIGGER HAZARD IN THE MEDAL UNIT TOO, NOT ONLY IN AUC. The two
+    priced wrong pairs cost -35.17e-6 and -81.92e-6 (w114a). Prediction: |dP(bronze)| for each
+    mis-click EXCEEDS the click's own |dP| at every sd, preserving the 7.8x / 18.1x ordering
+    that holds in AUC. FALSIFIER: any sd at which a mis-click's |dP| is smaller than the
+    click's.
+
+R5  PAIRED ARITHMETIC IS ACTUALLY PAIRED. At delta = 0 the two arms must be identical on every
+    rep, not merely equal in mean; and exactly one row of the board may differ between arms.
+    Prediction: max over reps |rank_arm1 - rank_arm0| = 0 at delta = 0, and the count of rows
+    whose score differs between arms is exactly 1 at every non-zero delta.
+    FALSIFIER: either check non-zero. This is a construction control, not a result.
+
+WHAT DOES NOT HAPPEN HERE. No submission (0 slots). No model of any kind is trained. WANTED
+does not move and no CV number is re-ranked -- R3/R4 price a decision that is already made, in
+a second unit, and a small dP is a REPORTING result, not a licence to re-open the pick. The
+board is downloaded ONCE (lb_w133, stamped 2026-08-31T13:14:16) because instrument B needs the
+file and w132 read the board through the API without persisting one; w120 §7's once-a-day rule
+is about re-deriving a rank, and this is the day's single download.
