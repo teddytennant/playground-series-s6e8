@@ -1,9 +1,9 @@
 {
-  "live_rows": 191,
+  "live_rows": 200,
   "sent_today": 10,
-  "slots_left": 10,
-  "projected_final": 201,
-  "bar": 241,
+  "slots_left": 0,
+  "projected_final": 200,
+  "bar": 240,
   "call_sites": 50,
   "under_bar": 0,
   "g4_missing": [],

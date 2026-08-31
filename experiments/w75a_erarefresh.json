@@ -1,7 +1,7 @@
 {
- "n_sent_stems": 191,
- "n_with_oof": 166,
- "n_without_oof": 25,
+ "n_sent_stems": 200,
+ "n_with_oof": 165,
+ "n_without_oof": 35,
  "nocv_stems": [
   "w15e_antistudent",
   "w15f_antistudent_avg",
@@ -19,15 +19,25 @@
   "w85_cal_ad_gnn_note",
   "w85_cal_ad_logregte",
   "w85_cal_bolt_cat_unique",
+  "w85_cal_bolt_dcnv2_cross",
   "w85_cal_bolt_extratrees_support",
+  "w85_cal_bolt_fttransformer",
+  "w85_cal_bolt_gandalf_gflu",
   "w85_cal_bolt_lgb_raw_d4",
+  "w85_cal_bolt_neural_5fold",
   "w85_cal_bolt_tabm_missing",
+  "w85_cal_bolt_tabm_rank1",
+  "w85_cal_bolt_tabr_retrieval",
   "w85_cal_golem_b",
+  "w85_cal_golem_c",
   "w85_cal_golem_g",
   "w85_cal_lat_encdrop_r400",
   "w85_cal_lat_tedrop_r400",
   "w85_cal_mkt_mlp",
-  "w85_cal_mkt_nn"
+  "w85_cal_mkt_nn",
+  "w85_cal_poly2_raw",
+  "w85_cal_qda_lat",
+  "w85_cal_rff_raw"
  ],
  "nocv_lb_max": 0.97107,
  "raw_argmax": "w36_ad199stdcorr",
@@ -68,7 +78,7 @@
   }
  ],
  "kill_era_lb6": -40.35,
- "spearman_cv_lb_all": 0.8147728496727047,
+ "spearman_cv_lb_all": 0.8113714490907356,
  "spearman_cv_lb_97": 0.8100922912048412,
  "failures": 0
 }

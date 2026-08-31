@@ -75,7 +75,7 @@ blend153_logit,0.9699540296194336,,1119,218e2f648353,"range [-8.538, 16.95]",0.9
 blend150fx_logit,0.9699498370519284,0.97103,1112,d4c678ce6450,"range [-8.486, 17.02]",0.97103,logit,True
 stack_pub86_hybrid,0.9696778003750686,0.9708,0,e8f4ab66691d,,0.9708,hybrid,True
 stack_pub88_mine_logit,0.9696599465172034,0.97081,0,8aecc58dde9b,,0.97081,logit,True
-stack_pub74_logit,0.969641351563196,0.97081,0,09a02db8b0e3,,0.97081,logit,True
+stack_pub74_logit,0.969641351563196,0.97081,0,09a02db8b0e3,,,logit,False
 w15e_antistudent,,0.97104,0,19f7f9fc4d5d,,0.97104,ens4,True
 w15f_antistudent_avg,,0.97107,0,cc2fdec4b011,,0.97107,ens4,True
 w15f_antistudent_cv,,,0,235add14266d,,0.97106,ens4,True

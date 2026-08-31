@@ -1,30 +1,20 @@
 {
  "bar": 0.970134905249569,
  "buckets": {
-  "COMPLEMENT": [],
+  "COMPLEMENT": [
+   "stack_pub74_logit",
+   "w85_cal_gmm_raw",
+   "w85_cal_gnb_raw",
+   "w85_cal_qda_raw"
+  ],
   "dup-of-sent": [
    "w16m_widegrid",
    "w23_ad187std_hybrid",
    "w23_ad187std_rankraw",
    "w23_ad187std_rescale"
   ],
-  "headroom": [
-   "w85_cal_gmm_raw",
-   "w85_cal_gnb_raw",
-   "w85_cal_qda_raw"
-  ],
-  "planned": [
-   "w85_cal_bolt_dcnv2_cross",
-   "w85_cal_bolt_fttransformer",
-   "w85_cal_bolt_gandalf_gflu",
-   "w85_cal_bolt_neural_5fold",
-   "w85_cal_bolt_tabm_rank1",
-   "w85_cal_bolt_tabr_retrieval",
-   "w85_cal_golem_c",
-   "w85_cal_poly2_raw",
-   "w85_cal_qda_lat",
-   "w85_cal_rff_raw"
-  ],
+  "headroom": [],
+  "planned": [],
   "refused": [
    "w34_ad196std_logit",
    "w69_ad208std_logit",
@@ -56,24 +46,39 @@
   ],
   "wrong-rows": []
  },
- "control_veto_removed_complement": 4,
- "day": "2026-08-30",
+ "control_veto_removed_complement": 8,
+ "day": "2026-08-31",
  "days_open": [
-  "2026-08-30",
   "2026-08-31"
  ],
- "failures": 0,
- "n_api": 191,
+ "failures": 5,
+ "n_api": 200,
  "n_disk": 231,
- "n_unsent": 40,
+ "n_unsent": 31,
  "n_veto": 19,
  "sender_reasons": {
+  "stack_pub74_logit": [
+   null,
+   null
+  ],
   "w48_cal_hboyang_mix": [
    "fam=member \u2014 a raw member's OOF AUC is not a cross-fitted stack CV (w53), so it cannot be compared against the pick at all",
    0.9999653736842734
+  ],
+  "w85_cal_gmm_raw": [
+   "fam=member \u2014 a raw member's OOF AUC is not a cross-fitted stack CV (w53), so it cannot be compared against the pick at all",
+   0.0
+  ],
+  "w85_cal_gnb_raw": [
+   "fam=member \u2014 a raw member's OOF AUC is not a cross-fitted stack CV (w53), so it cannot be compared against the pick at all",
+   0.0
+  ],
+  "w85_cal_qda_raw": [
+   "fam=member \u2014 a raw member's OOF AUC is not a cross-fitted stack CV (w53), so it cannot be compared against the pick at all",
+   0.0
   ]
  },
- "sent_column_disagreements": 0,
+ "sent_column_disagreements": 10,
  "sent_column_true_rows": 0,
  "tier": 0.97119,
  "veto_only": [

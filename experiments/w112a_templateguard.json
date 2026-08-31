@@ -4,10 +4,10 @@
   "heads": {
     "w26g queue-drain": 74,
     "w37 es-bias": 0,
-    "w55 tail-fill": 16
+    "w55 tail-fill": 26
   },
-  "n_automated": 90,
-  "n_submissions": 191,
+  "n_automated": 100,
+  "n_submissions": 200,
   "probe_marks": [
     "not an attempt on the board",
     "a MEASUREMENT, not a candidate"

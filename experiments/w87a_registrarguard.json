@@ -1,9 +1,9 @@
 {
- "day": "2026-08-30",
- "live_rows": 191,
- "slots": 10,
- "registered": 10,
- "plannable": 13,
+ "day": "2026-08-31",
+ "live_rows": 200,
+ "slots": 0,
+ "registered": 0,
+ "plannable": 3,
  "headroom": 3,
  "headroom_stems": [
   "w85_cal_gmm_raw",
@@ -12,8 +12,8 @@
  ],
  "tier": 0.97119,
  "bar": 0.970134905249569,
- "days": [
-  "2026-08-31"
- ],
- "failures": []
+ "days": [],
+ "failures": [
+  "C4: member certification is LOAD-BEARING: blind to it the pool holds 0 file(s) for 0 slot(s); reading it, 3 unregistered + 0 already registered"
+ ]
 }
