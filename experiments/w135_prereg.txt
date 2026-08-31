@@ -1,0 +1,94 @@
+w135 PRE-REGISTRATION — 2026-08-31, slot 4 of 10, ANGLE AS ASSIGNED: "Blending: rank-average or
+weight the tuned models by out-of-fold performance. Search blend weights on OOF predictions,
+never on the public leaderboard."
+Written BEFORE any w135 number exists, and BEFORE the private leaderboard exists at all.
+Falsifiers included. Commit this before running w135a.
+
+THE ANGLE IS VOID, TWICE OVER, AND THIS IS THE REASON STATED ONCE.
+  (a) NO SLOT, AND NO FUTURE ONE. `w26g_send.py --n 10` at 13:47Z: "200 submissions on record;
+      10 already sent on 2026-08-31 (UTC); 0 of 10 slots left today". The close is 23:59 UTC
+      tonight, so the counter never rolls over and there is no eleventh slot ever. Anything
+      built after this line is unsendable by construction.
+  (b) THE BLEND ROW IS CLOSED AND HAS BEEN RE-VERIFIED END TO END. The handed angle resolves to
+      the price table's row 6, closed since w63 (2026-08-23), verified at the artefact level by
+      w108, and re-derived from the OOF arrays by w126 with `fit_w` copied verbatim from
+      `w36d_wsearch.py` — all eight published cells reproducing to 1e-9. The incumbent IS an
+      OOF-fitted weighted blend: 104+ member weights fitted inside the frozen SKF5 folds by
+      `agent/stack.py`. Re-running the search would reproduce w126 and buy nothing.
+
+WHAT THIS SLOT MEASURES INSTEAD, AND WHY IT IS THE RIGHT THING.
+There is exactly ONE observation left in this competition: the private leaderboard, which
+appears once, tonight, and never changes. Every forecast this workspace has published about it
+— w83's two instruments, w133's 66.9-90.3% — was written before it existed, and NOTHING has
+been registered about how those forecasts get GRADED. A run that reads the private board and
+then decides what it had predicted is worthless; that is the Rogii failure wearing a different
+hat. So this slot registers the forecast, mechanically, in advance.
+
+And it measures the one quantity that decides whether tonight's observation can grade anything
+at all. The click's price, +4.5228e-6, is a difference of PAIR MAXIMA computed on a single OOF
+realisation: Kaggle scores a selection as max(private of the two selected files), so the WANTED
+arm is max(w36_ad199stdcorr, w23_ad187stdcorr) and the AUTO arm is
+max(w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4). Every paired-noise measurement this workspace
+holds is SINGLE-FILE and at the 20% PUBLIC scale (`cvlb2.py`: paired sd 8e-6 at 20% for a 7e-6
+gap, P(flip) 20%). Nobody has put max-of-pair and the 80% PRIVATE scale into the same estimator.
+`max` of two noisy files is biased upward, the two pairs are not equally spread, and the bias
+does not cancel between arms.
+
+--------------------------------------------------------------------------------------------
+M — PREDICTIONS ABOUT THE MEASUREMENT (`w135a_clickpower.py`, paired bootstrap on the four
+    `oof_*.npy` arrays, 691,369 rows each, resampled to private scale)
+
+M1  THE NOISE EXCEEDS THE EDGE. The paired sd of the private-scale delta
+    max(WANTED) - max(AUTO) will EXCEED the +4.5228e-6 point estimate it is noise on.
+    Reasoning: 8e-6 at 20% scales to ~4e-6 at 80%, and max-of-pair adds spread on top.
+    FALSIFIER: sd <= 4.5228e-6 at the 80% private scale.
+
+M2  ONE DRAW IS A WEAK BIT, NOT A VERDICT. P(delta > 0) on a single private draw lands
+    strictly inside 55%-85%.
+    FALSIFIER: P(delta > 0) outside [55%, 85%].
+
+M3  THE POINT ESTIMATE IS NOT THE EXPECTED REALISATION. Because max-of-two is biased upward
+    and the two pairs have unequal internal spread, the bootstrap MEAN of the delta will
+    differ from the OOF point estimate +4.5228e-6 by MORE than 0.5e-6.
+    FALSIFIER: |bootstrap mean - 4.5228e-6| <= 0.5e-6. If M3 falsifies, the bias cancels
+    between the arms and the point estimate is the honest expectation; I will say so.
+
+--------------------------------------------------------------------------------------------
+P — PREDICTIONS ABOUT THE PRIVATE LEADERBOARD, graded by the post-close run against
+    `w135b_grade.py`, which reads the board and grades these mechanically.
+
+    Live inputs, downloaded 13:44:56Z, not quoted from a journal entry:
+    rank 309 of 3,463 teams, score 0.97119, top-decile line 346, margin +37, leader 0.97207,
+    7 teams tied at exactly 0.97119, 175 teams inside 1e-4 above us.
+
+P1  NOBODY CLICKS. Thirty-three runs have asked for the final-selection click and it has not
+    happened; the base rate is 0/33 and this run cannot change it from inside the machine.
+    Prediction: at close, nothing is selected and Kaggle auto-selects
+    w36_ad199stdcorr_ens4 + w38_ad202stdcorr_ens4 on public score.
+    FALSIFIER: the submissions API shows a selected pair, or the account's final private score
+    equals max(private of the two WANTED files) and not max(private of the two AUTO files).
+    NOTE: this is the one prediction I want to be WRONG about, and saying so does not soften
+    the falsifier.
+
+P2  INSIDE THE TOP DECILE. The account finishes at or above the top-10% line of the private
+    board. All three shift-sd assumptions put this at 66.2-73.3%, so it is the point call and
+    it is NOT a confident one.
+    FALSIFIER: final private rank > floor(0.10 * n_teams_private).
+
+P3  THE RANK INTERVAL. Simulated at the live board with a common-shift matched null,
+    20,000 reps per sd: median 313 / 303 / 285 and 90% central intervals [194,398] /
+    [122,426] / [62,485] at sd 43 / 67 / 124e-6. Registered prediction, the middle sd:
+    final private rank inside [122, 426].
+    FALSIFIER: final private rank outside [122, 426]. Scored also against the union [62, 485].
+
+P4  THE ONE OBSERVATION CANNOT GRADE THE SELECTION THESIS. Whatever the realised sign of
+    (WANTED private max - AUTO private max), it is one draw from a distribution whose sd M1
+    predicts is larger than its mean. The post-close run MUST NOT read either sign as
+    vindication or refutation of CV-based selection, and MUST NOT rewrite the pick's rationale
+    to match the outcome.
+    FALSIFIER OF THE POWER CLAIM ITSELF: M2 returns P(delta > 0) >= 95%, in which case one
+    observation IS informative and P4 is withdrawn.
+
+--------------------------------------------------------------------------------------------
+WHAT WOULD MAKE THIS SLOT A FAILURE: grading any P against a board I have already seen, or
+quietly widening an interval after the fact. The intervals above are frozen at commit.
