@@ -38198,3 +38198,166 @@ difference is the one the remedy disabled. Six days of green over `PAGE = 500` w
 evidence the corpus was safe; they were evidence the corpus could not tell. **When a guard has
 never fired, that is not a clean bill of health until you have made it fire on purpose** — and
 the cheapest way is to ask where the quantity it measures runs out.
+
+---
+
+# (w141, 2026-08-31, SLOT 10/10, ANGLE "LightGBM: tune it properly") — 🔴 NO SLOT EXISTS.
+# THE ONE ARTEFACT THAT STILL HAD TO WORK WAS THE POST-CLOSE GRADER, AND IT COULD NOT LOG IN.
+
+## 0. ⛔ BLOCKED ON SUBMISSION, AND THE BLOCK IS NOW SOURCED TWICE
+
+`date -u` → **2026-08-31 16:53Z**. Close is 23:59Z, so this is pre-close and
+**`w135b_grade.py` WAS NOT USED TO GRADE ANYTHING.**
+
+    num_total 201 · num_today 10 · num_allowed_now 0 · limited_by_total False   (w139a, live, 16:53Z)
+
+🆕 **AND THE DEADLINE ITSELF IS NO LONGER QUOTED FROM THE PROMPT.** Sixteen runs took
+*"deadline 2026-08-31 23:59"* on faith. Read live off the competition object this run:
+**`deadline = 2026-08-31 23:59`**, `max_daily_submissions = 10`, `submissions_disabled = False`,
+`evaluation_metric = 'Roc Auc Score'`, `team_count = 3489`, `user_rank = 312`. The blocking
+claim holds and now has a server-side source. ⚠ **UTC rolls at 00:00Z, one minute AFTER the
+close**, so no slot will ever exist again.
+
+⛔ **THE ANGLE WAS NOT ACTIONABLE AND I DID NOT FAKE IT.** Tuning LightGBM against the fixed
+folds needs a slot to be worth anything; there is none, and there is no future day to spend one
+on. No model was trained, no queue was rebuilt, no guard was registered — per w140 §5.2.
+
+## 1. 🔴 WHAT I WENT LOOKING FOR, AND WHY IT WAS THE RIGHT PLACE
+
+w140 asked *"which artefact's mistakes can no future run catch?"*, found the grader, and tested
+it hard: `w140a` (10 gates, parse path) and `w140b` (7 scenarios, four verdicts, all three
+branches of P1). Both green, both green again this run.
+
+🎯 **EVERY ONE OF THOSE TESTS SUPPLIED ITS OWN INPUTS.** `w140b` execs the grading body with
+the two I/O functions swapped for fixtures. So the grader's ability to **parse** a board was
+measured seven ways and its ability to **obtain** one was measured zero times — because every
+harness handed it one. That is the gap w141 went into.
+
+## 2. 🔴 THE GRADER AUTHENTICATES WITH A FROZEN TOKEN, AND THE REFRESH FIRES 30 MINUTES LATE
+
+`experiments/w141a_authaudit.py`, **9 gates, FAILURES 0.**
+
+- **T1/T1b/T1-ctl** — `KaggleClient(api_token=<string>)`, the construction all 10 workspace
+  scripts use, **has no refresh path at all**: `KaggleHttpClient` wraps the string in
+  `BearerAuth`, and the only token helper it can reach is `get_access_token_from_env` (an env
+  read). The control shows the CLI path *does* call `KaggleCredentials.load().get_access_token()`,
+  so the absence is a fact and not a loose grep. ⚠ **T1 FAILED ON ITS FIRST RUN AND THE FAULT
+  WAS MINE** — a bare `get_access_token` substring also matches `get_access_token_from_env`.
+  Fixed by stripping that name first. A gate that fails on its own looseness looks exactly like
+  a finding.
+- **T2 / T2-ctl** — a dead token through the grader's own construction →
+  **`HTTPError: 401 Unauthorized`** on `ListSubmissions`; the live token through the identical
+  construction → 1 row. The failure is the token, not the code.
+- **T3** — `access_token_has_expired()` is `expiration < now - 30min`. 🎯 **THE MARGIN IS BEHIND
+  `now` INSTEAD OF AHEAD OF IT**, so expiry is declared half an hour late. Probed across the
+  boundary both ways: now−40m → `True`, **now−10m → `False`**, now+10m → `False`.
+- **T5** — the live token died at **2026-09-01T04:00:49Z**, i.e. **+4.03h after the close.**
+
+## 3. ✅ SO IT IS A 30-MINUTE HOLE, NOT A CLIFF — REPRODUCED WITH A REAL DEAD TOKEN
+
+The grader authenticates **twice**: `private_board()` shells to the `kaggle` CLI (which
+refreshes), then `submissions()` reads the raw token off disk. Both read the same file, so the
+CLI's late refresh sets the actual failure window. `experiments/w141b_deadzone.py`, **7 gates,
+FAILURES 0** — and it does not argue, it mints a token that really dies (the server honours
+`expiration_duration` exactly: 60s → `expires_in=60`).
+
+    A     alive                        -> download OK
+    B     dead, expiry 15s ago         -> CLI does NOT refresh, download FAILS, file not rewritten
+    C     dead, expiry backdated 31min -> CLI DOES refresh, download SUCCEEDS, file rewritten
+
+🎯 **B AND C USE THE SAME DEAD TOKEN AND DIFFER ONLY IN A DATE STRING. THE OUTCOME FLIPS.**
+That is what makes the 30-minute rule the cause rather than a network coincidence.
+
+**The window, stated exactly:** a grading run before **2026-09-01T04:00:49Z** works; a run in
+**[04:00:49Z, 04:30:49Z]** dies with *"could not download a leaderboard. Nothing graded."*,
+exit 1; a run after 04:30:49Z works again because by then the CLI finally agrees the token is
+dead. ⚠ **AND THE ERROR NEVER SAYS "EXPIRED"** — the CLI prints its onboarding text,
+*"export KAGGLE_API_TOKEN=…"*, pointing the reader at a missing credential instead of a stale
+one.
+
+## 4. ✅ THE FIX, AND IT IS PROVED AGAINST THE REPRODUCTION
+
+`experiments/kaggle_token.py` — `ensure_fresh(margin_minutes=90)` compares the expiry itself
+against a margin **ahead** of now and refreshes via `refresh_access_token()` (regenerates and
+saves). It never prints the token. ⛔ **`get_access_token()` AND `access_token_has_expired()`
+ARE BANNED IN THIS WORKSPACE**; both carry the sign error.
+
+`w135b_grade.py` gains `preflight_token()`, called **before `private_board()`**. One call fixes
+both auth paths, because both read the same file. It is **never fatal** — a failed refresh warns
+and continues, since a still-valid token must not be blocked by a precaution that failed.
+
+`experiments/w141c_fixproof.py`, **6 gates, FAILURES 0.** Same dead token, same recorded expiry,
+same command, same temp HOME; the only variable is whether the preflight ran:
+
+    NOFIX  no preflight     -> download FAILS
+    PRE    preflight        -> action=refreshed, file rewritten
+    FIX    preflight first  -> download SUCCEEDS
+
+⛔ **A FIX THAT ONLY PASSES ITS OWN NEW TEST IS UNPROVEN.** It has to beat the reproduction that
+showed the defect, under conditions that did not move.
+
+⚠ **ALL REFRESH TESTING RAN IN A TEMP `HOME` + `KAGGLE_CONFIG_DIR`**, with a `LIVE` gate in both
+scripts asserting `~/.kaggle/credentials.json` was not written. `KAGGLE_CONFIG_DIR` is set on
+this box (to `/home/nixos/.kaggle`), so overriding `HOME` alone would **not** have been enough.
+Live credential backed up to `credentials.json.w141bak` first. ⚠ **Minting a token does NOT
+revoke tokens already issued** (T4-live) — that is what makes any of this safe.
+
+## 5. ✅ REGRESSION — THE FROZEN BLOCK IS UNTOUCHED AND EVERYTHING w140 BUILT STILL PASSES
+
+`git diff experiments/w135b_grade.py` → **32 insertions, 0 deletions.** Purely additive, so
+nothing frozen could have moved; `WANTED`, `AUTO`, `P3_INTERVAL` `(122,426)`,
+`P3_UNION_INTERVAL` `(62,485)`, `PUBLIC_AT_CLOSE` rank 309/3463 @ 0.97119 all still match
+`w135_prereg.txt`.
+
+    w140a_gradeaudit    FAILURES 0      w140b_gradedryrun   FAILURES 0, 7/7
+    w139a_completeness  FAILURES 0      check_selection     true rc=1 (nothing selected)
+
+**And the grader itself was executed live, pre-close, exactly as w140 did at 16:05Z.** It
+printed `token: kept, expires 2026-09-01T05:00:57Z (12.0h left)` — the preflight working in the
+real code path, not a harness — then **exited 1 at the board-identity gate**, all four evidence
+signals `no`, board file `…-publicleaderboard-2026-08-31T16:58:16.csv`. ✅ **IT REACHED NO
+PREDICTION AND GRADED NO P. THE SEAL HELD.**
+
+## 6. ⚠ THE BACKLOG, REPORTED NOT EXCUSED
+
+**9 other scripts still read the raw token** and were deliberately not rewired:
+`check_selection.py`, `kaggle_list.py`, `w139a`, `w140a`, `w140c`, `w136a`, `w134a`, `w48a`,
+`w48e`. The grader is the only one that fires after the close and cannot be re-run, and on the
+last day churn is its own risk (w140 caused four regressions with a smaller edit). Their
+exposure is bounded and dated: any run before the live token dies is fine.
+
+## 7. NEXT RUN
+
+1. **`date -u` FIRST.** Past 23:59Z, run **`.venv/bin/python experiments/w135b_grade.py`
+   BEFORE reading the board any other way**, and write its four verdicts in verbatim.
+   🆕 **Expect the first line to be `token: refreshed …` or `token: kept …`.** If it says
+   `⚠ token refresh FAILED`, the reads below it may 401 — that is §3, not a broken API.
+   🆕 **Expect P1 = UNGRADED**: the WANTED/AUTO gap is 4.5e-6 and the board prints 5 d.p.
+   (w140 §4 S3). A property of the instrument, not a result.
+   🆕 If it exits 1 saying the board does not look private, **read the four evidence lines**
+   before reaching for `--force-private`, and say so in the entry if you override it.
+2. ⛔ **DO NOT REBUILD A QUEUE, TRAIN ANYTHING, OR REGISTER A GUARD.** `num_allowed_now = 0`
+   and `deadline = 2026-08-31 23:59` are both server-sourced now.
+3. ⛔ **DO-NOT, carried forward from w92–w140 in full and added to:**
+   • 🆕 **DO NOT CALL `get_access_token()` OR `access_token_has_expired()`.** Both declare
+     expiry 30 minutes late (§2). Use `experiments/kaggle_token.py`.
+   • 🆕 **DO NOT READ A 401, OR A "set KAGGLE_API_TOKEN" MESSAGE, AS AN API CHANGE.** It is a
+     stale token (§3).
+   • 🆕 **DO NOT OVERRIDE `HOME` ALONE TO SANDBOX A CREDENTIAL TEST.** `KAGGLE_CONFIG_DIR` is
+     set on this box and must be overridden too (§4).
+   • 🆕 **DO NOT SAY w141 FIXED THE SDK.** The 30-minute sign error is still in
+     `kagglesdk/kaggle_creds.py:118`; this workspace routes around it.
+   • 🆕 **DO NOT CLAIM THE 9 REMAINING RAW-TOKEN SITES ARE SAFE** — they are *dated* (§6).
+4. 🔴 **THE CLICK IS STILL OUTSTANDING AND IT IS THE ONLY THING LEFT THAT CHANGES THE PRIVATE
+   SCORE.** `check_selection.py` true rc=1, nothing selected, auto-pair still DETERMINED at
+   0.97119 and **both auto files are absent from the CV table entirely**. Worth +4.5228e-6;
+   a mis-click costs 7.8x–18.1x that.
+
+🎯 **THE LESSON.** w140 found that a seal against premature *use* reads, from the inside,
+exactly like a seal against *testing*. It then tested the grader seven ways and every test
+handed the grader its inputs.
+🎯 **A test that constructs its own fixtures verifies the code and silently vouches for the
+environment it never touched. When you mock the input, you stop testing the door.** Thirty
+runs' worth of green said the grader could read a board; none of it said the grader could still
+be logged in when it asked for one. **The cheap way to find this class is to ask which resource
+the code needs that no test supplies — and then ask when that resource runs out.**

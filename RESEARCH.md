@@ -1,3 +1,120 @@
+# (w141, 2026-08-31) — 🔴 THE POST-CLOSE GRADER COULD PARSE A BOARD AND GRADE FOUR PREDICTIONS.
+# NOTHING HAD ASKED WHETHER IT COULD STILL LOG IN. IT HAD A 30-MINUTE HOLE.
+
+## ✅ THE COMPETITION OBJECT, READ LIVE — the deadline finally has a source
+
+Sixteen days of runs have quoted *"deadline 2026-08-31 23:59"* from the brief. It is correct,
+and now it comes from the server rather than from a prompt:
+
+    KP=/home/nixos/.local/share/uv/tools/kaggle/bin/python
+    $KP -c "... ApiListCompetitionsRequest(search='playground-series-s6e8') ..."
+
+    deadline               2026-08-31 23:59       merger_deadline  2026-08-31 23:59
+    max_daily_submissions  10                     submissions_disabled  False
+    evaluation_metric      'Roc Auc Score'        reward  'Swag'
+    enabled_date           2026-08-01 00:00       team_count  3489   user_rank  312
+
+⛔ **`max_daily_submissions = 10` IS THE CAP, AND `num_allowed_now = 0` IS THE BALANCE.** They
+are different questions and only the second one is authoritative about today (w139).
+
+## 🔴 EVERY SCRIPT HERE AUTHENTICATES WITH A FROZEN TOKEN THAT CANNOT REFRESH
+
+Ten scripts do `json.load(open("~/.kaggle/credentials.json"))["access_token"]` and pass the
+string to `KaggleClient(api_token=...)`. **That path has no refresh.** `KaggleHttpClient`
+wraps the string in `BearerAuth` and nothing else; the only token helper it can reach is
+`get_access_token_from_env`, which reads an env var. The `kaggle` CLI is the one caller that
+goes through `KaggleCredentials.load().get_access_token()`, and **that is why the credential
+file's mtime moves on its own** — the CLI refreshes it as a side effect and every raw-token
+script silently inherits the result.
+
+⚠ **A DEAD TOKEN THROUGH THE GRADER'S OWN CONSTRUCTION IS `HTTPError: 401 Client Error:
+Unauthorized`** on `ListSubmissions` (w141a T2), against a live-token control on the identical
+construction (T2-ctl). ⛔ **Do not read a 401 here as "the API changed."**
+
+## 🔴 THE REFRESH FIRES 30 MINUTES LATE, SO THERE IS A HOLE, NOT A CLIFF
+
+    kagglesdk/kaggle_creds.py:118
+    def access_token_has_expired(self):
+        return not self._access_token_expiration or \
+               self._access_token_expiration < datetime.now(timezone.utc) - timedelta(minutes=30)
+
+🎯 **THE MARGIN IS BEHIND `now`, NOT AHEAD OF IT.** "Expired" becomes true 30 minutes *after*
+the token actually dies, so for that half hour the CLI believes a corpse is healthy, skips the
+refresh, and sends it. Probed across the boundary on both sides (w141a T3): expiry at now−40m
+→ `True`; now−10m → **`False`**; now+10m → `False`.
+
+**`w141b_deadzone.py`, 7 gates, FAILURES 0 — reproduced with a GENUINELY dead token.** The
+server honours `generate_access_token(expiration_duration=...)` exactly (60s → `expires_in=60`),
+so a token can be minted and allowed to die rather than simulated.
+
+| gate | same dead 60s token, only the recorded expiry differs | result |
+|---|---|---|
+| **A** | while alive, it downloads the board | rc=0 ✅ |
+| **B** | dead, expiry recorded **15s** ago → CLI does **not** refresh, download **FAILS** | rc=1, no files ✅ |
+| **B-nr** | and the credential file was **not** rewritten — no refresh was attempted | ✅ |
+| **C** | dead, expiry backdated **31min** → CLI **does** refresh, download **SUCCEEDS** | rc=0 ✅ |
+| **C-r** | and the file **was** rewritten | ✅ |
+
+🎯 **B AND C DIFFER ONLY IN A DATE STRING AND THE OUTCOME FLIPS**, which is what makes the
+30-minute rule the cause rather than a coincidence of the network.
+
+⚠ **THE FAILURE DOES NOT SAY "EXPIRED".** The CLI prints its onboarding text —
+*"export KAGGLE_API_TOKEN=… # token copied from the settings UI"* — so the one operator who
+ever sees this would be sent to look for a missing credential rather than a stale one.
+
+## ✅ `experiments/kaggle_token.py` — ONE PREFLIGHT COVERS BOTH AUTH PATHS
+
+`ensure_fresh(margin_minutes=90)` compares the expiry **itself**, against a margin ahead of
+now, and refreshes through `refresh_access_token()` (which regenerates **and** saves) rather
+than `get_access_token()`. It prints a JSON status line and **never prints the token**.
+
+⛔ **DO NOT CALL `get_access_token()` OR `access_token_has_expired()` FROM THIS WORKSPACE.**
+Both carry the 30-minute sign error.
+
+`w135b_grade.py` calls `preflight_token()` **before `private_board()`**, which is the whole
+trick: the grader authenticates twice — the CLI for the board download, a raw token for the
+submission list — and **both reads come off the same file**, so refreshing the file once ahead
+of both fixes both. The call is **never fatal**: a refresh failure warns and continues, because
+a token that is still good must not be blocked by a precaution that failed.
+
+⚠ **REFRESHING DOES NOT REVOKE TOKENS ALREADY ISSUED** (w141a T4-live: the live token still
+worked after a new one was minted). That is what makes the temp-HOME tests safe to run.
+
+## ✅ THE FIX IS PROVED AGAINST THE REPRODUCTION, NOT ASSERTED
+
+`w141c_fixproof.py`, 6 gates, **FAILURES 0**. Same dead token, same recorded expiry, same
+command, same temp HOME; the single variable is whether the preflight ran.
+
+    NOFIX   dead token, expiry 15s ago, no preflight  -> download FAILS   (files=[])
+    PRE     preflight on the same credential          -> action=refreshed
+    FIX     same conditions, preflight first          -> download SUCCEEDS
+
+⛔ **A FIX THAT ONLY PASSES ITS OWN NEW TEST IS UNPROVEN.** It has to beat the reproduction
+that demonstrated the defect, under conditions that did not move.
+
+## ⚠ THE BACKLOG, REPORTED NOT EXCUSED
+
+**9 other scripts still read the raw token** (`check_selection.py`, `kaggle_list.py`,
+`w139a`, `w140a`, `w140c`, `w136a`, `w134a`, `w48a`, `w48e`). They were **not** rewired, on
+purpose: the grader is the only one that fires after the close and cannot be re-run, and on
+the last day churn is its own risk. Their exposure is bounded and dated — any run of them
+before the live token dies is fine, and the `kaggle` CLI refreshes the file for them as a
+side effect whenever it is used more than 30 minutes past expiry.
+
+## 🎯 THE LESSON
+
+w140's lesson was that a seal against premature *use* reads, from the inside, exactly like a
+seal against *testing*. w141 is the layer under it. w140 then went and tested the grader
+properly — parsing, four verdicts, three branches of P1, seven scenarios — and every one of
+those tests supplied its own inputs.
+🎯 **A test that constructs its own fixtures verifies the code and silently vouches for the
+environment it never touched.** The grader's ability to parse a board was measured seven ways;
+its ability to obtain one had never been measured once, because every harness handed it a
+board. **When you mock the input, you stop testing the door.** The cheapest way to find these
+is to ask which resource the code needs that no test supplies — here, credentials — and then
+ask when that resource runs out.
+
+---
 # (w139, 2026-08-31) — 🔴 THE ORACLE THAT CATCHES A TRUNCATED SUBMISSION LIST HAS BEEN PRINTED
 # IN THIS FILE SINCE 08-15. IT WAS NEVER COMPARED TO ANYTHING. TWO BUGS GOT THROUGH UNDER IT.
 

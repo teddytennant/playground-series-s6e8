@@ -113,6 +113,37 @@ def private_board():
               f"{[os.path.basename(c) for c in csvs]}")
     return pd.read_csv(pick), os.path.basename(pick)
 
+def preflight_token():
+    """Refresh the on-disk access token before EITHER auth path uses it.
+
+    w141. The grader authenticates twice and both reads come off the same file:
+    private_board() shells out to the `kaggle` CLI, and submissions() reads
+    credentials.json["access_token"] as a raw string (that path cannot refresh at all).
+    Doing this once, here, covers both.
+
+    The SDK's own expiry test fires 30 minutes LATE, so between a token's death and
+    death+30min the CLI skips the refresh and the download fails with a generic "set
+    KAGGLE_API_TOKEN" message that says nothing about expiry -- w141b reproduced exactly that
+    with a real dead token. kaggle_token.ensure_fresh compares the expiry itself, ahead of now.
+
+    Never fatal: a token that is still good must not be blocked by a precaution that failed.
+    """
+    try:
+        p = subprocess.run([KAGGLE_PY, os.path.join(ROOT, "experiments", "kaggle_token.py"),
+                            "--margin", "90"], capture_output=True, text=True, timeout=120)
+        info = json.loads(p.stdout)
+    except Exception as e:
+        print(f"  ⚠ token preflight did not run ({type(e).__name__}: {e}). Continuing.")
+        return
+    if info["action"] == "failed":
+        print(f"  ⚠ token refresh FAILED: {info['error']}")
+        print(f"    continuing on the existing token (expires {info['expiration']}). If the "
+              f"reads below fail with 401 or an auth-setup message, that is why.")
+        return
+    left = info["seconds_left"] / 3600.0
+    print(f"  token: {info['action']}, expires {info['expiration']} ({left:.1f}h left)")
+
+
 def verdict(tag, claim, held, detail):
     mark = "HELD" if held else "FALSIFIED" if held is False else "UNGRADED"
     print(f"  {mark:10s} {tag}  {claim}")
@@ -122,6 +153,7 @@ print("=" * 92)
 print(f"w135b — grading the frozen forecast.  now {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M}Z")
 print("=" * 92)
 
+preflight_token()
 lb, lb_file = private_board()
 if lb is None:
     print("  could not download a leaderboard. Nothing graded."); sys.exit(1)
