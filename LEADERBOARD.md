@@ -1,3 +1,30 @@
+# 2026-09-01 — FINAL. THE BOARD IS GRADED AND THIS FILE'S TOP ENTRY WAS STILL QUOTING A LIVE
+# READING FROM 08-31. FIXED HERE.
+
+Read live this run from the competition object, not from a prompt or a prior entry:
+
+    deadline 2026-08-31 23:59:00   teams 3531   user_rank 319   metric Roc Auc Score
+
+| | rank | score |
+|---|---|---|
+| public board (frozen since 08-23) | — | **0.97119** |
+| **private board (final)** | **319 of 3,531** | **0.97093** |
+
+Top decile is 353, so we finish inside it by **34 places**. Best private over all 201 sends was
+**0.97094** (`w40_ad211stdcorr`, public 0.97118) — one tick above what landed, and unreachable by
+any public-argmax rule because its public score sat one tick under the 0.97119 auto-selection
+tier. Worth **+7 ranks** in hindsight. Argmax-CV, argmax-public, WANTED and AUTO all converge on
+0.97093 (w141 §4).
+
+🔴 **DO NOT READ THE FINAL SCORE OFF `kaggle competitions submissions -v`.** That command returns
+**50 of 201 rows** — one page, most recent first — and the best private score on that page is
+**0.97092**, one tick low, with `w40_ad211stdcorr` (08-22) not in it at all. A truncated read here
+does not error and does not look truncated. Use `experiments/w142b_privatecheck.py`, which
+paginates; re-run live this run and it reproduces 201/201 rows with privateScore populated.
+
+⛔ **NOTHING BELOW THIS LINE IS LIVE.** The 08-31 entry that used to head this file says
+*"still the live one: rank 309 of 3,469"*. It was live when written and is now history.
+
 # 2026-08-31 ~14:40Z — w136, A BOARD FROM A DIFFERENT COMPETITION, BECAUSE IT IS THE ONLY
 # PLACE THE SELECTION RULE CAN BE WATCHED EXECUTING.
 

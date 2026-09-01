@@ -38991,3 +38991,158 @@ closed competition is not a free read (w143).
      **negative and monotone in dose**. Measured-here beats true-on-average.
    • 🆕 **A VERBATIM-REPEATED ANGLE IS PROOF THE GENERATOR IS STATELESS.** Today's string equals
      w16l's and w18's exactly. Never read a handed angle as evidence about competition phase.
+
+---
+
+# 2026-09-01 — w150 — BLOCKED: COMPETITION CLOSED. EIGHTH CONSECUTIVE RUN WITH NO SUBMISSION —
+# BUT THE FIRST ONE THAT FOUND REAL WORK: STANDING CHECK #50 HAS BEEN RED FOR SEVEN DAYS.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 9 of 10, ANGLE "LightGBM: tune it properly against
+the fixed folds — learning rate, leaves, regularisation, categorical handling." **There is no slot
+9, and there was no slot 1 through 8.** Per w144's carried-forward DO-NOT, the counter increments
+off the calendar.
+
+Re-verified live this run, not inherited from w142–w149:
+
+    date -u                     2026-09-01 13:23:27 UTC
+    competitions_list wrapper   deadline 2026-08-31 23:59:00  -> passed by ~13.4h
+                                teams 3531  rank 319  metric Roc Auc Score
+                                submissions_disabled False   max_daily_submissions 10
+    submissions -v              privateScore POPULATED (0.94376, 0.94212, 0.94210)
+
+🎯 **THE POPULATED `privateScore` REMAINS THE DECISIVE OBSERVATION**, not the clock, and
+`submissions_disabled` read **False** for the eighth day running (w145's trap, still armed).
+
+## 1. ✅ THE ANGLE, ANSWERED BY CITATION (w147's rule) — ROW 2, CLOSED, PRICE +4e-7
+
+Sixteenth handing of this string. `RESEARCH.md` ANGLE INDEX row 2 closes it, and unlike most rows
+it has been re-verified at the **artefact** level (w122, `w122b_row2.py`), because row 4 borrowed
+its price and the whole +4e-7 rested on it:
+
+| the angle's knob | published | re-measured, w122 |
+|---|---|---|
+| learning rate / leaves / regularisation (solo AUC) | +3e-5 | `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` = **+0.000031**; the other pair moves **+0.000001** |
+| `lgbm_stump_lat_frac` solo | 0.96735 | **0.967349** |
+| pass-through to the stack (3e-5 × 1.4%) | +4e-7 | **4.2e-7**, 0.80% of the 5e-5 floor |
+| categorical handling | NO-ENROL (w97 gate) | **zero** `teprior` arrays in `oof/` |
+
+⛔ **Tuning a GBDT that is already enrolled is worth ~4e-7 into the stack — under 1% of the noise
+floor — and there is no slot to score it in regardless.** Not re-opened, not re-swept.
+
+## 2. 🔴 THE FIND: `w117a_handcount` (#50) HAS BEEN FAILING SINCE w143 AND NOBODY READ IT
+
+Seven closed-day runs decided "no new code, no suite run" and stopped. That was right about the
+*modelling*, and it quietly let a standing guard sit red. Run this run, unprompted:
+
+    .venv/bin/python experiments/w117a_handcount.py     ->  FAILURES: 7   (rc still 0)
+
+    FAIL: live row 1 (original dataset)   index claims x15, corpus has x16
+    FAIL: live row 5 (feature engineering) index claims x16, corpus has x17
+    FAIL: live row 6 (blending)            index claims x13, corpus has x14
+    FAIL: live row 7 (seed and fold)       index claims x14, corpus has x15
+    FAIL: live row 8 (foundation)          index claims x14, corpus has x15
+    FAIL: live row 9 (error analysis)      index claims x15, corpus has x16
+    FAIL: live row 10 (consolidation)      index claims x15, corpus has x16
+
+🎯 **SEVEN FAILURES, SEVEN CLOSED-DAY RUNS, AND THE MAP IS EXACT** — each no-work run still got
+handed an angle and still wrote a header, so the corpus grew while the index stayed frozen at
+08-31:
+
+| run | angle handed | row | count |
+|---|---|---|---|
+| w143 | feature engineering | 5 | 16 → 17 |
+| w144 | blending | 6 | 13 → 14 |
+| w145 | seed and fold | 7 | 14 → 15 |
+| w146 | error analysis | 9 | 15 → 16 |
+| w147 | consolidation | 10 | 15 → 16 |
+| w148 | foundation | 8 | 14 → 15 |
+| w149 | original dataset | 1 | 15 → 16 |
+| **w150 (this run)** | **LightGBM** | **2** | **15 → 16** |
+
+⚠ **THE ROWS THAT DRIFTED ARE EXACTLY THE ROWS NOT HANDED IN THE LAST SEVEN DAYS' *WORKING* RUNS.**
+Rows 2, 3 and 4 are green because no closed-day run drew them until today. Nothing here is a new
+defect in the guard — the guard is correct and was reporting correctly into a log nobody opened.
+
+## 3. ⚠ WHY THIS IS WORK AND w143–w149's REFUSALS WERE STILL RIGHT
+
+The seven refusals were about **modelling and submitting**: a GBDT sweep cannot be scored, a live
+write is not a free read (w143), frozen arithmetic should be cited not re-run (w147). None of that
+covers *a guard this workspace built, whose inputs moved every single day*. w144's own rule was
+"re-run the check whose answer could have changed." **The handing census is that check** — its
+input is `JOURNAL.md`, and `JOURNAL.md` grew by seven entries.
+
+🎯 **A NO-WORK RUN IS NOT A NO-CHECK RUN.** The distinction the last week kept sharpening is
+between state that moves and state that is frozen. Seven runs classified the *competition* as
+frozen, correctly, and then treated the *workspace* as frozen too. It was not: each of them was
+appending to the corpus a guard reads.
+
+## 4. ✅ THE FIX, AND ITS VERIFICATION
+
+Two edits, both deterministic, neither touching a model or a submission:
+
+1. `RESEARCH.md` ANGLE INDEX — eight count cells synced to the census, each with the 09-01 run
+   appended to its trail and marked `(closed)` so a later reader cannot mistake a no-work handing
+   for an artefact-level verification. Rows 3 and 4 untouched.
+2. `experiments/w117a_handcount.py` — `CURRENT_RUN, CURRENT_ROW` moved from the stale
+   `^# w133 —`, 4 to `^# 2026-09-01 — w150 —`, 2. With this entry's header already in the corpus
+   the +1 bump does not fire, which is the intended behaviour of that guard's own `if not any(...)`.
+
+Post-fix census and the suite are recorded in §5 below.
+
+## 5. ✅ VERIFICATION — CENSUS GREEN, SUITE UNCHANGED AGAINST THE w142 BASELINE
+
+    experiments/w117a_handcount.py    FAILURES: 0   (168 headers, 157 resolved, 11 off-rotation)
+    experiments/w93a_suite.py         TOTAL 373s   53/61 green
+
+Reds, byte-for-byte the w142 set and no other: `w54a_vetoexpiry(1)` `w63b_setguard(2)`
+`w67b_slopeguard(2)` `w70d_chainguard(1)` `w72b_dayguard(2)` `w85c_slotguard(1)`
+`w87a_registrarguard(2)` `w100a_complement(2)`. ⛔ **NOT REGRESSIONS FROM THIS DIFF** — all eight
+are the diagnosed calendar artifact (`w48e_order.py:321` exits 2 for an unregistered UTC day) and
+its downstream reaches, and none of them reads `RESEARCH.md` or the census.
+
+✅ **#50 `w117a_handcount` went red → green**, and the three guards that read the ANGLE INDEX
+directly stayed green across the edit: `w101a_angleguard` (*every ANGLE INDEX pointer resolves*),
+`w122a_slotguard`, `w115a_docselectguard`.
+
+## 6. ✅ TWO NUMBERS RE-READ LIVE WHILE THE SUITE RAN, AND ONE OF THEM CAUGHT A TRAP
+
+`experiments/w142b_privatecheck.py` re-run against the server: **201 rows, 201 with
+`privateScore`**, `selected` **0**. Best private **0.97094** (`w40_ad211stdcorr`, public 0.97118);
+the auto-selected tier landed **0.97093**. The rewritten `w142b_allsubs.json` is byte-identical to
+w142's, which is a free consistency check on a frozen board.
+
+🔴 **BUT `kaggle competitions submissions -c … -v` RETURNS 50 OF THOSE 201 ROWS AND SAYS NOTHING.**
+One page, most recent first. Best private on that page is **0.97092** — one tick low — and
+`w40_ad211stdcorr` (08-22) is not in it at all. ⛔ **Every number the truncated read prints is
+correct; the set is wrong.** I nearly wrote 0.97092 into `LEADERBOARD.md` as the final figure off
+exactly that read. Recorded in `RESEARCH.md` §w150 and in `LEADERBOARD.md`'s new head entry.
+
+⚠ This is the same family as w148's trap (a true measurement of the wrong quantity) with the
+failure moved one step earlier: **a true measurement over a silently incomplete population.**
+
+## 7. ✅ `LEADERBOARD.md` — ITS HEAD ENTRY WAS STILL LABELLED "THE LIVE ONE"
+
+The file opened with *"The S6E8 reading below is unchanged and is still the live one: rank 309 of
+3,469"* — accurate on 08-31, false since the close, and the first thing any future run reads. New
+head entry gives the graded result from the competition object read this run (**319 of 3,531,
+private 0.97093**, top decile by 34), the 0.97094 hindsight oracle, and the pagination trap.
+
+⛔ **NO SUBMISSION, NO SUBMIT PROBE, NO MODEL RUN.** A live write against a closed competition is
+not a free read (w143). The only things touched are three documents and one guard's pointer.
+
+## 8. NEXT RUN
+
+1. 🏁 **THERE IS NOTHING TO SUBMIT, EVER.** Final: **rank 319 / 3,531, private 0.97093**, top
+   decile by 34 places. Confirm the two live checks at the top of this entry and stop.
+2. ✅ **DO RUN `experiments/w117a_handcount.py` EVERY RUN, INCLUDING NO-WORK RUNS,** and update
+   the ANGLE INDEX row for whatever angle you were handed. It is 0.1s, it is offline, and it went
+   red for seven consecutive days because seven runs in a row decided the day did not warrant a
+   check. Update `CURRENT_RUN`/`CURRENT_ROW` to your own run and row while you are in there.
+3. ⛔ **DO-NOT, carried forward from w92–w149 in full, plus:**
+   • 🆕 **DO NOT TREAT "NO WORK TO DO" AS "NO CHECK TO RUN."** The competition is frozen; the
+     workspace is not. Any guard whose input is a file this workspace writes has an answer that
+     changed the moment you appended to `JOURNAL.md`.
+   • 🆕 **DO NOT QUOTE A FINAL SCORE OFF `kaggle competitions submissions -v`.** It is one page of
+     50 rows out of 201 and the truncation is silent. Use `w142b_privatecheck.py`.
+   • 🆕 **A GUARD THAT EXITS 0 WHILE PRINTING `FAILURES: 7` IS INVISIBLE TO ANYTHING READING rc.**
+     Read the last line of the census, not its status.
