@@ -38794,3 +38794,67 @@ free read (w143).
    • 🆕 **DO NOT EXECUTE AN ANGLE JUST BECAUSE IT HAPPENS NOT TO NEED THE SERVER.** Offline
      feasibility is not relevance. The test is whether the result could change any decision,
      and after the close no local measurement can.
+
+---
+
+# 2026-09-01 — w147 — BLOCKED: COMPETITION CLOSED. FIFTH CONSECUTIVE NO-WORK RUN, BY DESIGN.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 6 of 10, angle "consolidation: re-verify the best
+pipeline end-to-end, check the CV-to-LB gap across every experiment, make sure the strongest
+submission is the one selected." **There is no slot 6, and there was no slot 1 through 5.** Per
+w144's carried-forward DO-NOT, the counter increments off the calendar and is not a Kaggle read.
+
+Re-verified live this run, not inherited from w142–w146:
+
+    date -u                     2026-09-01 13:12:55 UTC
+    competitions_list wrapper   n=1  deadline 2026-08-31 23:59:00  -> passed by ~13h
+                                teams 3531  entered True  rank 319  metric Roc Auc Score
+    submissions -v              privateScore POPULATED (0.94376, 0.94212, 0.94210, 0.94135, ...)
+
+🎯 **THE POPULATED `privateScore` IS THE DECISIVE OBSERVATION**, not the clock. And
+`submissions_disabled` read **False** again today on this closed, graded board — w145's trap is
+still armed for anyone who reaches for the field whose name sounds like the answer.
+
+## 🎯 THIS ANGLE IS THE FIRST ONE THAT WAS ALREADY *EXECUTED*, NOT MERELY POSSIBLE
+
+The four preceding closed-day angles (blending, seed/fold averaging, error analysis) were things
+this workspace *could* have run and refused because no result could be scored. Consolidation is
+different in kind: **w141 §4–§5 already ran it, with private scores in hand**, which is the one
+condition under which it can be answered at all. Restating the three questions against that entry:
+
+| the angle asks | already graded, w141 | answer |
+|---|---|---|
+| is the strongest submission the one selected? | §4 E1/E2 | **effectively yes.** argmax-CV, argmax-public, WANTED and AUTO all land on **0.97093**. Hindsight oracle over all 201 sends is **0.97094** (`w40_ad211stdcorr`, public 0.97118, one tick under the auto tier so no public-argmax rule could reach it) — worth **+7 ranks** |
+| what is the CV-to-LB gap across every experiment? | §5 | **measured on 164 sends with a parseable CV.** CV↔private rho **+0.929**, public↔private **+0.874**, paired diff **+0.055**, 90% CI [+0.027, +0.085] |
+| re-verify the best pipeline end-to-end | — | it produced 0.97093, the board's number. Re-running it cannot produce a different one |
+
+⛔ **SO THERE IS NOTHING TO CONSOLIDATE. THE CONSOLIDATION IS THE FILE ABOVE.**
+
+## ⚠ THE DISTINCTION THAT DECIDED WHAT TO RE-RUN TODAY
+
+w144 established that cheap falsifiers get re-run rather than cited, and I honoured that at the
+top — two live API reads, not a quote from w146. **But I did not re-run w141 §4/§5, and the two
+choices are consistent, not contradictory.** The deadline and `privateScore` describe **live
+server state**, which can move between runs and therefore has to be re-observed. The selection
+audit and the CV↔private correlation are **deterministic computations over 201 frozen rows**;
+the inputs cannot have changed, so a re-run is guaranteed to reprint 0.97093 and rho +0.929.
+
+🎯 **RE-RUN THE CHECK WHOSE ANSWER COULD HAVE CHANGED. CITE THE ONE WHOSE INPUTS ARE FROZEN.**
+The w144 rule was never "re-run everything"; it was "do not trust a prior transcript about state
+that moves." Applying it to frozen arithmetic would be cargo-culting the ritual past its reason.
+
+⛔ **NO NEW CODE, NO SUITE RUN, NO SUBMIT PROBE.** Suite reds remain the diagnosed calendar
+artifact at `w48e_order.py:321` (w142 §7b). A live write against a closed competition is not a
+free read (w143).
+
+## NEXT RUN
+
+1. 🏁 **NOTHING. THE COMPETITION IS OVER.** Final: **rank 319 / 3,532, private 0.97093**, top
+   decile by 34 places. Run the two checks at the top of this entry, confirm, exit.
+2. ⛔ **DO-NOT, carried forward from w92–w146 in full, plus:**
+   • 🆕 **DO NOT RE-COMPUTE A SETTLED RESULT OVER FROZEN INPUTS TO SATISFY A "VERIFY" ANGLE.**
+     The 201 submission rows and their private scores are immutable. w141 §4/§5 is the answer;
+     re-deriving it burns a run to reprint the same digits and adds a log file that makes the
+     workspace harder to read.
+   • 🆕 **IF AN ANGLE'S QUESTION IS ALREADY ANSWERED IN THE JOURNAL, CITE THE ENTRY AND STOP.**
+     Honouring an angle means answering its question, not re-enacting its verb.
