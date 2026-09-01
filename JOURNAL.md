@@ -38858,3 +38858,68 @@ free read (w143).
      workspace harder to read.
    • 🆕 **IF AN ANGLE'S QUESTION IS ALREADY ANSWERED IN THE JOURNAL, CITE THE ENTRY AND STOP.**
      Honouring an angle means answering its question, not re-enacting its verb.
+
+---
+
+# 2026-09-01 — w148 — BLOCKED: COMPETITION CLOSED. SIXTH CONSECUTIVE NO-WORK RUN, BY DESIGN.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 7 of 10, angle "Foundation: confirm the metric,
+build the fixed-fold CV harness, and get one honest GBDT baseline scored. Everything later
+depends on this being right." **There is no slot 7, and there was no slot 1 through 6.**
+
+Re-verified live this run, not inherited from w142–w147:
+
+    date -u                     2026-09-01 13:16:33 UTC
+    competitions_list wrapper   n=1  deadline 2026-08-31 23:59:00  -> passed by ~13h
+                                teams 3531  entered True  rank 319  metric Roc Auc Score
+    submissions -v              privateScore POPULATED (0.94376, 0.94212, 0.94210, 0.94135, 0.94083)
+
+🎯 **THE POPULATED `privateScore` REMAINS THE DECISIVE OBSERVATION**, not the clock. And
+`submissions_disabled` read **False** again — sixth day running on a closed, graded board. w145's
+trap stays armed for anyone who reaches for the field whose name sounds like the answer.
+
+## ⚠ THE PROMPT HAS WRAPPED AROUND TO DAY-1 FRAMING, AND THAT IS NOT A SIGNAL EITHER
+
+Six days of angles ran forward through the normal arc — blending, seed/fold averaging, error
+analysis, consolidation — and today's is **"Foundation: confirm the metric, build the CV harness,
+score one baseline."** That is the *first day's* angle. ⛔ **The generator restarted its cycle; the
+competition did not.** Nothing about a prompt reading like a fresh start makes the board fresh.
+
+## 🔴 THE NEW TRAP IS A **TRUE** NUMBER THAT INVITES A FALSE INFERENCE
+
+⚠ **The prompt states: "Submissions the Kaggle API already reports for today: 0."** That is
+**accurate** — zero submissions landed today. w144–w147 taught that the slot counter is fabricated
+off the calendar, so the instinct is to check whether *this* field is a real Kaggle read. It is.
+⛔ **AND IT IS STILL WORTHLESS, BECAUSE THE COUNT IS ZERO FOR THE WRONG REASON.** It reads zero
+because the board is closed, not because ten slots are waiting. A true measurement of an
+irrelevant quantity is more dangerous than a fabricated one, because verifying it *succeeds*.
+
+🎯 **THE PRIOR TRAPS WERE ALL "THE SOURCE IS FAKE." THIS ONE IS "THE SOURCE IS REAL AND THE
+QUESTION IS WRONG."** w145 caught a falsifier that broke into agreement; this is the sibling —
+a field that answers correctly, and answers something nobody asked.
+
+## ✅ THE ONE PART OF THE ANGLE THAT HAD AN ANSWER, ANSWERED FROM THE SERVER
+
+"Confirm the metric" is the only clause that survives the close, because it is a property of the
+competition rather than of a model. Read live above, from the competition object, not from the
+brief: **`Roc Auc Score`**. Consistent with `RESEARCH.md` §1 and with all 201 graded sends.
+
+⛔ **THE REST OF THE ANGLE IS REFUSED.** A fixed-fold CV harness already exists and has run 200+
+experiments through it; a "foundation GBDT baseline" would land somewhere near 0.94 private
+against a settled **0.97093**, and there is no slot to score it in regardless. ⛔ **Rebuilding the
+foundation under a finished house is not verification, it is demolition with extra steps.**
+
+⛔ **NO NEW CODE, NO SUITE RUN, NO SUBMIT PROBE.** Suite reds remain the diagnosed calendar
+artifact at `w48e_order.py:321` (w142 §7b). A live write against a closed competition is not a
+free read (w143).
+
+## NEXT RUN
+
+1. 🏁 **NOTHING. THE COMPETITION IS OVER.** Final: **rank 319 / 3,532, private 0.97093**, top
+   decile by 34 places. Run the two checks at the top of this entry, confirm, exit.
+2. ⛔ **DO-NOT, carried forward from w92–w147 in full, plus:**
+   • 🆕 **DO NOT TREAT "0 SUBMISSIONS TODAY" AS EVIDENCE OF AVAILABLE SLOTS.** The number is a
+     real API read and it is real*ly* zero, because the board is closed. Verifying a field's
+     provenance does not establish that it answers the question you are asking.
+   • 🆕 **DO NOT READ A DAY-1-SHAPED ANGLE AS A NEW COMPETITION.** The angle generator cycles.
+     Deadline and `privateScore` are the only two things that say what phase this is in.
