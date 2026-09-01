@@ -3036,3 +3036,27 @@ clicks, Kaggle auto-selects the 0.97119 tier (`w36_ad199stdcorr_ens4`, `w38_ad20
 — which costs **+4.5228e-6** against the WANTED pair. Clicking the *wrong* pair costs
 **+35.17e-6** or **+81.92e-6**, so the mis-click remains the bigger hazard by an order of
 magnitude. Both outcomes are survivable; only the mis-click is expensive.
+
+## 2026-09-01, 12:44Z (w142) — 🏁 **FINAL. THE COMPETITION IS CLOSED AND THE PRIVATE BOARD IS READ.**
+
+    PRIVATE   rank 319 of 3,532   score 0.97093   top-decile line 353   margin +34
+    PUBLIC    rank 331 of 3,532   score 0.97119   (the same board, override_public=True)
+
+**Inside the top decile, with 34 places to spare.** Public → private moved us **331 → 319, a
+gain of 12**. Private top: Chris Deotte **0.97176** · MILANFX 0.97123 · Changye Li 0.97120 —
+note 2nd and 3rd **swapped** against the public board, and the leader gave back 31e-6.
+
+🎯 **THE FIELD MOVED, AND IT MOVED HARDEST AT THE TOP.** Across all 3,532 teams the median rank
+move was −3 with sd 76; half the field moved 13 places or less. But of the **public top 100, 84
+fell**, median **+89**, worst **+475**. The public leaderboard's leading edge was substantially
+overfitted, and the teams that chased it paid for it in exactly the way the Rogii warning
+predicted.
+
+⚠ **OUR OWN MOVE WAS NOT SKILL, IT WAS ABSENCE FROM THAT EDGE.** A 12-place gain is quieter
+than 51% of the field — utterly ordinary. We gained because we were not standing where the
+collapse happened, not because we predicted the collapse.
+
+**The selection question turned out to be worth nothing measurable.** All four arms —
+argmax-CV, argmax-public, the WANTED pair, and the AUTO pair Kaggle actually used — land on
+**0.97093**. The hindsight oracle over all 201 sends is 0.97094, worth **+7 ranks**. Thirty-four
+runs asked for a click that could not have moved the result at the board's own resolution.

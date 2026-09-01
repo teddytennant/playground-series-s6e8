@@ -96,22 +96,27 @@ def submissions():
     return df, None
 
 def private_board():
-    """Download the board and say WHICH FILE it came from. w140: `csvs[0]` on an unsorted
-    glob was picking a leaderboard nobody named out loud."""
-    d = tempfile.mkdtemp()
-    sh("kaggle", "competitions", "leaderboard", "-c", COMP, "-d", "-p", d)
-    for z in glob.glob(os.path.join(d, "*.zip")):
-        zipfile.ZipFile(z).extractall(d)
-    csvs = sorted(glob.glob(os.path.join(d, "*.csv")))
-    if not csvs:
-        return None, None
-    # If the zip ever carries both boards, take the one that does not announce itself as
-    # public. Deterministic, and it prefers the board we came for.
-    pick = next((c for c in csvs if "publicleaderboard" not in os.path.basename(c)), csvs[0])
-    if len(csvs) > 1:
-        print(f"  ⚠ {len(csvs)} leaderboard CSVs in the download: "
-              f"{[os.path.basename(c) for c in csvs]}")
-    return pd.read_csv(pick), os.path.basename(pick)
+    """The FINAL board, via the endpoint that can actually serve one.
+
+    w142 (2026-09-01). This used to shell out to `kaggle competitions leaderboard -d`. That is
+    `ApiDownloadLeaderboardRequest`, whose only field is `competition_name`: it serves the
+    PUBLIC board and no argument changes that. So after the close this function kept handing
+    back public scores, the board-identity gate below correctly rejected them, and the grader
+    exited 1 having graded nothing. The gate was right. The fetch was wrong.
+
+    `ApiGetLeaderboardRequest` is the endpoint with the switch -- `override_public=False` is
+    the final board, `True` is the public one after the close. experiments/kaggle_board.py
+    paginates it (200/page) with backoff and caches.
+
+    The board arrives in the server's own rank order, so the caller's sort must be STABLE or
+    it reshuffles tied teams; the frame handed back keeps the board's row order.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "experiments"))
+    import kaggle_board
+    rows = kaggle_board.board(private=True, comp=COMP)
+    df = pd.DataFrame({"TeamName": [r["teamName"] for r in rows],
+                       "Score": [float(r["score"]) for r in rows]})
+    return df, f"GetLeaderboard(override_public=False), {len(df)} rows, paginated"
 
 def preflight_token():
     """Refresh the on-disk access token before EITHER auth path uses it.
@@ -158,7 +163,7 @@ lb, lb_file = private_board()
 if lb is None:
     print("  could not download a leaderboard. Nothing graded."); sys.exit(1)
 print(f"  board file: {lb_file}")
-lb = lb.sort_values("Score", ascending=False).reset_index(drop=True)
+lb = lb.sort_values("Score", ascending=False, kind="mergesort").reset_index(drop=True)
 n = len(lb)
 row = lb.index[lb["TeamName"] == TEAM]
 if not len(row):

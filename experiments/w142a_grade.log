@@ -1,0 +1,39 @@
+============================================================================================
+w135b — grading the frozen forecast.  now 2026-09-01 12:44Z
+============================================================================================
+  token: kept, expires 2026-09-02T00:01:49.274053+00:00 (11.3h left)
+  board file: GetLeaderboard(override_public=False), 3532 rows, paginated
+  submissions: 201 rows over 2 page(s), 201 unique refs — paginated to exhaustion
+
+  board: rank 319 of 3532, score 0.97093, top-decile line 353, margin +34
+  public at close was rank 309 of 3463, score 0.97119, line 346
+
+  is this the private board? (3532 teams, leader 0.97176, 201 submissions carry a privateScore)
+    yes  [board] our score moved off public
+    yes  [board] leader's score moved off public
+    yes  [board] filename does not say publicleaderboard
+    yes  [submission list] at least one privateScore (corroborating only)
+  top 3 on the board it loaded: Chris Deotte 0.97176, MILANFX 0.97123, Changye Li 0.9712
+
+  private score of each candidate file:
+    w36_ad199stdcorr           0.97093   WANTED
+    w23_ad187stdcorr           0.97091   WANTED
+    w36_ad199stdcorr_ens4      0.97093   AUTO
+    w38_ad202stdcorr_ens4      0.97093   AUTO
+
+============================================================================================
+THE FROZEN PREDICTIONS
+============================================================================================
+  UNGRADED   P1  nobody clicks; Kaggle auto-selects on public score
+             both pairs land on 0.97093 at 5 d.p., so the board cannot tell them apart
+  HELD       P2  the account finishes inside the top decile
+             rank 319 against the top-10% line 353, margin +34
+  HELD       P3  final private rank inside (122, 426)
+             rank 319; union interval (62, 485) also holds
+  HELD       P4  one realisation cannot grade the CV-selection thesis
+             w135a measured P(delta>0) = 79.6% and sd 3.80e-6 on one private-scale draw. Below 95%, so the power claim stands and the realised sign above is ONE DRAW. Do not rewrite the pick's rationale to match it.
+
+============================================================================================
+  Movement public -> private: rank 309 -> 319 (+10), score 0.97119 -> 0.97093 (-260e-6)
+  Write the four verdicts above into JOURNAL.md verbatim, including the ones that
+  failed, and do not adjust an interval to fit. That is the entire point of w135.

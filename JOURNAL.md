@@ -38361,3 +38361,242 @@ environment it never touched. When you mock the input, you stop testing the door
 runs' worth of green said the grader could read a board; none of it said the grader could still
 be logged in when it asked for one. **The cheap way to find this class is to ask which resource
 the code needs that no test supplies — and then ask when that resource runs out.**
+
+---
+
+# (w142, 2026-09-01, SLOT 1/10, ANGLE "XGBoost: third leg of the ensemble") — 🏁 THE COMPETITION
+# IS OVER AND THE FORECAST IS GRADED. THE GRADER'S REFUSAL WAS RIGHT AND ITS FETCH WAS WRONG.
+
+## 0. ⛔ THE ANGLE IS VOID AND NOTHING WAS TRAINED
+
+`date -u` → **2026-09-01 12:40Z**. The close was 2026-08-31 23:59Z, server-sourced at w141.
+There is no slot, there is no future day to hold one, and an XGBoost leg would be unsendable by
+construction. **No model was trained, no queue was rebuilt, no guard was registered** — per
+w140 §5.2 and w141 §0. The one instruction that mattered was w141 §7.1, and I followed it:
+`date -u` first, then `w135b_grade.py` **before reading the board any other way.**
+
+## 1. 🔴 THE GRADER REFUSED, AND THE REFUSAL WAS CORRECT
+
+First run, 12:40Z, verbatim:
+
+    token: kept, expires 2026-09-02T00:01:49Z (11.4h left)
+    board file: playground-series-s6e8-publicleaderboard-2026-09-01T12:36:26.csv
+    is this the private board?
+      no   [board] our score moved off public          (0.97119, unchanged)
+      no   [board] leader's score moved off public     (0.97207, unchanged)
+      no   [board] filename does not say publicleaderboard
+      yes  [submission list] at least one privateScore
+    ⚠ THIS DOES NOT LOOK LIKE THE PRIVATE BOARD ... STOP.
+
+✅ **w141's preflight worked in the real path** — `token: kept`, no 401, 201 rows over 2 pages.
+Both of the last two runs' fixes held under their first live use.
+
+⛔ **AND I DID NOT REACH FOR `--force-private`,** which w141 §7.1 explicitly warned about. The
+override exists for "the evidence is wrong"; here the evidence was **right**. Our score really
+was still 0.97119 and the leader really was still 0.97207. Forcing it would have printed public
+ranks under a private label — the one outcome the gate exists to prevent — and I would have
+recorded a fabricated result rather than found the bug underneath it.
+
+## 2. 🎯 THE BUG: THE DOWNLOAD ENDPOINT CANNOT SERVE A PRIVATE BOARD. EVER.
+
+The grader fetched with `kaggle competitions leaderboard -d`. That is
+**`ApiDownloadLeaderboardRequest`, and the request type has exactly one field,
+`competition_name`.** There is no argument that selects a board. It serves public, which is why
+the file it writes is always named `…-publicleaderboard-….csv`.
+
+🎯 **THE SWITCH IS ON THE OTHER ENDPOINT.** `ApiGetLeaderboardRequest` carries
+`competition_name`, `page_size`, `page_token`, **`override_public`**:
+
+    override_public = True   -> Chris Deotte 0.97207, Changye Li 0.97154, MILANFX 0.97149
+    override_public = False  -> Chris Deotte 0.97176, MILANFX 0.97123, Changye Li 0.97120
+
+⚠ **2nd AND 3rD SWAP, THE LEADER GIVES BACK 31e-6, AND 3,386 OF 3,532 ROWS SIT IN A DIFFERENT
+ORDER.** That disagreement is what proves the flag does something — an identity gate that reads
+a filename or a vibe would have been satisfied by either one.
+
+`experiments/kaggle_board.py` — one paginated board reader, 200/page, follows the token, raises
+rather than returning partial, backs off, caches to `experiments/board_cache/`.
+⚠ **RATE LIMITS ARE REAL:** four full 18-page reads back to back earned a **429**. A closed
+board never changes, so it is cached.
+
+⚠ **AND I MADE THE SORT STABLE.** The grader did `sort_values("Score", ascending=False)` —
+pandas' default quicksort is **not stable**, so it was free to reshuffle tied teams. Our score
+has a **7-team tie block at positions 316–322**. `kind="mergesort"` keeps the server's own
+order. ⛔ It does not change the verdicts: the worst end of the block (322) is still inside both
+the top-decile line (353) and P3's [122, 426], so **the result is robust to the tie-break** and
+I am saying so rather than resting on the middle of the block.
+
+## 3. ✅ THE FROZEN FORECAST, GRADED. VERBATIM, INCLUDING WHAT COULD NOT BE GRADED.
+
+    board: rank 319 of 3532, score 0.97093, top-decile line 353, margin +34
+    public at close was rank 309 of 3463, score 0.97119, line 346
+    is this the private board?  yes / yes / yes / yes
+
+      private score of each candidate file:
+        w36_ad199stdcorr           0.97093   WANTED
+        w23_ad187stdcorr           0.97091   WANTED
+        w36_ad199stdcorr_ens4      0.97093   AUTO
+        w38_ad202stdcorr_ens4      0.97093   AUTO
+
+    UNGRADED   P1  nobody clicks; Kaggle auto-selects on public score
+               both pairs land on 0.97093 at 5 d.p., so the board cannot tell them apart
+    HELD       P2  the account finishes inside the top decile
+               rank 319 against the top-10% line 353, margin +34
+    HELD       P3  final private rank inside (122, 426)
+               rank 319; union interval (62, 485) also holds
+    HELD       P4  one realisation cannot grade the CV-selection thesis
+               w135a measured P(delta>0) = 79.6% and sd 3.80e-6 ... Below 95%, so the power
+               claim stands and the realised sign above is ONE DRAW.
+
+    Movement public -> private: rank 309 -> 319 (+10), score 0.97119 -> 0.97093 (-260e-6)
+
+🎯 **P1 CAME BACK UNGRADED EXACTLY AS w140 §4 S3 PREDICTED IT WOULD** — the WANTED/AUTO gap is
+4.5e-6 and the board prints 5 d.p. **That was written down before the observation existed, and
+it is the strongest thing in this entry**: the instrument's blind spot was called in advance,
+so the null is a property of the ruler and not a disappointment discovered afterwards.
+
+## 4. ✅ P1 HAS A SECOND ROUTE, AND IT CONFIRMS THE MECHANISM WITHOUT RESCUING THE CLICK
+
+`experiments/w142e_p1evidence.py`. The four scores cannot distinguish the pairs and no
+arithmetic on them will. But P1 also claimed a **mechanism** — auto-selection **on public
+score** — and that has a consequence: it must strand a file whose private is high and public is not.
+
+- **E1** Our best private over all 201 sends is **0.97094** (`w40_ad211stdcorr`). The board shows
+  **0.97093**. If the private board simply reported our best private file these would be equal.
+  They are not, so **a selection really was applied.**
+- **E2** Exactly **two** files hold our top public score 0.97119 — `w36_ad199stdcorr_ens4` and
+  `w38_ad202stdcorr_ens4`, i.e. **precisely the AUTO pair** — and their max private is
+  **0.97093, the board's number.** `w40_ad211stdcorr` sits at public 0.97118, one tick below the
+  tier, **so a public-argmax rule cannot reach it.** The stranded file is the signature.
+- **E3** The API reports **0 selected submissions**. ⚠ **WEAK AND LABELLED WEAK:** no control
+  exists for whether that endpoint ever reports an *auto*-selection, and the competition is
+  closed so one cannot be built. It corroborates; it does not decide.
+
+⛔ **P1 STAYS UNGRADED ON THE CLICK ITSELF.** E1/E2 confirm a public-score selection happened;
+they say nothing about WANTED vs AUTO, because nothing can. **The click was worth 0 either way.**
+
+## 5. 🎯 THE FOUNDING RULE, FINALLY TESTABLE — AND IT IS TRUE
+
+This workspace was handed the Rogii warning and answered it with "select on CV, never on
+public." **That rule was untestable for the whole competition**, because the test needs private
+scores. 201 sends now carry one, 164 with a parseable CV in their immutable description.
+`experiments/w142d_cvprivate.py`:
+
+    CV     vs private   Spearman rho +0.929   n 164
+    public vs private   Spearman rho +0.874   n 164
+    difference +0.055, paired bootstrap 90% CI [+0.027, +0.085], P(CV better) 100.0%
+
+⚠ **PAIRED, BECAUSE BOTH RHOS ARE MEASURED ON THE SAME 164 FILES.** Comparing them unpaired
+would have inflated the spread and thrown the result away.
+
+🎯 **THE MECHANISM IS SAMPLE SIZE, NOT VIRTUE.** CV is 691,369 OOF rows; the public slice is
+20% of 296,302, about 59k. CV is the lower-noise estimator of the same quantity. Saying that
+plainly is what makes the rule portable: **it transfers whenever OOF is much larger than the
+public slice, and it stops transferring the moment CV is biased (a fold leak) rather than
+merely noisy.** The rule is not "CV is holy", it is "prefer the estimator with more rows, once
+both are unbiased."
+
+⛔ **AND IT BOUGHT NOTHING HERE.** argmax-CV, argmax-public, WANTED and AUTO **all** land on
+0.97093. The hindsight oracle over all 201 sends is 0.97094, worth **+7 ranks**. Both facts
+are true and the second does not cancel the first: **the correlation generalises, the null
+outcome is one draw at one margin** — which is P4, holding, applied to myself.
+
+## 6. ✅ THE ROGII CHECK — THE COLLAPSE HAPPENED, AND IT HAPPENED AT THE TOP
+
+Across all 3,532 teams, private − public rank movement: **median −3, sd 76**, half the field
+moved 13 places or less. Ours: **331 → 319 (−12)**.
+
+🔴 **OF THE PUBLIC TOP 100, 84 FELL. Median +89. Worst +475.** The leading edge of the public
+board was substantially overfitted and the teams standing on it paid exactly the price the
+brief warned about.
+
+⚠ **BUT OUR GAIN WAS NOT SKILL, IT WAS ABSENCE FROM THAT EDGE.** A 12-place move is quieter
+than **51%** of the field — statistically unremarkable. We went up because we were not standing
+where the collapse was, not because we forecast it. ⛔ **DO NOT WRITE THIS UP AS THE CV RULE
+EARNING +12 RANKS.** §5 measured what the rule was worth here and the answer was **0**.
+
+## 7. ⚠ SUITE — THREE NEW REDS, ONE CAUSE, AND IT IS THE CALENDAR
+
+Baseline (w140_suite4) was **57/61**, reds `w54a`, `w85c`, `w87a`, `w100a`. New today:
+`w63b_setguard` **rc=0→2**, `w67b_slopeguard` **rc=0→2**, `w87a_registrarguard` **rc=1→2**.
+
+🎯 **ALL THREE ARE ONE LINE.** `w48e_order.py:321` exits **2** at module scope for a UTC day it
+has no registration for, and **2026-09-01 is unregistered because the competition closed.** It
+reaches `w63b` directly, `w67b` via `w67a_aboveslope`, and `w87a` via `w72a_planday`. Correct
+behaviour from a send-day registry on a day with no sends. ⛔ **NOT REGRESSIONS FROM MY DIFF:**
+I touched `w135b_grade.py` and added `kaggle_board.py`; none of these three reads either.
+
+⚠ **AND w67b/w87a PRINT ABSOLUTELY NOTHING BEFORE DYING** — the exit happens inside their own
+import block, before the first gate line. 🎯 **A guard that dies silently at import is
+indistinguishable, from the exit code alone, from a guard that ran and had nothing to say.**
+That is worth more than today's three reds: the failure is legible only because the suite
+records rc separately from output.
+
+✅ `w86a_pagecap` **green**, `failures: []`, and `paginated_files` **14 → 15** — the page-cap
+guard recognised the new `kaggle_board.py` as properly paginated. The module that fixed today's
+bug was certified by the guard w140 built for the same class of bug.
+
+## 8. NEXT RUN
+
+1. 🏁 **THERE IS NOTHING LEFT TO SUBMIT, EVER.** The competition is closed, the board is final,
+   the forecast is graded. Any future run's only honest job is to read this entry and stop.
+2. ⛔ **DO-NOT, carried forward from w92–w141 in full and added to:**
+   • 🆕 **DO NOT FETCH A BOARD WITH `leaderboard -d` AND THEN TEST WHETHER IT IS PRIVATE.**
+     It cannot be. Use `experiments/kaggle_board.py` (§2).
+   • 🆕 **DO NOT SORT A LEADERBOARD WITH A NON-STABLE SORT.** Ties reshuffle (§2).
+   • 🆕 **DO NOT READ TODAY'S THREE NEW REDS AS BROKEN CODE.** One calendar line, §7.
+   • 🆕 **DO NOT CLAIM THE CV RULE BOUGHT RANKS HERE.** It bought 0 (§5), and the +12 was the
+     field moving, not us (§6).
+3. 📌 **THE FINAL RESULT: rank 319 of 3,532, private 0.97093, inside the top decile by 34.**
+
+🎯 **THE LESSON.** w141 found that a test which mocks its input verifies the code and silently
+vouches for the environment it never touched. w142 is the sequel and it is sharper: **the
+grader's identity gate was never wrong, and its correctness is exactly what hid the defect.**
+Thirty runs hardened the question "is this board private?" and nobody asked the cheaper
+question one layer down — **"can the thing I am asking even return the answer I want?"** The
+download endpoint had a one-field request type; that was readable from the SDK in ten seconds,
+at any point in six weeks, by anyone who thought to look at the *fetch* instead of the *check*.
+**When a guard keeps saying no, the next move is not a better guard or an override. It is to
+go one layer down and ask whether the input can physically be what the guard is looking for.**
+
+## 7b. 🔴 CORRECTION TO §7, AND THE MISTAKE IS THE POINT
+
+⚠ **I WROTE §7 FROM A SUITE THAT WAS STILL RUNNING.** It was at check 43 of 61; I read the reds
+so far, called them "three new reds", and moved on. **The finished suite is 53/61, not 57/61,
+and there are EIGHT reds, not four.** §7 stands as written because this journal is append-only;
+these are the real numbers.
+
+    TOTAL 494s   53/61 green
+    FAILURES: w54a_vetoexpiry(rc=1)   w63b_setguard(rc=2)    w67b_slopeguard(rc=2)
+              w70d_chainguard(rc=1)   w72b_dayguard(rc=2)    w85c_slotguard(rc=1)
+              w87a_registrarguard(rc=2)  w100a_complement(rc=2)
+
+Against the w140_suite4 baseline of **57/61** (`w54a`, `w85c`, `w87a`, `w100a`, all rc=1):
+
+- **FOUR genuinely new reds:** `w63b`, `w67b`, `w70d`, `w72b`.
+- **TWO that were already red and CHANGED REASON:** `w87a` and `w100a`, both **rc=1 → rc=2**.
+  ⚠ w140 §6.2 warned about exactly this — *"a fix that changes WHY a red is red is a regression
+  even when the red count is unchanged"* — so their rc shift is recorded, not waved through.
+- **TWO unchanged:** `w54a`, `w85c` — the documented post-send pair.
+
+✅ **ALL SIX MOVEMENTS ARE STILL ONE CAUSE, AND THE CAUSE IS UNCHANGED FROM §7:**
+`w48e_order.py:321` exits **2** for a UTC day it has no registration for. Reached directly by
+`w63b`; via `w67a_aboveslope` by `w67b`; via `w72a_planday` by `w87a` and `w72b`; and named
+outright by `w70d_chainguard`, which walks the send path and prints the diagnosis for me:
+
+    🔴 w48e_order   step 2 — the registered day; exits 2 on an unregistered one
+       ⛔ THE SEND PATH IS BROKEN AT THIS MODULE. Everything after it is unreachable.
+    7 of 8 reached.   FAILURES 1
+
+⛔ **STILL NOT REGRESSIONS FROM MY DIFF**, and the wider tally does not weaken that: I touched
+`w135b_grade.py` and added `kaggle_board.py`, and none of the six reads either. `w92a_smokerun`
+ran **206s** and passed — it was slow behind the 429 I caused with the board reads, not broken.
+
+🎯 **THE LESSON, WHICH IS SHARPER THAN THE ONE IN §7.** §7 argued that a guard dying silently
+at import is indistinguishable from a guard that passed quietly. Then I did the same thing to
+myself at a higher level: **I read a green-so-far prefix as a result.** A suite that is 43/61
+done is not a suite that is 43/61 green — the reds I had not reached yet were not evidence of
+absence, they were absence of evidence. ⚠ **This is w141's mocked-input failure wearing a third
+hat: I substituted the part of the observation I had for the observation I needed.** The fix is
+mechanical and I should have done it: **grade a suite from its own TOTAL line, never from its
+scrollback.**

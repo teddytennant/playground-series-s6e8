@@ -4775,6 +4775,33 @@ instead of string mentions minus a hardcoded 2.
       python -c "import zipfile; zipfile.ZipFile('lb_<run>/playground-series-s6e8.zip').extractall('lb_<run>')"
 
   `w83a_reproject` globs `lb_*/**/*publicleaderboard*.csv`, so extracting is all it needs.
+  🔴 **CORRECTED 2026-09-01 (w142). THAT COMMAND CANNOT EVER GIVE YOU THE PRIVATE BOARD.**
+  `leaderboard -d` is `ApiDownloadLeaderboardRequest`, and the request type has **exactly one
+  field, `competition_name`** — there is no argument that selects a board, which is why the
+  file it hands back is always named `…-publicleaderboard-….csv`. After the close it still
+  returns **public** scores. `w135b_grade.py` fetched this way, its board-identity gate
+  correctly rejected the result, and the grader exited 1 having graded nothing. **The gate was
+  right; the fetch was wrong.**
+
+## 🎯 THE PRIVATE LEADERBOARD LIVES ON THE OTHER ENDPOINT (w142, 2026-09-01)
+
+`ApiGetLeaderboardRequest` has the switch the download endpoint lacks:
+`competition_name`, `page_size`, `page_token`, **`override_public`**.
+
+      override_public = False (or unset)  -> the FINAL board  (private, once closed)
+      override_public = True              -> the public board, still, after the close
+
+Measured live: private leader **0.97176**, public leader **0.97207**, and **3,386 of 3,532 rows
+sit in a different order** between them. That disagreement is the proof the flag does something
+— do not accept a board as private on a filename or a vibe. Use `experiments/kaggle_board.py`
+(paginates 200/page, follows the token, backs off, caches to `experiments/board_cache/`).
+
+⚠ **RATE LIMIT IS REAL.** Four full 18-page board reads back to back returned
+**429 Too Many Requests**. The board of a closed competition never changes, so cache it.
+
+⚠ **PER-SUBMISSION `privateScore` IS PUBLISHED ON THE LIST ENDPOINT** and needs no board at
+all: all 201 rows carried one on 09-01. That is the cheapest way to check the close has
+resolved. But it is **5 d.p.**, same as the board, so any difference below 1e-5 is invisible.
 - `kaggle competitions submissions --page-size 500` → 141 rows. Still under the cap (w86).
   🔴 **CORRECTED 2026-08-31 (w140). "THE CAP" IN THAT SENTENCE MEANT THE ACCOUNT'S ROW COUNT,
   AND THE SAME BULLET LIST HAD ALREADY MEASURED A 200-ROW *SERVER PAGE* CAP ONE ENDPOINT
@@ -18447,3 +18474,30 @@ all: marginal AUC **0.49570** (looks harmless), AUC after removing the group mea
 over ~40 file-level points — not a row-level feature — plus `SD_LOO` in `w48c_slope.py`, the
 same object's sd. **No row-level LOO target encoder exists in the modelling path**; our TE is
 fold-wise throughout, which is the encoder johnsebin had to fall back to.
+
+---
+## 🎯 CV BEAT THE PUBLIC LEADERBOARD AT PREDICTING PRIVATE — MEASURED, NOT ASSERTED (w142)
+
+The workspace's founding rule ("select on CV, never on public") was untestable until the
+private scores existed. They exist now, on all **201** sends, **164** of which carry a
+parseable CV in their immutable description. `experiments/w142d_cvprivate.py`:
+
+      CV     vs private   Spearman rho +0.929   n 164
+      public vs private   Spearman rho +0.874   n 164
+      difference +0.055, paired bootstrap 90% CI [+0.027, +0.085], P(CV better) 100.0%
+
+⚠ **PAIRED, BECAUSE BOTH ARE MEASURED ON THE SAME 164 FILES.** An unpaired comparison of two
+rhos would have overstated the spread and lost the result.
+
+🎯 **THE MECHANISM IS SAMPLE SIZE, NOT VIRTUE.** CV is 691,369 OOF rows; the public slice is
+20% of a 296,302-row test set, i.e. ~59k. CV is simply the lower-noise estimator of the same
+quantity. That is worth saying plainly because it predicts *when the rule transfers*: it
+transfers whenever OOF is much larger than the public slice, and it stops transferring when the
+CV is biased (a fold leak) rather than merely noisy. **The rule is not "CV is holy", it is
+"prefer the estimator with more rows, once both are unbiased."**
+
+⛔ **AND IT DID NOT CHANGE THE OUTCOME HERE.** argmax-CV, argmax-public, WANTED and AUTO all
+select a pair whose private max is **0.97093**. Being right about the estimator bought zero at
+this margin, because the top of our own send list was flat to 5 d.p. Both facts are true and
+the second does not cancel the first: the correlation result generalises, the null outcome is
+one draw at one margin.
