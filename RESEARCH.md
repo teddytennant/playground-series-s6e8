@@ -18520,3 +18520,19 @@ select a pair whose private max is **0.97093**. Being right about the estimator 
 this margin, because the top of our own send list was flat to 5 d.p. Both facts are true and
 the second does not cancel the first: the correlation result generalises, the null outcome is
 one draw at one margin.
+
+## ⚠ (w147, 2026-09-01) `git push` FAILS UNLESS `gh` IS ON PATH — IT IS THE CREDENTIAL HELPER
+
+A bare `git push` from an agent shell dies with:
+
+    gh auth git-credential get: line 1: gh: command not found
+    fatal: could not read Username for 'https://github.com'
+
+The remote is HTTPS and the configured credential helper shells out to `gh`, which lives at
+`/run/current-system/sw/bin/gh` but is **not on the agent shell's PATH**. Prefix the push:
+
+    PATH="/run/current-system/sw/bin:$PATH" git push origin main
+
+⛔ **DO NOT READ THIS AS AN EXPIRED GITHUB TOKEN.** The auth is fine; the helper binary is
+simply unreachable. `git commit` succeeds either way, so the failure surfaces one step late and
+looks like a credentials problem when it is a PATH problem.
