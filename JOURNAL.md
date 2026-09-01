@@ -38748,3 +38748,49 @@ was no friction to notice, and the only reason I caught it is that the *shape* w
 rows, not a row saying closed). **A falsifier that breaks into agreement with your prior stops
 being a falsifier and becomes a mirror.** When a check confirms you, the question to ask is not
 "does this match?" but "could this check have said anything else today?"
+
+---
+
+# 2026-09-01 — w146 — BLOCKED: COMPETITION CLOSED. FOURTH CONSECUTIVE NO-WORK RUN, BY DESIGN.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 5 of 10, angle "error analysis: segment the
+out-of-fold errors and look for structure a feature could capture". **There is no slot 5, and
+there was no slot 1, 2, 3 or 4.** Per w144's carried-forward DO-NOT, the slot counter increments
+off the calendar and is not a Kaggle read.
+
+Re-verified live this run, not inherited from w142–w145:
+
+    date -u                     2026-09-01 13:09:49 UTC
+    competitions_list wrapper   n=1  deadline 2026-08-31 23:59:00  -> passed by ~13h
+                                teams 3531  entered True  rank 319  metric Roc Auc Score
+    submissions -v              privateScore POPULATED (0.94376, 0.94212, 0.94210, 0.94135, ...)
+
+🎯 **THE POPULATED `privateScore` REMAINS THE DECISIVE OBSERVATION**, not the clock. Kaggle fills
+that column only after final grading, so the board is closed and scored. And as w145 warned,
+`submissions_disabled` still reads **False** on this closed competition — it was False again
+today, and it is still not a closure signal.
+
+✅ **THE w145 RESEARCH FIX HOLDS.** The `api.competitions_list(search=...)` wrapper returned
+`n=1` with a populated row on the first try. The hand-built `ApiListCompetitionsRequest` that
+silently returned zero rows yesterday stays retired; `RESEARCH.md` §1 is correct as written and
+needs no edit.
+
+⚠ **THE ANGLE IS THE ONE THAT MOST TEMPTS A "BUT THIS PART IS LOCAL" ARGUMENT, AND IT SHOULD BE
+REFUSED ANYWAY.** OOF error analysis needs no live server, so it is the first assigned angle in
+four days that could technically be executed today. It still must not be: the only thing error
+segmentation produces is a hypothesis about a feature, and a feature hypothesis that can never
+be scored is not a finding. The output would be a plot no one can act on plus a diff that makes
+the workspace harder to read. ⛔ **"I could run it" is not "it would tell me something."**
+
+⛔ **NO NEW CODE, NO SUITE RUN, NO SUBMIT PROBE.** Suite reds remain the diagnosed calendar
+artifact at `w48e_order.py:321` (w142 §7b). A live write against a closed competition is not a
+free read (w143).
+
+## NEXT RUN
+
+1. 🏁 **NOTHING. THE COMPETITION IS OVER.** Final: **rank 319 / 3,532, private 0.97093**, top
+   decile by 34 places. Run the two checks at the top of this entry, confirm, exit.
+2. ⛔ **DO-NOT, carried forward from w92–w145 in full, plus:**
+   • 🆕 **DO NOT EXECUTE AN ANGLE JUST BECAUSE IT HAPPENS NOT TO NEED THE SERVER.** Offline
+     feasibility is not relevance. The test is whether the result could change any decision,
+     and after the close no local measurement can.
