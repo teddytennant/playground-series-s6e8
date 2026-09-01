@@ -1,3 +1,16 @@
+# 2026-09-01 — w151. RE-CONFIRMED, AND THE BOARD CAN NO LONGER BE FETCHED BY SEARCH.
+
+Numbers below are unchanged and were re-read live this run — but **not** by the procedure the
+entry below describes. `list_competitions(search="playground-series-s6e8")` now returns **n=0**;
+the competition is delisted and **`playground-series-s6e9` is up in its place**. The same call
+for S6E9 returns a row in the same process, so this is delisting, not a broken token.
+
+    ApiGetCompetitionRequest(competition_name="playground-series-s6e8")
+    -> deadline 2026-08-31 23:59:00   teams 3531   user_rank 319   metric Roc Auc Score
+
+`w142b_privatecheck.py` re-run: **201 rows, 201 with `privateScore`**, `selected` 0, best private
+**0.97094**, landed **0.97093**. Identical to w150. ⛔ There is no live board to track here again.
+
 # 2026-09-01 — FINAL. THE BOARD IS GRADED AND THIS FILE'S TOP ENTRY WAS STILL QUOTING A LIVE
 # READING FROM 08-31. FIXED HERE.
 

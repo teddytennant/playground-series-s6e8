@@ -39146,3 +39146,149 @@ not a free read (w143). The only things touched are three documents and one guar
      50 rows out of 201 and the truncation is silent. Use `w142b_privatecheck.py`.
    • 🆕 **A GUARD THAT EXITS 0 WHILE PRINTING `FAILURES: 7` IS INVISIBLE TO ANYTHING READING rc.**
      Read the last line of the census, not its status.
+
+---
+
+# 2026-09-01 — w151 — BLOCKED: COMPETITION CLOSED. NINTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# THE ORIENTATION READ ITSELF BROKE THIS RUN: S6E8 IS DELISTED AND S6E9 IS UP.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 10 of 10, ANGLE *"CatBoost: it usually handles
+categoricals better than the others on survey-style data. Tune and compare on identical folds."*
+**There is no slot 10, and there was no slot 1 through 9.** Per w144's carried-forward DO-NOT, the
+counter increments off the calendar. Prompt also states "submissions the Kaggle API already
+reports for today: 0" — true, and w149's DO-NOT covers it: zero is a real read of a dead board.
+
+## 1. 🔴 THE STANDING ORIENTATION CHECK RETURNED n=0. IT IS NOT BROKEN — S6E8 IS DELISTED.
+
+w142–w150 each opened with `competitions_list(search="playground-series-s6e8")` and quoted
+`n=1 deadline 2026-08-31 23:59:00 teams 3531 rank 319` off it. **That read returned an empty list
+this run.** Four calls in one process settle what it means:
+
+    search="playground-series-s6e8"  ->  n=0   []
+    search="playground-series-s6e9"  ->  n=1   ['playground-series-s6e9']    <- THE SUCCESSOR IS UP
+    search="playground series"       ->  n=3   s6e9, cirrhosis-trial, sch2-reg
+    (no search)                      ->  n=20  arc-prize-2026, rsna-knee, ...
+
+🎯 **THE SAME CALL, SAME TOKEN, SAME PROCESS, RETURNS A ROW FOR S6E9 AND NOTHING FOR S6E8.** That
+rules out auth, endpoint and SDK breakage in a single comparison. The empty set is the answer, not
+a failure: the competition has dropped out of the listing and the next Playground episode has
+taken its place.
+
+✅ **REPLACEMENT READ, AND IT STILL WORKS IN FULL** — `ApiGetCompetitionRequest(competition_name=…)`,
+which `w134a_awardunit.py` already used for its `self` block:
+
+    deadline 2026-08-31 23:59:00   teams 3531   rank 319   metric Roc Auc Score
+    submissions_disabled False     max_daily_submissions 10
+
+    date -u   2026-09-01 13:36:10 UTC   ->  deadline passed by ~13.6h
+
+✅ **THE DECISIVE READ IS UNCHANGED AND WAS RE-RUN, NOT INHERITED.** `w142b_privatecheck.py`:
+**201 rows, 201 with `privateScore`**, `selected` **0**, status all COMPLETE. Best private
+**0.97094** (`w40_ad211stdcorr`, public 0.97118); landed **0.97093**. The rewritten
+`w142b_allsubs.json` is byte-identical to w150's — a free consistency check on a frozen board.
+
+⚠ `submissions_disabled` reads **False** for the **tenth** day, now on a board that is closed,
+graded *and* delisted. w145's trap is not merely still armed, it has outlived the listing.
+
+## 2. ⚠ THE TRAP: AN INSTRUMENT THAT WENT SILENT, WHERE SILENCE LOOKS LIKE FAILURE
+
+`n=0` does not raise, does not warn, and returns a well-formed empty list. A run following the
+w142–w150 procedure literally gets nothing where nine journal entries promise a populated row, and
+the two cheapest readings are both wrong: *the credentials broke* and *the competition never
+existed*. ⛔ **Do not debug the token on an `n=0`.** Search a competition known to be live in the
+same process; a row back means the API is fine and the empty set is the finding.
+
+This is the week's running family, one step further back each time:
+
+| run | shape of the trap |
+|---|---|
+| w145 | a falsifier that broke **into agreement** |
+| w148 | a **true number** answering the wrong question |
+| w150 | a true measurement over a **silently incomplete** population (50 of 201 rows) |
+| **w151** | a true measurement over an **empty** population, indistinguishable from a dead instrument |
+
+⛔ **NO CODE DEPENDS ON THE DEAD READ.** `list_competitions` appears in exactly one file across
+`experiments/*.py` and `agent/` — `w134a_awardunit.py` — which pages the listing for `peers` and
+uses `get_competition` for S6E8 itself. Nothing in `w93a_suite.py` reads it. **The dead procedure
+lived only in the journal's prose, which is precisely why no guard caught it**, and is the reason
+this entry writes it into `RESEARCH.md` rather than into a new check.
+
+## 3. ✅ THE ANGLE, ANSWERED BY CITATION (w147's rule) — ROW 3, CLOSED, AND ARTEFACT-VERIFIED
+
+Seventeenth handing of the CatBoost string. `RESEARCH.md` ANGLE INDEX row 3 closes it, and it is
+one of the rows re-verified at the **artefact** level (w123, `w123a_row3.py`; significance added
+w132a):
+
+| the angle's knob | published | status |
+|---|---|---|
+| "handles categoricals better" → enrolment value | **+10.04e-6/member** for the 8 CatBoosts measured alone | per-member sd 1.96e-6, **t = 5.12** on df=2 (5% crit 4.303, **1% crit 9.925 — not cleared**) |
+| the `rest`-group figure the row used to publish alone | 5.9e-6/member | ⚠ `rest` is a **RESIDUAL** (8/35 CatBoost, 4 NNs), so it was never a CatBoost price; re-measures +5.59e-6 on base104 |
+| corroboration | w20d foreign `cat` group | **10.3e-6/member** |
+| "tune and compare on identical folds" | row 2's **TUNING** price, +4e-7 into the stack | under 1% of the 5e-5 floor |
+
+🎯 **THE OPERATIONAL RULE THE ROW ACTUALLY SUPPORTS IS *PREFER A PIPELINE WE DO NOT HOLD*, NOT
+*PREFER CATBOOST*** — both pure-CatBoost measurements are of **foreign** pipelines. ⛔ And the
+tuning half is row 2's +4e-7. Nothing here re-opens, and there is no slot to score it in.
+
+## 4. ✅ THE WORK: CENSUS RUN AND SYNCED PER w150's STANDING INSTRUCTION
+
+w150's next-run item #2 says run `w117a_handcount` every run including no-work runs, and update
+the row for the angle handed. Done, in both states:
+
+    BEFORE any edit   FAILURES: 0    (row 3 not yet drifted — no closed-day run had drawn it)
+    AFTER  the edits  FAILURES: 0    (168+ headers, off-rotation unchanged)
+
+Two edits, deterministic, neither touching a model or a submission:
+
+1. `RESEARCH.md` ANGLE INDEX row 3 — **×16 → ×17**, trail extended `→ w151 09-01 (closed)`, marked
+   `(closed)` so a later reader cannot mistake a no-work handing for artefact-level verification.
+   Rows 1, 2, 4–10 untouched.
+2. `experiments/w117a_handcount.py` — `CURRENT_RUN, CURRENT_ROW` moved from `^# 2026-09-01 — w150 —`, 2
+   to `^# 2026-09-01 — w151 —`, 3. The guard's `if not any(...)` bump makes this correct **both**
+   before this entry lands (bump fires, +1) and after (header in corpus, no bump). Verified green
+   in the pre-entry state above; the post-entry state is the same arithmetic.
+
+Plus two documents: a `RESEARCH.md` head section on the delisting, and a `LEADERBOARD.md` head
+note recording that the numbers below it are unchanged but were re-read by a **different call**
+than the entry below them describes.
+
+## 5. ✅ VERIFICATION — SUITE UNCHANGED AGAINST THE w142/w150 BASELINE
+
+    experiments/w117a_handcount.py    FAILURES: 0
+    experiments/w93a_suite.py         TOTAL 318s   53/61 green      (logs_w151_suite.txt)
+
+Reds, byte-for-byte the w142/w150 set and no other: `w54a_vetoexpiry(1)` `w63b_setguard(2)`
+`w67b_slopeguard(2)` `w70d_chainguard(1)` `w72b_dayguard(2)` `w85c_slotguard(1)`
+`w87a_registrarguard(2)` `w100a_complement(2)`. ⛔ **NOT REGRESSIONS FROM THIS DIFF** — all eight
+are the diagnosed calendar artifact (`w48e_order.py:321` exits 2 for an unregistered UTC day) and
+its downstream reaches.
+
+✅ **THE FOUR GUARDS THAT PARSE THE BLOCK I EDITED ALL STAYED GREEN**, which is the check
+`RESEARCH.md` §3168 demands after any ANGLE INDEX edit:
+
+    w101a_angleguard       every ANGLE INDEX pointer resolves
+    w115a_docselectguard   no human-read doc names a non-WANTED selectable file
+    w122a_slotguard        slots are filled, not tiers listed
+    w123b_groupguard       the residual group is labelled as one, and ROW 3 SELLS BOTH PRICES
+
+That last one reads row 3 specifically — the row this run edited — and it is clean.
+
+⛔ **NO SUBMISSION, NO SUBMIT PROBE, NO MODEL RUN.** A live write against a closed competition is
+not a free read (w143). Only three documents and one guard's pointer were touched.
+
+## 6. NEXT RUN
+
+1. 🏁 **THERE IS NOTHING TO SUBMIT, EVER.** Final: **rank 319 / 3,531, private 0.97093**, top
+   decile by 34 places. Confirm and stop.
+2. ✅ **THE OPENING CHECK HAS CHANGED. USE `get_competition`, NOT A SEARCH.**
+   `list_competitions(search="playground-series-s6e8")` returns **n=0** and will keep doing so.
+3. ✅ **STILL RUN `experiments/w117a_handcount.py`, INCLUDING ON NO-WORK RUNS**, and sync the
+   ANGLE INDEX row for whatever angle you were handed, plus `CURRENT_RUN`/`CURRENT_ROW`.
+4. ⛔ **DO-NOT, carried forward from w92–w150 in full, plus:**
+   • 🆕 **DO NOT DEBUG THE TOKEN ON AN EMPTY RESULT.** Falsify it against a competition known to
+     be live in the same process. If that returns a row, the empty set is the answer.
+   • 🆕 **A DOCUMENTED PROCEDURE IS NOT A GUARDED ONE.** Nine runs ran the same opening command
+     out of prose; when it went dead, no check noticed, because no check read it. Anything the
+     journal instructs future runs to *run* is unguarded by construction.
+   • 🆕 **`playground-series-s6e9` IS LIVE.** It is **not** this workspace's competition, and a
+     handed angle is never evidence about which competition you are in (w149). Do not drift.
