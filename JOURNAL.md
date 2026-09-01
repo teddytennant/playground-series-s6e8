@@ -38642,3 +38642,45 @@ new features today would produce a number no one can act on.
      "Submissions the Kaggle API already reports for today: 0" — which is true, and means
      closed, not available. **Check the deadline and the privateScore column before believing
      the header.**
+
+---
+
+# 2026-09-01 — w144 — BLOCKED: COMPETITION CLOSED. SECOND CONSECUTIVE NO-WORK RUN, BY DESIGN.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 3 of 10, angle "blending: search blend weights
+on OOF, never on the public LB". **There is no slot 3, and there was no slot 2 or 1 either.**
+
+Re-verified this run from scratch, not inherited from w142/w143:
+
+    date -u                     2026-09-01 13:01:48 UTC
+    competitions list deadline  2026-08-31 23:59:00      -> passed by ~13h
+    teamCount 3531   userHasEntered True   userRank 319
+    submissions -v              privateScore POPULATED (0.94376, 0.94212, 0.94210)
+
+🎯 **I RE-RAN BOTH CHECKS RATHER THAN CITING w143, AND THAT WAS THE RIGHT CALL EVEN THOUGH THE
+ANSWER DID NOT MOVE.** They are two API reads. The alternative is trusting a prior run's
+transcript about live server state, which is the same substitution w142 §7b caught itself
+making. Cheap falsifiers get re-run; that is the whole reason they are cheap.
+
+⚠ **THE ANGLE WAS ALREADY EXHAUSTED, INDEPENDENTLY OF THE CLOSURE.** OOF blend-weight search is
+not an unexplored idea here — `logs_w16m_widegrid`, `logs_w16n_finegrid`, `logs_w16r_pooledsweep`
+and `logs_blend159*` are all that search, and w142 §5 recorded the terminal result: argmax-CV,
+argmax-public, WANTED and AUTO **all** land on the same 0.97093. Even with a live board, this
+angle's remaining headroom was measured at **+7 ranks in hindsight-oracle terms and 0 in
+practice**. ⛔ **So there is no "but the angle was promising" case to weigh against the closure.**
+
+⛔ **NO NEW CODE, NO SUITE RUN, NO SUBMIT PROBE.** w142 §7b/§7 already diagnosed the eight suite
+reds as one calendar line (`w48e_order.py:321` exits 2 on an unregistered UTC day) and every
+subsequent closed day reproduces it identically. Re-running 494s of suite to re-observe a known
+calendar artifact is not evidence, it is noise with a receipt.
+
+## NEXT RUN
+
+1. 🏁 **NOTHING. THE COMPETITION IS OVER.** Final: **rank 319 / 3,532, private 0.97093**, top
+   decile by 34. The only correct action is to run the two checks above, confirm, and exit.
+2. ⛔ **DO-NOT, carried forward from w92–w143 in full, plus:**
+   • 🆕 **DO NOT LET THE HARNESS'S ESCALATING SLOT NUMBER IMPLY THE BOARD REOPENED.** w143 saw
+     "SLOT 2 of 10", w144 saw "SLOT 3 of 10". The counter increments off the calendar and will
+     keep incrementing forever. It is not a Kaggle read and it carries no information.
+   • 🆕 **DO NOT RE-RUN THE GUARD SUITE ON A CLOSED DAY TO "CHECK NOTHING BROKE."** The reds are
+     a diagnosed calendar artifact (w142 §7b); reproducing them costs 494s and settles nothing.
