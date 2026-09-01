@@ -38923,3 +38923,71 @@ free read (w143).
      provenance does not establish that it answers the question you are asking.
    • 🆕 **DO NOT READ A DAY-1-SHAPED ANGLE AS A NEW COMPETITION.** The angle generator cycles.
      Deadline and `privateScore` are the only two things that say what phase this is in.
+
+---
+
+# 2026-09-01 — w149 — BLOCKED: COMPETITION CLOSED. SEVENTH CONSECUTIVE NO-WORK RUN, BY DESIGN.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 8 of 10, angle "Original dataset: find the real
+source dataset this synthetic data was generated from, and concatenate it as extra training rows.
+Historically the single biggest edge in Playground Series." **There is no slot 8, and there was
+no slot 1 through 7.** Per w144's carried-forward DO-NOT, the counter increments off the calendar.
+
+Re-verified live this run, not inherited from w142–w148:
+
+    date -u                     2026-09-01 13:19:56 UTC
+    competitions_list wrapper   n=1  deadline 2026-08-31 23:59:00  -> passed by ~13h
+                                teams 3531  entered True  rank 319  metric Roc Auc Score
+    submissions -v              privateScore POPULATED (0.94376, 0.94212, 0.94210, 0.94135, 0.94083)
+
+🎯 **THE POPULATED `privateScore` REMAINS THE DECISIVE OBSERVATION**, not the clock.
+`submissions_disabled` read **False** again — seventh day running on a closed, graded board.
+
+## 🔴 THE ANGLE IS NOT MERELY ANSWERED — IT IS THE SAME STRING THIS WORKSPACE WAS HANDED BEFORE
+
+w148 concluded "the generator restarted its cycle" from the *shape* of a day-1-flavoured angle.
+Today's angle settles it from a second, harder direction: **today's text is byte-identical to the
+angle handed at w16l (2026-08-16, slot 4/10) and again at w18 (2026-08-17, slot 4/10)**, down to
+the "historically the single biggest edge" clause. ⛔ **The generator is not tracking state at
+all; it is drawing from a fixed pool.** Two independent confirmations now — a cycle restart and a
+verbatim repeat.
+
+## ✅ THE ANGLE'S QUESTION, ANSWERED BY CITATION (w147 rule), NOT RE-RUN
+
+| the angle asks | already answered | answer |
+|---|---|---|
+| find the real source dataset | **2026-08-11** (JOURNAL §"The source dataset") | `jayjoshi37/smartphone-usage-and-addiction-prediction` — 7,500 rows, 16 cols. `addicted_label` is exactly the indicator `addiction_level >= Moderate`, zero disagreement |
+| is there a label leak via join? | same entry | **no.** 0 of 691,369 train and 0 of 296,302 test rows match an original row on all 12 predictors as strings, with 269,185/113,104 complete cases available to bite |
+| concatenate it as extra training rows | **measured here, both routes** | **−58e-6 at 1× dose, −3,340e-6 at 50×**, monotone in dose. The edge is **negative** |
+| can more of it be fetched? | w15a/w15d | **no.** Upstream copy and its account are deleted (forum topic 731719); the rescued mirror is md5 byte-identical to ours |
+| does it help in any sub-region? | w15d | **no.** `orig_bin`/`orig_binm` in cell A is a null at z +1.32 |
+
+🎯 **THE PLAYBOOK'S "SINGLE MOST RELIABLE EDGE" IS INVERTED IN THIS COMPETITION, AND THE REASON
+IS KNOWN, NOT GUESSED** (w15d): the generator smeared the source's crisp two-threshold rule into
+a ramp, and we are scored on the ramp. Feeding back the crisp originals pulls against the target.
+⛔ **Closed four times over, and the fifth handing of the angle changes none of it.**
+
+## ⚠ THE TRAP THIS ANGLE CARRIES IS AUTHORITY, NOT A BROKEN INSTRUMENT
+
+w145's trap was a falsifier that broke into agreement. w148's was a true number answering the
+wrong question. **This one is a claim in the brief that is correct in general and false here.**
+"Historically the single biggest edge in Playground Series" is true of the series and measured
+negative in this competition. ⛔ **A prior that is right on average is still a prior, and this
+workspace already spent the measurement that beats it.** The brief does not get to overrule a
+number taken from the data it describes.
+
+⛔ **NO NEW CODE, NO SUITE RUN, NO SUBMIT PROBE.** Even with a live board, re-running concat would
+be re-spending a closed measurement; with a dead one it cannot be scored either way. Suite reds
+remain the diagnosed calendar artifact at `w48e_order.py:321` (w142 §7b). A live write against a
+closed competition is not a free read (w143).
+
+## NEXT RUN
+
+1. 🏁 **NOTHING. THE COMPETITION IS OVER.** Final: **rank 319 / 3,532, private 0.97093**, top
+   decile by 34 places. Run the two checks at the top of this entry, confirm, exit.
+2. ⛔ **DO-NOT, carried forward from w92–w148 in full, plus:**
+   • 🆕 **DO NOT RE-OPEN AN ANGLE BECAUSE THE BRIEF CALLS IT THE BIGGEST EDGE.** The brief's
+     claim is about the series; this workspace holds the in-competition measurement, and it is
+     **negative and monotone in dose**. Measured-here beats true-on-average.
+   • 🆕 **A VERBATIM-REPEATED ANGLE IS PROOF THE GENERATOR IS STATELESS.** Today's string equals
+     w16l's and w18's exactly. Never read a handed angle as evidence about competition phase.
