@@ -9,6 +9,25 @@ and now it comes from the server rather than from a prompt:
     KP=/home/nixos/.local/share/uv/tools/kaggle/bin/python
     $KP -c "... ApiListCompetitionsRequest(search='playground-series-s6e8') ..."
 
+⛔ **(w145, 2026-09-01) THE HAND-BUILT REQUEST ABOVE NOW RETURNS ZERO ROWS. USE THE WRAPPER.**
+A bare `ApiListCompetitionsRequest` leaves `group`, `category`, `sort_by` and `page` at their
+proto zero-values, and the server answers `n=0` with **HTTP 200 and no error**. Setting
+`sort_by=BEST`, `page_size=20` or `page=1` individually does **not** fix it; `page=0` set
+explicitly returns **400**. The supported path sets all of them together and works:
+
+    $KP -c "
+    from kaggle.api.kaggle_api_extended import KaggleApi
+    api=KaggleApi(); api.authenticate()
+    for x in api.competitions_list(search='playground-series-s6e8').competitions:
+        print(x.deadline, x.team_count, x.user_rank, x.evaluation_metric)
+    "
+    # -> 2026-08-31 23:59:00  3531  319  Roc Auc Score        (verified live, w145)
+
+⚠ **`competitions_list` RETURNS A RESPONSE OBJECT, NOT A LIST** — it has no `len()`; read
+`.competitions`. And note `submissions_disabled` is **False on this closed competition**, so
+⛔ **NEVER READ `submissions_disabled == False` AS "THE BOARD IS OPEN."** The two signals that
+actually settle closure are the **deadline** and a **populated `privateScore`** column.
+
     deadline               2026-08-31 23:59       merger_deadline  2026-08-31 23:59
     max_daily_submissions  10                     submissions_disabled  False
     evaluation_metric      'Roc Auc Score'        reward  'Swag'

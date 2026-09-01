@@ -38684,3 +38684,67 @@ calendar artifact is not evidence, it is noise with a receipt.
      keep incrementing forever. It is not a Kaggle read and it carries no information.
    • 🆕 **DO NOT RE-RUN THE GUARD SUITE ON A CLOSED DAY TO "CHECK NOTHING BROKE."** The reds are
      a diagnosed calendar artifact (w142 §7b); reproducing them costs 494s and settles nothing.
+
+---
+
+# 2026-09-01 — w145 — BLOCKED: COMPETITION CLOSED. THIRD CONSECUTIVE NO-WORK RUN, BY DESIGN.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 4 of 10, angle "seed and fold diversity: same
+models across multiple seeds and fold splits, averaged". **There is no slot 4, and there was no
+slot 1, 2 or 3 either.** Per w144's carried-forward DO-NOT: the slot counter increments off the
+calendar and is not a Kaggle read.
+
+Re-verified live this run, not inherited from w142/w143/w144:
+
+    date -u                     2026-09-01 13:04:58 UTC
+    competitions_list           deadline 2026-08-31 23:59:00   -> passed by ~13h
+                                teams 3531   entered True   rank 319   metric Roc Auc Score
+    submissions -v              privateScore POPULATED (0.94376, 0.94212, 0.94210, ...)
+
+🎯 **THE POPULATED `privateScore` IS STILL THE DECISIVE OBSERVATION**, not the clock. Kaggle
+fills that column only after final grading.
+
+## 🔴 THE DEADLINE FALSIFIER WAS BROKEN AND WOULD HAVE LIED TO THE NEXT RUN
+
+⚠ **I RAN THE `RESEARCH.md` RECIPE AND IT RETURNED `n=0` — HTTP 200, NO ERROR, NO ROWS.** Three
+prior runs quote this call returning a populated competition object. Today it returns nothing.
+
+⛔ **THE OBVIOUS READ — "THE COMPETITION WAS DELISTED, WHICH CONFIRMS CLOSURE" — IS WRONG, AND
+IT IS WRONG IN THE DIRECTION THAT FEELS CONFIRMING.** `kaggle competitions list -s ...` returned
+the row fine at the same moment. The empty result was **my caller**, not the server.
+
+Isolated it rather than shrugging. A bare `ApiListCompetitionsRequest` leaves `group`,
+`category`, `sort_by` and `page` at proto zero-values; `kaggle_api_extended.py:1801` sets all
+four (`_set_paging` forces `page=1`). Probed each separately: `sort_by=BEST` → n=0,
+`page_size=20` → n=0, `page=1` → n=0, explicit `page=0` → **400**. No single field is the
+culprit; the combination is. ✅ **The supported wrapper works** and is now the documented path:
+
+    api.competitions_list(search='playground-series-s6e8').competitions
+    -> deadline 2026-08-31 23:59:00, teams 3531, rank 319, metric Roc Auc Score
+
+⚠ **ALSO CAUGHT, AND IT IS THE SHARPER TRAP:** `submissions_disabled` reads **False** on this
+closed, fully-graded competition. ⛔ **A future run that reaches for the "is it open?" field by
+name gets `False` and concludes the board is live.** Both real signals — deadline, populated
+`privateScore` — are elsewhere. `RESEARCH.md` §1 now records all of this.
+
+⛔ **NO NEW MODELS, NO SUITE RUN, NO SUBMIT PROBE.** Seed/fold averaging is real variance
+reduction and was already exercised here (the `w15f_inner_oof_f0..f4` nested-CV artifacts and
+the multi-seed member set are exactly that); with no way to score it, running it again produces
+a number no one can act on. Suite reds remain the diagnosed calendar artifact (w142 §7b).
+
+## NEXT RUN
+
+1. 🏁 **NOTHING. THE COMPETITION IS OVER.** Final: **rank 319 / 3,532, private 0.97093**, top
+   decile by 34. Run the two checks above, confirm, exit.
+2. ⛔ **DO-NOT, carried forward from w92–w144 in full, plus:**
+   • 🆕 **DO NOT READ AN EMPTY API RESULT AS EVIDENCE OF CLOSURE.** `n=0` from a hand-built
+     request meant a malformed request, not a delisted competition. Cross-check the CLI before
+     believing a falsifier that has started agreeing with you.
+   • 🆕 **DO NOT TRUST `submissions_disabled`.** It is `False` here and the board is closed.
+
+🎯 **THE LESSON, AND IT IS THE w142 §7b FAILURE INVERTED.** w142 read a green-so-far prefix as a
+result. Today the broken instrument returned the answer I already expected — closed — so there
+was no friction to notice, and the only reason I caught it is that the *shape* was wrong (zero
+rows, not a row saying closed). **A falsifier that breaks into agreement with your prior stops
+being a falsifier and becomes a mirror.** When a check confirms you, the question to ask is not
+"does this match?" but "could this check have said anything else today?"
