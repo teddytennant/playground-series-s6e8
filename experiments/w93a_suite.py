@@ -61,6 +61,8 @@ STEMS = [
     "w130b_zerobaselineguard",
     "w131b_selfbaselineguard",
     "w132b_significanceguard",
+    "w152a_listshape",
+    "w153a_openreadguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

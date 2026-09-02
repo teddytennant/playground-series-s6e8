@@ -39427,3 +39427,179 @@ not a free read (w143). Documents, one guard's pointer, and one new read-only ch
      `TypeError`. Read `.competitions`.
    • 🆕 **KAGGLE SEARCH IS FUZZY — `row[0]` IS NOT THE SLUG YOU ASKED FOR.** `arc-prize-2026`
      returns `arc-prize-2026-arc-agi-3` first. Match the ref exactly.
+
+---
+
+# 2026-09-02 — w153 — BLOCKED: COMPETITION CLOSED. ELEVENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# AND THE OPENING READ w152 PUBLISHED RAISES `TypeError` — IT IS NOT THE CALL THAT PRODUCED ITS OWN OUTPUT.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 2 of 10, ANGLE *"blending: rank-average or weight
+the tuned models by out-of-fold performance; search blend weights on OOF, never on the public
+leaderboard."* Deadline **2026-08-31 23:59**, read live off the competition object, now
+**2026-09-02 13:0x UTC** — passed by **~37 hours**. The prompt's *"submissions the Kaggle API
+already reports for today: 0"* is w149's case again: a true read of a dead board.
+
+## 1. 🔴 THE OPENING READ IS PUBLISHED IN A FORM THAT CANNOT RUN
+
+I ran w152's next-run instruction #2 as written and it did not dial:
+
+    ApiGetCompetitionRequest(competition_name='playground-series-s6e8')
+    TypeError: ApiGetCompetitionRequest.__init__() got an unexpected keyword argument 'competition_name'
+
+`inspect.signature(T.__init__)` is `(self)` for **all three** request types this workspace uses.
+🎯 **So the snippet cannot have produced the `deadline … rank 319` block printed underneath it** —
+it raises before a socket opens and emits nothing. w151 and w152 both ran construct-then-assign
+and typeset it as a kwarg, the way every executable artefact here already does it
+(`w134a_awardunit.py:74`, `w136a_autorule.py:95`). The read itself is unchanged:
+
+    deadline 2026-08-31 23:59:00   teams 3531   rank 319   metric Roc Auc Score
+    submissions_disabled False     max_daily_submissions 10
+
+⚠ And a fourth failure shape sits next to it: assigning a field the type does not carry
+(`ApiListCompetitionsRequest.competition_name`) is an **AttributeError** from
+`kaggle_object.py:304`, not an ignored field.
+
+| # | how the opening read can look like a dead token | found |
+|---|---|---|
+| 1 | `len()` on `ApiListCompetitionsResponse` | TypeError | w152 |
+| 2 | fuzzy search, `row[0]` is a different competition | wrong answer | w152 |
+| 3 | the kwarg constructor | TypeError | **w153** |
+| 4 | assigning a field the request type lacks | AttributeError | **w153** |
+
+⛔ **THE SECTION CARRYING THE DEFECT IS THE SECTION WARNING ABOUT THE DEFECT.** w152 catalogued
+two ways this read looks dead and published the third in the same paragraph. This week's family
+gains one more entry: w145 a falsifier that broke into agreement · w148 a true number answering
+the wrong question · w150 a true measurement over an incomplete population · w151 the same over
+an empty one · w152 a passing falsifier with no power · **w153 a fixed procedure published in a
+form that never ran.**
+
+## 2. ✅ GUARDED, NOT NARRATED — `experiments/w153a_openreadguard.py`
+
+C1 zero-argument `__init__` and the TypeError per type, off `inspect.signature` rather than
+asserted · C2 the attribute form completes the read live · C3 no uncallable kwarg-form request
+construction anywhere in `RESEARCH.md` · C4 `--control` over the frozen pre-fix snippet, which
+fires, plus the specimen moved out of its section, which also fires · C5 scope: `experiments/`
+and `agent/` carry **0**, so the genus is **DOC-ONLY** · C6 the blind spot as a number, not an
+omission: `JOURNAL.md` 1 and `LEADERBOARD.md` 2 uncallable forms, both history, neither enforced.
+
+    pre-fix   FAILURES: 2   (C3 flagged RESEARCH.md L53, L95, L171, L10631)
+    post-fix  FAILURES: 0
+    --control FAILURES: 0, having fired on the frozen snippet
+
+⚠ **A GUARD THAT FORBIDS A STRING CANNOT QUOTE ITS OWN DEFECT.** The w153 section needs the broken
+snippet verbatim, so C3 allowlists it by **exact text AND position** — inside that section only —
+and C4 proves the exemption is positional by moving the section boundary and watching it fire.
+
+## 3. ⛔ AND THE GUARD THAT PROVED w152's CASE WAS NEVER SCHEDULED TO RUN — THEN COULD NOT RUN
+
+`w152a_listshape` was written as a standing check and left out of `w93a_suite`'s `STEMS`, so it
+ran only when a run read the prose telling it to. That is w152's own lesson one level up: the
+guard existed and the **schedule** did not. Both it and `w153a_openreadguard` are registered now;
+`STEMS` and the published block both read **63**, and the suite's C2 compares the two copies.
+
+🔴 **AND REGISTRATION ALONE LEFT THEM BROKEN.** First run after registering: **53/63**, the two
+new stems red at `rc=1` in **0.0s**. The suite runs every stem under `.venv/bin/python`, which has
+numpy and **not** the kaggle SDK, so an API guard dies on `ModuleNotFoundError: No module named
+'kaggle'` — inside the runner that is indistinguishable from the guard failing. Both now hand
+themselves to `/home/nixos/.local/share/uv/tools/kaggle/bin/python` on `ImportError`.
+
+⚠ **AND THE FIRST HAND-OFF I WROTE DID NOTHING.** I broke the exec loop with
+`realpath(sys.executable) != realpath(KAGGLE_PY)` — but the two paths resolve to the **same**
+interpreter binary (`cpython-3.12.13`) and differ only in site-packages, so the condition is
+False and the hand-off never fires. The marker is an env var, `KAGGLE_PY_REEXEC=1`, through
+`os.execve`. Verified both ways: `.venv/bin/python experiments/w153a_openreadguard.py` →
+FAILURES 0, and through the runner → `rc=0  0.5s`.
+
+## 4. ✅ THE ANGLE, ANSWERED BY CITATION AND RE-VERIFIED AT THE ARTEFACT LEVEL — ROW 6, CLOSED
+
+Fifteenth handing of the blending string. It closes on `RESEARCH.md` ANGLE INDEX row 6, and this
+run re-ran its artefact-level verifier rather than quoting it: `w126a_row6.py` → **FAILURES: 0**, all five arms live
+
+| the angle's clause | layer | price |
+|---|---|---|
+| *"rank-average"* / equal weights | TOP-LEVEL, k=4 transform arms | cross-fitted `all4` vs zero-parameter `h3`: **−1.0710e-6** |
+| *"weight the models by OOF"* | MEMBER, k=104 | **+2,343e-6** — and it is the **INCUMBENT**, not a candidate |
+| *"never on the public leaderboard"* | — | already the rule; final selection was on CV (w141 §4) |
+
+⛔ The member-layer number is what `agent/stack.py` has been doing since w38 — cross-fitted
+`LogisticRegression` weights on the frozen folds (`agent/stack.py:262-269`), so there is nothing
+to add. The top-level search is **negative**. Nothing re-opens, and there is no slot to score it in.
+
+Everything re-measured live rather than quoted, `logs_w153_row6.txt`:
+
+    R2  the w36d table reproduces to 1e-9, cross-arm fitted-all4 vs equal-h3 = -1.0710e-6
+    R3  the k ladder, 13 rungs, k=2..104: the honest search beats equal weights at 13/13,
+        +828.55e-6 at k=2 -> +2,343.29e-6 at k=104; optimism +4.32e-6 at k=2 -> +45.35e-6 at k=104
+    R4  `0.55(k-1) e-6` predicts +56.6e-6 at k=104 against a measured +45.4e-6 — the RULE is
+        above the 50e-6 floor and the MEASUREMENT is below it, so a 26x extrapolation of a
+        two-point fit decides the closure by itself
+    R5  the two searchers' optimism is NOT interchangeable: logreg/simplex runs 4.00 (k=2),
+        0.26 (k=4), -2.43 (k=8) — it flips sign, so no bridge constant exists to assume
+
+## 5. ✅ THE DECISIVE READS, RE-RUN LIVE — NOTHING ELSE MOVED
+
+`experiments/w142b_privatecheck.py`, re-run and not inherited: **201 rows, 201 with `privateScore`**,
+`selected` **0**, status all COMPLETE. Best private **0.97094** (`w40_ad211stdcorr`, public
+0.97118); landed **0.97093**, **rank 319 / 3,531**. `w152a_listshape` re-run live: **FAILURES: 0**,
+the open/closed prediction still 5/5. ⚠ `submissions_disabled` reads **False** for the twelfth day
+on a closed, graded board.
+
+## 6. ✅ CENSUS RUN AND SYNCED PER w150's STANDING INSTRUCTION
+
+    BEFORE any edit   FAILURES: 0    (170 headers, row 6 not yet drifted)
+    AFTER  the edits  FAILURES: 0    (row 6 claimed ×15, corpus ×15)
+
+Two deterministic edits: `RESEARCH.md` ANGLE INDEX row 6 **×14 → ×15**, trail extended
+`→ w153 09-02 (closed)` and marked `(closed)` so a no-work handing cannot be mistaken for
+artefact-level verification; `experiments/w117a_handcount.py` `CURRENT_RUN, CURRENT_ROW` moved
+from `^# 2026-09-02 — w152 —`, 5 to `^# 2026-09-02 — w153 —`, 6.
+
+## 7. ✅ VERIFICATION
+
+    experiments/w153a_openreadguard.py   FAILURES: 0   (new; --control fires)
+    experiments/w152a_listshape.py       FAILURES: 0   (re-run live)
+    experiments/w126a_row6.py            FAILURES: 0   (R1–R5, 3 notes; re-run live)
+    experiments/w117a_handcount.py       FAILURES: 0
+    experiments/w93a_suite.py            53/61 green  (logs_w153_suite.txt, before registration)
+    experiments/w93a_suite.py            53/63 green  (logs_w153_suite2.txt, the two new stems red
+                                                       on the missing SDK — diagnosed above)
+    experiments/w93a_suite.py            55/63 green (logs_w153_suite3.txt, after the hand-off)
+
+Reds, byte-for-byte the w142/w150/w151/w152 set and no other: `w54a_vetoexpiry(1)`
+`w63b_setguard(2)` `w67b_slopeguard(2)` `w70d_chainguard(1)` `w72b_dayguard(2)`
+`w85c_slotguard(1)` `w87a_registrarguard(2)` `w100a_complement(2)`. ⛔ **NOT REGRESSIONS FROM THIS
+DIFF** — all eight are the diagnosed calendar artifact (`w48e_order.py:321` exits 2 for an
+unregistered UTC day).
+
+✅ The four guards that parse the ANGLE INDEX block I edited stayed green, which is what
+`RESEARCH.md` demands after any edit to it: `w101a_angleguard`, `w115a_docselectguard`,
+`w122a_slotguard`, `w123b_groupguard`.
+
+⛔ **NO SUBMISSION, NO SUBMIT PROBE, NO MODEL RUN.** A live write against a closed competition is
+not a free read (w143). Documents, one guard's pointer, two guards registered, one new guard.
+
+⚠ **AND ONE PROCESS-LEVEL SLIP WORTH RECORDING.** I started `w126a_row6.py` under `timeout`, its
+output buffered to nothing, and launched a second copy before confirming the first was dead — the
+exact double-run RESEARCH.md warns about. `/proc` showed both alive; I killed the older. `pgrep`
+and `ps` are not on this box's PATH, so the check is the `/proc/[0-9]*/cmdline` loop.
+
+## 8. NEXT RUN
+
+1. 🏁 **THERE IS NOTHING TO SUBMIT, EVER.** Final: **rank 319 / 3,531, private 0.97093**, top
+   decile by 34 places. Confirm and stop.
+2. ✅ **THE OPENING READ, IN THE ONLY FORM THAT RUNS:**
+   `r = ApiGetCompetitionRequest(); r.competition_name = COMP` — construct bare, then assign.
+   A kwarg raises `TypeError`; a field the type lacks raises `AttributeError`.
+3. ✅ **STILL RUN `experiments/w117a_handcount.py`, INCLUDING ON NO-WORK RUNS**, and sync the
+   ANGLE INDEX row for whatever angle you were handed, plus `CURRENT_RUN`/`CURRENT_ROW`.
+4. ⛔ **DO-NOT, carried forward from w92–w152 in full, plus:**
+   • 🆕 **A PROCEDURE THAT WAS NEVER EXECUTED IN THE FORM IT IS PUBLISHED IN IS NOT VERIFIED.**
+     If a snippet sits above its own output, run the snippet, not the memory of it.
+   • 🆕 **A NEW GUARD THAT IS NOT IN `w93a_suite`'s `STEMS` HAS NO SCHEDULE.** Register it in the
+     same run, and bump the published `## THE N STANDING CHECKS` heading — C2 compares the sets.
+   • 🆕 **DO NOT RUN LONG JOBS UNDER `timeout` OR WITHOUT `-u`.** A buffered log looks like a hang,
+     and the second copy you start to fix it starves the first. Check `/proc/[0-9]*/cmdline`
+     before relaunching; `pgrep` and `ps` are not on this box.
+   • 🆕 **`.venv/bin/python` HAS NO `kaggle`.** Any guard touching the API must hand itself to
+     `/home/nixos/.local/share/uv/tools/kaggle/bin/python`, and the loop-breaker cannot be a
+     `realpath` comparison — both paths resolve to the same interpreter binary.

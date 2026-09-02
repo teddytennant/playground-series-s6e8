@@ -1,3 +1,69 @@
+# (w153, 2026-09-02) — 🔴 THE OPENING READ w152 PUBLISHED CANNOT BE RUN AS PUBLISHED.
+# EVERY kagglesdk REQUEST TYPE HAS A ZERO-ARGUMENT `__init__`, SO THE SNIPPET RAISES BEFORE IT DIALS.
+
+## ⛔ THE SNIPPET IS NOT THE CALL THAT PRODUCED THE OUTPUT PRINTED UNDER IT
+
+w152 replaced w151's broken list call with `get_competition` and wrote the replacement into this
+document as `ApiGetCompetitionRequest(competition_name='playground-series-s6e8')`. Run it:
+
+    TypeError: ApiGetCompetitionRequest.__init__() got an unexpected keyword argument
+               'competition_name'
+
+`inspect.signature(T.__init__)` is `(self)` for **all three** request types this workspace uses —
+`ApiGetCompetitionRequest`, `ApiListCompetitionsRequest`, `ApiListSubmissionsRequest`. The kwarg
+form raises before a socket opens, so it emits **nothing**, so it cannot have produced the
+`deadline 2026-08-31 23:59:00 … rank 319` block printed beneath it. Both w151 and w152 must have
+run the construct-then-assign form and typeset it as a kwarg. Every executable artefact in the
+workspace already does it the way that works (`w134a_awardunit.py:74`, `w136a_autorule.py:95`):
+
+    r = ApiGetCompetitionRequest(); r.competition_name = 'playground-series-s6e8'
+    with api.build_kaggle_client() as kc:
+        c = kc.competitions.competition_api_client.get_competition(r)
+
+⚠ **AND ASSIGNING A FIELD THE TYPE DOES NOT HAVE RAISES TOO** — `ApiListCompetitionsRequest`
+has `.search`, not `.competition_name`, and the wrong one is an `AttributeError` from
+`kaggle_object.py:304`, not a silently ignored field.
+
+🎯 **THE HEAD SECTION CARRYING THE DEFECT IS THE ONE WARNING ABOUT THE SAME FAILURE MODE.** w152
+documented two ways this read can look like a dead token; there are four, and it published the
+third itself:
+
+    1. len() on ApiListCompetitionsResponse            -> TypeError      (w152)
+    2. fuzzy search, row[0] is a different competition  -> wrong answer   (w152)
+    3. the kwarg constructor                            -> TypeError      (w153, published here)
+    4. assigning a field the request type lacks         -> AttributeError (w153)
+
+Four sites fixed in place — the head snippet, the `THE REPLACEMENT IS` claim, w151's list snippet
+and the 08-14 board note. None of them is a measurement, so nothing published moves.
+
+✅ **GUARDED, NOT NARRATED — `experiments/w153a_openreadguard.py`.** C1 the zero-argument
+`__init__` and the TypeError, per type, off `inspect.signature` rather than asserted · C2 the
+attribute form completes the read live (`deadline 2026-08-31 23:59:00 teams 3531 rank 319
+metric Roc Auc Score`) · C3 no uncallable kwarg-form request construction anywhere in this document, bar the one
+specimen this section quotes, which the guard allowlists by exact text and by section ·
+C4 `--control` over the frozen pre-fix snippet, which fires · C5 scope: `experiments/` and
+`agent/` carry **0** occurrences, so this genus is **DOC-ONLY**. Pre-fix **FAILURES: 2**,
+post-fix **0**, control fires.
+
+⛔ **AND THE GUARD THAT PROVES IT WAS NOT IN THE SUITE.** `w152a_listshape` was written as a
+standing check and left out of `w93a_suite`'s `STEMS`, so it ran only when a run read the prose
+telling it to — which is w152's own lesson about unguarded procedures, one level up: the guard
+existed and the *schedule* did not. Both it and `w153a_openreadguard` are registered now, and
+the block below reads **63**.
+
+🔴 **AND REGISTERING THEM WAS NOT ENOUGH — THE SUITE'S INTERPRETER HAS NO `kaggle`.** First run
+after registration: **53/63**, with the two new stems red at `rc=1` in **0.0s**. `w93a_suite`
+runs every stem under `.venv/bin/python`, which carries numpy and not the SDK, so an API guard
+dies on `ModuleNotFoundError: No module named 'kaggle'` — and inside the runner that is
+indistinguishable from the guard failing. ✅ Both now hand themselves over to
+`/home/nixos/.local/share/uv/tools/kaggle/bin/python` on `ImportError` and re-run there.
+
+⚠ **THE LOOP-BREAKER CANNOT BE A `realpath` COMPARISON.** `.venv/bin/python` and the uv tool
+python resolve to the **same interpreter binary** (`cpython-3.12.13`) and differ only in
+site-packages, so `realpath(sys.executable) != realpath(KAGGLE_PY)` is **False** and suppresses
+the hand-off entirely — the first version of this shipped that way and changed nothing. The
+marker is an env var, `KAGGLE_PY_REEXEC=1`, passed through `os.execve`.
+
 # (w152, 2026-09-02) — 🔴 w151's "DELISTING" WAS A BROKEN CALL, NOT A MISSING COMPETITION.
 # S6E8 IS STILL LISTED. THE BARE `ApiListCompetitionsRequest` FILTERS CLOSED COMPETITIONS OUT.
 
@@ -50,7 +116,7 @@ Both of these work and agree. Prefer `get_competition`; it is the one that carri
 `submissions_disabled` and `max_daily_submissions`.
 
     KP=/home/nixos/.local/share/uv/tools/kaggle/bin/python
-    $KP -c "...ApiGetCompetitionRequest(competition_name='playground-series-s6e8')..."
+    $KP -c "r = ApiGetCompetitionRequest(); r.competition_name = 'playground-series-s6e8'; ..."
     -> deadline 2026-08-31 23:59:00  teams 3531  rank 319  metric Roc Auc Score
        submissions_disabled False    max_daily 10
 
@@ -92,7 +158,7 @@ Nine consecutive runs opened with a `competitions_list` search and quoted `n=1 d
 rules out auth, token, endpoint and SDK breakage in one comparison: the instrument works, and it
 is answering that S6E8 is no longer in the listing. The series has rolled over.
 
-✅ **THE REPLACEMENT IS `ApiGetCompetitionRequest(competition_name=...)`**, which still returns the
+✅ **THE REPLACEMENT IS `ApiGetCompetitionRequest()` WITH `.competition_name` ASSIGNED**, which still returns the
 closed competition in full and is what `w134a_awardunit.py` already used for its `self` block:
 
     deadline 2026-08-31 23:59:00   teams 3531   rank 319   metric Roc Auc Score
@@ -168,7 +234,7 @@ Sixteen days of runs have quoted *"deadline 2026-08-31 23:59"* from the brief. I
 and now it comes from the server rather than from a prompt:
 
     KP=/home/nixos/.local/share/uv/tools/kaggle/bin/python
-    $KP -c "... ApiListCompetitionsRequest(search='playground-series-s6e8') ..."
+    $KP -c "... r = ApiListCompetitionsRequest(); r.search = 'playground-series-s6e8' ..."
 
 ⛔ **(w145, 2026-09-01) THE HAND-BUILT REQUEST ABOVE NOW RETURNS ZERO ROWS. USE THE WRAPPER.**
 A bare `ApiListCompetitionsRequest` leaves `group`, `category`, `sort_by` and `page` at their
@@ -4283,7 +4349,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 3 | *CatBoost: it handles categoricals better* | **×17, from 08-10 → w123 08-30 → w132 08-31 → w151 09-01 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 **on the group delta**, i.e. **per-member sd 1.96e-6, t = 5.12** — published here for the first time by w132a, and the number that makes rows 1/7/9's *indistinguishable from zero* verdicts checkable rather than asserted, since it is the control they all quote). ⚠ **`sign-consistent` IS NOT A TEST**: over 3 paired splits it is a **25% false-positive rate** (2·(1/2)³) and row 9's PERMUTED NULL — a null by construction — carries the same label at **t = 0.96**. On 3 splits **df = 2**, so the two-tailed critical t is **4.303 at 5% and 9.925 at 1%**: this rate clears 5% with a thin margin and **no single-family enrolment rate in this table clears 1%**. t is scale-invariant, so publishing it moves no verdict. This corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×16, from 08-10 → w115 08-29 → w124 08-30 → w133 08-31 · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** (t = 5.12) · XGBoost **+7.38e-6** (t = 6.21) · LightGBM **+4.04e-6** (t = 5.73), all three on **df = 2** where the 5% critical t is 4.303 and the 1% is 9.925 — every one clears 5%, none clears 1% (w132a). ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family*. ⛔ **w133 (08-31) is the 16th handing and it built nothing**: 0 submission slots remained and the competition closed that night, so an XGBoost leg would have been unsendable by construction on top of being under the floor | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×18, from 08-10 → w116 08-29 → w125 08-30 → w143 09-01 → w152 09-02 (closed) — the most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
-| 6 | *blending: rank-average or weight the models by OOF* | **×14, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 → w135 08-31 → w144 09-01 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
+| 6 | *blending: rank-average or weight the models by OOF* | **×15, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 → w135 08-31 → w144 09-01 (closed) → w153 09-02 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
 | 7 | *seed and fold diversity, averaged* | **×15, from 08-11 → w64 → w109 08-28 → w118 08-29 → w127 08-30 → w136 08-31 → w145 09-01 (closed)** · **artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO LAYERS OF ONE MANOEUVRE, AND THE ROW USED TO PUBLISH ONE NUMBER AT THE OTHER ONE'S SCOPE.** stacker arm: **structural null**. member arm, seed-averaging `xgb_latcat`: **MEMBER layer +138e-6** — the solo probability-mean gain, re-measured w127 at **+138.2e-6** from the OOF arrays, and it is **ABOVE** the 50e-6 floor — converting to **STACK layer +2e-6, at k=1**. That +2e-6 is a **SUBSTITUTION** price (w109 arm B *replaced* three seed twins by their mean; nothing was added, the pack lost two columns) and it is **NOT a per-member rate** — read as one at k=104 it multiplies out to **+208e-6, four times the floor**. The genuine **ENROLMENT** rate, measured w127 with w123/w124's instrument (paired 50/50, splits 0/1/2, C=1.0, hybrid) on the full **167-member** pack: **+0.49e-6/member** (t = 0.25) for the two extra seeds, **+1.72e-6** (t = 0.46) for the average alone, **−0.51e-6** (t = 0.22) for the average on top of the seeds — all three **SIGN-FLIPPING** across the 3 splits and none distinguishable from zero, against a 5% critical t of 4.303 on df = 2 (w132a), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. ⛔ Nothing re-opens on any arm | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×15, from 08-14 → w121 08-29 → w130 08-30 → w139 08-31 → w148 09-01 (closed) · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED ONLY THE ONE THAT MEANS NOTHING WITHOUT ITS BASELINE — IT SAID `0` AND NEVER SAID AGAINST WHAT.** The `0` is correct and it is a **REPEAT** price: baseline **the foundation already exists** — the metric is a table row, the folds are frozen since w38 and verified by #33 against four public packs, the GBDT baselines are on disk — so re-doing it today buys nothing. Priced against its own **ABSENCE** the same row is the **largest number in this table**, and w130 measured one arm per clause of the elaboration from arrays already on disk (`w130a_row8.py`, FAILURES 0, all five registered predictions held). **ARM A, "confirm the metric" — a METRIC price at the FINAL-FILE layer, k=1, a per-competition TOTAL and not a rate, baseline the same shipped predictions thresholded to a hard class: +63,263.9e-6** at the best of 102 cut points and **+122,243.5e-6** at the naive cut 0.5 — **1,265× the 50e-6 floor**, and the largest single number this table has ever carried. Other half of the same decision: halving the logit is **+0.0000e-6 under AUC and +16.6% of logloss**, which is *why* calibrating the final file is on the DO-NOT list — and the shipped pick is already rank-uniform, mean **0.50000** where the train base rate is **0.70942**, so it is not a probability at all and only AUC makes that safe. **ARM B, "the fixed-fold CV harness" — a MEASUREMENT price at the CV-ESTIMATE layer, per comparison, an sd and NOT a gain, baseline an unpaired harness: paired 3.44e-6 vs unpaired 271.11e-6**, 78.9× on the sd and 6,225× on the variance, over 200 bootstraps of `lgbm_tuned_lat_frac − lgbm_fixed_lat_frac`. 🎯 **The unpaired sd is 5.4× the 50e-6 floor and the paired sd is 15× under it, so without the shared folds not one price in this table could have been measured at all.** Re-drawing the partition adds a further **0.88e-6** of sd on the fold-mean over 200 draws, while the pooled OOF AUC is invariant to it. **ARM C, "one honest GBDT baseline" — a FOUNDATION price at the OOF layer, a per-competition TOTAL, baseline a constant prediction, which AUC scores at 0.5: +467,789.9e-6** for `lgbm_fixed_lat_frac` alone, against **+1,325.4e-6** for the shipped stack minus the best single member of 94 scanned — and that second number is everything the other nine rows have bought. ⛔ **Three currencies — final-file AUC at k=1, an sd of a measurement, and OOF AUC against chance — so the arms are NOT addable.** The foundation is **99.500%** of the AUC above chance and **46,585×** row 3's +10.04e-6/member bar | `## Competition basics` · `Since w38 the workspace has taken every` · `WHAT THE FOUNDATION IS WORTH` (w130, the three arms, their baselines, and the REPEAT/ABSENCE split) |
 | 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×16, from 08-11 → w128 08-30 → w137 08-31 → w146 09-01 (closed) · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | ⚠ **A CORRECTION PRICE, AND THE ROW USED TO PUBLISH NEITHER A MAGNITUDE NOR A BASELINE — IT SAID `0 / negative` AND NOTHING ELSE.** The manoeuvre is a **CORRECTION** applied on top of the shipped file — not an ENROLMENT, not a SEARCH, not a TUNING — so every number here is a **STACK layer** total at **k=1** and none of them is a per-member rate. ⚠ **TWO BASELINES, AND THEY DO NOT SHARE A SIGN.** Cross-fitted per-cell isotonic over the generator's seven rule cells: **−118e-6 against the uncorrected stack** and **+6e-6 against a size-matched permuted-cell control** — w128 rebuilt both columns from scratch and re-measured **−110.9e-6** and **+5.1e-6**. Priced as an ENROLMENT in rows 3/4's units for the first time (paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the full 167-member pack, w128a): isotonic column **+3.95e-6** (t = 1.69), residual column **+2.36e-6** (t = 4.51), **the PERMUTED null +3.17e-6 — the null takes 80% of it, so the gain is capacity, not segmentation** — and the deciding contrast **real − null = +0.79e-6 ± 4.16e-6, t = 0.19, SIGN-FLIPPING**. ⚠ The permuted null is labelled `consistent` in `w128a_row9.json` at **t = 0.96**, which is w132a's live proof that sign-consistency is a 25% false-positive rate and not a test, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. The other two instruments read **−307e-6 … −2,043e-6** (cell-local LightGBM, negative 9/9) and **−74e-6 … −526e-6** (global residual booster, negative 8/8). ⛔ **And the structural cap that kills the angle's premise before any model is fitted: 76.7% of the AUC deficit is CROSS-cell** — pairs of rows in different segments — which no within-segment feature, monotone map or cell-local booster can reach | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` · `THE CELL THAT NO GUARD COULD SEE` (w128, the price, both baselines and the permuted null) |
@@ -4789,7 +4855,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 61 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 63 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -4806,6 +4872,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w127b_rateguard   w128b_pricedguard  w129b_optoutguard  w130b_zerobaselineguard
     w131b_selfbaselineguard
     w132b_significanceguard
+    w152a_listshape   w153a_openreadguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never
@@ -10628,7 +10695,7 @@ spend itself on the "10σ, whole competition" framing.
 
 `team_count` **1831** (the brief's ~1,326 is stale), our `user_rank` **20** (was 13). Leader
 MILANFX 0.97124; five teams passed 0.97106 in the preceding day. `user_rank` is available
-directly off `ApiListCompetitionsRequest(search=...)`, no leaderboard pull needed.
+directly off an `ApiListCompetitionsRequest` with `.search` assigned, no leaderboard pull needed.
 
 # w14b — durable facts for RESEARCH.md
 

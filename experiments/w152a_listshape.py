@@ -12,6 +12,24 @@ closed competitions too, S6E8 among them.
 
 Exits 0 when every assertion holds, 1 otherwise, and prints FAILURES: n as its last line.
 """
+# The suite runs every stem under .venv/bin/python, which has numpy but NOT the kaggle SDK;
+# API work in this workspace runs under the uv tool interpreter. A guard that needs the SDK
+# must therefore hand itself over rather than die with ModuleNotFoundError, which inside the
+# runner is indistinguishable from a real failure. Re-exec once, never in a loop.
+KAGGLE_PY = "/home/nixos/.local/share/uv/tools/kaggle/bin/python"
+try:
+    import kaggle  # noqa: F401
+except ModuleNotFoundError:
+    import os
+    import sys as _sys
+    # NOT a realpath comparison: .venv/bin/python and the uv tool python resolve to the SAME
+    # interpreter binary and differ only in site-packages, so realpath equality would suppress
+    # the hand-off. An env marker is what makes the loop impossible.
+    if os.path.exists(KAGGLE_PY) and os.environ.get("KAGGLE_PY_REEXEC") != "1":
+        os.environ["KAGGLE_PY_REEXEC"] = "1"
+        os.execve(KAGGLE_PY, [KAGGLE_PY, os.path.abspath(__file__), *_sys.argv[1:]], os.environ)
+    raise
+
 import datetime
 import sys
 

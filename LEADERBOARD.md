@@ -1,3 +1,16 @@
+# 2026-09-02 — w153. RE-CONFIRMED. THE READ BELOW IS THE SAME; THE COMMAND FOR IT WAS NOT RUNNABLE.
+
+Every entry above quotes the opening read as a kwarg constructor. That form raises
+`TypeError` — kagglesdk request types take no constructor arguments — so it is not the call any
+of these entries actually ran. The one that works, and what it returned live this run:
+
+    r = ApiGetCompetitionRequest(); r.competition_name = "playground-series-s6e8"
+    -> deadline 2026-08-31 23:59:00   teams 3531   user_rank 319   metric Roc Auc Score
+
+`w142b_privatecheck.py` re-run: **201 rows, 201 with `privateScore`**, `selected` 0, best private
+**0.97094** (`w40_ad211stdcorr`), landed **0.97093**. Identical to w150, w151 and w152. ⛔ There is
+no live board to track here — final standing is **319 / 3,531**, top decile by 34 places.
+
 # 2026-09-02 — w152. RE-CONFIRMED. ⛔ THE ENTRY BELOW IS WRONG: THE BOARD IS NOT DELISTED.
 
 w151's "delisted" reading came from a hand-built `ApiListCompetitionsRequest` with only `search`
