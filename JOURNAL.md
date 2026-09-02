@@ -39603,3 +39603,184 @@ and `ps` are not on this box's PATH, so the check is the `/proc/[0-9]*/cmdline` 
    • 🆕 **`.venv/bin/python` HAS NO `kaggle`.** Any guard touching the API must hand itself to
      `/home/nixos/.local/share/uv/tools/kaggle/bin/python`, and the loop-breaker cannot be a
      `realpath` comparison — both paths resolve to the same interpreter binary.
+
+---
+
+# 2026-09-02 — w154 — BLOCKED: COMPETITION CLOSED. TWELFTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# AND THE OPENING READ IS RIGHT IN EVERY COMPETITION FIELD WHILE ANSWERING `user_has_entered False`.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 3 of 10, ANGLE *"seed and fold diversity: same
+models across multiple seeds and fold splits, averaged."* Deadline **2026-08-31 23:59**, read live
+off the competition object, now **2026-09-02 13:31 UTC** — passed by **~37.5 hours**. The prompt's
+*"submissions the Kaggle API already reports for today: 0"* is w149's case again: a true read of a
+dead board. The brief's *"use all 10 every day, an unused slot is pure waste"* cannot be honoured
+and has not been honourable since 08-31.
+
+## 1. 🔴 A FIFTH FAILURE SHAPE, ON AN AXIS w153 DID NOT TOUCH: **WHICH CLIENT**, NOT HOW THE REQUEST IS BUILT
+
+I ran w153's next-run instruction #2 as written — construct bare, then assign — and it dialled.
+Then I reached for `comp.rank` and got `AttributeError`. The field is **`user_rank`**. Fine. But
+`user_rank` read **0**, and `user_has_entered` read **False**, on a board this account sent 201
+scored submissions to. Two calls, one difference:
+
+| client | `deadline` · `team_count` · `metric` · `max_daily` · `submissions_disabled` · `id` · `category` | `user_rank` | `user_has_entered` |
+|---|---|---|---|
+| `KaggleApi()` → `authenticate()` → `build_kaggle_client()` | correct | **319** | **True** |
+| bare `KaggleClient()` | **identical, all seven correct** | **0** | **False** |
+
+🎯 **THE ONLY WRONG FIELDS ARE THE TWO THAT DESCRIBE THIS ACCOUNT, AND THEY POINT AT ABSENCE.**
+Nothing raises, nothing is empty, no field is missing, and every competition-scoped field agrees
+exactly — so the read looks complete *and* looks validated. That is precisely why w151's
+empty-list shape and w152's/w153's TypeError shapes cannot catch it.
+
+| # | how the opening read can look like a dead token | found |
+|---|---|---|
+| 1 | `len()` on `ApiListCompetitionsResponse` | TypeError | w152 |
+| 2 | fuzzy search, `row[0]` is a different competition | wrong answer | w152 |
+| 3 | the kwarg constructor | TypeError | w153 |
+| 4 | assigning a field the request type lacks | AttributeError | w153 |
+| 5 | **the right call through an unauthenticated client** | **user fields zeroed** | **w154** |
+
+⚠ **AND I MUST CORRECT MY OWN FIRST READING OF IT.** On seeing `user_rank 0` I took the `rank 319`
+published in w151–w153 to be a fourth bad number in the head. It is not: **319 is correct**, and
+`w153a_openreadguard` obtains it correctly, because that guard authenticates
+(`w153a_openreadguard.py:130-137`) and my hand-run probe did not. **The defect was in the probe I
+wrote this run, not in anything the workspace had published.** The week's pattern held anyway,
+just with me as the instrument: the run that catalogues bad reads produced one.
+
+## 2. ✅ GUARDED, NOT NARRATED — `experiments/w154a_authscope.py` (#64)
+
+C1 the two clients agree on all **seven** competition-scoped fields, measured field by field —
+which proves *"did the read work"* is a non-test for this defect · C2 they disagree on both user
+fields, and the authenticated pair matches the workspace's own independent records
+(`w142b_privatecheck`: 201 rows; rank 319) · C3 the bare answer reproduces **in the direction of
+absence** · C4 no bare-client `get_competition` in `RESEARCH.md`, plus a commented/uncommented
+pair · C5 `--control` over a frozen bare-client snippet, which fires · C6 scope, measured.
+
+    shipped   FAILURES: 0
+    --control C4 FIRES on the frozen specimen, shipped silent
+
+✅ **SCOPE, AND IT IS THE GOOD ANSWER:** **441 files scanned, 0 bare-client opening reads in
+`experiments/` and `agent/`.** The defect never entered the code. The guard is what keeps it out.
+
+## 3. 🔴 THE FIX TRIPPED ITS OWN GUARD — w153's LESSON, ONE LEVEL DOWN
+
+I annotated the head snippet `# <- NOT a bare KaggleClient(); see w154 head`. C4's matcher counted
+that **mention** as an instance, and the first full suite came back **55/64 with
+`w154a_authscope(rc=1)`** — the new guard red on the document it was written to protect, for
+warning about the thing it forbids.
+
+⛔ **A GUARD THAT FORBIDS A TOKEN MUST READ COMMENTS ABOUT THE TOKEN AS PROSE.** Fixed by stripping
+`#` comments from **indented** lines only; stripping unconditionally would eat every markdown
+heading in `RESEARCH.md`, since a heading is `#` at column 0.
+
+✅ **AND THE EXEMPTION IS PROVED NARROW RATHER THAN ASSUMED.** Two lines differing only in whether
+the token is commented: **commented → 0 hits, uncommented → 1 hit.** Without that pair, *"none in
+RESEARCH.md"* is equally consistent with a matcher that quietly stopped matching — which is w152's
+no-power falsifier wearing a different hat.
+
+## 4. ✅ THE ANGLE, RE-VERIFIED AT THE ARTEFACT LEVEL — ROW 7, CLOSED
+
+Sixteenth handing of the seed-and-fold string. It closes on `RESEARCH.md` ANGLE INDEX row 7, and
+this run **re-ran `w127a_row7.py` live** rather than quoting it: **FAILURES: 0, NOTES: 3**,
+`logs_w154_row7.txt`. Every published figure reproduced.
+
+| the angle's arm | layer | price |
+|---|---|---|
+| seed-averaging `xgb_latcat`, solo | MEMBER, k=1 | **+138.2e-6** (published +138.2e-6) — above the floor, and it is a **SUBSTITUTION**, not an enrolment |
+| the same, priced into the stack | STACK, k=1 | **+2e-6** — the two differ by **69×** and are not the same number |
+| seeds added as members | STACK, enrolment | **+0.49e-6/member**, `[SIGN FLIPS]` across 3 splits |
+| the seed average alone | STACK, enrolment | **+1.72e-6/member**, `[SIGN FLIPS]` |
+| the average on top of the seeds | STACK, enrolment | **−0.51e-6/member**, `[SIGN FLIPS]` |
+
+✅ **THE CONTROL REPRODUCED EXACTLY** — w123's CatBoost rate in this process, these splits:
+**+10.0416e-6/member against w123's +10.0416e-6, gap +0.0000e-6.** Without that the enrolment
+arms would measure nothing. All three registered predictions **HELD**, and R3's own verdict line
+reads **`DOES ROW 7 RE-OPEN? (R-Q)/2 vs the 50e-6 floor : NO`**.
+
+⛔ Nothing re-opens on any arm, and there is no slot to score it in.
+
+## 5. ✅ THE DECISIVE READS, RE-RUN LIVE
+
+`w142b_privatecheck.py` re-run, not inherited: **201 rows, 201 with `privateScore`**, `selected`
+**0**, status all COMPLETE. Best private **0.97094** (`w40_ad211stdcorr`, public 0.97118); landed
+**0.97093**, **rank 319 / 3,531** — the rank re-derived live this run from `user_rank` through an
+authenticated client. `w152a_listshape` re-run live: **FAILURES: 0**, open/closed prediction 5/5.
+⚠ `submissions_disabled` reads **False** for the thirteenth day on a closed, graded board.
+
+⚠ **AND `LEADERBOARD.md` HAS BEEN MIXING TWO DENOMINATORS.** `team_count` reads **3,531** and has
+in every journal block back to 08-31; the **3,532** in the w142 entry is the row count of the
+private *leaderboard* read. Two endpoints, disagreeing by one, always have. It is **not** a team
+leaving after grading, which is what the two numbers side by side imply. Corrected in place;
+neither value moves rank 319 or the top-decile margin.
+
+## 6. ✅ CENSUS RUN AND SYNCED PER w150's STANDING INSTRUCTION
+
+    BEFORE any edit   FAILURES: 0    (row 7 not yet drifted)
+    AFTER  the edits  FAILURES: 0
+
+Two deterministic edits: `RESEARCH.md` ANGLE INDEX row 7 **×15 → ×16**, trail extended
+`→ w154 09-02 (closed)` and marked `(closed)`; `experiments/w117a_handcount.py`
+`CURRENT_RUN, CURRENT_ROW` moved from `^# 2026-09-02 — w153 —`, 6 to `^# 2026-09-02 — w154 —`, 7.
+
+## 7. ✅ VERIFICATION
+
+    experiments/w154a_authscope.py     FAILURES: 0   (new; --control fires; #64)
+    experiments/w127a_row7.py          FAILURES: 0, NOTES: 3   (row 7, re-run live, ~50min)
+    experiments/w153a_openreadguard.py FAILURES: 0   (re-run live)
+    experiments/w152a_listshape.py     FAILURES: 0   (re-run live)
+    experiments/w117a_handcount.py     FAILURES: 0
+    experiments/w93a_suite.py          55/64 green  (logs_w154_suite.txt, w154a red — §3)
+    experiments/w93a_suite.py          56/64 green  (logs_w154_suite2.txt, after the fix)
+
+✅ **AND THE STRONGEST SINGLE RESULT IS A `git diff` THAT PRINTS NOTHING.** `w127a_row7.py`
+rewrites `experiments/w127a_row7.json` on every run; the file is tracked and came back with **no
+diff at all**, so the whole row-7 measurement — control, three enrolment arms, three registered
+predictions — reproduced **byte-identical** to w127's on 08-30, three days and two model-free
+runs later. That is the reproduction claim tested rather than asserted.
+
+Reds, byte-for-byte the w142/w150/w151/w152/w153 set and no other: `w54a_vetoexpiry(1)`
+`w63b_setguard(2)` `w67b_slopeguard(2)` `w70d_chainguard(1)` `w72b_dayguard(2)`
+`w85c_slotguard(1)` `w87a_registrarguard(2)` `w100a_complement(2)`. ⛔ **NOT REGRESSIONS FROM THIS
+DIFF** — all eight are the diagnosed calendar artifact (`w48e_order.py:321` exits 2 for an
+unregistered UTC day).
+
+✅ The four guards that parse the ANGLE INDEX block I edited stayed green, which is what
+`RESEARCH.md` demands after any edit to it: `w101a_angleguard`, `w115a_docselectguard`,
+`w122a_slotguard`, `w123b_groupguard`.
+
+✅ Registered in the same run per w153's rule: `w154a_authscope` is in `w93a_suite`'s `STEMS` and
+the published heading reads **`## THE 64 STANDING CHECKS`** — the suite's own C2 compares the two
+copies and passed (`64 stems, heading says 64`).
+
+⛔ **NO SUBMISSION, NO SUBMIT PROBE, NO MODEL RUN.** A live write against a closed competition is
+not a free read (w143).
+
+## 8. NEXT RUN
+
+1. 🏁 **THERE IS NOTHING TO SUBMIT, EVER.** Final: **rank 319 / 3,531, private 0.97093**, top
+   decile by 34 places. Confirm and stop.
+2. ✅ **THE OPENING READ, IN THE ONLY FORM THAT IS BOTH CALLABLE AND COMPLETE:**
+
+       api = KaggleApi(); api.authenticate()
+       r = ApiGetCompetitionRequest(); r.competition_name = COMP
+       with api.build_kaggle_client() as kc:
+           c = kc.competitions.competition_api_client.get_competition(r)
+
+   Bare construct then assign (w153), **through an authenticated client** (w154). The rank field
+   is **`user_rank`**, not `rank`.
+3. ✅ **STILL RUN `experiments/w117a_handcount.py`, INCLUDING ON NO-WORK RUNS**, and sync the
+   ANGLE INDEX row for whatever angle you were handed, plus `CURRENT_RUN`/`CURRENT_ROW`.
+4. ⛔ **DO-NOT, carried forward from w92–w153 in full, plus:**
+   • 🆕 **A SUCCEEDING API CALL CAN STILL BE HALF-WRONG.** Check the fields that describe *you*
+     (`user_rank`, `user_has_entered`) separately from the ones that describe the contest. The
+     competition half being perfect is not evidence about the user half.
+   • 🆕 **BEFORE CALLING A PUBLISHED NUMBER WRONG, RUN THE ARTEFACT THAT PRODUCES IT.** I had
+     `w153a_openreadguard` on disk printing `rank 319`; reading its line 137 would have cost one
+     grep and saved a wrong accusation. The guard is the authority, not the hand-run probe.
+   • 🆕 **A GUARD THAT FORBIDS A TOKEN CANNOT READ A COMMENT ABOUT THAT TOKEN AS AN INSTANCE.**
+     Strip `#` comments on indented lines only — column-0 `#` is a markdown heading.
+   • 🆕 **AN EXEMPTION NEEDS A PAIRED PROBE.** "No hits" is equally consistent with a matcher that
+     stopped matching. Ship commented→0 / uncommented→1 alongside it.
+   • 🆕 **`team_count` (3,531) AND THE LEADERBOARD ROW COUNT (3,532) ARE DIFFERENT ENDPOINTS.**
+     They have always disagreed by one. Do not narrate it as a team withdrawing.

@@ -3127,3 +3127,23 @@ collapse happened, not because we predicted the collapse.
 argmax-CV, argmax-public, the WANTED pair, and the AUTO pair Kaggle actually used — land on
 **0.97093**. The hindsight oracle over all 201 sends is 0.97094, worth **+7 ranks**. Thirty-four
 runs asked for a click that could not have moved the result at the board's own resolution.
+
+## 2026-09-02, 13:5xZ (w154) — no change, and the rank was re-derived from the right field
+
+**Private rank 319, score 0.97093.** Unchanged for the twelfth day.
+
+⚠ **THE DENOMINATOR HAS TWO VALUES AND THIS FILE HAS BEEN MIXING THEM.** The competition object's
+`team_count` reads **3,531** and has read 3,531 in every journal block back to 08-31. The **3,532**
+in the w142 entry above is a different source: the row count of the private *leaderboard* read.
+The two endpoints disagree by one and always have — it is not a team leaving after grading, which
+is what a naive reading of the two numbers side by side suggests. Neither value moves rank 319 or
+the top-decile margin, so nothing published changes; the point is that "3,531 vs 3,532" is an
+endpoint difference to be stated, not a timeline to be explained.
+
+The rank number itself was re-read live this run rather than quoted, and the read is worth
+recording because it has a trap in it. `ApiCompetition` has **no `.rank`** — the field is
+**`user_rank`**, and it only carries 319 when the request goes through an authenticated client
+(`KaggleApi()` → `authenticate()` → `build_kaggle_client()`). Through a bare `KaggleClient()`
+the same call succeeds, returns every competition-scoped field correctly, and reports
+**`user_rank` 0** with **`user_has_entered` False** — a board this account sent 201 scored
+submissions to. Guarded as `experiments/w154a_authscope.py`.
