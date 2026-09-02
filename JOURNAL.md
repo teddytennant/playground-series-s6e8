@@ -39292,3 +39292,138 @@ not a free read (w143). Only three documents and one guard's pointer were touche
      journal instructs future runs to *run* is unguarded by construction.
    • 🆕 **`playground-series-s6e9` IS LIVE.** It is **not** this workspace's competition, and a
      handed angle is never evidence about which competition you are in (w149). Do not drift.
+
+---
+
+# 2026-09-02 — w152 — BLOCKED: COMPETITION CLOSED. TENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# AND w151's DELISTING IS RETRACTED: S6E8 IS STILL LISTED, THE CALL WAS FILTERING CLOSED ROWS OUT.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 1 of 10, ANGLE *"feature engineering: interactions,
+in-fold target and count encodings, and careful categorical treatment."* Deadline **2026-08-31
+23:59**, now **2026-09-02 12:40 UTC** — passed by **~36.7 hours**. Per w144's DO-NOT the slot
+counter increments off the calendar, not off anything the board will accept. The prompt's
+"submissions the Kaggle API already reports for today: 0" is w149's case: a true read of a dead
+board.
+
+## 1. 🔴 RETRACTION — w151 READ A DELISTING OFF A CALL THAT DROPS CLOSED COMPETITIONS
+
+w151's entry and the `RESEARCH.md` head section it wrote both say S6E8 has dropped out of Kaggle's
+listing. **It has not.** The evidence w151 had was real and its reading of it was wrong:
+
+    call                                    s6e8          s6e9
+    bare ApiListCompetitionsRequest         []            [row]      <- the call w151 ran
+    KaggleApi.competitions_list (wrapper)   [row]         [row]      <- returns BOTH
+
+🎯 **THE BARE REQUEST IS AN OPEN-COMPETITIONS-ONLY FILTER**, and five exact-slug probes fix that,
+each classified from its **own** `deadline` rather than from a hand table — s5e3 (closed, absent),
+s6e2 (closed, absent), **s6e8 (closed, absent)**, s6e9 (open, present), arc-prize-2026-arc-agi-2
+(open, present). **5/5.** Same zero-value defect w145 catalogued (`group`/`category`/`sort_by`/
+paging at proto zero-values, HTTP 200, no error); w145 only saw it return nothing, so what it was
+*selecting on* was never established.
+
+## 2. ⚠ THE TRAP: A FALSIFIER THAT PASSES AND STILL HAS NO POWER
+
+w151's rule was *"do not debug the token on an empty result — search a competition known to be
+live in the same process; a row back means the API is fine and the empty set is the answer."*
+**That test passes today against a call that is provably broken for S6E8.** `bare(s6e9)` returns
+its row; the token, endpoint and SDK really are fine; the conclusion drawn from it is still false.
+⛔ **The control differed from the subject on `live vs closed`, which is exactly the axis the bug
+cuts on.** A control has power only when it differs from the subject on nothing but the hypothesis.
+
+| run | shape of the trap |
+|---|---|
+| w145 | a falsifier that broke **into agreement** |
+| w148 | a **true number** answering the wrong question |
+| w150 | a true measurement over a **silently incomplete** population (50 of 201 rows) |
+| w151 | a true measurement over an **empty** population, read as a delisting |
+| **w152** | a **passing falsifier with no power** — the control varied along the bug's own axis |
+
+✅ **THIS ONE IS GUARDED, NOT NARRATED** — which is w151's own closing lesson, applied to w151.
+New standing check `experiments/w152a_listshape.py`: C1 the open/closed prediction (5/5), C2 the
+wrapper still returns S6E8, C3 w151's observation reproduces exactly, C4 the falsifier passes
+anyway. **FAILURES: 0.** ⚠ Its first draft misclassified `arc-prize-2026` by taking row[0] of a
+fuzzy search — the row is `arc-prize-2026-arc-agi-3`, a different competition. Exact-match on the
+ref; the guard now enforces it.
+
+## 3. ✅ THE DECISIVE READS, RE-RUN LIVE — NOTHING ELSE MOVED
+
+`get_competition` (w151's replacement read, which is correct and stays):
+
+    deadline 2026-08-31 23:59:00   teams 3531   rank 319   metric Roc Auc Score
+    submissions_disabled False     max_daily_submissions 10
+
+`experiments/w142b_privatecheck.py`, re-run not inherited: **201 rows, 201 with `privateScore`**,
+`selected` **0**, status all COMPLETE. Best private **0.97094** (`w40_ad211stdcorr`, public
+0.97118); landed **0.97093**. ⚠ `submissions_disabled` reads **False** for the eleventh day on a
+closed, graded board — w145's trap outlives everything.
+
+## 4. ✅ THE ANGLE, ANSWERED BY CITATION (w147's rule) — ROW 5, CLOSED, AND RE-VERIFIED LIVE
+
+Eighteenth handing of the feature-engineering string, the most-handed row in the index. It closes
+on `RESEARCH.md` ANGLE INDEX row 5, and this run re-ran its artefact-level verifier rather than
+quoting it: `w125b_layerguard.py` → **FAILURES: 0**, C4 reproducing **all 5 ladder arms from the
+arrays to 1e-9**.
+
+| the angle's knob | published | layer |
+|---|---|---|
+| in-fold target encoding, as a member | **−19.26e-6** (xgb), **−82.68e-6** (cat) of solo fold AUC on the LightGBM null | MEMBER — negative, and the reading the closure was argued from |
+| the same feature blocks, priced into the stack | **+0.5e-6 to +7.0e-6/member** over the six `w27r_blockdrop` arms | STACK — paired 50/50, 3 splits, base104, CatBoost control reproducing w123 to +0.000e-6 |
+| "careful categorical treatment" | row 3's enrolment price, **+10.04e-6/member**, t = 5.12 on df=2 | clears 5% (crit 4.303), **not** 1% (crit 9.925) |
+
+⛔ Every arm is far under the **50e-6** floor, the two layers do not share a sign, and `encdrop` is
+a raw-frame member the pack already holds ~74 of. Nothing re-opens, and there is no slot to score
+it in.
+
+## 5. ✅ CENSUS RUN AND SYNCED PER w150's STANDING INSTRUCTION
+
+    BEFORE any edit   FAILURES: 0    (row 5 not yet drifted — no closed-day run had drawn it)
+    AFTER  the edits  FAILURES: 0    (168+ headers, off-rotation unchanged)
+
+Two deterministic edits, neither touching a model or a submission:
+
+1. `RESEARCH.md` ANGLE INDEX row 5 — **×17 → ×18**, trail extended `→ w152 09-02 (closed)`, marked
+   `(closed)` so a later reader cannot mistake a no-work handing for artefact-level verification.
+   Rows 1–4, 6–10 untouched.
+2. `experiments/w117a_handcount.py` — `CURRENT_RUN, CURRENT_ROW` moved from `^# 2026-09-01 — w151 —`, 3
+   to `^# 2026-09-02 — w152 —`, 5. The `if not any(...)` bump makes this correct both before this
+   entry lands (bump fires, +1) and after (header in corpus, no bump).
+
+Plus the `RESEARCH.md` head retraction and a `LEADERBOARD.md` note.
+
+## 6. ✅ VERIFICATION — SUITE UNCHANGED AGAINST THE w142/w150/w151 BASELINE
+
+    experiments/w152a_listshape.py    FAILURES: 0   (new)
+    experiments/w125b_layerguard.py   FAILURES: 0   (row 5, re-run live)
+    experiments/w117a_handcount.py    FAILURES: 0
+    experiments/w93a_suite.py         53/61 green   (logs_w152_suite.txt)
+
+Reds, byte-for-byte the w142/w150/w151 set and no other: `w54a_vetoexpiry(1)` `w63b_setguard(2)`
+`w67b_slopeguard(2)` `w70d_chainguard(1)` `w72b_dayguard(2)` `w85c_slotguard(1)`
+`w87a_registrarguard(2)` `w100a_complement(2)`. ⛔ **NOT REGRESSIONS FROM THIS DIFF** — all eight
+are the diagnosed calendar artifact (`w48e_order.py:321` exits 2 for an unregistered UTC day).
+
+✅ The four guards that parse the ANGLE INDEX block I edited stayed green, which is what
+`RESEARCH.md` demands after any edit to it: `w101a_angleguard`, `w115a_docselectguard`,
+`w122a_slotguard`, `w123b_groupguard`.
+
+⛔ **NO SUBMISSION, NO SUBMIT PROBE, NO MODEL RUN.** A live write against a closed competition is
+not a free read (w143). Documents, one guard's pointer, and one new read-only check.
+
+## 7. NEXT RUN
+
+1. 🏁 **THERE IS NOTHING TO SUBMIT, EVER.** Final: **rank 319 / 3,531, private 0.97093**, top
+   decile by 34 places. Confirm and stop.
+2. ✅ **THE OPENING CHECK: `get_competition`, or `competitions_list` VIA THE WRAPPER.** Not a
+   hand-built `ApiListCompetitionsRequest` — it silently drops closed competitions, which is what
+   w151 mistook for a delisting. `experiments/w152a_listshape.py` holds the proof.
+3. ✅ **STILL RUN `experiments/w117a_handcount.py`, INCLUDING ON NO-WORK RUNS**, and sync the
+   ANGLE INDEX row for whatever angle you were handed, plus `CURRENT_RUN`/`CURRENT_ROW`.
+4. ⛔ **DO-NOT, carried forward from w92–w151 in full, EXCEPT w151's delisting claim, which is
+   RETRACTED above, plus:**
+   • 🆕 **A CONTROL THAT VARIES ALONG THE BUG'S OWN AXIS PROVES NOTHING BY PASSING.** w151's
+     live-competition falsifier passes today against a call that is broken. Pick a control that
+     differs from the subject on the hypothesis and nothing else — here, a **closed** competition.
+   • 🆕 **`competitions_list` RETURNS A RESPONSE OBJECT, NOT A LIST.** `len()` on it raises
+     `TypeError`. Read `.competitions`.
+   • 🆕 **KAGGLE SEARCH IS FUZZY — `row[0]` IS NOT THE SLUG YOU ASKED FOR.** `arc-prize-2026`
+     returns `arc-prize-2026-arc-agi-3` first. Match the ref exactly.

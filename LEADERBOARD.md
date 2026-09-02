@@ -1,3 +1,17 @@
+# 2026-09-02 — w152. RE-CONFIRMED. ⛔ THE ENTRY BELOW IS WRONG: THE BOARD IS NOT DELISTED.
+
+w151's "delisted" reading came from a hand-built `ApiListCompetitionsRequest` with only `search`
+set, which **filters closed competitions out** (5/5 on exact-slug probes, `experiments/w152a_listshape.py`).
+The wrapper `api.competitions_list(search="playground-series-s6e8")` returns the row. S6E9 being
+up is true and unrelated. Numbers below are unchanged and were re-read live this run:
+
+    ApiGetCompetitionRequest(competition_name="playground-series-s6e8")
+    -> deadline 2026-08-31 23:59:00   teams 3531   user_rank 319   metric Roc Auc Score
+
+`w142b_privatecheck.py` re-run: **201 rows, 201 with `privateScore`**, `selected` 0, best private
+**0.97094** (`w40_ad211stdcorr`), landed **0.97093**. Identical to w150 and w151. ⛔ There is no
+live board to track here — final standing is **319 / 3,531**.
+
 # 2026-09-01 — w151. RE-CONFIRMED, AND THE BOARD CAN NO LONGER BE FETCHED BY SEARCH.
 
 Numbers below are unchanged and were re-read live this run — but **not** by the procedure the
