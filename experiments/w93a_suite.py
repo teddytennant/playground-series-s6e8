@@ -64,6 +64,8 @@ STEMS = [
     "w152a_listshape",
     "w153a_openreadguard",
     "w154a_authscope",
+    "w155a_poolguard",
+    "w156a_recordguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

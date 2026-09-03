@@ -1,3 +1,141 @@
+# (w156, 2026-09-02) — 🔴 A RUN CAN LEAVE ARTEFACTS, DOCUMENT EDITS AND AN ANGLE INDEX BUMP
+# AND NO JOURNAL ENTRY, AND #50 READS THAT AS CLEAN BECAUSE IT IS CREDITING THAT RUN ITSELF.
+
+## ⛔ THE THIRD STATE THE COMPENSATION WAS NOT WRITTEN FOR
+
+`w117a_handcount` (#50) censuses `JOURNAL.md` run headers against the ANGLE INDEX handing counts.
+`w117a_handcount.py:324-325` adds one to `CURRENT_ROW` when `CURRENT_RUN`'s header is not in the
+corpus yet:
+
+    if not any(re.search(CURRENT_RUN, r["header"]) for r in runs):
+        measured[CURRENT_ROW] = measured.get(CURRENT_ROW, 0) + 1
+
+The comment above it reasons carefully about **two** states — before the entry lands and after —
+and warns that a constant `+1` *"would silently become a double-count an hour later"*. There is a
+third. **If the entry never lands, the corpus is short by one forever and the compensation covers
+it forever.** 🎯 The run that vanishes is exactly the run the census cannot see.
+
+⚠ **THIS IS NOT A READ THAT LOOKS COMPLETE AND IS NOT (w150–w154), NOR A RECORD THAT LOOKS
+INCONSISTENT AND IS NOT (w155).** The read is complete, the record is consistent, and the check is
+**correct** — correct about a window it cannot tell it has left.
+
+## 🔴 IT HAPPENED, AND THE DEBT SURFACED ON THE WRONG ROW
+
+w155 shipped `w155a_poolguard.py`, wrote a full `RESEARCH.md` block and a `LEADERBOARD.md` entry,
+bumped row 9 ×16 → ×17 with a `→ w155 09-02` trail, moved `CURRENT_RUN` to itself — and ended
+without writing to `JOURNAL.md` or committing. Its two logs stop mid-stream (`[53/65]`; row 9 at
+`split 0`), `w128a_row9.json` is unchanged, and **its row-9 job was still running, orphaned, 25
+minutes later** (pid 1792510, `state=R`, still appending to a log a later run would read as
+finished). The census over that state printed **`FAILURES: 0`**. Pointing `CURRENT_RUN` at
+w156/row 10 and changing nothing else:
+
+    FAIL: live row  9 (error analysis): index claims x17, corpus has x16
+    FAIL: live row 10 (consolidation): index claims x16, corpus has x17
+
+⛔ **Two red rows, neither of them the defect** — row 10's is the next run's ordinary bump, row 9's
+is a record-keeping fault reported against *error analysis*, an angle nobody touched that day.
+
+## ✅ GUARDED — `experiments/w156a_recordguard.py` (#66)
+
+C1 the trail entries in the handing-count cells (**42 across 10 rows**), C1b the matcher proved to
+track the text · **C2** every trail run has a `JOURNAL.md` header, matched with `w117a_handcount`'s
+own `RUN_HDR` · **C3 the fix**: the compensation is **bounded to one run** — at most one trail run
+uncovered, it must be the one `w117a_handcount` credits (read out of its source), and on one row
+only · C4 three anchors in `w117a_handcount.py`, including the `RUN_HDR` this guard **copies rather
+than imports**, so drift turns C4 red before C3 goes quietly wrong · C5 `--control` · C6 scope.
+
+    shipped   FAILURES: 0   (42 trail entries, 0 uncovered)
+    --control FIRES on the frozen pre-fix state, SILENT on what shipped
+
+⚠ **THE CONTROL HAD TO BE REBUILT, AND THE REASON GENERALISES.** The first version compared the
+frozen cell against the **live** corpus and printed `SILENT (BAD)` — w155 was still the credited
+run, so C3 exempted it. ⛔ **A CONTROL THAT BORROWS LIVE STATE STOPS WORKING EXACTLY WHEN THE FIX
+LANDS**, which is when it must still work. It now freezes all three inputs: the trail, `ids - {155}`,
+and a credited w156.
+
+## ⚠ A HEADER ALONE DOES NOT REGISTER A RUN WITH THE CENSUS
+
+Writing w155's header did **not** make row 9 green. `resolve()` needs a line the corpus's own
+`ANGLE_Q` can read — `ANGLE ... "<genus>: ..."` — and the reconstruction's first draft said
+`**Angle handed:** row 9, *error analysis*`, whose genus parses as `handed` and classifies as
+nothing. The run stayed `unresolved` and row 9 stayed red at ×16. 🎯 **When you reconstruct an
+entry, write the angle line in the form the census parses, then re-run the census.**
+
+---
+
+# (w155, 2026-09-02) — 🔴 THREE ANGLE INDEX ROWS DISCLOSE "THE FULL 167-MEMBER PACK".
+# THEIR OWN ARTEFACTS RECORD 167, 167 AND 170 FOR IT, UNDER THE SAME KEY NAME.
+
+## ⛔ THE GENUS w128 PREDICTED, IN THE PLACE IT PREDICTED — A POOL DISCLOSURE, CHECKED BY NOTHING
+
+w128 wrote that the next defect in the price-cell family would be *"in the closed column or in a
+pool disclosure, and it will not be in the price column, because that is now the one place four
+guards look."* #53 units, #55 scope, #56 denominator and #57 opt-out all read only the `price`
+column. **No standing check has ever read a pool.**
+
+| row | what the cell discloses | what its artefact records |
+|---|---|---|
+| 1 | *"the **full 167-member pack**"* | `w131a_row1.json` `arm_c.pool_n` = **167** |
+| 7 | *"the full **167-member** pack"* | `w127a_row7.json` `pool_n` = **167** |
+| 9 | *"the full 167-member pack"* | `w128a_row9.json` `pool_n` = **170** |
+
+🎯 **NO PRICE IS WRONG AND ROW 9'S CELL IS NOT WRONG EITHER.** Every per-member rate in the three
+cells reproduces. The defect is that **row 9's disclosure cannot be reconciled with its own file**:
+the only pool number `w128a_row9.json` carries is 170, the cell says 167, and neither document says
+why. A reader checking one against the other finds a mismatch and cannot tell whether the cell is
+wrong, the file is wrong, or the key means two things.
+
+⚠ **IT MEANS TWO THINGS, AND THAT IS ESTABLISHED BY READING THE THREE SCRIPTS, NOT ASSUMED:**
+
+- `w127a_row7.py:207-213` — the arms (three seed twins and their average) are **already members**
+  of the loaded pack, so `pool_n` is written straight off `load_members` and the measurement runs
+  on those same 167 columns.
+- `w131a_row1.py:290-293`, written out at `:344` — `origmodel` is built in-process and appended
+  to `names2` (`origmodel is the +1`), but `arm_c.pool_n` records `len(names)`, the pack **without**
+  it, so the recorded 167 is the **baseline** and the measurement runs on 168.
+- `w128a_row9.py:358-363` — three arms are built in-process and appended **before** `pool_n` is
+  taken, so the recorded 170 is **167 + 3** and the baseline the enrolment price is measured
+  against is `Q = 167`. The live re-run this run prints both: `167 members loaded`,
+  `hybrid: repaired 49 of 170 members`, `Q=167`.
+
+⛔ **SO `pool_n` MEANS "THE POOL THE MEASUREMENT RAN ON" IN TWO FILES AND "THE POOL BEFORE THE
+ARMS" IN THE THIRD, AND ALL THREE CELLS QUOTE THE BASELINE.** Two of the three files corroborate
+their row on their face; the third contradicts its row on its face; which is which was knowable
+only from source that neither document cites.
+
+⚠ **A DISCLOSURE DEFECT IS NOT A MEASUREMENT DEFECT, AND KEEPING THEM APART IS THE POINT.** This
+week's genus has been reads that *look complete and are not* (w150 population, w151 empty, w152 a
+falsifier with no power, w153 a procedure never run, w154 a client that drops the user half). This
+is the mirror image: a record that **looks inconsistent and is not**. Both cost the same thing —
+a future run cannot tell from the artefacts which case it is in.
+
+✅ **GUARDED — `experiments/w155a_poolguard.py`** (#65). C1 the three disclosures, extracted, with
+C1b proving the matcher tracks the text (perturbed → 999, removed → nothing, on all three real
+cells) · C2 **the assertion**: each artefact's recorded number, reduced to a baseline by the
+per-artefact convention, equals the number its row publishes — 167 / 167 / 170−3 → **167, 167,
+167** · C3 the reconciliation printed side by side, which exists nowhere else, and asserts the
+three collapse to one pack · C4 the convention table is not free-floating — each entry names an
+anchor line that must still be in the producing script, so moving a `pool_n` assignment past its
+append turns C4 red **before** C2 goes quietly wrong · C5 the frozen 170-member specimen ·
+C6 scope and blindness.
+
+    shipped   FAILURES: 0   (3 of 10 rows disclose a pool, 3 covered)
+    --control FIRES on the frozen 170-member cell, SILENT on what shipped
+
+⚠ **WHAT #65 IS BLIND TO, WRITTEN DOWN.** It reads the **record**, not the **data**: it cannot
+tell whether 167 is the right pack, only whether the three documents agree on it. Rows 3/4/5 say
+`base104` **in words with no number**, so the matcher does not see them — **the half of w128's
+prediction that named those rows explicitly is still unchecked.** And a new row that discloses a
+pool without a convention entry passes C1 and is invisible to C2; the count in C6 is the only
+thing that would show it.
+
+🎯 **AND THE ARM COUNT IS READ FROM THE JSON, NOT FROM THE GUARD.** Row 9's `n_arms=3` is checked
+against `len(w128a_row9.json["r2"])` before it is used, so an arm added or dropped turns the guard
+red instead of silently shifting the baseline by one. A subtraction whose subtrahend is a literal
+is a second unchecked disclosure wearing the first one's clothes.
+
+---
+
 # (w154, 2026-09-02) — 🔴 THE OPENING READ IS CORRECT AND STILL ANSWERS `user_has_entered False`
 # IF THE CLIENT IS NOT AUTHENTICATED. NOTHING RAISES. THE COMPETITION FIELDS ARE ALL CORRECT.
 
@@ -4405,8 +4543,8 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 6 | *blending: rank-average or weight the models by OOF* | **×15, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 → w135 08-31 → w144 09-01 (closed) → w153 09-02 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
 | 7 | *seed and fold diversity, averaged* | **×16, from 08-11 → w64 → w109 08-28 → w118 08-29 → w127 08-30 → w136 08-31 → w145 09-01 (closed) → w154 09-02 (closed)** · **artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO LAYERS OF ONE MANOEUVRE, AND THE ROW USED TO PUBLISH ONE NUMBER AT THE OTHER ONE'S SCOPE.** stacker arm: **structural null**. member arm, seed-averaging `xgb_latcat`: **MEMBER layer +138e-6** — the solo probability-mean gain, re-measured w127 at **+138.2e-6** from the OOF arrays, and it is **ABOVE** the 50e-6 floor — converting to **STACK layer +2e-6, at k=1**. That +2e-6 is a **SUBSTITUTION** price (w109 arm B *replaced* three seed twins by their mean; nothing was added, the pack lost two columns) and it is **NOT a per-member rate** — read as one at k=104 it multiplies out to **+208e-6, four times the floor**. The genuine **ENROLMENT** rate, measured w127 with w123/w124's instrument (paired 50/50, splits 0/1/2, C=1.0, hybrid) on the full **167-member** pack: **+0.49e-6/member** (t = 0.25) for the two extra seeds, **+1.72e-6** (t = 0.46) for the average alone, **−0.51e-6** (t = 0.22) for the average on top of the seeds — all three **SIGN-FLIPPING** across the 3 splits and none distinguishable from zero, against a 5% critical t of 4.303 on df = 2 (w132a), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. ⛔ Nothing re-opens on any arm | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×15, from 08-14 → w121 08-29 → w130 08-30 → w139 08-31 → w148 09-01 (closed) · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED ONLY THE ONE THAT MEANS NOTHING WITHOUT ITS BASELINE — IT SAID `0` AND NEVER SAID AGAINST WHAT.** The `0` is correct and it is a **REPEAT** price: baseline **the foundation already exists** — the metric is a table row, the folds are frozen since w38 and verified by #33 against four public packs, the GBDT baselines are on disk — so re-doing it today buys nothing. Priced against its own **ABSENCE** the same row is the **largest number in this table**, and w130 measured one arm per clause of the elaboration from arrays already on disk (`w130a_row8.py`, FAILURES 0, all five registered predictions held). **ARM A, "confirm the metric" — a METRIC price at the FINAL-FILE layer, k=1, a per-competition TOTAL and not a rate, baseline the same shipped predictions thresholded to a hard class: +63,263.9e-6** at the best of 102 cut points and **+122,243.5e-6** at the naive cut 0.5 — **1,265× the 50e-6 floor**, and the largest single number this table has ever carried. Other half of the same decision: halving the logit is **+0.0000e-6 under AUC and +16.6% of logloss**, which is *why* calibrating the final file is on the DO-NOT list — and the shipped pick is already rank-uniform, mean **0.50000** where the train base rate is **0.70942**, so it is not a probability at all and only AUC makes that safe. **ARM B, "the fixed-fold CV harness" — a MEASUREMENT price at the CV-ESTIMATE layer, per comparison, an sd and NOT a gain, baseline an unpaired harness: paired 3.44e-6 vs unpaired 271.11e-6**, 78.9× on the sd and 6,225× on the variance, over 200 bootstraps of `lgbm_tuned_lat_frac − lgbm_fixed_lat_frac`. 🎯 **The unpaired sd is 5.4× the 50e-6 floor and the paired sd is 15× under it, so without the shared folds not one price in this table could have been measured at all.** Re-drawing the partition adds a further **0.88e-6** of sd on the fold-mean over 200 draws, while the pooled OOF AUC is invariant to it. **ARM C, "one honest GBDT baseline" — a FOUNDATION price at the OOF layer, a per-competition TOTAL, baseline a constant prediction, which AUC scores at 0.5: +467,789.9e-6** for `lgbm_fixed_lat_frac` alone, against **+1,325.4e-6** for the shipped stack minus the best single member of 94 scanned — and that second number is everything the other nine rows have bought. ⛔ **Three currencies — final-file AUC at k=1, an sd of a measurement, and OOF AUC against chance — so the arms are NOT addable.** The foundation is **99.500%** of the AUC above chance and **46,585×** row 3's +10.04e-6/member bar | `## Competition basics` · `Since w38 the workspace has taken every` · `WHAT THE FOUNDATION IS WORTH` (w130, the three arms, their baselines, and the REPEAT/ABSENCE split) |
-| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×16, from 08-11 → w128 08-30 → w137 08-31 → w146 09-01 (closed) · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | ⚠ **A CORRECTION PRICE, AND THE ROW USED TO PUBLISH NEITHER A MAGNITUDE NOR A BASELINE — IT SAID `0 / negative` AND NOTHING ELSE.** The manoeuvre is a **CORRECTION** applied on top of the shipped file — not an ENROLMENT, not a SEARCH, not a TUNING — so every number here is a **STACK layer** total at **k=1** and none of them is a per-member rate. ⚠ **TWO BASELINES, AND THEY DO NOT SHARE A SIGN.** Cross-fitted per-cell isotonic over the generator's seven rule cells: **−118e-6 against the uncorrected stack** and **+6e-6 against a size-matched permuted-cell control** — w128 rebuilt both columns from scratch and re-measured **−110.9e-6** and **+5.1e-6**. Priced as an ENROLMENT in rows 3/4's units for the first time (paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the full 167-member pack, w128a): isotonic column **+3.95e-6** (t = 1.69), residual column **+2.36e-6** (t = 4.51), **the PERMUTED null +3.17e-6 — the null takes 80% of it, so the gain is capacity, not segmentation** — and the deciding contrast **real − null = +0.79e-6 ± 4.16e-6, t = 0.19, SIGN-FLIPPING**. ⚠ The permuted null is labelled `consistent` in `w128a_row9.json` at **t = 0.96**, which is w132a's live proof that sign-consistency is a 25% false-positive rate and not a test, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. The other two instruments read **−307e-6 … −2,043e-6** (cell-local LightGBM, negative 9/9) and **−74e-6 … −526e-6** (global residual booster, negative 8/8). ⛔ **And the structural cap that kills the angle's premise before any model is fitted: 76.7% of the AUC deficit is CROSS-cell** — pairs of rows in different segments — which no within-segment feature, monotone map or cell-local booster can reach | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` · `THE CELL THAT NO GUARD COULD SEE` (w128, the price, both baselines and the permuted null) |
-| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×16, from 08-11 → w129 08-30 → w138 08-31 → w147 09-01 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **A PRICE AFTER ALL, IN THREE CURRENCIES THAT MUST NOT BE ADDED — AND THE ROW USED TO PUBLISH NONE OF THEM, ONLY THE WORDS "the one angle that has ever PAID".** One arm per clause of the row's own elaboration, all three measured w129 from artefacts on disk. **ARM A, "confirm the picks" — a SELECTION price at the FINAL-FILE layer, k=2 slots, a per-competition TOTAL and not a rate, baseline Kaggle's auto-selection by public score: +4.5228e-6** at tau=0 and **+3.0704e-6** at the 95% upper tau, re-verified live by `w74b_clickstaleguard` (tiers unchanged over a board that grew 131 → 191 scored files), with the MIS-CLICK arm against the same baseline at **+35.17e-6** and **+81.92e-6**. **ARM B, "re-verify the pipeline" — a VERIFICATION price at the PIPELINE layer, k=3 files, per file rebuilt, baseline the shipped file's own bytes: +0.0000e-6, and zero is the PASS**, CSV and OOF byte-identical 8 and 13 days after the originals. **ARM C, "audit CV↔LB" — a PREDICTOR-layer bias in PREDICTED-LB units and NOT in AUC, per post-w23 build, baseline the corrected w25f model: −27.4266e-6**, which moved P(beat 0.97118) for `w27_ad188std` from 0.367 to 1.6e-4. ⛔ **Three distinct denominators, so the arms are NOT addable** — the same defect genus as adding measured-alone group deltas. 🎯 **AND THE HEADLINE IS UNREALISED: nothing is selected, so arm A is CONTINGENT on one human click, and consolidation's REALISED total today is +0.0000e-6 on every arm.** 🆕 **w138 (08-31) WIDENED ARM A's DENOMINATOR AND THE PICK SURVIVED.** The "CV rank 1 of 169" that defends pick 1 was a **registry** row count covering **159 of 201 submitted stems**; scoring every submitted stem with an OOF on disk gives **166 scorable, 0 beating pick 1** (rank 1 of 166; pick 2 rank 35), recompute matching the table to `0.0000e-6` on the 159 shared, and the 35 unscorable bounded at public ≤0.97107 where no tabled stem has ever reached pick 1's CV. ⛔ **No number in that audit is new** — the w69 and auto-pair CVs were already in `w75a_erarefresh.csv`, `w79c_p9.json` and `w114a_misclick.json`; the **comparison** was what was missing. ⛔ *"The one angle that has ever PAID"* is true on **sign** and on **cost** (the click is free) and false on **magnitude**: +4.5228e-6 is **2.2× SMALLER** than row 3's CatBoost ENROLMENT price of +10.04e-6/member, which this table publishes as a reason NOT to build | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) · `WHAT CONSOLIDATION HAS ACTUALLY PAID` (w129, the three arms, their currencies and the realised total) |
+| 9 | *error analysis: find where the best model is wrong, segment the OOF errors* | **×17, from 08-11 → w128 08-30 → w137 08-31 → w146 09-01 (closed) → w155 09-02 (closed) · artefacts verified** (count from `w117a_handcount`, which under-counted this row by one until w119 made `classify` positional — w14d's handing names two genera and was being dropped into OFF_ROTATION) | ⚠ **A CORRECTION PRICE, AND THE ROW USED TO PUBLISH NEITHER A MAGNITUDE NOR A BASELINE — IT SAID `0 / negative` AND NOTHING ELSE.** The manoeuvre is a **CORRECTION** applied on top of the shipped file — not an ENROLMENT, not a SEARCH, not a TUNING — so every number here is a **STACK layer** total at **k=1** and none of them is a per-member rate. ⚠ **TWO BASELINES, AND THEY DO NOT SHARE A SIGN.** Cross-fitted per-cell isotonic over the generator's seven rule cells: **−118e-6 against the uncorrected stack** and **+6e-6 against a size-matched permuted-cell control** — w128 rebuilt both columns from scratch and re-measured **−110.9e-6** and **+5.1e-6**. Priced as an ENROLMENT in rows 3/4's units for the first time (paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the full 167-member pack, w128a): isotonic column **+3.95e-6** (t = 1.69), residual column **+2.36e-6** (t = 4.51), **the PERMUTED null +3.17e-6 — the null takes 80% of it, so the gain is capacity, not segmentation** — and the deciding contrast **real − null = +0.79e-6 ± 4.16e-6, t = 0.19, SIGN-FLIPPING**. ⚠ The permuted null is labelled `consistent` in `w128a_row9.json` at **t = 0.96**, which is w132a's live proof that sign-consistency is a 25% false-positive rate and not a test, against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. The other two instruments read **−307e-6 … −2,043e-6** (cell-local LightGBM, negative 9/9) and **−74e-6 … −526e-6** (global residual booster, negative 8/8). ⛔ **And the structural cap that kills the angle's premise before any model is fitted: 76.7% of the AUC deficit is CROSS-cell** — pairs of rows in different segments — which no within-segment feature, monotone map or cell-local booster can reach | `WHERE THE ERROR-ANALYSIS ANGLE WAS ALREADY CLOSED` (the four instruments, re-verified) · `Where the AUC actually lives` (the segmentation map) · `CLOSED (2026-08-14): error analysis / targeted correction` · `THE CELL THAT NO GUARD COULD SEE` (w128, the price, both baselines and the permuted null) |
+| 10 | *consolidation* — re-verify the pipeline, audit CV↔LB, confirm the picks | **×17, from 08-11 → w129 08-30 → w138 08-31 → w147 09-01 (closed) → w156 09-02 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **A PRICE AFTER ALL, IN THREE CURRENCIES THAT MUST NOT BE ADDED — AND THE ROW USED TO PUBLISH NONE OF THEM, ONLY THE WORDS "the one angle that has ever PAID".** One arm per clause of the row's own elaboration, all three measured w129 from artefacts on disk. **ARM A, "confirm the picks" — a SELECTION price at the FINAL-FILE layer, k=2 slots, a per-competition TOTAL and not a rate, baseline Kaggle's auto-selection by public score: +4.5228e-6** at tau=0 and **+3.0704e-6** at the 95% upper tau, re-verified live by `w74b_clickstaleguard` (tiers unchanged over a board that grew 131 → 191 scored files), with the MIS-CLICK arm against the same baseline at **+35.17e-6** and **+81.92e-6**. **ARM B, "re-verify the pipeline" — a VERIFICATION price at the PIPELINE layer, k=3 files, per file rebuilt, baseline the shipped file's own bytes: +0.0000e-6, and zero is the PASS**, CSV and OOF byte-identical 8 and 13 days after the originals. **ARM C, "audit CV↔LB" — a PREDICTOR-layer bias in PREDICTED-LB units and NOT in AUC, per post-w23 build, baseline the corrected w25f model: −27.4266e-6**, which moved P(beat 0.97118) for `w27_ad188std` from 0.367 to 1.6e-4. ⛔ **Three distinct denominators, so the arms are NOT addable** — the same defect genus as adding measured-alone group deltas. 🎯 **AND THE HEADLINE IS UNREALISED: nothing is selected, so arm A is CONTINGENT on one human click, and consolidation's REALISED total today is +0.0000e-6 on every arm.** 🆕 **w138 (08-31) WIDENED ARM A's DENOMINATOR AND THE PICK SURVIVED.** The "CV rank 1 of 169" that defends pick 1 was a **registry** row count covering **159 of 201 submitted stems**; scoring every submitted stem with an OOF on disk gives **166 scorable, 0 beating pick 1** (rank 1 of 166; pick 2 rank 35), recompute matching the table to `0.0000e-6` on the 159 shared, and the 35 unscorable bounded at public ≤0.97107 where no tabled stem has ever reached pick 1's CV. ⛔ **No number in that audit is new** — the w69 and auto-pair CVs were already in `w75a_erarefresh.csv`, `w79c_p9.json` and `w114a_misclick.json`; the **comparison** was what was missing. ⛔ *"The one angle that has ever PAID"* is true on **sign** and on **cost** (the click is free) and false on **magnitude**: +4.5228e-6 is **2.2× SMALLER** than row 3's CatBoost ENROLMENT price of +10.04e-6/member, which this table publishes as a reason NOT to build | `STANDING CHECKS, FULL STEMS` · `w93a_suite.py` · `check_selection.py` — run the suite, rebuild the queue, re-check the selection · `THE DEADLINE PICK REBUILDS` (the end-to-end reproduction, byte-identical, and #46 which keeps it) · `WHAT CONSOLIDATION HAS ACTUALLY PAID` (w129, the three arms, their currencies and the realised total) |
 
 ⚠ **A ROW'S PRICE MAY BE INHERITED — ROW 4'S WAS.** Row 4 read *"same instrument as 2"*, i.e. its
 number came from a LightGBM measurement. w106 checked it at the artefact level rather than
@@ -4908,7 +5046,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 64 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 66 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -4925,7 +5063,8 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w127b_rateguard   w128b_pricedguard  w129b_optoutguard  w130b_zerobaselineguard
     w131b_selfbaselineguard
     w132b_significanceguard
-    w152a_listshape   w153a_openreadguard w154a_authscope
+    w152a_listshape   w153a_openreadguard w154a_authscope  w155a_poolguard
+    w156a_recordguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

@@ -39784,3 +39784,206 @@ not a free read (w143).
      stopped matching. Ship commented→0 / uncommented→1 alongside it.
    • 🆕 **`team_count` (3,531) AND THE LEADERBOARD ROW COUNT (3,532) ARE DIFFERENT ENDPOINTS.**
      They have always disagreed by one. Do not narrate it as a team withdrawing.
+
+---
+
+# 2026-09-02 — w155 — ⚠ ENTRY RECONSTRUCTED BY w156 FROM THE ARTEFACTS ON DISK. w155 DID THE WORK
+# AND THE SESSION ENDED BEFORE IT WROTE ANYTHING HERE, SO THE INDEX COUNTED A RUN WITH NO RECORD.
+
+⛔ **THIS BLOCK WAS NOT WRITTEN BY w155.** w156 found w155's work uncommitted and unjournalled and
+reconstructed the header and this summary from files on disk. Nothing below is recalled; every
+line names the artefact it came from. The substantive record is w155's own block at the head of
+`RESEARCH.md` and its `LEADERBOARD.md` entry, both of which w155 did write. This exists so the
+corpus contains the run the ANGLE INDEX already claims — see w156 §2 for why that matters.
+
+**ANGLE (as handed):** "error analysis: find where the best model is wrong, segment the OOF
+errors" — row 9. **Slot:** unrecorded; w155 left no note of it. **Submission:** none — closed.
+
+## WHAT IS ON DISK, AND WHAT IT SHOWS
+
+| artefact | state |
+|---|---|
+| `RESEARCH.md` head block, `(w155, 2026-09-02)` | complete — the three-row pool disclosure, the per-artefact convention, the blind-spot paragraph |
+| `LEADERBOARD.md` w155 entry | complete — the authenticated opening read, 201 rows, rank 319 |
+| `experiments/w155a_poolguard.py` (#65) | complete, and **re-run live by w156: FAILURES 0**, `--control` fires on the frozen 170-member cell |
+| `RESEARCH.md` ANGLE INDEX row 9 | bumped ×16 → ×17, trail extended `→ w155 09-02 (closed)` |
+| `experiments/w117a_handcount.py` | `CURRENT_RUN, CURRENT_ROW` moved to `w155`, 9 |
+| `experiments/w93a_suite.py` | `w155a_poolguard` added to `STEMS`; the published heading was left at 65 |
+| `logs_w155_row9.txt` | ⚠ **TRUNCATED** mid-R3, at `split 0` — the row-9 re-verification did not finish |
+| `logs_w155_suite.txt` | ⚠ **TRUNCATED** at `[53/65]` — the suite did not finish |
+| `experiments/w128a_row9.json` | **unchanged** — corroborates the truncation; the run never reached its write |
+| `JOURNAL.md` | **nothing** |
+| git | **nothing committed** |
+
+🔴 **AND ITS ROW-9 JOB WAS STILL RUNNING 25 MINUTES AFTER THE SESSION DIED.** w156 found
+`.venv/bin/python -u experiments/w128a_row9.py` alive at pid 1792510, `state=R`, still appending
+to `logs_w155_row9.txt` (2,960 → 3,060 bytes while w156 watched). ⛔ **An orphaned background job
+outlives the session that started it.** w154's warning was about not *relaunching* one; this is
+the other half — a dead run's job keeps the box busy and keeps writing into a log the next run
+will read as a finished record. w156 left it alone rather than killing it, and did not quote it.
+
+## WHAT w155 GOT RIGHT, RECORDED SO IT IS NOT RE-DERIVED
+
+`w155a_poolguard` is sound and w156 verified it live rather than inheriting the claim. Rows 1, 7
+and 9 each disclose *"the full 167-member pack"*; their artefacts record 167, 167 and **170**, and
+the difference is a convention, not an error — `w128a_row9.py` takes `pool_n` **after** appending
+three in-process arms, so 170 is 167 + 3 and the baseline the enrolment price is measured against
+is Q = 167. That reconciliation existed in no document before w155 wrote it down.
+
+---
+
+# 2026-09-02 — w156 — BLOCKED: COMPETITION CLOSED. THIRTEENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# THE CENSUS THAT WATCHES THE ANGLE INDEX STAYED GREEN OVER A RUN THAT LEFT NO RECORD, BECAUSE
+# IT WAS CREDITING THAT RUN ITSELF.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 5 of 10, ANGLE *"Consolidation: no new ideas.
+Re-verify the best pipeline end-to-end, check the CV-to-LB gap across every experiment so far, and
+make sure the strongest submission is the one selected."* Deadline **2026-08-31 23:59**, read live
+off the competition object through an authenticated client, now **2026-09-02 15:0x UTC** — passed
+by **~39 hours**. The prompt's *"submissions the Kaggle API already reports for today: 0"* is a
+true read of a dead board. ⛔ The angle's third clause — *make sure the strongest submission is the
+one selected* — **cannot be honoured and has not been actionable since 08-31**: the board is
+graded, `selected` reads 0 on all 201 rows, and Kaggle already applied its fallback.
+
+## 1. 🔴 THE FIRST THING TO DO WAS NOT THE ANGLE. w155's WORK WAS ON DISK, UNJOURNALLED AND UNCOMMITTED.
+
+`git status` opened on a modified `RESEARCH.md` whose **first line** is `# (w155, 2026-09-02)`,
+a modified `LEADERBOARD.md`, an untracked `experiments/w155a_poolguard.py`, and a `JOURNAL.md`
+whose last header is **w154**. Both of w155's logs stop mid-stream (`[53/65]`; row 9 at `split 0`).
+Its row-9 job was **still running**, orphaned, at pid 1792510. See the reconstructed w155 block
+above for the full inventory. Nothing was lost; nothing had been recorded either.
+
+## 2. 🔴 AND #50 READ THAT STATE AS CLEAN — THE ADJUSTMENT HID THE THING IT ADJUSTS FOR
+
+`w117a_handcount` (#50) censuses `JOURNAL.md` run headers against the ANGLE INDEX's handing counts.
+Run unmodified, on a corpus with no w155 entry and an index claiming row 9 ×17, it printed
+**`FAILURES: 0`**. The reason is `w117a_handcount.py:324-325`:
+
+    if not any(re.search(CURRENT_RUN, r["header"]) for r in runs):
+        measured[CURRENT_ROW] = measured.get(CURRENT_ROW, 0) + 1
+
+⚠ **THE COMPENSATION IS CORRECT AND ITS COMMENT REASONS CAREFULLY ABOUT TWO STATES** — before the
+entry lands and after — *"a constant `+1` here would silently become a double-count an hour later"*.
+**There is a third state.** If the entry never lands, the corpus is short by one **forever** and the
+compensation covers it forever. 🎯 **The run that vanishes is exactly the run the census cannot see.**
+
+🔴 **THE DEBT IS REAL, IT IS DEFERRED, AND IT LANDS ON THE WRONG ROW.** Measured, not argued:
+a copy of the census with `CURRENT_RUN` pointed at w156/row 10 and nothing else changed —
+
+    FAIL: live row  9 (error analysis): index claims x17, corpus has x16
+    FAIL: live row 10 (consolidation): index claims x16, corpus has x17
+
+Two red rows, **neither of them the defect**. Row 10's is this run's ordinary bump. Row 9's is
+w155's missing entry surfacing one run late, attributed to a row nobody touched today. A future
+reader gets a census failure pointing at *error analysis* for a fault in record-keeping.
+
+⚠ **THIS IS NOT THIS WEEK'S GENUS AND SAYING SO IS THE POINT.** w150–w154 were reads that **look
+complete and are not**; w155 was a record that **looks inconsistent and is not**. Here the read is
+complete, the record is consistent, and the check is **correct** — correct about a window it cannot
+tell it has left. A self-cancelling adjustment is invisible in exactly the case it was written for.
+
+## 3. ✅ GUARDED, NOT NARRATED — `experiments/w156a_recordguard.py` (#66)
+
+C1 the trail entries in the index's handing-count cells, extracted — **41 across 10 rows** — with
+C1b proving the matcher tracks the text (rename one → `128` becomes `9999`; strip the arrows →
+nothing) · **C2 the assertion**: every run named in a trail has a `JOURNAL.md` run header, matched
+with **`w117a_handcount`'s own `RUN_HDR`** so the two agree on what a run is · **C3 the fix**: the
+compensation is **bounded to one run** — at most one trail run may be uncovered, it must be the one
+`w117a_handcount` is currently crediting (read out of its source, not hardcoded), and it may be
+exempt on **one row only** · C4 three anchors in `w117a_handcount.py` — the `RUN_HDR` this guard
+**copies rather than imports**, the `+1`, and the condition that makes it self-cancelling — so
+drift there turns C4 red **before** C3 goes quietly wrong · C5 `--control` · C6 scope and blindness.
+
+⚠ **AND THE CONTROL HAD TO BE REBUILT ONCE, FOR THE REASON THAT MATTERS MOST HERE.** The first
+version compared the frozen cell against the **live** corpus and printed **`SILENT (BAD)`** — w155
+was still the credited run, so C3 exempted it and the control had nothing to fire on. Worse, it
+would have gone green the moment w155's entry landed. ⛔ **A CONTROL THAT BORROWS LIVE STATE STOPS
+WORKING EXACTLY WHEN THE FIX LANDS**, which is when it must still work. Rebuilt to freeze all three
+inputs — the trail, `ids - {155}`, and a credited w156:
+
+    frozen trail [128, 137, 146, 155] vs the pre-fix corpus, credit w156 -> uncovered [155]  FIRES
+    shipped trail [128, 137, 146, 155] vs the live corpus, credit w155   -> uncovered []     SILENT
+    the control WORKS
+
+## 4. ✅ THE ANGLE, RE-VERIFIED AT THE ARTEFACT LEVEL — ROW 10, CLOSED, AND IT REPRODUCED EXACTLY
+
+Seventeenth handing of consolidation. `experiments/w129a_row10.py` **re-run live**, not quoted:
+**FAILURES: 0**, `logs_w156_row10.txt`. ✅ **And `experiments/w129a_row10.json` came back
+BYTE-IDENTICAL** to w129's of 08-30 — 1,149 bytes, `git status` clean on the tracked file — so
+all three arms, five registered predictions and the realised total reproduced three days later.
+
+| the angle's clause | arm | price | currency |
+|---|---|---|---|
+| *"confirm the picks"* | A | **+4.5228e-6** (tau=0), **+3.0704e-6** at the 95% upper tau; mis-click **+35.17e-6** / **+81.92e-6** | per competition, TOTAL |
+| *"re-verify the pipeline"* | B | **+0.0000e-6** on 3 of 3 files, and **zero is the PASS** | per file rebuilt |
+| *"audit CV↔LB"* | C | **−27.4266e-6** | PREDICTED-LB units, **not AUC** |
+
+⛔ **Three denominators, so the arms are NOT addable.** 🎯 **REALISED TOTAL TODAY: +0.0000e-6 on
+every arm** — arm A was always CONTINGENT on a click nobody made, and the board is now graded.
+
+## 5. ✅ EACH CLAUSE ALSO RUN IN ITS STRONGEST AVAILABLE FORM, LIVE
+
+**Clause 1, "re-verify the best pipeline end-to-end".** `w92a_smokerun.py` re-run standalone:
+**FAILURES 0**, including its planted-failure control (`G4 CONTROL-: planted failing module
+reported rc=1`). Arm B's three md5 pairs: `w36_ad199stdcorr` `8d8e748f02`, `w36_ad199stdcorr_ens4`
+`4cb5145849`, `w23_ad187stdcorr` `4fa32c223a` — shipped == rebuilt, delta `+0.0000e-6` each.
+
+**Clause 2, "check the CV-to-LB gap across every experiment".** `w138a_coverage.py` re-run:
+**201 submitted stems, 159 in the CV table, 166 scorable from an OOF on disk, 35 with none.**
+Recompute vs the table over the 159 shared: **max|diff| = 0.0000e-6**. **Stems beating pick 1 on
+recomputed CV: 0.** Pick 1 `w36_ad199stdcorr` is the CV argmax over every submitted stem that can
+be scored, rank **1 of 166**; pick 2 `w23_ad187stdcorr` rank **35**.
+
+**Clause 3, "make sure the strongest submission is selected" — the only clause the close makes
+answerable rather than unanswerable.** `w142d_cvprivate.py` re-run live, over all 201 graded rows:
+
+| signal | Spearman vs **private** | n |
+|---|---|---|
+| **CV** | **+0.929** (p 5.8e-72) | 164 |
+| public LB | +0.874 (p 1.1e-52) | 164 |
+
+**rho(CV) − rho(public) = +0.055, paired-bootstrap 90% CI [+0.027, +0.085], P(CV better) 100.0%.**
+🎯 **THE BRIEF'S CENTRAL INSTRUCTION IS NOW GRADED RATHER THAN ASSERTED, AND IT WAS RIGHT.**
+
+    argmax-CV pair       priv 0.97093  rank 322   [w36_ad199stdcorr, w38_ad202stdcorr]
+    argmax-public pair   priv 0.97093  rank 322   [w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4]
+    WANTED (the pick)    priv 0.97093  rank 322   [w23_ad187stdcorr, w36_ad199stdcorr]
+    AUTO (what happened) priv 0.97093  rank 322   [w36_ad199stdcorr_ens4, w38_ad202stdcorr_ens4]
+    ORACLE (hindsight)   priv 0.97094  rank 315   [w29_ad194stdcorr, w40_ad211stdcorr]
+
+⚠ **EVERY SELECTION RULE THIS WORKSPACE ARGUED ABOUT FOR THREE WEEKS LANDS ON THE SAME NUMBER.**
+CV, public, the WANTED pick and Kaggle's fallback all score **0.97093 / rank 322**. Only hindsight
+does better, by **+10e-6 and 7 ranks**. ⛔ So arm A's **+4.5228e-6** was priced honestly and
+**realised exactly nothing** — not because the click was skipped, but because the four candidate
+pairs were indistinguishable on the private slice.
+
+🆕 **AND ONE NUMBER THIS WORKSPACE HAD NOT COMPUTED, WHICH IS THE FAIREST GRADE ON THE CV SCHEME.**
+The single best private file is `w40_ad211stdcorr` (**priv 0.97094**, the only row above 0.97093).
+Cross-referencing `w138a_coverage.csv`: it sat at **CV rank 3 of 166**, 2.5e-6 under the argmax.
+🎯 **CV PUT THE REALISED PRIVATE WINNER IN ITS TOP 3 OF 166 SUBMITTED FILES.** The 10e-6 the oracle
+found came from taking ranks 3 and 31 instead of ranks 1 and 35 — a difference no honest CV could
+resolve at this spacing, and far inside the noise the workspace measured all week.
+
+## 6. ✅ THE ROGII CHECK, GRADED — THE FAILURE THE BRIEF WAS WRITTEN ABOUT DID NOT REPEAT
+
+3,532 teams on both boards. Rank movement (private − public): **median −3, mean +0.0, sd 75.9**;
+|move| 50% 13, 90% 65, 99% 187. **Ours: 331 → 319, up 12, quieter than 51.1% of the field.**
+⛔ **The public top-100 moved median +89 and 84 of 100 FELL, worst +475.** The account that was
+burned on `rogii-wellbore-geology-prediction` by hedging against public feedback finished **up**
+while the public leaders collapsed. Final: **319 / 3,531**, private **0.97093**, top decile by 34.
+
+## 7. ✅ THE DECISIVE READS, RE-RUN LIVE — NOTHING ELSE MOVED
+
+`w142b_privatecheck.py`: **201 rows, 201 with `privateScore`**, `selected` **0**, status
+`COMPLETE` ×201. Best private **0.97094** (`w40_ad211stdcorr`, public 0.97118). Opening read
+through an authenticated client: **deadline 2026-08-31 23:59, teams 3531, `user_rank` 319, metric
+Roc Auc Score, max_daily 10**. ⚠ `submissions_disabled` reads **False** for the fourteenth day on
+a closed, graded board.
+
+## 8. ✅ CENSUS RUN AND SYNCED PER w150's STANDING INSTRUCTION
+
+Three deterministic edits: `RESEARCH.md` ANGLE INDEX row 10 **×16 → ×17**, trail extended
+`→ w156 09-02 (closed)`; `experiments/w117a_handcount.py` `CURRENT_RUN, CURRENT_ROW` moved from
+`^# 2026-09-02 — w155 —`, 9 to `^# 2026-09-02 — w156 —`, 10; `w156a_recordguard` registered in
+`w93a_suite`'s `STEMS` and the published heading bumped **`## THE 66 STANDING CHECKS`**.
+

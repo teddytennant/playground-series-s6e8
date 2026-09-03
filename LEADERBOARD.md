@@ -1,3 +1,45 @@
+# 2026-09-02 — w156. THE PUBLIC→PRIVATE MOVEMENT, GRADED AGAINST THE FIELD.
+
+Nothing on the board moved and nothing can. What is new here is the **comparison**, computed live
+from all 201 graded rows (`w142d_cvprivate.py`) rather than asserted:
+
+| signal | Spearman vs **private** | n |
+|---|---|---|
+| **CV** | **+0.929** (p 5.8e-72) | 164 |
+| public LB | +0.874 (p 1.1e-52) | 164 |
+
+rho(CV) − rho(public) = **+0.055**, paired-bootstrap 90% CI **[+0.027, +0.085]**, P(CV better)
+**100.0%**. ⚠ And every selection rule this workspace argued over lands on the same number:
+argmax-CV, argmax-public, the WANTED pick and Kaggle's own fallback all score **0.97093 / rank
+322**. Only hindsight does better — **0.97094 / rank 315**, +10e-6 and 7 ranks. The single best
+private file, `w40_ad211stdcorr`, sat at **CV rank 3 of 166** submitted stems with an OOF on disk.
+
+⛔ **THE ROGII FAILURE DID NOT REPEAT.** 3,532 teams on both boards. Rank movement (private −
+public): median −3, mean +0.0, sd 75.9; |move| 50% 13, 90% 65, 99% 187. **Ours: 331 → 319, up 12,
+quieter than 51.1% of the field.** The public top-100 moved **median +89 and 84 of 100 FELL**,
+worst +475. Final: **319 / 3,531**, private **0.97093**, top decile by 34 places.
+
+# 2026-09-02 — w155. RE-CONFIRMED, THROUGH THE ONLY CLIENT THAT ANSWERS THE USER FIELDS.
+
+⚠ The w153 entry below prints `user_rank 319` under a two-line snippet that never says which
+client sent it. That is not wrong, it is **incomplete**, and w154 measured what incompleteness
+costs here: a bare `KaggleClient()` returns every competition field correctly and answers
+`user_rank 0`, `user_has_entered False`. The full form, run live this run:
+
+    api = KaggleApi(); api.authenticate()
+    r = ApiGetCompetitionRequest(); r.competition_name = "playground-series-s6e8"
+    with api.build_kaggle_client() as kc:
+        c = kc.competitions.competition_api_client.get_competition(r)
+    -> deadline 2026-08-31 23:59:00   now 2026-09-02 14:25 UTC   teams 3531
+       metric Roc Auc Score   max_daily 10   submissions_disabled False
+       user_rank 319   user_has_entered True
+
+Closed by **~38.4 hours**. `w142b_privatecheck.py` re-run: **201 rows, 201 with `privateScore`**,
+`selected` 0, status COMPLETE ×201, best private **0.97094** (`w40_ad211stdcorr`, public 0.97118),
+landed **0.97093**. Identical to w150–w154. ⛔ There is no live board to track — final standing is
+**319 / 3,531**, top decile by 34 places. `team_count` 3,531 and the private-leaderboard row count
+3,532 are two endpoints that have always disagreed by one (w154); neither moves the rank.
+
 # 2026-09-02 — w153. RE-CONFIRMED. THE READ BELOW IS THE SAME; THE COMMAND FOR IT WAS NOT RUNNABLE.
 
 Every entry above quotes the opening read as a kwarg constructor. That form raises
