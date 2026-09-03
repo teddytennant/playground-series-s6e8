@@ -1,0 +1,84 @@
+w93a suite — 70 checks, 900s each, python /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/.venv/bin/python
+C2 list matches RESEARCH.md (70 stems, heading says 70)  PASS
+C1 all 70 stems resolve on disk  PASS
+[ 1/70] w54a_vetoexpiry          rc=1     3.0s                     .venv/bin/python experiments/w48e_order.py --day <UTC day> --write  (in the post-send set — see the summary)
+[ 2/70] w55a_unpriced            rc=0    58.0s  guard check: `w55: unpriceable` in w26g_send.py -> present ✅
+[ 3/70] w56b_wantedguard         rc=0     0.5s  WANTED guard intact.
+[ 4/70] w57c_muguard             rc=0     6.4s  MU pin holds, its artefacts agree, and the pin is load-bearing.
+[ 5/70] w59b_barguard            rc=0     5.1s  w59b: the measured bar is wired, strict, and fails safe.
+[ 6/70] w60b_ineligguard         rc=0     6.2s  FAILURES: 0
+[ 7/70] w60d_memberguard         rc=0     3.9s  w60d: the member label is derived in stdflag and bites in the sender.
+[ 8/70] w62b_barstaleguard       rc=0     6.7s  FAILURES: 0
+[ 9/70] w63b_setguard            rc=2     4.0s       which is exactly the w48 defect this keying exists to prevent.
+[10/70] w64b_hedgeguard          rc=0     5.2s  FAILURES: 0
+[11/70] w65b_pinguard            rc=0    13.6s  FAILURES 0
+[12/70] w65c_subsetcheck         rc=0   460.9s  R-M11f VERDICT: CONFIRMED
+[13/70] w66d_rangeguard          rc=0     9.1s  w66d: the fitted range is a number, and the member row is out of the max.
+[14/70] w67b_slopeguard          rc=2     5.3s  
+[15/70] w68b_floorguard          rc=0     6.4s  FAILURES 0
+[16/70] w70b_basisguard          rc=0     2.9s    FAILURES 0
+[17/70] w70d_chainguard          rc=1     6.4s    ⛔ Do NOT open a send window until this exits 0.
+[18/70] w71b_dupguard            rc=0   116.2s    ✅ the override is unapplied and both apply paths are shut.
+[19/70] w72b_dayguard            rc=2     6.6s  
+[20/70] w74b_clickstaleguard     rc=0     5.2s  FAILURES: 0
+[21/70] w75b_muguard             rc=0     5.8s  w75b_muguard: 0 complaint(s)
+[22/70] w76b_addguard            rc=0     0.2s    ✅ all four checks pass.
+[23/70] w77b_bracketguard        rc=0     3.7s  FAILURES 0
+[24/70] w78b_treatguard          rc=0     0.5s  FAILURES 0
+[25/70] w79b_fillguard           rc=0     4.4s  FAILURES 0
+[26/70] w80f_packguard           rc=0     1.2s    FAILURES 0: []
+[27/70] w82a_pricecal            rc=0     9.5s  FAILURES: 0
+[28/70] w84a_pickargmax          rc=0     5.0s  FAILURES: 0
+[29/70] w85c_slotguard           rc=1    35.7s  FAILURES 2  (in the post-send set — see the summary)
+[30/70] w86a_pagecap             rc=0     8.0s  FAILURES 0
+[31/70] w87a_registrarguard      rc=2     5.4s  
+[32/70] w88a_calexposure         rc=0     8.7s  ℹ NOTHING IN SCOPE: the calendar is spent — 0 file(s) remain registered for a future send,
+[33/70] w89a_foldid              rc=0    12.2s  packs failing the identity test: 0
+[34/70] w91b_dateguard           rc=0     5.0s  FAILURES: 0
+[35/70] w92a_smokerun            rc=0   488.4s  FAILURES 0
+[36/70] w93c_pickverify          rc=0    13.6s  FAILURES: 0
+[37/70] w100a_complement         rc=2     3.9s       which is exactly the w48 defect this keying exists to prevent.
+[38/70] w101a_angleguard         rc=0     0.2s  OK: every ANGLE INDEX pointer resolves. A handed angle still costs one grep.
+[39/70] w103a_pathguard          rc=0     0.1s  OK: 5 of 6 tools are invisible to a bare `command -v`. A 'command not found' here is a sta
+[40/70] w104a_cgroupguard        rc=0     1.0s  OK: detach.py stays in the runner's cgroup and dies with it; the systemd-run --user recipe
+[41/70] w105a_liveguard          rc=0     1.2s  FAILURES 0   -> experiments/w105a_liveguard.json
+[42/70] w106a_claimguard         rc=0     1.4s  FAILURES 0   -> experiments/w106a_claimguard.json
+[43/70] w107a_lineref            rc=0     0.3s  FAILURES 0   -> experiments/w107a_lineref.json
+[44/70] w109b_colguard           rc=0    87.2s  PASS  one member per column, plus one known and still-real duplicate pair
+[45/70] w110b_covguard           rc=0     0.1s  FAILURES 0
+[46/70] w111b_baseguard          rc=0     9.2s  FAILURES: 0
+[47/70] w112a_templateguard      rc=0     2.8s    FAILURES 0   -> experiments/w112a_templateguard.json
+[48/70] w114b_selectguard        rc=0     0.1s  ✅ CLEAN — every printed literal names only WANTED or an ALLOWED stem.
+[49/70] w115a_docselectguard     rc=0     0.8s  ✅ CLEAN — no human-read doc names a non-WANTED selectable file as the pick
+[50/70] w117a_handcount          rc=0     0.3s  FAILURES: 0
+[51/70] w122a_slotguard          rc=0     0.1s  ✅ CLEAN — slots are filled, not tiers listed; the frozen defect stays caught.
+[52/70] w123b_groupguard         rc=0     2.9s  ✅ CLEAN — the residual group is labelled as one, and row 3 sells both prices
+[53/70] w124b_priceunitguard     rc=0     3.7s  ✅ CLEAN — every published magnitude names the quantity it measures
+[54/70] w125b_layerguard         rc=0     9.5s  ✅ CLEAN — every published price names its layer, and the ladder has no prose left in its n
+[55/70] w126c_scopeguard         rc=0     0.3s  ✅ CLEAN — every SEARCH price names which search, at which layer, over how many parameters
+[56/70] w127b_rateguard          rc=0     0.1s  ✅ CLEAN — every ENROLMENT price says what it is divided by, and row 7 says which layer eac
+[57/70] w128b_pricedguard        rc=0     3.4s  FAILURES: 0
+[58/70] w129b_optoutguard        rc=0     3.5s  FAILURES: 0
+[59/70] w130b_zerobaselineguard  rc=0     3.8s  FAILURES: 0
+[60/70] w131b_selfbaselineguard  rc=0     2.8s  FAILURES: 0
+[61/70] w132b_significanceguard  rc=0     3.7s  FAILURES: 0
+[62/70] w152a_listshape          rc=0     4.6s  FAILURES: 0
+[63/70] w153a_openreadguard      rc=0     1.7s  FAILURES: 0
+[64/70] w154a_authscope          rc=0     1.8s  FAILURES: 0
+[65/70] w155a_poolguard          rc=0     0.1s  FAILURES: 0
+[66/70] w156a_recordguard        rc=0     0.3s  FAILURES: 0
+[67/70] w157a_closedguard        rc=0     1.3s  FAILURES: 0
+[68/70] w158a_tscaleguard        rc=0     0.1s  FAILURES: 0
+[69/70] w159a_committedguard     rc=0     0.6s  FAILURES: 0
+[70/70] w160a_pushguard          rc=0     1.9s  FAILURES: 0
+
+TOTAL 1494s   62/70 green
+FAILURES: w54a_vetoexpiry(rc=1)  w63b_setguard(rc=2)  w67b_slopeguard(rc=2)  w70d_chainguard(rc=1)  w72b_dayguard(rc=2)  w85c_slotguard(rc=1)  w87a_registrarguard(rc=2)  w100a_complement(rc=2)
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w54a_vetoexpiry.log
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w63b_setguard.log
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w67b_slopeguard.log
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w70d_chainguard.log
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w72b_dayguard.log
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w85c_slotguard.log
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w87a_registrarguard.log
+  full output: /home/nixos/all-my-repos/ai/kaggle-agents/workspace/playground-series-s6e8/experiments/w93a_fail_w100a_complement.log

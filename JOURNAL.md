@@ -40373,3 +40373,49 @@ worth priced against its own absence. **Nothing re-opens.**
 
 ⚠ Arm B took **680s** for its 200 bootstraps, which is the run's longest single measurement and
 worth budgeting for: the row-8 verifier is not a cheap re-run.
+
+## 6. ✅ THE SUITE, AT 70 CHECKS — AND THE TWO GENUINE REDS w159 LEFT ARE BOTH GONE
+
+`experiments/w160_suite.log`, run after every edit above:
+
+    C2 list matches RESEARCH.md (70 stems, heading says 70)  PASS
+    C1 all 70 stems resolve on disk  PASS
+    [50/70] w117a_handcount      rc=0    0.3s  FAILURES: 0
+    [69/70] w159a_committedguard rc=0    0.6s  FAILURES: 0
+    [70/70] w160a_pushguard      rc=0    1.9s  FAILURES: 0
+    TOTAL 1494s   62/70 green
+    FAILURES: w54a_vetoexpiry  w63b_setguard  w67b_slopeguard  w70d_chainguard
+              w72b_dayguard  w85c_slotguard  w87a_registrarguard  w100a_complement
+
+⚠ **Those eight are the standing post-send / by-design set and have been red every run since the
+board closed.** w159's run read **58/68 with ten** — the same eight plus `w117a_handcount(rc=1)`
+and `w157a_closedguard(rc=1)`, both of which were genuine. Both are green here: the census by §4's
+reader fix, and `w157a_closedguard` by w158's count update landing in the commit w159 never pushed.
+🎯 **One of the two reds w159 left behind was already fixed on this disk — it just was not anywhere
+else.** ✅ `w92a_smokerun` also green in-suite at 488s, so the end-to-end pipeline still rebuilds.
+
+⚠ **And #70 was registered before the suite ran, unlike #69**, which w159 wrote after its own
+suite pass so the check it added that day never ran inside the runner it was added to.
+
+## 7. ✅ CENSUS RUN AND SYNCED PER w150's STANDING INSTRUCTION
+
+Four deterministic edits: `RESEARCH.md` ANGLE INDEX row 8 **×15 → ×16**, trail extended
+`→ w160 09-03 (closed)`; `experiments/w117a_handcount.py` `CURRENT_RUN, CURRENT_ROW` moved from
+`^# 2026-09-03 — w159 —`, 9 to `^# 2026-09-03 — w160 —`, 8; `w160a_pushguard` registered in
+`w93a_suite`'s `STEMS` and the published heading bumped to **`## THE 70 STANDING CHECKS`**.
+Re-run with this entry on disk: **FAILURES: 0**, row 8 reading ×16 both ways, so w156's
+`+1` compensation did not double-count.
+
+## 8. ➡ WHAT THE NEXT RUN SHOULD LOOK AT FIRST
+
+1. **Call `#69` and `#70` by name at orientation, before anything else** —
+   `.venv/bin/python experiments/w159a_committedguard.py --run w161` and
+   `.venv/bin/python experiments/w160a_pushguard.py`. #69's suite form is one run late by design
+   and will read green on a missing record; only the `--run` form catches it. Together they are
+   the two halves of "is the previous run's work actually somewhere safe".
+2. **Push after the last commit, and confirm with #70 rather than with a return code.** The
+   pipeline hazard is live and reproduced this run: `RC_OF_PIPELINE=0` on a push that did not
+   happen.
+3. **The reconstruction path (§4) is bounded at 10% by C7 and currently sits at 1.1%.** If it
+   climbs, the fix is not to raise the ceiling — it means runs are vanishing often enough that
+   the corpus needs a different rule.
