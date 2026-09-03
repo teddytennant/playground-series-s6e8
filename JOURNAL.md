@@ -40205,3 +40205,171 @@ is the fourth run in that streak and its own guard is the evidence.**
 ⚠ The log covers **68**, not 69: w159 ran the suite and then wrote and registered #69, so the
 check it added that day never ran inside the runner it was added to. w160 ran it standalone
 instead — `FAILURES: 0` in the suite form, and the orientation FAIL quoted above.
+
+
+---
+
+# 2026-09-03 — w160 — BLOCKED: COMPETITION CLOSED. SEVENTEENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# 🔴 TWO COMMITS EXISTED ON THIS DISK AND NOWHERE ELSE, INCLUDING GUARD #68 IN ITS ENTIRETY.
+
+⛔ **BLOCKED AT THE TOP.** ANGLE as issued: *"Foundation: confirm the metric, build the fixed-fold
+CV harness, and get one honest GBDT baseline scored"* — genus `foundation`, **row 8**, sixteenth
+handing. Deadline **2026-08-31 23:59**, read live off the competition object through an
+authenticated client, now **2026-09-03 13:48 UTC** — **past by 61.8 hours**. The prompt's
+*"submissions the Kaggle API already reports for today: 0"* is a true read of a dead board.
+Final standing unchanged: **rank 319 / 3,531, private 0.97093**, `max_daily` 10, metric
+`Roc Auc Score`, `submissions_disabled` still **False** for the sixteenth day on a graded board.
+
+⛔ **NO SUBMISSION AND NO SUBMIT PROBE.** A live write against a closed competition is not a free
+read (w143). The brief's *"use all 10 every day"* has not been actionable since 08-31.
+
+## 1. ✅ FOR THE FIRST TIME THE MISSING RECORD WAS FOUND BY A CHECK, NOT BY `git status`
+
+w159 left the same fault as w155, w156 and w158: it did the work, wrote a guard, synced the
+census, and wrote **no journal entry, no `RESEARCH.md` head, no `LEADERBOARD.md` note and no
+commit**. Every previous instance was noticed by eyeballing `git status` at the next run's
+orientation. This one was named by **#69 `w159a_committedguard`, in the orientation form w159
+built for exactly this and never got to use**:
+
+    C4: caller is w160 but the census credits w159 -- the in-flight exemption is REFUSED
+    FAIL: row 9 trails w159, which has no committed JOURNAL.md entry and none in the tree either
+    C3  w159 (row 9): UNWRITTEN
+
+⚠ **AND ITS SUITE FORM READ GREEN ON THE SAME STATE — `FAILURES: 0`.** That is #69's declared
+design, not a defect in it: without `--run` the exemption stands and the check is one run late.
+🎯 **So the guard that catches this genus only works if the run calling it says its own name**,
+and nothing in the playbook forces that. Recorded here because the next run has to type it.
+
+w159's entry is reconstructed above from its artefacts, re-run live rather than copied, and
+committed with its guard as `5259571`.
+
+## 2. 🔴 THE DEFECT: `origin/main` WAS TWO COMMITS BEHIND `HEAD`
+
+Read live with `ls-remote`, not out of a cached ref:
+
+    975bde7  09-03 08:53  Update the closed-column guard's entry counts to the post-fix text
+    f3a837e  09-03 09:22  Correct the price column's t to delta/(sd/sqrt(REPS)) and guard the scale
+
+From the reflog, not from memory: **w157 pushed at 08:48:57 and then made a fourth commit at
+08:53:46**; **w159 committed at 09:22:14 and pushed nothing**. ⛔ Neither push was refused —
+neither run ran one. The remote is the only copy of this workspace that survives the machine, and
+it was missing two runs of work, one of which is **guard #68 in full**.
+
+🎯 **AND THIS DOCUMENT HAD ALREADY WRITTEN DOWN THE FAILURE AND THE FIX, FIVE RUNS BEFORE THE
+FIRST MISS.** `RESEARCH.md`, w136, 08-31:
+
+    🔴 AND IT EXITS 0 WHEN PIPED, so `git push … | tail; echo RC=$?` prints `RC=0` on a push
+    that did not happen. Confirm with `git status -sb` (look for `ahead N`) or
+    `git log --oneline origin/main -1`, never with the exit code of a pipeline.
+
+Reproduced live — git on PATH, `gh` deliberately off it, nothing transmitted:
+
+    piped     gh auth git-credential get: line 1: gh: command not found     RC_OF_PIPELINE=0
+    unpiped   the same two lines                                            RC_DIRECT=128
+    after     git status -sb  ->  ## main...origin/main [ahead 2]
+
+⛔ **RIGHT ABOUT THE FAILURE, RIGHT ABOUT THE CONFIRMATION, AND IT WAS PROSE.** Prose is read once,
+by whoever greps for it. Measured over the shipped `STEMS` list: **0 of 69** standing checks read
+the remote — no `origin/`, no `ls-remote`, no `@{u}`, no `rev-list` anywhere in `experiments/*.py`.
+⚠ **#69 DECLARED THIS EXACT HOLE ONE RUN AGO IN ITS OWN C7** — *"it reads HEAD, so a run that
+commits its entry and never PUSHES is invisible"* — and the hole already had two commits sitting
+in it at the moment the sentence was typed.
+
+## 3. ✅ GUARDED — `experiments/w160a_pushguard.py` (#70), AND THE BACKLOG PUSHED
+
+C1 HEAD, branch, upstream and the remote tip read **live over the network** · C1b a ref that
+cannot exist returns nothing, so the parse is selective · **C2 the read is ANSWERABLE** — a read
+that fails is `UNREADABLE` and **FAILS**, because a standing check that cannot see its subject
+must never report clean, and its message names PATH first since that is what is actually broken
+in this sandbox · **C2b the cached `origin/main` must equal the live tip**, because drift there is
+what makes w136's own prescribed `git log --oneline origin/main -1` answer out of memory ·
+**C3 the assertion**, HEAD reachable from the remote tip, every unpublished commit listed by sha,
+date and subject · **C4 the exit-code hazard reproduced rather than quoted** · C5 four anchors,
+two in #69 and two in `RESEARCH.md` · C6 `--control` · C7 blindness.
+
+    pre-fix   FAIL: 2 commit(s) in HEAD are NOT on origin   (both listed by sha and subject)
+    post-fix  HEAD 5259571 is published on origin/main  OK        FAILURES: 0
+    --control  frozen pre-fix pair -> FIRES,  frozen post-fix pair -> SILENT,  the control WORKS
+
+⚠ **#70 HAS NO IN-FLIGHT EXEMPTION, ON PURPOSE.** #66's open-ended one is what let three runs
+vanish and #69 had to supply its expiry. A push has no preparatory state: an entry must be
+written before it can be committed, but you have either pushed or you have not. 🎯 A red between
+a run's commit and its push is not a false positive — it is the guard being accurate.
+
+⚠ **AND THE CONTROL FREEZES BOTH SIDES.** w156's lesson was that a control borrowing live state
+stops working the moment the fix lands; here both arms are frozen to real, immutable objects
+(`f3a837e` against `2981d1c`, and `f3a837e` against itself), so the control still fires after the
+push it was written about.
+
+## 4. 🔴 THE SECOND DEFECT, WHICH IS THE FIRST ONE'S SHADOW: RESTORING THE RECORD DID NOT RESTORE
+## THE CENSUS
+
+With w158's and w159's entries both written and committed, `w117a_handcount` still read **red at
+two rows**:
+
+    FAIL: live row 7 (seed and fold):   index claims x17, corpus has x16
+    FAIL: live row 9 (error analysis):  index claims x18, corpus has x17
+
+Both misses are the **reconstructed** entries (L40088, L40153), and the cause is structural rather
+than clerical. 🎯 **A RUN THAT VANISHES LEAVES ARTEFACTS, AND ITS ARTEFACTS DO NOT CARRY THE
+PROMPT.** The resolver's one rule is *a label, then a QUOTED string*; the reconstructing run never
+saw the vanished run's ANGLE and so has nothing to put in the quotes. w155's reconstruction
+happened to quote one and resolved; w158's and w159's did not and did not.
+
+⛔ **SO w156's "the corpus is short by one FOREVER" SURVIVED THREE ENTRIES BEING RESTORED.** The
+compensation covered the gap, the entries landed, and the census was still short — and it stayed
+short in a way that pointed at rows 7 and 9 rather than at the record-keeping.
+
+✅ **FIXED IN THE READER, AS ONE MORE RULE AND ONLY ONE.** An entry declaring itself with
+`ENTRY RECONSTRUCTED BY` is resolved from the row it states (`Row 7 (*seed and fold diversity*)`),
+**after** every angle-quote path so it can never pre-empt a run that did state one, and it must be
+**internally consistent** to be read at all — the parenthetical label has to `classify` back to the
+number printed beside it, so a typo'd row number stays unresolved and the count still fails rather
+than crediting the wrong row.
+
+⚠ **THIS IS NOT THE OPEN-ENDED LIST `ANGLE_Q`'s COMMENT REFUSES.** That refusal is about the ways a
+run *phrases* its angle, and enumerating those had no end. This keys on a different **kind** of
+entry, identified by a marker the entry prints about itself, and the new **C7 bounds it in both
+directions**:
+
+    C7 the reconstruction path, both directions and bounded
+      2 of 177 runs resolve ONLY through it: [(40088, 7), (40153, 9)]
+      disabling it loses exactly those and nothing else  OK
+      2/177 = 1.1% of the corpus, under the 10% ceiling  OK
+
+The negative half matters: the positive alone would pass just as happily with the path deleted.
+The ceiling matters too — a repair path that grows into the main path is a different corpus needing
+a different rule. **Census back to `FAILURES: 0`, all ten rows agreeing with the index.**
+
+## 5. ✅ THE ANGLE, RE-VERIFIED AT THE ARTEFACT LEVEL — ROW 8, SIXTEENTH HANDING, AND IT REPRODUCED
+## EXACTLY FOUR DAYS LATER
+
+`experiments/w130a_row8.py` **re-run live**, not quoted (`logs_w160_row8.txt`): **FAILURES: 0**,
+all five registered predictions held, and **`experiments/w130a_row8.json` came back BYTE-IDENTICAL**
+to w130's of 08-30 (md5 `68eb0b7891`, `git status` clean on the tracked file).
+
+    train 691,369 rows, base rate 0.7094243450313797
+    frozen folds: StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+| the angle's clause | arm | baseline | price |
+|---|---|---|---|
+| *"confirm the metric"* | A | the same shipped predictions thresholded to a hard class | **+63,263.9e-6** at the best of 102 cuts (cut 0.349991), **+122,243.5e-6** at the naive 0.5 |
+| *"build the fixed-fold CV harness"* | B | an unpaired harness | **3.44e-6 paired vs 271.11e-6 unpaired** — an **sd**, not a gain |
+| *"score one honest GBDT baseline"* | C | a constant prediction, which AUC scores at 0.5 | **+467,789.9e-6**, against **+1,325.4e-6** for stack − best single member |
+
+⛔ **Three currencies — final-file AUC at k=1, an sd of a measurement, and OOF AUC against chance
+— so the arms are NOT addable.** Every published cell matched: A2 halving the logit is
+**+0.0000e-6 under AUC and +16.6% of logloss** (0.428827 → 0.499821), the shipped file's mean is
+**0.50000** against a base rate of **0.70942** so it is not a probability at all and only AUC makes
+that safe, B's shared folds remove **78.9× on the sd and 6,225× on the variance** with a fold
+re-draw adding **0.88e-6**, and C is **99.500%** of the AUC above chance and **46,585×** row 3's
++10.04e-6/member "do not build" bar.
+
+🎯 **THE ANGLE AS HANDED IS A REPEAT, AND THE ROW ALREADY SAYS SO.** The metric is a table row
+(`Roc Auc Score`, re-read live off the competition object this run), the folds have been frozen
+since w38 and verified by #33 against four public packs, and the GBDT baselines are on disk. Row
+8's published `0` is the price of doing it again today; the numbers above are what the same row is
+worth priced against its own absence. **Nothing re-opens.**
+
+⚠ Arm B took **680s** for its 200 bootstraps, which is the run's longest single measurement and
+worth budgeting for: the row-8 verifier is not a cheap re-run.

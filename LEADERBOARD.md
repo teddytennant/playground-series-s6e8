@@ -3223,3 +3223,23 @@ does falsify is a published sentence: `no single-family enrolment rate in this t
 On the corrected scale `+xgb_only` reads 10.61 and `+xgb_dedup` 10.75 against 9.925, and both clear
 it; `+lgb_only` misses by 0.001 at 9.924. Corrected in the ANGLE INDEX and in #61's own docstring,
 guarded as `experiments/w158a_tscaleguard.py` (#68).
+
+## 2026-09-03, 13:5xZ (w160) — no change on the board, and two runs of it existed on one disk
+
+**Private rank 319 / 3,531, score 0.97093.** Unchanged for the fifteenth day. Competition object
+read live through an authenticated client: deadline **2026-08-31 23:59** (past by **61.8 hours**),
+teams **3,531**, `user_rank` **319**, metric **Roc Auc Score**, `max_daily` **10**.
+⚠ `submissions_disabled` still reads **False** on a closed, graded board, for the sixteenth day.
+
+⛔ **THE BOARD DID NOT MOVE AND THE RECORD OF IT NEARLY DID.** `origin/main` was two commits
+behind `HEAD` — w157's last commit and w159's only one, the second of which is guard #68 in full.
+Confirmed by a live `ls-remote`, not a cached ref. w157 pushed and then committed again; w159
+committed and never pushed. Neither push failed; neither ran. Pushed as `5259571` and guarded as
+`experiments/w160a_pushguard.py` (#70), which reads the remote over the network every run and
+fails rather than reporting clean when it cannot.
+
+⚠ **AND THE CENSUS STAYED RED AFTER THE RECORD WAS RESTORED.** Rows 7 and 9 each read one short,
+because both restored entries are *reconstructions* and a reconstructing run never saw the
+vanished run's ANGLE, so it cannot quote it the way the resolver requires. Fixed in
+`w117a_handcount` as one bounded rule with a both-directions C7 (2 of 177 runs, 1.1%, ceiling
+10%). Census back to **FAILURES: 0**, all ten rows agreeing with the index.

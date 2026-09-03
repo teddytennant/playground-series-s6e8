@@ -80,7 +80,7 @@ BLOCK_HEAD = "# 📇 THE ANGLE INDEX"
 MIN_RUNS, MIN_RESOLVED, MIN_HISTORICAL_BAD, MIN_AMBIGUOUS = 100, 110, 5, 1
 
 # The run currently executing, whose journal entry is written after this check runs.
-CURRENT_RUN, CURRENT_ROW = r"^# 2026-09-03 — w159 —", 9
+CURRENT_RUN, CURRENT_ROW = r"^# 2026-09-03 — w160 —", 8
 
 # Row number -> (label, pattern matched against the resolved GENUS only).
 GENERA = {
@@ -161,6 +161,27 @@ ANGLE_Q = re.compile(r"\b(?:angle|issued)\b.{0,80}?[\u201c\"]", re.I | re.S)
 # The pre-fix window, frozen as a literal on w115's rule so C6 keeps a fixed reference.
 ANGLE_Q_NARROW = re.compile(r"\b(?:angle|issued)\b.{0,30}?[\u201c\"]", re.I | re.S)
 LABEL = re.compile(r"\b(?:angle|issued)\b", re.I)
+# 🔴 A SECOND RULE, AND THE ONLY ONE, FOR ENTRIES WHOSE AUTHOR NEVER SAW AN ANGLE STRING.
+# w160 opened on the census red at TWO rows -- row 7 x17 vs x16, row 9 x18 vs x17 -- and both
+# misses were RECONSTRUCTED entries (w158, written by w159; w159, written by w160). A run that
+# vanishes leaves artefacts, and its artefacts do not carry the prompt. So the reconstructing
+# run structurally CANNOT quote the angle: it never had it. The one rule above requires a label
+# followed by a QUOTED string, and a reconstruction has nothing to put in the quotes.
+#
+# ⚠ THIS IS NOT THE OPEN-ENDED LIST THE COMMENT ABOVE REFUSES. That refusal is about the ways a
+# run PHRASES its angle; enumerating those was a maintenance burden with no end. This keys on a
+# different KIND of entry, identified by a marker the entry prints about itself, and it is
+# bounded by C7. 🎯 Fixing the record does NOT fix the census, because the entry that finally
+# gets written is a different shape from the one that went missing -- which is why w156's
+# "the corpus is short by one forever" survived three entries being restored.
+#
+# The reconstruction must be INTERNALLY CONSISTENT to be read: it states a row number and the
+# row's label, and the label must classify back to the number it states. A typo'd row number
+# stays unresolved and the count still fails, rather than counting the wrong row.
+RECON = re.compile(r"ENTRY RECONSTRUCTED BY", re.I)
+RECON_ROW = re.compile(r"\bRow (\d+) \(\*([^*]+)\*\)")
+# C7 refuses to let this path quietly become the main one.
+MAX_RECON_SHARE = 0.10
 CUT = re.compile(r"[:.—]|\bslot\b|\bAT CAP\b|\bno submission\b|\bOVERRIDDEN\b|\bDECLINED\b"
                  r"|\bREFUSED\b|\bSUBSTITUTED\b", re.I)
 
@@ -271,6 +292,13 @@ def resolve(lines, i, end):
                 for cand in genera_of(s):
                     if classify(cand):
                         return cand, "body" if quoted_only else "body-bare", s
+    # LAST, and only for an entry that declares itself a reconstruction: see RECON above.
+    # It runs after every angle-quote path so it can never pre-empt a run that DID state one.
+    body = "\n".join(lines[i:end])
+    if RECON.search(body):
+        m = RECON_ROW.search(body)
+        if m and classify(m.group(2)) == int(m.group(1)):
+            return m.group(2), "reconstructed", m.group(0)
     return genus_of(lines[i]), "unresolved", lines[i]
 
 
@@ -472,6 +500,35 @@ def main() -> int:
     else:
         print(f"  {len(wide)} resolved corpus run(s) need a gap > 30: "
               f"{[r['line'] for r in wide]}")
+
+    print("\nC7 the reconstruction path, both directions and bounded")
+    # POSITIVE: it resolves runs nothing else can. NEGATIVE: turning it off must lose exactly
+    # those runs and no others -- without that half this passes just as happily with the path
+    # deleted, because `resolve` might be finding them somewhere else. The pairing is the check.
+    recon = [r for r in runs if r["how"] == "reconstructed"]
+    marked = [r for r in runs if RECON.search(r["header"]) or r["how"] == "reconstructed"]
+    old_r, globals()["RECON"] = RECON, re.compile(r"(?!x)x")
+    try:
+        without = census()
+    finally:
+        globals()["RECON"] = old_r
+    lost = {r["line"] for r in runs if r["row"]} - {r["line"] for r in without if r["row"]}
+    if not recon:
+        fail("C7 INERT: no entry in the corpus resolves through the reconstruction path, so "
+             "the rule is carrying nothing and should be removed rather than left to rot")
+    elif lost != {r["line"] for r in recon}:
+        fail(f"C7: disabling the path loses lines {sorted(lost)} but the path claims "
+             f"{sorted(r['line'] for r in recon)} -- it is not what recovers them")
+    elif len(recon) > MAX_RECON_SHARE * len(runs):
+        fail(f"C7: {len(recon)} of {len(runs)} runs resolve only as reconstructions "
+             f"(> {MAX_RECON_SHARE:.0%}). That is not a repair path any more, it is the "
+             f"main one, and the corpus needs a different rule")
+    else:
+        print(f"  {len(recon)} of {len(runs)} runs resolve ONLY through it: "
+              f"{[(r['line'], r['row']) for r in recon]}")
+        print(f"  disabling it loses exactly those and nothing else  OK")
+        print(f"  {len(recon)}/{len(runs)} = {len(recon)/len(runs):.1%} of the corpus, "
+              f"under the {MAX_RECON_SHARE:.0%} ceiling  OK")
 
     json.dump({"measured": measured, "claimed": claims, "ambiguous": len(amb),
                "bad_rows": [list(b) for b in bad], "runs": len(runs),

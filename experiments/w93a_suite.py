@@ -69,6 +69,7 @@ STEMS = [
     "w157a_closedguard",
     "w158a_tscaleguard",
     "w159a_committedguard",
+    "w160a_pushguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).
