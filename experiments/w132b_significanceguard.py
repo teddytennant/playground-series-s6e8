@@ -19,16 +19,26 @@ a 25% false-positive rate wearing the costume of a test.
 
 🎯 AND THE TABLE CARRIES ITS OWN COUNTEREXAMPLE, LIVE. Row 9's PERMUTED NULL -- a size-matched
 permuted-cell control, a null BY CONSTRUCTION, the arm whose whole job is to be nothing --
-is labelled `consistent` in w128a_row9.json. Its t is 0.96. The label passes the null it was
-built to reject. Two more `consistent` arms sit under |t| = 1.7.
+is labelled `consistent` in w128a_row9.json. Its t is 1.66. The label passes the null it was
+built to reject. Two more `consistent` arms sit under |t| = 3.
 
-WHAT IT DOES NOT DO, WHICH IS THE POINT. t is scale-invariant: delta/sd at group scope equals
-per_member/(sd/n) at member scope, exactly (w132a R3, max gap 3.6e-15 over 11 arms). So
-publishing t moves NO published verdict. The CatBoost control is |t| = 5.12 and every arm it
-certifies as null is under 1.3. This is a REPORTING finding. Nothing re-opens, and the
-operational rule -- all these rates are under the 50e-6 floor, so do not build -- is unchanged
-and slightly reinforced: on 3 splits, df = 2, the 5% two-tailed critical t is 4.303 and the 1%
-is 9.925, and NO single-family enrolment rate in this table clears 1%.
+WHAT IT DOES NOT DO, WHICH IS THE POINT. t is scope-invariant: it is the same number computed at
+group scope from (delta, sd) or at member scope from (per_member, sd/n), exactly (w132a R3, max
+gap 3.6e-15 over 11 arms). So publishing t moves NO published verdict. The CatBoost control is
+|t| = 8.87 and every arm it certifies as null is under 2.3. This is a REPORTING finding. Nothing
+re-opens, and the operational rule -- all these rates are under the 50e-6 floor, so do not build
+-- is unchanged: on 3 splits, df = 2, the 5% two-tailed critical t is 4.303 and the 1% is 9.925.
+
+🔴 CORRECTED BY w158 (#68), AND THE CORRECTION FALSIFIES A SENTENCE THAT STOOD HERE FOR 26 RUNS.
+This file shipped t as `delta/sd`. That is an effect size, not a t: `sd` is the sample standard
+deviation of the REPS = 3 paired split deltas, so the statistic is `delta/(sd/sqrt(REPS))` and
+every t this workspace published was understated by sqrt(3) = 1.732. The critical values above
+belong to the CORRECTED scale, so the comparison was between two different objects. It ran in
+the CONSERVATIVE direction for discovery and the ANTI-conservative one for dismissal, and no
+arm changes side at 5% -- the largest corrected t among the arms this table calls null is 2.92
+against 4.303. But the line that used to end this paragraph -- `NO single-family enrolment rate
+in this table clears 1%` -- is FALSE on the corrected scale: +xgb_only reads 10.61 and
++xgb_dedup 10.75 against 9.925, and +lgb_only misses by 0.001 at 9.924.
 
 CONTROLS (w72 5.3: a control that can only fail is not a control; both directions or decoration)
   C1 +   NOT VACUOUS. Every ANGLE INDEX price cell carrying BOTH an e-6/e-7 magnitude and a
@@ -43,9 +53,11 @@ CONTROLS (w72 5.3: a control that can only fail is not a control; both direction
          seven siblings -- and it must FIRE here.
   C4 +-  THE LABEL'S DISCRIMINATING POWER IS MEASURED, NOT ASSERTED. t is computed for every
          arm in the five run artefacts and split by the artefacts' OWN `sign` field. At least
-         one `consistent` arm must land under |t| = 1.5 and at least one `SIGN FLIPS` arm must
-         exist; if `consistent` cleanly separated |t| >= 3 the label would be doing the job and
-         this guard would be unnecessary, so that outcome is reported as INERT and fails.
+         one `consistent` arm must land under WEAK_T and at least one `SIGN FLIPS` arm must
+         exist; if `consistent` cleanly separated the label would be doing the job and this
+         guard would be unnecessary, so that outcome is reported as INERT and fails. WEAK_T is
+         1.5*sqrt(REPS), the w132 threshold carried onto w158's corrected scale unchanged in
+         substance -- a bare 1.5 there would have silently tightened the rule by sqrt(3).
   C5 +-  THE SIBLINGS' BLINDNESS IS MEASURED, NOT ASSERTED. #53/#55/#56/#57/#58/#59/#60 are
          imported and their own C1 predicates run over a table whose row 3 is PREFIX_ROW3. All
          seven must return ZERO findings for row 3 while this file's C1 fires, and each must
@@ -74,6 +86,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import sys
@@ -119,6 +132,14 @@ PREFIX_ROW3 = (
 ARTEFACTS = ("w123a_row3.json", "w124a_row4.json", "w127a_row7.json",
              "w128a_row9.json", "w131a_row1.json")
 
+# The paired-split count every one of those five producers ran (`REPS = 3`). `sd` in the
+# artefacts is std(ddof=1) over the REPS per-split deltas, so the standard error is sd/sqrt(REPS)
+# and t is delta/(sd/sqrt(REPS)). #68 reads REPS out of the producers and out of this line, and
+# goes red if they ever disagree -- do not edit one without the other.
+REPS = 3
+SQRT_REPS = math.sqrt(REPS)   # named for what it IS: sd/SQRT_REPS is the standard error
+WEAK_T = 1.5 * SQRT_REPS   # w132's 1.5 carried onto w158's scale; see C4
+
 
 def in_scope(cell):
     """A cell closes on a sign verdict and carries a magnitude, so its noise is load-bearing."""
@@ -154,15 +175,15 @@ def arm_table():
                 pm = v.get("per_member", v["delta"])
                 out.append({"src": nm[:5], "arm": k.strip()[:30], "n": n,
                             "per_member_e6": pm * 1e6, "sd_member_e6": v["sd"] / n * 1e6,
-                            "t_group": v["delta"] / v["sd"],
-                            "t_member": pm / (v["sd"] / n),
+                            "t_group": v["delta"] / (v["sd"] / SQRT_REPS),
+                            "t_member": pm / (v["sd"] / n / SQRT_REPS),
                             "sign": v.get("sign", "consistent")})
         ac = d.get("arm_c")
         if ac and "sd_e6" in ac:
             out.append({"src": nm[:5], "arm": "origmodel enrolment", "n": 1,
                         "per_member_e6": ac["mean_e6"], "sd_member_e6": ac["sd_e6"],
-                        "t_group": ac["mean_e6"] / ac["sd_e6"],
-                        "t_member": ac["mean_e6"] / ac["sd_e6"],
+                        "t_group": ac["mean_e6"] / (ac["sd_e6"] / SQRT_REPS),
+                        "t_member": ac["mean_e6"] / (ac["sd_e6"] / SQRT_REPS),
                         "sign": "SIGN FLIPS" if ac.get("sign_flipping") else "consistent"})
     return out
 
@@ -275,8 +296,8 @@ def main() -> int:
         print(f"   {a_['src']:<6} {a_['arm']:<32} {a_['n']:>2} "
               f"{a_['per_member_e6']:>+9.3f}e-6 {a_['sd_member_e6']:>7.3f} "
               f"{abs(a_['t_member']):>5.2f}  {a_['sign']}")
-    weak = [a_ for a_ in cons if abs(a_["t_member"]) < 1.5]
-    print(f"   `consistent` arms under |t| = 1.5: {len(weak)} "
+    weak = [a_ for a_ in cons if abs(a_["t_member"]) < WEAK_T]
+    print(f"   `consistent` arms under |t| = {WEAK_T:.3f}: {len(weak)} "
           f"({', '.join(a_['arm'] for a_ in weak) or 'none'})")
     if not weak or not flips:
         fails.append("C4 INERT: `consistent` separates cleanly, so the label is doing the job "

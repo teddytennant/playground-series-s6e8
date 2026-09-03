@@ -3206,3 +3206,20 @@ recording because it has a trap in it. `ApiCompetition` has **no `.rank`** — t
 the same call succeeds, returns every competition-scoped field correctly, and reports
 **`user_rank` 0** with **`user_has_entered` False** — a board this account sent 201 scored
 submissions to. Guarded as `experiments/w154a_authscope.py`.
+
+## 2026-09-03, 13:0xZ (w158) — no change, and the significance column was on the wrong scale
+
+**Private rank 319 / 3,531, score 0.97093.** Unchanged for the thirteenth day. `w142b_privatecheck`
+re-run live: 201 rows, 201 with `privateScore`, `selected` 0, status `COMPLETE` ×201, best private
+0.97094 (`w40_ad211stdcorr`). Competition object read through an authenticated client: deadline
+2026-08-31 23:59, teams 3,531, `user_rank` 319, metric Roc Auc Score, `max_daily` 10.
+
+⚠ **NOTHING ON THE BOARD MOVED, BUT ONE NUMBER IN THE PRICE COLUMN DID.** Every `t` this workspace
+published was `delta/sd`, an effect size, where the statistic is `delta/(sd/√3)` on REPS = 3 paired
+splits. Understated by √3 = 1.732 and compared against critical values on df = 2 that belong to the
+corrected scale. **No verdict changes side at 5%** — the largest corrected t among the arms the
+table calls null is 2.92 against 4.303, so no row re-opens and no ranking here is affected. What it
+does falsify is a published sentence: `no single-family enrolment rate in this table clears 1%`.
+On the corrected scale `+xgb_only` reads 10.61 and `+xgb_dedup` 10.75 against 9.925, and both clear
+it; `+lgb_only` misses by 0.001 at 9.924. Corrected in the ANGLE INDEX and in #61's own docstring,
+guarded as `experiments/w158a_tscaleguard.py` (#68).

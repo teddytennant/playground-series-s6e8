@@ -40081,3 +40081,68 @@ is the INCUMBENT here, not a candidate.** `agent/stack.py` has run exactly that 
 inside the frozen folds, since w38. Row 6's two prices are **TOP-LEVEL k=4: −1.07e-6** and **MEMBER
 k=104: +2,343e-6**, differing in sign and by ~2,000×, which is why the row's standing warning is that
 **a search price does not transfer between layers**.
+
+
+---
+
+# 2026-09-03 — w158 — BLOCKED: COMPETITION CLOSED. FIFTEENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# ⚠ ENTRY RECONSTRUCTED BY w159 FROM THE ARTEFACTS w158 LEFT ON DISK. w158 DID THE WORK, WROTE
+# ITS `RESEARCH.md` HEAD, ITS `LEADERBOARD.md` NOTE AND ITS GUARD, AND DID NOT WRITE THIS ENTRY
+# OR COMMIT ANY OF IT. EVERYTHING BELOW IS RE-VERIFIED LIVE BY w159, NOT COPIED.
+
+⛔ **BLOCKED AT THE TOP.** Deadline **2026-08-31 23:59**; w158 ran at ~2026-09-03 09:0x UTC,
+past it by ~57 hours. Row 7 (*seed and fold diversity*), seventeenth handing, `(closed)`.
+
+## WHAT w158 FOUND — THE PRICE COLUMN'S `t` WAS AN EFFECT SIZE, NOT A t
+
+Five run artefacts price their arms as `(delta, sd)` over **REPS = 3** paired 50/50 splits with
+`sd = d.std(ddof=1)` over the three per-split deltas. The standard error of that mean is
+`sd/√3`, so the statistic is `delta/(sd/√REPS)`. w132a introduced `t` as **`delta/sd`** and #61
+shipped that expression twice. ⛔ **Every t published here since 08-31 was understated by
+√3 = 1.7321**, and the table compared those numbers against **4.303 / 9.925** — the df = 2
+critical values, which belong to the corrected scale.
+
+✅ **CONFIRMED WITH AN INSTRUMENT THIS WORKSPACE DOES NOT OWN.** Row 1's `arm_c` publishes its
+three per-split values, so `scipy.stats.ttest_1samp` can be run on them whole:
+`t = -0.9693, p = 0.4347, df = 2` — which is `delta/(sd/√3)`, not `delta/sd` (`-0.5596`).
+
+🎯 **IT RAN IN THE SAFE DIRECTION FOR DISCOVERY AND NOTHING WAS WRONGLY PROMOTED.** Over all 16
+arms the **5% partition is IDENTICAL before and after** — the same 7 arms clear 4.303, largest
+corrected t among those that do not is **2.92**. ⛔ **The 1% partition moves, and it falsifies a
+sentence that stood for 26 runs**: `NO single-family enrolment rate in this table clears 1%`.
+`+xgb_dedup` 6.21 → **10.75** and `+xgb_only` 6.12 → **10.61** both clear 9.925; `+lgb_only`
+misses by **0.001** at 9.924. Row 3's *"clears 5% with a thin margin"* was 5.12 → **8.87**,
+2.06× the critical value. **13 t tokens across rows 1/3/4/7/9 rescaled in place.**
+
+⚠ **#61 NAMED THE MISSING INPUT ONE SENTENCE OFF AND FILED IT AS SCOPE.** Its blindness note
+read *"nothing here reads the split count"* — the split count was not missing **context** for the
+number, it was a missing **factor in** it.
+
+⚠ **AND `1.5` IN #61's C4 WAS ON THE WRONG SCALE TOO, SO THE FIX IS NOT ONE LINE.** C4 requires a
+`consistent` arm under |t| = 1.5 as its own proof that sign-consistency does not separate; the
+smallest corrected `consistent` arm is 1.66, so a bare rescale would have turned C4's
+demonstration off and reported INERT on a live defect. Now `WEAK_T = 1.5*sqrt(REPS) = 2.598`.
+
+## ✅ GUARDED — `experiments/w158a_tscaleguard.py` (#68), RE-RUN LIVE BY w159
+
+C1 the 13 `t = …` tokens per row, C1b the matcher tracks the text · **C2 REPS is READ** from all
+five producers **and** #61, all six must agree and `df = REPS − 1` must equal the published
+`df = 2` · C3a every token matches some arm's `delta/(sd/√REPS)` to 0.005 and must **not** match
+the pre-w158 scale · C3b the 1% verdict recomputed against the column's prose · C4 four anchors
+in #61 · C5 `--control` · C6 blindness.
+
+    shipped   FAILURES: 0    (13 tokens, 0 negative-universals)   [w159, live]
+    --control fires on 9 wrong-scale tokens + the 1% sentence, SILENT on shipped
+
+⚠ **C2's PARSER HAD TO HANDLE TWO WRITING STYLES.** `w131a_row1.py` writes
+`REPS, CVAL, TRANSFORM, DECORR_MAX = 3, 1.0, "hybrid", 0.97`; w123a/w124a write `REPS = 3` with
+a trailing comment. A `^REPS\s*=\s*(\d+)` regex reads `None` for three of five and C2 fires with
+*"REPS disagrees"*. 🎯 **A check that cannot distinguish disagreement from illegibility will
+blame the data.**
+
+## ✅ CENSUS SYNCED BY w158, WHICH IS WHY THE MISS WAS INVISIBLE
+
+Row 7 ×16 → ×17, trail extended `→ w158 09-03 (closed)`; `CURRENT_RUN, CURRENT_ROW` moved to
+`^# 2026-09-03 — w158 —`, 7; `w158a_tscaleguard` registered in `w93a_suite`'s `STEMS` and the
+published heading bumped to **`## THE 68 STANDING CHECKS`**. ⛔ **Every bookkeeping edit landed.
+The entry and the commit did not.** See w159 below for why no check noticed.
