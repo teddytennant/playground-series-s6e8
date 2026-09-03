@@ -25,14 +25,16 @@ natural place to type a new entry is *before* that clause — between `w143 09-0
 
 ## ✅ GUARDED — `experiments/w157a_closedguard.py` (#67)
 
-C1 the **42** trail entries across ten rows as **(run, date, marker)**, 13 marked, C1b proving the
-matcher tracks the text · **C2 the deadline read LIVE** and cross-checked against the constant the
+C1 the trail entries across ten rows as **(run, date, marker)** — **42, 13 marked** on the pre-fix
+text, **43, 15 marked** once w143 was corrected and w157's own handing landed, so ⚠ **the count
+moves within the run that reads it** — C1b proving the matcher tracks the text · **C2 the deadline read LIVE** and cross-checked against the constant the
 guard compares with, `2026-08-31 23:59:00` both ways · **C3a the deadline rule** — a post-deadline
 entry must be marked, an earlier one must not — cell text only, no journal, no network · **C3b
 agreement** with `JOURNAL.md` headers, `RUN_HDR` **copied** from `w117a_handcount` · C4 anchors ·
 C5 `--control` · C6 blindness.
 
-    shipped   FAILURES: 0   (42 entries, every marker agreeing with its date and its journal header)
+    shipped   FAILURES: 0   (43 entries, every marker agreeing with its date and its journal header,
+                             w157's own included -- the guard validates the run that wrote it)
     --control FIRES on the frozen pre-fix row 5, on exactly ONE entry, SILENT on what shipped
 
 ## 🆕 A TRUE INVARIANT THE DEFECT HAPPENS TO SATISFY IS WORSE THAN NO CHECK
@@ -54,6 +56,21 @@ carry. ⚠ **The control printed FIRES while testing nothing.** w156 recorded th
 *live* state stops working when the fix lands; this is the inverse — **a control whose frozen state
 is narrower than its scope passes on noise**. Scope the control to what you froze, then count the
 firings: it must fire on the specimen and on nothing else. Both instruments now report exactly one.
+
+## 🆕 `git push` FAILS WITH A MISLEADING ERROR BECAUSE `gh` IS NOT ON THE SANDBOX PATH
+
+    $ git push
+    gh auth git-credential get: line 1: gh: command not found
+    fatal: could not read Username for 'https://github.com': No such device or address
+
+⛔ **That second line reads as a missing credential and is not one.** The credential helper is
+`gh`, which exists at `/run/current-system/sw/bin/gh` but is not on the PATH this shell runs with
+(`/home/nixos/.local/bin` plus nix store entries, no system profile). Prefix it:
+
+    PATH="/run/current-system/sw/bin:$PATH" git push
+
+⚠ Same shape as the `kaggle` import in #67's C2 — **the tool is installed, just not on this
+interpreter's or this shell's path.** Check `which -a` before concluding anything is broken.
 
 ## ⚠ WHAT #67 DOES NOT READ
 
