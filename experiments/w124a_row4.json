@@ -186,6 +186,15 @@
       "sign": "consistent"
     }
   },
+  "dup_effect": {
+    "group_delta_shift": 2.928795049446793e-07,
+    "per_split": [
+      7.64160571264938e-07,
+      2.4843743517966033e-06,
+      -2.36989640822749e-06
+    ],
+    "sign": "SIGN FLIPS -> not distinguishable from zero"
+  },
   "failures": [],
   "notes": [
     "the 'xgboost' row of the family table names latr1_xgb at 0.96780; the best xgboost-named array on disk today is xgb_latcat_avg3 at 0.96790 (+104e-6). The table is STALE, not wrong at the time.",

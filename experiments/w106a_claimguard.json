@@ -24,14 +24,14 @@
       {
         "found": true,
         "header": "## \u26b0\ufe0f AND A CITATION IN THE CATBOOST CLOSURE THAT POINTS AT NOTHING",
-        "hi": 4465,
-        "lo": 4440
+        "hi": 4640,
+        "lo": 4615
       },
       {
         "found": true,
         "header": "# \ud83d\udd3b A CLOSURE'S CITATIONS ARE NOW MACHINE-CHECKED \u2014 `w106a_claimguard`, standing check #42",
-        "hi": 4299,
-        "lo": 4284
+        "hi": 4474,
+        "lo": 4459
       }
     ]
   },
@@ -40,5 +40,5 @@
     "resolved_tokens": 17
   },
   "failures": 0,
-  "utc": "2026-09-03T13:42:07+00:00"
+  "utc": "2026-09-03T15:26:51+00:00"
 }

@@ -40598,3 +40598,55 @@ registering after its own pass, so the check it added never ran inside the runne
    pre-09-01 window #71 refuses to reconcile, because the launcher only began writing per-slot
    ANGLE lines partway through. Whether the index means *handed* or *recorded* has never been
    written down, and until it is, the two instruments cannot be made to agree.
+
+## 7. ✅ VERIFICATION (appended after the long jobs landed)
+
+**THE READER CHANGE IS PURELY ADDITIVE, MEASURED RUN BY RUN AND NOT ASSERTED.** Adding a header
+shortens the *preceding* entry's body, and `resolve` reads bodies, so the blast radius is not
+bounded by the two lines that changed. Both censuses diffed per run:
+
+    headers added   : 2  [38204, 38367]
+    headers removed : 0
+    pre-existing runs whose (row, how) CHANGED: 0
+    the entry before each new header (L37883, w140): (1, 'header') -> (1, 'header')  UNCHANGED
+
+w140 resolves by `header`, so shrinking its body could not move it. **Nothing re-assigns.**
+
+**THE ANGLE, RE-VERIFIED AT THE ARTEFACT LEVEL** — `w124a_row4.py` re-run live
+(`logs_w161_row4.txt`), **FAILURES: 0**, paired 50/50 over splits 0/1/2 on the frozen folds:
+
+    +xgb_only    n=12  +0.000081 ± 0.000013    +6.74e-6/member  [consistent]
+    +xgb_dedup   n=11  +0.000081 ± 0.000013    +7.38e-6/member  [consistent]
+    +lgb_only    n= 8  +0.000032 ± 0.000006    +4.04e-6/member  [consistent]
+    +cat_only    n= 8  +0.000080 ± 0.000016   +10.04e-6/member  [consistent]
+    CONTROL `+cat_only` re-measures +10.04e-6 against w123's +10.04e-6 (gap +0.000e-6)
+
+The same-process CatBoost control reproduces w123 **to 0.05e-6**, so the three families are on one
+footing. Row 4's published **+7.38e-6/member** stands, and the **11 vs 12** denominator still bites:
+`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical on OOF *and* test, dropping the twin moves the group
+delta by **+0.293e-6 with a sign flip across splits** — indistinguishable from zero — while the
+per-member price moves +6.74e-6 → +7.38e-6 purely through the denominator.
+
+⚠ **AND THE VERIFIER'S OWN NOTES CARRY A LIVE STALENESS WARNING WORTH REPEATING**: the family
+table names `latr1_xgb` 0.96780 for XGBoost and `lattri_lgbm` 0.96768 for LightGBM, but today's
+best arrays are `xgb_latcat_avg3` **0.96790** and `lgbm_tuned_lat_frac` **0.96782**. ⛔ The best
+LightGBM array on disk now **beats the XGBoost number the table publishes**, so *"XGBoost is not a
+missing leg"* holds on today's arrays (+84e-6, above the 50e-6 floor) but **reading the published
+table against the disk gives the opposite ordering** — the claim survives only because both rows
+are stale together. Not re-opened; recorded so it is not mistaken for a fresh result.
+
+**THE SUITE AT 71 CHECKS** — `experiments/w161_suite.log`, run after every edit:
+
+    C2 list matches RESEARCH.md (71 stems, heading says 71)  PASS
+    C1 all 71 stems resolve on disk  PASS
+    [35/71] w92a_smokerun        rc=0  314.2s  FAILURES 0
+    [50/71] w117a_handcount      rc=0    0.5s  FAILURES: 0
+    [71/71] w161a_driverguard    rc=0    0.1s  FAILURES: 0
+    TOTAL 649s   63/71 green
+    FAILURES: w54a_vetoexpiry w63b_setguard w67b_slopeguard w70d_chainguard
+              w72b_dayguard w85c_slotguard w87a_registrarguard w100a_complement
+
+⚠ **Those eight are the standing post-send / by-design set, red every run since the board closed —
+the same eight w160 reported, no new reds and none lost.** ✅ `w92a_smokerun` green at 314s, so the
+end-to-end pipeline still rebuilds. #71 was registered *before* the suite ran, so unlike #69 the
+check added today did run inside the runner it was added to.
