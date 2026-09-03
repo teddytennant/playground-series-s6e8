@@ -40146,3 +40146,62 @@ Row 7 ×16 → ×17, trail extended `→ w158 09-03 (closed)`; `CURRENT_RUN, CUR
 `^# 2026-09-03 — w158 —`, 7; `w158a_tscaleguard` registered in `w93a_suite`'s `STEMS` and the
 published heading bumped to **`## THE 68 STANDING CHECKS`**. ⛔ **Every bookkeeping edit landed.
 The entry and the commit did not.** See w159 below for why no check noticed.
+
+
+---
+
+# 2026-09-03 — w159 — BLOCKED: COMPETITION CLOSED. SIXTEENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# ⚠ ENTRY RECONSTRUCTED BY w160 FROM THE ARTEFACTS w159 LEFT ON DISK. 🎯 w159 WROTE A GUARD
+# WHOSE ENTIRE SUBJECT IS RUNS THAT LEAVE AN INCOMPLETE RECORD, AND THEN LEFT ONE. EVERYTHING
+# BELOW IS RE-RUN LIVE BY w160, NOT COPIED OUT OF w159's LOGS.
+
+⛔ **BLOCKED AT THE TOP.** Deadline **2026-08-31 23:59**; w159 ran ~2026-09-03 09:1x–09:4x UTC,
+past it by ~57 hours. Row 9 (*error analysis*), eighteenth handing, `(closed)`.
+
+## WHAT w159 DID, AND WHAT IT LEFT BEHIND
+
+✅ It recovered w158 in full: reconstructed w158's journal entry from the artefacts on disk and
+committed the lot as `f3a837e`. ✅ It ran the suite — `experiments/w159_suite.log`, **58/68 green
+in 1,593s**, ten reds all in the known post-send/by-design set. ✅ It wrote **#69
+`w159a_committedguard.py`**, registered it in `w93a_suite`'s `STEMS`, bumped the published
+heading to `## THE 69 STANDING CHECKS`, and synced the census (row 9 ×17 → ×18, trail extended
+`→ w159 09-03 (closed)`, `CURRENT_RUN, CURRENT_ROW` moved to `^# 2026-09-03 — w159 —`, 9).
+
+⛔ **AND THEN: no journal entry, no `RESEARCH.md` head section, no `LEADERBOARD.md` note, no
+commit, and no push.** The `RESEARCH.md` head still opened on w158's t-scale section when w160
+arrived. Row 9 has **no artefact log** — there is no `logs_w159_row9.txt`, so w159's angle was
+never re-verified at the artefact level the way w155/w157/w158 did theirs.
+
+## 🎯 WHAT #69 IS, AND WHY IT IS THE RIGHT GUARD WRITTEN ONE STEP SHORT
+
+#69 asks a question #66 could not: not *"was an entry written anywhere"* but *"is it in HEAD"*.
+Its argument, re-verified live by w160 — `--control`, every input frozen:
+
+    no --run (suite form)          credited w158  uncovered [158]  strays []     SILENT
+    --run w159 (orientation form)  credited w158  uncovered [158]  strays [158]  FIRES
+    shipped state, --run w159      credited w158  uncovered []     strays []     SILENT
+    the control WORKS: it fires on the orientation form and only there
+
+⚠ **AND ITS OWN SUITE FORM READS GREEN ON w159's MISS.** Run live by w160 with no `--run`:
+**`FAILURES: 0`**, on a corpus with no w159 entry. That is not a bug — it is #69's declared
+design, its C4 exists precisely to refuse the exemption, and the orientation form is the one
+that works. Run as `--run w160`, which is the call the playbook's step 1 is for:
+
+    C4: caller is w160 but the census credits w159 -- the in-flight exemption is REFUSED
+    FAIL: row 9 trails w159, which has no committed JOURNAL.md entry and none in the tree either
+    C3  w159 (row 9): UNWRITTEN
+
+🎯 **SO #69 WORKED, FIRST TIME, ON THE RUN THAT WROTE IT.** Three runs in a row (w155, w156,
+w158) had their incomplete record found by `git status` at the next run's orientation and never
+by a check. w159's was found by a check — the one w159 had just written — and named in one line
+before anything else was touched. ⛔ **The cost of it being written one step short is that w159
+is the fourth run in that streak and its own guard is the evidence.**
+
+## THE SUITE, AS w159 LEFT IT
+
+    C2 list matches RESEARCH.md (68 stems, heading says 68)  PASS
+    TOTAL 1593s   58/68 green
+
+⚠ The log covers **68**, not 69: w159 ran the suite and then wrote and registered #69, so the
+check it added that day never ran inside the runner it was added to. w160 ran it standalone
+instead — `FAILURES: 0` in the suite form, and the orientation FAIL quoted above.
