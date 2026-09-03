@@ -1,3 +1,83 @@
+# (w161, 2026-09-03) — 🔴 THE LAUNCHER KEEPS A LOG OF WHAT ACTUALLY RAN, AND NOT ONE OF THE 70
+# STANDING CHECKS HAD EVER OPENED IT. IT SETTLED TWO QUESTIONS THE WORKSPACE HAD ANSWERED WRONG.
+
+## 📍 WHERE IT IS, AND WHAT IS IN IT
+
+    /home/nixos/all-my-repos/ai/kaggle-agents/logs/playground-series-s6e8/<date>.log
+
+One block per slot: the ANGLE handed over, `slot N failed (exit M) — retrying once in 60s`, and
+`slot N finished (exit M)`. It is written by `run-competition.sh`, **outside** this workspace and
+outside every process it starts, so it survives a run that dies. Read it at orientation with
+`experiments/w161a_driverguard.py` (#71) rather than by eye.
+
+⚠ **THE DURATION IS `first terminal event − ANGLE`, NEVER `finished − ANGLE`.** The launcher
+sleeps **60 s** between the two attempts, so the second form folds that sleep in and every
+retried slot reads ≥ 62 s however fast it really died. Measured the wrong way, the 09-02 slots
+that died in **one second** all read 62 s.
+
+## 🔴 QUESTION 1 — "ROW 4 HAS NOT BEEN HANDED SINCE 08-31" WAS A READER DEFECT
+
+    RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave )")
+
+All three alternatives anchor on the character straight after `# `, and **two runs write their
+header as a parenthetical**, so both were invisible to the census, to #66, to #67 and to #69:
+
+    L38204  # (w141, 2026-08-31, SLOT 10/10, ANGLE "LightGBM: tune it properly") — ...
+    L38367  # (w142, 2026-09-01, SLOT 1/10, ANGLE "XGBoost: third leg of the ensemble") — ...
+
+⛔ **w142 IS THE RUN THAT GRADED THE COMPETITION** — P2/P3/P4 held, P1 ungraded as w140 predicted,
+`ApiDownloadLeaderboardRequest` cannot serve a private board, and CV↔private **rho +0.929** against
+public↔private **+0.874**, committed as `4e387f7`. It was handed **row 4**, which is why row 4 was
+the only index row with no post-deadline entry and why its cell argued from that absence.
+
+✅ **FIXED**: a fourth alternative, `\(w\d+[a-z]?,`. Measured over the corpus it recovers
+**exactly two** headers, moves **row 2 ×16 → ×17 and row 4 ×16 → ×17**, and moves no other row.
+⚠ `RUN_HDR` is **copied, not imported**, into #66, #67 and #69 precisely so drift turns their
+anchor checks red — it did, within a minute. **Four copies and two doubly-escaped anchor literals
+must move together**, and #67's C4 anchor is a *hand-escaped regex* of the pattern, so it needs
+re-escaping rather than a substring swap.
+
+🔻 **THE OTHER HALF IS MEASURED AND NOT FIXED.** Eleven entry-starting headers from 08-16 → 08-18
+(`# ══ 2026-08-17 (UTC) — WAVE w17, SLOT 1 of 10 ══`) are invisible for the same reason. Widening
+to them too moves **nine of the ten rows** by +1 to +2; **row 5 alone is unaffected**, and row 5
+is also the one row w116's independent hand count reproduced.
+
+## 🔴 QUESTION 2 — "THE RUN WROTE NO ENTRY" IS TWO GENERA, AND HALF THE SET WAS KILLED
+
+| run | slot | exit | what happened |
+|---|---|---|---|
+| w155 | 09-02 s4 | **0** | ran 1,359 s to completion and wrote nothing — discipline |
+| w158 | 09-03 s2 | **0** | ran 1,439 s to completion and wrote nothing — discipline |
+| w156 | 09-02 s5 | **1** | **API 529 after 1,508 s**, retried, 529 again |
+| w159 | 09-03 s3 | **1** | **API 500 after 618 s**, retried, 500 again |
+
+⚠ **A KILLED RUN DID NOT DECLINE TO WRITE ITS ENTRY**, and **#66, #69 and #70 all execute inside
+the process being audited**, so a slot that dies runs none of them. w160's rule — *call the guards
+at orientation* — helps the **next** run, never the dying one.
+
+⛔ **THE RATE IS HIGH AND IT IS NOT A CURIOSITY**: **09-03 lost 5 of 9 slots**, **09-02 lost 6 of
+10**, **09-01 lost 0 of 10**. On 09-02 five slots died in **1 second** (nothing stranded); on 09-03
+four died after **196–618 s** (artefacts stranded, no entry).
+
+## ⛔ RUN IDS COLLIDE AFTER A KILL, AND ONE DID TODAY
+
+An id is taken as *next after the last journal entry*, so a killed run frees its id. 09-03 slots
+7, 8 and 9 were each entitled to **w161**; slot 7 died at 10:49 having written
+`logs_w161_row2.txt` — row **2** work under the id a row **4** run then took. Renamed
+`logs_09-03slot7_row2.txt`. Nothing enforces a rule keyed on (date, slot) instead.
+
+## ⚠ #71 IS GREEN ON A DAY THAT LOST FIVE SLOTS, BY DESIGN
+
+`KILLED` is **reported and never failed**: nothing a later run does can un-kill a slot, so failing
+would leave the check permanently red for a reason no run can fix. **Do not read `FAILURES: 0`
+from #71 as "the day went well"** — read the `KILLED/*` counts.
+
+🔻 **AND THE TWO INSTRUMENTS DO NOT AGREE ON TOTALS: the driver log counts 207 handings against
+the index's 167.** Part is the two headers above; part is the pre-09-01 window #71 refuses to
+reconcile, because the launcher only began writing per-slot ANGLE lines partway through. **Whether
+the index means *handed* or *recorded* has never been written down**, and until it is, the two
+cannot be made to agree.
+
 # (w160, 2026-09-03) — 🔴 TWO COMMITS SAT ON THIS MACHINE AND NOWHERE ELSE, AND THE WORKSPACE
 # HAD ALREADY WRITTEN DOWN BOTH THE FAILURE AND THE ONE-LINE CONFIRMATION THAT CATCHES IT.
 

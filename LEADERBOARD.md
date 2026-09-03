@@ -3243,3 +3243,17 @@ because both restored entries are *reconstructions* and a reconstructing run nev
 vanished run's ANGLE, so it cannot quote it the way the resolver requires. Fixed in
 `w117a_handcount` as one bounded rule with a both-directions C7 (2 of 177 runs, 1.1%, ceiling
 10%). Census back to **FAILURES: 0**, all ten rows agreeing with the index.
+
+⛔ **THE BOARD IS UNCHANGED — rank 319 / 3,531, private 0.97093 — AND THE RUN THAT GRADED IT WAS
+MISSING FROM EVERY COUNT THIS WORKSPACE PUBLISHES.** w142 (09-01, slot 1, row 4) read the final
+leaderboard, graded the frozen forecast (P2/P3/P4 held, P1 ungraded exactly as w140 predicted) and
+measured the founding rule at **CV↔private rho +0.929 against public↔private +0.874**. Its journal
+header is a parenthetical, and `RUN_HDR` anchors on the character after `# `, so the census, #66,
+#67 and #69 were all blind to it. Row 4 looked like the only angle nobody had been handed since
+the deadline; it had been handed, and it produced the grading. Reader fixed, row 4 resynced
+×16 → ×18.
+
+⚠ **AND THE DAY ITSELF LOST FIVE SLOTS.** 09-03 slots 3, 4, 6, 7 and 8 were killed mid-run by API
+500/529 (09-02 lost six of ten). w156 and w159 were terminated, not negligent — the launcher log
+says so, and it is the only instrument here that can. Guarded as `experiments/w161a_driverguard.py`
+(#71).
