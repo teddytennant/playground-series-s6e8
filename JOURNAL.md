@@ -39987,3 +39987,97 @@ Three deterministic edits: `RESEARCH.md` ANGLE INDEX row 10 **×16 → ×17**, t
 `^# 2026-09-02 — w155 —`, 9 to `^# 2026-09-02 — w156 —`, 10; `w156a_recordguard` registered in
 `w93a_suite`'s `STEMS` and the published heading bumped **`## THE 66 STANDING CHECKS`**.
 
+
+---
+
+# 2026-09-03 — w157 — BLOCKED: COMPETITION CLOSED. FOURTEENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# THE ANGLE INDEX'S `(closed)` MARKER ON w143 WAS NOT LOST — THE RUN THAT APPENDED AFTER IT TOOK IT.
+
+⛔ **BLOCKED AT THE TOP.** Prompt assigned SLOT 1 of 10, ANGLE *"blending: rank-average or weight
+the tuned models by out-of-fold performance. Search blend weights on OOF predictions, never on the
+public leaderboard."* Genus `blending` → **row 6**, sixteenth handing. Deadline **2026-08-31 23:59**,
+read live off the competition object through an authenticated client, now **2026-09-03 12:4x UTC** —
+passed by **~61 hours**. The prompt's *"submissions the Kaggle API already reports for today: 0"* is
+a true read of a dead board. Final standing unchanged: **rank 319 / 3,531, private 0.97093.**
+
+⛔ **NO SUBMISSION, NO SUBMIT PROBE.** A live write against a closed competition is not a free read
+(w143). The brief's "use all 10 every day" cannot be honoured and has not been actionable since 08-31.
+
+## 1. ✅ FIRST, w156's OWN WORK WAS ON DISK UNCOMMITTED — THE THING IT HAD JUST FINISHED DIAGNOSING
+
+`git status` opened on a modified `JOURNAL.md`, `RESEARCH.md` and `LEADERBOARD.md` and two untracked
+guards (`w155a_poolguard.py`, `w156a_recordguard.py`), with `HEAD` at w154's commit. ⚠ **w156 wrote
+the entry w155 failed to write and then did not commit it**, which is the same fault one step later —
+its record survived only because nothing overwrote it. Committed as `ea41358` before touching anything
+else, staged by path, no `-A`.
+
+## 2. 🔴 THE DEFECT: A MARKER THAT MOVED, IN THE COLUMN w128 PREDICTED
+
+The handing-count cells trail the runs handed each row. `(closed)` records that a run fell after the
+deadline and could not submit. **Nine of ten rows carry it on every post-deadline entry. Row 5 does
+not** — its `w143 09-01` is bare, and w143's own header reads `BLOCKED: COMPETITION CLOSED. NO WORK
+DONE, BY DESIGN.`, the first run the close ever blocked and so the least ambiguous case in the table.
+
+🎯 **THE MARKER WAS NOT DROPPED. IT WAS TAKEN.** From git, not from memory:
+
+    fff8d08 (09-01)  → w143 09-01 (closed) — the most-handed row
+    d44c082 (09-02)  → w143 09-01 → w152 09-02 (closed) — the most-handed row
+
+⛔ **One `(closed)` went in and one came out.** w152 appended itself and the annotation ended up on
+the new entry instead of a second one being added, so the diff shows a marker on the newest run and a
+trail one longer — **exactly what a correct append looks like**.
+
+⚠ **AND IT IS ROW 5 BECAUSE OF ROW 5's PUNCTUATION, NOT BECAUSE OF WHO EDITED IT.** Every other row's
+trail runs straight into the cell's closing prose (`· artefacts verified**`). Row 5 is the only one
+followed by a dash clause belonging to the trail itself (`— the most-handed row`), so the natural
+place to type the new entry is *before* that clause — which puts the cursor between `w143 09-01` and
+`(closed)`. 🎯 **The trap is in the text, so it will catch the next editor too.** That is what makes
+it worth a standing check rather than a correction.
+
+⚠ **THIS IS THE OTHER HALF OF w128's PREDICTION** — *"the next defect will be in the closed column or
+in a pool disclosure"*. w155 found the pool one (#65). **No standing check had ever read the closed
+column**: #53 units, #55 scope, #56 denominator and #57 opt-out all read the price column, #65 reads
+pools, and #66 reads the trail's run **ids** while ignoring everything printed after them.
+
+## 3. ✅ GUARDED — `experiments/w157a_closedguard.py` (#67)
+
+C1 the 42 trail entries across ten rows extracted as **(run, date, marker)** — 13 marked — with C1b
+proving the matcher tracks the text (rename a run → still 6; strip the arrows → 0; strip the markers
+→ 0 marked) · **C2 the deadline read LIVE** and cross-checked against the date the guard compares
+with (`2026-08-31 23:59:00` both ways) · **C3a the deadline rule**, cell text only · **C3b agreement**
+against `JOURNAL.md` headers · C4 anchors · C5 `--control` · C6 blindness.
+
+    shipped   FAILURES: 0   (42 entries, every marker agreeing with its date and its journal header)
+    --control FIRES on the frozen pre-fix row 5, on exactly one entry, SILENT on what shipped
+
+🆕 **MY FIRST INSTRUMENT WAS MONOTONICITY AND IT DOES NOT CATCH THIS.** "Closedness only turns on, so
+markers must be monotone along a trail" is a true invariant and **row 5 satisfies it**: the marker
+moved *forward* onto the newer entry, so the trail is still monotone in date order and the bare
+`w143 09-01` sits legitimately before the first marked one. It fired only on `w107 08-28`, a
+**second, unrelated provenance trail** (`w15b/w15d → w62 → w107 08-28`) living in the same cell —
+a false positive on an entry that is not a handing at all. ⛔ **A true invariant that the defect
+happens to satisfy is worse than no check**, because it reports clean. Replaced with the deadline
+rule, which needs only the cell and separates the two entries on the one axis that distinguishes them.
+
+🆕 **AND THE CONTROL FIRED FOR THE WRONG REASON ON ITS FIRST RUN.** C3b went red with **38**
+disagreements where the defect is **one**: the frozen journal map covers row 5's runs and no others,
+so 37 were `no JOURNAL.md run header` for runs the map simply does not carry. ⚠ **Green, on a defect
+it was not testing.** w156 recorded that a control borrowing *live* state stops working when the fix
+lands; this is the inverse — a control whose frozen state is *narrower than its scope* passes on
+noise. C3b is now scoped to row 5 under `--control`, and both instruments report exactly one entry.
+
+## 4. ✅ THE ANGLE, RE-VERIFIED AT THE ARTEFACT LEVEL — ROW 6, SIXTEENTH HANDING
+
+`experiments/w126a_row6.py` **re-run live**, not quoted (`logs_w157_row6.txt`). R1 all three anchors
+resolve. **R2 reproduced all eight of w36d's published cells from the OOF arrays on disk to 1e-9**,
+four days after w126 wrote them:
+
+    h3    k=3   equal 0.9701205753  insample 0.9701208766  xfit 0.9701196117  optimism +1.2649e-6
+    all4  k=4   equal 0.9701181652  insample 0.9701213202  xfit 0.9701195043  optimism +1.8159e-6
+    CROSS-ARM  fitted-all4 (k=4) vs equal-h3 (k=3, zero parameters):  -1.0710e-6   (row 6: -1.07e-6)
+
+⚠ **The angle as handed — "search blend weights on OOF predictions, never on the public leaderboard" —
+is the INCUMBENT here, not a candidate.** `agent/stack.py` has run exactly that search, cross-fitted
+inside the frozen folds, since w38. Row 6's two prices are **TOP-LEVEL k=4: −1.07e-6** and **MEMBER
+k=104: +2,343e-6**, differing in sign and by ~2,000×, which is why the row's standing warning is that
+**a search price does not transfer between layers**.

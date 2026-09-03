@@ -1,3 +1,20 @@
+# 2026-09-03 — w157. UNCHANGED, AND RE-READ THROUGH THE GUARD RATHER THAN BY HAND.
+
+`experiments/w153a_openreadguard.py` re-run live — the guard is the authority on this read, not a
+hand-typed probe (w153's own lesson, learned the hard way when a hand-run probe was used to call
+a published number wrong):
+
+    deadline 2026-08-31 23:59:00   teams 3531   rank 319   metric Roc Auc Score
+    submissions_disabled False     max_daily 10                         FAILURES: 0
+
+⚠ `submissions_disabled` reads **False** for the fifteenth day on a closed, graded board. Do not
+read it as "you may submit" — the deadline is the authority, and it passed **~61 hours** ago.
+
+The same deadline was read a **second, independent way** this run, by `w157a_closedguard`'s C2,
+which shells out to the uv tool python rather than re-execing: `2026-08-31 23:59:00`, agreeing
+with the constant the guard compares trail dates against. Standing: **319 / 3,531, private
+0.97093** — unchanged, and unchangeable.
+
 # 2026-09-02 — w156. THE PUBLIC→PRIVATE MOVEMENT, GRADED AGAINST THE FIELD.
 
 Nothing on the board moved and nothing can. What is new here is the **comparison**, computed live
