@@ -80,7 +80,7 @@ BLOCK_HEAD = "# 📇 THE ANGLE INDEX"
 MIN_RUNS, MIN_RESOLVED, MIN_HISTORICAL_BAD, MIN_AMBIGUOUS = 100, 110, 5, 1
 
 # The run currently executing, whose journal entry is written after this check runs.
-CURRENT_RUN, CURRENT_ROW = r"^# 2026-09-03 — w161 —", 4
+CURRENT_RUN, CURRENT_ROW = r"^# 2026-09-03 — w162 —", 5
 
 # Row number -> (label, pattern matched against the resolved GENUS only).
 GENERA = {
@@ -147,7 +147,7 @@ MIN_WIDE_GAP = 3
 # committed the result as 4e387f7. The run was in the journal the whole time; the reader could
 # not see the line. Measured over the corpus: exactly TWO headers are recovered, they move
 # row 2 x16->x17 and row 4 x16->x17, and no other row moves.
-RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,)")
+RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,|══ 20\d\d-\d\d-\d\d)")
 # THE DECLARING LINE, AS ONE RULE RATHER THAN A LIST OF SHAPES. Every run that states its angle
 # in the body does it the same way: a label, then a QUOTED string. Enumerating the surface forms
 # instead ("ANGLE was", "Angle issued:", "The assigned ANGLE (") left 37 runs unresolved and is

@@ -66,13 +66,13 @@ HANDCOUNT = ROOT / "experiments" / "w117a_handcount.py"
 # Copied from w117a_handcount.py:137 on purpose, not imported. Importing would make the two
 # agree by construction and this guard would have nothing to say about drift; C4 asserts the
 # copy is still faithful, which is the check the import would have thrown away.
-RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,)")
+RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,|══ 20\d\d-\d\d-\d\d)")
 
 # The anchors C4 stands on. Each is a line that must still be in w117a_handcount.py, and each
 # is the line that DECIDES something this guard assumes.
 ANCHORS = {
     "the RUN_HDR this guard copied":
-        r'RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,)")',
+        r'RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,|══ 20\d\d-\d\d-\d\d)")',
     "the compensation C3 bounds":
         "measured[CURRENT_ROW] = measured.get(CURRENT_ROW, 0) + 1",
     "the condition that makes it self-cancelling":

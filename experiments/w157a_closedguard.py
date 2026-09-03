@@ -89,7 +89,7 @@ DEADLINE_FULL = "2026-08-31 23:59:00"
 
 # COPIED from w117a_handcount.py:137, not imported, so that C4 fires if that file's idea of a
 # run header moves. w156a_recordguard copies the same line for the same reason.
-RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,)")
+RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,|══ 20\d\d-\d\d-\d\d)")
 
 ROW = re.compile(r"^\| (\d+) \| \*")
 
@@ -97,11 +97,18 @@ ROW = re.compile(r"^\| (\d+) \| \*")
 # optional, which is the whole point -- #66's TRAIL stops at the date and cannot see it.
 ENTRY = re.compile(r"(?:→|->) w(\d+) (\d\d-\d\d)( \(closed\))?")
 
-# Row 5 exactly as d44c082 left it, frozen. The defect is `w143 09-01` with no marker while
-# `w152 09-02` carries one.
+# Row 5 as d44c082 left it, frozen, carrying ONE deliberate defect: `w143 09-01` has no marker
+# while `w152 09-02` carries one.
+#
+# ⚠ THIS LITERAL MUST BE EXTENDED EVERY TIME ROW 5 IS HANDED, and w162 is the first time that
+# came due. C5 zips the two cells entry by entry and asserts the ONLY difference is w143's
+# marker; if the control is left short, what separates the arms is ordinary growth rather than
+# the defect, and the check goes red for the wrong reason. Add the new handing with its CORRECT
+# marker (the arms must agree about it) and bump the count to match.
 CONTROL_CELL = (
     "| 5 | *feature engineering: interactions, in-fold target and count encodings* | "
-    "**×18, from 08-10 → w116 08-29 → w125 08-30 → w143 09-01 → w152 09-02 (closed) — the "
+    "**×19, from 08-10 → w116 08-29 → w125 08-30 → w143 09-01 → w152 09-02 (closed) "
+    "→ w162 09-03 (closed) — the "
     "most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → "
     "w107 08-28 · **artefacts verified** | prices |"
 )
@@ -109,7 +116,8 @@ CONTROL_CELL = (
 # The journal dates the control is judged against, frozen alongside the cell so that C5 keeps
 # working after the live corpus changes. w156: a control that borrows live state stops working
 # exactly when the fix lands.
-CONTROL_JOURNAL = {116: "08-29", 125: "08-30", 143: "09-01", 152: "09-02", 107: "08-28"}
+CONTROL_JOURNAL = {116: "08-29", 125: "08-30", 143: "09-01", 152: "09-02", 162: "09-03",
+                   107: "08-28"}
 
 
 def table_rows(text: str) -> dict[int, str]:
@@ -313,7 +321,7 @@ def main() -> int:
     print("C4 the anchors this guard copies rather than imports")
     hc = HANDCOUNT.read_text(encoding="utf-8")
     anchors = [
-        (r'RUN_HDR = re\.compile\(r"\^#\{1,2\} \(20\\d\\d-\\d\\d-\\d\\d\|w\\d\+\[a-z\]\? —\|wave \|\\\(w\\d\+\[a-z\]\?,\)"\)',
+        (r'RUN_HDR = re\.compile\(r"\^#\{1,2\} \(20\\d\\d-\\d\\d-\\d\\d\|w\\d\+\[a-z\]\? —\|wave \|\\\(w\\d\+\[a-z\]\?,\|══ 20\\d\\d-\\d\\d-\\d\\d\)"\)',
          "w117a_handcount's RUN_HDR, copied verbatim into this file"),
     ]
     for pat, what in anchors:

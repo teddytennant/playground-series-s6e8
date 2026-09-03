@@ -68,7 +68,7 @@ RECORDGUARD = ROOT / "experiments" / "w156a_recordguard.py"
 # Copied from w117a_handcount.py:137 via w156a_recordguard.py:68, not imported, for the reason
 # #66 gives: importing would make the three agree by construction and none of them could say
 # anything about drift. C5 asserts the copy is still faithful to BOTH of them.
-RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,)")
+RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,|══ 20\d\d-\d\d-\d\d)")
 
 TRAIL = re.compile(r"→ w(\d+) \d\d-\d\d")
 ROW = re.compile(r"^\|\s*(\d+)\s*\|")
@@ -84,7 +84,7 @@ ANCHORS = {
         "#66's tree-side exemption, which C2 mirrors onto HEAD":
             'strays = [(n, w) for n, w in uncovered if w != cur_run]',
         "the RUN_HDR all three copies share":
-            'RUN_HDR = re.compile(r"^#{1,2} (20\\d\\d-\\d\\d-\\d\\d|w\\d+[a-z]? —|wave |\\(w\\d+[a-z]?,)")',
+            'RUN_HDR = re.compile(r"^#{1,2} (20\\d\\d-\\d\\d-\\d\\d|w\\d+[a-z]? —|wave |\\(w\\d+[a-z]?,|══ 20\\d\\d-\\d\\d-\\d\\d)")',
     },
 }
 

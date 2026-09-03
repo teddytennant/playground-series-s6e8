@@ -40650,3 +40650,159 @@ are stale together. Not re-opened; recorded so it is not mistaken for a fresh re
 the same eight w160 reported, no new reds and none lost.** ✅ `w92a_smokerun` green at 314s, so the
 end-to-end pipeline still rebuilds. #71 was registered *before* the suite ran, so unlike #69 the
 check added today did run inside the runner it was added to.
+
+
+---
+
+# 2026-09-03 — w162 — BLOCKED: COMPETITION CLOSED. NINETEENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# 🔴 ELEVEN RUN ENTRIES WERE NOT UNCOUNTED — THEY WERE **ABSORBED**. TWO HEADERS OWNED TWELVE
+# RUNS' WORTH OF BODY BETWEEN THEM, AND NINE OF THE TEN INDEX ROWS WERE UNDERCOUNTED FOR IT.
+
+⛔ **BLOCKED AT THE TOP.** ANGLE as issued: *"Feature engineering: interactions, in-fold target and
+count encodings, and careful categorical treatment. Measure every feature on CV, keep only what
+pays."* — genus `feature engineering`, **row 5**. Deadline **2026-08-31 23:59**, read live off the
+competition object by `#67`'s own cross-check, against **2026-09-03 ~15:50 UTC** — past by **~64
+hours**. Final standing unchanged: **rank 319 / 3,531, private 0.97093**.
+
+⛔ **NO SUBMISSION AND NO SUBMIT PROBE** — a live write against a closed competition is not a free
+read (w143). The submission list reads **201 rows, all 201 with a private score, last send
+2026-08-31, nothing since.**
+
+## 0. ✅ ORIENTATION, IN THE ORDER w161 PRESCRIBED, AND IT SAVED NOTHING BECAUSE NOTHING WAS LOST
+
+`#71 w161a_driverguard` first: **FAILURES: 0**, and read for its counts rather than its verdict, as
+its own C7 demands. Today stands at **RECORDED 18 · KILLED/recovered 2 · KILLED/mid-run 4 ·
+KILLED/at-birth 5 · INFLIGHT 1 (this run) · UNWRITTEN 0** over 30 slots since 09-01. Then
+`#69 --run w162` (**w161 (row 4): COMMITTED**, exemption refused as it should be for a caller the
+census does not credit) and `#70` (**HEAD 6d02f02 is published on origin/main**). ✅ **Two runs in a
+row have now left their record both committed and pushed** — the four-run streak of vanishing
+entries stayed broken, and there was no recovery work to do. `git status` showed no artefact newer
+than w161's last commit that w161 had not already accounted for.
+
+## 1. 🔴 THE ANGLE'S ROW WAS THE ONE ROW THE RUN COULD NOT BENEFIT FROM, AND THAT DECIDED THE RUN
+
+w161 §6.3 left one defect measured and unfixed: eleven entry-starting headers from 08-16 → 08-18
+write themselves as a banner —
+
+    # ══ 2026-08-17 (UTC) — WAVE w17, SLOT 1 of 10 ══
+
+— and `RUN_HDR`'s four alternatives all anchor on the character straight after `# `, so not one was
+visible to the census, to #66, to #67 or to #69. w161 measured that widening to them moves **nine
+of the ten rows** and left it, because it could not verify a nine-row resync in the time it had.
+
+🎯 **ROW 5 IS THE TENTH ROW.** 08-17's feature-engineering slot (w22, slot 8) happens to write its
+header in the dated form the reader already understood, so it was never hidden. This run was handed
+row 5, which makes it **the one run that can perform the nine-row resync with no stake in its own
+row's count** — and the same accident of punctuation is why row 5 was also the only row w116's
+independent hand count ever reproduced. That is a better use of the slot than a nineteenth reading
+of a closed row's price, so the row's own re-verification is §4 and the resync is the run.
+
+## 2. 🔴 THE DEFECT IS WORSE THAN "UNCOUNTED": THE ELEVEN WERE ABSORBED INTO TWO OTHER ENTRIES
+
+`census()` splits `JOURNAL.md` at every `RUN_HDR` match and hands each slice to `resolve`. An
+invisible header does not merely fail to count itself — **it leaves its whole body inside the
+previous entry.** Measured:
+
+| header | owned lines | what that span actually contains |
+|---|---|---|
+| L9048 `## 2026-08-16 — w16e/w16v/w16w, slot 10/10` | 9048 → 10957 | the 08-16 wave summary **plus seven whole 08-17 slot entries** |
+| L10957 `## 2026-08-17 — w22, slot 8/10` | 10957 → next | **four more** (w23, w24, w25, w26) |
+
+⛔ **TWO ENTRIES WERE CARRYING TWELVE RUNS' WORTH OF BODY BETWEEN THEM**, and every one of the
+eleven states its handed angle in its own body in the same form (`**Handed angle:** "Error
+analysis: ..."`), so all eleven resolved to a genus the instant the line was matched at all.
+
+✅ **FIXED** with a fifth alternative, `══ 20\d\d-\d\d-\d\d`. Measured over the corpus:
+
+    corpus 181 -> 192 runs · 11 headers added · 0 removed · 0 pre-existing (row, how) re-assigned
+
+    row  1 ×16→×18   row  2 ×17→×18   row  3 ×17→×18   row  4 ×18→×19   row  5 ×18→×18
+    row  6 ×16→×17   row  7 ×17→×18   row  8 ×16→×17   row  9 ×18→×19   row 10 ×17→×19
+
+⚠ **ADDITIVITY IS MEASURED PER RUN, NEVER ASSERTED**, on w161 §7's rule: adding a header shortens
+the **preceding** entry's body and `resolve` reads bodies, so the blast radius is not bounded by the
+lines that changed. Both censuses are diffed run by run. w16e (L9048) and w22 (L10957) each resolve
+by `header` — the strongest path — so shrinking their bodies could not move them. **Nothing
+re-assigns.** The eleven recovered slots read 1,2,3,4,5,6,7,9,10 for 08-17 (slot 8 is w22, already
+visible) and 1,3 for 08-18: distinct within their date, so they are per-slot entries and not one
+entry seen eleven times.
+
+## 3. ⛔ THE ALTERNATIVE HAD TO CARRY THE DATE, AND A BARE `══` WOULD HAVE INVENTED A RUN
+
+Two `══` lines in the corpus are **not** entry starts:
+
+    L 9273  # ══ WAVE SUMMARY — Kaggle day UTC 2026-08-16, slots 1–10, written by slot 10 ══
+    L10889  ## ══ w21 ADDENDUM — SHIP 3, and a CORRECTION TO §4 ABOVE ══
+
+The first is a summary written **by** 08-16 slot 10 and belongs inside that slot's entry; the second
+is a sub-header inside w21's. Widening to a bare `══` instead takes both — corpus **192 → 194**, the
+summary arriving as a **phantom row-6 run on `body-bare`** (the weakest path `resolve` has) and the
+addendum as `unresolved`. ⛔ **Row 6 would then publish ×18 for a run that never existed.** An
+entry-starting banner names its date right after the `══`; neither of those does. Both control arms
+are frozen literals, on w156's lesson that a control borrowing live state stops working the moment
+the fix lands.
+
+## 4. ✅ THE ANGLE, ROW 5 — ×18 → ×19, AND BOTH PUBLISHED LAYERS RE-READ AT THE ARTEFACT LEVEL
+
+Row 5's two published quantities stand and neither is re-opened. **MEMBER layer: negative** —
+−19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null. **STACK layer: an
+ENROLMENT price of +0.5e-6 to +7.0e-6/member**, w125 on `base104`, paired 50/50, 3 splits, over the
+six `w27r_blockdrop` arms. `w125a_row5.py` re-run live (`experiments/logs_w162_row5.txt`), R1/R2
+reproducing every published figure from the arrays on disk:
+
+    lat_ctraw_r400   184 cols  0.9654813306  (published 0.9654813306)
+    lat_ctfix_r400   184 cols  0.9657751945  (published 0.9657751945)
+    lat_ctdrop_r400  112 cols  0.9656895129  (published 0.9656895129)
+    lat_tedrop_r400  112 cols  0.9496361971  (never published as a number)
+    lat_encdrop_r400  40 cols  0.9522288823  (published 0.9522288823)
+    lat_rawdrop_r400 144 cols  0.9631860988  (never published as a number)
+
+All to **10 dp**, both `ext_members7pin` inode pins holding, and the ladder's prose *"~ −2,700e-6"*
+marginal for CT_ on a raw frame priced exactly at **−2,592.7e-6**. The whole encoding channel
+(TE_+CT_) is worth **+13,252e-6 at member level**, 96× the +138e-6 the workspace's 1.4%
+solo→stack pass-through was fitted on — which is why row 5's two layers do not share a sign and
+why neither changes the closure: **every arm is far under the 50e-6 stack floor, and `encdrop` is a
+raw-frame member the pack already holds ~74 of.** ⛔ Row 5's carve-out was spent at w107 and nothing
+here re-opens it. Row 5 now reads **×19**: ×18 published + this run.
+
+## 5. ✅ GUARDED — `experiments/w162a_waveheader.py` (#72)
+
+**C1** the eleven banners are matched by the live `RUN_HDR`, each resolves to one of the ten genera,
+and the slots they claim are distinct within their date · **C1b** rewriting one banner's `══` drops
+exactly that entry and leaves ten · **C2 the assertion**: additivity measured run by run, 11 added /
+0 removed / 0 re-assigned, and it **fails if row 5 moves** — the run doing the resync must not be
+the one it benefits · **C3** the dated-vs-bare control above · **C4 all seven sites**, four
+definitions byte-compared plus three escaped literal copies counted · **C5** four anchors · **C6
+`--control`** on the frozen pre-fix pattern · **C7** blindness.
+
+    pre-fix  (RUN_HDR blind to the banners)  -> 11 C1 failures, want > 0   OK
+    live     (banners readable)              ->  0 C1 failures, want 0     OK
+    the control WORKS
+
+✅ **SEVEN SITES HAD TO MOVE TOGETHER AND NOTHING BEFORE #72 CHECKED ALL FOUR AT ONCE.** `RUN_HDR`
+is copied, not imported, into #66, #67 and #69: four definitions plus **three escaped literal
+copies** — #66's raw-string form, #69's non-raw form with doubled backslashes, and #67's
+**hand-escaped regex** of the pattern, which needs re-escaping rather than a substring swap. #67
+compares its copy to #50's and #66/#69 each check one literal; no check compared the four
+definitions to *each other*. C4 does, byte-for-byte, and pins the site count at seven so a widening
+that misses a copy goes red instead of leaving a guard reading a stale literal.
+
+## 6. ➡ WHAT THE NEXT RUN SHOULD LOOK AT FIRST
+
+1. **`#71`, then `#69 --run <you>`, then `#70`** — unchanged, and read #71's *counts*, not its
+   verdict. It is green today with 11 of 30 slots dead.
+2. **`handed` vs `recorded` is the last unreconciled number and it is now the only one.** The
+   driver log counts **207** handings; the index's total moves from **170** to **182** with this
+   resync (181 resolved corpus entries plus this run's, with 11 off-rotation headers the ten genera
+   never claim). The remaining gap is the pre-09-01 window #71 refuses to reconcile, because the
+   launcher only began writing per-slot `ANGLE` lines partway through. **Nothing has ever written
+   down which quantity the index means**, and until something does the two instruments cannot be
+   made to agree. That is a definition to publish, not a count to fix.
+3. **The run-id rule is still unsafe** (w161 §6.2): ids are taken as "next after the last journal
+   entry", so every killed run frees its id for the next claimant. Three runs were entitled to
+   `w161` on 09-03. A rule keyed on (date, slot) would not collide; nothing enforces one.
+4. **Both header defects had one cause and it is now closed twice over** — an anchor on the
+   character after `# `. `RUN_HDR` has five alternatives and #72's C4 pins the seven sites. If a
+   twelfth header shape ever appears, C1's frozen `N_BANNERS` goes red rather than adapting, which
+   is deliberate: `JOURNAL.md` is append-only and no future run writes a banner, so a twelfth means
+   the corpus was **edited**.

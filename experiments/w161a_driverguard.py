@@ -51,6 +51,11 @@ CHECKED:
        so this guard and the census cannot disagree about what a row is.
   C1b  the parse tracks the log rather than agreeing by luck: rewriting one slot's exit code
        moves that slot's verdict and nothing else, and removing the marker line yields nothing.
+  C1c  the record key is (CYCLE, slot), not slot. Added w162: the launcher can be restarted
+       against the same date and append a whole second 1..10 cycle to the same file, and the old
+       key let the second cycle overwrite the first -- 16 of 208 records vanished that way. The
+       check asserts `slot header lines == records` and declares itself INERT rather than
+       passing quietly if no multi-cycle date is left in the corpus.
   C2   the read is ANSWERABLE. A log directory that is missing or empty is UNREADABLE and
        FAILS, on #70's rule: a standing check that cannot see its subject must never report
        clean.
@@ -68,6 +73,7 @@ import os
 import re
 import sys
 import pathlib
+import datetime
 import collections
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -92,9 +98,13 @@ FAILED = re.compile(r"^\[(\d{4}-\d\d-\d\d) (\d\d:\d\d:\d\d)[^\]]*\] slot (\d+) f
 HDR_DATE = re.compile(r"(20\d\d-\d\d-\d\d)")
 HDR_RUN = re.compile(r"\bw(\d+)\b")
 
-# The launcher only began writing per-slot ANGLE lines partway through the competition, and the
-# journal predates it. Reconciling a date the launcher never logged would compare a corpus
-# against nothing, so the window starts at the first date both instruments cover.
+# ⚠ THE STATED REASON FOR THIS WINDOW WAS WRONG AND THE WINDOW IS STILL RIGHT (w162). w161 wrote
+# that "the launcher only began writing per-slot ANGLE lines partway through"; in fact every log
+# from 2026-08-10 on carries them, all 208. What the earlier logs lack is a slot-level RUN ID, so
+# on a date with 10 handed and 6 recorded there is no way to say WHICH four went missing -- C3
+# asserts per slot, not per date, and it cannot be honest without that. The totals reconcile
+# across the whole corpus (see RESEARCH's `handed` vs `recorded` section); the attribution only
+# reconciles here. Two dates (08-14, 08-15) also have no slot log at all.
 FIRST_RECONCILED = "2026-09-01"
 
 # C4's threshold, and it is not a tuning choice: the observed durations fall either side of a
@@ -116,33 +126,71 @@ def secs(hms):
     return h * 3600 + m * 60 + s
 
 
+# ⛔ THE LAUNCHER STAMPS EDT AND THE JOURNAL DATES ITS HEADERS IN UTC (w162). Every one of the
+# 645 timestamps in the log directory carries the literal `EDT`, i.e. UTC-4, so any slot that
+# starts after 20:00 local belongs to the NEXT UTC day -- and C3 joins the driver record to a
+# journal entry on (date, row). Taken raw, 2026-08-19's evening cycle reads 08-19 in the log and
+# 08-20 in the journal, and the join misses ten slots. Converted, they agree.
+EDT_OFFSET_H = 4
+
+
+def utc_date(date_s, hms):
+    """The UTC calendar date of an EDT log timestamp, which is what a journal header carries."""
+    h, m, sec = (int(x) for x in hms.split(":"))
+    y, mo, d = (int(x) for x in date_s.split("-"))
+    t = datetime.datetime(y, mo, d, h, m, sec) + datetime.timedelta(hours=EDT_OFFSET_H)
+    return t.strftime("%Y-%m-%d")
+
+
 def parse_log(text):
-    """One day's launcher log -> {slot: {date, angle, row, t0, t1, exit}}.
+    """One log file -> {(cycle, slot): {slot, cycle, date, angle, row, t0, t1, exit}}.
 
     The `finished` line is authoritative for the exit code and it is written once per attempt;
     the launcher retries a failed slot in place, so the LAST one is the slot's real outcome.
+
+    ⛔ THE KEY IS (CYCLE, SLOT), NOT SLOT (w162). A log file is named for the launcher's START
+    date and the launcher can be started MORE THAN ONCE against the same date, appending a whole
+    second 1..10 cycle to the same file. Keyed on the slot number alone, the second cycle
+    silently OVERWRITES the first: 2026-08-10 holds cycles [1..5] then [1..10] and 2026-08-19
+    holds one aborted start, [1..10] and [1..10] again. That collapsed 16 of 208 ANGLE lines
+    down to 192 records, and the record it then reported for those slots -- angle, exit code,
+    duration -- belonged to the later cycle only. A new cycle is a slot number that does not
+    increase.
+
+    ⚠ `date` still comes off the slot's OWN ANGLE timestamp, not the file name, and that is
+    deliberate: a cycle started at 20:12 runs past local midnight (2026-08-10's second cycle
+    finished eight of its ten slots on 08-11), and C3 matches against the run's journal header
+    date, which is the run's own. So the file name dates the CYCLE and the timestamp dates the
+    SLOT, and they are allowed to differ.
     """
-    out, cur = {}, None
+    out, cur, cycle, last_slot = {}, None, 1, 0
     for ln in text.splitlines():
         m = SLOT_HDR.match(ln)
         if m:
-            cur = int(m.group(1))
-            out.setdefault(cur, {})
+            slot = int(m.group(1))
+            if slot <= last_slot:
+                cycle += 1
+            last_slot = slot
+            cur = (cycle, slot)
+            out.setdefault(cur, {"slot": slot, "cycle": cycle})
             continue
         m = ANGLE.match(ln)
         if m and cur is not None:
-            r = out.setdefault(cur, {})
-            r["date"], r["t0"], r["angle"] = m.group(1), secs(m.group(2)), m.group(3)
+            r = out[cur]
+            r["date"] = utc_date(m.group(1), m.group(2))        # UTC, to match the journal
+            r["local_date"], r["t0"], r["angle"] = m.group(1), secs(m.group(2)), m.group(3)
             r["row"] = classify(r["angle"].split(":")[0])
             continue
         m = FAILED.match(ln)
         if m:
-            r = out.setdefault(int(m.group(3)), {})
+            r = out.setdefault((cycle, int(m.group(3))),
+                               {"slot": int(m.group(3)), "cycle": cycle})
             r.setdefault("t_end", secs(m.group(2)))          # first attempt only
             continue
         m = DONE.match(ln)
         if m:
-            r = out.setdefault(int(m.group(3)), {})
+            r = out.setdefault((cycle, int(m.group(3))),
+                               {"slot": int(m.group(3)), "cycle": cycle})
             r.setdefault("t_end", secs(m.group(2)))
             r["t1"], r["exit"] = secs(m.group(2)), int(m.group(4))
     return out
@@ -180,6 +228,8 @@ def verdicts(days, seen, inflight_row=None):
                 continue
             entries = seen.get((r["date"], r["row"]), [])
             dur = r["t_end"] - r["t0"] if "t_end" in r and "t0" in r else None
+            if dur is not None and dur < 0:
+                dur += 86400            # the slot ran past local midnight (08-10's 2nd cycle)
             if "exit" not in r:
                 # In flight. Bounded, not open-ended: it must be the newest log's last slot.
                 v = "INFLIGHT" if (date == newest and n == max(days[date])) else "NO-EXIT"
@@ -189,8 +239,8 @@ def verdicts(days, seen, inflight_row=None):
                 v = "UNWRITTEN"
             else:
                 v = "KILLED/at-birth" if dur is not None and dur < BIRTH_S else "KILLED/mid-run"
-            rows.append(dict(date=date, slot=n, row=r["row"], exit=r.get("exit"),
-                             dur=dur, entries=entries, verdict=v))
+            rows.append(dict(date=date, slot=r["slot"], cycle=r["cycle"], row=r["row"],
+                             exit=r.get("exit"), dur=dur, entries=entries, verdict=v))
     return rows
 
 
@@ -214,7 +264,7 @@ def main():
 
     print("C1 the slot records parse, and every angle resolves through the census's classify")
     total = sum(len(v) for v in days.values())
-    unres = [(d, n, days[d][n].get("angle", "")[:44])
+    unres = [(d, days[d][n]["slot"], days[d][n].get("angle", "")[:44])
              for d in days for n in days[d] if days[d][n].get("row") is None
              and "angle" in days[d][n]]
     print(f"  {total} slot record(s) across {len(days)} day(s); "
@@ -231,7 +281,8 @@ def main():
         txt = probe.read_text(errors="replace")
         base = parse_log(txt)
         flipped = parse_log(txt.replace("slot 1 finished (exit 0)", "slot 1 finished (exit 7)"))
-        moved = [n for n in base if base[n].get("exit") != flipped.get(n, {}).get("exit")]
+        moved = sorted(base[n]["slot"] for n in base
+                       if base[n].get("exit") != flipped.get(n, {}).get("exit"))
         print(f"  rewriting slot 1's exit code moves exactly {moved}  "
               f"{'OK' if moved == [1] else 'BROKEN'}")
         if moved != [1]:
@@ -244,6 +295,28 @@ def main():
             fail("exit codes survive the removal of the lines they are read from")
     else:
         fail(f"UNREADABLE: C1b's probe log {probe.name} is absent")
+
+    print("C1c the key is (cycle, slot) -- a second launcher cycle must not overwrite the first")
+    hdrs = {}
+    for f in sorted(LOGDIR.glob("20*.log")):
+        # SLOT_HDR has no re.M, so match it per LINE rather than over the whole file.
+        hdrs[f.stem] = sum(1 for ln in f.read_text(errors="replace").splitlines()
+                           if SLOT_HDR.match(ln))
+    multi = {d: (len(days[d]), hdrs[d], max(r["cycle"] for r in days[d].values()))
+             for d in sorted(days) if hdrs.get(d, 0) and
+             max(r["cycle"] for r in days[d].values()) > 1}
+    total_hdr = sum(hdrs.values())
+    collapsed = len({(d, days[d][n]["slot"]) for d in days for n in days[d]})
+    print(f"  {total_hdr} slot header line(s) -> {total} record(s)  "
+          f"{'OK' if total_hdr == total else 'BROKEN'}")
+    if total_hdr != total:
+        fail(f"C1c {total_hdr} slot headers parse into {total} records -- a cycle is being lost")
+    for d, (n_rec, n_hdr, n_cyc) in multi.items():
+        print(f"    {d}: {n_cyc} launcher cycles, {n_hdr} headers, {n_rec} records")
+    print(f"  keyed on the slot number alone the same logs give {collapsed} record(s), "
+          f"losing {total - collapsed}")
+    if not multi or total == collapsed:
+        fail("C1c is inert: no multi-cycle date in the corpus, so the key proves nothing")
 
     seen = journal_rows()
     rows = verdicts(days, seen)
@@ -297,8 +370,11 @@ def main():
     for path, label, needle in (
         (HANDCOUNT, "the census's classify, which fixes what a row is",
          "def classify(genus: str):"),
-        (HANDCOUNT, "the header shape that made w142 readable",
-         r"|wave |\(w\d+[a-z]?,)"),
+        # Both recovered header shapes: `(w142,` (w161) and the `══ <date>` banner (w162).
+        # This anchor is a SUBSTRING of RUN_HDR on purpose -- widening the pattern turns it red
+        # here first, which is what happened when w162 added the banner alternative.
+        (HANDCOUNT, "the two header shapes that made w142 and the banner entries readable",
+         r"|wave |\(w\d+[a-z]?,|══ 20\d\d-\d\d-\d\d)"),
         (COMMITTEDGUARD, "#69's C7 blindness, which this guard closes",
          "a run that leaves artefacts but is never named in a trail is invisible to both"),
         (RECORDGUARD, "#66's in-flight exemption, which C3 bounds differently",
@@ -334,10 +410,14 @@ def main():
 # it, against the journal map BEFORE the RUN_HDR fix (w142 invisible, so row 4 has no entry)
 # and AFTER it (w142 present). Both arms are frozen, on w156's lesson that a control borrowing
 # live state stops working the moment the fix lands.
-FROZEN_DAYS = {"2026-09-01": {1: {"date": "2026-09-01", "t0": 31201, "t1": 32160, "exit": 0,
-                                  "angle": "XGBoost: third leg of the ensemble, tuned on the "
-                                           "same folds so the blend weights mean something.",
-                                  "row": 4}}}
+# The key is (cycle, slot) since w162, so the frozen arm carries it too -- and `slot`/`cycle`
+# are in the record because `verdicts` reports them.
+FROZEN_DAYS = {"2026-09-01": {(1, 1): {"slot": 1, "cycle": 1, "date": "2026-09-01",
+                                       "t0": 31201, "t1": 32160, "exit": 0,
+                                       "angle": "XGBoost: third leg of the ensemble, tuned on "
+                                                "the same folds so the blend weights mean "
+                                                "something.",
+                                       "row": 4}}}
 FROZEN_PRE = {}
 FROZEN_POST = {("2026-09-01", 4): ["w142"]}
 
