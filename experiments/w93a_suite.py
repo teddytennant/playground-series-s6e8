@@ -70,6 +70,7 @@ STEMS = [
     "w158a_tscaleguard",
     "w159a_committedguard",
     "w160a_pushguard",
+    "w161a_driverguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

@@ -80,7 +80,7 @@ BLOCK_HEAD = "# 📇 THE ANGLE INDEX"
 MIN_RUNS, MIN_RESOLVED, MIN_HISTORICAL_BAD, MIN_AMBIGUOUS = 100, 110, 5, 1
 
 # The run currently executing, whose journal entry is written after this check runs.
-CURRENT_RUN, CURRENT_ROW = r"^# 2026-09-03 — w160 —", 8
+CURRENT_RUN, CURRENT_ROW = r"^# 2026-09-03 — w161 —", 4
 
 # Row number -> (label, pattern matched against the resolved GENUS only).
 GENERA = {
@@ -134,7 +134,20 @@ REFUSAL_DECLS = [
 # At least this many resolved runs must need a gap > 30, else C6 declares itself inert.
 MIN_WIDE_GAP = 3
 
-RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave )")
+# 🔴 THE FOURTH ALTERNATIVE IS A HEADER SHAPE, NOT A NEW KIND OF ENTRY. Two runs write their
+# header as a PARENTHETICAL -- `# (w142, 2026-09-01, SLOT 1/10, ANGLE "XGBoost: ...")` -- and
+# the three alternatives above all anchor on what follows `# `, so a leading `(` made both
+# invisible. They are not malformed: the header states the run id, the date, the slot AND a
+# quoted angle, which is more than the dated form carries, and both resolve by the `header`
+# path -- the strongest one -- the moment they are seen at all.
+#
+# 🎯 w142 IS WHY ROW 4 WAS THE ONLY ROW WITH NO POST-DEADLINE HANDING. Its trail ended at
+# `w133 08-31` and the cell argued from that absence ("w133 is the 16th handing and it built
+# nothing"), while w142 had in fact been handed row 4 on 09-01, graded the frozen forecast and
+# committed the result as 4e387f7. The run was in the journal the whole time; the reader could
+# not see the line. Measured over the corpus: exactly TWO headers are recovered, they move
+# row 2 x16->x17 and row 4 x16->x17, and no other row moves.
+RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,)")
 # THE DECLARING LINE, AS ONE RULE RATHER THAN A LIST OF SHAPES. Every run that states its angle
 # in the body does it the same way: a label, then a QUOTED string. Enumerating the surface forms
 # instead ("ANGLE was", "Angle issued:", "The assigned ANGLE (") left 37 runs unresolved and is

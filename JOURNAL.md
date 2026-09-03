@@ -40419,3 +40419,182 @@ Re-run with this entry on disk: **FAILURES: 0**, row 8 reading ×16 both ways, s
 3. **The reconstruction path (§4) is bounded at 10% by C7 and currently sits at 1.1%.** If it
    climbs, the fix is not to raise the ceiling — it means runs are vanishing often enough that
    the corpus needs a different rule.
+
+
+---
+
+# 2026-09-03 — w161 — BLOCKED: COMPETITION CLOSED. EIGHTEENTH CONSECUTIVE RUN WITH NO SUBMISSION.
+# 🔴 ROW 4 WAS NEVER "UNHANDED SINCE 08-31". THE RUN THAT GRADED THE WHOLE COMPETITION WAS
+# SITTING IN THIS JOURNAL AND THE CENSUS COULD NOT SEE THE LINE.
+
+⛔ **BLOCKED AT THE TOP.** ANGLE as issued: *"XGBoost: third leg of the ensemble, tuned on the same
+folds so the blend weights mean something"* — genus `XGBoost`, **row 4**. Deadline **2026-08-31
+23:59**, read live off the competition object through an authenticated client, now **2026-09-03
+15:04 UTC** — **past by 63.1 hours**. `Roc Auc Score`, `max_daily` 10, `teams` 3531,
+`submissions_disabled` still **False** for the seventeenth day on a graded board. Final standing
+unchanged: **rank 319 / 3,531, private 0.97093**.
+
+⛔ **NO SUBMISSION AND NO SUBMIT PROBE** — a live write against a closed competition is not a free
+read (w143).
+
+## 0. 🎯 THE ORIENTATION READ THAT CHANGED THE RUN: THE LAUNCHER KEEPS A LOG AND NOTHING HERE READ IT
+
+`#69 --run w161` and `#70` both came back **FAILURES: 0** — w160's record is committed *and*
+pushed, so the four-run streak of vanishing entries is broken. But `git status` showed artefacts
+written **after** w160's last commit (`f91e944`, 10:27): `w128a_row9.json` 10:33,
+`logs_w159_row9.txt` 10:34, `w127a_row7.json` 10:36, and at 10:48 a file named
+**`logs_w161_row2.txt`** — stamped with the id *this* run holds, sixteen minutes before this run
+started. No sibling process was alive (checked; PID 3580785 is this session and the only one).
+
+🎯 **THE ANSWER WAS NOT ON THIS DISK. IT WAS IN THE LAUNCHER'S LOG**, which no check has ever
+opened:
+
+    /home/nixos/all-my-repos/ai/kaggle-agents/logs/playground-series-s6e8/2026-09-03.log
+
+    [10:40:31] ANGLE: LightGBM: tune it properly against the fixed folds ...
+    API Error: 500 Internal server error.
+    [10:49:27] slot 7 failed (exit 1) — retrying once in 60s
+    API Error: 500 Internal server error.
+    [10:52:26] slot 7 finished (exit 1)
+
+Slot 7 was handed row 2, ran for 536 seconds, wrote that log, was **killed by a 500**, retried,
+and was killed again. It had named itself w161 because w160 was the last entry in the journal —
+the same rule this run used. ⚠ **A KILLED RUN LEAVES ITS ID FREE FOR THE NEXT ONE TO CLAIM**, so
+today three runs (slots 7, 8 and this one) were all entitled to call themselves w161. The stray is
+renamed `logs_09-03slot7_row2.txt`; nothing else references it.
+
+## 1. 🔴 THE DEFECT: `RUN_HDR` ANCHORS ON WHAT FOLLOWS `# `, SO A LEADING `(` HID TWO ENTIRE RUNS
+
+The census (#50) reads run entries out of `JOURNAL.md` with
+
+    RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave )")
+
+All three alternatives anchor on the character straight after `# `. **Two runs write their header
+as a parenthetical**, and both were invisible:
+
+    L38204  # (w141, 2026-08-31, SLOT 10/10, ANGLE "LightGBM: tune it properly") — 🔴 NO SLOT EXISTS.
+    L38367  # (w142, 2026-09-01, SLOT 1/10, ANGLE "XGBoost: third leg of the ensemble") — 🏁 THE
+            COMPETITION IS OVER AND THE FORECAST IS GRADED.
+
+⛔ **THESE ARE NOT MALFORMED HEADERS — THEY CARRY MORE THAN THE DATED FORM DOES.** Each states the
+run id, the date, the slot **and a quoted angle**, and the moment the reader can see them at all
+both resolve by the `header` path, the strongest one the resolver has. Measured over the corpus:
+**exactly two headers are recovered, row 2 goes ×16 → ×17 and row 4 ×16 → ×17, and no other row
+moves.**
+
+🎯 **AND w142 IS WHY ROW 4 LOOKED LIKE THE ONE ROW NOBODY HAD BEEN HANDED SINCE THE DEADLINE.**
+Every other row's trail carried a post-deadline `(closed)` entry; row 4's stopped at `w133 08-31`,
+and the cell argued *from that absence* — *"w133 (08-31) is the 16th handing and it built
+nothing"*. w142 was handed row 4 on **09-01 as slot 1**, ran 990 seconds, exited 0, and in that
+time graded the frozen forecast (**P2/P3/P4 held, P1 ungraded exactly as w140 predicted**), found
+that `ApiDownloadLeaderboardRequest` cannot serve a private board, made the grader's sort stable,
+and measured the founding rule — **CV↔private rho +0.929 against public↔private +0.874** — then
+committed the lot as `4e387f7`. ⛔ **The most consequential run of the post-deadline period was
+absent from every count this workspace publishes, and it was absent because of one character.**
+
+✅ **FIXED IN THE READER**, with the fourth alternative and a comment saying what it is for.
+`RUN_HDR` is deliberately **copied, not imported**, into #66, #67 and #69 so that drift turns their
+anchor checks red first — and it did: `w157a_closedguard`'s C4 went red on the byte-comparison
+within a minute. All four copies and both doubly-escaped anchor literals updated together; C4 back
+to `OK` and the pattern re-matched against the live literal rather than assumed.
+
+## 2. 🔴 THE CORRECTION: TWO GENERA WERE BEING TREATED AS ONE, AND THE DIAGNOSIS WENT THE WRONG WAY
+
+w160 wrote that w159 *"left the same fault as w155, w156 and w158: it did the work, wrote a guard,
+synced the census, and wrote no journal entry"*, and built #69 on that reading. **The launcher log
+disagrees on half the set**, and it is the only instrument that can:
+
+| run | slot | exit | what actually happened |
+|---|---|---|---|
+| w155 | 09-02 s4 | **0** | ran 1,359s to completion and wrote nothing — a discipline failure |
+| w158 | 09-03 s2 | **0** | ran 1,439s to completion and wrote nothing — the same |
+| w156 | 09-02 s5 | **1** | **API 529 after 1,508s**, retried, 529 again |
+| w159 | 09-03 s3 | **1** | **API 500 after 618s**, retried, 500 again |
+
+⚠ **A KILLED RUN DID NOT DECLINE TO WRITE ITS ENTRY.** It was terminated before it could, and **no
+guard that runs inside that run can change that** — #66, #69 and #70 all execute in the process
+being audited. So w160's prescription (*"call #69 and #70 by name at orientation"*) is right about
+mechanism and wrong about who it saves: it cannot help the dying run, only the next one.
+
+⛔ **AND THE RATE IS NOT A CURIOSITY.** **2026-09-03 lost 5 of its 9 slots** (3, 4, 6, 7, 8) and
+**2026-09-02 lost 6 of 10**, against **0 of 10 on 09-01**. Today's four unrecovered kills were
+handed rows 10, 1, 2 and 3.
+
+## 3. ✅ GUARDED — `experiments/w161a_driverguard.py` (#71), THE FIRST CHECK THAT READS OUTSIDE THIS WORKSPACE
+
+**C1** the logs parse into slot records — date, slot, angle, exit, duration — and every ANGLE
+resolves through **`w117a_handcount`'s own `classify`**, so the guard and the census cannot
+disagree about what a row is · **C1b** rewriting one slot's exit code moves exactly that slot's
+verdict (`[1]`) and stripping the `finished` lines leaves **0** exit codes · **C2 the read is
+ANSWERABLE** — a missing or empty log directory is `UNREADABLE` and **FAILS**, on #70's rule ·
+**C3 the assertion**: every slot that exited 0 has a `JOURNAL.md` entry for its (date, row) ·
+**C4 the genus split**, named per slot · **C5** four anchors · **C6 `--control`** · **C7** blindness.
+
+    pre-fix   (RUN_HDR blind to `# (w142,`)  -> UNWRITTEN  FIRES   (want FIRES)   OK
+    post-fix  (w142 readable)                -> RECORDED   SILENT  (want SILENT)  OK
+    the control WORKS
+
+Both control arms are **frozen literals** on w156's lesson that a control borrowing live state
+stops working the moment the fix lands. The reconciliation over 29 slots since 09-01:
+**RECORDED 17 · KILLED/recovered 2 · KILLED/mid-run 4 · KILLED/at-birth 5 · INFLIGHT 1 ·
+UNWRITTEN 0**, `FAILURES: 0`.
+
+⚠ **C4's FIRST CUT WAS SILENTLY INERT AND THE SECOND CUT SAYS SO.** Duration was `finished −
+ANGLE`, which folds in the launcher's **60-second retry sleep**, so the 09-02 slots that died in
+**one second** all read `62s`, the at-birth arm matched nothing, and the threshold check skipped
+itself without a word. Measured off the **first** terminal event instead: **at-birth max 1s,
+mid-run min 196s** — the 60s split sits inside a 195-second gap rather than on a tuning choice,
+and the inert case now prints `⚠ INERT ... asserting nothing` instead of passing quietly.
+
+⚠ **KILLED IS REPORTED AND NEVER FAILED, ON PURPOSE**, and C7 says why that must not be misread:
+nothing a later run does can un-kill a slot, so failing on it would leave the check permanently red
+for a reason no run can fix. ⛔ **The consequence is that #71 reading green does NOT mean the day
+went well** — today it is green with 9 slots dead.
+
+## 4. ✅ THE ANGLE, ROW 4 — ×16 → ×18, AND THE PRICES ARE UNCHANGED
+
+The row's two published quantities stand and neither is re-opened: **TUNING +4e-7** (inherited from
+row 2) and **ENROLMENT +7.38e-6/member** (w124, `base104`, paired 50/50, 3 splits, over the 11
+distinct arrays of the 12-name XGB subgroup, `bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical). On
+identical folds CatBoost **+10.04e-6** (t 8.87) · XGBoost **+7.38e-6** (**t 10.75**, the only
+family clearing the 1% critical 9.925) · LightGBM **+4.04e-6** (t 9.92). ⛔ All three are FOREIGN
+pipelines already enrolled and **all three are under the 50e-6 floor** — *prefer a pipeline we do
+not hold*, not *prefer a family*.
+
+🎯 **AND THE ANGLE'S SECOND CLAUSE — *"tuned on the same folds so the blend weights mean
+something"* — IS PRICED IN ROW 8 ARM B, NOT HERE**: shared folds are worth **paired sd 3.44e-6 vs
+unpaired 271.11e-6**, 78.9× on the sd and 6,225× on the variance. That is a **measurement** price,
+an sd and not a gain, so it is not addable to the two above. The clause is the reason every price
+in the index exists, not a separate thing to build.
+
+Row 4 now reads **×18**: ×16 published + **w142 09-01 (closed)**, recovered by §1, + this run.
+
+## 5. ✅ CENSUS AND SUITE
+
+Census (#50) run after every edit: **FAILURES: 0**, all ten rows agreeing, `CURRENT_RUN` moved to
+`^# 2026-09-03 — w161 —`, row 4. Index rows 2 and 4 resynced with their trails
+(`→ w141 08-31` bare, since 08-31 is **on** the deadline day and #67's C3a requires no marker
+there; `→ w142 09-01 (closed)` and `→ w161 09-03 (closed)` marked). #71 was registered in
+`w93a_suite`'s `STEMS` and the heading bumped to **71** *before* the suite ran — w159's mistake was
+registering after its own pass, so the check it added never ran inside the runner it was added to.
+
+## 6. ➡ WHAT THE NEXT RUN SHOULD LOOK AT FIRST
+
+1. **Run `#71` first, then `#69 --run <you>` and `#70`.** #71 is the only one that can tell you
+   whether the previous slot *died* or *skipped*, and that decides whether there is work to
+   recover or a habit to fix. It is also the only check that can see a run which left no trail
+   entry at all — #69's own C7 declares that blind spot and #71 closes it.
+2. **The run-id rule is unsafe and it bit today.** Ids are taken as "next after the last journal
+   entry", so every killed run frees its id for the next. Three runs today were entitled to
+   `w161`. A rule keyed on (date, slot) instead of on journal position would not collide; nothing
+   currently enforces one.
+3. **The `══` wave headers are the other half of §1 and are NOT fixed.** Eleven entry-starting
+   headers from 08-16 → 08-18 (`# ══ 2026-08-17 (UTC) — WAVE w17, SLOT 1 of 10 ══`) are still
+   invisible to `RUN_HDR` for the same reason the parenthetical ones were. Widening to them as
+   well moves **nine of the ten rows** (+1 to +2 each; row 5 alone is unaffected, which is also
+   the one row w116's independent hand count reproduced). That is a much larger resync than this
+   run could verify, so it is measured and left, not quietly folded in.
+4. **The driver log counts 207 handings against the index's 167.** Part is §1 and part is the
+   pre-09-01 window #71 refuses to reconcile, because the launcher only began writing per-slot
+   ANGLE lines partway through. Whether the index means *handed* or *recorded* has never been
+   written down, and until it is, the two instruments cannot be made to agree.

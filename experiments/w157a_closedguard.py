@@ -89,7 +89,7 @@ DEADLINE_FULL = "2026-08-31 23:59:00"
 
 # COPIED from w117a_handcount.py:137, not imported, so that C4 fires if that file's idea of a
 # run header moves. w156a_recordguard copies the same line for the same reason.
-RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave )")
+RUN_HDR = re.compile(r"^#{1,2} (20\d\d-\d\d-\d\d|w\d+[a-z]? —|wave |\(w\d+[a-z]?,)")
 
 ROW = re.compile(r"^\| (\d+) \| \*")
 
@@ -313,7 +313,7 @@ def main() -> int:
     print("C4 the anchors this guard copies rather than imports")
     hc = HANDCOUNT.read_text(encoding="utf-8")
     anchors = [
-        (r'RUN_HDR = re\.compile\(r"\^#\{1,2\} \(20\\d\\d-\\d\\d-\\d\\d\|w\\d\+\[a-z\]\? —\|wave \)"\)',
+        (r'RUN_HDR = re\.compile\(r"\^#\{1,2\} \(20\\d\\d-\\d\\d-\\d\\d\|w\\d\+\[a-z\]\? —\|wave \|\\\(w\\d\+\[a-z\]\?,\)"\)',
          "w117a_handcount's RUN_HDR, copied verbatim into this file"),
     ]
     for pat, what in anchors:
