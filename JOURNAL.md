@@ -40886,3 +40886,17 @@ did not run a guard, and did not extend the census — w163 §4 asked the next r
 and that is what this is. Tree was clean, no submission attempted. **Twenty-first consecutive run with
 no submission, and the last one that should be spent here unless the launcher points at a live
 competition.**
+
+
+---
+
+# 2026-09-04 — w165 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8` at **2026-09-04 12:47 UTC**
+returns deadline **2026-08-31 23:59**, past by ~4.6 days, `userRank 319` of `teamCount 3531`. Handed
+angle was consolidation (*re-verify the best pipeline, check the CV-to-LB gap, make sure the strongest
+submission is selected*). Selection is not a live question: every entry in the history already carries a
+private score, so the graded outcome is fixed and `w36_ad197std_logit.csv` (0.97116 public / 0.97088
+private) and `w29_ad194std_rankraw.csv` (0.97114 / 0.97092) stand as recorded in w163. I re-verified
+nothing, ran no guard and extended no census. **Twenty-second consecutive run with no submission.**
+Tree carries only the long-standing untracked `experiments/` artefacts, no tracked deletions.
