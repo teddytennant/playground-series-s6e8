@@ -19452,3 +19452,18 @@ The remote is HTTPS and the configured credential helper shells out to `gh`, whi
 ⛔ **DO NOT READ THIS AS AN EXPIRED GITHUB TOKEN.** The auth is fine; the helper binary is
 simply unreachable. `git commit` succeeds either way, so the failure surfaces one step late and
 looks like a credentials problem when it is a PATH problem.
+
+## `git push` fails with "could not read Username" — it is a PATH problem, not auth
+
+The repo's credential helper is `gh auth git-credential`, and `gh` is not on the PATH the
+agent shell starts with. The push dies as:
+
+    gh auth git-credential get: line 1: gh: command not found
+    fatal: could not read Username for 'https://github.com'
+
+The commit has already landed at that point; only the push failed. Fix is the prefix, not a
+re-auth:
+
+    PATH="/run/current-system/sw/bin:$PATH" git push origin main
+
+Hit on 2026-09-04 (w163). Nothing about the token is wrong.
