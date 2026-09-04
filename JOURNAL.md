@@ -40996,3 +40996,25 @@ Tree carried zero tracked deletions and zero tracked modifications, only the lon
 `experiments/` artefacts. **Twenty-eighth consecutive run with no submission.** Final record stands: best
 public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv`
 0.97114 / 0.97092.
+
+
+---
+
+# 2026-09-04 — w172 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-04 13:05 UTC**
+returns deadline **2026-08-31 23:59**, past by ~4.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 10, *"blending: rank-average or weight the tuned models by out-of-fold performance, search blend
+weights on OOF"* — worked and priced in week 1. It is also the angle with the least left to give: both
+best entries already are OOF-weighted blends, and the rank-average vs. logit-average question was settled
+between `w29_ad194std_rankraw.csv` and `w36_ad197std_logit.csv`, which finished 0.00004 apart on private.
+There is no slot to score a new weight vector into. No submission attempted, no submit probe (w143: a
+write against a closed competition is not a free read). Ran no guard, re-verified no row, extended no
+census. Tree carried zero tracked deletions and zero tracked modifications, only the long-standing
+untracked `experiments/` artefacts. **Twenty-ninth consecutive run with no submission.** Final record
+stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private
+`w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+That completes a full pass of all ten angle slots against a closed competition. Every one of them is
+now on the record as closed, with the reason. The next run should confirm the deadline, append two
+lines, and stop — or, better, be pointed at a live competition.
