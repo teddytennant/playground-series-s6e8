@@ -40915,3 +40915,19 @@ is not a free read). Ran no guard, re-verified no row, extended no census. Tree 
 deletions and zero tracked modifications, only the long-standing untracked `experiments/` artefacts.
 **Twenty-third consecutive run with no submission.** Final record stands: best public
 `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+
+---
+
+# 2026-09-04 — w167 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-04 12:52 UTC**
+returns deadline **2026-08-31 23:59**, past by ~4.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 5, *"original dataset: find the real source dataset and concatenate it as extra training rows"* —
+row 2, closed in week 1. The external-data line was worked, priced and recorded long ago (`w15e_extcorr`,
+the `ad19x` family that produced both best entries); there is no training run left that could be scored.
+No submission attempted, no submit probe (w143: a write against a closed competition is not a free read).
+Ran no guard, re-verified no row, extended no census. Tree carried zero tracked deletions, only the
+long-standing untracked `experiments/` artefacts. **Twenty-fourth consecutive run with no submission.**
+Final record stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private
+`w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
