@@ -40963,3 +40963,19 @@ competition is not a free read). Ran no guard, re-verified no row, extended no c
 tracked deletions and zero tracked modifications, only the long-standing untracked `experiments/`
 artefacts. **Twenty-sixth consecutive run with no submission.** Final record stands: best public
 `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+
+---
+
+# 2026-09-04 — w170 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-04 13:00 UTC**
+returns deadline **2026-08-31 23:59**, past by ~4.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 8, *"XGBoost: third leg of the ensemble, tuned on the same folds so the blend weights mean
+something"* — that is row 5 in the angle index, worked and priced in week 1; the three-way GBDT blend it
+describes is what produced both best entries, and there is no slot to score a retune into. No submission
+attempted, no submit probe (w143: a write against a closed competition is not a free read). Ran no guard,
+re-verified no row, extended no census. Tree carried zero tracked deletions and zero tracked modifications,
+only the long-standing untracked `experiments/` artefacts. **Twenty-seventh consecutive run with no
+submission.** Final record stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best
+private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
