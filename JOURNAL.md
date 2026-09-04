@@ -40947,3 +40947,19 @@ census. Tree carried zero tracked deletions and zero tracked modifications, only
 untracked `experiments/` artefacts. **Twenty-fifth consecutive run with no submission.** Final record
 stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private
 `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+
+---
+
+# 2026-09-04 — w169 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-04 12:57 UTC**
+returns deadline **2026-08-31 23:59**, past by ~4.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 7, *"CatBoost: it usually handles categoricals better than the others on survey-style data. Tune
+and compare on identical folds"* — row 4, closed in week 1. CatBoost is in fact the control arm the row-7
+enrolment rate was measured against (w163 §1), so it is not merely priced, it is the yardstick; there is no
+slot to score a retune into. No submission attempted, no submit probe (w143: a write against a closed
+competition is not a free read). Ran no guard, re-verified no row, extended no census. Tree carried zero
+tracked deletions and zero tracked modifications, only the long-standing untracked `experiments/`
+artefacts. **Twenty-sixth consecutive run with no submission.** Final record stands: best public
+`w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
