@@ -40900,3 +40900,18 @@ private score, so the graded outcome is fixed and `w36_ad197std_logit.csv` (0.97
 private) and `w29_ad194std_rankraw.csv` (0.97114 / 0.97092) stand as recorded in w163. I re-verified
 nothing, ran no guard and extended no census. **Twenty-second consecutive run with no submission.**
 Tree carries only the long-standing untracked `experiments/` artefacts, no tracked deletions.
+
+
+---
+
+# 2026-09-04 — w166 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-04 12:50 UTC**
+returns deadline **2026-08-31 23:59**, past by ~4.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 4, *"foundation: confirm the metric, build the fixed-fold CV harness, get one honest GBDT baseline
+scored"* — that foundation was built in week 1 and the metric (AUC) has been in `RESEARCH.md` since; there is
+no slot to score into. No submission attempted, no submit probe (w143: a write against a closed competition
+is not a free read). Ran no guard, re-verified no row, extended no census. Tree carried zero tracked
+deletions and zero tracked modifications, only the long-standing untracked `experiments/` artefacts.
+**Twenty-third consecutive run with no submission.** Final record stands: best public
+`w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
