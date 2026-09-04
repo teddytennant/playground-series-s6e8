@@ -3257,3 +3257,45 @@ the deadline; it had been handed, and it produced the grading. Reader fixed, row
 500/529 (09-02 lost six of ten). w156 and w159 were terminated, not negligent — the launcher log
 says so, and it is the only instrument here that can. Guarded as `experiments/w161a_driverguard.py`
 (#71).
+
+
+## 2026-09-03 — w162 — the board is still 319 / 3,531 at private 0.97093, and the other eleven
+## missing runs were found
+
+⛔ **THE BOARD IS UNCHANGED.** 201 submissions, all 201 graded, nothing sent since 08-31. Read live
+this run: the single best private file over everything ever sent is `w40_ad211stdcorr.csv` at
+**0.97094**, one quantisation step above the pair the auto-select took; twelve files tie at
+0.97093. The CV pair and the public pair both realise **0.97093**. That reproduces w142's finding
+independently and it is not a new number.
+
+🔴 **w161 FOUND TWO RUNS THE CENSUS COULD NOT SEE. THERE WERE ELEVEN MORE.** The 08-16 → 08-18
+window writes its entry headers as a banner (`# ══ 2026-08-17 (UTC) — WAVE w17, SLOT 1 of 10 ══`),
+and `RUN_HDR` anchors on the character after `# `, so none was visible. They were not merely
+uncounted: an invisible header leaves its body inside the previous entry, so **two headers were
+carrying twelve runs' worth of body between them** — one of them owned the 08-16 wave summary plus
+seven whole 08-17 slot entries. Corpus 181 → 192, and **nine of the ten index rows were short**,
+by +1 or +2 each.
+
+⚠ **ROW 5 IS THE ONE ROW THAT DOES NOT MOVE**, because 08-17's feature-engineering slot happened to
+use the dated header form. This run was handed row 5, so the run doing the nine-row resync had no
+stake in its own count — and #72's C2 fails if row 5 ever does move.
+
+🔴 **AND THE DRIVER LOG'S OWN PARSER HAD TWO DEFECTS.** It keyed records on the slot number, so a
+second launcher cycle appended to the same date's log overwrote the first (16 of 208 records lost on
+08-10 and 08-19). And it joined an **EDT** log stamp against **UTC** journal dates, mislaying every
+slot that started after 20:00 local. Both fixed; handed now reads **≥** recorded on all 22 logged
+dates instead of swinging ±9 in both directions. `handed` 208 vs `recorded` 182, and the definitions
+are written down at last.
+
+
+## 2026-09-04 — w163 — final, unchanged: 319 / 3,531
+
+Board re-read live off the API, not quoted from a table. Deadline 2026-08-31 23:59 against
+2026-09-04 12:40 UTC, past by ~4.5 days; every submission in the history carries a private score,
+which is what a fully graded and closed competition looks like.
+
+    best public : 0.97116 public / 0.97088 private   w36_ad197std_logit.csv
+    best private: 0.97114 public / 0.97092 private   w29_ad194std_rankraw.csv
+    last send   : 2026-08-31 12:37:26
+
+Nothing has moved since 08-31 and nothing will. This is the final entry for this competition.

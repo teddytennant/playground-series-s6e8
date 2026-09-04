@@ -40806,3 +40806,70 @@ that misses a copy goes red instead of leaving a guard reading a stale literal.
    twelfth header shape ever appears, C1's frozen `N_BANNERS` goes red rather than adapting, which
    is deliberate: `JOURNAL.md` is append-only and no future run writes a banner, so a twelfth means
    the corpus was **edited**.
+
+
+---
+
+# 2026-09-04 — w163 — BLOCKED: COMPETITION CLOSED. TWENTIETH CONSECUTIVE RUN WITH NO SUBMISSION.
+# THIS ENTRY IS SHORT ON PURPOSE. THE WORK HERE IS OVER AND THE JOURNAL SHOULD STOP GROWING.
+
+⛔ **BLOCKED.** Deadline **2026-08-31 23:59**, read live off the competition object this run,
+against **2026-09-04 12:40 UTC** — past by **~4.5 days**. Final standing unchanged:
+**rank 319 / 3,531**. Every submission in the history carries a private score, which is itself
+proof the competition is fully graded and shut. No submission attempted and no submit probe: a
+live write against a closed competition is not a free read (w143).
+
+Re-read live, from the API rather than from a table:
+
+    best public : 0.97116 public / 0.97088 private   w36_ad197std_logit.csv
+    best private: 0.97114 public / 0.97092 private   w29_ad194std_rankraw.csv
+    last send   : 2026-08-31 12:37:26
+
+## 1. THE ANGLE IS ROW 7, AND ROW 7 IS CLOSED
+
+Handed angle: *"Seed and fold diversity: same models across multiple seeds and fold splits,
+averaged."* — genus `seed and fold diversity`, **row 7**. The row is closed, both layers priced,
+and has already been re-verified nine times: w64 → w109 → w118 → w127 → w136 → w145 → w154 → w158.
+Stacker arm is a **structural null**; member arm is **+138e-6 solo**, converting to **+2e-6 at the
+stack, k=1**, and the genuine enrolment rate is **+0.49e-6/member (t = 0.44)**, sign-flipping
+across all three splits and 20× below the CatBoost control. Nothing re-opens.
+
+I did not re-verify it a tenth time. The row's `×18` count is machine-derived from
+`w117a_handcount`, not hand-maintained, so I have not touched it either — a run that verified
+nothing should not increment a count whose column header says *artefacts verified*.
+
+## 2. WHAT I ACTUALLY DID: RECOVERED w162'S UNCOMMITTED TAIL
+
+w162 committed its journal entry and `w162a_waveheader.py` but left four files dirty. Checked each
+before staging rather than assuming they were noise:
+
+    LEADERBOARD.md                     w162's own board entry, never committed
+    experiments/w106a_claimguard.json  line refs shifted, failures 0
+    experiments/w107a_lineref.json     line refs shifted, failures []
+    experiments/w123b_groupguard.json  row-3 cell x17 -> x18, failures []
+
+All three JSON diffs are guard caches re-emitted after the docs grew — line numbers moved, verdicts
+did not. `git status` showed **zero tracked deletions** and HEAD was already published on
+origin/main, so there was no broken checkout and nothing lost. Committed.
+
+## 3. THE THING WORTH SAYING, WHICH NO PRIOR RUN HAS SAID PLAINLY
+
+**Nineteen runs have now been spent on journal-parser archaeology after the competition closed.**
+w159 through w162 fixed header regexes, reconciled a driver log against a census, and re-derived
+counts for rows nobody can act on. That work is careful and internally correct. It is also not
+Kaggle work, and the standing playbook's blocked rule — *write it clearly at the top and stop, do
+not thrash, do not fake progress* — has been read as licence to do unbounded meta-work instead of
+as an instruction to stop.
+
+There is no submission to make, no score to move, and no private-LB feedback left to earn. The
+competition is over and the account finished **319 / 3,531**. The instruments in `experiments/` are
+in good order, the suite is green apart from the eight standing by-design reds, and the record is
+committed and pushed. **That is a finished state, not a blocked one.**
+
+## 4. WHAT THE NEXT RUN SHOULD DO
+
+**Nothing, unless it is pointed at a different competition.** Confirm the deadline is still past
+(one `kaggle competitions list -s playground-series-s6e8` call), append two lines, and stop. Do not
+open a guard, do not re-verify a row, do not extend the census. If a future run wants real work,
+the useful ask is for the launcher to hand it a **live** competition; this one has nothing left to
+give.
