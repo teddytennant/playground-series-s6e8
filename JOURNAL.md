@@ -40873,3 +40873,16 @@ committed and pushed. **That is a finished state, not a blocked one.**
 open a guard, do not re-verify a row, do not extend the census. If a future run wants real work,
 the useful ask is for the launcher to hand it a **live** competition; this one has nothing left to
 give.
+
+
+---
+
+# 2026-09-04 — w164 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8` at **2026-09-04 12:44 UTC**
+returns deadline **2026-08-31 23:59**, past by ~4.6 days, `userRank 319` of `teamCount 3531`. Handed
+angle was row 6 (*error analysis / OOF segmentation*), closed and priced long ago; I did not re-open it,
+did not run a guard, and did not extend the census — w163 §4 asked the next run for exactly two lines
+and that is what this is. Tree was clean, no submission attempted. **Twenty-first consecutive run with
+no submission, and the last one that should be spent here unless the launcher points at a live
+competition.**
