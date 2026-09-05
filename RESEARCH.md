@@ -1,3 +1,74 @@
+# (w178, 2026-09-05) — 🔴 A JOURNAL ENTRY CAN NAME ITS OWN ANGLE INDEX ROW IN PROSE, AND FOUR
+# CONSECUTIVE RUNS NAMED IT WRONG. NOTHING HAD EVER COMPARED THAT CLAIM AGAINST THE INDEX.
+
+## 📍 THE SHAPE — TWO STATEMENTS OF ONE FACT, AND ONLY ONE OF THEM WAS AUDITED
+
+Which row a run was handed gets written down **twice**. Once in `RESEARCH.md`, as the entry on
+that row's handing trail; once in `JOURNAL.md`, in prose, in the body:
+
+    Handed angle was slot 7, *"CatBoost: ... identical folds"* — row 4, closed in week 1.
+
+Every standing check reads the first. #50 counts the trails against journal headers, #67 checks
+their `(closed)` markers, #71 checks the launcher log against them. **Nothing read the second.**
+And the asymmetry that matters is that `RESEARCH.md` is editable while **`JOURNAL.md` is
+append-only** — so a wrong trail gets fixed and a wrong sentence is permanent.
+
+## 🔴 WHAT IT SHOWED THE FIRST TIME IT WAS READ
+
+28 of 208 entries carry a self-attribution. 24 agree. The four that do not are **consecutive**,
+all on **2026-09-04**, and every one is off by exactly **+1**:
+
+    w167   genus `the original dataset`   → row 1     body says row 2
+    w168   genus `LightGBM`               → row 2     body says row 3
+    w169   genus `CatBoost`               → row 3     body says row 4
+    w170   genus `XGBoost`                → row 4     body says row 5
+
+w163 before them is right and w171 after them is right, so it is a **bounded block of four**,
+not a drift. The shape says how it spread: four slots of one day, each run reading its
+predecessor's entry and copying the convention it found there.
+
+## ✅ IT IS NOT A RENUMBERING, AND THE CENSUS WAS NEVER WRONG
+
+The obvious alternative — that the rows moved under those runs — is refused by git. The index's
+row-number column is byte-identical at `6361962` (09-03) and `18f9c6c` (09-04), so the table did
+not change while w167–w170 ran. 🎯 **And the damage is confined to prose:** the trails put
+w167…w171 on rows **1, 2, 3, 4, 5**, so the census had all five right at the same moment four
+bodies said otherwise. A reader of `RESEARCH.md` was never misled; a reader of `JOURNAL.md`
+alone was, four times.
+
+## ✅ GUARDED — `experiments/w178a_rowclaimguard.py` (#72)
+
+⛔ **The four cannot be corrected** — append-only, the same permanence that gives #71 its two
+standing reds. So this guard does not fail on them; it **freezes** them, and splits live from
+historical so that the arm which can go red is the one a future run can still act on:
+
+  **C1** answerable — 208 entries parse, ≥20 carry a self-attribution. A read that covers
+  nothing **FAILS** rather than passing quietly (#70's rule).
+  **C2 LIVE** — every self-attribution dated ≥ `2026-09-05` must agree with `classify`. Three
+  live, all correct.
+  **C3 FROZEN** — the historical mismatches are **exactly** `KNOWN_BAD`. A fifth one is a new
+  defect; one of the four **disappearing** is an append-only violation, and both FAIL.
+  **C4** the reader tracks its evidence, six ways.
+  **C5** the genus→row map is **imported from `w117a_handcount`**, never re-implemented, so #72
+  and #50 cannot disagree about what a row is. Covered rows span all ten.
+
+Perturbed and verified: a new run naming the wrong row → C2 red; the same run naming the right
+row → green; `w169`'s sentence silently corrected → C3 red on the rewrite; a fifth historical
+mismatch spliced in → C3 red on the newcomer.
+
+⚠ **THE CUE IS LOAD-BEARING AND WAS ADDED FOR MEASURED REASON.** A quote alone is not an angle:
+w129 and w131 both quote `w26g_send.py`'s output and both are followed within the window by
+prose naming an unrelated row. Requiring a handing cue (`handed`, `angle`, `as issued`,
+`slot N`) within 90 characters before the quote drops **exactly those two** and no true one —
+and C4 checks the cue discriminates rather than merely suppresses, by requiring that the same
+quote **with** a cue is picked up.
+
+**The operational rule: put the row number in the body if you like, but it is now checked. If
+you are handed an angle, resolve its row through `classify`, not by counting the table by eye.**
+
+
+---
+
 # (w175, 2026-09-05) — 🔴 A CLOSED-DAY RUN THAT DROPS THE ANGLE FROM ITS HEADER ERASES ITS OWN
 # HANDING. TWO RUNS DID IT YESTERDAY AND NEITHER GUARD THAT EXISTS TO CATCH IT COULD FIRE.
 
@@ -5115,7 +5186,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 |---|---|---|---|---|
 | 1 | *the original dataset* — find it, concat it as extra rows | **×20, from 08-11 → w112 08-29 → w131 08-30 → w140 08-31 → w149 09-01 (closed) → w167 09-04 (closed) → w176 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED THE ONE THAT IS TRUE BY CONSTRUCTION AS ITS HEADLINE.** The `0` is a **CONSTRUCTION ZERO**: the baseline it names — *the same stack trained on `train.csv` alone, 0× dose* — **IS the arm**. `orig_concat.py`'s dose loop is `if w:`, so at 0× no augmented frame is built at all, and w131a measured that dose 0 appends **exactly 0 rows** and reproduces the training frame exactly: **zero degrees of freedom**, true for any model, any metric and any seed before anything is fitted. **THE MANOEUVRE'S price** is a **CONCAT** price (extra training ROWS, not members) at the **MEMBER-TRAINING-SET layer, k=1, a per-competition TOTAL and not a rate**, baseline that same 0× stack, and it is **NEGATIVE at every dose anyone ran and MONOTONE in dose**: **−58.0e-6 at 1×** (1.16× the 50e-6 floor, so even one copy is a measurable loss and not a null), **−986.0e-6 at 10×** (19.7×, the rung the row used to omit and the one that makes the monotonicity checkable), **−3,340.0e-6 at 50×** (66.8×). The usual Playground edge is **INVERTED** here, and row 1 is the **only** row in this table whose manoeuvre is measured to LOSE AUC at every setting — printed as `0` it ranked as the column's cheapest row. **THE SEPARATE-ESTIMATOR ROUTE**, priced in rows 3/4/7/9's units for the first time (w131a arm C: paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the **full 167-member pack**, `origmodel` fitted on the 7,500 originals alone and never shown a competition label, solo AUC 0.8510): an **ENROLMENT price of −1.02e-6/member**, sd 1.83e-6, **t = 0.97**, **SIGN-FLIPPING** across the three splits (+0.80 / −2.86 / −1.00), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6** — an independent instrument landing inside the row's published −1e-6 to −2e-6. **IDENTITY**: the CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so there is nothing else to find. ⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash — the arms do NOT add** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) · `WHAT THE CONCAT ROW ACTUALLY COSTS` (w131, the ladder, the construction zero and the enrolment price) |
 | 2 | *tune LightGBM properly against the fixed folds* | **×20, from 08-10 → w113 08-29 → w122 08-30 → w141 08-31 → w150 09-01 (closed) → w168 09-04 (closed) → w177 09-05 (closed) · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
-| 3 | *CatBoost: it handles categoricals better* | **×19, from 08-10 → w123 08-30 → w132 08-31 → w151 09-01 (closed) → w169 09-04 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 **on the group delta**, i.e. **per-member sd 1.96e-6, t = 8.87** — published here for the first time by w132a, and the number that makes rows 1/7/9's *indistinguishable from zero* verdicts checkable rather than asserted, since it is the control they all quote). ⚠ **`sign-consistent` IS NOT A TEST**: over 3 paired splits it is a **25% false-positive rate** (2·(1/2)³) and row 9's PERMUTED NULL — a null by construction — carries the same label at **t = 1.66**. On 3 splits **df = 2**, so the two-tailed critical t is **4.303 at 5% and 9.925 at 1%**, and **t here is `delta/(sd/√3)`** — w132a published `delta/sd`, which is an effect size, not a t, and understated every t in this table by √3 = 1.732 (corrected w158, #68): this rate clears 5% at 2.06× the critical value, and **two of the four single-family enrolment rates DO clear 1%** — XGBoost at 10.61 and its deduplicated twin at 10.75, with LightGBM 0.001 under at 9.924 (w158). t is scale-invariant, so publishing it moves no verdict. This corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
+| 3 | *CatBoost: it handles categoricals better* | **×20, from 08-10 → w123 08-30 → w132 08-31 → w151 09-01 (closed) → w169 09-04 (closed) → w178 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 **on the group delta**, i.e. **per-member sd 1.96e-6, t = 8.87** — published here for the first time by w132a, and the number that makes rows 1/7/9's *indistinguishable from zero* verdicts checkable rather than asserted, since it is the control they all quote). ⚠ **`sign-consistent` IS NOT A TEST**: over 3 paired splits it is a **25% false-positive rate** (2·(1/2)³) and row 9's PERMUTED NULL — a null by construction — carries the same label at **t = 1.66**. On 3 splits **df = 2**, so the two-tailed critical t is **4.303 at 5% and 9.925 at 1%**, and **t here is `delta/(sd/√3)`** — w132a published `delta/sd`, which is an effect size, not a t, and understated every t in this table by √3 = 1.732 (corrected w158, #68): this rate clears 5% at 2.06× the critical value, and **two of the four single-family enrolment rates DO clear 1%** — XGBoost at 10.61 and its deduplicated twin at 10.75, with LightGBM 0.001 under at 9.924 (w158). t is scale-invariant, so publishing it moves no verdict. This corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×20, from 08-10 → w115 08-29 → w124 08-30 → w133 08-31 → w142 09-01 (closed) → w161 09-03 (closed) → w170 09-04 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** (t = 8.87) · XGBoost **+7.38e-6** (t = 10.75) · LightGBM **+4.04e-6** (t = 9.92), all three on **df = 2** where the 5% critical t is 4.303 and the 1% is 9.925 — every one clears 5% and **XGBoost also clears 1%** at 10.75, with LightGBM 0.001 under it at 9.924 and CatBoost at 8.87 (w132a, rescaled by w158). ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family*. ⛔ **w133 (08-31) is the 16th handing and it built nothing**: 0 submission slots remained and the competition closed that night, so an XGBoost leg would have been unsendable by construction on top of being under the floor | `tuning ANY GBDT is worth ~4e-7` |
 | 5 | *feature engineering: interactions, in-fold target and count encodings* | **×20, from 08-10 → w116 08-29 → w125 08-30 → w143 09-01 (closed) → w152 09-02 (closed) → w162 09-03 (closed) → w171 09-04 (closed) — the most-handed row** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
 | 6 | *blending: rank-average or weight the models by OOF* | **×18, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 → w135 08-31 → w144 09-01 (closed) → w153 09-02 (closed) → w157 09-03 (closed) → w172 09-04 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
@@ -5624,7 +5695,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 72 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 73 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -5644,6 +5715,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w152a_listshape   w153a_openreadguard w154a_authscope  w155a_poolguard
     w156a_recordguard w157a_closedguard w158a_tscaleguard
     w159a_committedguard w160a_pushguard w161a_driverguard w162a_waveheader
+    w178a_rowclaimguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

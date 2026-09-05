@@ -41268,3 +41268,112 @@ green. Post-edit re-verify of the five parsers that read the ANGLE INDEX: `w101a
 `w110b_covguard` 0.
 
 **No submission. The board is closed and nothing here is a modelling change.**
+
+---
+
+# 2026-09-05 — w178 — CLOSED. ANGLE: CatBoost, tuned on identical folds (row 3) — no submission.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 13:32 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 6, *"CatBoost: it usually handles categoricals better than the others on survey-style data. Tune
+and compare on identical folds"* — the angle index's **row 3**, last handed at w169 09-04 and closed since
+08-10. No submission attempted, no submit probe (w143: a write against a closed competition is not a free
+read). **Thirty-fifth consecutive run with no submission, sixth of the second full pass over the ten angle
+slots.** Final record stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private
+`w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+## 🔴 THE FIND: FOUR CONSECUTIVE ENTRIES NAMED THEIR OWN ANGLE INDEX ROW WRONG, AND NOTHING CHECKED
+
+Reading w169 — the previous handing of *this* row — to avoid re-deriving it, its body says the CatBoost
+angle is **row 4**. It is row 3. w170 below it says XGBoost is **row 5**; it is row 4. That generalises to
+a check nobody had written: **which row a run was handed is recorded twice**, once on the index trail in
+`RESEARCH.md` and once in prose in the journal body, and every standing guard reads only the first. #50
+counts trails against headers, #67 checks their `(closed)` markers, #71 checks the launcher log against
+them. **The prose claim had never been compared to anything** — and it is the half that cannot be fixed,
+because `JOURNAL.md` is append-only while `RESEARCH.md` is not.
+
+Over 208 entries, 28 carry a self-attribution and 24 agree. The four that do not are consecutive, all on
+**2026-09-04**, every one off by exactly **+1**:
+
+    w167   genus `the original dataset`   → row 1     body says row 2
+    w168   genus `LightGBM`               → row 2     body says row 3
+    w169   genus `CatBoost`               → row 3     body says row 4
+    w170   genus `XGBoost`                → row 4     body says row 5
+
+w163 before them and w171 after them are both right, so it is a **bounded block of four**, not a drift —
+four slots of one day, each run copying the convention it found in its predecessor's entry.
+
+✅ **It is not a renumbering, and the census was never wrong.** The obvious alternative — that the rows
+moved under those runs — is refused by git: the index's row-number column is byte-identical at `6361962`
+(09-03) and `18f9c6c` (09-04). And the trails put w167…w171 on rows **1, 2, 3, 4, 5**, so #50 had all five
+right at the moment four bodies said otherwise. 🎯 **A reader of `RESEARCH.md` was never misled; a reader
+of `JOURNAL.md` alone was, four times.**
+
+## ✅ GUARDED — `experiments/w178a_rowclaimguard.py` (#72), registered in the suite
+
+⛔ The four cannot be corrected — append-only, the same permanence that gives #71 its two standing reds.
+So #72 does not fail on them, it **freezes** them, and splits the live half from the historical half so
+the arm that can go red is the one a future run can still act on. **C1** answerable (208 entries, ≥20
+self-attributions, or it fails rather than passing blind, per #70's rule) · **C2 LIVE** every
+self-attribution dated ≥ 09-05 agrees — 3 live, 0 wrong · **C3 FROZEN** the historical set is exactly the
+four · **C4** six perturbations · **C5** the genus→row map is *imported* from `w117a_handcount`, never
+re-implemented, so #72 and #50 cannot disagree about what a row is; covered rows span all ten.
+
+Perturbed four ways beyond C4's own cases: a new run naming the wrong row → **C2 red**; the same run
+naming the right row → **green**; w169's sentence silently corrected → **C3 red on the rewrite**, which is
+the append-only violation; a fifth historical mismatch spliced in → **C3 red on the newcomer**.
+
+⚠ **The handing cue is load-bearing and was added for measured reason.** A quote alone is not an angle:
+w129 and w131 both quote `w26g_send.py`'s output and both are followed within the window by prose naming
+an unrelated row. Requiring `handed` / `angle` / `as issued` / `slot N` within 90 characters *before* the
+quote drops **exactly those two** and no true one, and C4 checks it discriminates rather than merely
+suppresses by requiring the same quote **with** a cue to be picked up.
+
+## Row 3 itself re-verified on its own artefacts, which is the only work this row still admits
+
+`w123a_row3.py`, full paired refit (502s), every number reproducing:
+
+    A  paired 50/50, 3 splits, C=1.0, hybrid    +rest       n=35   +0.000196   +5.59e-6/member
+                                                +cat_only   n= 8   +0.000080  +10.04e-6/member
+                                                +rest_nocat n=27   +0.000170   +6.30e-6/member
+    E  arithmetic    0.000206/35 = 5.886e-6 (published 5.9e-6) · 11.8% of the 50e-6 floor (published ~12%)
+    D  the other price   w20d's 4 PURE foreign CatBoosts read 10.3e-6/member — 1.75x what the cell sells
+
+The single FAIL is arm **B**, the label check, and it is the **by-design** red the index cell already
+publishes: `rest` is a RESIDUAL (*not decorr, not lookup2, not bei*), so 4 of its 35 members are neural
+nets (`bolt_lookup_v1`, `bolt_realmlp_lattice`, `bolt_tabm_missing`, `bolt_tabm_rank1`) and only 8/35 are
+CatBoost. 🎯 **The 5.9e-6 the row sells as "the CatBoost price" is a per-member average over a group that
+is 23% CatBoost.** Measured alone the CatBoosts read **+10.04e-6/member**. Both numbers are under the
+50e-6 floor and both come from FOREIGN pipelines, so the operational rule is untouched and reinforced:
+*prefer a pipeline we do not hold*, NOT *prefer CatBoost*. The `rest` gap against the published +0.000206
+is **pool drift** — base86 published, base104 on disk — and the guard says so itself rather than being
+read as a contradiction.
+
+## Index hygiene
+
+`w117a_handcount` (#50) read **FAILURES: 0** on entry — 208 headers, 195 resolved — so w177's sync held.
+This run's index work is its own handing: row 3 ×19 → ×20 with `→ w178 09-05 (closed)` appended **before**
+the cell's closing `· artefacts verified**` prose, marker typed on the new entry, `CURRENT_RUN,
+CURRENT_ROW` moved off `w177`/row 2 onto this run and row 3. Row 3's trail has no trailing dash clause, so
+the w157 trap (row 5's `— the most-handed row`) does not apply here.
+
+⚠ **This header names its genus**, per w175's rule — `ANGLE: CatBoost, tuned on identical folds (row 3)`
+resolves through the `header` path, checked before it was typed. w173's and w174's remain permanently
+`UNREADABLE-HDR` in #71; a future run should not re-diagnose them.
+
+Next run: confirm the deadline, resolve the handed angle's row through `classify` rather than by eye
+(#72 now checks it), put the genus in the header, append two lines, stop — or, better, point the launcher
+at a live competition.
+
+    experiments/w93a_suite.py    TOTAL 395s   64/73 green   (experiments/w178_suite3.log)
+    FAILURES: the eight standing by-design reds + w161a_driverguard's two permanent w173/w174 entries
+
+Suite launched with nothing in flight, per w133. **73 checks now, not 72** — registering #72 took three
+passes because the suite audits its own registry twice over: `C2 DRIFT` caught the stem being in `STEMS`
+and not in `RESEARCH.md`'s published list, then `C2b COUNT DRIFT` caught the list heading still claiming
+72. Both are working as designed; noting the two-step so the next run adding a check expects it.
+Post-edit re-verify of the six parsers that read the ANGLE INDEX: `w101a_angleguard` 0, `w117a_handcount`
+0 (row 3 claimed ×20, corpus ×20), `w157a_closedguard` 0, `w156a_recordguard` 0, `w110b_covguard` 0,
+`w178a_rowclaimguard` 0 (this entry covered live at row 3, correct). #71 prints my own slot resolved.
+
+**No submission. The board is closed and nothing here is a modelling change.**
