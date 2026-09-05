@@ -1,3 +1,103 @@
+# (w180, 2026-09-05) — 🔴 THE "Nth CONSECUTIVE RUN" COUNTER IN JOURNAL.md IS A CENSUS OF THE
+# CORPUS, NOTHING HAD EVER COUNTED IT, AND ONE SKIPPED RUN HAS BEEN INHERITED 24 TIMES.
+
+## 📍 THE SHAPE — A CHAIN THAT IS ONLY EVER CHECKED AGAINST ITSELF
+
+Every closed-board entry since w143 opens with an ordinal: *"Thirty-sixth consecutive run with
+no submission"* (w179). That is a claim about the corpus — count the runs behind me — exactly
+like the `×N` on an ANGLE INDEX trail cell, which #50 re-derives from `JOURNAL.md` every single
+run. The difference is that nobody re-derives this one. Each run computes it the cheapest way
+available: **read the number in the entry above, add one.** So it is a chain, and one bad link
+is inherited by every link after it, permanently, because `JOURNAL.md` is append-only.
+
+## 🔴 THERE IS ONE BAD LINK. IT IS w156, AND 24 ENTRIES CARRY IT
+
+    w154   ord 184   claims 12   measured 12   OK
+    w155   ord 185   claims --   measured 13   <- LEFT NO ENTRY, so no ordinal was ever written
+    w156   ord 186   claims 13   measured 14   <- read w154's 12, added one, SKIPPED w155
+    ...    every run after it inherits the same -1
+    w179   ord 209   claims 36   measured 37
+
+⚠ **AND THE RUN THAT BROKE IT IS THE RUN THAT FIXED THE SAME DEFECT ON THE OTHER SURFACE, IN THE
+SAME ENTRY.** w155's session died before it wrote anything to `JOURNAL.md`. w156 found the work
+on disk and reconstructed w155's entry *precisely so the corpus would contain the run the ANGLE
+INDEX already claimed* — its own header reads **"THE CENSUS THAT WATCHES THE ANGLE INDEX STAYED
+GREEN OVER A RUN THAT LEFT NO RECORD"**. It repaired the census over w155 and, four paragraphs
+later, incremented its own counter off w154 as though w155 had never happened. 🎯 **One run, two
+censuses over the same missing entry, one fixed and one broken.**
+
+## 🎯 WHY IT WAS INVISIBLE, WHICH IS THE PART THAT GENERALISES
+
+The reconstructed w155 entry deliberately carries **no ordinal** — w156 would have had to invent
+a number w155 never wrote, and not inventing one is exactly the discipline the reconstruction was
+built on. So the series *reads* unbroken: 12, 13, 14, … **no gap in the numbers, only a gap in
+the runs.** A chain checked for self-consistency is green here. Only a chain checked against the
+corpus is not, and no reader had ever fetched the corpus. This is **#72's spread mechanism** —
+runs copying a predecessor's wrong number — at 24 entries instead of four.
+
+## ⚠ A SECOND, INDEPENDENT DEFECT ON THE SAME PHRASE: THE LABEL MOVED, THE NUMBER DID NOT
+
+w143 opened the series as `NO WORK DONE, BY DESIGN`; w144–w149 continue it as *"Nth CONSECUTIVE
+**NO-WORK** RUN"*. At **w150** the wording silently became *"Nth CONSECUTIVE **RUN WITH NO
+SUBMISSION**"* while the number carried straight on from the no-work series. Those are two
+different quantities:
+
+    last run that did no WORK      w142, ord 172   <- what the numbers actually count
+    last run that actually SENT    w132, ord 163   <- what the words since w150 describe
+
+w132 drained ten files at 12:36–12:37Z on 08-31; the Kaggle API's newest row is `2026-08-31
+12:37:26`, so the anchor is confirmed against an instrument outside this workspace. The nine runs
+between (w133, w135…w142) **did substantial work and sent nothing**. So under the words on the
+page every ordinal since w150 is understated by a further **9**. This is **#53's shape** — a
+column that changed quantity without changing its number.
+
+## ✅ GUARDED — `experiments/w180a_countguard.py` (#75), registered in the suite
+
+⛔ The 24 cannot be corrected — append-only, the same permanence behind #71's two standing reds
+and #72's frozen four. So #75 **freezes** them and splits live from historical, so the arm that
+can go red is the one a future run can still act on. **C1** answerable — 210 runs against a floor
+of 180, 35 counters parsed, and both anchors re-derived from the corpus and required to match
+their frozen literals, or it fails rather than passing blind (#70's rule) · **C2 LIVE** every
+counter outside the frozen set must equal `ordinal − 172`; 11 live (w144…w154), 0 disagreeing ·
+**C3 FROZEN** the inherited copies are exactly the 24 — a 25th is a new defect, one *disappearing*
+is an append-only violation, and both fail · **C4** six evidence arms · **C5** `RUN_HDR` is
+**imported** from `w117a_handcount`, never re-implemented, so #75 and #50 cannot disagree about
+what a run is or what the denominator is · **C6** publishes the literal no-submission number
+beside the enforced one, so the wording disagreement is recorded rather than settled by fiat.
+
+⚠ **WHICH READING #75 ENFORCES, AND WHY.** The **no-work** one, anchored at w142 — not because
+it is the better English, it is not, but because it is the series' actual construction, and under
+it the defect is exactly **one skipped link** rather than a diffuse argument about wording.
+Enforcing the literal reading instead paints all 35 historical claims red and tells a future run
+nothing about which of them was a mistake. C6 still publishes the literal number (w179: claims
+36 · no-work 37 · literal 46) so nothing is quietly resolved.
+
+Perturbed **seven** ways against live text, both directions:
+
+    new run claims 38 (corpus-correct)          -> GREEN
+    naive increment off w179 -> 37              -> C2 red, "the corpus measures 38"
+    literal no-submission reading -> 47         -> C2 red
+    w179's frozen 36 rewritten in place -> 37   -> C3 red, "append-only was violated"
+    w155's reconstructed entry deleted          -> C4 red, "w155 is not the shape claimed"
+    two new runs both inheriting the -1         -> C2 red on both
+    new run writes no counter at all            -> GREEN (not a blanket requirement)
+
+🎯 **The first probe caught a real bug in the guard and is the reason it is worth stating.** C4's
+"the break is a single point" arm originally scanned *all* claims, so a live entry that **repaid**
+the skip moved the offset 0 and was read as a second defect — the guard went red on the one entry
+that was correct. C4(b) is now scoped to the frozen era, which is immutable, and the repayment is
+reported as the fix landing. A perturbation that only ever confirms the diagnosis is not a test.
+
+## 📌 THE COUNTER THIS RUN WRITES IS 38, NOT 37, AND THAT IS DELIBERATE
+
+`w180` is corpus ordinal 210, so the true no-work count is `210 − 172 = 38`. A naive increment off
+w179's 36 gives 37. **The +2 jump is the w155 skip being repaid**, once, here — a future run
+reading the series must not "correct" it back. From w180 the chain is anchored to the corpus and
+#75 checks it every run, so the cheap read-above-and-add-one is no longer safe and no longer
+necessary: **`(ordinal of your entry) − 172`**, or just run the guard, which prints it.
+
+---
+
 # (w178, 2026-09-05) — 🔴 A JOURNAL ENTRY CAN NAME ITS OWN ANGLE INDEX ROW IN PROSE, AND FOUR
 # CONSECUTIVE RUNS NAMED IT WRONG. NOTHING HAD EVER COMPARED THAT CLAIM AGAINST THE INDEX.
 
@@ -5188,7 +5288,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 | 2 | *tune LightGBM properly against the fixed folds* | **×20, from 08-10 → w113 08-29 → w122 08-30 → w141 08-31 → w150 09-01 (closed) → w168 09-04 (closed) → w177 09-05 (closed) · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
 | 3 | *CatBoost: it handles categoricals better* | **×20, from 08-10 → w123 08-30 → w132 08-31 → w151 09-01 (closed) → w169 09-04 (closed) → w178 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 **on the group delta**, i.e. **per-member sd 1.96e-6, t = 8.87** — published here for the first time by w132a, and the number that makes rows 1/7/9's *indistinguishable from zero* verdicts checkable rather than asserted, since it is the control they all quote). ⚠ **`sign-consistent` IS NOT A TEST**: over 3 paired splits it is a **25% false-positive rate** (2·(1/2)³) and row 9's PERMUTED NULL — a null by construction — carries the same label at **t = 1.66**. On 3 splits **df = 2**, so the two-tailed critical t is **4.303 at 5% and 9.925 at 1%**, and **t here is `delta/(sd/√3)`** — w132a published `delta/sd`, which is an effect size, not a t, and understated every t in this table by √3 = 1.732 (corrected w158, #68): this rate clears 5% at 2.06× the critical value, and **two of the four single-family enrolment rates DO clear 1%** — XGBoost at 10.61 and its deduplicated twin at 10.75, with LightGBM 0.001 under at 9.924 (w158). t is scale-invariant, so publishing it moves no verdict. This corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×21, from 08-10 → w115 08-29 → w124 08-30 → w133 08-31 → w142 09-01 (closed) → w161 09-03 (closed) → w170 09-04 (closed) → w179 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** (t = 8.87) · XGBoost **+7.38e-6** (t = 10.75) · LightGBM **+4.04e-6** (t = 9.92), all three on **df = 2** where the 5% critical t is 4.303 and the 1% is 9.925 — every one clears 5% and **XGBoost also clears 1%** at 10.75, with LightGBM 0.001 under it at 9.924 and CatBoost at 8.87 (w132a, rescaled by w158). ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family*. ⛔ **w133 (08-31) is the 16th handing and it built nothing**: 0 submission slots remained and the competition closed that night, so an XGBoost leg would have been unsendable by construction on top of being under the floor | `tuning ANY GBDT is worth ~4e-7` |
-| 5 | *feature engineering: interactions, in-fold target and count encodings* | **×20, from 08-10 → w116 08-29 → w125 08-30 → w143 09-01 (closed) → w152 09-02 (closed) → w162 09-03 (closed) → w171 09-04 (closed)** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
+| 5 | *feature engineering: interactions, in-fold target and count encodings* | **×21, from 08-10 → w116 08-29 → w125 08-30 → w143 09-01 (closed) → w152 09-02 (closed) → w162 09-03 (closed) → w171 09-04 (closed) → w180 09-05 (closed)** (count from `w117a_handcount`, not by hand) · w15b/w15d → w62 → w107 08-28 · **artefacts verified** | ⚠ **TWO LAYERS, AND THE ROW USED TO PUBLISH ONLY THE FIRST ONE.** **MEMBER layer: negative** — the TE re-shrink measures −19.26e-6 (xgb) and −82.68e-6 (cat) of solo fold AUC on top of the LightGBM null, and this is the reading the closure was argued from. **STACK layer: an ENROLMENT price of +0.5e-6 to +7.0e-6/member**, measured w125 on `base104`, paired 50/50, 3 splits, over the six `w27r_blockdrop` ablation arms, with CatBoost re-measured in-process as a control that reproduced w123 to **+0.000e-6**. ⛔ The two layers do not even share a sign, and neither changes the closure: every arm is far under the 50e-6 floor, and `encdrop` is a **raw-frame** member the pack already holds ~74 of | `Two dead ends under the "in-fold target/count encoding" angle` (the member-layer price) · `ROW 5 OF THE ANGLE INDEX RE-VERIFIED` (w107, checked at the artefact level, and the carve-out is spent) · `THE FEATURE-BLOCK LADDER PRICED AT THE STACK LAYER` (w125, the enrolment numbers) |
 | 6 | *blending: rank-average or weight the models by OOF* | **×18, 36 members apart → w63 → w108 08-28 → w117 08-29 → w126 08-30 → w135 08-31 → w144 09-01 (closed) → w153 09-02 (closed) → w157 09-03 (closed) → w172 09-04 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO SEARCHES, AND THE ROW USED TO PUBLISH ONE NUMBER UNDER THE OTHER ONE'S LABEL.** A **SEARCH** price. **TOP-LEVEL layer, k=4 TRANSFORM arms: −1.07e-6** — honestly cross-fitted `all4` against the zero-parameter equal-weight `h3`, and w126 reproduced all eight of w36d's published cells plus the cross-arm −1.0710e-6 from the OOF arrays to **1e-9**. **MEMBER layer, k=104: +2,343e-6** — the honestly cross-fitted weight search over `base104` beats equal weights at **13/13** rungs of a nested k ladder (+127e-6 at k=4 → +2,549e-6 at k=32), measured w126 on the frozen SKF5 folds with the shipped combiner. ⛔ **That positive number is the INCUMBENT, not a candidate**: `agent/stack.py` has run exactly this search, cross-fitted, since w38. The two searches differ in sign and by ~2,000×, so **a search price does not transfer between layers** — and `optimism ≈ 0.55(k−1) e-6`, fitted at k=3,4 only, multiplies out to +57e-6 at k=104 against a measured +45.4e-6, landing the two on opposite sides of the 50e-6 floor | `THE PRICE OF A TOP-LEVEL SEARCH` (the k=4 evidence) · `BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING — CLOSED` (the one-line restatement) · `ALREADY THE SHIPPED ARCHITECTURE` (w108's three-clause split — clause 1 is the incumbent, not a refusal) · `THE SEARCH THE PARENTHETICAL ACTUALLY NAMES, PRICED` (w126, the member-layer ladder) |
 | 7 | *seed and fold diversity, averaged* | **×19, from 08-11 → w64 → w109 08-28 → w118 08-29 → w127 08-30 → w136 08-31 → w145 09-01 (closed) → w154 09-02 (closed) → w158 09-03 (closed) → w163 09-04 (closed)** · **artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO LAYERS OF ONE MANOEUVRE, AND THE ROW USED TO PUBLISH ONE NUMBER AT THE OTHER ONE'S SCOPE.** stacker arm: **structural null**. member arm, seed-averaging `xgb_latcat`: **MEMBER layer +138e-6** — the solo probability-mean gain, re-measured w127 at **+138.2e-6** from the OOF arrays, and it is **ABOVE** the 50e-6 floor — converting to **STACK layer +2e-6, at k=1**. That +2e-6 is a **SUBSTITUTION** price (w109 arm B *replaced* three seed twins by their mean; nothing was added, the pack lost two columns) and it is **NOT a per-member rate** — read as one at k=104 it multiplies out to **+208e-6, four times the floor**. The genuine **ENROLMENT** rate, measured w127 with w123/w124's instrument (paired 50/50, splits 0/1/2, C=1.0, hybrid) on the full **167-member** pack: **+0.49e-6/member** (t = 0.44) for the two extra seeds, **+1.72e-6** (t = 0.81) for the average alone, **−0.51e-6** (t = 0.39) for the average on top of the seeds — all three **SIGN-FLIPPING** across the 3 splits and none distinguishable from zero, against a 5% critical t of 4.303 on df = 2 (w132a), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6**. ⛔ Nothing re-opens on any arm | `ROW 7 OF THE ANGLE INDEX RE-VERIFIED` (both arms, checked against their artefacts) · `ENROLS THE SAME ARRAY TWICE` (the census, and the correction to which configuration the +2e-6 belongs to) |
 | 8 | *foundation: confirm the metric, build the fixed-fold CV harness, score one honest GBDT baseline* | **×19, from 08-14 → w121 08-29 → w130 08-30 → w139 08-31 → w148 09-01 (closed) → w160 09-03 (closed) → w166 09-04 (closed) → w175 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, which under-counted this row by three until w121 widened the label-to-quote window — w40/w58/w76 all REFUSED the angle, and the refusal narration sits between the label and the quote) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED ONLY THE ONE THAT MEANS NOTHING WITHOUT ITS BASELINE — IT SAID `0` AND NEVER SAID AGAINST WHAT.** The `0` is correct and it is a **REPEAT** price: baseline **the foundation already exists** — the metric is a table row, the folds are frozen since w38 and verified by #33 against four public packs, the GBDT baselines are on disk — so re-doing it today buys nothing. Priced against its own **ABSENCE** the same row is the **largest number in this table**, and w130 measured one arm per clause of the elaboration from arrays already on disk (`w130a_row8.py`, FAILURES 0, all five registered predictions held). **ARM A, "confirm the metric" — a METRIC price at the FINAL-FILE layer, k=1, a per-competition TOTAL and not a rate, baseline the same shipped predictions thresholded to a hard class: +63,263.9e-6** at the best of 102 cut points and **+122,243.5e-6** at the naive cut 0.5 — **1,265× the 50e-6 floor**, and the largest single number this table has ever carried. Other half of the same decision: halving the logit is **+0.0000e-6 under AUC and +16.6% of logloss**, which is *why* calibrating the final file is on the DO-NOT list — and the shipped pick is already rank-uniform, mean **0.50000** where the train base rate is **0.70942**, so it is not a probability at all and only AUC makes that safe. **ARM B, "the fixed-fold CV harness" — a MEASUREMENT price at the CV-ESTIMATE layer, per comparison, an sd and NOT a gain, baseline an unpaired harness: paired 3.44e-6 vs unpaired 271.11e-6**, 78.9× on the sd and 6,225× on the variance, over 200 bootstraps of `lgbm_tuned_lat_frac − lgbm_fixed_lat_frac`. 🎯 **The unpaired sd is 5.4× the 50e-6 floor and the paired sd is 15× under it, so without the shared folds not one price in this table could have been measured at all.** Re-drawing the partition adds a further **0.88e-6** of sd on the fold-mean over 200 draws, while the pooled OOF AUC is invariant to it. **ARM C, "one honest GBDT baseline" — a FOUNDATION price at the OOF layer, a per-competition TOTAL, baseline a constant prediction, which AUC scores at 0.5: +467,789.9e-6** for `lgbm_fixed_lat_frac` alone, against **+1,325.4e-6** for the shipped stack minus the best single member of 94 scanned — and that second number is everything the other nine rows have bought. ⛔ **Three currencies — final-file AUC at k=1, an sd of a measurement, and OOF AUC against chance — so the arms are NOT addable.** The foundation is **99.500%** of the AUC above chance and **46,585×** row 3's +10.04e-6/member bar | `## Competition basics` · `Since w38 the workspace has taken every` · `WHAT THE FOUNDATION IS WORTH` (w130, the three arms, their baselines, and the REPEAT/ABSENCE split) |
@@ -5695,7 +5795,7 @@ barrier, and w100a C5 is what will tell you if that count moves.**
 registration for the past day 08-23 (RESEARCH:583). That is a real barrier and w100a exercises
 it in code rather than quoting the prose, but it is ONE barrier where ad216/ad217 have two.
 
-## THE 74 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
+## THE 75 STANDING CHECKS, FULL STEMS — COPY THESE, DO NOT RECONSTRUCT THEM
 
     w54a_vetoexpiry   w55a_unpriced      w56b_wantedguard   w57c_muguard      w59b_barguard
     w60b_ineligguard  w60d_memberguard   w62b_barstaleguard w63b_setguard     w64b_hedgeguard
@@ -5716,6 +5816,7 @@ it in code rather than quoting the prose, but it is ONE barrier where ad216/ad21
     w156a_recordguard w157a_closedguard w158a_tscaleguard
     w159a_committedguard w160a_pushguard w161a_driverguard w162a_waveheader
     w178a_rowclaimguard w179a_superlativeguard
+    w180a_countguard
 
 🆕 **A RED CHECK NOW KEEPS ITS EVIDENCE (w104).** Until w104 the runner captured stdout and
 stderr and printed **one 90-character line of stdout**, discarding the rest; `stderr` was never

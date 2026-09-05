@@ -41532,3 +41532,241 @@ read the ANGLE INDEX: `w101a_angleguard` 0, `w117a_handcount` 0 (row 4 claimed �
 covered live at row 4, correct), `w179a_superlativeguard` 0. #71 prints my own slot resolved.
 
 **No submission. The board is closed and nothing here is a modelling change.**
+
+
+---
+
+# 2026-09-05 — w180 — CLOSED. ANGLE: feature engineering, interactions and in-fold encodings priced on CV (row 5) — no submission.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 14:23 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 8, *"Feature engineering: interactions, in-fold target and count encodings, and careful categorical
+treatment. Measure every feature on CV, keep only what pays."* — the angle index's **row 5**, closed since
+week 1 and last handed at w171 09-04. No submission attempted, no submit probe (w143: a write against a
+closed competition is not a free read). Final record stands: best public `w36_ad197std_logit.csv` 0.97116 /
+0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+🎯 **Row resolved through `classify`, not by eye**, per w178's #72 and w179's practice. `classify` on the
+raw handed string → **5**; the header I typed resolves `genus_of` → `'feature engineering, interactions and
+in-fold encodings priced on CV ('` → **5**. Two surfaces, one answer.
+
+## 🔴 THE FIND: THE "Nth CONSECUTIVE RUN" COUNTER IS A CENSUS, AND NOTHING HAD EVER COUNTED IT
+
+Every closed-board entry since w143 opens with an ordinal — w179's is *"Thirty-sixth consecutive run with
+no submission"*. That is a claim about the corpus: **count the runs behind me.** It is the same kind of
+statement as the `×N` on an ANGLE INDEX trail cell, which #50 re-derives from `JOURNAL.md` every single run.
+The difference is that nobody re-derives this one. Each run computes it the cheapest way available — **read
+the number in the entry above, add one** — so it is a *chain*, and one bad link is inherited by every link
+after it, permanently, because `JOURNAL.md` is append-only.
+
+**There is one bad link. It is w156, and 24 entries carry it:**
+
+    w154   ord 184   claims 12   measured 12   OK
+    w155   ord 185   claims --   measured 13   <- LEFT NO ENTRY, so no ordinal was ever written
+    w156   ord 186   claims 13   measured 14   <- read w154's 12, added one, SKIPPED w155
+    ...    every run after it inherits the same -1
+    w179   ord 209   claims 36   measured 37
+
+⚠ **AND THE RUN THAT BROKE IT IS THE RUN THAT FIXED THE SAME DEFECT ON THE OTHER SURFACE, IN THE SAME
+ENTRY.** w155's session died before it wrote anything here. w156 found the work on disk and reconstructed
+w155's entry *precisely so the corpus would contain the run the ANGLE INDEX already claimed* — its own header
+reads **"THE CENSUS THAT WATCHES THE ANGLE INDEX STAYED GREEN OVER A RUN THAT LEFT NO RECORD"**. It repaired
+the census over w155 and, four paragraphs later, incremented its own counter off w154 as though w155 had
+never happened. 🎯 **One run, two censuses over the same missing entry, one fixed and one broken.**
+
+🎯 **WHY IT WAS INVISIBLE, WHICH IS THE PART THAT GENERALISES.** The reconstructed w155 entry deliberately
+carries **no ordinal** — w156 would have had to invent a number w155 never wrote, and not inventing one is
+exactly the discipline the reconstruction was built on. So the series *reads* unbroken: 12, 13, 14, … **no
+gap in the numbers, only a gap in the runs.** A chain checked for self-consistency is green here; only a
+chain checked against the corpus is not, and no reader had ever fetched the corpus. This is **#72's spread
+mechanism** — runs copying a predecessor's wrong number — at **24 entries** instead of four.
+
+## ⚠ A SECOND, INDEPENDENT DEFECT ON THE SAME PHRASE: THE LABEL MOVED AND THE NUMBER DID NOT
+
+w143 opened the series as `NO WORK DONE, BY DESIGN`; w144–w149 continue it as *"Nth CONSECUTIVE **NO-WORK**
+RUN"*. At **w150** the wording silently became *"Nth CONSECUTIVE **RUN WITH NO SUBMISSION**"* while the
+number carried straight on from the no-work series. Those are two different quantities:
+
+    last run that did no WORK      w142, ord 172   <- what the numbers actually count
+    last run that actually SENT    w132, ord 163   <- what the words since w150 describe
+
+w132 drained ten files at 12:36–12:37Z on 08-31, and the Kaggle API's newest row is `2026-08-31 12:37:26`,
+so that anchor is confirmed against an instrument outside this workspace. The nine runs between (w133,
+w135…w142) **did substantial work and sent nothing** — they were at cap or past the close. So under the
+words on the page every ordinal since w150 is understated by a further **9**. That is **#53's shape**: a
+column that changed quantity without changing its number.
+
+## ✅ GUARDED — `experiments/w180a_countguard.py` (#75), registered in the suite
+
+⛔ The 24 cannot be corrected — append-only, the same permanence behind #71's two standing reds and #72's
+frozen four. So #75 **freezes** them and splits live from historical, so the arm that can go red is the one
+a future run can still act on. **C1** answerable — 210 runs against a floor of 180, 35 counters parsed, and
+**both anchors re-derived from the corpus and required to match their frozen literals**, or it fails rather
+than passing blind (#70's rule) · **C2 LIVE** every counter outside the frozen set must equal `ordinal − 172`
+— 11 live (w144…w154), 0 disagreeing · **C3 FROZEN** the inherited copies are exactly the 24; a 25th is a new
+defect, one *disappearing* is an append-only violation, both fail · **C4** six evidence arms · **C5**
+`RUN_HDR` is **imported** from `w117a_handcount`, never re-implemented, so #75 and #50 cannot disagree about
+what a run is or what the denominator is · **C6** publishes the literal no-submission number beside the
+enforced one, so the wording disagreement is recorded rather than settled by fiat.
+
+⚠ **WHICH READING #75 ENFORCES, AND WHY.** The **no-work** one, anchored at w142 — not because it is the
+better English, it is not, but because it is the series' actual construction, and under it the defect is
+exactly **one skipped link** rather than a diffuse argument about wording. Enforcing the literal reading
+instead paints all 35 historical claims red and tells a future run nothing about *which* of them was a
+mistake. C6 still prints both (w179: claims 36 · no-work 37 · literal 46).
+
+Perturbed **seven** ways against live text, both directions:
+
+    new run claims 38 (corpus-correct)          -> GREEN
+    naive increment off w179 -> 37              -> C2 red, "the corpus measures 38"
+    literal no-submission reading -> 47         -> C2 red
+    w179's frozen 36 rewritten in place -> 37   -> C3 red, "append-only was violated"
+    w155's reconstructed entry deleted          -> C4 red, "w155 is not the shape claimed"
+    two new runs both inheriting the -1         -> C2 red on both
+    new run writes no counter at all            -> GREEN (not a blanket requirement)
+
+🎯 **The first probe caught a real bug in the guard, which is the reason it is worth stating.** C4's *"the
+break is a single point"* arm originally scanned **all** claims, so a live entry that **repaid** the skip
+moved the offset back to 0 and was read as a second defect — the guard went red on the one entry that was
+correct. C4(b) is now scoped to the frozen era, which is immutable, and the repayment is reported as the fix
+landing. A perturbation that only ever confirms the diagnosis is not a test.
+
+## 📌 THIS ENTRY'S COUNTER IS 38, NOT 37, AND THAT IS DELIBERATE
+
+`w180` is corpus ordinal 210, so the true count is `210 − 172 = 38`. A naive increment off w179's 36 gives
+37. **The +2 jump is the w155 skip being repaid**, once, here — a future run must not "correct" it back.
+From this entry the chain is anchored to the corpus and #75 checks it every run, so read-above-and-add-one
+is no longer safe and no longer necessary: **`(ordinal of your entry) − 172`**, or run the guard, which
+prints it. **Thirty-eighth consecutive run with no submission**, eighth of the second full pass over the ten
+angle slots.
+
+## Row 5 itself re-verified on its own artefacts, which is the only work this row still admits
+
+`w125a_row5.py`, full paired refit (~40 min), **FAILURES: 0**, every published number reproducing:
+
+    R1  citations   `agent/features.py:te_block` at line 175; both anchors present; -19.26e-6 / -82.68e-6 found
+    R2  ladder      all six ablation arms recompute to 10 dp     ctraw .9654813306  ctfix .9657751945
+                    ctdrop .9656895129  tedrop .9496361971  encdrop .9522288823  rawdrop .9631860988
+    R3  ENROLMENT, identical folds, base104, paired 50/50, 3 splits, C=1.0, hybrid
+          +ctraw +4.44e-6  +ctfix +3.83e-6  +ctdrop +3.37e-6  +tedrop +0.54e-6  +encdrop +7.01e-6
+          +rawdrop +3.62e-6   — all n=1, all far under the 50e-6 floor
+    CONTROL  `+cat_only` re-measures **+10.04e-6/member** against w123's +10.04e-6, gap **+0.000e-6**
+    R4  member layer vs stack layer, arm by arm, both measured in the same process
+
+The control is again what makes the rest admissible: CatBoost re-measured in-process landing on w123's and
+w124's number to 0.000e-6 means these six arms sit on exactly the same footing as rows 3 and 4's enrolment
+prices, not merely on numbers from the same script.
+
+🎯 **THE ONE RESULT HERE THAT IS NOT JUST A REPRODUCTION: THE 1.4% PASS-THROUGH DOES NOT EXTRAPOLATE, AND
+NOW HAS A SECOND POINT SAYING SO.** The workspace quotes `1.4%` in nine places as the solo→stack conversion
+constant, and it was fitted on **one** point (+138e-6 solo → +2e-6 stack, seed-averaging `xgb_latcat`). The
+whole encoding channel is a second point **96× further out**:
+
+    member layer   +13,252e-6   (`ctraw` 184 cols vs `encdrop` 40 cols, same model, seed and folds)
+    stack  layer      -2.57e-6   per split -0.95 / -7.46 / +0.70  -> SIGN FLIPS, not distinguishable from zero
+    what 1.4% predicts  +186e-6
+
+⛔ **The constant is off by two orders of magnitude at this distance and the measured mean has the other
+sign.** Bounded by the largest single split the channel's true pass-through is under **0.056%**. So `1.4%`
+is a local slope fitted at one small point, not a conversion constant, and quoting it on a large member-level
+effect overstates the stack gain by ~25×. Nothing re-opens — every arm is under the floor either way — but a
+future run must not use 1.4% to argue a big solo win is worth enrolling.
+
+⚠ Row 5's price cell reads **`negative`** and is carried by MEMBER-layer numbers (-19.26e-6 xgb, -82.68e-6
+cat) while every other magnitude in that column is a STACK-layer number. Measured at the stack layer all six
+arms are **positive** and all six are inside the floor. That is w125's standing finding re-confirmed on
+today's disk, not a new one; the closure does not change and its price still names its layer.
+
+## Index hygiene
+
+`w117a_handcount` (#50) read **FAILURES: 0** on entry — 210 headers, 195 resolved — so w179's sync held.
+This run's index work: row 5 ×20 → ×21 with `→ w180 09-05 (closed)` appended **before** the cell's closing
+`· artefacts verified` prose, `CURRENT_RUN, CURRENT_ROW` moved off `w179`/row 4 onto this run and row 5.
+Row 5 no longer carries the trailing dash clause w179 removed, so the w157 marker trap does not apply.
+
+⚠ **This header names its genus** (w175's rule) **and its prose names row 5** (w178's #72) — both checked
+through `classify` before either was typed. w173's and w174's `UNREADABLE-HDR` entries in #71 remain
+permanent; a future run should not re-diagnose them.
+
+Registration took **one** pass, not w178's three, by doing the three edits together: the stem into
+`w93a_suite.py`'s `STEMS`, the stem into `RESEARCH.md`'s published list, and the heading 74 → 75. w179's
+note on this is correct and worth keeping.
+
+Next run: confirm the deadline, resolve the handed angle's row through `classify`, put the genus in the
+header and the row in the body, take your counter from **`ordinal − 172`** or from #75 rather than from the
+entry above, append two lines, stop — or, better, point the launcher at a live competition.
+
+## ⚠ ADDENDUM, WRITTEN AFTER THE ABOVE: #75 WENT RED ON *THIS* ENTRY, AND IT WAS RIGHT TO
+
+Appending rather than editing, because the rule is the rule. Running the eight index parsers after
+writing the entry above, **`w180a_countguard` failed on my own text**:
+
+    FAIL: w180 (ord 210) claims 36 consecutive, the corpus measures 38
+
+🎯 **It read w179's counter, which this very entry quotes as evidence, as my own claim.** The reader
+took the *first* `CLAIM` match in the body, and the diagnosis section above quotes *"Thirty-sixth
+consecutive run with no submission"* several paragraphs before I state my own Thirty-eighth. So the
+first entry ever to *discuss* the counter was the first entry the reader got wrong — and it got it
+wrong in the direction that would have quietly re-broken the chain I had just repaired.
+
+⚠ **This is #50's ANGLE_Q trap at a second quantity: a quote is not a declaration.** The same
+workspace already learned it for angle strings (w27's quoted aside, w129/w131's quoted output) and
+I re-made it for counters an hour later. Recording it because the lesson clearly does not transfer
+by being written down once.
+
+✅ **Fixed in `own_claims()`**: a match is DISOWNED when another run's id appears within
+`DISOWN_WIN = 30` characters before it, and the run's own claim is the last one left standing.
+**The window is measured, not guessed**, and C4(g) re-measures it every run so the margin cannot
+quietly close:
+
+    nearest preceding other-run id on a GENUINE claim   62  (the stock "(w143: ... free read). **Nth")
+    the same distance on the one real quotation          8  ("... — w179's is *\"")
+
+Anything in [9, 61] separates them; 30 is the midpoint by order of magnitude and matches #50's own
+`ANGLE_Q_NARROW`. Re-perturbed **eight** ways against the tree with this entry in it — including a
+new probe 7, *a run that only quotes w180's counter and states none of its own*, which must stay
+**GREEN** and does. Probe 5 now also correctly reds on my own line, since deleting w155 moves my
+ordinal. #75 green, `FAILURES: 0`.
+
+⛔ **Note for the next run: the naive read is safe again, but only by luck.** C4 now prints *"the
+next run's correct counter is 39; naive increment off w180 gives 39 — same"*. That is because the
+chain is repaired, not because incrementing is sound. Take it from `ordinal − 172` or from #75.
+
+### ⚠ AND THE ADDENDUM ITSELF BROKE IT AGAIN — SECOND CORRECTION, SAME PARAGRAPH
+
+Re-running the eight parsers after writing the addendum above, **#75 went red on my own text a
+second time**, same message. The addendum quotes the counter *again* — `the diagnosis section
+above quotes *"Thirty-sixth ..."` — with **no run id within 30 characters**, so the distance rule
+kept it, and because that quotation sits *after* my real claim the "last one standing" selector
+picked it. 🎯 **The fix I had just written was defeated by the sentence describing the fix.**
+
+✅ **`QUOTED` added, and it goes first**: a quote mark immediately before the ordinal (allowing
+markdown emphasis) disowns the match outright. That is a direct syntactic signal rather than a
+heuristic about distance. Measured over the corpus: **38 raw matches, exactly 2 preceded by a
+quote mark, and both are this entry quoting w179.** No genuine claim in 211 runs opens on a quote.
+The distance rule stays as a second net for an *unquoted* attribution and probe 8 keeps it live.
+
+Re-perturbed **ten** ways, all correct: corpus-correct 39 → green · repeat 38 → red · literal 48 →
+red · frozen 36 rewritten → red · w155 deleted → red · no counter → green · quoted-only (quote
+mark) → green · **unquoted attribution → green** (exercises the distance rule) · **quotes w179 and
+states its own 39 → green** (the composite this entry actually is). #75 `FAILURES: 0`.
+
+⛔ **The honest reading of two corrections in one run:** a reader of prose has to survive the prose
+that describes it, and the entry announcing a guard is the most adversarial input that guard will
+ever get. Neither miss was in the *diagnosis* — the 24-entry skip and both anchors held throughout
+— they were both in the *reader*. A future run adding a guard over `JOURNAL.md` should write the
+entry first and run the guard against it **before** claiming the guard works, which is the order
+that caught both of these.
+
+    experiments/w93a_suite.py    TOTAL 356s   66/75 green   (experiments/w180_suite.log)
+    FAILURES: the eight standing by-design reds + w161a_driverguard's two permanent w173/w174 entries
+
+Suite launched with nothing in flight, per w133 — the row-5 refit had finished and the journal entry was
+written first, so #67's C3b had a run header to agree with. **75 checks now, not 74**, and the failure set
+is byte-for-byte w179's: no new red. #71 resolves this run as `2026-09-05 slot 8 row 5 exit None INFLIGHT
+w180`, which is the handed slot mapping to the handed row. Post-edit re-verify of the **eight** parsers that
+read the ANGLE INDEX or the corpus: `w101a_angleguard` 0, `w117a_handcount` 0 (row 5 claimed ×21, corpus
+×21), `w157a_closedguard` 0, `w156a_recordguard` 0, `w110b_covguard` 0, `w178a_rowclaimguard` 0 (this entry
+covered live at row 5, correct), `w179a_superlativeguard` 0, `w180a_countguard` 0.
+
+**No submission. The board is closed and nothing here is a modelling change.**

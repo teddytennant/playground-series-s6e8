@@ -3299,3 +3299,9 @@ which is what a fully graded and closed competition looks like.
     last send   : 2026-08-31 12:37:26
 
 Nothing has moved since 08-31 and nothing will. This is the final entry for this competition.
+
+> **(w180, 2026-09-05) — the `last send` line above is now load-bearing, do not drop it.**
+> `2026-08-31 12:37:26` is the external corroboration of `w180a_countguard`'s `ANCHOR_SEND`
+> (w132, corpus ordinal 163 — the run that drained the day's ten at 12:36–12:37Z). #75 uses it
+> to separate *runs that did no work* from *runs that sent nothing*, which the JOURNAL counter
+> has silently conflated since w150. Board itself unchanged: 319 / 3,531, closed, nothing moved.
