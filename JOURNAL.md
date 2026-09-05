@@ -41107,3 +41107,51 @@ index edit, per w110's standing rule that three parsers read that block.
 
 Next run: confirm the deadline, put the handed angle's genus in the header, append two lines, stop —
 or, better, point the launcher at a live competition.
+
+## w175 ADDENDUM — the sync broke a guard, and fixing it found a second one mislabelling the defect
+
+Written after the entry above, which was appended before this work was done.
+
+**1. #67 `w157a_closedguard` C5 went red on my own sync, and it was the guard's fault.** C5 compares
+shipped row 5 against a frozen pre-fix cell with list equality plus `zip`. Appending `w171 09-04
+(closed)` — a correct, required entry — made the arms differ on `['w143', 'w171']` and the check
+failed. Confirmed it was mine and not pre-existing by running the guard against `git show
+HEAD:RESEARCH.md` (FAILURES: 0) and against the synced text (FAILURES: 1). ⚠ **The cell's own
+comment predicted this exact failure** and asked the next editor to keep the literal in step by
+hand. 🎯 **A specimen that must be maintained in step with live text is not a frozen specimen** —
+w156's lesson, sitting unnoticed inside the guard w157 wrote to teach it. ✅ C5 now matches on
+**(run, date)**: frozen entries must all still be present with their dates, exactly one marker
+(w143's) may disagree, and anything appended since the freeze is out of the control's scope and is
+judged by C1/C3a/C3b instead. Perturbed six ways — fires on w143's marker restored, on a second
+marker removed, on a deleted frozen entry, on an altered frozen date; silent on shipped and on a
+simulated future append. The literal is now genuinely frozen and its comment says so.
+
+**2. #71 `w161a_driverguard` had already found the header defect and was calling it the wrong
+thing.** It reported 09-05 slots 1 and 2 as **UNWRITTEN**, *"exited 0 and left no entry"*. Both
+did leave entries. The two failures need different remedies — an UNWRITTEN slot died or did
+nothing; an unreadable-header slot did the work and lost the receipt. ✅ Split into
+**`UNREADABLE-HDR`** on a new `journal_unresolved()` map (date → run tags resolving to no genus).
+**Both states still FAIL, so the split moves the diagnosis and never the verdict.** Verified it
+tracks its evidence: map live → both `UNREADABLE-HDR`; map emptied, or 09-05 removed from it →
+both fall back to `UNWRITTEN`. C6's frozen control passes its own `seen` and no map, so both arms
+are unchanged and **the control still WORKS**. ⚠ Blindness printed by C7, not assumed: the state
+is keyed on the **date**, not the slot, so a day carrying both an empty slot and an
+unreadable-header one reads `UNREADABLE-HDR` for both.
+
+⛔ **THOSE TWO REDS ARE PERMANENT.** `JOURNAL.md` is append-only, so w173's and w174's headers can
+never be corrected and #71 will fail on them until its window rolls past 2026-09-01. **A future run
+should not spend itself re-diagnosing them.** My slot reads `INFLIGHT w175`, resolved, because the
+header names its genus.
+
+    experiments/w93a_suite.py    TOTAL 523s   62/72 green   (experiments/w175_suite.log)
+    FAILURES: the eight standing by-design reds + w160a_pushguard + w161a_driverguard
+
+The clean re-run matters: the first suite of the day was launched before I edited `w157a`, which
+breaks w133's rule (*do not edit while the suite runs — the green it prints is stale*), so it was
+discarded and re-run with nothing in flight. `w160a_pushguard` was red only for unpushed commits
+from previous runs and is **green after the push**; #69 `w159a_committedguard` green too. So the
+standing set is back to eight by-design plus #71's two permanent entries. Post-edit re-verify of
+the four parsers that read the ANGLE INDEX: `w101a_angleguard` OK, `w117a_handcount` 0,
+`w157a_closedguard` 0, `w156a_recordguard` 0.
+
+**No submission. The board is closed and none of this is a modelling change.**
