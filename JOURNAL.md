@@ -41155,3 +41155,61 @@ the four parsers that read the ANGLE INDEX: `w101a_angleguard` OK, `w117a_handco
 `w157a_closedguard` 0, `w156a_recordguard` 0.
 
 **No submission. The board is closed and none of this is a modelling change.**
+
+
+---
+
+# 2026-09-05 — w176 — CLOSED. ANGLE: original dataset (row 1) — deadline re-confirmed, no submission.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 13:09 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.5 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 4, *"Original dataset: find the real source dataset this synthetic data was generated from, and
+concatenate it as extra training rows"* — the angle index's **row 1**, last handed at w167 09-04 and closed
+since 08-11. No submission attempted, no submit probe (w143: a write against a closed competition is not a
+free read). **Thirty-third consecutive run with no submission, fourth of the second full pass over the ten
+angle slots.** Final record stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best
+private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+## Why this row would be refused even on a live board
+
+Row 1 is the one angle the brief calls "the single biggest edge in the entire series", and it is the only
+row in the index whose manoeuvre is **measured to lose AUC at every setting anyone ran**:
+
+    concat dose   1x   −58.0e-6      (1.16x the 50e-6 floor — one copy is already a measurable loss)
+    concat dose  10x  −986.0e-6      (19.7x)
+    concat dose  50x  −3,340.0e-6    (66.8x)
+
+Monotone in dose, and the published `0` for this row is a **construction zero** — `orig_concat.py`'s dose
+loop is `if w:`, so at 0x no augmented frame is built and the "baseline" is the arm itself. The separate-
+estimator route was priced in rows 3/4/7/9's units at w131a arm C: **−1.02e-6/member**, sd 1.83e-6,
+**t = 0.97** after w158's √3 correction, sign-flipping across the three splits (+0.80 / −2.86 / −1.00),
+against a same-process base104 CatBoost control at +10.04e-6/member. And the search side is finished, not
+merely tired: the linked "other" original hashes to `d831a326bc6f0ab76056a12279cb0047`, a byte-copy of the
+deleted official one, so there is nothing left to find.
+
+## The census was already in sync, and the header rule w175 wrote held
+
+`w117a_handcount` (#50) read **FAILURES: 0** on entry — 206 headers, 193 resolved — because w175 synced all
+ten rows for the second pass yesterday. So this run's only index work is its own handing: row 1 ×19 → ×20
+with `→ w176 09-05 (closed)` appended **before** the cell's closing `· artefacts verified**` prose, and
+`CURRENT_RUN, CURRENT_ROW` moved off `w175`/row 8 onto this run and row 1. Row 1's trail has no trailing
+dash clause, so the w157 trap (row 5's `— the most-handed row`, which is where w143's marker got taken) does
+not apply here; the marker still goes on the new entry and I checked it did.
+
+⚠ **This header names its genus**, per w175's rule: `ANGLE: original dataset (row 1)` resolves through the
+`header` path, so the handing is recordable. w173's and w174's remain permanently `UNREADABLE-HDR` in #71
+and cannot be fixed — `JOURNAL.md` is append-only. A future run should not spend itself re-diagnosing those
+two; they are expected reds until #71's window rolls past 2026-09-01.
+
+Next run: confirm the deadline, put the handed angle's genus in the header, append two lines, stop — or,
+better, point the launcher at a live competition.
+
+    experiments/w93a_suite.py    TOTAL 379s   63/72 green   (experiments/w176_suite.log)
+    FAILURES: the eight standing by-design reds + w161a_driverguard's two permanent w173/w174 entries
+
+Suite launched with nothing in flight, per w133 (do not edit while it runs). #69 `w159a_committedguard`
+and #70 `w160a_pushguard` both green. Post-edit re-verify of the four parsers that read the ANGLE INDEX:
+`w101a_angleguard` 0, `w117a_handcount` 0 (row 1 claimed ×20, corpus ×20), `w157a_closedguard` 0,
+`w156a_recordguard` 0; `w110b_covguard` 0 as well.
+
+**No submission. The board is closed and nothing here is a modelling change.**
