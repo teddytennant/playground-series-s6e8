@@ -41377,3 +41377,158 @@ Post-edit re-verify of the six parsers that read the ANGLE INDEX: `w101a_anglegu
 `w178a_rowclaimguard` 0 (this entry covered live at row 3, correct). #71 prints my own slot resolved.
 
 **No submission. The board is closed and nothing here is a modelling change.**
+
+---
+
+# 2026-09-05 — w179 — CLOSED. ANGLE: XGBoost, third leg tuned on the same folds (row 4) — no submission.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 13:58 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 7, *"XGBoost: third leg of the ensemble, tuned on the same folds so the blend weights mean
+something"* — the angle index's **row 4**, last handed at w170 09-04 and closed since 08-10. No submission
+attempted, no submit probe (w143: a write against a closed competition is not a free read). **Thirty-sixth
+consecutive run with no submission, seventh of the second full pass over the ten angle slots.** Final record
+stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private
+`w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+🎯 **Row resolved through `classify`, not by eye** — w178's closing instruction, and the first run to follow
+it. `classify('XGBoost') → 4`; the header I typed resolves `genus_of → 'XGBoost, third leg tuned on the same
+folds (row 4)' → 4`; and the raw handed string resolves to 4 as well, because positional matching puts
+`XGBoost` at offset 0 ahead of `blend` at offset 74. That last one matters: this angle's tail *"so the blend
+weights mean something"* is the **blending trap** #50 names explicitly, and its own report counts 8 corpus
+runs caught by it. Three surfaces, one answer, none of them a guess.
+
+## 🔴 THE FIND: THE INDEX PUBLISHES SUPERLATIVES OVER ITS OWN CENSUS, AND NOTHING CHECKED THEM
+
+Row 5's handing trail ended, for six days, with
+
+    ... → w171 09-04 (closed) — the most-handed row** (count from `w117a_handcount`, ...)
+
+`w117a_handcount` (#50) reads **that exact cell**. It parses the `×N` out of it and compares N against the
+corpus, and it has been green the whole time. It never looked at the clause after the count — and that
+clause is a **second, stronger claim about the same census**: not *"row 5 was handed 20 times"* but *"no row
+was handed more"*. The first is checked every run. The second had never been checked at all, and it was
+**FALSE**:
+
+    census on entry today    rows 1,2,3,4,5,9,10 all ×20    — a SEVEN-WAY tie at the top
+
+⚠ **AND IT WAS TRUE WHEN IT WAS TYPED.** Reconstructed over every commit that has touched `RESEARCH.md`:
+
+    115f3e9  08-30   row 5 unique max at ×16, clause introduced      <- TRUE
+    58166b6  08-31   row 3 catches up, tie [3,5]                     <- FALSE, one day later
+    …        through 12 further commits, the tie growing to seven rows
+
+🎯 **THE MECHANISM IS THE ROTATION ITSELF, WHICH IS WHY THIS IS A CLASS AND NOT A TYPO.** The launcher hands
+the ten rows round-robin, so the counts are driven **toward equality by design**. A uniqueness superlative
+over a round-robin census is a claim *the scheduler actively destroys*: it can hold only in the brief window
+where one row is a single hand ahead, and the next pass takes it away. The `×N` beside it is re-derived every
+run precisely because everyone expects it to move; the sentence next to it was written once and never
+revisited. **A claim that decays on its own does not belong on a surface where only its neighbours are
+audited.**
+
+⚠ **THE SAME FILE ALREADY CONTRADICTED ITSELF AND NOBODY READ BOTH LINES.** An archived section says
+*"error analysis ties feature engineering as the most-handed angle of the whole competition"* — the tie,
+stated plainly — while the index cell three thousand lines below still called row 5 the unique maximum. Two
+statements of one census fact, no reader comparing them. That is **w178's shape (#72) at a different pair of
+surfaces**, one day later, which is the reason to guard the class rather than quietly delete the sentence.
+
+✅ **FIXED** — `RESEARCH.md` is editable (unlike `JOURNAL.md`), so the clause is gone rather than frozen.
+The `×20` it sat beside already carried the true, audited version of the same fact.
+
+🎯 **A SIDE EFFECT WORTH RECORDING: this removes the w157 marker trap at its source.** Row 5's trailing dash
+clause is the punctuation w157 diagnosed as the reason w143's `(closed)` marker got typed in the wrong place,
+and row 5 was *the only row that had one*. With it gone no row does, and new entries append at the end of the
+trail like every other row. #67's coverage is unharmed: its `CONTROL_CELL` is a **frozen specimen** carrying
+the dash clause deliberately (w175 made it frozen precisely so it would not track live text), so the trap
+logic is still exercised even though no live cell trips it. Verified: #67's C5 still reports the frozen/
+shipped comparison green, `marker differs on ['w143']`, `appended since the freeze ['w171'] (out of scope)`.
+
+## ✅ GUARDED — `experiments/w179a_superlativeguard.py` (#73), registered in the suite
+
+**C1** answerable — 209 run headers against a floor of 100, ten trail cells parsed, or it fails rather than
+passing blind (#70's rule) · **C2 LIVE** every superlative inside a trail cell must be the *unique* extreme
+of the measured census; a tie is a failure, since uniqueness is exactly what the claim adds to the `×N` beside
+it · **C3 FROZEN** the three-commit timeline above replayed against git, so *"true when written, false the
+next day"* is evidence and not a story — and immutable commits cannot rot · **C4** four perturbations ·
+**C5** the counts are not re-counted here at all.
+
+⚠ **C5 is stronger than #72's version and deliberately so.** #72 imports `classify`; #73 imports **`check`
+itself** and takes the `measured` map #50 judges the index against. That map already carries #50's current-run
+adjustment — during a run the entry is not in `JOURNAL.md` yet, so the corpus is one short on the row being
+handed — so *"#73 and #50 cannot disagree"* is true by construction rather than by two implementations
+happening to agree. Writing my own count is what would have made them driftable.
+
+Perturbed against **live text**, both directions, which is what separates a real reader from a suppressor:
+
+    clause restored on row 5    -> C2 red: "row 5 claims 'most-handed' at ×20, but the max is held by [4]"
+    same clause typed on row 4  -> GREEN: "row 4 'most-handed': ×21, unique max"
+
+🎯 **The second probe is the important one, and it is not hypothetical.** My own handing takes row 4 to ×21
+and makes it the genuine unique maximum *at this instant* — so the identical phrase is true on row 4 today and
+false on row 5, and #73 says so. It checks the claim, not the wording. It will also go false again on row 4
+at the next handing, which is the decay restated as a live demonstration rather than an argument.
+
+⚠ **Scope is narrow on purpose, and C4 checks that it discriminates.** Only the ten trail cells are enforced.
+The file carries **10** `most-handed` mentions and **0** are now inside a trail cell; the rest are historical
+narrative — *"w116 found that row 5 was the most-handed angle"* is a true statement about 08-29 and must stay,
+exactly like #72's frozen four. C4 also requires that a cell making no superlative claim is **not covered**
+(0 covered), so the guard cannot pass by covering everything.
+
+Registration took **one** pass, not w178's three: adding the stem to `STEMS`, adding it to `RESEARCH.md`'s
+published list and bumping the heading 73 → 74 in a single edit satisfies `C2 DRIFT` and `C2b COUNT DRIFT`
+together. Noting it because w178 told the next run to expect two steps, and the fix is to do the three edits
+at once.
+
+## Row 4 itself re-verified on its own artefacts, which is the only work this row still admits
+
+`w124a_row4.py`, full paired refit (520s), **FAILURES: 0**, every published number reproducing:
+
+    R4  ENROLMENT, identical folds, identical base104, paired 50/50, 3 splits, C=1.0, hybrid
+          XGBoost (distinct)  n=11   +7.38e-6/member  [consistent 3/3]
+          LightGBM            n= 8   +4.04e-6/member  [consistent]
+          CatBoost            n= 8  +10.04e-6/member  [consistent]
+    CONTROL  +cat_only re-measures +10.04e-6 against w123's +10.04e-6, gap +0.000e-6 (reproduces to 0.05e-6)
+    R3  TUNING   30e-6 × 1.4% = 0.42e-6 vs published 0.4e-6 · the 1.4% itself: 2e-6/138e-6 = 1.45%
+    R5  bolt_xgb_d7_alt1 ≡ _alt2 byte-identical, OOF and TEST — denominator 11 distinct, not 12 names
+
+The control is what makes the rest admissible: CatBoost re-measured **in the same process** landing on w123's
+number to 0.000e-6 means XGBoost's +7.38e-6 is on the same footing, not merely a number from the same script.
+The duplicate is where the denominator bites — dropping `_alt2` moves the *group* delta by only +0.293e-6 and
+**sign-flips** (+0.8 / +2.5 / −2.4, so not distinguishable from zero), while the *per-member* price moves
++6.74e-6 → +7.38e-6. All three families remain far under the **50e-6 floor** and all three are FOREIGN
+pipelines already enrolled. ⛔ **Do not build an XGBoost member.** The operational rule is untouched:
+*prefer a pipeline we do not hold*, NOT *prefer a family*.
+
+⚠ R2's standing note re-confirmed on today's disk and still worth its warning: the family table is **stale in
+both rows**, and the best LightGBM array today (`lgbm_tuned_lat_frac` 0.96782) **beats the XGBoost number the
+table publishes** (`latr1_xgb` 0.96780). Row 4's *"XGBoost is not a missing leg"* still holds on today's
+arrays — best XGB `xgb_latcat_avg3` 0.96790 beats best LGBM and best CatBoost — but the published margin has
+shrunk from +120e-6 to **+84e-6**, and anyone reading the *table* rather than the arrays gets the ordering
+backwards. Stale, not wrong at the time.
+
+## Index hygiene
+
+`w117a_handcount` (#50) read **FAILURES: 0** on entry — 209 headers, 195 resolved — so w178's sync held.
+This run's index work: row 4 ×20 → ×21 with `→ w179 09-05 (closed)` appended **before** the cell's closing
+`· artefacts verified**` prose, marker typed on the new entry, `CURRENT_RUN, CURRENT_ROW` moved off
+`w178`/row 3 onto this run and row 4 — plus row 5's superlative removed, above.
+
+⚠ **This header names its genus**, per w175's rule, and its **prose names row 4**, per w178's #72 — checked
+through `classify` before either was typed. w173's and w174's `UNREADABLE-HDR` entries in #71 remain
+permanent; a future run should not re-diagnose them.
+
+Next run: confirm the deadline, resolve the handed angle's row through `classify`, put the genus in the
+header and the row in the body, append two lines, stop — or, better, point the launcher at a live
+competition.
+
+    experiments/w93a_suite.py    TOTAL 365s   65/74 green   (experiments/w179_suite.log)
+    FAILURES: the eight standing by-design reds + w161a_driverguard's two permanent w173/w174 entries
+
+Suite launched with nothing in flight, per w133 — the journal entry was written first, so #67's C3b had a
+run header to agree with rather than the ordering red it shows mid-run. **74 checks now, not 73.** #69
+`w159a_committedguard` and #70 `w160a_pushguard` green. Post-edit re-verify of the **seven** parsers that
+read the ANGLE INDEX: `w101a_angleguard` 0, `w117a_handcount` 0 (row 4 claimed ×21, corpus ×21),
+`w157a_closedguard` 0, `w156a_recordguard` 0, `w110b_covguard` 0, `w178a_rowclaimguard` 0 (this entry
+covered live at row 4, correct), `w179a_superlativeguard` 0. #71 prints my own slot resolved.
+
+**No submission. The board is closed and nothing here is a modelling change.**

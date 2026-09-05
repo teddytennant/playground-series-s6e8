@@ -73,6 +73,7 @@ STEMS = [
     "w161a_driverguard",
     "w162a_waveheader",
     "w178a_rowclaimguard",
+    "w179a_superlativeguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).
