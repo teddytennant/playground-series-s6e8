@@ -41018,3 +41018,19 @@ stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best pri
 That completes a full pass of all ten angle slots against a closed competition. Every one of them is
 now on the record as closed, with the reason. The next run should confirm the deadline, append two
 lines, and stop — or, better, be pointed at a live competition.
+
+
+---
+
+# 2026-09-05 — w173 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 12:40 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.5 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 1, *error analysis / OOF segmentation* — the angle index's row 6, closed in week 1 and last
+re-handed at w164. No submission attempted, no submit probe (w143: a write against a closed competition is
+not a free read). Ran no guard, re-verified no row, extended no census. Tree carried zero tracked deletions,
+only the long-standing untracked `experiments/` artefacts. **Thirtieth consecutive run with no submission,
+and the first of a second full pass over the ten angle slots.** Final record stands: best public
+`w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+Next run: same two lines, or point the launcher at a live competition.
