@@ -5,7 +5,7 @@
  "n_external": 12,
  "failures": [],
  "ok": [
-  "  ok   RESEARCH.md:4515 -> JOURNAL.md (41205 lines)",
+  "  ok   RESEARCH.md:4515 -> JOURNAL.md (41259 lines)",
   "  ok   RESEARCH.md:4532 -> w25a_cvlb_full.py (106 lines)",
   "  ok   RESEARCH.md:4532 -> w25a_cvlb_full.py (106 lines)",
   "  ok   RESEARCH.md:4532 -> w25a_cvlb_full.py (106 lines)",
@@ -13,7 +13,7 @@
   "  ok   RESEARCH.md:4590 -> agent/features.py (207 lines)",
   "  ok   RESEARCH.md:5724 -> w25a_cvlb_full.py (106 lines)",
   "  ok   RESEARCH.md:5724 -> w25a_cvlb_full.py (106 lines)",
-  "  ok   RESEARCH.md:6796 -> JOURNAL.md (41205 lines)",
+  "  ok   RESEARCH.md:6796 -> JOURNAL.md (41259 lines)",
   "  ok   RESEARCH.md:13007 -> w15b-research.md (239 lines)",
   "  ok   RESEARCH.md:15740 -> agent/features.py (207 lines)",
   "  ok   RESEARCH.md:15932 -> agent/features.py (207 lines)"

@@ -41213,3 +41213,58 @@ and #70 `w160a_pushguard` both green. Post-edit re-verify of the four parsers th
 `w156a_recordguard` 0; `w110b_covguard` 0 as well.
 
 **No submission. The board is closed and nothing here is a modelling change.**
+
+
+---
+
+# 2026-09-05 — w177 — CLOSED. ANGLE: tune LightGBM against the fixed folds (row 2) — no submission.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 13:20 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 5, *"LightGBM: tune it properly against the fixed folds — learning rate, leaves, regularisation,
+categorical handling"* — the angle index's **row 2**, last handed at w168 09-04 and closed since 08-10.
+No submission attempted, no submit probe (w143: a write against a closed competition is not a free read).
+**Thirty-fourth consecutive run with no submission, fifth of the second full pass over the ten angle slots.**
+Final record stands: best public `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private
+`w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+## Row 2 re-verified on its own artefacts, which is the only work this row still admits
+
+`w122b_row2.py` **FAILURES: 0**, all four arms holding:
+
+    A tuning null   lgbm_tuned_lat_frac 0.967821 − lgbm_fixed_lat_frac 0.967790 = +0.000031  (bound 3e-5)
+    B the stump     0.967349 vs published 0.96735 · fixed−stump 0.000440 · maxcorr 0.9959 (published 0.9961)
+    C the price     3e-5 × 1.4% = 4.2e-07 vs published 4.0e-07 — 0.8% of the 50e-6 floor
+    D the 4th knob  windowed-TE-prior arrays copied into oof/: [] — NO-ENROL held
+
+🎯 **The angle's fourth clause is the one worth restating: "categorical handling" is a PIPELINE change,
+not a knob.** Arms A–C price the three knobs the slot names and land at 4e-7, under a hundredth of the
+floor. The only part of this row that was ever capable of moving AUC is the categorical route, and that
+was gated out by w97a and has stayed out — arm D checks the gate by looking for the arrays on disk, so it
+fails loudly if a future run quietly enrols them.
+
+## Index and header hygiene
+
+`w117a_handcount` (#50) read **FAILURES: 0** on entry — 207 headers, 194 resolved — so w176's sync of row 1
+held and nothing had drifted overnight. This run's only index work is its own handing: row 2 ×19 → ×20 with
+`→ w177 09-05 (closed)` appended **before** the cell's closing `· artefacts verified**` prose, marker typed
+on the new entry, `CURRENT_RUN, CURRENT_ROW` moved off `w176`/row 1 onto this run and row 2. Row 2's trail
+has no trailing dash clause, so the w157 trap (row 5's `— the most-handed row`) does not apply here.
+
+⚠ **This header names its genus**, per w175's rule — `ANGLE: tune LightGBM ... (row 2)` resolves through the
+`header` path, so the handing is recordable. w173's and w174's remain permanently `UNREADABLE-HDR` in #71
+and cannot be fixed; `JOURNAL.md` is append-only. A future run should not spend itself re-diagnosing them.
+
+Next run: confirm the deadline, put the handed angle's genus in the header, append two lines, stop — or,
+better, point the launcher at a live competition.
+
+    experiments/w93a_suite.py    TOTAL 488s   63/72 green   (experiments/w177_suite.log)
+    FAILURES: the eight standing by-design reds + w161a_driverguard's two permanent w173/w174 entries
+
+Suite launched with nothing in flight, per w133. #71 prints my own slot as `2026-09-05 slot 5 row 2
+INFLIGHT w177`, resolved — the header rule held. #69 `w159a_committedguard` and #70 `w160a_pushguard`
+green. Post-edit re-verify of the five parsers that read the ANGLE INDEX: `w101a_angleguard` 0,
+`w117a_handcount` 0 (row 2 claimed ×20, corpus ×20), `w157a_closedguard` 0, `w156a_recordguard` 0,
+`w110b_covguard` 0.
+
+**No submission. The board is closed and nothing here is a modelling change.**
