@@ -215,7 +215,27 @@ def journal_rows():
     return seen
 
 
-def verdicts(days, seen, inflight_row=None):
+def journal_unresolved():
+    """date -> the run tags whose JOURNAL.md header resolves to NO genus.
+
+    w175: the census drops these, so a slot whose entry has no angle in its header is
+    indistinguishable from a slot that wrote nothing at all. It is not the same failure and
+    it does not have the same remedy, so C3 names the two apart rather than calling both
+    UNWRITTEN. w173 and w174 are the specimens: both ran, both appended a full entry, and
+    both headers read `# 2026-09-05 — w173 — CLOSED. Deadline re-confirmed, nothing done,
+    nothing to do.` with the handed angle stripped out.
+    """
+    from w117a_handcount import census
+    out = collections.defaultdict(list)
+    for r in census():
+        d = HDR_DATE.search(r["header"])
+        w = HDR_RUN.search(r["header"])
+        if d and w and not r["row"]:
+            out[d.group(1)].append("w" + w.group(1))
+    return out
+
+
+def verdicts(days, seen, inflight_row=None, unresolved=None):
     """One row per slot in the reconciled window, classified."""
     rows = []
     newest = max(days) if days else None
@@ -236,11 +256,13 @@ def verdicts(days, seen, inflight_row=None):
             elif entries:
                 v = "RECORDED" if r["exit"] == 0 else "KILLED/recovered"
             elif r["exit"] == 0:
-                v = "UNWRITTEN"
+                # An entry with an unreadable header is not an absent entry (w175).
+                v = "UNREADABLE-HDR" if (unresolved or {}).get(r["date"]) else "UNWRITTEN"
             else:
                 v = "KILLED/at-birth" if dur is not None and dur < BIRTH_S else "KILLED/mid-run"
             rows.append(dict(date=date, slot=r["slot"], cycle=r["cycle"], row=r["row"],
-                             exit=r.get("exit"), dur=dur, entries=entries, verdict=v))
+                             exit=r.get("exit"), dur=dur, entries=entries, verdict=v,
+                             unresolved=(unresolved or {}).get(date, [])))
     return rows
 
 
@@ -319,7 +341,7 @@ def main():
         fail("C1c is inert: no multi-cycle date in the corpus, so the key proves nothing")
 
     seen = journal_rows()
-    rows = verdicts(days, seen)
+    rows = verdicts(days, seen, unresolved=journal_unresolved())
 
     print(f"C3 every slot that exited 0 has a JOURNAL.md entry for its (date, row) "
           f"-- window from {FIRST_RECONCILED}")
@@ -327,8 +349,13 @@ def main():
     for r in rows:
         if r["verdict"] == "UNWRITTEN":
             fail(f"{r['date']} slot {r['slot']} (row {r['row']}) exited 0 and left no entry")
+        elif r["verdict"] == "UNREADABLE-HDR":
+            fail(f"{r['date']} slot {r['slot']} (row {r['row']}) exited 0 and its entry "
+                 f"({'/'.join(r['unresolved'])}) has no angle in its header, so the census "
+                 f"cannot resolve it -- the handing is real and will never be counted")
     for r in rows:
-        mark = {"RECORDED": "  ", "INFLIGHT": "· ", "UNWRITTEN": "⛔", "NO-EXIT": "⛔"}.get(
+        mark = {"RECORDED": "  ", "INFLIGHT": "· ", "UNWRITTEN": "⛔", "NO-EXIT": "⛔",
+                "UNREADABLE-HDR": "⛔"}.get(
             r["verdict"], "⚠ ")
         d = "     " if r["dur"] is None else f"{r['dur']:4d}s"
         print(f"  {mark} {r['date']} slot {r['slot']:2d}  row {r['row']:2d}  "
@@ -344,7 +371,7 @@ def main():
 
     print("C4 the two genera, separated -- a killed run did not decline to write")
     for k in ("RECORDED", "KILLED/recovered", "KILLED/mid-run", "KILLED/at-birth",
-              "UNWRITTEN", "INFLIGHT"):
+              "UNWRITTEN", "UNREADABLE-HDR", "INFLIGHT"):
         if tally[k]:
             print(f"  {k:17s} {tally[k]:3d}")
     killed = tally["KILLED/recovered"] + tally["KILLED/mid-run"] + tally["KILLED/at-birth"]
@@ -396,6 +423,10 @@ def main():
     print("  it reads what the LAUNCHER recorded, not what the run did: a slot that exited 0")
     print("    having done nothing at all still reads RECORDED if an entry exists")
     print("  it cannot see a run started by hand, outside the launcher -- those leave no slot")
+    print("  UNREADABLE-HDR is keyed on the DATE, not on the slot: it says this day has an entry")
+    print("    the census cannot resolve, not that THIS slot wrote it. A day carrying both a")
+    print("    genuinely-empty slot and an unreadable-header one reads UNREADABLE-HDR for both.")
+    print("    Both still FAIL, so the split changes the diagnosis and never the verdict.")
     print(f"  it reconciles from {FIRST_RECONCILED} only; earlier logs predate the per-slot")
     print("    ANGLE line, so the corpus before that is out of its reach and not audited")
     print("  KILLED is reported and never failed, so a run of dead slots keeps this green --")
@@ -428,7 +459,8 @@ def control():
     for label, seen, want in (("pre-fix  (RUN_HDR blind to `# (w142,`)", FROZEN_PRE, "FIRES"),
                               ("post-fix (w142 readable)             ", FROZEN_POST, "SILENT")):
         rows = verdicts(FROZEN_DAYS, seen)
-        got = "FIRES" if any(r["verdict"] == "UNWRITTEN" for r in rows) else "SILENT"
+        got = ("FIRES" if any(r["verdict"] in ("UNWRITTEN", "UNREADABLE-HDR")
+                              for r in rows) else "SILENT")
         mark = "OK" if got == want else "BROKEN"
         ok = ok and mark == "OK"
         print(f"  {label}  -> {rows[0]['verdict']:10s} {got:6s} (want {want})  {mark}")

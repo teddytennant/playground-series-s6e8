@@ -100,11 +100,14 @@ ENTRY = re.compile(r"(?:→|->) w(\d+) (\d\d-\d\d)( \(closed\))?")
 # Row 5 as d44c082 left it, frozen, carrying ONE deliberate defect: `w143 09-01` has no marker
 # while `w152 09-02` carries one.
 #
-# ⚠ THIS LITERAL MUST BE EXTENDED EVERY TIME ROW 5 IS HANDED, and w162 is the first time that
-# came due. C5 zips the two cells entry by entry and asserts the ONLY difference is w143's
-# marker; if the control is left short, what separates the arms is ordinary growth rather than
-# the defect, and the check goes red for the wrong reason. Add the new handing with its CORRECT
-# marker (the arms must agree about it) and bump the count to match.
+# ⚠ (w175) THIS LITERAL IS FROZEN AND MUST NOT BE EXTENDED. It used to say the opposite: C5
+# zipped the two cells, so leaving the control short made ordinary growth -- not the defect --
+# what separated the arms, and the check went red for the wrong reason. It duly did, on the
+# first legitimate append after the freeze (`w171 09-04`). C5 now matches on (run, date):
+# every frozen entry must still be present with the same date and exactly one marker (w143's)
+# may disagree, while entries appended since the freeze are out of the control's scope and are
+# judged by C1/C3a/C3b. A specimen that has to be maintained in step with live text is not a
+# frozen specimen -- that is w156's lesson, and this cell was quietly carrying it.
 CONTROL_CELL = (
     "| 5 | *feature engineering: interactions, in-fold target and count encodings* | "
     "**×19, from 08-10 → w116 08-29 → w125 08-30 → w143 09-01 → w152 09-02 (closed) "
@@ -343,14 +346,23 @@ def main() -> int:
     ship = table_rows(text)
     ship5 = entries(ship.get(5, ""))
     ctrl5 = entries(CONTROL_CELL)
-    same_runs = [r for r, _, _ in ship5] == [r for r, _, _ in ctrl5]
-    same_dates = [d for _, d, _ in ship5] == [d for _, d, _ in ctrl5]
-    diff = [(r, a, b) for (r, _, a), (_, _, b) in zip(ship5, ctrl5) if a != b]
-    ok = same_runs and same_dates and len(diff) == 1 and diff[0][0] == 143
+    # w175: match on (run, date), do NOT zip. The frozen cell is a PRE-FIX SPECIMEN and the
+    # shipped cell keeps growing as row 5 is handed again, so list equality made an ordinary
+    # append indistinguishable from the defect and the check went red for the wrong reason --
+    # the very failure mode this cell's own comment warned about. Every frozen entry must
+    # still be present with its date; entries the freeze does not cover are out of the
+    # control's scope and are judged by C1/C3a/C3b, which read all ten rows.
+    shipmap = {(r, d): m for r, d, m in ship5}
+    missing = [(r, d) for r, d, _ in ctrl5 if (r, d) not in shipmap]
+    diff = [(r, m, shipmap[(r, d)]) for r, d, m in ctrl5
+            if (r, d) in shipmap and shipmap[(r, d)] != m]
+    extra = [(r, d) for r, d, _ in ship5 if (r, d) not in {(a, b) for a, b, _ in ctrl5}]
+    ok = not missing and len(diff) == 1 and diff[0][0] == 143
     print(f"  shipped row 5 {[f'w{r}{d}{int(m)}' for r, d, m in ship5]}")
     print(f"  frozen  row 5 {[f'w{r}{d}{int(m)}' for r, d, m in ctrl5]}")
-    print(f"  same runs {same_runs}, same dates {same_dates}, marker differs on "
-          f"{[f'w{r}' for r, _, _ in diff]}  {'OK' if ok else 'FAIL'}")
+    print(f"  frozen entries missing from shipped {[f'w{r}' for r, _ in missing]}, "
+          f"appended since the freeze {[f'w{r}' for r, _ in extra]} (out of scope), "
+          f"marker differs on {[f'w{r}' for r, _, _ in diff]}  {'OK' if ok else 'FAIL'}")
     fails += not ok
 
     print("C6 what this guard is blind to, measured rather than assumed")

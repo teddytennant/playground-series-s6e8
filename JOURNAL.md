@@ -41053,3 +41053,57 @@ full pass over the ten angle slots.** Final record stands: best public `w36_ad19
 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
 
 Next run: same two lines, or point the launcher at a live competition.
+
+
+---
+
+# 2026-09-05 — w175 — CLOSED. Deadline re-confirmed. Angle refused (foundation, row 8), but the census was out of sync and is now fixed.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 12:45 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.5 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 3, *"foundation: confirm the metric, build the fixed-fold CV harness, and get one honest GBDT
+baseline scored"* — the angle index's **row 8**, closed since 08-14 and last re-handed at w166 09-04. The
+metric (AUC), the fixed folds and the GBDT baseline are the oldest settled facts in this workspace and
+there is no slot to score a rebuild into. No submission attempted, no submit probe (w143: a write against
+a closed competition is not a free read). **Thirty-second consecutive run with no submission, third of the
+second full pass over the ten angle slots.** Final record stands: best public `w36_ad197std_logit.csv`
+0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+## 🔴 THE TWO RUNS BEFORE THIS ONE DROPPED THE ANGLE FROM THEIR HEADER, AND #50 CANNOT SEE THEM
+
+This is w150's rule — *a no-work run is not a no-check run* — applied, and it paid. `w117a_handcount`
+(#50) read **FAILURES: 10**: every one of the ten index rows short by exactly one against the corpus.
+
+    row 1 x18/19 · row 2 x18/19 · row 3 x18/19 · row 4  x19/20 · row 5  x19/20
+    row 6 x17/18 · row 7 x18/19 · row 8 x17/18 · row 9  x19/20 · row 10 x19/20
+
+The +1 on every row is the second pass w163–w172 (09-04), one run per row, landing after the last sync
+at 09-03. ✅ Synced: all ten rows bumped to the corpus value with their 09-04 run appended and marked
+`(closed)`, the marker typed **on the new entry** and the trail appended **before** row 5's trailing
+`— the most-handed row` clause (the w157 trap, which is in row 5's punctuation and was waiting for me).
+Row 8 additionally carries `w175 09-05 (closed)`, this run's own handing, so it syncs to **×19**.
+`CURRENT_RUN` moved off the stale `^# 2026-09-03 — w162 —` (row 5) to this run and row 8.
+
+🎯 **THE NEW DEFECT, WHICH THE SYNC EXPOSED RATHER THAN CAUSED.** w173 and w174 are in the corpus as
+**off-rotation/unresolved** (`L 41025`, `L 41041`) — not miscounted, *invisible*. Their headers read
+`# 2026-09-05 — w173 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.` and carry **no genus
+token at all**. #50's contract is that the index counts **RECORDED** handings, i.e. journal headers that
+resolve to one of the ten genera, so a header with the angle stripped out is correctly not counted — the
+guard is right and the *header* is wrong. Row 9 was handed at w173 and row 10 at w174; neither handing
+will ever appear in its trail, because `JOURNAL.md` is append-only and those headers cannot be corrected.
+
+⚠ **THIS IS THE w101 UNDER-COUNT RETURNING BY A NEW ROUTE.** w101 built the index from the closures it
+remembered and lost thirteen handings; `w110b_covguard` (#45) closes the demand side by requiring every
+handed angle to be carried by a row. Neither guard fires here, because a header with no angle in it makes
+**no demand** — the handing simply leaves no trace to check. The uniform "CLOSED, nothing done" header
+that the last dozen closed-day runs converged on is what strips it.
+
+✅ **FIXED GOING FORWARD, IN THE ONLY PLACE IT CAN BE:** this run's header names its genus
+(*foundation*, row 8) and resolves. **A closed-day run must still put its angle in its header.** The
+refusal is the work product on a dead board; a refusal nothing can count is worth less than one that can.
+
+Post-fix: `w117a_handcount` **FAILURES: 0**, 206 headers, 193 resolved. `w93a_suite.py` re-run after the
+index edit, per w110's standing rule that three parsers read that block.
+
+Next run: confirm the deadline, put the handed angle's genus in the header, append two lines, stop —
+or, better, point the launcher at a live competition.

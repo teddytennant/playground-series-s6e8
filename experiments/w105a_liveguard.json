@@ -3,15 +3,15 @@
     "fix_rc": 1,
     "naive_lines": 1,
     "naive_rc": 0,
-    "token": "w105tokf6c07315f4c8"
+    "token": "w105tok9609c84f6f6c"
   },
   "c2": {
     "alive_rc": 0,
     "bare_rc": 0,
     "bre_rc": 1,
-    "pid": 3591521,
+    "pid": 278781,
     "sentinel_started": true,
-    "token": "w105tok31fb21b0e597"
+    "token": "w105tok1266c294934b"
   },
   "c3": {
     "alive_rc": 0,
@@ -25,10 +25,10 @@
     "anti_covered": 3,
     "anti_total": 3,
     "header_hits": [
-      4550
+      4658
     ],
-    "hi": 4640,
-    "lo": 4550
+    "hi": 4748,
+    "lo": 4658
   },
   "c5": {
     "arms_run": [
@@ -39,5 +39,5 @@
     ]
   },
   "failures": 0,
-  "utc": "2026-09-03T15:26:50+00:00"
+  "utc": "2026-09-05T13:04:54+00:00"
 }
