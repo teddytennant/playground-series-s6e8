@@ -1,0 +1,59 @@
+w126a -- ANGLE INDEX row 6 (blending / OOF weight search) against its artefacts
+
+[R1] row 6's citations
+    OK anchor 'THE PRICE OF A TOP-LEVEL SEARCH': 4 occurrence(s)
+    OK anchor 'BLENDING / OOF WEIGHT SEARCH / HILL CLIMBING': 3 occurrence(s)
+    OK anchor 'ALREADY THE SHIPPED ARCHITECTURE': 3 occurrence(s)
+    OK the -1.07e-6 cross-arm figure at the evidence anchor
+
+[R2] the w36d top-level table, recomputed from the OOF arrays on disk
+    h3    k=3
+      OK equal     0.9701205753   (published 0.9701205753)
+      OK insample  0.9701208766   (published 0.9701208766)
+      OK xfit      0.9701196117   (published 0.9701196117)
+      OK optimism  +1.2649e-6   (published +1.2649e-6)
+    all4  k=4
+      OK equal     0.9701181652   (published 0.9701181652)
+      OK insample  0.9701213202   (published 0.9701213202)
+      OK xfit      0.9701195043   (published 0.9701195043)
+      OK optimism  +1.8159e-6   (published +1.8159e-6)
+    OK CROSS-ARM  fitted-all4 (k=4) vs equal-h3 (k=3, zero parameters): -1.0710e-6   (row 6 publishes -1.07e-6)
+  note row 6's -1.07e-6 is a k=4 TRANSFORM-arm number. Its cell's parenthetical says 're-weighting members already in', which is a k>=104 MEMBER-layer search. R3 prices that one.
+    (146s)
+
+[R3] reconstructing the base pool w123/w124/w125 priced on
+    pool 167 | base 104
+    member columns rank-transformed (104), nested order seed=42
+
+[R5] instrument bridge -- both searchers, same k, same member columns
+    k=2   simplex optimism +1.0798e-6   logreg optimism +4.3201e-6   logreg/simplex 4.00
+    k=3   simplex optimism +1.8078e-6   logreg optimism +4.7870e-6   logreg/simplex 2.65
+    k=4   simplex optimism +3.7112e-6   logreg optimism +0.9748e-6   logreg/simplex 0.26
+    k=6   simplex optimism +4.4059e-6   logreg optimism +6.4667e-6   logreg/simplex 1.47
+    k=8   simplex optimism -2.7029e-6   logreg optimism +6.5713e-6   logreg/simplex -2.43
+
+[R3] the optimism of a MEMBER-layer OOF weight search vs k (shipped combiner, C=1.0, frozen SKF5)
+       k           equal       in-sample    cross-fitted      optimism    xfit-equal   0.55(k-1)  meas/rule
+       2  0.9680297244  0.9688625971  0.9688582769      +4.320e-6     +828.55e-6      0.55e-6      7.855   (7s)
+       3  0.9686913929  0.9688804557  0.9688756687      +4.787e-6     +184.28e-6      1.10e-6      4.352   (6s)
+       4  0.9690129415  0.9691411320  0.9691401572      +0.975e-6     +127.22e-6      1.65e-6      0.591   (7s)
+       6  0.9687210869  0.9692207896  0.9692143229      +6.467e-6     +493.24e-6      2.75e-6      2.352   (8s)
+       8  0.9688188393  0.9692752613  0.9692686899      +6.571e-6     +449.85e-6      3.85e-6      1.707   (9s)
+      12  0.9679813401  0.9692934675  0.9692857002      +7.767e-6    +1304.36e-6      6.05e-6      1.284   (11s)
+      16  0.9673656878  0.9693002958  0.9692905813      +9.714e-6    +1924.89e-6      8.25e-6      1.178   (11s)
+      24  0.9669605323  0.9693706977  0.9693426997     +27.998e-6    +2382.17e-6     12.65e-6      2.213   (12s)
+      32  0.9668610420  0.9694088555  0.9694105095      -1.654e-6    +2549.47e-6     17.05e-6     -0.097   (19s)
+      48  0.9675898227  0.9696086071  0.9695547515     +53.856e-6    +1964.93e-6     25.85e-6      2.083   (30s)
+      64  0.9673748819  0.9696168533  0.9695809566     +35.897e-6    +2206.07e-6     34.65e-6      1.036   (40s)
+      80  0.9674480013  0.9696940926  0.9696614927     +32.600e-6    +2213.49e-6     43.45e-6      0.750   (66s)
+     104  0.9673551564  0.9697438010  0.9696984475     +45.353e-6    +2343.29e-6     56.65e-6      0.801   (71s)
+
+[R4] `optimism ~ 0.55(k-1) e-6` against the ladder it was never fitted on
+    the rule is a TWO-POINT fit at k=(3, 4). The ladder reaches k=104, a 26x extrapolation.
+    at k=104: rule predicts +56.6e-6, measured +45.4e-6, ratio 0.80
+    against the 50e-6 floor: the RULE puts k=104 ABOVE it, the MEASUREMENT puts it below it.
+  note the rule and the measurement land on OPPOSITE SIDES of the floor at k=104. Extrapolating a two-point fit 26x past its range decides the closure by itself.
+    honest search beats equal weights at 13/13 rungs; at k=104 by +2343.3e-6
+  note at the MEMBER layer the honestly cross-fitted search beats the equal-weight baseline by +2343.3e-6 at k=104. Row 6's price is -1.07e-6. The two searches do not share a sign, and the positive one is the incumbent, not a candidate.
+
+FAILURES: 0   notes: 3

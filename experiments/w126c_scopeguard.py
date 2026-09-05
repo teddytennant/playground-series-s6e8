@@ -83,9 +83,24 @@ ROW6 = 6
 ROW6_TOKENS = ("TOP-LEVEL", "MEMBER", "k=4", "k=104", "INCUMBENT")
 
 # C3. The two phrasings the rate is stated in, and the disclosure a definition must carry.
+# ⚠ (w181) THE CANONICAL FORM WAS MISSING UNTIL NOW. This regex shipped matching only the
+# SUPERSEDED `0.45k e-6` and the "per free parameter" phrasing, while RESEARCH.md states the
+# live rule as `optimism ≈ 0.55(k−1) e-6` in seven places -- including line 2552, which is this
+# guard's own published description of what C3 checks. So C3 printed "all 5 sites disclose their
+# fitted k" about five statements of a rule the workspace no longer uses, and had never once read
+# the rule it names. Adding the canonical form found exactly one genuine unranged definition:
+# w126's own entry, the run that wrote this guard.
 RATE_DEFINITION = re.compile(
-    r"0\.45k\s+e-6|\+0\.(?:45|55)e-6 of optimism per free parameter")
-RATE_RANGE_TOKENS = ("k=3 AND k=4", "k=3 and k=4", "fitted at k=3")
+    r"0\.45k\s+e-6"
+    r"|\+0\.(?:45|55)e-6 of optimism per free parameter"
+    r"|0\.55\s*\(\s*k\s*[−-]\s*1\s*\)\s*e-6")
+# MENTION vs USE. The canonical form appears as a bare heading (`THE \`0.55(k−1)\` RULE`), as a
+# ladder column label (`| 0.55(k−1) |`), and inside C3's own description -- none of which assert
+# the rate, so none of which owe a range. A site that states the rule AS A PROPERTY states its
+# value with its UNIT, so requiring `e-6` in the match separates the two syntactically rather
+# than by a distance heuristic. Same lesson as #75's QUOTED rule, at a different quantity:
+# naming a thing is not claiming it.
+RATE_RANGE_TOKENS = ("k=3 AND k=4", "k=3 and k=4", "fitted at k=3", "fit at k=3")
 RATE_WINDOW = 8
 # A DEFINITION site issues the licence; a QUOTATION of prior text does not, and this document
 # quotes its own superseded numbers constantly when recording a correction. The workspace's
@@ -156,6 +171,16 @@ def missing_row6(cell):
     return [t for t in ROW6_TOKENS if t not in cell]
 
 
+# ⚠ (w181) A SPECIMEN IS NOT A DEFINITION. This entry's own diagnosis quotes the defective sites
+# verbatim inside indented blocks, and both C3 arms went red on that prose -- the same way #75 went
+# red on w180's entry for quoting a counter. An indented block is the workspace's verbatim-specimen
+# convention; measured over RESEARCH.md, every one of the 11 genuine rate/pass-through definitions
+# is unindented and every specimen is indented, so the exemption separates them cleanly and loses
+# no real site. Checked, not assumed -- see the w181 entry's site table.
+def _is_specimen(line):
+    """A verbatim specimen (indented block) MENTIONS a rule; it does not assert one."""
+    return line.startswith("    ")
+
 def unranged_rate(txt):
     """C3 predicate: rate DEFINITION sites that do not disclose the k they were fitted at."""
     lines = txt.splitlines()
@@ -164,6 +189,8 @@ def unranged_rate(txt):
         m = RATE_DEFINITION.search(ln)
         if not m:
             continue
+        if _is_specimen(ln):
+            continue                      # a verbatim specimen, not a definition
         if any(q.start() <= m.start() and m.end() <= q.end()
                for q in QUOTED_SPAN.finditer(ln)):
             continue                      # a quotation of superseded text, not a definition
@@ -258,7 +285,13 @@ def main() -> int:
         print(f"  C2 OK row {ROW6} publishes both searches {list(ROW6_TOKENS)}")
 
     # C3 ------------------------------------------------------------------
-    sites = [i + 1 for i, ln in enumerate(txt.splitlines()) if RATE_DEFINITION.search(ln)]
+    # ⚠ (w181) this used to list every raw match, including the specimens and quotations the
+    # predicate skips, so "all N sites disclose their fitted k" named a wider set than it checked.
+    sites = [i + 1 for i, ln in enumerate(txt.splitlines())
+             if RATE_DEFINITION.search(ln) and not _is_specimen(ln)
+             and not any(q.start() <= RATE_DEFINITION.search(ln).start()
+                         and RATE_DEFINITION.search(ln).end() <= q.end()
+                         for q in QUOTED_SPAN.finditer(ln))]
     if not sites:
         fail("C3 is VACUOUS: the search-cost rate is stated nowhere in RESEARCH.md under "
              "either phrasing. The predicate has stopped matching the document.")

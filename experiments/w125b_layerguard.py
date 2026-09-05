@@ -85,11 +85,21 @@ LADDER_PROSE = re.compile(r"\*below\s+`?encdrop`?\*", re.I)
 
 # C3. A DEFINITION site states the pass-through as a property of the workspace. A USE site
 # multiplies by it. Only definition sites need the range -- that is where the licence is issued.
+# ⚠ (w181) `solo[-→>]+stack` did not admit the spelled-out "Solo-TO-stack", and the whole
+# pattern did not admit the "X HAS ~1.4% pass-through" word order. Both forms appear in
+# RESEARCH.md stating the rate as a property of the workspace, and both were invisible.
 PT_DEFINITION = re.compile(
-    r"(?:solo\s*[-→>]+\s*stack\s+)?pass-through\s+(?:here\s+)?is\s+(?:~\s*)?\*{0,2}1\.4%",
+    r"(?:solo\s*(?:[-→>]+|-to-)\s*stack\s+)?pass-through\s+(?:here\s+)?is\s+(?:~\s*)?\*{0,2}1\.4%"
+    r"|has\s+(?:~\s*)?\*{0,2}1\.4%\*{0,2}\s+pass-through",
     re.I)
 # the range disclosure the definition must carry, within its own line or the next two
 PT_RANGE_TOKENS = ("138e-6", "fitted", "one point", "not a constant", "range")
+# ⚠ (w181) #55 has had this exemption since w126; #54 never did, and it showed. w181's own entry
+# quotes the matched sentence as `*"Solo→stack pass-through here is ~1.4%"*` to compare it against
+# the wrapped twin -- a MENTION -- and it passed only because the following prose contains the
+# word "ranged", whose substring "range" is a disclosure token. A site that passes by accident is
+# indistinguishable from one that passes on purpose, so quotations are now exempted outright.
+QUOTED_SPAN = re.compile(r'\*"[^"]*"\*')
 PT_WINDOW = 3
 
 # C4. The ladder's published pooled-OOF column, frozen as literals so this is a COMPARISON.
@@ -145,13 +155,56 @@ def prose_cells(txt):
     return [ln for ln in txt.splitlines() if LADDER_PROSE.search(ln)]
 
 
+# ⚠ (w181) A SPECIMEN IS NOT A DEFINITION. This entry's own diagnosis quotes the defective sites
+# verbatim inside indented blocks, and both C3 arms went red on that prose -- the same way #75 went
+# red on w180's entry for quoting a counter. An indented block is the workspace's verbatim-specimen
+# convention; measured over RESEARCH.md, every one of the 11 genuine rate/pass-through definitions
+# is unindented and every specimen is indented, so the exemption separates them cleanly and loses
+# no real site. Checked, not assumed -- see the w181 entry's site table.
+def _is_specimen(line):
+    """A verbatim specimen (indented block) MENTIONS a rule; it does not assert one."""
+    return line.startswith("    ")
+
+def _checked_sites(txt):
+    """How many definition sites C3 actually ADJUDICATED. ⚠ (w181) this used to be
+    `len(PT_DEFINITION.findall(txt))`, i.e. every raw match, so the guard printed "all N sites
+    disclose their fitted range" about a set that included the specimens and quotations it had
+    just skipped. A count that names a different set than the claim it supports is #53's defect
+    genus at the guard's own output."""
+    lines = txt.splitlines()
+    n = 0
+    for i, ln in enumerate(lines):
+        joined = ln + " " + (lines[i + 1] if i + 1 < len(lines) else "")
+        m = PT_DEFINITION.search(joined)
+        if not m or m.start() >= len(ln) or _is_specimen(ln):
+            continue
+        if any(q.start() <= m.start() and m.end() <= q.end()
+               for q in QUOTED_SPAN.finditer(joined)):
+            continue
+        n += 1
+    return n
+
+
 def unranged_definitions(txt):
     """C3 predicate: pass-through DEFINITION sites that do not disclose their fitted range."""
+    # ⚠ (w181) THIS USED TO MATCH ONE LINE AT A TIME, and a definition that WRAPPED was
+    # invisible. RESEARCH.md:19547 reads "Solo-to-stack pass-through here is\n~1.4%." -- the same
+    # sentence as the site matched at 4810, differing only in the arrow spelling and a line
+    # break, and it carried no range. Matching a claim that spans a wrap means matching against
+    # the joined pair, then requiring the match to START on this line so a hit is not counted
+    # twice.
     lines = txt.splitlines()
     bad = []
     for i, ln in enumerate(lines):
-        if not PT_DEFINITION.search(ln):
-            continue
+        joined = ln + " " + (lines[i + 1] if i + 1 < len(lines) else "")
+        m = PT_DEFINITION.search(joined)
+        if not m or m.start() >= len(ln):
+            continue                      # no match, or it belongs to the next line
+        if _is_specimen(ln):
+            continue                      # a verbatim specimen, not a definition
+        if any(q.start() <= m.start() and m.end() <= q.end()
+               for q in QUOTED_SPAN.finditer(joined)):
+            continue                      # a quotation of prior text, not a definition
         win = "\n".join(lines[i:i + PT_WINDOW])
         if not any(t in win for t in PT_RANGE_TOKENS):
             bad.append((i + 1, ln.strip()))
@@ -241,7 +294,7 @@ def main() -> int:
                  f"stack); the encoding channel is +13,252e-6 and does not convert at 1.4%. "
                  f">> {ln[:90]}")
     else:
-        n = len(PT_DEFINITION.findall(txt))
+        n = _checked_sites(txt)
         print(f"  C3 OK all {n} pass-through definition site(s) disclose their fitted range")
 
     # C4 ------------------------------------------------------------------

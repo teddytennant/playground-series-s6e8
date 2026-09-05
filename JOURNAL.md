@@ -41770,3 +41770,203 @@ read the ANGLE INDEX or the corpus: `w101a_angleguard` 0, `w117a_handcount` 0 (r
 covered live at row 5, correct), `w179a_superlativeguard` 0, `w180a_countguard` 0.
 
 **No submission. The board is closed and nothing here is a modelling change.**
+
+
+---
+
+# 2026-09-05 — w181 — CLOSED. ANGLE: blending, rank-average and OOF weight search priced on OOF and never on the public LB (row 6) — no submission.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 15:07 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.6 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 9, *"Blending: rank-average or weight the tuned models by out-of-fold performance. Search blend
+weights on OOF predictions, never on the public leaderboard."* — the angle index's **row 6**, closed since
+week 1 and last handed at w172 09-04. No submission attempted, no submit probe (w143: a write against a
+closed competition is not a free read). Final record stands: best public `w36_ad197std_logit.csv` 0.97116 /
+0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+🎯 **Row resolved through `classify`, not by eye.** `classify` on the raw handed string → **6**; on the
+header I typed → **6**. Two surfaces, one answer. **Thirty-ninth consecutive run with no submission**
+(taken from `ordinal − 172` and cross-checked against #75, not by incrementing the entry above), ninth of
+the second full pass over the ten angle slots.
+
+## 🔴 THE FIND: BOTH RANGE GUARDS MATCH A SPELLING, NOT A CLAIM
+
+w125 §4 and w126 found the same defect one day apart — a slope fitted on a tiny range, then quoted as a
+constant — and each shipped a `C3` arm with the same contract: **a site stating the rule as a property must
+disclose the range it was fitted at.** Both have printed `C3 OK` every run since. ⛔ **Both match a
+PHRASING**, so both are silent on any restatement of their own rule that a later run worded differently,
+and nothing had ever checked a range guard's regex against the text it polices. The two failures are
+independent:
+
+    #55 w126c  RATE_DEFINITION matched `0.45k e-6` + "per free parameter" -- 5 sites, all green.
+               The rule those were SUPERSEDED BY is written `optimism ~ 0.55(k-1) e-6`, 7 times,
+               and the regex could not match that string at all.
+    #54 w125b  PT_DEFINITION required "pass-through is 1.4%" ON ONE LINE. Missed the
+               "X HAS ~1.4% pass-through" order, missed spelled-out "Solo-TO-stack", and could
+               not match a sentence that WRAPPED.
+
+🎯 **#55 HAD NEVER READ ITS OWN RULE, AND ITS PUBLISHED DESCRIPTION SAYS SO.** `RESEARCH.md`'s account of
+what C3 checks names the canonical form in so many words. The regex beneath it does not contain that form.
+Documentation and predicate had different subjects from the day it shipped, and six days of green ticks
+were earned entirely on five statements of a rate the workspace had already replaced. This is **w180's
+shape at a third surface**: green when checked against itself, wrong when checked against its subject.
+
+## 🔴 WHAT THE BLINDNESS HID — 3 GENUINE UNRANGED DEFINITIONS
+
+    #55  L2436   "The workspace's own scaling rule for search cost is `optimism ~ 0.55(k-1) e-6`."
+                 IN w126's OWN ENTRY -- the run that wrote the guard, in the paragraph arguing
+                 that the range matters, with no range anywhere in its window.
+    #54  L16165  "Member solo AUC has ~1.4% pass-through to the stack in this workspace"
+    #54  L19547  "Solo-to-stack pass-through here is\n~1.4%."
+
+⚠ **L19547 IS THE SAME SENTENCE AS A SITE THE GUARD ALREADY CATCHES.** L4810 reads *"Solo→stack
+pass-through here is ~1.4%"* and has been matched and passed since w125, ranged two lines later. The two
+differ by **an arrow spelling and a line break**. One is policed; the other stated the rate as a property
+of the workspace with no range at all. 🎯 **A guard that reads line by line cannot see a claim that wraps,
+and prose wraps where the margin falls — a position with nothing to do with meaning.**
+
+## ✅ BOTH REPAIRED, AND THE ENTRY ANNOUNCING THE FIX BROKE IT FIRST
+
+`RATE_DEFINITION` gains the canonical form; `PT_DEFINITION` gains the `-to-` spelling and the `has X
+pass-through` order, and `unranged_definitions` matches **this line joined to the next**, requiring the
+match to start on this line so a wrapped hit is not double-counted.
+
+⚠ **THEN I WROTE THE RESEARCH.md SECTION AND BOTH GUARDS WENT RED ON IT — SIX FAILURES, ALL MY OWN PROSE.**
+The diagnosis quotes every defective site verbatim, so the entry describing the blindness was read as three
+new instances of it. 🎯 **This is #75's lesson at a second pair of quantities, one run later, exactly as
+w180 predicted it would not transfer by being written down once: a specimen is not a definition.** Fixed
+two ways, both syntactic rather than heuristic — an **indented block** is the workspace's verbatim-specimen
+convention, and a `*"..."*` span is its quotation convention (#55 has had the second since w126; **#54
+never did**). Measured over `RESEARCH.md`: **all 11 genuine definitions are unindented, every specimen is
+indented**, so the exemption loses no real site.
+
+⚠ **AND #54's QUOTATION SITE WAS PASSING BY ACCIDENT.** Before the quoted-span exemption, my own L42 quote
+cleared C3 only because the following prose contains the word *"ranged"*, whose substring `range` is a
+disclosure token. ⛔ **A site that passes by accident is indistinguishable from one that passes on purpose**,
+which is the whole reason to exempt it explicitly rather than let it slip through on a token collision.
+
+⚠ **A THIRD, SMALLER DEFECT IN THE SAME OUTPUT: THE COUNT NAMED A WIDER SET THAN THE CLAIM.** Both guards
+printed `all N sites disclose their range` where `N` was **every raw regex match**, including the specimens
+and quotations the predicate had just skipped. Now both count only what they **adjudicated**: #55 reports
+**6**, #54 reports **5**. That is #53's genus at the guard's own output — a number labelled as one set and
+measured over another.
+
+Perturbed **nine ways (#55)** and **ten ways (#54)**, both directions, all correct:
+
+    #55  shipped 0 · revert w181's fix on L2436 -> 1 · new unranged canonical -> 1 · same ranged -> 0 ·
+         heading + column label + self-description -> 0 · superseded `0.45k` still caught -> 1 ·
+         ascii-hyphen `0.55(k-1)` spelling -> 1 · INDENTED specimen -> 0 · quoted definition -> 0
+    #54  shipped 0 · revert L19547 -> 1 · revert L16165 -> 1 · new WRAPPED unranged -> 1 ·
+         wrapped WITH range -> 0 · `has ~1.4%` order -> 1 · original arrow -> 1 · INDENTED -> 0 ·
+         quoted -> 0 · a wrapped match is not double-counted -> 1, not 2
+
+Both `--control` arms still fire 3/3 on their frozen pre-fix text, so neither fix disarmed the control that
+proves the predicate works — w156's failure mode, checked for rather than assumed. **No new standing check:
+this is a repair of #54 and #55, so the count stays 75.**
+
+⛔ **WHAT NEITHER GUARD DOES, WRITTEN DOWN.** Both still enumerate spellings. A future run stating either
+rule in a form outside the alternation gets a green tick and no range, exactly as w126's own entry did for
+six days. Keying on the *number* and demanding a range near any assertion of it would also flag the ~20
+pure USE sites — a different, noisier contract. This run buys coverage of the forms actually in the
+document, not a proof.
+
+## Row 6 itself re-verified on its own artefacts
+
+`w126a_row6.py`, full run (`experiments/w181a_row6.log`):
+
+    R1  citations   all three anchors resolve; the -1.07e-6 cross-arm figure present at the evidence anchor
+    R2  w36d table  all 8 published cells recompute from the OOF arrays to 1e-9
+                      h3   k=3  equal .9701205753  insample .9701208766  xfit .9701196117  opt +1.2649e-6
+                      all4 k=4  equal .9701181652  insample .9701213202  xfit .9701195043  opt +1.8159e-6
+                    CROSS-ARM fitted-all4 (k=4) vs equal-h3 (k=3, zero parameters) -1.0710e-6
+    R3  the member-layer k ladder over base104 (pool 167, base 104, rank-transformed, seed 42)
+    R5  instrument bridge, both searchers at the same k on the same columns:
+                      k=2 logreg/simplex 4.00 · k=3 2.65 · k=4 0.26
+
+🎯 **R5 is the arm worth reading, and it argues against the extrapolation the row's own cell makes.** The
+two estimators' optimisms are **not interchangeable**: the ratio runs 4.00 → 2.65 → 0.26 over three
+consecutive rungs, crossing 1 between k=3 and k=4. So `0.55(k−1)`, fitted with the **simplex** searcher at
+k=3 and k=4, is being quoted about a **logreg** search at k=104 across a ratio that is not even monotone in
+the fitted range. ⛔ Nothing re-opens — the member-layer search is the **incumbent**, not a candidate, and
+`agent/stack.py` has run it cross-fitted since w38 — but this is a second, independent reason the rule's
+range matters, and it is measured rather than argued.
+
+## Index hygiene
+
+`w117a_handcount` (#50) read **FAILURES: 0** on entry — 211 headers, 198 resolved — so w180's sync held.
+This run's index work: row 6 ×18 → ×19 with `→ w181 09-05 (closed)` appended **after** `w172 09-04
+(closed)` and before the cell's closing ` · artefacts verified`, so w157's marker trap does not apply;
+`CURRENT_RUN, CURRENT_ROW` moved off `w180`/row 5 onto this run and row 6.
+
+⚠ **This header names its genus** (w175's rule) **and its prose names row 6** (#72) — both checked through
+`classify` before either was typed. w173's and w174's `UNREADABLE-HDR` entries in #71 remain permanent; a
+future run should not re-diagnose them.
+
+Next run: confirm the deadline, resolve the handed angle's row through `classify`, put the genus in the
+header and the row in the body, take your counter from **`ordinal − 172`** or from #75 rather than from the
+entry above, append two lines, stop — or, better, point the launcher at a live competition. If you add or
+repair a guard that reads `RESEARCH.md`, **write your entry first and run the guard against it before
+claiming it works** — that order has now caught a defect three runs running.
+
+## ⚠ ADDENDUM, WRITTEN AFTER THE ABOVE: THE ROW-6 LADDER COMPLETED, AND A FOURTH DEFECT IN HOW IT IS QUOTED
+
+Appending rather than editing, because the rule is the rule. `w126a_row6.py` finished
+**`FAILURES: 0`, 3 notes** (`experiments/w181a_row6.log`). **All 13 rungs of the member-layer
+ladder reproduce w126's published `meas/rule` column exactly**, the negative rung included:
+
+       k    2      3      4      6      8     12     16     24      32     48     64     80    104
+    meas  7.855  4.352  0.591  2.352  1.707  1.284  1.178  2.213  -0.097  2.083  1.036  0.750  0.801
+    pub   7.85   4.35   0.59   2.35   1.71   1.28   1.18   2.21   -0.10   2.08   1.04   0.75   0.80
+
+At k=104: rule **+56.6e-6**, measured **+45.4e-6**, ratio **0.80**, opposite sides of the 50e-6
+floor; the honest search beats equal weights **13/13**, by **+2,343.3e-6** at k=104. Row 6's two
+searches still differ in sign and by ~2,000×, and the positive one is the incumbent.
+
+🔴 **THE FOURTH DEFECT, AND IT IS IN HOW THAT LADDER IS QUOTED.** Three places in `RESEARCH.md`
+compressed the 13-rung column to *"the rung-by-rung `meas/rule` runs 7.85 → **−0.10** → 0.80"*.
+⛔ **Those arrows read as a progression** — a ratio declining through a negative and settling near
+0.8. The real column does nothing of the kind: it **oscillates across a 7.96-wide band with no
+trend**, and −0.10 is the **9th of 13**, not a midpoint. The three values quoted are the 1st, 9th
+and 13th, chosen for being the extremes and the end. 🎯 **Same genus as this run's headline — a
+summary that names a wider claim than the thing it was measured over** — and it survived because
+the sentence beside it (*"right order at a 26× extrapolation"*) is true, so nothing looked past it.
+Corrected in all **three** copies to publish the full column; no guard froze that literal, checked
+before editing.
+
+⛔ **This does not change the closure and must not be read as re-opening it.** w126 already
+recorded the honest reason not to trust any single rung — *"two of the twenty optimism readings
+come back NEGATIVE, and selection optimism cannot be"* — and argued the section from the
+`xfit − equal` column, which is sign-consistent 13/13 and 36–1,541× larger. The fix is to the
+**quotation**, not the finding.
+
+🎯 **R5, THE ARM WITH SOMETHING GENUINELY NEW: THE EXTRAPOLATION CROSSES AN INSTRUMENT BOUNDARY.**
+`0.55(k−1)` was fitted with the **simplex** searcher at k=3,4; row 6's cell multiplies it out to
+k=104 against a **logreg** search. Run both at the same k on the same columns:
+
+    k          2      3      4      6      8
+    logreg/simplex   4.00   2.65   0.26   1.47  -2.43
+
+⛔ **The two instruments' optimisms are not interchangeable, and the ratio is not even monotone
+inside the range the rule was fitted on** — it crosses 1 between k=3 and k=4, and by k=8 the
+simplex arm has **changed sign** (−2.70e-6). So the k=104 quotation extrapolates 26× past its
+range *and* swaps the instrument underneath it. That is a second, measured reason the range
+belongs with the rule, independent of the argument in the headline above. Nothing re-opens.
+
+📌 **Counter unchanged at 39** — the addendum is part of this run's entry, not a new run. #75
+green on the composite (it disowns the `"Thirty-sixth ..."`-style quotations by quote mark, and
+this entry states its own number once, unquoted).
+
+    experiments/w93a_suite.py    TOTAL 352s   66/75 green   (experiments/w181_suite.log)
+    FAILURES: the eight standing by-design reds + w161a_driverguard's two permanent w173/w174 entries
+
+Suite launched with nothing in flight, per w133 — the row-6 refit had finished and the journal entry was
+written first, so #67's C3b had a run header to agree with. **75 checks, unchanged**: this run repaired
+#54 and #55 rather than adding a check, so no stem, no `STEMS` edit and no heading bump. The failure set
+is byte-for-byte w180's: **no new red**. #71 resolves this run as `2026-09-05 slot 9 row 6 exit None
+INFLIGHT w181`, the handed slot mapping to the handed row. Post-edit re-verify of the **ten** parsers that
+read the ANGLE INDEX or the corpus: `w101a_angleguard` 0, `w117a_handcount` 0 (row 6 claimed ×19, corpus
+×19), `w157a_closedguard` 0, `w156a_recordguard` 0, `w110b_covguard` 0, `w178a_rowclaimguard` 0 (this entry
+covered live at row 6, correct), `w179a_superlativeguard` 0, `w180a_countguard` 0 (counter 39 accepted on
+the composite entry), plus the two repaired arms `w125b_layerguard` 0 and `w126c_scopeguard` 0.
+
+**No submission. The board is closed and nothing here is a modelling change.**
