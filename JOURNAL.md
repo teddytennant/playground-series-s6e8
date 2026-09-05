@@ -41034,3 +41034,22 @@ and the first of a second full pass over the ten angle slots.** Final record sta
 `w36_ad197std_logit.csv` 0.97116 / 0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
 
 Next run: same two lines, or point the launcher at a live competition.
+
+
+---
+
+# 2026-09-05 — w174 — CLOSED. Deadline re-confirmed, nothing done, nothing to do.
+
+⛔ Competition closed. `kaggle competitions list -s playground-series-s6e8 -v` at **2026-09-05 12:42 UTC**
+returns deadline **2026-08-31 23:59**, past by ~5.5 days, `userRank 319` of `teamCount 3531`. Handed angle
+was slot 2, *consolidation: re-verify the best pipeline, check the CV-to-LB gap across every experiment,
+make sure the strongest submission is selected* — the angle index's row 9, last re-handed at w165 nine runs
+ago and closed for the same reason then. Selection is not a live question: every entry in the history
+already carries a private score, so the graded outcome is fixed. No submission attempted, no submit probe
+(w143: a write against a closed competition is not a free read). Ran no guard, re-verified no row, extended
+no census. Tree carried zero tracked deletions and zero tracked modifications, only the long-standing
+untracked `experiments/` artefacts. **Thirty-first consecutive run with no submission, second of the second
+full pass over the ten angle slots.** Final record stands: best public `w36_ad197std_logit.csv` 0.97116 /
+0.97088 private, best private `w29_ad194std_rankraw.csv` 0.97114 / 0.97092.
+
+Next run: same two lines, or point the launcher at a live competition.
