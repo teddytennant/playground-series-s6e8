@@ -42995,3 +42995,27 @@ valuable, so the production number will not be larger than this one.
 `cdfd_*` variants of the xgb/catboost families expecting the pack to move. Items (2) and (3)
 stand, and (2) — the RealMLP gap, +440e-6 and now measurable against the private board — is worth
 more than the whole of this run.
+
+## ✅ THIRD ADDENDUM — FINAL SUITE, AFTER THE FIXES AND THE PUSH
+
+    experiments/w93a_suite.py    TOTAL 377s   65/76 green   (experiments/w186_suite2.log)
+
+**One better than w185's 64/76.** All four reds I caused cleared: `w65c_subsetcheck` and
+`w109b_colguard` by moving the two new members out of the curated pack instead of editing their
+pinned counts, `w112a_templateguard` by registering the heads and widening `LATE_PREFIX` to a
+tuple, `w160a_pushguard` by the push below.
+
+The eleven remaining are the eight standing by-design reds (`w54a_vetoexpiry`, `w63b_setguard`,
+`w67b_slopeguard`, `w70d_chainguard`, `w72b_dayguard`, `w85c_slotguard`, `w87a_registrarguard`,
+`w100a_complement`), `w161a_driverguard`'s permanent w173/w174 entries, `w74b_clickstaleguard`
+(w185's ninth by-design red), and `w92a_smokerun` reporting w185's three deferred history-derived
+modules. **Standing checks stay at 76.**
+
+`w117a_handcount` FAILURES: 0 after bumping ANGLE INDEX row 2 to ×21 with a `→ w186 09-06
+(closed)` trail entry. The row's published **TUNING** price of **+4e-7** is untouched — this run
+did not sweep a hyperparameter, so it has no business moving that number.
+
+⚠ **`git push` needed `PATH=/run/current-system/sw/bin:...` as `RESEARCH.md:2243` says.** The
+plain push died on `gh: command not found` and **the pipeline still reported rc=0**, exactly the
+trap that section documents. Verified with `git log --oneline origin/main -1` → `db25ce4`, not
+with an exit code.
