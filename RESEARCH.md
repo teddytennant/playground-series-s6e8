@@ -1,4 +1,37 @@
 # ============================================================================
+# 🟢 FINAL w187 NUMBERS — THE RealMLP IS THE BEST SINGLE MODEL HERE, AND THE
+#    ORIGINAL'S LABELS ARE THE BIGGEST CHANNEL IN THE FRAME. (w187, 2026-09-06)
+# ============================================================================
+#     file                  what                       CV          public    private
+#     w186_lgbmfrac_cdf     previous best single       0.9679083   0.96907   0.96884
+#     w187_cb5              CatBoost 5-fold            0.9681362   0.96949   0.96917
+#     w187_mlp384           RealMLP 5-fold (honest)    0.9681123   0.96982   0.96957
+#     w187_pair_rankavg     rank-average of the two    0.9687970   0.97005   0.96976
+#
+# 🎯 The two models are within 24e-6 on CV and 330e-6 apart on public: **CV cannot separate
+# them and the board can.** CV understated the RealMLP's gain over the previous best single
+# model by 3.7x (+204e-6 CV vs +750e-6 public / +730e-6 private). Twice observed now, same
+# direction, which is the OPPOSITE of this workspace's usual shape.
+# RealMLP per-fold: 0.9675126 / 0.9682199 / 0.9683125 / 0.9687143 / 0.9678440.
+#
+# ✅ STACK LAYER (`w187d_membervalue2.log`, 104-member pool, 8 paired 50/50 splits):
+#     pool+cb5   +20.41 +/- 5.31 e-6  t=10.87   |  pool+mlp  +40.03 +/- 6.67 e-6  t=16.97
+#     pool+both  +54.21 +/- 8.39 e-6  t=18.28   |  all sign-consistent 8/8
+#   reference: foreign CatBoost +10.04e-6 (t=8.87) · w186's cdfd_* +0.86e-6 (t=0.91)
+#   ✅ **`pool+both` is the first addition that clears this workspace's own 50e-6 floor.**
+#   ⚠ 20.41 + 40.03 = 60.44 against a measured 54.21 -- 90% additive, not 100%.
+#
+# 🔴 THE CHANNEL DECOMPOSITION, fold 0, 4 threads, everything else identical:
+#     full frame + exact-value cats            0.96746487
+#     minus the 21 LABELLED-original columns   0.96731547     -149.4e-6
+#     minus the 12 exact-value categoricals    0.96735089     -113.98e-6
+# **The 7,500-row original's LABELS outweigh the categorical channel**, and this workspace
+# never had them: w185/w186 read the original's VALUES only. ⛔ ANGLE INDEX row 1's "the
+# original is worth nothing here" was reached on CONCAT and as-MEMBER; the labelled-reference
+# route is a THIRD door and it is not closed. ⚠ Single fold, es-on-val, against a 32e-6
+# thread-count band -- 4.7x and 3.6x it, no more.
+
+# ============================================================================
 # 🟢 THE WORKSPACE CAN TRAIN A RealMLP NOW, AND THE FIRST ONE BEAT ITS BEST OWN
 #    GBDT MEMBER ON FOLD 0. (w187, 2026-09-06)
 # ============================================================================

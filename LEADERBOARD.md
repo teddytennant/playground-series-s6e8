@@ -3428,3 +3428,16 @@ recipe tuned for `n_ens=8` and 100.
 
 📌 The blending route, for contrast, is priced in this file and in ANGLE INDEX rows 6/7/10 at
 -1.07e-6 to +4.5e-6, and 14th place's 278-shared-OOF ledger bought them +57e-6 in total.
+
+**Final w187 board reads**, all five sends late measurements on a closed board:
+
+    w187_cb5             CatBoost 5-fold           0.96949 / 0.96917
+    w187_mlp384_f0       RealMLP, 1 fold           0.96877 / 0.96875
+    w187_mlp384_f2       RealMLP, 2-fold average   0.96945 / 0.96930
+    w187_mlp384          RealMLP, 5-fold           0.96982 / 0.96957
+    w187_pair_rankavg    rank-average of the two   0.97005 / 0.96976
+
+The RealMLP is the best single model this workspace has produced, on both slices. Two models
+from one afternoon rank-average to within 1,140e-6 public of the ~200-member blend that was
+graded. Deotte's tuned single RealMLP is still 1,690e-6 of public above ours, and ours runs at
+`n_ens=1` and 20 epochs against his tuned recipe — the remaining gap has a known direction.

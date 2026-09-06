@@ -1,0 +1,17 @@
+{
+ "name": "w187_cb_nolabelorig",
+ "nocat": false,
+ "folds": [
+  0
+ ],
+ "aucs": {
+  "0": 0.9673154742218161
+ },
+ "iters": [
+  1695
+ ],
+ "lr": 0.1,
+ "depth": 6,
+ "ctr": 1,
+ "nolabelorig": true
+}

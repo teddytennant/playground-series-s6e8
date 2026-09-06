@@ -74,6 +74,7 @@ HEADS = {
     "w187 realmlp":       "late measurement: the first RealMLP this workspace trained itself",
     "w187 cb-cat":        "late measurement: CatBoost given the exact values as categoricals",
     "w187 cb-nocat":      "late measurement: the same CatBoost with those columns dropped",
+    "w187 pairavg":       "late measurement: rank-average of the two new members",
 }
 # A tuple, not a string, since w186. The late class is defined by the DEADLINE and not by a
 # run number, so it will keep gaining run tags; T6 is what holds it to that definition.

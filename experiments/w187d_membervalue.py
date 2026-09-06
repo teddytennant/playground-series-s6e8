@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 from common import DATA, ROOT, TARGET, load_raw  # noqa: E402
 from stack import DEFAULT_DROP, load_members, to_logit  # noqa: E402
 
-NEW = ["w187_cb5"]
+NEW = ["w187_cb5", "w187_mlp384"]
 REPS, C = 8, 1.0
 
 tr, te = load_raw()
@@ -45,12 +45,16 @@ print(f"pool {len(pool)} members;  candidate " +
 
 # how close is it to anything already in? a member that is worth nothing is usually a member
 # the pool already holds a copy of, and that is checkable before the fit rather than after.
-c = np.abs(np.corrcoef(np.column_stack([O[:, idx[n]] for n in NEW] +
-                                       [O[:, idx[m]] for m in pool]).T)[0, 1:])
-print(f"max |corr| to any pool member: {c.max():.6f}  ({pool[int(c.argmax())]})", flush=True)
+for n in NEW:
+    c = np.abs(np.corrcoef(np.column_stack([O[:, idx[n]]] +
+                                           [O[:, idx[m]] for m in pool]).T)[0, 1:])
+    print(f"{n}: max |corr| to any pool member {c.max():.6f}  ({pool[int(c.argmax())]})",
+          flush=True)
+print(f"cb5 vs mlp corr {np.corrcoef(O[:, idx[NEW[0]]], O[:, idx[NEW[1]]])[0,1]:.6f}", flush=True)
 
 Z = to_logit(O)
-variants = {"pool": pool, "pool+cb5": pool + NEW}
+variants = {"pool": pool, "pool+cb5": pool + NEW[:1], "pool+mlp": pool + NEW[1:],
+            "pool+both": pool + NEW}
 
 rows = []
 for rep in range(REPS):

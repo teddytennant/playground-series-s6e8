@@ -43288,3 +43288,68 @@ than after: three heads registered (`w187 realmlp`, `w187 cb-cat`, `w187 cb-noca
    one cheap run and would say how much of the +228e-6 is the original's labels.
 4. ⛔ **Do NOT re-run `w187c_catboost.py` arms at different `thread_count` and compare them.**
    The band is 32e-6 and the effects here are 114e-6.
+
+## 🔴 ADDENDUM — THE 5-FOLD RealMLP LANDED AND IT IS THE BEST SINGLE MODEL HERE ON BOTH BOARDS
+
+The body was written with two of five folds done and said to read the progress file before
+quoting a 5-fold number. It finished:
+
+    fold        0          1          2          3          4
+    AUC     0.9675126  0.9682199  0.9683125  0.9687143  0.9678440
+    mean fold 0.96812066          OOF 0.96811228     (honest, inner-val early stopping)
+
+⚠ **Fold 0 cost 3,506 s and fold 4 cost 576 s for identical work** — a 6.1x spread from
+contention alone, which is the oversubscription defect above, measured a third time.
+
+    file                  what                       CV          public    private
+    w186_lgbmfrac_cdf     previous best single       0.9679083   0.96907   0.96884
+    w187_cb5              CatBoost 5-fold            0.9681362   0.96949   0.96917
+    w187_mlp384           RealMLP 5-fold             0.9681123   0.96982   0.96957
+    w187_pair_rankavg     rank-average of the two    0.9687970   0.97005   0.96976
+
+🎯 **The two models are within 24e-6 of each other on CV and 330e-6 apart on public.** CV cannot
+separate them; the board puts the RealMLP clearly ahead, and it is the honest arm of the two.
+**CV understated the RealMLP's gain over the previous best single model by 3.7x** (+204e-6 CV vs
++750e-6 public, +730e-6 private) — the same direction as `w187_cb5` and now twice observed.
+
+📌 **Two models built in one afternoon rank-average to 0.97005 / 0.96976**, which is 1,140e-6
+public below the ~200-member blend that was actually graded. ⛔ **That is not a claim we would
+have placed higher** — it is a claim about where the marginal hour was worth spending.
+
+## ✅ ADDENDUM — THE STACK PRICES, WITH THE RealMLP IN
+
+`experiments/w187d_membervalue2.log`, same instrument, 104-member pool, 8 paired 50/50 splits:
+
+    pool+cb5     +20.41 +/- 5.31 e-6   [consistent 8/8]   t = 10.87
+    pool+mlp     +40.03 +/- 6.67 e-6   [consistent 8/8]   t = 16.97
+    pool+both    +54.21 +/- 8.39 e-6   [consistent 8/8]   t = 18.28
+
+    reference: a foreign CatBoost +10.04e-6 (t=8.87) · w186's cdfd_* +0.86e-6 (t=0.91)
+    max |corr| to any pool member:  cb5 0.993973 (naji04) · mlp 0.994881 (naji02)
+    cb5 vs mlp corr 0.990223
+
+🎯 **The RealMLP alone is +40.03e-6/member — 4.0x the foreign-CatBoost rate and 46x w186's
+channel.** ✅ **`pool+both` at +54.21e-6 is the first thing this workspace has added that clears
+its own 50e-6 floor.** ⚠ The two are NOT independent: 20.41 + 40.03 = 60.44 against a measured
+54.21, so 90% additive, not 100% — they share the frame even though they are different function
+classes.
+
+## ✅ ADDENDUM — THE ORIGINAL'S LABELS ARE THE BIGGEST SINGLE CHANNEL IN THE FRAME
+
+`w187c_catboost.py --nolabelorig` drops the 21 columns built from the 7,500 originals' LABEL
+column (`__orig_cdf_gap` x5, `__orig_q50_distance_y0` x5, `_y1` x4, `__orig_mean` x4,
+`__orig_kde_llr` x3) and keeps the unlabelled ones. Fold 0, 4 threads, everything else identical:
+
+    full frame + exact-value cats            0.96746487
+    minus the 21 LABELLED-original columns   0.96731547      -149.4e-6
+    minus the 12 exact-value categoricals    0.96735089      -113.98e-6
+
+🎯 **The original's labels are worth MORE than the categorical channel the angle names**, and
+this workspace never had them: w185/w186 read the original's VALUES only (`cdfd_*`, +87.7e-6
+solo, +0.86e-6 in the stack). ⛔ **ANGLE INDEX row 1 says the original is worth nothing here —
+that verdict was reached on two routes, CONCAT and as-MEMBER, and neither is this one.** Row 1
+should not be re-closed on the strength of those two until the labelled-reference route is
+priced at the stack layer.
+
+⚠ **Both ablations are single-fold, es-on-val, and sit against a 32e-6 thread-count
+nondeterminism band.** They are 3.6x and 4.7x that band, not more.

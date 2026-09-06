@@ -38,6 +38,9 @@ def main():
     ap.add_argument("--name", required=True)
     ap.add_argument("--folds", default="0")
     ap.add_argument("--nocat", action="store_true")
+    ap.add_argument("--nolabelorig", action="store_true",
+                    help="drop the columns built from the ORIGINAL'S LABELS, keeping the "
+                         "unlabelled ones. Isolates w185/w186's channel from the new one.")
     ap.add_argument("--iters", type=int, default=6000)
     ap.add_argument("--lr", type=float, default=0.06)
     ap.add_argument("--depth", type=int, default=8)
@@ -60,7 +63,8 @@ def main():
     y = tr[TARGET].astype(int).to_numpy()
     folds = get_folds(y)
     want = list(range(5)) if a.folds == "all" else [int(x) for x in a.folds.split(",")]
-    print(f"[{a.name}] nocat={a.nocat} folds={want} lr={a.lr} depth={a.depth}", flush=True)
+    print(f"[{a.name}] nocat={a.nocat} nolabelorig={a.nolabelorig} folds={want} "
+          f"lr={a.lr} depth={a.depth} threads={a.threads}", flush=True)
 
     oof = np.full(len(y), np.nan)
     tp = np.zeros(len(te))
@@ -71,6 +75,15 @@ def main():
             rng = np.random.default_rng(SEED + f)
             itr = np.sort(rng.choice(itr, size=min(a.rows, len(itr)), replace=False))
         Xa, Xb, Xt = build_fold(Xc, Xct, cat_tr, cat_te, cont_cols, itr, iva, y, SEED + f)
+        if a.nolabelorig:
+            # `__orig_cdf` and `__orig_q50_distance` read only the original's VALUES, which is
+            # the w185/w186 channel. Everything below reads its LABEL column.
+            drop = [c for c in Xa.columns
+                    if any(k in c for k in ("__orig_cdf_gap", "__orig_q50_distance_y0",
+                                            "__orig_q50_distance_y1", "__orig_mean",
+                                            "__orig_kde_llr"))]
+            assert len(drop) == 21, len(drop)   # 5 gap + 5 q50_y0 + 4 q50_y1 + 4 mean + 3 kde
+            Xa, Xb, Xt = (d.drop(columns=drop) for d in (Xa, Xb, Xt))
         if a.nocat:
             Xa, Xb, Xt = (d.drop(columns=RAW) for d in (Xa, Xb, Xt))
             cats = []
@@ -116,7 +129,8 @@ def main():
     if not a.no_test:
         np.save(os.path.join(out, f"test_{a.name}.npy"), tp)
     json.dump({"name": a.name, "nocat": a.nocat, "folds": want, "aucs": aucs,
-               "iters": iters, "lr": a.lr, "depth": a.depth, "ctr": a.ctr},
+               "iters": iters, "lr": a.lr, "depth": a.depth, "ctr": a.ctr,
+               "nolabelorig": a.nolabelorig},
               open(os.path.join(HERE, f"{a.name}.json"), "w"), indent=1)
 
 
