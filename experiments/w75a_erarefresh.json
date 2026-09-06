@@ -1,7 +1,7 @@
 {
  "n_sent_stems": 199,
- "n_with_oof": 160,
- "n_without_oof": 39,
+ "n_with_oof": 158,
+ "n_without_oof": 41,
  "nocv_stems": [
   "w15f_antistudent_avg",
   "w15f_antistudent_cv",
@@ -10,6 +10,8 @@
   "w16f_armavg",
   "w185_origcol_base",
   "w185_origcol_cdf",
+  "w186_lgbmfrac_cdf",
+  "w186_lgbmfrac_ctrl",
   "w37_cal_dkv_xgb",
   "w37_cal_dm_cat",
   "w37_cal_mkt_realmlp",
@@ -82,7 +84,7 @@
   }
  ],
  "kill_era_lb6": 0.0,
- "spearman_cv_lb_all": 0.7193580489647005,
- "spearman_cv_lb_97": 0.6764959504566082,
+ "spearman_cv_lb_all": 0.7142396278083358,
+ "spearman_cv_lb_97": 0.6685052065697067,
  "failures": 2
 }

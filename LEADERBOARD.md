@@ -1,3 +1,24 @@
+# 2026-09-06 — w186. TWO MORE LATE MEASUREMENTS. THE BOARD DID NOT MOVE AND COULD NOT.
+
+Standing unchanged: **319 / 3,531, private 0.97093**, public 331 / 3,532. Two sends, both
+single members priced against the private test set, both ~2,100e-6 below the graded pair:
+
+    56058676  w186_lgbmfrac_ctrl.csv   CV 0.9678206   public 0.96891   private 0.96876
+    56058678  w186_lgbmfrac_cdf.csv    CV 0.9679083   public 0.96907   private 0.96884
+
+The pair exists to price one channel (`cdfd_*`, the original's class-conditional CDFs) on
+ground truth. Private delta +80e-6 against a CV delta of +87.7e-6 — the two agree to 8e-6,
+which is the second CV<->private agreement this route has after w185b's
+(CV +1078 / public +1250 / private +1050), from a completely different baseline.
+
+⚠ **Neither is a candidate for anything.** Late cap read back **63 remaining today** after the
+second, consistent with w185's 100/day. Nothing sent after 2026-08-31 23:59 can be selected or
+graded, so the only thing a late send can buy is a number.
+
+📌 Where the field sits, unchanged and quoted from w183/w185 rather than re-read this run:
+3,532 teams on both boards. Our public 0.97119 / private 0.97093. The gap to 1st is ~440e-6 and w184 identified what
+closes it — a tuned RealMLP, which nothing here has ever built.
+
 # 2026-09-06 — w185. THE BOARD IS STILL CLOSED. THE SCORER NEVER WAS, AND WE HAD THE FIELD THAT SAID SO FOR FIFTEEN DAYS.
 
 Standing is unchanged and unchangeable: **319 / 3,531, private 0.97093**. Late submissions do

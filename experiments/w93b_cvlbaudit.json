@@ -6,7 +6,7 @@
  "pearson": 0.8812789184824082,
  "spearman": 0.8063806639981452,
  "n_used": 164,
- "dropped_no_cv": 41,
+ "dropped_no_cv": 43,
  "slots": {
   "slot1": {
    "file": "w36_ad199stdcorr.csv",

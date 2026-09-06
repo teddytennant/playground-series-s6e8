@@ -42743,3 +42743,255 @@ specification for whoever picks it up, in the order I would do it:
    argmax at all. I think they do not, but that is a selection-policy call and it should be made
    on purpose rather than to turn a light green.
 ⚠ **None of them is urgent and none affects the standing**, which is locked at 319 / 3,531.
+
+# 2026-09-06 — w186 — 🟢 CLOSED BOARD. ANGLE: tune LightGBM properly against the fixed folds — I did not touch a hyperparameter, and the model got better anyway (+87.7e-6 CV, +80e-6 private, 5/5 folds)
+
+## 📍 THE HEADLINE — w185's OPEN QUESTION IS ANSWERED, AND MY OWN PREREGISTERED PREDICTION WAS WRONG AGAIN
+
+w185 closed with the honest limit on its own result: `cdfd_*` (the original's class-conditional
+CDF differences) bought **+1077.9e-6** on a bare 12-column LightGBM at OOF 0.9633, and it said so
+in the same breath — *"a bare single LightGBM ~380e-6 below this workspace's stack CV… large
+gains on a weak baseline routinely shrink against a strong one. NOT settled: what it is worth
+inside the stack."* Its next-run list put that second.
+
+Measured. `experiments/w186a_lgbm_cdf.py`, the same nine columns bolted onto the strongest
+single GBDT this workspace has, frozen folds, identical params, identical seed, one code path:
+
+    arm    cols                       OOF AUC       per-fold delta (e-6)
+    ctrl   184 lattice + 12 frac      0.9678206     —
+    cdf    + 9 cdfd_*                 0.9679083     +64.2 +94.7 +33.1 +91.6 +156.4
+
+    delta  +87.7e-6      folds won by cdf: 5/5
+
+**0.9679083 is now the highest OOF AUC of any single model in any library on this workspace's
+folds**, above the previous holder `lgbm_tuned_lat_frac` (0.9678206, the ctrl arm here) and above
+the best public-library member `latr1_xgb` (0.96780). It is a solo-member number and it is not
+the stack, which stands at ~0.9701.
+
+## ⛔ THE PREDICTION, PUBLISHED IN THE SCRIPT BEFORE THE FIT, AND FALSIFIED BY ITS OWN THRESHOLD
+
+`w186a_lgbm_cdf.py`'s docstring was committed at 2c8f1a4 **before either arm finished**, so this
+is checkable rather than asserted. It predicted near-null, with a mechanism:
+
+> `cdfd_c` is a univariate function of column c estimated from ~2.1k positive / ~5.4k negative
+> original rows. The lattice already carries `TE_c`, which is a univariate function of the SAME
+> column estimated from 553k in-fold rows — 70x the sample, the same axis, at exact-value
+> resolution. w185 won because its baseline had no target encoding at all… Here it is the second
+> one, and the incumbent is better estimated.
+> **Falsifier: cdf arm beats ctrl by more than +50e-6 OOF.**
+
+It beat it by +87.7e-6 on 5 of 5 folds. 🎯 **A 7,500-row univariate CDF still pays next to a
+553,000-row target encoding of the same column.** That is the transferable finding and it is the
+opposite of what the sample-size argument predicts.
+
+## ⛔ AND THE ESCAPE HATCH I WROTE INTO THE SAME DOCSTRING IS DEAD TOO — I CHECKED IT INSTEAD OF CLAIMING IT
+
+The docstring named the one channel it thought could still pay, and pre-committed to not claiming
+it if the diagnostic did not show it: *"it is a denoised prior immune to the competition frame's
+own sampling noise, where TE at an exact value with few rows is not. If that is what carries it,
+the gain should concentrate on rare values."*
+
+`experiments/w186c_where.py` splits both saved OOF arrays by how often the row's
+`daily_screen_time_hours` value occurs in train. AUC deltas are not scale-free, so it also prints
+`hr` = delta / (1 − ctrl AUC), which takes the band's headroom out:
+
+    band (train frequency of the value)      n        ctrl       cdf        delta      hr
+    daily missing                        95,854   0.937993  0.938219   +226.3e-6  +3.65e-3
+    value seen 0-200x                    39,633   0.976722  0.976715     -6.7e-6  -0.29e-3
+    value seen 200-400x                  65,626   0.971622  0.971691    +68.9e-6  +2.43e-3
+    value seen 400-600x                  65,861   0.969891  0.970015   +123.8e-6  +4.11e-3
+    value seen 600-900x                 110,177   0.965984  0.966079    +94.6e-6  +2.78e-3
+    value seen 900x+                    314,218   0.972045  0.972103    +58.9e-6  +2.11e-3
+
+⛔ **The rarest band is the ONLY negative one, on both scales.** The prediction said the gain
+concentrates there; it is the one place there is no gain. The by-missingness split looks like a
+story at first — +52.3e-6 at 0 missing rising to +151.9e-6 at ≥4 missing — but on the headroom
+scale it is +2.13 / +2.82 / +3.86 / +2.32 / +2.13 e-3, which peaks in the middle and returns to
+where it started. That is not a gradient.
+
+🎯 **So the honest reading is: the gain is DIFFUSE.** Roughly +2 to +4e-3 of headroom in nearly
+every band I cut, concentrated nowhere I can name, and I do not have a mechanism that survives its
+own test. Two named, both dead. What is left is the measurement, which reproduces on the private
+board below.
+
+## ✅ THE PRIVATE BOARD PRICED THE PAIR, AND CV DID NOT OVERSTATE IT
+
+Both arms sent as late measurements (the board closed 08-31; nothing sent now can be selected):
+
+    file                        CV          public     private
+    w186_lgbmfrac_ctrl.csv      0.9678206   0.96891    0.96876
+    w186_lgbmfrac_cdf.csv       0.9679083   0.96907    0.96884
+    delta                      +87.7e-6    +160e-6    +80e-6
+
+Private delta lands **8e-6** from the CV delta, and all three agree in sign and size. That is the
+same shape w185b got one level down (CV +1078 / public +1250 / private +1050), from a completely
+different baseline — so the as-COLUMN route now has two independent CV↔private agreements.
+
+## ✅ THE CONTROL ARM REPRODUCES THE ENROLLED MEMBER TO 3.6e-8, WHICH IS WHAT MAKES +87.7e-6 READABLE
+
+`ctrl` is `lgbm_tuned_lat_frac` rebuilt from scratch on today's LightGBM 4.7.0. Every fold matched
+the stored run's AUC to six decimals **and its best-iteration count exactly** — 2128 / 2142 / 2222
+/ 2227 / 1905, the stored `iters` list digit for digit. Full precision:
+
+    mine    0.9678205926974974
+    stored  0.9678205564256707      difference 3.6e-8
+
+⚠ **The OOF vectors are NOT bit-identical, and the reason matters more than the number.**
+`max |mine − stored| = 3.5e-3`, but 99.4% of rows agree to better than 1e-12 and only 0.57% differ
+at all — the signature of a handful of near-tied splits resolving the other way under a different
+thread count (8 here, `n_jobs=-1` when the member was built), not of a different model. **The
+nondeterminism band is 3.6e-8 on CV; the effect being measured is 87.7e-6, 2,400x larger.**
+
+## ✅ w184's UNFINISHED BUSINESS IS CLOSED BY IDENTITY, NOT BY A FIT — `fake_daily` IS ALREADY IN THE MODEL
+
+w185's next-run list opened with *"run `w184a_budget_feats.py` WITH `fake_daily` added — it is
+w184's unfinished business and 2nd place's one named feature win."* ⛔ **Do not run it expecting
+news.** 2nd place's `fake_daily = social + work + game` and the three `fake_*` rotations are
+already columns of the lattice under different names, and it is an identity, not a resemblance —
+checked on 200k cached rows of fold 0:
+
+    daily_lower_bound             ≡ social + gaming + work_study   max |diff| 9.5e-7  (130,817 rows)
+    social_media_hours_upper_bound ≡ daily − gaming − work_study    max |diff| 1.9e-6  (137,071 rows)
+
+`agent/features.py:67,84` builds both, and has since the feature builder was written. The only
+differences are that `_upper_bound` clips at 0 and reads `daily_imp` rather than raw `daily`.
+🎯 **w184a would still measure something — its baseline is the bare 12-column frame, where none of
+these exist — but the claim "2nd place's named feature is missing from our model" is false**, and
+a run that got a null out of the real feature set would have read it as "the feature does not
+work" instead of "it has been in there the whole time."
+
+## 📌 WHY THE ANGLE'S OWN KNOBS WERE NOT SWEPT AGAIN, STATED RATHER THAN SKIPPED
+
+The angle is ANGLE INDEX row 2, *tune LightGBM properly against the fixed folds*, handed forward
+for the 21st time. The row's own recorded price is a **TUNING** price of **+4e-7** — two runs
+closed it (08-10 stage A/B, and the 08-13 `max_bin` ladder), and w122b re-measured it on its own
+arrays. Sweeping learning rate, leaves and regularisation a third time would re-derive a null this
+file already owns. So the run kept the angle's model, folds, params and seed **fixed** and moved
+the one thing tuning cannot reach — the columns. That is this row's own 08-10 lesson, quoted from
+its entry: *"a new channel beats tuning the existing one."* It just cost +87.7e-6 to say it again.
+
+## ⚠ WHAT IS STILL NOT SETTLED — A SOLO GAIN IS NOT A STACK GAIN
+
++87.7e-6 solo says nothing about what a combiner over ~90 correlated members does with it.
+`experiments/w186d_membervalue.py` prices exactly that, paired over 8 50/50 splits, with the
+control that makes it readable: `pool+ctrl` adds a near-duplicate BODY (spearman 0.999999994
+against the enrolled member) and `pool+cdf` adds the same body plus the channel, so the difference
+is the channel with "one more correlated member" subtracted rather than assumed away. **It was
+still running when this entry was written** — read `experiments/w186d_membervalue.log` before
+quoting any stack-level number for `cdfd_*`. Nothing above depends on it.
+
+## ✅ VERIFICATION
+
+    experiments/w93a_suite.py    TOTAL 798s   61/76 green   (experiments/w186_suite.log)
+
+That is 3 worse than w185's 64/76, taken before the fixes below. **Four of the fifteen reds were
+mine, all four caused by this run's own artefacts, and three are fixed.**
+
+⛔ **`w65c_subsetcheck` (expected 202, got 204) and `w109b_colguard` (pack is 201,
+`w109a_dupscan.EXPECT` is 199) — FIXED, and NOT by editing either constant.** Both are censuses of
+`oof/`, and both broke the moment `save_preds` dropped two new members into it. 🎯 **The pack is a
+CURATED inventory: a member joins it by a selection decision, not by a file landing in the
+directory** — and these two are measurements on a board that closed six days ago, so no such
+decision exists to make. Moved to `oof_w186/`, `w186a` now writes there, and `w186d` reads it via
+`load_members(extra_dirs=...)`. Both guards rc=0 again with their registered counts untouched.
+⚠ Bumping 199 → 201 would have been the wrong fix and it was the easy one.
+
+⛔ **`w112a_templateguard` T1 — FIXED, same shape as w185's fix and with the same discipline.**
+My two heads (`w186 lgbmfrac-ctrl`, `w186 lgbmfrac-cdf`) matched no classifier. Registered them in
+the LATE class w185 opened, and turned `LATE_PREFIX` from the string `"w185 "` into the tuple
+`("w185 ", "w186 ")` — the late class is defined by the **deadline**, not by a run number, so it
+will keep gaining tags. Watched **T6 fire on a backdated `w186_lgbmfrac_cdf.csv` row** before
+shipping it, because a guard arm nobody has seen fire is w54/w55's lesson. rc=0, with all five T5
+control mutations still firing.
+
+⛔ **`w160a_pushguard` FAILURES: 1 — self-inflicted and cleared by this run's push.** I committed
+`w186a` mid-run so the prediction above would carry a timestamp older than its own result. That is
+the right thing to do and it makes this guard red for the length of the run.
+
+The remaining eleven are the eight standing by-design reds (`w54a_vetoexpiry`, `w63b_setguard`,
+`w67b_slopeguard`, `w70d_chainguard`, `w72b_dayguard`, `w85c_slotguard`, `w87a_registrarguard`,
+`w100a_complement`), `w161a_driverguard`'s permanent w173/w174 entries, `w74b_clickstaleguard`
+(w185's ninth by-design red), and `w92a_smokerun`, which still reports the three history-derived
+modules w185's second addendum specified and deliberately did not fix. **I did not fix them
+either, and for w185's reason, not out of forgetfulness:** `w75a_erarefresh`'s is a
+selection-policy call, `w93b_cvlbaudit`'s needs the DEADLINE concept rather than another mark, and
+`w28a_cvlb_refresh` sits on the MU pin. My two sends add two more rows to all three. **Standing
+checks stay at 76**; nothing new was registered, one existing guard gained a tag.
+
+## 📌 SUBMISSIONS THIS RUN — 2, BOTH MEASUREMENTS, NEITHER A PICK
+
+    56058676  w186_lgbmfrac_ctrl.csv   0.96891 / 0.96876
+    56058678  w186_lgbmfrac_cdf.csv    0.96907 / 0.96884
+
+Late cap read back as **63 remaining today** after the second, consistent with w185's 100/day.
+Standing is unchanged and cannot change: **319 / 3,531, private 0.97093**. These are single
+members ~2,100e-6 below the graded pair; they are on the board to price a channel, not to rank.
+
+**Next run should:** (1) read `w186d_membervalue.log` — if the channel survives a combiner, the
+follow-on is a `cdfd_*` variant of the OTHER enrolled GBDT families (xgb, catboost), since the
+channel is model-agnostic and the pack's diversity is what pays; (2) the RealMLP gap w184
+identified (+440e-6 over our best clean single model) is still the largest known number in this
+workspace and is now directly measurable against the private board — it is worth more than
+anything in this entry; (3) `w186c_where.py` found no mechanism for a real +87.7e-6, and a channel
+you cannot explain is one you cannot extend — a feature-importance read on the cdf arm would cost
+one refit and is the cheapest route to it.
+
+## 🔴 ADDENDUM — THE SUPERLATIVE IN THE HEADLINE IS WRONG, AND I FOUND IT BY CHECKING MY OWN SENTENCE
+
+The body says *"0.9679083 is now the highest OOF AUC of any single model in any library on this
+workspace's folds."* ⛔ **That is false.** I scanned all 251 distinct member arrays across the 25
+`oof*/` and `data/ext_members*/` directories rather than trusting the 0.96768/0.96780 reference
+line printed by `agent/run_lgbm.py`, which is about the ORIGINAL 74-model library only:
+
+    0.9701816  hboyang_mix          ext_members16     (an aggregator over 138 streams, not a model)
+    0.9692957  ravi200_l2stack1r    ext_members16
+    0.9692140  ravi200_publicm12    ext_members16
+    0.9688146  naji05 / y94_naji05  oof, ext_members15
+    0.9688139  naji03 / y94_naji03  oof, ext_members15
+    0.9687565  ravi200_publicm13    ext_members16
+    0.9687332  om_xgb2              ext_members10es
+    0.9687216  naji04               oof
+
+**Eight arrays beat it**, and I cannot tell from here which of the third-party ones are single
+models rather than blends. ✅ **The claim that survives, stated at the width the evidence
+supports:** 0.9679083 is the highest OOF AUC of any member **this workspace has built itself**,
+above its own previous best `lgbm_tuned_lat_frac` at 0.9678206, and above both reference members
+`run_lgbm.py` prints for the public 74-model library (`lattri_lgbm`/`latmax_lgbm` 0.96768,
+`latr1_xgb` 0.96780). Everything else in the entry stands; this sentence does not.
+
+## 🔴 SECOND ADDENDUM — AND THE STACK SAYS THE +87.7e-6 IS WORTH NOTHING. THAT IS THE RUN'S REAL ANSWER TO w185.
+
+`experiments/w186d_membervalue.py` finished (`experiments/w186d_membervalue.log`). 104-member
+pool, 8 paired 50/50 splits, C=1.0, logit transform, same rows for every variant:
+
+    variant            paired delta vs pool
+    pool+ctrl          -0.39 +/- 1.85 e-6   [SIGN FLIPS]
+    pool+cdf           +0.48 +/- 3.16 e-6   [SIGN FLIPS]
+    pool+both          +0.48 +/- 2.92 e-6   [SIGN FLIPS]
+
+    THE CHANNEL, body subtracted:  cdf - ctrl   +0.86 +/- 2.68 e-6   [SIGN FLIPS]   t = 0.91
+
+⛔ **Null on every arm, sign-flipping on every arm.** A member that is +87.7e-6 better solo, whose
+gain reproduces on the private test set, is worth **+0.86e-6/member at t = 0.91** once a combiner
+can already see 104 correlated members — indistinguishable from the body-only control, which is
+what the control is for.
+
+🎯 **So w185's open question has an answer and it is not the one the solo number implied: the
+as-COLUMN route is real at the MEMBER layer and null at the STACK layer.** Both halves are needed
+to state it honestly, and the solo number alone would have been a misleading thing to hand
+forward. ⚠ Note the currency: **+87.7e-6 is an OOF AUC on one model; +0.86e-6 is an AUC-per-member
+ENROLMENT price** — the same two-currency trap ANGLE INDEX row 1 carries, and they do not add.
+
+📌 This lands within noise of the other route through the same original data: row 1's as-MEMBER
+arm measured **−1.02e-6/member, t = 0.97, sign-flipping**. Two different routes, two different
+runs, two t-statistics under 1. **The 7,500-row original is worth something to a lone model and
+nothing to this pack, whichever door you carry it through.**
+
+⚠ **SCOPE, and it cuts toward the null, not away from it.** This pool is 104 members, not the
+167-member production pack. A bigger, more diverse pool can only make a redundant member less
+valuable, so the production number will not be larger than this one.
+
+**Correction to the body's next-run list:** item (1) is answered — do not spend a run building
+`cdfd_*` variants of the xgb/catboost families expecting the pack to move. Items (2) and (3)
+stand, and (2) — the RealMLP gap, +440e-6 and now measurable against the private board — is worth
+more than the whole of this run.

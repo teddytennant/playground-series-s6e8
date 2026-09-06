@@ -42,7 +42,13 @@ import pandas as pd
 from sklearn.metrics import roc_auc_score
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agent"))
-from common import CACHE, N_SPLITS, OOF, TARGET, get_folds, load_raw, save_preds  # noqa: E402
+from common import CACHE, N_SPLITS, ROOT, TARGET, get_folds, load_raw, save_preds  # noqa: E402
+
+# NOT `oof/`. That directory is the curated pack every downstream module censuses
+# (w65c_subsetcheck pins it at 202, w109b_colguard at 199), and a member joins it by a
+# selection decision, not by a file landing in it. These two are measurements.
+OOF_W186 = os.path.join(ROOT, "oof_w186")
+os.makedirs(OOF_W186, exist_ok=True)
 
 ORIG = "data/orig/Smartphone_Usage_And_Addiction_Analysis_7500_Rows.csv"
 NUM = ["age", "daily_screen_time_hours", "social_media_hours", "gaming_hours",
@@ -134,10 +140,10 @@ def main():
         cv = roc_auc_score(y, oof)
         print(f"\n[{name}] FULL OOF AUC = {cv:.7f}  ({time.time()-t0:.0f}s)", flush=True)
         print(f"  stored lgbm_tuned_lat_frac = 0.9678206", flush=True)
-        save_preds(name, oof, tp, len(y), len(te))
+        save_preds(name, oof, tp, len(y), len(te), out=OOF_W186)
         json.dump(dict(name=name, cv=float(cv), params=PARAMS, arm=a.arm,
                        ncols_appended=int(Ftr.shape[1]), iters=iters),
-                  open(os.path.join(OOF, f"summary_{name}.json"), "w"), indent=2)
+                  open(os.path.join(OOF_W186, f"summary_{name}.json"), "w"), indent=2)
 
 
 if __name__ == "__main__":

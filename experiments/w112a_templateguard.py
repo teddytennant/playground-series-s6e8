@@ -69,8 +69,12 @@ HEADS = {
     "w185 late-score":   "late measurement: an unsent file scored for the record",
     "w185 origcol-base": "late measurement: as-COLUMN control arm (row 1)",
     "w185 origcol-cdf":  "late measurement: as-COLUMN treatment arm (row 1)",
+    "w186 lgbmfrac-ctrl": "late measurement: control arm, the enrolled tuned member rebuilt",
+    "w186 lgbmfrac-cdf":  "late measurement: treatment arm, the same member plus cdfd_*",
 }
-LATE_PREFIX = "w185 "
+# A tuple, not a string, since w186. The late class is defined by the DEADLINE and not by a
+# run number, so it will keep gaining run tags; T6 is what holds it to that definition.
+LATE_PREFIX = ("w185 ", "w186 ")
 DEADLINE = "2026-08-31 23:59:00"
 AUTOMATED_FROM = "2026-08-22"          # the first day the registrar wrote the descriptions
 
@@ -154,7 +158,7 @@ def run(auto: pd.DataFrame, marks: tuple[str, ...], cmark: str, cv_re,
                    f"or a retired template: {dead}")
 
     # T6 ⛔ The late heads are exempt from T2/T3 ONLY because they are late. Check that, rather
-    # than trusting the name: a `w185 *` head on a pre-deadline row would be an ordinary
+    # than trusting the name: a late-prefixed head on a pre-deadline row would be an ordinary
     # unclassified attempt that this guard had been talked into waving through.
     late = auto[auto.tmpl.astype(str).str.startswith(LATE_PREFIX)]
     if len(late):

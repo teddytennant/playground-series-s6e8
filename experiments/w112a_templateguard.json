@@ -6,12 +6,14 @@
     "w185 late-score": 32,
     "w185 origcol-base": 1,
     "w185 origcol-cdf": 1,
+    "w186 lgbmfrac-cdf": 1,
+    "w186 lgbmfrac-ctrl": 1,
     "w26g queue-drain": 74,
     "w37 es-bias": 0,
     "w55 tail-fill": 26
   },
-  "n_automated": 135,
-  "n_submissions": 236,
+  "n_automated": 137,
+  "n_submissions": 238,
   "probe_marks": [
     "not an attempt on the board",
     "a MEASUREMENT, not a candidate"
