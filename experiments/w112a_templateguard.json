@@ -8,12 +8,15 @@
     "w185 origcol-cdf": 1,
     "w186 lgbmfrac-cdf": 1,
     "w186 lgbmfrac-ctrl": 1,
+    "w187 cb-cat": 1,
+    "w187 cb-nocat": 0,
+    "w187 realmlp": 1,
     "w26g queue-drain": 74,
     "w37 es-bias": 0,
     "w55 tail-fill": 26
   },
-  "n_automated": 137,
-  "n_submissions": 238,
+  "n_automated": 139,
+  "n_submissions": 240,
   "probe_marks": [
     "not an attempt on the board",
     "a MEASUREMENT, not a candidate"

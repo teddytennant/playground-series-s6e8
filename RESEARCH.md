@@ -1,4 +1,149 @@
 # ============================================================================
+# 🟢 THE WORKSPACE CAN TRAIN A RealMLP NOW, AND THE FIRST ONE BEAT ITS BEST OWN
+#    GBDT MEMBER ON FOLD 0. (w187, 2026-09-06)
+# ============================================================================
+# w184's post-mortem named the miss: 1st place won with a SINGLE RealMLP (CV 0.97070) and
+# this workspace never fitted one -- it only ever harvested other people's OOF columns,
+# whose best honest number here is ~0.9647. w186 handed that forward as *"the largest known
+# number in this workspace"*. It was never a search problem. **`torch` was not installed.**
+#
+#     .venv/bin/python -m pip install torch pytabkit     # ~9 min, +2.2G in .venv
+#     -> torch 2.14.0+cu130 (CPU; this box has no nvidia-smi and 16 cores)
+#     -> pytabkit RealMLP_TD_Classifier imports and fits
+#
+# 📌 THE RECIPE CAME FROM THE NOTEBOOK w184 SAID WAS MISSING FROM ALL THREE DOCUMENTS:
+# `kodaifukuda0311/s6e8-how-to-achieve-0-97-with-realmlp-only`, public **0.97016** with one
+# model. Pulled to `notebooks/w187_realmlp_only/`. Its idea is FOUR REPRESENTATIONS of every
+# raw column at once -- raw value, exact-value CATEGORY, exact-value target encoding,
+# exact-value frequency -- plus features read off the 7,500-row original WITH ITS LABELS
+# (class-conditional CDF gap, distance to the y0/y1 medians, a binned original target mean,
+# a Gaussian-KDE log-likelihood ratio). Ported to our frozen folds by
+# `experiments/w187a_features.py`: 65 continuous columns + 12 exact-value categoricals,
+# cardinality 3 to 1,460. **Its `StratifiedKFold(5, shuffle=True, random_state=42)` is our
+# frozen fold scheme, digit for digit**, so its fold AUCs are directly comparable to ours.
+#
+# ⛔ THE SOURCE NOTEBOOK IS es-ON-VAL AND ITS OOF IS THEREFORE OPTIMISTIC. It calls
+# `model.fit(X_train, y_train, X_valid, y_valid)` -- RealMLP early-stops on the very rows
+# that become its OOF. That is the defect this workspace drops members for. Our runs use
+# `--es inner`: `fit(X_train, y_train)` only, so RealMLP carves `val_fraction=0.2` out of the
+# outer TRAINING part and never sees a fold validation row. **Every number below is the
+# honest arm.** The public 0.97016 is clean either way; only the OOF is affected.
+#
+# ✅ THE FOLD-0 LADDER, honest arm, against our best own single model at fold-0 0.9670732
+#    (`w186_lgbmfrac_cdf`, OOF 0.9679083):
+#
+#     width  batch  epochs   fold-0 AUC     vs our best
+#      128   2048      1     0.9631649      -3,908e-6
+#      128   2048      3     0.9664950        -578e-6
+#      128   2048     40     0.9667037        -370e-6      <- w128 saturates here
+#      384    512     20     0.9675126        +444e-6      <- beats our best GBDT member
+#
+# 🎯 **Twenty epochs of a 4x384 MLP, one ensemble member, no tuning of our own, beat three
+# weeks of lattice engineering by +444e-6 on the same fold.** The step from 3 to 40 epochs at
+# width 128 is worth +209e-6; the step from width 128 to 384 is worth +809e-6. **Capacity, not
+# training length, is the lever** -- which is why an undertrained harvested copy told us
+# nothing about the architecture, and is the mechanism behind w184's *"harvesting a public OOF
+# tells you what somebody else's untuned copy scores"*.
+#
+# ⚠ THE COST MODEL ON THIS BOX, because it is nothing like what a GBDT costs and the naive
+# extrapolation says "impossible". Per fold, 16 threads, 553k rows:
+#     fixed setup (preprocessing, embeddings, val split)   ~325 s   <- DOMINATES
+#     per epoch, width 128 / batch 2048                      ~2 s
+#     per epoch, width 384 / batch 512                       ~18 s
+# 1 epoch and 3 epochs at width 128 cost 325 s and 329 s. **Measure the intercept before
+# extrapolating the slope**: the first estimate here (from a width-384/batch-512 run that had
+# not finished 2 epochs in 35 minutes) said 42 hours for a 5-fold run and was wrong by ~20x.
+#
+# ⚠ `sklearn.neighbors.KernelDensity.score_samples` on 553k+296k rows is ~10 min per column
+# and was the whole cost of the feature build. The columns are a quantisation lattice, so
+# scoring the ~10^3 DISTINCT values and mapping back with `np.unique(..., return_inverse=True)`
+# is the SAME NUMBER ~200x cheaper. Whole build: 40 s.
+#
+# ============================================================================
+# 🟢 ANGLE INDEX ROW 3 HAD NEVER TESTED ITS OWN SENTENCE, AND THE SENTENCE IS
+#    WORTH +113.98e-6. (w187, 2026-09-06)
+# ============================================================================
+# Row 3's angle string is *"CatBoost: it handles categoricals better."* Twenty handings, and
+# every closure priced a DIFFERENT quantity: TUNING (+4e-7) or ENROLMENT of a foreign
+# CatBoost (+10.04e-6/member). ⛔ **Neither is the sentence.** Our pipeline converts every raw
+# column to a target-encoded NUMERIC column and hands CatBoost no categorical features at all,
+# so "handles categoricals better" had no arm anywhere in this workspace.
+#
+# ✅ THE PAIR, fold 0, identical folds and rows, the only difference the 12 columns:
+#
+#     arm                                       fold-0 AUC    best_iter   fit (4 threads)
+#     exact values as native cat_features       0.96746487      1784         885 s
+#     the same frame, those 12 columns dropped  0.96735089      1585         341 s
+#     ------------------------------------------------------------------------------
+#     THE CATEGORICAL CHANNEL                  +113.98e-6                   2.6x cost
+#
+# 🎯 **+114e-6 is 2.3x the 50e-6 floor**, so the sentence is right and the row's published
+# prices were answering a different question. ⚠ Both arms early-stop on the fold's own
+# validation rows -- the same convention as our enrolled members, so the pair and the
+# comparison below are like-for-like, but neither arm's absolute OOF is clean.
+#
+# 📌 THE DECOMPOSITION AGAINST OUR OWN BEST MEMBER (fold-0 0.9670732, `w186_lgbmfrac_cdf`):
+#     + 277.7e-6   the notebook's FRAME (65 continuous columns), no exact-value cats
+#     + 114.0e-6   giving CatBoost those 12 columns as categoricals
+#     = 391.7e-6   total, on a frame with a fraction of our lattice's columns
+# ⚠ The frame term is CONFOUNDED -- different library and different hyperparameters from the
+# LightGBM member it is compared against. Only the +114e-6 pair term is clean.
+#
+# ⛔ A FREE DETERMINISM CHECK, BY ACCIDENT. The control arm was first launched WITHOUT its
+# `--nocat` flag, so two independent processes ran the same configuration and returned
+# 0.9674648709144932 / best_iter 1784 twice, identical to 16 digits. The tell was that a
+# "control" matched its treatment exactly; a pair that agrees to the last digit is a bug
+# report, not a null. Kept as `experiments/w187_cb_dup.*`.
+#
+# ============================================================================
+# 🟢 THE BEST SINGLE MODEL THIS WORKSPACE HAS EVER BUILT, AND CV UNDERSTATED IT
+#    ON BOTH BOARDS. (w187, 2026-09-06)
+# ============================================================================
+#     file                     CV           public     private
+#     w186_lgbmfrac_cdf        0.9679083    0.96907    0.96884   <- previous best single
+#     w187_cb5                 0.9681362    0.96949    0.96917
+#     delta                   +227.9e-6    +420e-6    +330e-6
+#     w187_mlp384_f0 (1 fold)  0.9675126*   0.96877    0.96875   *a fold AUC, not an OOF
+#
+# `w187_cb5` is CatBoost on the ported notebook frame with the 12 raw columns as native
+# categoricals, lr 0.10 / depth 6 / max_ctr_complexity 1, best iterations
+# 1670/1721/1266/1536/1531, per-fold 0.9674969 / 0.9682736 / 0.9681725 / 0.9688620 / 0.9678773.
+#
+# 🎯 **CV understated the gain by about half on BOTH slices, and public and private agree with
+# each other to 90e-6.** Nearly everything else this workspace measured went the other way --
+# a solo gain that shrank or vanished out of sample. Reproduce the recipe before trusting the
+# direction; one observation is not a rule.
+#
+# ⚠ REPRODUCING IT: `experiments/w187a_features.py` then
+#     .venv/bin/python experiments/w187c_catboost.py --name <n> --folds all \
+#         --iters 2500 --lr 0.10 --depth 6 --ctr 1 --threads 3
+# ~15 min per fold at 3 threads. `--nocat` drops the 12 categorical columns for the control.
+# ⛔ CatBoost is deterministic in its seed and NOT in `thread_count`: the identical
+# configuration returns 0.96746487 at 4 threads and 0.96749688 at 3. **The band is 32e-6**, so
+# never compare two CatBoost arms run at different thread counts.
+#
+# ⚠ RealMLP COSTS ~3,500 s PER FOLD at width 384 / batch 512 / 20 epochs / 8 threads with a
+# co-tenant, and `w187b_realmlp.py` checkpoints its OOF and a partial test average after every
+# fold. The partial test file is `tp` already divided by `len(want)`, so a k-of-5 average has
+# to be multiplied by 5/k before it becomes a submission -- that is how `w187_mlp384_f0` was
+# built from one fold.
+#
+# ✅ AND IT SURVIVED THE COMBINER, WHICH w186's CHANNEL DID NOT.
+# `experiments/w187d_membervalue.py`, the same instrument as w186d: 104-member pool, 8 paired
+# 50/50 splits, C=1.0, logit, same rows every variant.
+#
+#     pool+cb5   +20.41 +/- 5.31 e-6   [consistent 8/8]   t = 10.87
+#     reference: a foreign CatBoost +10.04e-6 (t=8.87) · w186's cdfd_* +0.86e-6 (t=0.91)
+#     max |corr| to any pool member 0.993973 (naji04); w186's body control was 0.999999994
+#
+# 🎯 2.0x the foreign-CatBoost ENROLMENT rate, 24x w186's channel, t against a 1% critical
+# 3.50 on df=7. ⚠ No body control is needed and that is structural, not a shortcut: w186's
+# treatment was extra columns inside an ALREADY ENROLLED member, this is a different library
+# on a frame no pool member has seen. **The pool itself is the control.**
+# ⛔ THREE CURRENCIES THAT DO NOT ADD: +227.9e-6 OOF AUC at k=1, +420e-6 public total at k=1,
+# +20.41e-6 AUC per member. Same trap ANGLE INDEX rows 1 and 7 carry.
+
+# ============================================================================
 # 🟢 THE ORIGINAL AS COLUMNS: REAL IN A MODEL (+87.7e-6 CV, +80e-6 PRIVATE),
 #    NULL IN THE PACK (+0.86e-6/member, t=0.91). BOTH HALVES. (w186, 2026-09-06)
 # ============================================================================

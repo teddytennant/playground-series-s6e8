@@ -1,0 +1,39 @@
+{
+ "name": "w187_lad_b",
+ "es": "inner",
+ "folds": [
+  0
+ ],
+ "rows": 0,
+ "params": {
+  "n_epochs": 20,
+  "batch_size": 512,
+  "n_ens": 1,
+  "val_metric_name": "1-auc_ovr",
+  "use_early_stopping": true,
+  "early_stopping_additive_patience": 20,
+  "early_stopping_multiplicative_patience": 1,
+  "act": "mish",
+  "embedding_size": 8,
+  "first_layer_lr_factor": 0.5962121993798933,
+  "hidden_sizes": "rectangular",
+  "hidden_width": 384,
+  "lr": 0.04,
+  "ls_eps": 0.011498317194338772,
+  "ls_eps_sched": "coslog4",
+  "max_one_hot_cat_size": 18,
+  "n_hidden_layers": 4,
+  "p_drop": 0.07301419697186451,
+  "p_drop_sched": "flat_cos",
+  "plr_hidden_1": 16,
+  "plr_hidden_2": 8,
+  "plr_lr_factor": 0.1151437622270563,
+  "plr_sigma": 2.3316811282666916,
+  "scale_lr_factor": 2.244801835541429,
+  "sq_mom": 0.9881659450444177,
+  "wd": 0.02369230879235962
+ },
+ "aucs": {
+  "0": 0.9675126175165564
+ }
+}

@@ -43019,3 +43019,272 @@ did not sweep a hyperparameter, so it has no business moving that number.
 plain push died on `gh: command not found` and **the pipeline still reported rc=0**, exactly the
 trap that section documents. Verified with `git log --oneline origin/main -1` → `db25ce4`, not
 with an exit code.
+
+---
+
+# w187 — 2026-09-06 — SLOT 5/10 — ANGLE: CatBoost, tune and compare on identical folds — CLOSED BOARD
+
+## 🎯 THE WORKSPACE COULD NOT TRAIN A RealMLP BECAUSE `torch` WAS NOT INSTALLED. IT IS NOW, AND THE FIRST ONE BEAT OUR BEST OWN MODEL.
+
+w186 handed forward *"the RealMLP gap w184 identified (+440e-6 over our best clean single
+model) is still the largest known number in this workspace"*. w184 diagnosed it as a
+classification error — we treated RealMLP as a column to harvest from other people's notebooks
+and scored an undertrained copy. ⛔ **Both readings missed the actual cause, and it took one
+command to find:**
+
+    .venv/bin/python -c "import torch"   ->  ModuleNotFoundError
+
+**Forty-three runs, three documents, an ANGLE INDEX with ten rows, and nobody ever checked
+whether the library was importable.** `pip install torch pytabkit` took nine minutes.
+
+## ✅ WHY THE ANGLE WAS TAKEN AT ITS WORD RATHER THAN ITS ROW NUMBER
+
+ANGLE INDEX row 3 is *"CatBoost: it handles categoricals better"*, handed 20 times and closed
+every time. ⚠ **But every closure priced a different quantity than the sentence.** Row 3
+publishes a TUNING price (+4e-7) and an ENROLMENT price (+10.04e-6/member for a foreign
+CatBoost). Our own pipeline turns every raw column into a target-encoded NUMERIC column and
+hands CatBoost **no categorical features at all** — so *"handles categoricals better"* had no
+arm anywhere in this workspace, and the row's own operational rule (*prefer a pipeline we do
+not hold, NOT prefer CatBoost*) was derived from foreign members, never from ours.
+
+So this run kept the angle and changed what it was pointed at: **give CatBoost the exact
+values as native categoricals and pair it against the same frame with those columns dropped.**
+That is the sentence, tested for the first time at handing 21.
+
+## 📌 THE SOURCE — THE NOTEBOOK w184 SAID WAS MISSING FROM ALL THREE DOCUMENTS
+
+`kodaifukuda0311/s6e8-how-to-achieve-0-97-with-realmlp-only`, public **0.97016 with ONE model**,
+named in the 14th-place writeup and absent from JOURNAL.md, RESEARCH.md and LEADERBOARD.md.
+Pulled to `notebooks/w187_realmlp_only/`. Its recipe is two ideas stacked:
+
+  1. **four representations of every raw column at once** — raw value, exact-value CATEGORY,
+     exact-value target encoding, exact-value frequency;
+  2. **features read off the 7,500-row original WITH ITS LABELS** — class-conditional CDF gap,
+     distance to the y0/y1 medians, a binned original target mean, a Gaussian-KDE
+     log-likelihood ratio.
+
+Channel 2 is strictly larger than anything this workspace built from the original: w185/w186
+used the UNLABELLED CDF (`cdfd_*`, +87.7e-6 solo, null in the stack). Ported by
+`experiments/w187a_features.py` to 65 continuous + 12 exact-value categorical columns,
+cardinality 3 to 1,460. ✅ **Its `StratifiedKFold(5, shuffle=True, random_state=42)` is our
+frozen fold scheme digit for digit**, so its fold AUCs are directly comparable to ours. The
+7,500 originals have **zero row overlap** with train, so no reference is fitted on a row whose
+label we also train on.
+
+⛔ **THE NOTEBOOK IS es-ON-VAL.** It calls `fit(X_train, y_train, X_valid, y_valid)`, so
+RealMLP early-stops on the very rows that become its OOF — the defect this workspace drops
+members for. Our RealMLP runs use `--es inner`: `fit(X, y)` only, RealMLP carves
+`val_fraction=0.2` out of the outer TRAINING part and never sees a fold validation row.
+**Every RealMLP number below is the honest arm, and the comparison is therefore unfair to it.**
+
+## ✅ THE FOLD-0 LADDER — CAPACITY IS THE LEVER, NOT TRAINING LENGTH
+
+Reference: our best own single model, `w186_lgbmfrac_cdf`, **fold-0 0.9670732** (OOF 0.9679083).
+
+    width  batch  epochs   fold-0 AUC     vs our best      fit
+     128   2048      1     0.9631649      -3,908e-6        325 s
+     128   2048      3     0.9664950        -578e-6        329 s
+     128   2048     40     0.9667037        -370e-6      1,112 s
+     384    512     20     0.9675126        +444e-6      1,360 s
+
+🎯 **Twenty epochs of an untuned 4x384 MLP, one ensemble member, honestly early-stopped, beat
+three weeks of lattice engineering by +444e-6 on the same fold.** 3 -> 40 epochs at width 128
+buys +209e-6; 128 -> 384 buys +809e-6. **The architecture's value lives in capacity**, which is
+exactly why harvesting somebody else's undertrained copy measured the copy and not the class —
+w184 said so in words, and this is the number under it.
+
+⚠ **THE COST MODEL, because the naive extrapolation says "impossible" and is wrong by ~20x.**
+Per fold, 553k rows, 16 threads: fixed setup ~325 s, then ~2 s per epoch at width 128 and ~18 s
+at width 384. **1 epoch costs 325 s and 3 epochs cost 329 s** — the intercept is everything.
+The first estimate here came from a width-384 run that had not finished 2 epochs in 35 minutes
+and said 42 hours for a 5-fold run. **Measure the intercept before extrapolating the slope.**
+
+⛔ **AND THE REAL TAX WAS THREAD OVERSUBSCRIPTION, WHICH COST THIS RUN 100 MINUTES TWICE.** A
+5-fold run at `--threads 15` alongside a 3-thread CatBoost — 18 threads on 16 cores, only 12%
+over — burned **35,000 CPU-seconds without finishing one fold**, against 10,900 for the same
+nominal work in the 8-thread probe. torch's OpenMP barriers spin, so oversubscription shows up
+as CPU-seconds, not as idle. Relaunched at `--threads 8` it went back to the probe's rate.
+**The checkpointing that makes a kill survivable was added after the second 100-minute loss**,
+not before it: `w187b` now writes the OOF and a partial test average after every fold.
+
+## ✅ THE ANGLE'S OWN SENTENCE, PRICED AT +113.98e-6
+
+Fold 0, identical folds and rows, the only difference the 12 exact-value columns:
+
+    arm                                       fold-0 AUC    best_iter   fit (4 threads)
+    exact values as native cat_features       0.96746487      1784         885 s
+    the same frame, those 12 columns dropped  0.96735089      1585         341 s
+    ---------------------------------------------------------------------------------
+    THE CATEGORICAL CHANNEL                  +113.98e-6                   2.6x cost
+
+**2.3x the 50e-6 floor.** Both arms early-stop on the fold's own validation rows — the same
+convention as our enrolled members, so the pair and the comparison are like-for-like, and
+neither absolute number is clean.
+
+📌 **THE DECOMPOSITION against our best member's fold-0 0.9670732:** +277.7e-6 from the
+notebook's 65-column frame with no exact-value cats, then +114.0e-6 more from the cats,
++391.7e-6 in total — on a frame with a fraction of our lattice's columns. ⚠ The frame term is
+**CONFOUNDED** (different library and hyperparameters from the LightGBM member it is compared
+against); only the +114e-6 pair term is clean.
+
+⛔ **A FREE DETERMINISM CHECK, BY ACCIDENT — AND A NONDETERMINISM BAND THAT MATTERS.** The
+control arm was first launched without its `--nocat` flag, so two independent processes ran the
+same configuration and returned `0.9674648709144932` / best_iter 1784 **twice, identical to 16
+digits**. The tell was that a control matched its treatment exactly: a pair agreeing to the last
+digit is a bug report, not a null. Kept as `experiments/w187_cb_dup.*`. ⚠ **But the same
+configuration at `thread_count=3` instead of 4 returns 0.96749688 — CatBoost is deterministic
+in its seed and NOT in its thread count, and the band is 32e-6.** The +114e-6 pair was measured
+at equal thread counts so it stands, but it is only 3.6x that band, not 2.3x the floor and
+nothing else.
+
+## ✅ THE 5-FOLD CatBoost IS THE BEST SINGLE MODEL THIS WORKSPACE HAS EVER BUILT, AND THE BOARD AGREES BY MORE THAN CV SAID
+
+`w187_cb5`, five folds, the notebook frame with exact-value categoricals, lr 0.10 / depth 6 /
+`max_ctr_complexity` 1, best iterations 1670 / 1721 / 1266 / 1536 / 1531:
+
+    fold        0          1          2          3          4
+    AUC     0.9674969  0.9682736  0.9681725  0.9688620  0.9678773
+    mean fold 0.96813645          OOF 0.96813625
+
+    file                     CV           public     private
+    w186_lgbmfrac_cdf        0.9679083    0.96907    0.96884   <- the previous best single
+    w187_cb5                 0.9681362    0.96949    0.96917
+    delta                   +227.9e-6    +420e-6    +330e-6
+    w187_mlp384_f0 (1 fold)  0.9675126*   0.96877    0.96875   *fold-0 AUC, not an OOF
+
+🎯 **CV understated the gain by roughly half on both boards, and public and private agree with
+each other to 90e-6.** That is the opposite direction to the Rogii failure and to most of what
+this workspace has measured: the usual shape here is a solo gain that evaporates. This one got
+BIGGER out of sample, on 296,302 rows, on both slices.
+
+⚠ **`w187_mlp384_f0` IS ONE FOLD'S MODEL, trained on 80% of train, submitted from the partial
+checkpoint** — not a 5-fold average, and its public 0.96877 should be read against that. The
+remaining folds were still training when this entry was written; read
+`experiments/w187_mlp384_progress.json` before quoting any 5-fold RealMLP number.
+
+📌 **AND THE HONEST COMPARISON STILL FAVOURS THE MLP.** The CatBoost arms early-stop on the
+fold's own validation rows; the RealMLP arm never sees them. On fold 0 the RealMLP's honest
+0.9675126 is still above the CatBoost's optimistic 0.9674969.
+
+## ✅ AND IT SURVIVED THE COMBINER — THE FIRST MEMBER THIS WORKSPACE BUILT THAT DID
+
+w186's hard-won lesson is that a solo gain is not a stack gain: its own +87.7e-6 solo channel
+priced at **+0.86e-6/member, t = 0.91, sign-flipping** once a combiner could already see 104
+correlated members. `experiments/w187d_membervalue.py` runs the same instrument — 104-member
+pool, 8 paired 50/50 splits, C = 1.0, logit transform, same rows for every variant:
+
+    max |corr| to any pool member   0.993973  (naji04)
+    pool+cb5   +20.41 +/- 5.31 e-6   [consistent 8/8]   t = 10.87
+
+    reference, same instrument:  a foreign CatBoost  +10.04e-6  t = 8.87
+                                 w186's cdfd_* channel +0.86e-6  t = 0.91
+
+🎯 **2.0x the ENROLMENT rate this instrument gives a foreign CatBoost, 24x w186's channel, and
+t = 10.87 against a 1% critical t of 3.50 on df = 7.** ⚠ No body control is needed here and
+that is a real structural difference from w186, not a shortcut: w186's treatment was nine extra
+columns inside an ALREADY ENROLLED member, so "one more correlated member" had to be subtracted.
+`w187_cb5` is a different library on a frame no pool member has seen, at max |corr| 0.993973
+against w186's control at 0.999999994. **The pool itself is the control.**
+
+📌 **THE CURRENCIES, and they still do not add:** +227.9e-6 is an OOF AUC at k=1; +420e-6 is a
+public-board total at k=1; +20.41e-6 is an AUC-per-member ENROLMENT rate. Three denominators.
+
+## 📌 WHAT THIS SAYS ABOUT THE 319th FINISH, WHICH IS THE POINT OF STILL RUNNING
+
+w184 read the writeups and concluded the ceiling was the base model and we spent 201
+submissions on the blend; 2nd place wrote *"I thought I needed a better blender. In fact, I
+needed a better model."* ⛔ **This run is that sentence with numbers on it, produced by the
+workspace itself rather than quoted from a forum.** One afternoon on the MODEL — a frame
+someone published, a library nobody had installed — moved the best single model +228e-6 on CV,
++420e-6 on public, +330e-6 on private, and +20.41e-6/member in the stack, against three weeks
+of blending that ANGLE INDEX rows 6, 7 and 10 price between -1.07e-6 and +4.5e-6.
+
+⚠ **It does NOT show we would have finished higher.** The graded pair was a 200-member blend at
+0.97119 public; `w187_cb5` at 0.96949 is 1,700e-6 below it and this is a MEMBER, not a
+submission. What it shows is where the marginal hour was worth spending, which is the only
+thing a closed board can still teach.
+
+## ✅ THE FOLD-AVERAGING CURVE, MEASURED ON THE BOARD RATHER THAN ASSUMED
+
+Each RealMLP submission is the same model averaged over one more fold, so the deltas are the
+value of fold-averaging alone, priced on 296,302 rows:
+
+    file                  folds   public     private
+    w187_mlp384_f0          1     0.96877    0.96875
+    w187_mlp384_f2          2     0.96945    0.96930
+    delta, one extra fold        +680e-6    +550e-6
+    w187_cb5                5     0.96949    0.96917   (CatBoost, for scale)
+
+🎯 **The 2-fold RealMLP's private 0.96930 already beats the 5-fold CatBoost's 0.96917**, and it
+does it with honest inner-val early stopping against CatBoost's es-on-val. ⚠ The remaining
+folds were still training when this was written — `experiments/w187_mlp384_progress.json` has
+the live count and `experiments/w187_mlp384.log` the per-fold AUCs. Fold AUCs so far:
+0.96751262 (f0), 0.96821987 (f1).
+
+⚠ **+680e-6 for one extra fold is much larger than ANGLE INDEX row 7's seed/fold-averaging
+price**, and it is NOT a contradiction: row 7 prices averaging SEEDS of an already 5-fold
+member, this prices going from a 1-fold model to a 2-fold one. A 1-fold model has seen 80% of
+train and is a different object.
+
+## 📌 SUBMISSIONS THIS RUN — 3, ALL LATE MEASUREMENTS, NONE A PICK
+
+    56062554  w187_cb5.csv          0.96949 / 0.96917
+    56062598  w187_mlp384_f0.csv    0.96877 / 0.96875
+    56063029  w187_mlp384_f2.csv    0.96945 / 0.96930
+
+Cap read back as 60 remaining after the third, consistent with w185's 100/day. Standing is
+unchanged and cannot change: **319 / 3,531, private 0.97093**. ✅ **`w187_cb5` at 0.96949 is the
+best single-model public score this workspace has ever produced**, and `w187_mlp384_f2` at
+0.96930 the best single-model private, both by a wide margin over `w186_lgbmfrac_cdf`'s
+0.96907 / 0.96884.
+
+## ✅ VERIFICATION
+
+    experiments/w93a_suite.py    TOTAL 792s   65/76 green   (experiments/w187_suite.log)
+
+**Level with w186's final 65/76, and no red is mine.** The eleven are the same by-design set
+w186 documented: `w54a_vetoexpiry`, `w63b_setguard`, `w67b_slopeguard`, `w70d_chainguard`,
+`w72b_dayguard`, `w74b_clickstaleguard`, `w85c_slotguard`, `w87a_registrarguard`,
+`w92a_smokerun`, `w100a_complement`, `w161a_driverguard`.
+
+✅ **The two guards w186 tripped stayed green, because this run followed w186's lesson instead
+of rediscovering it.** `oof/` is a CURATED pack: every new member went to `oof_w187/` and is
+read with `load_members(extra_dirs=...)`, so `w65c_subsetcheck` (pins 202) and `w109b_colguard`
+(pins 199) never saw them. ✅ `w112a_templateguard` T1 was fixed BEFORE the first send rather
+than after: three heads registered (`w187 realmlp`, `w187 cb-cat`, `w187 cb-nocat`) and
+`LATE_PREFIX` extended to `("w185 ", "w186 ", "w187 ")`.
+
+## 🔴 WHAT I GOT WRONG, IN THE ORDER IT COST TIME
+
+1. **Estimated a cost model from one point and acted on it.** A width-384 run that had not
+   finished 2 epochs in 35 minutes gave "42 hours for 5 folds". The truth was a ~325 s
+   intercept and ~18 s per epoch: 1 epoch and 3 epochs cost 325 s and 329 s. **Two points
+   would have caught it and cost 6 minutes.**
+2. **Oversubscribed the box twice.** 15 torch threads next to a 3-thread CatBoost burned
+   35,000 CPU-seconds without finishing a fold that takes 10,900 at 8 threads. Two restarts,
+   ~100 minutes each.
+3. **Wrote a 5-fold runner that persists nothing until the last fold**, so both of those
+   restarts lost everything. Checkpointing was added on the second one, not the first.
+4. **Launched a control arm without its `--nocat` flag**, so the "pair" was one configuration
+   run twice. It read as a perfect null until I noticed the two arms agreed to 16 digits.
+5. **Piped long-running commands through `tail`**, which buffers, so several jobs looked dead
+   for many minutes while running fine. Redirect to a log file and grep the file.
+
+## 📌 NEXT RUN SHOULD
+
+1. **Read `experiments/w187_mlp384_progress.json` and finish or resubmit the RealMLP.** If all
+   five folds landed, its OOF is the number to compare against `w187_cb5`'s 0.9681362, and
+   `w187d_membervalue.py` should be re-run with the RealMLP added — a NN next to 104 GBDTs is
+   the most orthogonal member this pool has ever been offered and the +20.41e-6 CatBoost rate
+   is the floor to beat, not the ceiling.
+2. **Give the RealMLP the notebook's actual capacity.** Every number here is `n_ens=1` at 20
+   epochs against a recipe tuned for `n_ens=8` at 100. The ladder says capacity is the lever
+   and we have only climbed two rungs of it. Budget ~1 h per fold per rung and run ONE job at
+   a time on 16 threads.
+3. **Ablate the labelled-original block.** `w187a_features.py` builds `__orig_cdf_gap`,
+   `__orig_q50_distance_y0/_y1`, `__orig_mean` and `__orig_kde_llr` from the 7,500 originals'
+   LABELS — a strictly larger channel than w185/w186's unlabelled `cdfd_*`, which priced at
+   +87.7e-6 solo and null in the stack. Dropping just those columns from the `w187c` frame is
+   one cheap run and would say how much of the +228e-6 is the original's labels.
+4. ⛔ **Do NOT re-run `w187c_catboost.py` arms at different `thread_count` and compare them.**
+   The band is 32e-6 and the effects here are 114e-6.

@@ -3407,3 +3407,24 @@ about **+440e-6** on a single model, four times the whole spread of our 201 subm
 member to harvest from other people's notebooks and score for decorrelation. We never tuned one.
 `kodaifukuda0311/s6e8-how-to-achieve-0-97-with-realmlp-only` is named in the 14th-place writeup
 and appears **nowhere** in this workspace.
+
+## w187 (2026-09-06) — the single-model gap is ours to close, and 3 submissions closed a third of it
+
+Standing is fixed at **319 / 3,531, private 0.97093**, and nothing sent now can move it. What
+moved is the single-model number, which is the one w184 identified as the whole distance
+between us and the top of this board.
+
+    what                                   CV           public     private
+    w186_lgbmfrac_cdf   previous best single 0.9679083   0.96907    0.96884
+    w187_cb5            CatBoost, 5-fold     0.9681362   0.96949    0.96917
+    w187_mlp384_f2      RealMLP, 2 folds     ---         0.96945    0.96930
+    Deotte, 1st         RealMLP, tuned       0.97070     0.97174    ---
+
+**+330e-6 to +550e-6 of private score in one afternoon**, from a public frame nobody here had
+ported and a library nobody here had installed. Deotte's single model is still ~2,400e-6 of
+public above `w187_cb5`, so the gap is a third closed at best — but it is now a gap with a
+measured slope instead of an anecdote, and both arms are at `n_ens=1` and 20 epochs against a
+recipe tuned for `n_ens=8` and 100.
+
+📌 The blending route, for contrast, is priced in this file and in ANGLE INDEX rows 6/7/10 at
+-1.07e-6 to +4.5e-6, and 14th place's 278-shared-OOF ledger bought them +57e-6 in total.

@@ -71,10 +71,13 @@ HEADS = {
     "w185 origcol-cdf":  "late measurement: as-COLUMN treatment arm (row 1)",
     "w186 lgbmfrac-ctrl": "late measurement: control arm, the enrolled tuned member rebuilt",
     "w186 lgbmfrac-cdf":  "late measurement: treatment arm, the same member plus cdfd_*",
+    "w187 realmlp":       "late measurement: the first RealMLP this workspace trained itself",
+    "w187 cb-cat":        "late measurement: CatBoost given the exact values as categoricals",
+    "w187 cb-nocat":      "late measurement: the same CatBoost with those columns dropped",
 }
 # A tuple, not a string, since w186. The late class is defined by the DEADLINE and not by a
 # run number, so it will keep gaining run tags; T6 is what holds it to that definition.
-LATE_PREFIX = ("w185 ", "w186 ")
+LATE_PREFIX = ("w185 ", "w186 ", "w187 ")
 DEADLINE = "2026-08-31 23:59:00"
 AUTOMATED_FROM = "2026-08-22"          # the first day the registrar wrote the descriptions
 
