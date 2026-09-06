@@ -1,0 +1,14 @@
+  base fold0 auc=0.962521
+  base fold1 auc=0.963163
+  base fold2 auc=0.963632
+  base fold3 auc=0.964205
+  base fold4 auc=0.963135
+base  ncol= 12 OOF=0.963329 -> submissions/w185_origcol_base.csv (142s)
+  cdf fold0 auc=0.963629
+  cdf fold1 auc=0.964275
+  cdf fold2 auc=0.964704
+  cdf fold3 auc=0.965237
+  cdf fold4 auc=0.964195
+cdf   ncol= 21 OOF=0.964407 -> submissions/w185_origcol_cdf.csv (226s)
+
+CV delta = +1077.9e-6   0.963329 -> 0.964407

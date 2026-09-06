@@ -1,0 +1,71 @@
+200 in history, 231 on disk, 32 never sent
+[ 1/32] ok  stack_pub74_logit.csv
+[ 2/32] ok  stack_pub88_mine_logit.csv
+[ 3/32] ok  w16m_widegrid.csv
+[ 4/32] ok  w23_ad187std_hybrid.csv
+[ 5/32] ok  w23_ad187std_rankraw.csv
+[ 6/32] ok  w23_ad187std_rescale.csv
+[ 7/32] ok  w29_ad194stdcorr_ens4.csv
+[ 8/32] ok  w29_ad194stdcorr_rescale.csv
+[ 9/32] ok  w34_ad196std_logit.csv
+[10/32] ok  w36_ad199std_logit.csv
+[11/32] ok  w38_ad202std_logit.csv
+[12/32] ok  w40_ad211std_logit.csv
+[13/32] ok  w42_ad217std.csv
+[14/32] ok  w42_ad217std_h3.csv
+[15/32] ok  w42_ad217std_hybrid.csv
+[16/32] ok  w42_ad217std_logit.csv
+[17/32] ok  w42_ad217std_rankraw.csv
+[18/32] ok  w42_ad217std_rescale.csv
+[19/32] ok  w42_ad217stdcorr.csv
+[20/32] ok  w48_cal_hboyang_mix.csv
+[21/32] ok  w50_ad216std.csv
+[22/32] ok  w50_ad216std_h3.csv
+[23/32] ok  w50_ad216std_hybrid.csv
+[24/32] ok  w50_ad216std_logit.csv
+[25/32] ok  w50_ad216std_rankraw.csv
+[26/32] ok  w50_ad216std_rescale.csv
+[27/32] ok  w50_ad216stdcorr.csv
+[28/32] ok  w69_ad208std_logit.csv
+[29/32] ok  w69_ad208stdcorr.csv
+[30/32] ok  w85_cal_gmm_raw.csv
+[31/32] ok  w85_cal_gnb_raw.csv
+[32/32] ok  w85_cal_qda_raw.csv
+
+waiting 60s for scoring...
+
+file                                          public   private
+w42_ad217stdcorr.csv                         0.97119   0.97096
+w42_ad217std_rankraw.csv                     0.97116   0.97095
+w42_ad217std_h3.csv                          0.97117   0.97095
+w42_ad217std.csv                             0.97117   0.97095
+w50_ad216stdcorr.csv                         0.97118   0.97094
+w69_ad208stdcorr.csv                         0.97117   0.97093
+w50_ad216std_rescale.csv                     0.97116   0.97093
+w50_ad216std_h3.csv                          0.97116   0.97093
+w50_ad216std.csv                             0.97117   0.97093
+w42_ad217std_rescale.csv                     0.97116   0.97093
+w42_ad217std_hybrid.csv                      0.97115   0.97093
+w29_ad194stdcorr_ens4.csv                    0.97119   0.97093
+w50_ad216std_rankraw.csv                     0.97114   0.97092
+w42_ad217std_logit.csv                       0.97117   0.97092
+w50_ad216std_hybrid.csv                      0.97114   0.97091
+w48_cal_hboyang_mix.csv                      0.97109   0.97091
+w29_ad194stdcorr_rescale.csv                 0.97117   0.97091
+w23_ad187std_rescale.csv                     0.97114   0.97090
+w69_ad208std_logit.csv                       0.97116   0.97089
+w50_ad216std_logit.csv                       0.97115   0.97089
+w40_ad211std_logit.csv                       0.97116   0.97089
+w36_ad199std_logit.csv                       0.97117   0.97089
+w23_ad187std_rankraw.csv                     0.97114   0.97089
+w23_ad187std_hybrid.csv                      0.97112   0.97089
+w38_ad202std_logit.csv                       0.97116   0.97088
+w34_ad196std_logit.csv                       0.97116   0.97088
+w16m_widegrid.csv                            0.97107   0.97084
+stack_pub88_mine_logit.csv                   0.97081   0.97059
+stack_pub74_logit.csv                        0.97081   0.97058
+w85_cal_gnb_raw.csv                          0.89934   0.89741
+w85_cal_qda_raw.csv                          0.89595   0.89635
+w85_cal_gmm_raw.csv                          0.85027   0.84982
+
+32 scored back of 32 sent

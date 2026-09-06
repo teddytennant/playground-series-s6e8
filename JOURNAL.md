@@ -42466,3 +42466,280 @@ returns `tail`'s status. That is w136 §9 and w137's registered trap, which `RES
 firing on the run that had read it earlier in the same session. **Redirect to a file, then test `$?`:** the
 true code was **128**. Caught within one command because the output said `fatal:` two lines above the `0`,
 but the `0` is what a scanning eye takes.
+
+# 2026-09-06 — w185 — 🟢 THE BOARD IS CLOSED. THE SCORER IS NOT. ANGLE: the original dataset (row 1) — 35 submissions, and the run's finding is that the last 41 runs could have made them too.
+
+## 📍 THE HEADLINE — I TRIED THE THING EVERY RUN SINCE 09-01 ASSUMED WAS IMPOSSIBLE
+
+`LEADERBOARD.md`'s w157 entry has printed this for fifteen days, and then argued it away:
+
+> ⚠ `submissions_disabled` reads **False** for the fifteenth day on a closed, graded board.
+> Do not read it as "you may submit" — the deadline is the authority.
+
+⛔ **It reads `False` because submissions are not disabled.** One API call settles it:
+
+    kaggle competitions submit -c playground-series-s6e8 -f submissions/w36_ad199stdcorr_ens4.csv
+    -> rc=0  "Successfully submitted"   "99 submissions remaining today."
+    -> scored back COMPLETE  public 0.97119  private 0.97093
+
+That reproduces the file's record digit for digit, so it is the same 296,302-row test set and
+still deterministic. **The late cap is 100/day and every submission returns the PRIVATE score.**
+
+🎯 Same shape as the 50-of-201 pagination defect this workspace spent three runs on: an
+instrument reported ground truth, printed it plainly, and a chain of inference on top of it won.
+The difference is that the pagination bug corrupted a *record*; this one cost 41 runs of
+*capability*. Recorded at line 1 of `RESEARCH.md`, where the orient step reaches it.
+
+⚠ **Stated before anyone reaches for it:** the private column is now a MEASURING instrument for
+a competition that is over. Selecting on it would be the Rogii failure with a better oracle.
+There is no rank left to win here; do not carry the habit to a live board, where this channel
+does not exist and CV discipline is the only thing standing in for it.
+
+## 🔴 SO I SPENT IT, AND IT FOUND +21 PLACES THAT HAVE BEEN ON DISK SINCE 08-20
+
+32 files in `submissions/` appear in no row of the 201-row history. `w185c_scoreunsent.py` sent
+all 32; 32 of 32 scored (`experiments/w185c_unsent_scores.json`). Private ranks computed off the
+final board via `kaggle_board.board(private=True)`, 3,532 teams, ties to worst:
+
+    w42_ad217stdcorr.csv     public 0.97119   private 0.97096   rank 301   ⛔ NEVER SENT
+    w42_ad217std_h3/_rankraw public 0.97116   private 0.97095   rank 310   ⛔ NEVER SENT
+    w50_ad216stdcorr.csv     public 0.97118   private 0.97094   rank 315   ⛔ NEVER SENT
+    w40_ad211stdcorr.csv     public 0.97118   private 0.97094   rank 315   best we DID send
+    w36/w38 ..._ens4         public 0.97119   private 0.97093   rank 322   THE GRADED PAIR (official 319)
+
+📌 **`w42_ad217stdcorr` is the best file this workspace ever produced.** Built 2026-08-20 22:03,
+never left the box. Its public 0.97119 ties the top public tier, so under Kaggle's default
+top-2-by-public it would have been auto-selected on arrival — and nothing was ever clicked, so
+the default is what graded us.
+
+## ✅ AND IT WAS NOT AN OVERSIGHT — THE VETO SURVIVES ITS OWN TEST. I CHECKED BEFORE BLAMING ANYONE.
+
+ARM 217's fusion rests on `oof_hboyang_mix`, an aggregator over 138 third-party streams, so
+w40d/w48d/w49/w51/w56 ruled the family WANTED-INELIGIBLE on CV over five runs, wired it into
+`check_selection.py` at import, and built `w56b_wantedguard.py` to watch the guard fire on this
+exact filename. That is a careful piece of work, not a lapse.
+
+w56 also preregistered a **powered** test with thresholds fixed before any score existed, to be
+read off one file, `w48_cal_hboyang_mix.csv`:
+
+    point prediction 0.971230 (band 0.971198..0.971252)
+    HONEST   fires if public >= 0.97116      INFLATED fires if public <= 0.97080
+    in between -> "report it and change nothing"  <- w56 called this the MODAL outcome
+
+⛔ **That file was never sent either.** It scores **public 0.97109**. Neither arm fires.
+**INDETERMINATE — the modal branch — so the veto STANDS by its own registered rule.** The prereg
+was well designed, correctly powered, and never executed; running it now changes no decision it
+was written to govern.
+
+🎯 **The lesson is therefore NOT "the veto was wrong". It was procedurally right and cost 21
+places anyway.** It is the brief's own standing rule, which this workspace had in writing:
+**where submissions do not evict each other, send the file you distrust.** Distrust governs
+SELECTION, not the send. w56 saw exactly this — *"a HONEST read licenses SENDING and pricing
+ad217 on the LB, never SELECTING it"* — and then the send never happened.
+
+⚠ **The one tension I cannot resolve, stated rather than smoothed over:** with nothing clicked,
+Kaggle auto-selects the top two by PUBLIC. ad217's public ties the top tier, so on THIS
+competition "send it but don't select it" was not actually separable. The fix is to click a
+selection, not to withhold the send. Nobody ever clicked.
+
+## 🎯 THE ANGLE — ROW 1 AGAINST GROUND TRUTH, AND A THIRD ROUTE IT NEVER PRICED
+
+Row 1 has been handed forward 21 times and closed on two routes: as ROW (concat, −58.0e-6 at 1×,
+−3,340e-6 at 50×) and as MEMBER (first-stage model, −1.02e-6/member, t=0.97). w184 downloaded six
+winners' writeups, so both halves are checkable against outsiders for the first time.
+
+✅ **Identity confirmed by an outside party.** 14th place names the file:
+`Smartphone_Usage_And_Addiction_Analysis_7500_Rows.csv`. Ours is md5 `d831a326…`, the hash row 1
+publishes. Nobody found a better original because there isn't one.
+
+✅ **The inverted-edge verdict survives.** Across all six writeups, not one reports a gain from
+concatenating it as rows. 1st (Deotte) used no original data at all — a single tuned RealMLP.
+2nd lists "Original Data as ROW / as COL / No Original Data" as diversity axes over 100–200
+week-1 models and claims no gain for any of them.
+
+⛔ **But "both routes measured / nothing else to find" is wrong. There is a THIRD**, and it is the
+one 14th place actually adopted: the original **as COLUMNS** — "nearest-neighbour features, prior
+means, class-conditional CDF differences". Only their fourth item is row 1's as-MEMBER route.
+This workspace never built one. `w185a_origcols.py`, frozen folds, 691,369 rows, one plain
+LightGBM, identical params and seed:
+
+    base   12 cols  OOF 0.963329
+    cdf    21 cols  OOF 0.964407   **+1077.9e-6**   class-conditional CDF differences
+    prior  24 cols  OOF 0.963294       -35.2e-6     original mean label by decile
+    knn    15 cols  OOF 0.963155      -174.4e-6     k=25 neighbour label mean + distance
+    all    36 cols  OOF 0.964216      +887.0e-6
+
+One group carries all of it, and `all` < `cdf` — bolting the two dead groups on COSTS 191e-6.
+
+## ⛔ I PUBLISHED A PREDICTION BEFORE RUNNING THIS AND IT WAS BACKWARDS ON BOTH COUNTS
+
+Written into `RESEARCH.md` before the fit, so the measurement could judge it: *"for a GBDT, two of
+those three groups are information-free by construction"* — `cdfd_*` and `oprior_*` are each a
+function of ONE raw column that a tree can already reach by splitting, so *"only the k-NN group is
+a joint function of all nine numerics and therefore unreachable"*.
+
+**The two single-column groups split +1078 / −35, and the multivariate one was the worst arm.**
+
+🎯 The mechanism I had wrong, and the rule that fits all four numbers — it is not
+representability, it is **estimation resolution against 7,500 rows**:
+
+- `cdfd_c` estimates a 1-D class-conditional CDF pair from ~2.1k positive / ~5.4k negative
+  originals at FULL resolution, non-monotone in x. Well estimated, and it hands the tree a
+  univariate discriminability score that greedy axis-aligned splitting would need very many
+  splits to recover. **Wins.**
+- `oprior_c` is the same information coarsened to 10 bins. A 63-leaf tree reproduces 10 bins of
+  one column for free. **Null** — my argument was right, but only for the coarse version.
+- `knn` estimates a label mean in 9-D from 7,500 points. 7500^(1/9) ≈ 2.7 per axis, so the
+  neighbourhood mean is mostly noise. **Worst arm.**
+
+📌 **7,500 rows is plenty for one-dimensional label-conditional structure at full resolution and
+nowhere near enough for anything joint. Coarsen it and it dies; take it multivariate and it dies.**
+That is the transferable form of row 1, and it took being wrong out loud to get to it.
+
+## ✅ AND THE ORACLE PRICED IT ON THE REAL TEST SET — CV DID NOT OVERSTATE
+
+`w185b_origcols_test.py` built the paired files; both submitted and scored:
+
+    file                      CV          public     private
+    w185_origcol_base.csv     0.963329    0.96481    0.96471
+    w185_origcol_cdf.csv      0.964407    0.96606    0.96576
+    delta                    +1077.9e-6  +1250e-6   +1050e-6
+
+Private delta lands within 28e-6 of the CV delta. Sign and size agree across all three, which is
+what an honest feature looks like and what the concat arm never showed. `base` OOF reproduced
+w185a's `base` to ten digits across two independent runs.
+
+⚠ **SCOPE, stated plainly:** this is a bare single LightGBM at 0.9633, ~380e-6 below this
+workspace's stack CV and ~440e-6 below the winner. Large gains on a weak baseline routinely
+shrink against a strong one, and 14th place — the only competitor who used this route — called
+these proxies "modest on their own", earning their place by decorrelation. **Settled: row 1's
+completeness claim was wrong and the third route is not a null. NOT settled: what it is worth
+inside the stack.**
+
+## 📌 W184's WORK WAS ORPHANED, AND ITS 0-BYTE LOG IS A TRAP THIS FILE ALREADY DOCUMENTS
+
+w184 wrote `RESEARCH.md` and `LEADERBOARD.md`, built `w184a_budget_feats.py` and
+`w184b_forum.py`, pulled six writeups — then wrote **no `JOURNAL.md` entry and committed
+nothing**. That is w182's failure one run later, and `w159a_committedguard` catches it.
+
+⛔ Its `w184a_run.log` was 0 bytes, and I first read that as "cut off mid-run". It is not.
+`RESEARCH.md:5656` already says why: **`nohup ... &` is not enough on this box** — the runner is
+a system unit with `KillMode=control-group`, `setsid` does not leave a cgroup, and standing check
+**#40 `w104a_cgroupguard`** exists for exactly this. My own first `nohup` died the same way inside
+five minutes. The remedy that works here is the harness's tracked background runner.
+
+⚠ **And I then wasted ~20 minutes on a self-inflicted version of it.** Three copies of w184a were
+alive at once (w184's, my nohup's, my foreground one) — 48 LightGBM threads on 16 cores with
+OpenMP spin-wait, so `ps` showed 12 cores busy and pos 0 on stdout: **CPU burn that looks
+identical to progress.** Cleared the box and the same arm finished in 88s. `OMP_WAIT_POLICY=passive`
+and one job at a time. w184a's own measurement is still unrun; its script also omits
+`fake_daily = social + work + game`, which 2nd place names as the one that WORKED. Next run's job.
+
+## ✅ VERIFICATION
+
+    experiments/w93a_suite.py    TOTAL 397s   59/76 green   (experiments/w185_suite.log)
+
+That is 7 reds worse than w183's 66/76, and the run above was taken BEFORE this entry existed —
+nine of the guards read `JOURNAL.md` or `git show HEAD:JOURNAL.md`, so they were judging a
+workspace where row 1's trail had been bumped to ×21 and no w185 entry backed it. Re-run below.
+
+## 📌 SUBMISSIONS THIS RUN — 35, ALL MEASUREMENTS, NONE A PICK
+
+1 closed-check probe, 32 unsent-file scores, 2 paired as-COLUMN files. Nothing here changes the
+standing, which is **319 / 3,531, private 0.97093**, and nothing can.
+
+**Next run should:** (1) run `w184a_budget_feats.py` WITH `fake_daily` added — it is w184's
+unfinished business and 2nd place's one named feature win; (2) put `cdfd_*` into a real stack
+member and price it there rather than against a bare baseline, now that the private board can
+score it; (3) the RealMLP gap w184 identified (+440e-6 over our best clean one) is the largest
+known number in this workspace and is now directly measurable — that is where the value is, not
+in another guard.
+
+## ⚠ ADDENDUM — THE SUITE COUNT IN THE BODY IS PRE-ENTRY, AND TWO REDS ARE MINE
+
+The 59/76 above was taken before this entry was appended. Nine guards read `JOURNAL.md` or
+`git show HEAD:JOURNAL.md`, and they were judging a workspace where row 1's trail said ×21 with
+no w185 entry backing it. Re-run after appending, **four cleared immediately**:
+`w117a_handcount` (row 10 / row 1 counts now reconcile), `w156a_recordguard`,
+`w157a_closedguard`, `w179a_superlativeguard` — all rc=0.
+
+Two were genuinely mine, and they are different from each other.
+
+✅ **`w112a_templateguard` rc=1 — FIXED, and the fix is a rule rather than a widening.** My four
+new submission heads (`w185 closed-check`, `w185 late-score`, `w185 origcol-base`,
+`w185 origcol-cdf`) matched no classifier. The file's own comment says *"widen this only together
+with the rules in T2/T3 — adding a head without a rule defeats it"*, which is the right warning.
+So the heads went in as a **fourth class, LATE sends**, exempt from T2/T3 because a post-deadline
+send on a graded board cannot be an attempt — plus **T6**, which checks that claim instead of
+trusting the name: any `w185 *` row dated at or before `2026-08-31 23:59:00` fires it. Watched it
+fire on a backdated row (`w185_origcol_cdf.csv`) before shipping it, because a guard arm nobody
+has seen fire is w54/w55's lesson. Guard now rc=0 with all five T5 control mutations still firing.
+
+⛔ **`w74b_clickstaleguard` rc=1 — LEFT RED, BY DESIGN, AND IT IS RIGHT.** My 35 sends moved the
+public tier-1 membership from two files to four:
+
+    was  ['w36_ad199stdcorr_ens4', 'w38_ad202stdcorr_ens4']
+    now  [+ 'w29_ad194stdcorr_ens4', 'w42_ad217stdcorr']          all four at public 0.97119
+
+and tier 2 gained `w50_ad216stdcorr`. Its third failure is the honest one: *"tier 1 holds 4 files
+— the pair is no longer DETERMINED and w74a does not price that case at all."* 🎯 **That is
+exactly the tension in the ad217 section above, now visible in an instrument:** on a live board,
+sending files that tie the top public tier changes which pair gets auto-selected. Here it changes
+nothing, because grading finished on 08-31 — confirmed live this run, `kaggle_board` reads us at
+**private rank 319 / 3532, score 0.97093** and public 331, unmoved by all 35 sends.
+
+📌 **I am not re-recording w74b's baseline to make it green.** Editing a guard's good state so it
+stops reporting a true change is the failure this workspace has caught in itself repeatedly. It
+joins the standing by-design reds as the **ninth**, and its reason is one line: *late sends
+widened tier 1 on a board that was already graded, so "DETERMINED" is no longer a live question.*
+A future run must not read it as a regression. **Standing checks stay at 76**; nothing new was
+registered, one existing guard gained an arm.
+
+## 🔴 SECOND ADDENDUM — MY 35 SENDS BROKE THREE HISTORY-DERIVED MODULES, AND ALL THREE ARE TELLING THE TRUTH
+
+Final suite: **`experiments/w93a_suite.py` TOTAL 370s, 64/76 green** (`experiments/w185_suite2.log`).
+That is **two worse than w183's 66/76**, and I caused it. Stating the cost plainly rather than
+burying it under the wins.
+
+The twelve reds are the eight standing by-design ones (`w54a_vetoexpiry`, `w63b_setguard`,
+`w67b_slopeguard`, `w70d_chainguard`, `w72b_dayguard`, `w85c_slotguard`, `w87a_registrarguard`,
+`w100a_complement`), `w161a_driverguard`'s permanent w173/w174 entries, `w159a_committedguard`
+(clears on this run's commit), `w74b_clickstaleguard` (first addendum — by design), and
+**`w92a_smokerun` rc=1, which is new.** It reports three modules that now exit 1. All three were
+green at w183. All three broke because I put 35 files on the board, and **not one of them is a
+bug** — they are instruments noticing a state change that is real:
+
+⛔ **`w75a_erarefresh` — the sharpest of the three.** *"raw-CV argmax over ALL 160 sent stems:
+`w48_cal_hboyang_mix` (0.9701815536)"*. That file had the highest CV on disk and had never been
+sent, so it was not in the universe this module ranks. I sent it, and **the CV argmax over sent
+files is now a WANTED-INELIGIBLE file** — precisely the state `check_selection.py`'s
+`WANTED_INELIGIBLE` was built to make unreachable. 🎯 On a live board this is the dangerous
+version of the ad217 lesson: *sending a distrusted file puts it into every downstream argmax that
+reads the sent history.* Here it is inert, because grading closed on 08-31. It is also the
+concrete counterweight to the "just send it" rule in the ad217 section, and both belong on the
+record together.
+
+⛔ **`w93b_cvlbaudit` G2** — 5 ATTEMPTs outside the blend band (0.97, 0.972): the two `origcol`
+files at 0.96606 / 0.96481 and the three `w85_cal_*_raw` at 0.85–0.90. They are measurements, not
+attempts, but they carry no `PROBE_MARKS` literal so the audit classifies them as attempts. ⚠ And
+the fix is NOT simply adding a mark: the module says so itself — *"NOT AN EXEMPTION. A declared
+measurement is excused the blend band and then held to the property that actually matters: it must
+have landed BELOW the auto-selection tier"* — and `w42_ad217stdcorr` at public 0.97119 sits AT the
+tier. A blanket `w185 ` mark would trade one true red for another.
+
+⛔ **`w28a_cvlb_refresh`** — `GATE: w26e rows n=31 residual sd 9.63e-6 (dof 21) vs stored 8.35e-6
+— FAIL`, then a hard assert. My sends added rows to the CV↔LB regression, so the stored refit no
+longer describes the data. That is ordinary staleness in a module whose name is `refresh`.
+
+📌 **I AM NOT FIXING THESE THIS RUN, AND THAT IS A CHOICE, NOT AN OMISSION.** Editing three
+analysis modules at the end of a long run, to clear a red I created by taking measurements I
+still think were worth taking, is how a rushed fix becomes next week's silent wrong number. The
+specification for whoever picks it up, in the order I would do it:
+1. `w28a_cvlb_refresh` — refresh the stored w26e fit. Mechanical, that is what it is for.
+2. `w93b_cvlbaudit` — the missing concept is the DEADLINE, not another mark. A send dated after
+   `2026-08-31 23:59:00` cannot be selected or graded, so it belongs outside the attempt/
+   measurement audit entirely. `w112a`'s new T6 is the same predicate and can be borrowed.
+3. `w75a_erarefresh` — decide deliberately whether WANTED-INELIGIBLE stems belong in a sent-CV
+   argmax at all. I think they do not, but that is a selection-policy call and it should be made
+   on purpose rather than to turn a light green.
+⚠ **None of them is urgent and none affects the standing**, which is locked at 319 / 3,531.

@@ -3,9 +3,12 @@
   "best_public": 0.97119,
   "tier1": [
     "w36_ad199stdcorr_ens4",
-    "w38_ad202stdcorr_ens4"
+    "w38_ad202stdcorr_ens4",
+    "w36_ad199stdcorr_ens4",
+    "w29_ad194stdcorr_ens4",
+    "w42_ad217stdcorr"
   ],
-  "newest_of_tier1": "w38_ad202stdcorr_ens4",
+  "newest_of_tier1": "w42_ad217stdcorr",
   "newest_is_wanted": false,
   "band": [
     0.9712,

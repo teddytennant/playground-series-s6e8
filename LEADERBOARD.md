@@ -1,3 +1,41 @@
+# 2026-09-06 — w185. THE BOARD IS STILL CLOSED. THE SCORER NEVER WAS, AND WE HAD THE FIELD THAT SAID SO FOR FIFTEEN DAYS.
+
+Standing is unchanged and unchangeable: **319 / 3,531, private 0.97093**. Late submissions do
+not re-rank anything. What changed is what this workspace can MEASURE.
+
+⛔ **`submissions_disabled` reads `False` because submissions are not disabled.** The entry
+directly below this one (w157, 09-03) prints that field and then talks itself out of it:
+
+> ⚠ `submissions_disabled` reads **False** for the fifteenth day on a closed, graded board. Do
+> not read it as "you may submit" — the deadline is the authority, and it passed ~61 hours ago.
+
+🎯 The instrument was right and the inference on top of it was wrong. Verified this run by doing
+the thing rather than reasoning about it: `kaggle competitions submit` returns rc=0,
+`"Successfully submitted"`, `"99 submissions remaining today"`, and the file comes back with
+**publicScore AND privateScore**. Resending `w36_ad199stdcorr_ens4.csv` scored 0.97119 / 0.97093,
+matching its record digit for digit. The late cap is **100/day**, not 10.
+
+## 🔴 AND USING IT IMMEDIATELY FOUND +21 PLACES SITTING ON DISK
+
+32 files in `submissions/` appear in no row of the 201-row history. All 32 sent, all 32 scored:
+
+    w42_ad217stdcorr.csv    public 0.97119   private 0.97096   private rank 301   NEVER SENT
+    w40_ad211stdcorr.csv    public 0.97118   private 0.97094   private rank 315   best sent
+    w36/w38 ..._ens4        public 0.97119   private 0.97093   private rank 322   graded, official 319
+
+`w42_ad217stdcorr` is the best file this workspace ever produced and it never left the box. It
+was not forgotten — the ARM 217 family was vetoed over five runs because its fusion rests on
+`oof_hboyang_mix`, an aggregator over 138 third-party streams whose OOF could not be audited.
+
+✅ **The veto survives its own test.** w56 preregistered thresholds on `w48_cal_hboyang_mix.csv`
+before any score existed: HONEST ≥ 0.97116, INFLATED ≤ 0.97080. That file was never sent either.
+It scores **0.97109** — neither arm fires, **INDETERMINATE**, the branch w56 itself called modal,
+which resolves to "the veto stands". The procedure was right. It cost 21 places anyway.
+
+📌 The transferable line, and it is the brief's own: **on a board where submissions do not evict
+each other, send the file you distrust.** Distrust governs SELECTION, not the send. The full
+table is `experiments/w185c_unsent_scores.json`.
+
 # 2026-09-03 — w157. UNCHANGED, AND RE-READ THROUGH THE GUARD RATHER THAN BY HAND.
 
 `experiments/w153a_openreadguard.py` re-run live — the guard is the authority on this read, not a
@@ -3314,3 +3352,37 @@ Nothing has moved since 08-31 and nothing will. This is the final entry for this
 > (w132, corpus ordinal 163 — the run that drained the day's ten at 12:36–12:37Z). #75 uses it
 > to separate *runs that did no work* from *runs that sent nothing*, which the JOURNAL counter
 > has silently conflated since w150. Board itself unchanged: 319 / 3,531, closed, nothing moved.
+
+## 2026-09-06 (w184) — 🔴 **THE WINNERS' WRITEUPS ARE OUT, AND THEY SAY THE BLEND WAS NEVER THE PROBLEM**
+
+The board has not moved and cannot: **private rank 319 / 3531, score 0.97093**, unchanged since
+grading. What is new is that the solution writeups were posted after the close, and this is the
+first run to read them rather than to track scores. Saved: `notebooks/w184_writeups/*.md`.
+
+| place | who | what it was |
+|---|---|---|
+| 1st | Chris Deotte | **a single RealMLP**, CV 0.97070 / public 0.97174. No ensemble. |
+| 2nd | Xin Feng | 0.97055 OOF / 0.97148 pub / **0.97123 priv** after four weeks |
+| 7th | Keanan | RealMLP 0.968781; 593-stream mega-blend 0.970763 → 0.970820 |
+| 14th | Taemyung Heo | best own single 0.96941; biggest gain of the month was a RealMLP dtype bugfix |
+| **319th** | **us** | CV 0.97014 / pub 0.97119 / **priv 0.97093** |
+
+🎯 **Deotte's ONE model (0.97070 CV) beat 7th place's 593-stream blend (0.970763 CV) on the board
+and beat 2nd place's entire four-week stack.** A single model has not won a Playground in 18
+months.
+
+⛔ **Our final result is 2nd place's WEEK ONE.** His week 1 was pub 0.97120 / priv 0.97096 off
+"100–200 basic models, no manual feature engineering"; ours is pub 0.97119 / priv 0.97093. He
+then spent three weeks on features and base models for **+27e-6 private**. We spent the same
+three weeks on stacking, calibration and self-audit for nothing measurable.
+
+📌 **He wrote our post-mortem about himself:** *"I thought my problem was diversity and blending
+… almost nothing helped. I thought I needed a better blender. In fact, I needed a better model."*
+
+🔴 **The specific miss is RealMLP.** The best *honest* one in this workspace is **0.9647**; the
+three above it (0.96956, 0.96913, 0.96641) are all flagged es-on-val or level-2 in RESEARCH.md
+itself, and the copies we harvested clean scored **0.958**. Deotte's clean one was **0.97070** —
+about **+440e-6** on a single model, four times the whole spread of our 201 submissions. We only ever treated RealMLP as a
+member to harvest from other people's notebooks and score for decorrelation. We never tuned one.
+`kodaifukuda0311/s6e8-how-to-achieve-0-97-with-realmlp-only` is named in the 14th-place writeup
+and appears **nowhere** in this workspace.

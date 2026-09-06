@@ -2,12 +2,16 @@
   "cert_mark": "w55a certifies its public score BELOW the",
   "failures": 0,
   "heads": {
+    "w185 closed-check": 1,
+    "w185 late-score": 32,
+    "w185 origcol-base": 1,
+    "w185 origcol-cdf": 1,
     "w26g queue-drain": 74,
     "w37 es-bias": 0,
     "w55 tail-fill": 26
   },
-  "n_automated": 100,
-  "n_submissions": 201,
+  "n_automated": 135,
+  "n_submissions": 236,
   "probe_marks": [
     "not an attempt on the board",
     "a MEASUREMENT, not a candidate"

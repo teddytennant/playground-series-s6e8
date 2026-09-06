@@ -1,0 +1,162 @@
+{
+ "w85_cal_qda_raw.csv": [
+  "0.89595",
+  "0.89635",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w85_cal_gnb_raw.csv": [
+  "0.89934",
+  "0.89741",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w85_cal_gmm_raw.csv": [
+  "0.85027",
+  "0.84982",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w69_ad208stdcorr.csv": [
+  "0.97117",
+  "0.97093",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w69_ad208std_logit.csv": [
+  "0.97116",
+  "0.97089",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w50_ad216stdcorr.csv": [
+  "0.97118",
+  "0.97094",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w50_ad216std_rescale.csv": [
+  "0.97116",
+  "0.97093",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w50_ad216std_rankraw.csv": [
+  "0.97114",
+  "0.97092",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w50_ad216std_logit.csv": [
+  "0.97115",
+  "0.97089",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w50_ad216std_hybrid.csv": [
+  "0.97114",
+  "0.97091",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w50_ad216std_h3.csv": [
+  "0.97116",
+  "0.97093",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w50_ad216std.csv": [
+  "0.97117",
+  "0.97093",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w48_cal_hboyang_mix.csv": [
+  "0.97109",
+  "0.97091",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w42_ad217stdcorr.csv": [
+  "0.97119",
+  "0.97096",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w42_ad217std_rescale.csv": [
+  "0.97116",
+  "0.97093",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w42_ad217std_rankraw.csv": [
+  "0.97116",
+  "0.97095",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w42_ad217std_logit.csv": [
+  "0.97117",
+  "0.97092",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w42_ad217std_hybrid.csv": [
+  "0.97115",
+  "0.97093",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w42_ad217std_h3.csv": [
+  "0.97117",
+  "0.97095",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w42_ad217std.csv": [
+  "0.97117",
+  "0.97095",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w40_ad211std_logit.csv": [
+  "0.97116",
+  "0.97089",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w38_ad202std_logit.csv": [
+  "0.97116",
+  "0.97088",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w36_ad199std_logit.csv": [
+  "0.97117",
+  "0.97089",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w34_ad196std_logit.csv": [
+  "0.97116",
+  "0.97088",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w29_ad194stdcorr_rescale.csv": [
+  "0.97117",
+  "0.97091",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w29_ad194stdcorr_ens4.csv": [
+  "0.97119",
+  "0.97093",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w23_ad187std_rescale.csv": [
+  "0.97114",
+  "0.97090",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w23_ad187std_rankraw.csv": [
+  "0.97114",
+  "0.97089",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w23_ad187std_hybrid.csv": [
+  "0.97112",
+  "0.97089",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "w16m_widegrid.csv": [
+  "0.97107",
+  "0.97084",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "stack_pub88_mine_logit.csv": [
+  "0.97081",
+  "0.97059",
+  "SubmissionStatus.COMPLETE"
+ ],
+ "stack_pub74_logit.csv": [
+  "0.97081",
+  "0.97058",
+  "SubmissionStatus.COMPLETE"
+ ]
+}

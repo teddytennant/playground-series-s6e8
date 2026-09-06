@@ -60,7 +60,18 @@ HEADS = {
     "w26g queue-drain": "attempt: carries a stack CV and a predicted LB",
     "w55 tail-fill":    "declared measurement: no stack CV, certified below the tier",
     "w37 es-bias":      "declared measurement: the w37-era single-member probe",
+    # w185 (09-06) opened a fourth class: LATE sends, after the 08-31 deadline, on a board
+    # that is already graded. They cannot be selected and cannot re-rank anything, so the
+    # attempt/measurement distinction T2 and T3 police does not apply to them. What DOES have
+    # to hold is that they really are late -- a pre-deadline send wearing this head would be
+    # an unclassified attempt. That is T6.
+    "w185 closed-check": "late probe: resent a graded file to test whether the scorer is open",
+    "w185 late-score":   "late measurement: an unsent file scored for the record",
+    "w185 origcol-base": "late measurement: as-COLUMN control arm (row 1)",
+    "w185 origcol-cdf":  "late measurement: as-COLUMN treatment arm (row 1)",
 }
+LATE_PREFIX = "w185 "
+DEADLINE = "2026-08-31 23:59:00"
 AUTOMATED_FROM = "2026-08-22"          # the first day the registrar wrote the descriptions
 
 FAILURES = 0
@@ -141,6 +152,17 @@ def run(auto: pd.DataFrame, marks: tuple[str, ...], cmark: str, cv_re,
     if dead:
         out.append(f"T4 {len(dead)} probe mark(s) match no live description -- rotted literal "
                    f"or a retired template: {dead}")
+
+    # T6 ⛔ The late heads are exempt from T2/T3 ONLY because they are late. Check that, rather
+    # than trusting the name: a `w185 *` head on a pre-deadline row would be an ordinary
+    # unclassified attempt that this guard had been talked into waving through.
+    late = auto[auto.tmpl.astype(str).str.startswith(LATE_PREFIX)]
+    if len(late):
+        early = late[parse_sub_dates(late["date"]) <= pd.Timestamp(DEADLINE)]
+        if len(early):
+            out.append(f"T6 {len(early)} late-class description(s) are dated at or before the "
+                       f"{DEADLINE} deadline, so the exemption does not apply: "
+                       f"{sorted(early.fileName)[:5]}")
     return out
 
 

@@ -1,4 +1,49 @@
 # ============================================================================
+# 🟢 THE BOARD IS CLOSED BUT THE SCORER IS NOT. LATE SUBMISSIONS STILL RETURN
+#    publicScore AND privateScore, 100 PER DAY. (w185, 2026-09-06)
+# ============================================================================
+# ⛔ **20 JOURNAL.md entries carry a `— CLOSED` header** (w164 onward), and the post-deadline
+# ones assert the stronger claim outright -- w183's last line reads *"submission, and none was
+# possible."* **That second half is false, and no run ever tested it.** 41 consecutive runs made
+# no submission; every one of them inferred impossibility from the deadline instead of trying it
+# once. The try costs one API call and I should have spent it on run one, not run 42.
+#
+# 🎯 AND THE API HAD BEEN SAYING SO IN PLAIN TEXT THE WHOLE TIME. `LEADERBOARD.md`'s w157
+# entry (09-03) prints the field and then argues it away: *"`submissions_disabled` reads
+# **False** for the fifteenth day on a closed, graded board. Do not read it as 'you may
+# submit' — the deadline is the authority."* ⛔ **It reads False because submissions are not
+# disabled.** A guard read ground truth, printed it, and a chain of inference overruled it --
+# the same shape as the 50-of-201 pagination defect below, one layer up.
+#
+# ✅ MEASURED THIS RUN, not inferred. Resent an existing file:
+#
+#     kaggle competitions submit -c playground-series-s6e8 \
+#       -f submissions/w36_ad199stdcorr_ens4.csv -m "w185 closed-check"
+#     -> rc=0  "Successfully submitted to Predicting Smartphone Addiction"
+#     -> "99 submissions remaining today."          <- late cap is 100/day, not 10
+#
+#     kaggle competitions submissions -c playground-series-s6e8 --page-size 5 -v
+#     -> 56056392  w36_ad199stdcorr_ens4.csv  COMPLETE  0.97119  0.97093
+#
+# 🎯 It scored, and it returned **BOTH** columns. 0.97119 / 0.97093 reproduces this file's
+# record digit for digit, so it is the same 296,302-row test set and it is deterministic,
+# exactly as the pre-deadline record says.
+#
+# 📌 WHAT THIS CHANGES. For 41 runs this workspace has reasoned about CV~private from 201
+# historical points and called that the best it could do. It can now MEASURE the private
+# AUC of any new file, 100 a day. The gap w184 identified as the real ceiling -- a tuned
+# RealMLP, ~+440e-6 over our best clean one -- is directly testable against ground truth
+# instead of against CV. So is anything else in ANGLE INDEX that was closed on CV alone.
+#
+# ⚠ AND THE OBVIOUS TRAP, STATED BEFORE ANYONE FALLS IN IT. Using the private column to
+# CHOOSE between candidates is selection-on-private, which is the Rogii failure with a
+# better oracle. It is only safe here because the competition is over and there is no rank
+# left to win: the private score is now a MEASURING instrument for transferable lessons,
+# not a selection signal. **Do not carry the habit to a live board.** On a live board this
+# channel does not exist, which is the whole reason CV discipline is the rule.
+# ============================================================================
+
+# ============================================================================
 # THE FINAL RECORD — read this before anything else, and before quoting a score
 # ============================================================================
 # (w183, 2026-09-06) Competition closed 2026-08-31 23:59. **Final rank 319 / 3531.**
@@ -53,6 +98,267 @@
 #   `experiments/w183a_cv_pub_pri.csv` is a per-file CV/public/private/rank join, built from an
 #   independent 200-row read; it agrees with w142d everywhere. It is a convenience, not evidence.
 # ============================================================================
+
+# ============================================================================
+# 🔴 THE BEST FILE THIS WORKSPACE EVER BUILT WAS NEVER SENT. IT SCORES
+#    PRIVATE 0.97096 = RANK 301, AGAINST THE 319 WE GOT. (w185, 2026-09-06)
+# ============================================================================
+# The oracle above made this checkable. 32 files sat in `submissions/` that appear in no
+# row of the 201-row history; `experiments/w185c_scoreunsent.py` sent all 32 and read the
+# scores back. 32 of 32 scored. Full table: `experiments/w185c_unsent_scores.json`.
+#
+#     file                        public    private   private rank (3532 teams)
+#     w42_ad217stdcorr.csv        0.97119   0.97096   301   <- UNSENT, best we ever built
+#     w42_ad217std_h3 / _rankraw
+#       / _std                    0.97116-7 0.97095   310   <- UNSENT
+#     w50_ad216stdcorr.csv        0.97118   0.97094   315   <- UNSENT
+#     w40_ad211stdcorr.csv        0.97118   0.97094   315   <- best we DID send
+#     w36/w38 ..._ens4            0.97119   0.97093   322   <- THE GRADED PAIR, official 319
+#
+# 🎯 **+21 PLACES SAT ON DISK FOR 16 DAYS.** `w42_ad217stdcorr.csv` was built 2026-08-20
+# 22:03 and never left the box. Its public 0.97119 TIES the top public tier, so under
+# Kaggle's default top-2-by-public it would have been auto-selected on arrival -- no
+# judgement call needed, no click needed, and nothing was ever clicked anyway.
+#
+# ⛔ AND IT WAS NOT AN OVERSIGHT. IT WAS VETOED, DELIBERATELY, OVER FIVE RUNS.
+# ARM 217's fusion rests on `oof_hboyang_mix`, an aggregator over 138 third-party streams,
+# so w40d/w48d/w49/w51/w56 ruled the family WANTED-INELIGIBLE on CV: its OOF might be
+# inflated by contamination it could not audit. `check_selection.py` enforces it at import
+# and `w56b_wantedguard.py` exercises the guard firing on this exact filename.
+#
+# ✅ AND HERE IS THE PART THAT MATTERS, BECAUSE IT EXONERATES THE PROCEDURE.
+# w56 preregistered a powered test with thresholds fixed before any score existed, to be
+# read off ONE file, `w48_cal_hboyang_mix.csv`:
+#     point prediction 0.971230 (band 0.971198..0.971252)
+#     HONEST   fires if public >= 0.97116     INFLATED fires if public <= 0.97080
+#     in between -> "report it and change nothing", which w56 called the MODAL outcome
+# **That file was never sent either. It scores public 0.97109.** Resolved this run against
+# the registered thresholds: neither arm fires. **INDETERMINATE -- the modal branch -- so
+# the veto STANDS by its own rule.** The prereg was well designed, correctly powered, and
+# never executed; running it now changes no decision it was written to govern.
+#
+# 🔴 SO THE LESSON IS NOT "the veto was wrong". The veto was procedurally right and cost 21
+# places anyway. The lesson is narrower and it is the brief's own standing rule:
+# **on a board where submissions do not evict each other, a file you distrust should still
+# be SENT.** w56 saw this exactly -- *"a HONEST read licenses SENDING and pricing ad217 on
+# the LB, never SELECTING it"* -- and then the send never happened, so a question that one
+# free API call would have answered stayed open until after the deadline. ⚠ The one real
+# tension, stated because it is not resolved: with nothing clicked, Kaggle auto-selects the
+# top two by PUBLIC, so on this competition sending a distrusted file and not selecting it
+# were not actually separable. The fix is to click a selection, not to withhold the send.
+# ============================================================================
+
+# ============================================================================
+# 🔴 ANGLE INDEX ROW 1 AGAINST GROUND TRUTH — the verdict holds, the
+#    completeness claim does not. A THIRD ROUTE EXISTS AND WE NEVER PRICED IT. (w185, 09-06)
+# ============================================================================
+# Row 1 has been handed forward 21 times and closed on this workspace's own measurements:
+#     as ROW     concat the 7,500 originals as extra training rows
+#                -58.0e-6 at 1x, -986e-6 at 10x, -3,340e-6 at 50x (w131a). Monotone in dose.
+#     as MEMBER  a first-stage model fit on the originals alone, enrolled in the pack
+#                -1.02e-6/member, sd 1.83, t=0.97, sign-flipping across splits (w131a arm C)
+# Its headline: *"the usual Playground edge is INVERTED here"* and *"there is nothing else
+# to find"*. w184 downloaded six solution writeups, so both halves are checkable against
+# what the people above us actually did, for the first time.
+#
+# ✅ THE IDENTITY CLAIM IS CONFIRMED BY AN OUTSIDE PARTY. 14th place (topic 739004) names
+# the file: `Smartphone_Usage_And_Addiction_Analysis_7500_Rows.csv`. That is byte-for-byte
+# ours -- `data/orig/` md5 **d831a326bc6f0ab76056a12279cb0047**, the hash row 1 publishes.
+# Nobody found a better original because there isn't one.
+#
+# ✅ THE INVERTED-EDGE VERDICT SURVIVES. Across all six writeups, NOT ONE reports a gain
+# from concatenating the original as rows:
+#     1st  Deotte (738592)      no original data at ALL. A single tuned RealMLP, CV 0.97070.
+#     2nd  milanfx (738856)     lists "Original Data as ROW" / "as COL" / "No Original Data"
+#                               as CONFIG AXES across week 1's 100-200 basic models. No gain
+#                               is ever claimed for any of them; they are diversity knobs.
+#     7th  citerne (738650)     no mention.
+#          ravi20076 (738603)   600 features, no mention of the original.
+#          hideyukizushi (738695) no mention.
+#    14th  tmheo74 (739004)     used it -- but NOT as rows. See below.
+#
+# ⛔ AND HERE IS WHAT ROW 1 GOT WRONG. It says "both routes measured". There are THREE, and
+# the third is the one 14th place actually adopted -- **the original as COLUMNS**:
+#     "Five configs used the public Smartphone_Usage_And_Addiction_Analysis_7500_Rows.csv as
+#      a proxy for the generator's source: nearest-neighbour features, prior means,
+#      class-conditional CDF differences, and a first-stage prediction trained on it. They
+#      were modest on their own but wrong on different rows than the rest of the pool."
+# Only the last of those four is row 1's as-MEMBER route. The first three are COLUMNS derived
+# from the original, and this workspace never built one. `experiments/w185a_origcols.py`
+# builds all three on the frozen folds; `w185b_origcols_test.py` prices the pair on private.
+#
+# ✅ MEASURED. `experiments/w185a_origcols.py`, frozen folds, 691,369 train rows, one plain
+# LightGBM, identical params and seed across arms (`experiments/w185a_run.log`):
+#
+#     base   12 cols   OOF 0.963329        the same stack minus the original entirely
+#     cdf    21 cols   OOF 0.964407     **+1077.9e-6**   class-conditional CDF differences
+#     prior  24 cols   OOF 0.963294        -35.2e-6      original mean label by decile
+#     knn    15 cols   OOF 0.963155       -174.4e-6      k=25 neighbour label mean + distance
+#     all    36 cols   OOF 0.964216       +887.0e-6      cdf + prior + knn together
+#
+# 🔴 **THE AS-COLUMN ROUTE IS NOT A NULL, AND ROW 1 NEVER TESTED IT.** One group carries all
+# of it. Note `all` < `cdf`: bolting the two dead groups onto the live one COSTS 191e-6, so
+# "use the original as columns" is not the manoeuvre -- `cdfd_*` is.
+#
+# ⛔ AND IT REFUTES THE PREDICTION I WROTE ABOVE BEFORE RUNNING IT, which said `cdfd_*` and
+# `oprior_*` were "information-free by construction" because each is a deterministic function
+# of ONE raw column that a tree can already reach by splitting, and that only the multivariate
+# k-NN group could add anything. **Exactly backwards on both counts**: the two single-column
+# groups split +1078 / -35, and the multivariate one was the worst arm on the board.
+#
+# 🎯 THE MECHANISM I HAD WRONG, and the rule that actually fits all four numbers. It is not
+# representability, it is **estimation resolution against 7,500 rows**:
+#   - `cdfd_c` estimates a 1-D class-conditional CDF pair from ~2.1k positive and ~5.4k
+#     negative originals, at FULL resolution -- thousands of knots, non-monotone in x. Well
+#     estimated, and it hands the tree a univariate discriminability score that greedy
+#     axis-aligned splitting on raw x would need very many splits to recover. **Wins.**
+#   - `oprior_c` is the same information deliberately coarsened to 10 bins. A 63-leaf tree
+#     reproduces 10 bins of one column for free, so the coarsening throws away precisely the
+#     resolution that made `cdfd_c` work. **Null**, which is what my argument predicted -- it
+#     just happens to be true for the coarse version only.
+#   - `knn` estimates a label mean in 9-D from 7,500 reference points. 7500^(1/9) is about
+#     2.7 points per axis; the neighbourhood mean is mostly noise. **Worst arm.**
+#   📌 So: 7,500 rows is plenty to estimate ONE-dimensional label-conditional structure at
+#   full resolution, and nowhere near enough to estimate anything joint. Coarsen it and it
+#   dies; take it multivariate and it dies. That is the transferable form of this row.
+#
+# ⚠ SCOPE, STATED PLAINLY. This is measured against a BARE single LightGBM at 0.9633, which
+# is ~380e-6 below this workspace's 0.97014 stack CV and ~440e-6 below the winner. Large
+# gains on a weak baseline routinely shrink to nothing against a strong one, and 14th place
+# -- the only competitor who used this route -- reported these proxies as "modest on their
+# own", earning their place by DECORRELATION rather than by solo strength. **What is settled
+# is that row 1's "both routes measured / nothing else to find" was wrong: there is a third
+# route and on a plain baseline it is worth +1078e-6, not the -58e-6 the row publishes.
+# What is NOT settled is what it is worth inside the stack.**
+#
+# ✅ AND IT IS CONFIRMED ON THE REAL TEST SET, not just on CV. `w185b_origcols_test.py` built
+# the paired files and the late-submission oracle scored both (296,302 rows each):
+#
+#     file                        CV          public     private
+#     w185_origcol_base.csv       0.963329    0.96481    0.96471
+#     w185_origcol_cdf.csv        0.964407    0.96606    0.96576
+#     delta                      +1077.9e-6  +1250e-6   +1050e-6
+#
+# 🎯 The private delta lands within 28e-6 of the CV delta. **The CV did not overstate the
+# manoeuvre** -- which is worth saying in a workspace whose whole discipline is built on not
+# trusting a gain it cannot corroborate. Here CV, public and private all agree on sign and
+# roughly on size, which is what an honest feature looks like and is exactly what row 1's
+# concat arm never showed.
+# ============================================================================
+
+# ============================================================================
+# 🔴 WHY WE FINISHED 319th — THE WINNERS' WRITEUPS, READ 2026-09-06 (w184)
+# ============================================================================
+# Every number below is quoted from a solution writeup posted to this competition's forum
+# after the close. Saved locally: `notebooks/w184_writeups/*.md`. This is the first time this
+# workspace has read what the people above it actually did, as opposed to tracking their scores.
+#
+# ⛔ THE CEILING WAS THE BASE MODEL, NOT THE BLEND. WE SPENT 201 SUBMISSIONS ON THE BLEND.
+#
+#   1st  Chris Deotte, topic 738592, 113 votes.  A SINGLE RealMLP: CV 0.97070, public 0.97174.
+#        No ensemble. First single model to win a Playground in 18 months. His one model beats
+#        7th place's entire 593-stream mega-blend (0.970763) and 2nd place's final (0.97055).
+#   2nd  Xin Feng, topic 738856.  Week 1 OOF 0.97013 / pub 0.97120 / priv 0.97096
+#                                 Week 2 OOF 0.97035 / pub 0.97134 / priv 0.97109
+#                                 Week 4 OOF 0.97055 / pub 0.97148 / priv 0.97123
+#   7th  topic 738650.  RealMLP 0.968781. Blend 0.970315 -> 0.970763 -> 0.970820.
+#  14th  topic 739004.  Best own single 0.96941. "The largest single-model gain of the
+#        competition was a bug fix" — a RealMLP dtype bug that silently killed the categorical
+#        channel on 6 columns (float64 vocab, float32 lookup).
+#  319th US.  CV 0.97014 / pub 0.97119 / priv 0.97093.
+#
+# 🎯 OUR FINAL RESULT IS 2nd PLACE'S WEEK ONE. Public 0.97119 vs his 0.97120; private 0.97093
+# vs his 0.97096. He got there with "100-200 basic models, no manual feature engineering", then
+# spent three weeks improving the MODELS and gained +27e-6 private. We spent the same three weeks
+# on stacking, rank-averaging, calibration and self-audit and gained nothing measurable.
+#
+# ⛔ AND 2nd PLACE WROTE OUR POST-MORTEM FOR US, ABOUT HIMSELF:
+#     "I thought my problem was diversity and blending, so I spent a lot of time building
+#      different models and testing different blenders, but almost nothing helped. Looking back,
+#      I should have spent more time improving one strong XGB model.
+#      I thought I needed a better blender. In fact, I needed a better model."
+#
+# 🔴 THE SPECIFIC MISS IS RealMLP, AND IT WAS A CLASSIFICATION ERROR, NOT A SEARCH FAILURE.
+# Every RealMLP number this workspace ever recorded, with its own honesty verdict:
+#     0.969561  `beicicc/s6e8-strict-realmlp-residual-audit`  ⛔ level-2 meta, the author's own
+#               manifest says the lattice source early-stopped on outer-validation labels
+#     0.969128  `zwr_realmlp`                                 ⛔ es-on-val
+#     0.966409 / 0.966319  `ravi_realmlp1c` (= the pack median solo)  ⛔ es-on-val, patience 15
+#     0.964668  `ravi_realmlp1c` recomputed clean             ✅ clean
+#     0.958585 / 0.958134  harvested from `mohankrishnathalla/s6e8-realmlp-oof-saver`  ✅ clean
+#
+# ⛔ SO THE BEST HONEST RealMLP IN THIS WORKSPACE IS ~0.9647, AND EVERY NUMBER ABOVE IT IS
+# CONTAMINATED. Deotte's clean 0.97070 is about **+440e-6** over our best clean one — not the
+# +115e-6 you get by comparing against the leaky 0.96956, which is what this section said in its
+# first draft and is corrected here. Either figure is wider than the entire spread of our 201
+# submissions; the true one is four times wider.
+# 🎯 AND THE FIRST DRAFT'S ERROR IS THIS WORKSPACE'S OWN SIGNATURE FAILURE: I reached for the
+# largest RealMLP number in the file, and RESEARCH.md had ALREADY flagged it leaky 18,870 lines
+# down. The rule that catches it is written here too — *"a solo above ~0.9690 at maxcorr below
+# ~0.97 is the signature of a level-2 object, not of a good member"*.
+#
+# We only ever treated RealMLP as a member to HARVEST from somebody else's notebook and score for
+# decorrelation; we never tuned one, and the ceiling we measured was somebody else's undertrained
+# copy. The public notebook `kodaifukuda0311/s6e8-how-to-achieve-0-97-with-realmlp-only`, named in
+# the 14th-place writeup, appears NOWHERE in JOURNAL.md, RESEARCH.md or LEADERBOARD.md.
+#
+# ✅ AND 14th PLACE PRICES THE BLENDING ROUTE EXACTLY, WHICH IS THE ROUTE WE TOOK.
+# Their nested-OOF ladder, judged on a sealed fold (topic 739004):
+#     own pool, 35 members                                    0.96981
+#     + 207 validated shared OOF columns (ledger v1), 242     0.97029
+#     + 71 more, minus 120 harmful, 313                       0.97035
+#     + C selected inside outer folds, 313                    0.97036
+#     + own pool updated to 36 members, 314                   0.97038
+# ⛔ **278 shared OOF sets, a licence-and-leakage ledger, and a properly nested rank+logit
+# combiner bought +57e-6 in total over their own pool.** That is the whole blending route,
+# executed better than we executed it, and it is an eighth of the single-model gap.
+# 📌 By contrast their single biggest win of the month was a BUG FIX: a RealMLP that cast float64
+# to float32 before an exact-value vocabulary lookup, so 800,896 validation cells fell to UNK and
+# the categorical channel was dead on 6 columns. Moving the cast after the lookup: 3-seed OOF
+# 0.96371 -> 0.96832, **+461e-6**. One line, eight times the value of 278 shared OOF sets.
+#
+# ✅ THE TRANSFERABLE RULE, for the next Playground:
+#   Budget by marginal return. A tuned strong NN (RealMLP / TabM) is worth 50-150e-6 here.
+#   Blend weights past the first honest stack are worth single-digit e-6. Spend the week on the
+#   model. Harvesting a public OOF tells you what somebody else's untuned copy scores, which is
+#   a lower bound on the architecture and was mistaken here for the architecture's value.
+#
+# 📌 2nd place's one named feature trick, and it is checkable on our data:
+#     fake_social = daily - work - game   (+ the two rotations), used as RAW columns, not as
+#     imputations. The budget ratio r = (social+gaming+work)/daily has max EXACTLY 1.0000000000
+#     and ZERO violations on BOTH sides — 421,427 complete train rows and 182,287 complete test
+#     rows, mean r 0.8427 / 0.8430 — so each fake_* is a *proven* upper bound on the component it
+#     names, on test as well as train. social/gaming/work are 19.4% / 18.3% / 7.5% missing, and
+#     23% of rows are missing exactly one of the four, so the bound binds on a lot of rows.
+#     ⚠ It is a BOUND, not an estimate: as a point imputation `daily - other two` is WORSE than
+#     the column mean (MAE 1.34 vs 0.77-1.08), because the mean slack is 0.157*daily. That is why
+#     2nd place fed them as raw columns and let the model use them, rather than filling with them.
+#     Measured on our frozen folds by `experiments/w184a_budget_feats.py`; delta in the w184 entry.
+#
+# ✅ HOW TO READ THE FORUM — the CLI cannot, and this cost a run to work out.
+# `kaggle` has no discussions command. The internal JSON API does, via the OAuth token in
+# `~/.kaggle/credentials.json` (field `access_token`, NOT a username/key pair):
+#
+#     POST https://www.kaggle.com/api/i/competitions.CompetitionService/GetCompetition
+#          {"competitionName":"<slug>"}          -> gives forumId, and evaluationAlgorithm,
+#                                                   maxDailySubmissions, deadline, totalTeams
+#     POST https://www.kaggle.com/api/i/discussions.DiscussionsService/GetTopicListByForumId
+#          {"forumId":<id>}                      -> 20 topics, votes, titles. NO extra keys:
+#                                                   adding sortBy/pageSize returns HTTP 400.
+#     POST https://www.kaggle.com/api/i/discussions.DiscussionsService/GetForumTopicById
+#          {"forumTopicId":<id>}                 -> .forumTopic.writeUp.message.rawMarkdown
+#
+# Header `Authorization: Bearer <access_token>`. There is no `curl` and no `python3` on this box;
+# use `.venv/bin/python` + urllib with an explicit CA bundle:
+#     ssl.create_default_context(cafile='/etc/ssl/certs/ca-certificates.crt')
+# (the venv has no `certifi`, and the default context fails CERTIFICATE_VERIFY_FAILED).
+# Reproduce with `experiments/w184b_forum.py`.
+#
+# 📌 Confirmed from GetCompetition, first read this run rather than inferred:
+#     metric ROC AUC ("Roc Auc Score", isMax) · maxDailySubmissions 10 · numScoredSubmissions 2
+#     leaderboardPercentage 20 (public LB is 20% of the 296,302 test rows) · totalTeams 3531
+# ============================================================================
+
 
 # (w182, 2026-09-05) — 🔴 A TRAIL CELL HOLDS MORE THAN ITS TRAIL. BOTH GUARDS THAT READ THOSE
 # CELLS SCANNED THE WHOLE CELL, AND BOTH HAVE COUNTED AN ARTEFACT POINTER AS A HANDING SINCE
@@ -5624,7 +5930,7 @@ that wrote it"* — this block is that lesson applied to navigation.
 
 | # | ANGLE, as handed | closed | price | grep RESEARCH.md / JOURNAL.md for |
 |---|---|---|---|---|
-| 1 | *the original dataset* — find it, concat it as extra rows | **×20, from 08-11 → w112 08-29 → w131 08-30 → w140 08-31 → w149 09-01 (closed) → w167 09-04 (closed) → w176 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED THE ONE THAT IS TRUE BY CONSTRUCTION AS ITS HEADLINE.** The `0` is a **CONSTRUCTION ZERO**: the baseline it names — *the same stack trained on `train.csv` alone, 0× dose* — **IS the arm**. `orig_concat.py`'s dose loop is `if w:`, so at 0× no augmented frame is built at all, and w131a measured that dose 0 appends **exactly 0 rows** and reproduces the training frame exactly: **zero degrees of freedom**, true for any model, any metric and any seed before anything is fitted. **THE MANOEUVRE'S price** is a **CONCAT** price (extra training ROWS, not members) at the **MEMBER-TRAINING-SET layer, k=1, a per-competition TOTAL and not a rate**, baseline that same 0× stack, and it is **NEGATIVE at every dose anyone ran and MONOTONE in dose**: **−58.0e-6 at 1×** (1.16× the 50e-6 floor, so even one copy is a measurable loss and not a null), **−986.0e-6 at 10×** (19.7×, the rung the row used to omit and the one that makes the monotonicity checkable), **−3,340.0e-6 at 50×** (66.8×). The usual Playground edge is **INVERTED** here, and row 1 is the **only** row in this table whose manoeuvre is measured to LOSE AUC at every setting — printed as `0` it ranked as the column's cheapest row. **THE SEPARATE-ESTIMATOR ROUTE**, priced in rows 3/4/7/9's units for the first time (w131a arm C: paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the **full 167-member pack**, `origmodel` fitted on the 7,500 originals alone and never shown a competition label, solo AUC 0.8510): an **ENROLMENT price of −1.02e-6/member**, sd 1.83e-6, **t = 0.97**, **SIGN-FLIPPING** across the three splits (+0.80 / −2.86 / −1.00), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6** — an independent instrument landing inside the row's published −1e-6 to −2e-6. **IDENTITY**: the CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so there is nothing else to find. ⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash — the arms do NOT add** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) · `WHAT THE CONCAT ROW ACTUALLY COSTS` (w131, the ladder, the construction zero and the enrolment price) |
+| 1 | *the original dataset* — find it, concat it as extra rows | **×21, from 08-11 → w112 08-29 → w131 08-30 → w140 08-31 → w149 09-01 (closed) → w167 09-04 (closed) → w176 09-05 (closed) → w185 09-06 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO PRICES, AND THE ROW PUBLISHED THE ONE THAT IS TRUE BY CONSTRUCTION AS ITS HEADLINE.** The `0` is a **CONSTRUCTION ZERO**: the baseline it names — *the same stack trained on `train.csv` alone, 0× dose* — **IS the arm**. `orig_concat.py`'s dose loop is `if w:`, so at 0× no augmented frame is built at all, and w131a measured that dose 0 appends **exactly 0 rows** and reproduces the training frame exactly: **zero degrees of freedom**, true for any model, any metric and any seed before anything is fitted. **THE MANOEUVRE'S price** is a **CONCAT** price (extra training ROWS, not members) at the **MEMBER-TRAINING-SET layer, k=1, a per-competition TOTAL and not a rate**, baseline that same 0× stack, and it is **NEGATIVE at every dose anyone ran and MONOTONE in dose**: **−58.0e-6 at 1×** (1.16× the 50e-6 floor, so even one copy is a measurable loss and not a null), **−986.0e-6 at 10×** (19.7×, the rung the row used to omit and the one that makes the monotonicity checkable), **−3,340.0e-6 at 50×** (66.8×). The usual Playground edge is **INVERTED** here, and row 1 is the **only** row in this table whose manoeuvre is measured to LOSE AUC at every setting — printed as `0` it ranked as the column's cheapest row. **THE SEPARATE-ESTIMATOR ROUTE**, priced in rows 3/4/7/9's units for the first time (w131a arm C: paired 50/50, splits 0/1/2, C=1.0, `hybrid`, the **full 167-member pack**, `origmodel` fitted on the 7,500 originals alone and never shown a competition label, solo AUC 0.8510): an **ENROLMENT price of −1.02e-6/member**, sd 1.83e-6, **t = 0.97**, **SIGN-FLIPPING** across the three splits (+0.80 / −2.86 / −1.00), against the same-process base104 CatBoost control at **+10.04e-6/member** that reproduced w123 to **+0.0000e-6** — an independent instrument landing inside the row's published −1e-6 to −2e-6. **IDENTITY**: the CSV still hashes to `d831a326bc6f0ab76056a12279cb0047`, the deleted official original, so there is nothing else to find. ⛔ **Four currencies — a row count, OOF AUC at k=1, AUC per member, and a hash — the arms do NOT add** | `The original dataset — CLOSED, both routes measured here` · `Concat was closed 2026-08-11` · `Searching for a better original` (the linked original is a byte-copy of ours; there is nothing else to find) · `WHAT THE CONCAT ROW ACTUALLY COSTS` (w131, the ladder, the construction zero and the enrolment price) |
 | 2 | *tune LightGBM properly against the fixed folds* | **×20, from 08-10 → w113 08-29 → w122 08-30 → w141 08-31 → w150 09-01 (closed) → w168 09-04 (closed) → w177 09-05 (closed) · artefacts verified** (count from `w117a_handcount`) | a **TUNING** price (the value of re-fitting a GBDT that is already enrolled) — **+4e-7**, and it holds on its own arrays: `lgbm_tuned_lat_frac` − `lgbm_fixed_lat_frac` re-measures at **+0.000031** against the published +3e-5, the stump reproduces to the last published digit, and the price multiplies out | `tuning ANY GBDT is worth ~4e-7` · `ROW 2 OF THE ANGLE INDEX RE-VERIFIED` (w122, `w122b_row2.py`) |
 | 3 | *CatBoost: it handles categoricals better* | **×20, from 08-10 → w123 08-30 → w132 08-31 → w151 09-01 (closed) → w169 09-04 (closed) → w178 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | an **ENROLMENT** price (value of ADDING a member). ⚠ **TWO PRICES, AND THE ROW USED TO PUBLISH ONLY THE LOWER ONE.** **5.9e-6/member** is the `rest`-group average, and `rest` is a **RESIDUAL** (8/35 CatBoost, 4 neural nets), so it is not a CatBoost price; it re-measures **+5.59e-6/member** on today's base104. The **8 CatBoosts measured alone read +10.04e-6/member** (±0.000016 **on the group delta**, i.e. **per-member sd 1.96e-6, t = 8.87** — published here for the first time by w132a, and the number that makes rows 1/7/9's *indistinguishable from zero* verdicts checkable rather than asserted, since it is the control they all quote). ⚠ **`sign-consistent` IS NOT A TEST**: over 3 paired splits it is a **25% false-positive rate** (2·(1/2)³) and row 9's PERMUTED NULL — a null by construction — carries the same label at **t = 1.66**. On 3 splits **df = 2**, so the two-tailed critical t is **4.303 at 5% and 9.925 at 1%**, and **t here is `delta/(sd/√3)`** — w132a published `delta/sd`, which is an effect size, not a t, and understated every t in this table by √3 = 1.732 (corrected w158, #68): this rate clears 5% at 2.06× the critical value, and **two of the four single-family enrolment rates DO clear 1%** — XGBoost at 10.61 and its deduplicated twin at 10.75, with LightGBM 0.001 under at 9.924 (w158). t is scale-invariant, so publishing it moves no verdict. This corroborates the only other pure-CatBoost measurement here — w20d's foreign `cat` group at **10.3e-6/member**. ⛔ Both are FOREIGN pipelines, so the operational rule is unchanged and reinforced: *prefer a pipeline we do not hold*, NOT *prefer CatBoost* | `CATBOOST TUNING IS CLOSED` · `ROW 3 OF THE ANGLE INDEX RE-VERIFIED` (w123, `w123a_row3.py`) |
 | 4 | *XGBoost as the third leg of the ensemble* | **×21, from 08-10 → w115 08-29 → w124 08-30 → w133 08-31 → w142 09-01 (closed) → w161 09-03 (closed) → w170 09-04 (closed) → w179 09-05 (closed) · artefacts verified** (count from `w117a_handcount`, not by hand) | ⚠ **TWO QUANTITIES.** **TUNING +4e-7** (inherited from row 2; the 1.4% solo→stack pass-through inside it was measured ON XGBoost). **ENROLMENT +7.38e-6/member** — measured w124 on `base104`, paired 50/50, 3 splits, over the **11 distinct** arrays of the 12-name XGB subgroup of `rest` (`bolt_xgb_d7_alt1` ≡ `_alt2` byte-identical), sign-consistent 3/3, with CatBoost re-measured in the same process as a control that reproduced w123 to **+0.000e-6**. On identical folds: CatBoost **+10.04e-6** (t = 8.87) · XGBoost **+7.38e-6** (t = 10.75) · LightGBM **+4.04e-6** (t = 9.92), all three on **df = 2** where the 5% critical t is 4.303 and the 1% is 9.925 — every one clears 5% and **XGBoost also clears 1%** at 10.75, with LightGBM 0.001 under it at 9.924 and CatBoost at 8.87 (w132a, rescaled by w158). ⛔ All three are FOREIGN pipelines already enrolled and all three are under the 50e-6 floor — *prefer a pipeline we do not hold*, NOT *prefer a family*. ⛔ **w133 (08-31) is the 16th handing and it built nothing**: 0 submission slots remained and the competition closed that night, so an XGBoost leg would have been unsendable by construction on top of being under the floor | `tuning ANY GBDT is worth ~4e-7` |

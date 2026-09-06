@@ -1,0 +1,35 @@
+  base fold0 auc=0.962521 iter=700
+  base fold1 auc=0.963163 iter=699
+  base fold2 auc=0.963632 iter=698
+  base fold3 auc=0.964205 iter=700
+  base fold4 auc=0.963135 iter=696
+base   ncol= 12  OOF AUC = 0.963329   (88s)
+  cdf fold0 auc=0.963629 iter=697
+  cdf fold1 auc=0.964275 iter=698
+  cdf fold2 auc=0.964704 iter=700
+  cdf fold3 auc=0.965237 iter=700
+  cdf fold4 auc=0.964195 iter=686
+cdf    ncol= 21  OOF AUC = 0.964407   (110s)
+  prior fold0 auc=0.962463 iter=700
+  prior fold1 auc=0.963326 iter=700
+  prior fold2 auc=0.963579 iter=700
+  prior fold3 auc=0.964086 iter=700
+  prior fold4 auc=0.963022 iter=700
+prior  ncol= 24  OOF AUC = 0.963294   (114s)
+  knn fold0 auc=0.962333 iter=700
+  knn fold1 auc=0.963061 iter=699
+  knn fold2 auc=0.963486 iter=700
+  knn fold3 auc=0.964041 iter=700
+  knn fold4 auc=0.962860 iter=699
+knn    ncol= 15  OOF AUC = 0.963155   (92s)
+  all fold0 auc=0.963436 iter=700
+  all fold1 auc=0.964122 iter=700
+  all fold2 auc=0.964554 iter=699
+  all fold3 auc=0.964957 iter=700
+  all fold4 auc=0.964017 iter=700
+all    ncol= 36  OOF AUC = 0.964216   (128s)
+
+cdf    delta =  +1077.9e-6   0.963329 -> 0.964407
+prior  delta =    -35.2e-6   0.963329 -> 0.963294
+knn    delta =   -174.4e-6   0.963329 -> 0.963155
+all    delta =   +887.0e-6   0.963329 -> 0.964216

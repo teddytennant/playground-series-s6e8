@@ -1,20 +1,20 @@
 {
   "account_best": 0.97119,
   "envelope": {
-    "0.99": 0.0029600000000000737,
+    "0.99": 0.005620000000000069,
     "0.999": 0.0002500000000000835,
     "0.9999": 4.0000000000040004e-05,
     "0.99995": 4.0000000000040004e-05,
     "0.99999": 2.0000000000020002e-05
   },
-  "n_scored": 201,
+  "n_scored": 233,
   "rows": {
     "w85_cal_bolt_dcnv2_cross.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.941566046951906,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9671992590640672,
+          "overshoot": 0.027271220967322818,
           "point": 0.9399280380967444,
           "valid": true
         },
@@ -38,8 +38,8 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9431765641196498,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.968809776231811,
+          "overshoot": 0.027271220967322818,
           "point": 0.9415385552644882,
           "valid": true
         },
@@ -63,8 +63,8 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.941782026337313,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9674152384494742,
+          "overshoot": 0.027271220967322818,
           "point": 0.9401440174821514,
           "valid": true
         },
@@ -88,8 +88,8 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.942296004325021,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9679292164371822,
+          "overshoot": 0.027271220967322818,
           "point": 0.9406579954698594,
           "valid": true
         },
@@ -113,8 +113,8 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9425856066539988,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.96821881876616,
+          "overshoot": 0.027271220967322818,
           "point": 0.9409475977988372,
           "valid": true
         },
@@ -138,8 +138,8 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9410618970308444,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9666951091430056,
+          "overshoot": 0.027271220967322818,
           "point": 0.9394238881756828,
           "valid": true
         },
@@ -163,24 +163,24 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.8246367878878388,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.85027,
+          "overshoot": 0.027271220967322818,
           "point": 0.8229987790326772,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_qda_lat.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.03886999999999996,
-          "point": 0.93232,
-          "spearman": 0.8296813992914297,
-          "valid": false
+          "anchor": "w85_cal_gmm_raw.csv",
+          "bound": 0.85029,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.85027,
+          "spearman": 1.0,
+          "valid": true
         }
       },
-      "bound": 0.8246367878878388,
+      "bound": 0.85027,
       "instrument": "prereg",
-      "margin_e6": 146553.2121121612,
+      "margin_e6": 120920.00000000003,
       "reg_lb": 0.8229987790326772,
       "safe": true
     },
@@ -188,33 +188,33 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.8994088551112299,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9250420672233911,
+          "overshoot": 0.027271220967322818,
           "point": 0.8977708462560683,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_poly2_raw.csv",
-          "bound": 0.97508,
-          "bucket": 0.0,
-          "envelope": 0.03886999999999996,
-          "point": 0.93621,
-          "spearman": 0.9222351114030892,
-          "valid": false
+          "anchor": "w85_cal_gnb_raw.csv",
+          "bound": 0.89936,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.89934,
+          "spearman": 0.9999999999999998,
+          "valid": true
         }
       },
-      "bound": 0.8994088551112299,
-      "instrument": "prereg",
-      "margin_e6": 71781.14488877008,
-      "reg_lb": 0.8977708462560683,
+      "bound": 0.89936,
+      "instrument": "spearman",
+      "margin_e6": 71829.99999999996,
+      "reg_lb": 0.89934,
       "safe": true
     },
     "w85_cal_golem_c.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9374518794223672,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9630850915345284,
+          "overshoot": 0.027271220967322818,
           "point": 0.9358138705672056,
           "valid": true
         },
@@ -238,8 +238,8 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.938124764055257,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9637579761674182,
+          "overshoot": 0.027271220967322818,
           "point": 0.9364867552000954,
           "valid": true
         },
@@ -263,8 +263,8 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.934247891480496,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9598811035926572,
+          "overshoot": 0.027271220967322818,
           "point": 0.9326098826253344,
           "valid": true
         },
@@ -288,33 +288,33 @@
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.8975273466594452,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9231605587716064,
+          "overshoot": 0.027271220967322818,
           "point": 0.8958893378042836,
           "valid": true
         },
         "spearman": {
-          "anchor": "w85_cal_qda_lat.csv",
-          "bound": 0.97119,
-          "bucket": 0.0,
-          "envelope": 0.03886999999999996,
-          "point": 0.93232,
-          "spearman": 0.9389010627436958,
-          "valid": false
+          "anchor": "w85_cal_qda_raw.csv",
+          "bound": 0.89597,
+          "bucket": 0.99999,
+          "envelope": 2.0000000000020002e-05,
+          "point": 0.89595,
+          "spearman": 0.9999999999999998,
+          "valid": true
         }
       },
-      "bound": 0.8975273466594452,
-      "instrument": "prereg",
-      "margin_e6": 73662.65334055477,
-      "reg_lb": 0.8958893378042836,
+      "bound": 0.89597,
+      "instrument": "spearman",
+      "margin_e6": 75219.99999999996,
+      "reg_lb": 0.89595,
       "safe": true
     },
     "w85_cal_rff_raw.csv": {
       "all": {
         "prereg": {
           "anchor": "prereg",
-          "bound": 0.9367761002591276,
-          "overshoot": 0.0016380088551616323,
+          "bound": 0.9624093123712888,
+          "overshoot": 0.027271220967322818,
           "point": 0.935138091403966,
           "valid": true
         },
