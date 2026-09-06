@@ -42446,3 +42446,23 @@ agreed.** Committed here with this run's work; `w159a` is re-run against the new
 
 📌 **The by-design reds are stable at eight for the fifteenth consecutive run.** No modelling change, no
 submission, and none was possible.
+
+## 📌 COMMITTED AND PUSHED — plus the pipeline-`$?` trap firing a third time
+
+    5096c7b  Correct the final record and put it where the orient step reads
+    daf81d6..5096c7b  main -> main
+
+`w159a_committedguard` re-run against the new HEAD: **rc=0, "69 trail entries, 0 not in HEAD, 0 of them
+exempt"**. All 12 document parsers green against the committed state; `w117a_handcount` reads row 10
+`claimed ×21 corpus ×21`, `w180a_countguard` reads `w183 claims 41 · no-work 41`.
+
+⚠ **`git push` needed `PATH=/run/current-system/sw/bin:$PATH`.** The credential helper is
+`gh auth git-credential`, and the helper subprocess does not inherit a PATH containing `gh` — it fails
+`gh: command not found`, then `fatal: could not read Username`. `gh` is at `/run/current-system/sw/bin/gh`
+and is on the interactive PATH, so this looks like a missing tool and is not one.
+
+🎯 **AND THE FIRST PUSH ATTEMPT PRINTED `PUSH_RC=0` WHILE FAILING** — `git push 2>&1 | tail -4; echo $?`
+returns `tail`'s status. That is w136 §9 and w137's registered trap, which `RESEARCH.md` documents by name,
+firing on the run that had read it earlier in the same session. **Redirect to a file, then test `$?`:** the
+true code was **128**. Caught within one command because the output said `fatal:` two lines above the `0`,
+but the `0` is what a scanning eye takes.
