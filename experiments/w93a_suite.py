@@ -75,6 +75,7 @@ STEMS = [
     "w178a_rowclaimguard",
     "w179a_superlativeguard",
     "w180a_countguard",
+    "w182c_elapsedguard",
 ]
 
 # Fails by design after the day's send until the queue is rebuilt (RESEARCH, w85/w92 §7).

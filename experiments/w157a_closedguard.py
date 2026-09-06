@@ -53,6 +53,10 @@ CHECKED, each against an artefact rather than a quotation:
         C3b  AGREEMENT. Every trail entry's date must equal the date in that run's JOURNAL.md
              header. RUN_HDR is COPIED from w117a_handcount rather than imported, so drift
              there turns C4 red first.
+        C3c  (w182) ORDER. A handing trail is written in the order the row was handed, so its
+             dates only go forward. This is the arm that catches a foreign entry WITHOUT
+             relying on the span rule that excludes it -- it fires on row 5's raw cell, which
+             is the one cell carrying an artefact-provenance chain, and on no other row.
   C4  the anchors this guard assumes: w117a_handcount's RUN_HDR, byte-compared against the
       copy in this file, and the row-identification rule that #65 and #66 also use, which
       lives in w156a_recordguard rather than in w117a_handcount.
@@ -69,9 +73,18 @@ Exits 0 when every assertion holds, 1 otherwise, and prints FAILURES: n as its l
 from __future__ import annotations
 
 import argparse
+import os
 import pathlib
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# w182: IMPORTED, not re-implemented. #66 and #67 read the same cells and must not be able to
+# disagree about where the handing trail stops -- the same reason #75 imports RUN_HDR from #50
+# rather than copying it. RUN_HDR below is still a COPY on purpose (C4 byte-compares it); the
+# difference is that RUN_HDR is a frozen literal and this is a rule that will keep moving.
+from w156a_recordguard import handing_span  # noqa: E402
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -119,6 +132,11 @@ CONTROL_CELL = (
 # The journal dates the control is judged against, frozen alongside the cell so that C5 keeps
 # working after the live corpus changes. w156: a control that borrows live state stops working
 # exactly when the fix lands.
+# ⚠ (w182) `107` IS NOW UNREACHABLE, AND IT IS KEPT AS EVIDENCE RATHER THAN DELETED. w107 is
+# the artefact-provenance link outside row 5's bold span; the whole-cell scan pulled it in as a
+# handing, C3b then wanted a journal date for it, and it was given one here. That is the shape
+# worth remembering -- the guard was taught to accept the foreign entry instead of being asked
+# why it was reading one. entries() now stops at the span, so this line is never looked up.
 CONTROL_JOURNAL = {116: "08-29", 125: "08-30", 143: "09-01", 152: "09-02", 162: "09-03",
                    107: "08-28"}
 
@@ -141,8 +159,25 @@ def table_rows(text: str) -> dict[int, str]:
 
 
 def entries(cell: str) -> list[tuple[int, str, bool]]:
-    """(run, date, marker) for every trail entry in one cell, in the order written."""
-    return [(int(a), d, bool(c)) for a, d, c in ENTRY.findall(cell)]
+    """(run, date, marker) for every HANDING entry in one cell, in the order written.
+
+    ⚠ (w182) THIS USED TO SCAN THE WHOLE CELL, and a trail cell holds more than its trail.
+    Row 5 carries an artefact-provenance chain outside the bold span, `· w15b/w15d → w62 →
+    w107 08-28 ·`, and its dated link was read as a row-5 handing from the day this guard
+    shipped -- C1 printed 67 entries over 66 handings, and C3b's frozen CONTROL_JOURNAL was
+    given a `107: "08-28"` line so the foreign entry would pass rather than be questioned.
+    See handing_span's comment in w156a_recordguard for why it passed and what that hid.
+    """
+    return [(int(a), d, bool(c)) for a, d, c in ENTRY.findall(handing_span(cell))]
+
+
+def outside_span(cell: str) -> list[tuple[int, str]]:
+    """(run, date) for arrow-shaped links in the cell that are NOT in the handing span.
+
+    Reported rather than dropped: excluding text silently is how the whole-cell scan got here.
+    """
+    keep = {(r, d) for r, d, _ in entries(cell)}
+    return [(int(a), d) for a, d, _ in ENTRY.findall(cell) if (int(a), d) not in keep]
 
 
 def journal_dates() -> dict[int, str]:
@@ -239,11 +274,23 @@ def main() -> int:
         fail(f"expected 10 handing-count rows, found {len(rows)}: {sorted(rows)}")
     total = sum(len(entries(c)) for c in rows.values())
     marked = sum(1 for c in rows.values() for e in entries(c) if e[2])
-    print(f"  {len(rows)} rows, {total} trail entries, {marked} carrying (closed)")
+    print(f"  {len(rows)} rows, {total} handing entries adjudicated, {marked} carrying (closed)")
     for n in sorted(rows):
         es = entries(rows[n])
         print(f"    row {n:>2}  " + "  ".join(
             f"w{r} {d}{'(closed)' if m else ''}" for r, d, m in es))
+    out = [(n, r, d) for n in sorted(rows) for r, d in outside_span(rows[n])]
+    print(f"  {len(out)} arrow-shaped link(s) outside a handing span, NOT adjudicated: "
+          + (", ".join(f"row {n} w{r} {d}" for n, r, d in out) or "none"))
+    # ⚠ (w182) PER-ROW, NOT AN AGGREGATE FLOOR. The `total < 40` arm below is worth keeping but
+    # it fails OPEN: scoping to the bold span means one malformed cell contributes zero
+    # handings, and 66 - 9 is still comfortably over 40, so the guard would go green having
+    # silently stopped reading a whole row. w182b's probe found exactly that in this run's own
+    # fix. A rule that narrows what is read has to say when it read nothing.
+    empty = [n for n in sorted(rows) if not entries(rows[n])]
+    if empty:
+        fail(f"row(s) {empty} yield no handing entries -- the cell has no readable bold span "
+             f"and this guard has stopped reading it")
     if total < 40:
         fail(f"only {total} trail entries extracted; the matcher has stopped tracking the text")
 
@@ -321,6 +368,34 @@ def main() -> int:
               + ("FAIL -- control did not fire" if control else "OK"))
         fails += control
 
+    # w182. An INDEPENDENT detector of the defect C1 was carrying, so the span rule is not
+    # taken on trust. A handing trail is written in the order the row was handed, so its dates
+    # can only go forward; a foreign entry spliced in from another segment almost never lands
+    # in date order. Measured when this shipped: all ten spans monotone, and the raw cells
+    # monotone for nine rows and NOT for row 5 -- the one cell with an artefact chain, whose
+    # w107 08-28 sat after w180 09-05 in C1's output every run since 09-03 and was read by
+    # nobody. This arm fails on exactly the rows the span rule fixes, and on nothing else.
+    print("C3c ORDER -- a handing trail runs forward in time")
+    bad_order = []
+    for n in sorted(rows):
+        ds = [d for _, d, _ in entries(rows[n])]
+        for i in range(len(ds) - 1):
+            if ds[i] > ds[i + 1]:
+                bad_order.append((n, ds[i], ds[i + 1]))
+    for n, a, b in bad_order:
+        print(f"  row {n:>2}  {a} is followed by {b}")
+    if bad_order:
+        fail(f"{len(bad_order)} handing trail(s) run backwards in date")
+    else:
+        print(f"  all {len(rows)} handing spans are non-decreasing in date  OK")
+    raw_bad = []
+    for n in sorted(rows):
+        ds = [d for _, d, _ in ENTRY.findall(rows[n])]
+        if any(ds[i] > ds[i + 1] for i in range(len(ds) - 1)):
+            raw_bad.append(n)
+    print(f"  the same test on the RAW cells fails on row(s) {raw_bad or 'none'} -- the arm "
+          f"detects a foreign entry without relying on the span rule that excludes it")
+
     print("C4 the anchors this guard copies rather than imports")
     hc = HANDCOUNT.read_text(encoding="utf-8")
     anchors = [
@@ -341,6 +416,12 @@ def main() -> int:
     same = theirs is not None and theirs.group(1) == mine
     print(f"  {'OK  ' if same else 'FAIL'} the copy is byte-identical to the original")
     fails += not same
+    # w182: the one rule this guard IMPORTS. #66 and #67 adjudicate the same cells, so a copy
+    # here would let them drift into disagreeing about where a handing trail stops.
+    lives_there = "def handing_span(" in recguard
+    print(f"  {'OK  ' if lives_there else 'FAIL'} handing_span imported from "
+          f"w156a_recordguard -- one implementation, not two")
+    fails += not lives_there
 
     print("C5 the control differs from the shipped text on the defect and nothing else")
     ship = table_rows(text)

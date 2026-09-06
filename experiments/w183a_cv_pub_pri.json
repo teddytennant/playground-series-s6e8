@@ -1,0 +1,12 @@
+{
+ "n_submissions_api": 200,
+ "n_submissions_lb": 201,
+ "n_with_cv": 165,
+ "best_public": 0.97119,
+ "best_private": 0.97094,
+ "cv_gap_public_mean_e6": 1035.1753299232676,
+ "cv_gap_public_sd_e6": 34.00969088741388,
+ "cv_gap_private_mean_e6": 805.1753299232739,
+ "cv_gap_private_sd_e6": 22.113681663648777,
+ "pub_minus_pri_mean_e6": 229.9999999999935
+}

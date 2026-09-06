@@ -89,6 +89,38 @@ ROW = re.compile(r"^\|\s*(\d+)\s*\|")
 # The control cell is frozen ASCII, so it needs the ASCII arrow too.
 TRAIL_ANY = re.compile(r"(?:→|->) w(\d+) \d\d-\d\d")
 
+# 🔴 (w182) THE HANDING TRAIL IS A SEGMENT OF THE CELL, NOT THE WHOLE CELL. Every trail cell
+# opens with a bold span -- `**×N, from 08-10 → w116 08-29 → ... **` -- and that span IS the
+# handing trail. What follows it is other business: the count's provenance note, a pointer,
+# and in row 5 an ARTEFACT-PROVENANCE chain, `· w15b/w15d → w62 → w107 08-28 ·`, which is
+# written in the same arrow-run-date shape and is not a handing at all.
+#
+# ⚠ #66 AND #67 BOTH SCANNED THE WHOLE CELL AND BOTH ADMITTED w107 AS A ROW-5 HANDING. It
+# passed every arm of both guards for a reason that has nothing to do with it being a handing:
+# w107 happens to be a genuine row-5 run (its angle `Feature engineering` classifies to 5)
+# dated 08-28, before the deadline, so the journal-date arm and the marker arm are both
+# satisfied by accident. A site that passes by accident is indistinguishable from one that
+# passes on purpose -- w181's rule, at a third and fourth guard.
+#
+# ASCII `x` as well as `×`, because both guards' frozen control cells are ASCII specimens.
+HANDING_SPAN = re.compile(r"\*\*[×x]\d+.*?\*\*", re.S)
+
+
+def handing_span(cell: str) -> str:
+    """The part of a trail cell that IS the handing trail: its opening bold span.
+
+    Returns "" when the cell has no such span, which is a cell shape neither guard knows how
+    to read -- callers treat that as nothing adjudicated rather than as everything adjudicated,
+    so a format change shows up as an empty trail and trips the low-count arm.
+
+    Measured over the live index when this shipped: 66 entries inside the spans, 67 in the raw
+    cells, the one difference being row 5's artefact chain. Date monotonicity holds for all ten
+    spans and fails for exactly the one raw cell that carries a foreign entry, which is why
+    #67's C3c uses it as an independent detector rather than trusting this rule alone.
+    """
+    m = HANDING_SPAN.search(cell)
+    return m.group(0) if m else ""
+
 
 def table_rows(text: str) -> dict[int, str]:
     """The ANGLE INDEX rows, keyed by row number.
@@ -163,8 +195,10 @@ def main() -> int:
         # power independent of the fix -- borrowing the live `ids` would make it silent again
         # the moment w155's entry landed, which is exactly when it must still work.
         ids_pre, cur_pre = ids - {155}, 156
-        frozen = sorted({int(m.group(1)) for m in TRAIL_ANY.finditer(CONTROL_CELL)})
-        shipped = sorted({int(m.group(1)) for m in TRAIL.finditer(rows.get(9, ""))})
+        frozen = sorted({int(m.group(1))
+                         for m in TRAIL_ANY.finditer(handing_span(CONTROL_CELL))})
+        shipped = sorted({int(m.group(1))
+                          for m in TRAIL.finditer(handing_span(rows.get(9, "")))})
         f_miss = [w for w in frozen if w not in ids_pre and w != cur_pre]
         s_miss = [w for w in shipped if w not in ids and w != cur_run]
         print(f"  frozen trail {frozen} against the pre-fix corpus, credit w{cur_pre}")
@@ -178,26 +212,49 @@ def main() -> int:
     if len(rows) != 10:
         fail(f"the table resolved to {len(rows)} rows, not 10")
     trail: dict[int, list[int]] = {}
+    outside: list[tuple[int, int]] = []
     for n in sorted(rows):
-        trail[n] = sorted({int(m.group(1)) for m in TRAIL.finditer(rows[n])})
+        span = handing_span(rows[n])
+        trail[n] = sorted({int(m.group(1)) for m in TRAIL.finditer(span)})
+        for m in TRAIL.finditer(rows[n]):          # w182: what the span rule excluded
+            if int(m.group(1)) not in trail[n]:
+                outside.append((n, int(m.group(1))))
         print(f"  row {n:2d}  trail {trail[n]}")
     total = sum(len(v) for v in trail.values())
-    print(f"  {total} trail entries across {len(trail)} rows")
+    print(f"  {total} trail entries across {len(trail)} rows, adjudicated (the bold handing "
+          f"spans, not the whole cells)")
+    print(f"  {len(outside)} arrow-shaped link(s) outside a handing span, NOT adjudicated: "
+          f"{[f'row {n} w{w}' for n, w in outside]}")
+    # w182: per-row, because scoping to the bold span fails OPEN. One cell with no readable
+    # span contributes nothing and the aggregate floor below never notices.
+    empty = [n for n in sorted(rows) if not trail[n]]
+    if empty:
+        fail(f"row(s) {empty} yield no trail entries -- no readable bold handing span, so "
+             f"this guard has stopped reading those cells")
     if total < 30:
         fail(f"only {total} trail entries parsed -- the cell format has moved and this guard "
              f"is no longer reading it")
 
     print("C1b the matcher tracks the text rather than agreeing by luck")
     probe = rows.get(9, "").replace("→ w128", "→ w9999")
-    got = sorted({int(m.group(1)) for m in TRAIL.finditer(probe)})
+    got = sorted({int(m.group(1)) for m in TRAIL.finditer(handing_span(probe))})
     if 9999 in got and 128 not in got:
         print("  renaming one trail entry moves the extraction: 128 -> 9999  OK")
     else:
         fail(f"perturbing row 9's trail changed nothing -- extraction reads {got}")
-    if not TRAIL.search(rows.get(9, "").replace("→ w", "→ x")):
+    if not TRAIL.search(handing_span(rows.get(9, "").replace("→ w", "→ x"))):
         print("  removing the arrow form yields nothing at all  OK")
     else:
         fail("the matcher still fires on a cell with no trail arrows")
+    # w182: the span rule has to be able to EXCLUDE, or scoping to it is decoration. Row 5 is
+    # the live positive; this probe is the synthetic one, so the arm keeps working if row 5's
+    # artefact chain is ever moved or dropped.
+    planted = rows.get(9, "") + " · provenance → w9998 09-05 ·"
+    if 9998 in {int(m.group(1)) for m in TRAIL.finditer(planted)} and \
+       9998 not in {int(m.group(1)) for m in TRAIL.finditer(handing_span(planted))}:
+        print("  a link appended OUTSIDE the bold span is visible raw and excluded here  OK")
+    else:
+        fail("the span rule did not exclude a link planted outside the bold span")
 
     print("C2 every run named in a trail has a JOURNAL.md run header")
     print(f"  {n_hdr} run header(s) in the corpus, naming {len(ids)} distinct run id(s)")

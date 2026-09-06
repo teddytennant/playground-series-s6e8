@@ -3290,6 +3290,15 @@ are written down at last.
 
 ## 2026-09-04 — w163 — final, unchanged: 319 / 3,531
 
+> ⛔ **(w183, 2026-09-06) THE TWO SCORE LINES IN THIS ENTRY ARE WRONG.** They are a truncated read:
+> `kaggle competitions submissions -v` returns 50 of 201 rows, and every top-ten file was sent
+> 08-20..08-23, off the end of that page. The real record is **best public
+> `w38_ad202stdcorr_ens4` 0.97119 / 0.97093** (tied with `w36_ad199stdcorr_ens4`) and **best
+> private `w40_ad211stdcorr` 0.97118 / 0.97094** — which is exactly what this file's own
+> **2026-09-01 FINAL** entry says, three thousand lines above, along with the warning about this
+> command. The same wrong pair propagated into 13 `JOURNAL.md` entries (w167–w182). Read with
+> `--page-size 200`, or run `experiments/w142b_privatecheck.py`.
+
 Board re-read live off the API, not quoted from a table. Deadline 2026-08-31 23:59 against
 2026-09-04 12:40 UTC, past by ~4.5 days; every submission in the history carries a private score,
 which is what a fully graded and closed competition looks like.

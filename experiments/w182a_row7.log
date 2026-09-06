@@ -1,0 +1,24 @@
+w127a -- ANGLE INDEX row 7 (seed and fold diversity) against its artefacts
+
+[R1] w118's member arm, recomputed from oof/
+    OK xgb_latcat           0.967696   (published 0.967696)
+    OK xgb_latcat_s17       0.967750   (published 0.967750)
+    OK xgb_latcat_s23       0.967766   (published 0.967766)
+    probability mean 0.967904   (published 0.967904)
+    over the best single: +138.2e-6   (published +138.2e-6)
+    max|xgb_latcat_avg3 - mean(seeds)| = 0.000e+00   (w109a relation 2: exactly 0.0)
+  note the MEMBER-layer number for this manoeuvre is +138.2e-6, which is ABOVE the 50e-6 floor. The row's cell publishes +2e-6 under the word `(member)`. They are different layers of the same manoeuvre and differ by 69x.
+
+[pool] the FULL loaded pack via load_members(drop=DEFAULT_DROP); the base104 control group is carved out of it in R3
+    167 members loaded
+
+[R2] is `avg3` in the span of its three seeds? (rank, not rhetoric)
+  hybrid: repaired 49 of 167 members
+    seed block + avg3   smallest singular value 6.8712e+00   lstsq max|resid| 1.5012e-01
+    control block       smallest singular value 2.8145e+02   lstsq max|resid| 4.6961e+00   (altview, cat, cat_tuned, digit_cat)
+    -> the avg3 block is rank-deficient
+    OK the control block is NOT (else the statistic measures nothing)
+  note in the `hybrid` transform `avg3` is NOT an exact linear function of its three seeds -- the transform is applied per column, and rank-averaging is not linear. The span argument holds in PROBABILITY space (R1, max|diff| 0.0) and is approximate here; R3 is the measurement that decides, not this.
+
+[R3] paired 50/50, 3 splits, C=1.0, transform=hybrid (w123/w124's procedure and seeds).  P=163  T=167
+    split 0: P=0.970103  Q=0.970104  R=0.970102  S=0.970103  T=0.970103  catbase=0.969801  catbase+cat=0.969864
